@@ -1,0 +1,20 @@
+-*- mode: Text -*-
+
+                  Csmith --- a random generator of C programs
+
+              Xuejun Yang, Yang Chen, Eric Eide, and John Regehr
+                  {jxyang,chenyang,eeide,regehr}@cs.utah.edu
+
+                    University of Utah School of Computing
+                            http://www.cs.utah.edu/
+                                       
+
+Please send bug reports and fixes to <csmith-bugs@flux.utah.edu>.
+
+There is a mailing list, <csmith-dev@flux.utah.edu>, for discussing Csmith.
+Visit <http://www.flux.utah.edu/mailman/listinfo/csmith-dev> to subscribe.
+To post messages to the list, you must first subscribe to the list.
+
+Most Csmith info can be found here:
+
+  http://embed.cs.utah.edu/csmith/

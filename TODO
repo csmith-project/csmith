@@ -1,0 +1,201 @@
+## -*- mode: Text -*-
+
+This file is not expected to be interseting/useful for people other
+than Csmith's developers.  It's not particularly up to date either.
+
+-------------------------------------------------------------------------------
+
++ Come up with a better naming convention for "platform" files for csmith
+  itself, versus "platform" files that make up the runtime of generated
+  programs.  It is confusing to have both named "platform*'.
+
++ Fix the conditional CPU macros in "src/platform.{cpp,h}".  These should
+  apparently refer to the *host* CPU type, not the *target* CPU type, because
+  the conditionally compiled functions are invoked by csmith itself, not by
+  the generated programs.  (See how confusing it is to call everything
+  "platform*"?)
+
+-------------------------------------------------------------------------------
+Yang's working list:
+
+  - generating several groups of outputs within certain exhaustive depth, e.g,
+    all pointer operations, binary operations, etc;
+
+  - better delta implemetation. Ideas:
+    * remove the usage of variable without affecting the function summary;
+    * replace function calls with "equivalent" variables, then remove unused
+      functions;
+
+  - exhaustively generate code based on some shapes, e.g,
+    csmith reads a configuration which looks like:
+    if (express) {
+      assignment;
+      assignment;
+    }
+
+    then it will only generate code with respect to the shape configuration. 
+
+  - make csmith to take symbolic inputs and try to run it over splat:
+    http://www.cs.ucla.edu/~rxu/splat.html
+      
+Xuejun's TODO:
+
+- Purposely generating unsafe code
+
+-------------------------------------------------------------------------------
+csmith output should compile as C++
+
+-------------------------------------------------------------------------------
+all program features should be controllable (either on/off, or using
+a parameter) from the command line
+
+basically, if we invoke csmith with all features turned off, it should
+emit an empty func_1() 100% of the time
+
+-------------------------------------------------------------------------------
+add a command line option 
+
+  -func_1_parameters=x,y,z
+
+that makes func_1() take integer parameters with types x, y, z
+
+the main in csmith should make random values to pass to func_1
+
+-------------------------------------------------------------------------------
+add a command line option where random programs report on their branch
+coverage.  this amounts to:
+
+- numbering the branches in the random program
+- creating a global array of bools, with two bools for each branch (taken
+  and not taken) initialized to false
+- add code following each branch that sets the appropriat flag to true
+- print coverage information at the end
+  - for each branch: was it taken? not-taken?
+  - overall amount of branch coverage 
+
+-------------------------------------------------------------------------------
+arrays:
+
+- have a type system similar to Deputy where for every pointer,
+csmith knows a lower bound on the number of items that are pointed
+to
+
+- optionally, emit deputy annotations
+
+- array assignment operators:
+  - create sub-array
+  - assign same size
+  - assign longer to shorter
+
+- feature we want: optionally generate unsafe code that sometimes
+  accesses null pointers and out-of-bounds memory cells; we'll use
+  this to find bugs in safe language implementations
+
+-------------------------------------------------------------------------------
+extension: make special bounded integers that always live within some range;
+use these in switches and in array indices
+
+  - emit special for-loops that increment/decrement these
+
+  - assign into them using expressions like this:
+
+    bounded_int = unbounded_int % bound;
+
+    bounded_int = (unbounded_unsigned_int>bound)?0:unbounded_unsigned_int;
+
+-------------------------------------------------------------------------------
+CSMITH C FEATURES TO GENERATE
+
+assignments in expressions
+
+++, --
+
+same variable on LHS and RHS of assignments
+
++=, -=, /=, *=, %=, <<=, >>= require wrappers-- write these
+
+memset, memcpy, and other heavily optimized intrinsics
+
+->
+
+?:
+
+register
+
+comma operator
+
+switches
+
+-------------------------------------------------------------------------------
+GENERATING TYPE CASTS
+
+Main reference is the C standard, in particular the C99 aliasing
+rules, explained intuitively here:
+
+  http://codingrelic.geekhold.com/2008/10/aliasing-by-any-other-name.html
+  http://cellperformance.beyond3d.com/articles/2006/06/understanding-strict-aliasing.html
+
+Very useful paper:
+
+  http://www.cs.wisc.edu/wpis/papers/fse99.pdf
+
+Probably also useful:
+
+  http://www.cs.ru.nl/~tews/cv07-slides/union_and_cast.pdf
+  http://www.cs.washington.edu/homes/marius/papers/tpd/tpd-popl08.pdf
+  http://users.encs.concordia.ca/~debbabi/pdf/Interprocedural%20and%20flow-sensitive%20type%20analysis%20for%20memory%20and%20type%20safety%20of%20C%20code.pdf
+  http://portal2.acm.org/citation.cfm?id=316183&dl=guide&coll=GUIDE
+
+Can generate "restrict" qualifiers
+
+  http://cellperformance.beyond3d.com/articles/2006/05/demystifying-the-restrict-keyword.html
+  http://www.cs.pitt.edu/~mock/papers/clei2004.pdf
+
+-------------------------------------------------------------------------------
+Repair the effect sanity-checking in CGContext.  Basically, check that the
+thing you are doing doesn't interfere with the context.  Note that this is too
+broad:
+
+void
+CGContext::sanity_check(void)
+{
+	if (effect_accum && !effect_context.is_side_effect_free()) {
+		assert(effect_accum->is_side_effect_free());
+	}
+}
+
+Checking for side-effects only is no good in general.  We can usually have
+side-effects in both the context and accum, as long as they do not overlap.
+
+-------------------------------------------------------------------------------
+Fix what "side_effect_free" means.  It should either mean side-effect free, or
+it should be renamed to "volatile-free" or similar.  See:
+
+void
+Effect::write_var(const Variable *v)
+{
+	write_vars.push_back(v);
+	// pure = pure;
+	// TODO: not quite correct below ---
+	// --- but I think we want "side_effect_free" to mean "volatile_free".
+	side_effect_free &= !v->isVolatile;
+	// side_effect_free = false;
+}
+
+-------------------------------------------------------------------------------
+ENE, Sun Jul 7 2009: Fix the handling of the generated `.h' files in `src'.
+
+In distributions, we include both the `.m4' files and the generated `.h' files.
+But we require (?) users to have `m4' at distribution build-time.  Also,
+running `make clean' in an unpacked distribution will remove the generated `.h'
+files --- which came with the distribution.
+
+We should either:
+
+  + Treat the generated files more like "regular" source files in dists.
+
+  + Just distribute the `.m4' files, and not the generated `.h' files.
+
+-------------------------------------------------------------------------------
+
+## End of file.

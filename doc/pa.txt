@@ -1,0 +1,392 @@
+       				Pointer Analysis in csmith
+
+Author: 		Xuejun Yang
+Initial Date: 	08/26/2009
+Revise Date: 	09/21/2009
+
+1. Point-to fact
+
+A point-to fact is the smallest piece of information we collect during the analysis. It has a pointer p and a list of variables p might point to, denoted as "<p, {v1, v2 ...}>". For example, after the following code, we would have collected a point-to fact <p, {a, b}>:
+
+		    int* p;
+		    int a = 0;
+		    int b = 0; 
+		    if (...) {
+		        p = &a;
+		    }
+		    else {
+		        p = &b;
+		    }
+		
+		 example 1
+
+Sometimes a pointer p might point to special spaces instead of the address of another variable. For instance p is not initialized, or p is a null pointer. I use special name "garbage" and "null" for such special cases. For example, we would have collected a point-to fact <p, {a, garbage}> if the above code was generated without "else" clause. Dangling pointers are treated the same as uninitialized pointers as they both point to some garbage in memory.
+
+As you can see from example 1,  the point-to list typically grows when at the end of a branch. We take variables that p is made point-to from both branches and merge (join) them.
+  
+The third special variable that p can point to is undecided variable, named as "tbd". This happens in a function like this:
+
+		    void func_2(int* p1) 
+		    {
+		        int* p2 = p1;
+		        ...
+		    }
+
+Imagine we are creating func_2 and we certainly don't know what p1 would hold. We would have fact <p, {tbd}> after the 1st statement. This is to deal with the fact that in csmith, we generated the body of a function before the actual parameters, and we have to do pointer analysis while the body is generated.
+
+Emami et al. have another definition of points-to fact. (see http://www.cs.cornell.edu/courses/cs711/2005fa/papers/egh-pldi94.pdf) Which doesn't include special variables. Although both definitions are very similiar, I suspect theirs is less concrete than mine.
+
+2. Point-to Environment 
+
+Point-to Environment is a list of point-to facts we collected up to a certain execution point. That means for every statement, we have an input env for point-to facts and a output env for point-to facts. The env is precise and complete, in a sense that all statements leading to this point must be abstracted (see section 3) to obtain the environment; and no statement that doesn't lead to this point should be included. (see section 3 for details)
+
+For example, with a env {<p1, {a, b}>; <p2, {c, d}>} as input point-to-env for statement "p3 = p1", after abstraction, the output point-to-env should be {<p1, {a, b}>; <p2, {c, d}>; <p3, {a, b}>} , in which p3 inherits the point-to fact of p1.
+
+3. Abstraction
+
+Abstraction is the process of collecting new fact(s) from a statement, given the current environment. Usually the new fact(s) then replaces or is merged with existing fact(s) in input environment, to form the output environment for this statement.
+ 
+3.1) abstraction for simple statement 
+
+There are three types of simple statement that need to be abstracted for pointer analysis: 
+
+    a) assignment with LHS being a pointer
+    b) return statement that returns a pointer
+    c) a statement that invoke function(s) 
+
+For case a) , RHS can be in one of those forms:
+
+   * constant. for example "int* p = 0", the abstraction would yield <p, {null}>
+
+   * address of another variable. for example "int* p = &a", the abstraction would yield <p, {a}>
+
+   * another pointer. for example "int* p = q", the abstraction would yield <p, {v1, v2, ...}> where <q, {v1, v2, ...}> is in current env
+
+   * a dereferenced pointer. for example "int* p = *q", the abstraction would yield <p, {v1, v2, ...}> where <q, {u1, u2, ...}> is in current env, and {v1, v2, ...} are all the variables can be possibly pointed to by pointer set {u1, u2...}
+
+   * a function that returns pointer, for example "int* p = f1()", an abstraction would be carried out on the function invocation first (see case c), then the second abstraction for the assignment itself would yield <p, {v1, v2, ...}> where <f1_rv, {v1, v2, ...}> (see case b for details)  is in the env after the first abstraction.     
+
+For case b), any return statement "return x" in function f1 is treated as "f1_rv = x", then abstracted in the way described in a). "f1_rv" is a imaginary variable we create for the sake of the caller so it can retrieve point-to facts regarding f1's return value later. Notice for functions with multiple return statements, the analyzer must merge the point-to facts derived from these return statements.
+
+For case c), we find all the functions being invoked, and abstract each of them, in the order of evaluation, by abstracting the body of the function (see section 3.2), with current environment incorporated with point-to facts regarding parameters. For example:
+
+		    int* p3, p4;
+		
+		    int* f1(int* p1) 
+		    { 
+		        return p1;
+		    }
+		
+		    void f2(int* p2) 
+		    { 
+		        p3 = p2;
+		    }
+		
+		    main()
+		    {
+		        ...
+		        f2(f1(p4));
+		        ...
+		    }
+
+		 example 2
+
+Here when we abstract "f2(f1(p4))", the abstraction goes through the following steps:
+    
+    (1) find out functions f2 and f1 are invoked, and f1 is evaludated first
+    (2) create a imaginary statement "p1 = p4" for f1's parameter p1, abstract it in a way described in a)
+    (3) add the abstracted fact to current env
+    (4) abstract function f1 by going into the body and abstract each statement one by one, updating env along the way.
+    (5) once we finished f1, remove all point-to facts pertaining to local variables and parameters of f1, as they are not relevant anymore
+    (6) create a imaginary statement "p2 = f1_rv" for f2's parameter p2, abstract it in a way described in a). From b) we know there must be a point-to fact in current env regarding f1_rv (because we visited "return p1" in the body of f1)
+    (7) abstract function f2 in a way similiar to what described in step 4 and 5
+
+After abstraction for statement "f2(f1(p4))", we should have an environment in that global pointers p3 and p4 point to the same variable set. You can draw a few lines to see how the analyzer reached this conclusion.
+
+In example 2, the order of evaluation is clear cut: f1 should always be evaluated before f2. However, there are cases that the evaluation order is not so clear, such as "v = f1() + f2() + f3()", the compiler implementor is free to choose which function to be evaluated first, and in which order to evaluate all three of them. Sometimes the compiler can skip the evaluation of a function all together, such as "v || func()" in which "v" is evaluated to a non-zero value.
+
+To abstract statements having uncertain function calls, we modify the above strategy by adding an extra step after step 5:
+
+    (5.b) after revisit f1, we merge the env with original env (that is, the input env for this statement)
+
+Take the example of "v = f1() + f2() + f3()", we can choose which function to re-visit first arbitrarily. In csmith we follow the convention to revisit the left-most f1() first. Let's say a global pointer "p" is null before this statement, and f1() set "p" to address of variable "i". After revisit f1, we should merge the env {p, <i>} with original env {p, <null>} to get {p, <null, i>}, then feed this into the re-visit of f2(); similiarly the output env after re-visit f2() should be merged with {p, null} again before it's feed into f3().
+
+Re-visiting a function is a very expensive operation, because the analyzer not only has to analyze all the statements, but also re-visit recursively all the functions being invoked in this function. There are ways to speed up, such as saving the incoming and output env for each function invocation. When a new invocation is encountered, compare current env with saved incoming env, and skip the re-visit if find a match.  Use the corresponding output env directly. This is not currently implemented because performance is not a major concern at this moment.
+
+3.2) abstraction for compound statement 
+
+There are 3 types of compound statement in Csmith: block, loop, and branch.
+
+a) Block is just a sequence of statement. Abstraction for block is the easiest: abstract each statement one by one, updating env on the way. Any new fact would overwrite the existing fact of same pointer in the environment. The output env for the last statement (if there are pre-mature exit statement in the block, such as "return"/"break", then that exit statement is considered the last statement) is the output env for the whole block, with facts regarding local block variables being discarded. For example:
+
+    int* p;
+    int   a;
+    {
+        int b;
+        int* q;		===> env out = {<p, {uninit}>; <q, {uninit}>}
+        p = &a; 		===> env out = {<p, {a}>; <q, {uninit}>}
+        p = &b;                           ===> env out = {<p, {b}>; <q, {uninit}>}
+        q = p;                              ===> env out = {<p, {b}>; <q, {b}>}
+    }                                          ===> env out = {<p, {b}>}   note p becomes dangling pointer after the block
+
+b) Branch has a condition expression, and true and/or false branch(es) which is in turn a block. To abstract a branch, we first abstract the condition expression, and mark the output env as "pre-branch env", then we abstract the true block in a way described in a) starting from pre-branch env, to reach a post-true-branch env.  Then we abstract the false block in a similiar way, starting again from pre-branch env. Finally we merge the output env from both branches. This becomes the output env for the whole branch. For example:
+
+    int* p; 
+    int b = 0; 
+                                               
+    if (...) {                                 ===> pre-branch env = {<p, {uninit}>}
+        int a = 0;
+        p = &a;
+    }			====> post-true-branch env = {<p, {a}>} 
+    else {
+        p = &b;
+    }                                           ====> post-false-branch env = {<p, {b}>}
+
+                                                ====> post-branch env = {<p, {a, b}>}
+
+c)  In csmith, loops exist in the form of for-loops, that have an initializing statement, a test expression for loop exit, a increment statement, and lastly the body, which is in turn a block.Loop is the most difficult compund statement to be abstracted, partly because it is the only type of statement that requires multiple iterations to reach a fixed point.
+
+To abstract a loop, the following steps must be carried out:
+
+    (1) abstract the initializing statement, as described in 3.1.a).  and incorporate the fact into so called  "pre-loop env"
+    (2) abstract the loop body, as described in 3.2.a), starting from the pre-loop env
+    (3) merge the output env of loop body with pre-loop env, if the result is different from pre-loop env, set pre-loop env to the merged env, and repeat from step 2.
+    (4) if the merged env is the same as pre-loop env, it means we reached a fixed point, and the merged env becomes the output env of the whole loop
+
+Here is a illustration on how to reach a fixed point for a loop:
+
+int* p;
+int i;
+int* q = &i;                                                                           
+                                        input env = {<p, {uninit}>; <q, {i}>}       
+                                                                   1st iteration                          2nd iteration                              3rd iteration
+for (i=0; i<7; i++)            pre-loop env  = {<p, {uninit}>; <q, {i}>}           {<p, {uninit, i}>; <q, {i, j}>}       {<p, {uninit, i, j}>; <q, {i, j}>}
+{
+   int j;
+   p = q;                           output env = {<p, {i}>; <q, {i}>}                        {<p, {i, j}>; <q, {i, j}>}                {<p, {i, j}>; <q, {i, j}>}
+   q = &j;                          output env = {<p, {i}>; <q, {j}>}                        {<p, {i, j}>; <q, {i, j}>}                {<p, {i, j}>; <q, {i, j}>}
+}                                       merged env = {<p, {uninit, i}>; <q, {i, j}>}       {<p, {uninit, i, j}>; <q, {i, j}>}    {<p, {uninit, i, j}>; <q, {i, j}>} 
+
+          example 3
+
+We reached the fixed point at the end of the 3rd iteration because the pre-loop env and the merged env are the same.
+
+4. Applications of Pointer Analysis
+
+There are two applications of pointer analysis, one is to insert assertions regarding the point-to facts we collect. The other is to avoid dereferencing a pointer that is null or dangling.
+
+4.1) Assertions
+
+In paranoid mode (default is on, to turn it off, run csmith with command line option "--no_paranoid"), csmith inserts assertions regarding point-to facts for pointer as much as possible. Take example 3, the final code generated with paranoid mode would be:
+
+    int* p;
+    int i;
+    int* q = &i;         
+    //assert(p == dangling);                                              // has to be commented out because "dangling" is not a valid variable name                     
+    assert(q == &i);                                       
+                                                                           
+    for (i=0; i<7; i++)             
+    {
+        int j;
+        // assert (p ==  || p == &i || p == &j);
+        assert (q == &i || q == &j);                              // derived from pre-loop env
+        p = q;                            
+        assert (p == &i || p == &j);                              
+        assert (q == &i || q == &j);                              // derived from output env of this statement
+        q = &j;                 
+        assert (p == &i || p == &j);
+        assert (q == &i || q == &j);                              // derived from output env of this statement
+    }                       
+    // assert (p ==dangling || p == &i || p == &j);
+    // assert (q == &i || q == &j);                               // has to be commented out because "j" is out of scope
+
+As shown in the example, there are some assertions has to be commented out because they are not valid C code.  
+
+4.2) Avoidance of dereferencing dead/null pointers
+
+Since we know the point-to environment at any point of program generation, we can look up the point-to variables for a pointer, and if we found any of null / garbage / tbd in the set, this pointer should not be allowed to dereference. However, dereferencing a out-of-scope pointer on the stack (from the active function's point of view) is allowed.
+
+5. Challenges posed by analyzing incomplete program
+
+Obviously we can not wait until a program is fully generated by csmith to perform pointer analysis. Doing that would defeat our ultimate goal, avoiding undefined behavior, i.e, null/dead pointer dereferences.
+
+On the contrary, pointer analysis must be performed whenever a new piece of program is generated, so that we always have the most up-to-date point-to environment. However which forces us to analyze an incomplete program, thus poses several challenges:
+
+    a) when we generate a function, we are forced to analyze it without knowledge of actual parameters
+    b) when we generate a loop, we are forced to analyze it without the knowledge of subsequent code in the same loop
+    c) code generated later could create a new global/local variable, and point-to for the new variable should be incoporated into earlier analysis
+   
+a) is tackled by doing a best-guess analysis while function is generated, i.e., using "tbd" to denote a un-fixed paramter (see section 1).  Then we re-analyze the function again (this is called "re-visit") when the function is called with actual parameters and known calling context. However re-visit introduces other complications (see section 6).
+
+b) is tackled similiarly: doing a best guess analysis while generating loop body, i.e., disregarding the subsequent code, and performing another analysis when the loop body is done. However the damage might be already done. For example, the loop might has a dereferenced pointer, which at the moment of code generation was valid (not null or dangling), but was somehow changed to a null / dead pointer by the subsequent code in the same loop. The complexity of this problem can grow without limit if this pointer depends on other pointers in the same loop. For example:
+
+    int* p, q;
+    int a;
+    q = &a;
+
+    for ( ...) 
+    {
+        p = q;
+        *p = 3;   // statement 1
+        q = 0;    // statement 2
+    }
+        
+Once the loop is generated, and a pointer analysis is performed on the whole loop, we would find "p" at statement 1 could be a null pointer due to statement 2. We have to delete statement 1 to prevent null pointer dereference. This would detroy the read-only property  of AST nodes in csmith, and would invalidate previous results for pointer analysis and effect analysis.
+
+The simplified solution is to disallow pointer dereferences in any loop. Which means, if a function "f" is called in a loop, there should be no pointer dereferences in "f", even though "f" itself has no loops.
+
+6. Complications added by function
+
+The way to create a function invocation in csmith is in three steps:
+    
+    a) determine an expected type
+    b) from the functions that return this type, randomly choose one
+    c) for each parameter, choose a random value 
+
+In another word, the function is chosen before the parameters are chosen. 
+    
+6.1) function re-visit
+
+Once a function is selected, and the parameters are fixed, we re-visit the function body with the most precise environment. If the calling chain is long, which means we have to re-visit the functions in this chain recursively, the burden on memory usage is quite huge. 
+
+A function can be called multiple times in different calling context. Each visit would yield an input env and output env for each statement in the function. For generalization purpose,  the input env produced by various calls must be merged, same is the output env. For example: 
+
+		    int a;      
+		    int* p, q;                                           
+		
+		    void f()				                    
+		    {			 
+		        p = q;                            // statement 0 
+		    } 
+		
+		    void g()
+		    {
+		       int* r = 0;		// statement 1
+		       f();			// statement 2
+		    }
+		
+		    main() 
+		    {
+		       q = 0;		// statement 3
+		       f();			// statement 4
+		       q = &a;		// statement 5
+		       f();			// statement 6
+		       g();			// statement 7
+		    }
+
+		    example 4
+
+In above example function "f" is called three times, twice in main(), and once by g(), which is called by main() in turn. To calculate the correct input / output env for statement 0 in function f, we must do the following:
+
+    1st call by stmt 4              2nd call by stmt 6           merge 1st & 2nd                3rd call by g()                  merge 3rd with (1st + 2nd)
+in:  {<p, {uninit}>; <q, {null}>}    {<p, {null}>; <q, {a}>}       {<p, {uninit, null}>; <q, {null, a}>}    {<p, {a}>; <q, {a}>; <r, {null}>}      {<p, {uninit, null, a}>; <q, {null, a}>} 
+out: {<p, {null}>; <q, {null}>}       {<p, {a}>; <q, {a}>}          {<p, {null, a}>; <q, {null, a}>}          {<p, {a}>; <q, {a}>; <r, {null}>}     {<p, {null, a}>; <q, {null, a}>}
+
+Notice the fact <r, {null}> produced by 3rd call should not be included, because the fact regarding pointer r is not relevant to 1st and 2nd calls. And if we keep it,  we would have to  add wrong assertion "assert (r == 0)"  before and after statement 0.
+
+6.2) cadcading function calls
+
+Cascading function calls are invocations like "f1(f2(f3(f4(...))))". The order of evaluation is critical to pointer analysis. However the order of generation in csmith for such statements is the reverse order of evaludation. In the above example, csmith would choose f1 first, then choose f2 when selecting parameters, and followed by f3, f4, ...This causes huge confusion to the analyzer.
+
+To work around this, we design the following rules
+
+ * For a function call, we always validate the paramters first, then the 
+   function itself. This gurantees that inner calls would be validated 
+   before outer calls
+ * function validation is done by re-visit. If any statement in the body
+   caused a null/dead pointer dereference, we say this function failed
+   validation
+ * if a function fails validation, but it's parameters passed, to keep the
+   effect caused by parameters, we insert artifical statements for parameters,
+   but replace the function call itself with harmless expressions.
+
+For example:
+
+   f1 (f2 (*p, f3())
+
+  * first we analyze *p and f3, and find them passes validation, that is 
+    there is no null/dead pointer dereferences in them
+  * second we analyze f2, and find with paramters being *p and f3(), a re-vist
+    to f2 would cause null/dead pointer dereference. i.e. f2 fails validation
+  * at this moment we already analyzed f3, the env contains all changes caused
+    by f3,  and we don't want to throw out them
+  * so we replace the above nested call with the following code:
+      
+      tmp1 = *p;  (1)
+      f3();       (2)
+      f1(tmp2);   (3)
+
+   where tmp1 and tmp2 are temporary variables matching the required type.
+
+   From (1) and (2) we achieved the same env that would have been reached by
+evaluating *p and f3() as arguments of f2. From (3) we avoided null/dead pointer 
+dereference.
+
+7. Integration of effect analysis and pointer analysis
+
+With pointers, the read/write set of a function is no longer static. With one calling context, "*p = 0" could mean variable A is written; with another calling context, same statement could mean variable B is written. The previous strategy: computing a summary of read/write set for functions when it is created is no longer working, instead we use function re-visit to compute read/write set every time it is called. 
+
+Specifically, for assignment statements, if pointer p is dereferenced on LHS, then {v1, v2, ...} should be added to write set if <p, {v1, v2, ...}> is in current env. For all other pointer dereference in simple statements, the point-to variable set should be added to read set.
+
+This add another validation for function calls in addition to pointer analysis. For example: let assume "f(g(), h())" is a valid statement when we create it. But later on a re-visit to this statement under a different calling context could invalidate this statement due to one of the reasons:
+
+1)  a null/dead pointer dereference in either function f, or g, or h
+2)  a effect conflict between f and g and h. This is possible if g() always write global variable v1, and h() was reading global  v2 in the initial calling context (when "f(g(), h())" was created) , but changed to read v1 in this calling context.
+
+If a statement is invalidated by pointer analyzer or effect analyzer, it must be removed as described in 6.3.
+
+8. Inter-procedural analysis
+
+Each function has an analyzer reponsible for maintaining the fact environments for it's statements. Each statement has an input env and output env. The analyzer also keep an evolving env when the analysis progresses. 
+
+Since function body is represented as a block in csmith, single precedural analysis is very much like abstraction for block, see section 3.2.a
+
+Inter-procedural analysis can be divided into two cases 
+
+case 1) function invocations involved of a new function
+
+Csmith creates a new function if a function call is being generated and there is no existing function can satisfy the call.  An analyzer is constructed along with the creation of the function. It's evolving env is initialized to the evolving env of the caller. For example:
+
+    int* g;
+    int a;
+    void  f1()
+   {
+       g = 0;
+       a = f2()          
+       ----> at this moment, csmith find it has to generate a function that returns int, it leaves the work on f1 and shift to generate f2. We create an analyzer for f2, and in that analyzer the evolving env is inherited from f1: {<g, {null}>}. While we generating f2, after each statement creation, the analyzer abstracts the new statement, and update the environments accordingly.
+       ...
+
+    void f2() 
+   {
+		input env:  {<g, {null}>}
+       g = &a;
+		output env / evolving env:  {<g, {a}>}
+   } 
+    ----> at this moment, we finished the creation of f2, and the evolving env is passed back to the caller f1's analyzer, and csmith proceeds to make the function call "a = f2()".  In this case, f1 would take f2's evolving env as it's own evolving env. But if f2 has parameters, we have to re-vist f2 to get the most precise env. That's because when we generated f2, we knew nothing about paramters, and now we know.
+
+case 2)  function invocations involved of an existing function
+
+We must re-analyze the callee function if one of the conditions is true:
+
+   1) the parameters have changed, 
+   2) a global variable has changed
+
+and the change would cause statements to be abstracted differently. But this is too difficult to determine without re-analyzing callee. In practice we just re-analyze callee generally. Only functions that don't dereference pointers and don't changing point-to env are skipped from revisit. For example:
+
+    int* g;
+    int a, b;
+    void  f3()
+   {
+       g = &b;
+       a = f2()
+       -----> at this moment, csmith choose f2 to make a function call, and f2 is already generated.  Since the env is {<g, {b}>}, which is different from the last env in which we called f2 (see f1 in the previous example), we have to invoke the analyzer for f2, and ask it to re-analyze f2.
+
+At the end of re-analyzing f2, f2's analyzer pass the evolving env back to f3's analyzer. And csmith continues to generate code for f3 with this env.
+
+9. Shortcuts we take to improve porformance
+
+* for functions that don't dereference pointers and don't changing point-to env, i.e., and effect-free function from pointer analysis's point of view, we can safely skip the re-visit
+
+* The first function csmith creates, "func_1",  is a special function in that it has no parameters, and it always starts from an empty point-to env (not considering the global pointers). Basically we can skip revisiting func_1 if the issue of global pointers are taken care.
+
+* When re-visiting a statement in a function, we always compare the input env with the previous input env, if they are the same, we don't need to abstract the statement again, just take the previous output env.

@@ -1,0 +1,9 @@
+## -*- mode: Text -*-
+
+The files in this directory come from the Autoconf macro archive:
+
+  http://www.gnu.org/software/ac-archive/
+
+We copy these into the `acinclude.m4' file for this project.
+
+## End of file.

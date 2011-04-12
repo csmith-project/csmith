@@ -1,0 +1,14 @@
+-*- mode: Text -*-
+
+Csmith was written by Yang Chen, Eric Eide, John Regehr, and Xuejun Yang at
+the University of Utah.
+
+  Yang Chen <chenyang@cs.utah.edu>
+  Eric Eide <eeide@cs.utah.edu>
+  John Regehr <regehr@cs.utah.edu>
+  Xuejun Yang <jxyang@cs.utah.edu>
+
+Csmith evolved from an earlier random program generator written by Bryan
+Turner.  The current Csmith shares almost no code with Bryan's generator.
+
+  Bryan Turner <bryan.turner@pobox.com>

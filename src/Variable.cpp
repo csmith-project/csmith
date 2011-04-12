@@ -1,0 +1,1274 @@
+// -*- mode: C++ -*-
+//
+// Copyright (c) 2007, 2008, 2009, 2010, 2011 The University of Utah
+// All rights reserved.
+//
+// This file is part of `csmith', a random generator of C programs.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+//   * Redistributions of source code must retain the above copyright notice,
+//     this list of conditions and the following disclaimer.
+//
+//   * Redistributions in binary form must reproduce the above copyright
+//     notice, this list of conditions and the following disclaimer in the
+//     documentation and/or other materials provided with the distribution.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+
+//
+// This file was derived from a random program generator written by Bryan
+// Turner.  The attributions in that file was:
+//
+// Random Program Generator
+// Bryan Turner (bryan.turner@pobox.com)
+// July, 2005
+//
+
+#ifdef WIN32 
+#pragma warning(disable : 4786)   /* Disable annoying warning messages */
+#endif
+#include "Variable.h"
+
+#include <cassert>
+
+#include "Common.h"
+#include "Block.h"
+#include "CGContext.h"
+#include "CGOptions.h"
+#include "Constant.h"
+#include "Effect.h"
+#include "Function.h"
+#include "Type.h"
+#include "Fact.h"
+#include "FactMgr.h"
+#include "FactPointTo.h"
+#include "random.h"
+#include "util.h"
+#include "Lhs.h"
+#include "ExpressionVariable.h"
+#include "Bookkeeper.h"
+#include "Filter.h"
+#include "Error.h"
+#include "ArrayVariable.h"
+#include "StringUtils.h"
+
+
+using namespace std; 
+std::vector<const Variable*> Variable::ctrl_vars;
+const char Variable::sink_var_name[] = "csmith_sink_";
+
+//////////////////////////////////////////////////////////////////////////////
+
+int find_variable_in_set(const vector<const Variable*>& set, const Variable* v)
+{
+    size_t i;
+    for (i=0; i<set.size(); i++) {
+        if (set[i]->match(v)) {
+            return i;
+        } 
+    }
+    return -1;
+}
+
+int find_variable_in_set(const vector<Variable*>& set, const Variable* v)
+{
+    size_t i;
+    for (i=0; i<set.size(); i++) {
+        if (set[i]->match(v)) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+int find_field_variable_in_set(const vector<const Variable*>& set, const Variable* v)
+{
+    size_t i;
+	if (v->type->eType == eStruct) {
+		for (i=0; i<v->field_vars.size(); i++) {
+			const Variable* field = v->field_vars[i];
+			int pos = find_variable_in_set(set, field);
+			if (pos != -1) return pos;
+			pos = find_field_variable_in_set(set, field);
+			if (pos != -1) return pos;
+		}
+	}
+    return -1;
+}
+
+bool is_variable_in_set(const vector<const Variable*>& set, const Variable* v)
+{
+    size_t i;
+    for (i=0; i<set.size(); i++) {
+        if (set[i] == v) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool add_variable_to_set(vector<const Variable*>& set, const Variable* v)
+{
+	if (!is_variable_in_set(set, v)) {
+		set.push_back(v);
+		return true;
+	}
+    return false;
+}
+
+bool add_variables_to_set(vector<const Variable*>& set, const vector<const Variable*>& new_set)
+{
+	size_t i;
+	bool changed = false;
+	for (i=0; i<new_set.size(); i++) {
+		if (add_variable_to_set(set, new_set[i])) {
+			changed = true;
+		}
+	}
+	return changed;
+}
+
+// return true if two sets contains same variables
+bool equal_variable_sets(const vector<const Variable*>& set1, const vector<const Variable*>& set2)
+{
+    size_t i;
+    if (set1.size() == set2.size()) { 
+        for (i=0; i<set1.size(); i++) {
+            if (!is_variable_in_set(set2, set1[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+    return false;
+}
+
+// return true if set1 is subset of set2, or equal
+bool sub_variable_sets(const vector<const Variable*>& set1, const vector<const Variable*>& set2)
+{
+    size_t i;
+    if (set1.size() <= set2.size()) { 
+        for (i=0; i<set1.size(); i++) {
+            if (!is_variable_in_set(set2, set1[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+    return false;
+}
+
+// combine two variable sets into one, note struct field "s1.f1" and "s1" is combined into "s1"
+void combine_variable_sets(const vector<const Variable*>& set1, const vector<const Variable*>& set2, vector<const Variable*>& set_all)
+{
+	size_t i;
+	set_all = set1;
+	for (i=0; i<set2.size(); i++) {
+		const Variable* v = set2[i];
+		if (find_variable_in_set(set1, v) == -1) {
+			set_all.push_back(v);
+		}
+	}
+}
+
+/* replace all the field vars with their parent vars */
+void remove_field_vars(vector<const Variable*>& set)
+{
+	size_t i;
+	size_t len = set.size();
+	for (i=0; i<len; i++) {
+		const Variable* v = set[i];
+		if (v->is_field_var()) {
+			while (v->isFieldVarOf_) {
+				v = v->isFieldVarOf_;
+			}
+			set.erase(set.begin() + i);
+			add_variable_to_set(set, v);
+			i--;
+			len = set.size();
+		}
+	}
+}
+
+/*
+ *
+ */
+bool 
+Variable::match(const Variable* v) const
+{
+	if (type && v->type && type->eType == eStruct) {
+		return (this == v) || has_field_var(v);
+	}
+	return this == v;
+}
+
+int
+Variable::get_seq_num(void) const
+{
+	size_t index = name.find('_');
+	assert(index != string::npos);
+	return StringUtils::str2int(name.substr(index+1));
+}
+
+/*
+ * return if this is the field of an array member
+ */
+bool 
+Variable::is_array_field(void) const 
+{ 
+	if (isFieldVarOf_) {
+		return isFieldVarOf_->is_array_field();
+	}
+	return isArray;
+}
+
+/*
+ * return if this is the field of an pre-itemized array member
+ */
+bool 
+Variable::is_virtual(void) const 
+{ 
+	if (isFieldVarOf_) {
+		return isFieldVarOf_->is_virtual();
+	}
+	if (isArray) {
+		return ((const ArrayVariable*)this)->collective==0;
+	}
+	return false;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+ /* check if field variables exists in this struct
+  ************************************************************************/
+bool Variable::has_field_var(const Variable* v) const
+{
+    if (type->eType == eStruct) {
+		const Variable* tmp = v;
+		while (tmp) {
+			if (tmp == this) {
+				return true;
+			}
+			tmp = tmp->isFieldVarOf_;
+		}
+    }
+    return false;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+ /* expand field variables of struct, assigned names, f0, f1, etc, to them
+  ************************************************************************/
+void Variable::create_field_vars(const Type *type)
+{
+    assert(type->eType == eStruct);
+    size_t i, j;
+    assert(type->fields.size() == type->qfers_.size());
+	j = 0;
+    bool is_vol_struct = qfer.is_volatile_after_deref(0);
+    bool is_const_struct = qfer.is_const_after_deref(0);
+    for (i=0; i<type->fields.size(); i++) {
+		if (type->is_unamed_padding(i))
+			continue;
+		ostringstream ss;
+		if (isArray) {
+			Output(ss);
+		}
+		else {
+			ss << name;
+		}
+		ss << ".f" << j++;
+		CVQualifiers quals = type->qfers_[i];
+		//bool isConst = is_const() || quals.is_const();
+		//bool isVolatile = is_volatile() || quals.is_volatile();
+		bool isConst = is_const_struct || quals.is_const();
+		bool isVolatile = is_vol_struct || quals.is_volatile();
+		bool isBitfield = type->is_bitfield(i);
+		Variable *var = Variable::CreateVariable(ss.str(), type->fields[i],
+					isConst, isVolatile, false, false, false, isBitfield, this);
+		ERROR_RETURN();
+		field_vars.push_back(var);
+    }
+}
+
+Variable *
+Variable::CreateVariable(const std::string &name, const Type *type,
+			   bool isConst, bool isVolatile,
+			   bool isAuto, bool isStatic, 
+			   bool isRegister, bool isBitfield, const Variable* isFieldVarOf)
+{
+	vector<bool> isConsts, isVolatiles;
+	isConsts.push_back(isConst);
+	isVolatiles.push_back(isVolatile);
+	return CreateVariable(name, type, isConsts, isVolatiles, isAuto, isStatic, isRegister, isBitfield, isFieldVarOf);
+}
+
+Variable *
+Variable::CreateVariable(const std::string &name, const Type *type,
+				   const vector<bool>& isConsts, const vector<bool>& isVolatiles,
+				   bool isAuto, bool isStatic, bool isRegister, bool isBitfield, const Variable* isFieldVarOf)
+{
+	Variable *var = new Variable(name, type, isConsts, isVolatiles,
+					isAuto, isStatic, isRegister, isBitfield, isFieldVarOf);
+	assert(type);
+	if (type->eType == eSimple)
+		assert(type->simple_type != eVoid);
+
+	var->init = Constant::make_random(type);
+
+	ERROR_GUARD_AND_DEL1(NULL, var);
+	if (type->eType == eStruct) {
+		var->create_field_vars(type);
+	}
+	ERROR_GUARD_AND_DEL1(NULL, var);
+	return var;
+}
+
+Variable *
+Variable::CreateVariable(const std::string &name, const Type *type, const Expression* init, const CVQualifiers* qfer)
+{
+	assert(type);
+	if (type->eType == eSimple)
+		assert(type->simple_type != eVoid);
+
+	Variable *var = new Variable(name, type, init, qfer);
+	if (type->eType == eStruct) {
+		var->create_field_vars(type);
+	}
+	ERROR_GUARD_AND_DEL1(NULL, var);
+	return var;
+}
+
+/*
+ *
+ */
+Variable::Variable(const std::string &name, const Type *type,
+				   const vector<bool>& isConsts, const vector<bool>& isVolatiles,
+				   bool isAuto, bool isStatic, bool isRegister, bool isBitfield, const Variable* isFieldVarOf)
+	: name(name), type(type),
+	  init(0),
+	  isAuto(isAuto), isStatic(isStatic), isRegister(isRegister),
+	  isBitfield_(isBitfield), isFieldVarOf_(isFieldVarOf), isArray(false),
+	  qfer(isConsts, isVolatiles)
+{
+	// nothing else to do
+}
+
+/*
+ *
+ */
+Variable::Variable(const std::string &name, const Type *type, const Expression* init, const CVQualifiers* qfer)
+	: name(name), type(type),
+	  init(init),
+	  isAuto(false), isStatic(false), isRegister(false), isBitfield_(false), isFieldVarOf_(0), isArray(false),
+	  qfer(*qfer)
+{
+	// nothing else to do
+}
+
+Variable::Variable(const std::string &name, const Type *type, const Expression* init, const CVQualifiers* qfer, const Variable* isFieldVarOf, bool isArray)
+	: name(name), type(type),
+	  init(init),
+	  isAuto(false), isStatic(false), isRegister(false), isBitfield_(false),
+	  isFieldVarOf_(isFieldVarOf),
+	  isArray(isArray),
+	  qfer(*qfer)
+{
+	// nothing else to do
+}
+
+/*
+ *
+ */
+Variable::~Variable(void)
+{ 
+	// delete field vars explicitly because they are not stored in AllVars anymore
+	vector<Variable *>::iterator i;
+	for(i = field_vars.begin(); i != field_vars.end(); ++i)
+		delete (*i); 
+	field_vars.clear();
+	if (init) {
+		delete init;
+		init = NULL;
+	}
+} 
+
+// --------------------------------------------------------------
+bool
+Variable::is_global(void) const
+{
+	if (is_field_var()) {
+		return isFieldVarOf_->is_global();
+	}
+	return (name.find("g_") == 0);
+}
+
+// ------------------------------------------------------------- 
+bool
+Variable::is_visible_local(const Block* blk) const
+{  
+	if (blk == 0) {
+		return is_global();
+	}
+	if (is_field_var()) {
+		return isFieldVarOf_->is_visible_local(blk);
+	}
+    size_t i;
+	const Function* func = blk->func;
+    for (i=0; i<func->param.size(); i++) {
+        if (func->param[i]->match(this)) {
+            return true;
+        }
+    } 
+	const Block* b = blk;
+	while (b) {
+		if (find_variable_in_set(b->local_vars, this) != -1) {
+			return true;
+		}
+		b = b->parent;
+	}
+    return false;
+} 
+
+// --------------------------------------------------------------
+bool
+Variable::is_argument(void) const
+{
+	// JYTODO: need stronger criteria?
+	return (name.find("p_") == 0);
+}
+
+// --------------------------------------------------------------
+bool
+Variable::is_tmp_var(void) const
+{
+	// JYTODO: need stronger criteria?
+	return (name.find("t") == 0);
+}
+
+bool 
+Variable::is_const(void) const 
+{
+	return is_const_after_deref(0);
+}
+
+bool 
+Variable::is_volatile(void) const 
+{
+	return is_volatile_after_deref(0);
+}
+
+bool 
+Variable::is_const_after_deref(int deref_level) const 
+{
+	if (deref_level < 0) {
+		return false;
+	}
+	// check qualifiers
+	if (qfer.is_const_after_deref(deref_level)) {
+		return true;
+	}
+	if (type) {
+		// check struct type
+		int i;
+		const Type* t = type;
+		for (i=0; i<deref_level; i++) {
+			t = t->ptr_type;
+		}
+		assert(t);
+		return t->is_const_struct();
+	}
+	return false;
+}
+
+bool 
+Variable::is_volatile_after_deref(int deref_level) const 
+{
+	if (deref_level < 0) {
+		return false;
+	}
+	// check qualifiers
+	if (qfer.is_volatile_after_deref(deref_level)) {
+		return true;
+	}
+	if (type) {
+		// check struct type
+		int i;
+		const Type* t = type;
+		for (i=0; i<deref_level; i++) {
+			t = t->ptr_type;
+		}
+		assert(t);
+		return t->is_volatile_struct();
+	}
+	return false;
+}
+
+/*
+ * return an array deputy annotation for each level of indirection of a pointer based on it's point-to set
+ * for non-pointers, return an empty set
+ */
+vector<string>
+Variable::deputy_annotation(void) const
+{
+	size_t len;
+        int pos, i, j;
+	vector<string> annotations;
+	const Variable* tmp = this;
+	bool has_null = false;
+	bool null_based = false;
+	if (name == "p_24")
+		i = 0;
+	while (tmp && tmp->type->eType == ePointer) { 
+		pos = -1;
+		string anno;
+		for (i=0; i<static_cast<int>(FactPointTo::all_ptrs.size()); i++) {
+			if (FactPointTo::all_ptrs[i] == tmp) {
+				pos = i;
+				break;
+			}
+		}
+		if (pos == -1) break;
+		vector<const Variable*> set = FactPointTo::all_aliases[pos];
+		// take out tbd in point-to-set for parameters
+		j = find_variable_in_set(set, FactPointTo::tbd_ptr);
+		if (set.size() > 1 && j != -1) {
+			set.erase(set.begin() + j);
+		}
+		bool has_array = false;
+		len = set.size();
+		for (j=0; j<static_cast<int>(len); j++) {
+			if (set[j] == FactPointTo::null_ptr) {
+				// remove null pointer from set
+				has_null = true;
+				set.erase(set.begin() + j);
+				j--;
+				len--;
+			} 
+			else if (set[j]->isArray || set[j]->is_array_field()) {
+				has_array = true;
+			}
+		}
+		/* if "int *** p = 0", we can annotate it as "int * SAFE * SAFE * SAFE p" */
+		if (len == 0 && has_null) {
+			null_based = true;
+		}
+		if (!has_array) {
+			anno = (has_null ? "SAFE" : "SAFE NONNULL");
+			// special handling to satisfy deputy, no "NONNULL" for array of pointers
+			if (tmp->isArray || tmp->is_array_field()) {
+				anno = "SAFE";
+			}
+		} 
+		tmp = 0;
+
+		if (len == 1) {
+			const Variable* pointee = set[0];
+			if (pointee->isArray || pointee->is_array_field()) { 
+				ostringstream oss;
+				oss << "BOUND(&";
+				pointee->OutputLowerBound(oss);
+				oss << ", &";  
+				pointee->OutputUpperBound(oss);
+				oss <<  ")"; 
+				anno = oss.str();
+			} 
+			//if (pointee->is_array_field()) {
+			//	while (pointee->isFieldVarOf_) {
+			//		pointee = pointee->isFieldVarOf_;
+			//	}
+			//	assert(pointee->isArray);
+			//}
+			//// pointing to an array
+			//if (pointee->isArray) {
+			//	const ArrayVariable* av = (const ArrayVariable*)pointee;
+			//	ostringstream oss;
+			//	oss << "COUNT(";
+			//	for (j=0; j<av->get_dimension(); j++) {
+			//		if (j > 0) oss << " * ";
+			//		oss << av->get_sizes()[j];
+			//	}
+			//	oss << ")";
+			//	anno = oss.str();
+			//} 
+			if (pointee->type && pointee->type->eType == ePointer) {
+				tmp = pointee;
+			}
+		}
+		if (anno == "") {
+			anno = "BOUND(__auto, __auto)";
+		}
+		annotations.insert(annotations.begin(), anno);
+	}
+	int prepend = type->get_indirect_level() - annotations.size();
+	for (i=0; i<prepend; i++) {
+		if (null_based) {
+			annotations.insert(annotations.begin(), "SAFE");
+		} else {
+			annotations.insert(annotations.begin(), "BOUND(__auto, __auto)");
+		}
+	}
+	return annotations;
+}
+
+const Variable* 
+Variable::get_collective(void) const
+{
+	// special handling for array fields
+	if (is_array_field()) {
+		// find top-level parent, which should be an array
+		const Variable* parent = isFieldVarOf_;
+		for (; parent && !parent->isArray; parent = parent->isFieldVarOf_) {
+			/* Empty. */
+		}
+		assert(parent);
+		// if this is alreay a field of a collective array, return itself
+		if (parent->get_collective() == parent) return this;
+
+		// find the collective for top-level array, and return the corresponding field var
+		const Variable* coll = parent->get_collective();
+		size_t index, pos1, pos2;
+		size_t pos3 = name.find_last_of("]");
+		assert(pos3 != string::npos);
+		string field_names = name.substr(pos3); 
+		pos1 = field_names.find(".");
+		while (pos1 != string::npos) {
+			pos2 = field_names.find(".", pos1+1);
+			string s = (pos2 == string::npos) ? field_names.substr(pos1+2) : field_names.substr(pos1+2, pos2-pos1-2);
+			index = StringUtils::str2int(s);
+			assert(index < coll->field_vars.size());
+			coll = coll->field_vars[index];
+			pos1 = pos2;
+		}
+		return coll;
+	} else {
+		return this;
+	}
+}
+
+const Variable* 
+Variable::get_named_var(void) const
+{
+	const Variable* v = this;
+	while (v->isFieldVarOf_) {
+		v = v->isFieldVarOf_;
+	}
+	return v->get_collective();
+}
+
+const ArrayVariable* 
+Variable::get_array(string& field) const
+{
+	// special handling for array fields
+	if (is_array_field()) {
+		// find top-level parent, which should be an array
+		const Variable* parent = isFieldVarOf_;
+		for (; parent && !parent->isArray; parent = parent->isFieldVarOf_) {
+			/* Empty. */
+		}
+		assert(parent);
+
+		size_t bracket = name.find_last_of("]");
+		if (bracket == string::npos) {
+			bracket = 0;
+		}
+		size_t dot = name.find(".", bracket);
+		assert(dot != string::npos);
+		field = name.substr(dot);
+		return (const ArrayVariable*)parent;
+	}
+	return NULL;
+}
+
+// --------------------------------------------------------------
+void
+Variable::OutputDef(std::ostream &out, int indent) const
+{
+	output_tab(out, indent);
+	output_qualified_type(out);
+	out << get_actual_name() << " = ";
+	assert(init);
+	init->Output(out);
+	out << ";";
+	if (is_volatile()) {
+		string comment = "VOLATILE GLOBAL " + get_actual_name();
+		output_comment_line(out, comment);
+	} else {
+		outputln(out);
+	}
+}
+
+void Variable::OutputDecl(std::ostream &out) const
+{
+	output_qualified_type(out);
+	out << get_actual_name();
+}
+
+std::string
+Variable::get_actual_name() const
+{
+	std::string s = name;
+
+	if (is_global())
+		return get_prefixed_name(s);
+	else
+		return s;
+}
+
+// --------------------------------------------------------------
+void
+Variable::Output(std::ostream &out) const
+{
+	if (is_volatile() && CGOptions::wrap_volatiles()) {
+		out << "VOL_RVAL(" << get_actual_name() << ", ";
+		type->Output(out);
+		out << ")";
+	} else {
+		out << get_actual_name();
+	}
+}
+
+// --------------------------------------------------------------
+// This function is a bit of hack, because ---
+//   &VOL_RVAL(g_4)
+// is invalid when VOL_RVAL expands into a function call.
+void
+Variable::OutputAddrOf(std::ostream &out) const
+{
+	out << "&" << get_actual_name();
+}
+
+// --------------------------------------------------------------
+void
+Variable::OutputForComment(std::ostream &out) const
+{
+	out << get_actual_name();
+}
+
+// --------------------------------------------------------------
+void 
+Variable::output_qualified_type(std::ostream &out) const 
+{
+	if (type->eType == ePointer && CGOptions::deputy()) {
+		vector<string> annotations = deputy_annotation();
+		qfer.output_qualified_type_with_deputy_annotation(type, out, annotations);
+	}
+	else {
+		qfer.output_qualified_type(type, out);
+	}
+}
+
+// --------------------------------------------------------------
+void
+Variable::OutputUpperBound(std::ostream &out) const
+{
+	if (isFieldVarOf_) {
+		isFieldVarOf_->OutputUpperBound(out);
+		size_t dot = name.find_last_of(".");
+		assert(dot != string::npos);
+		string postfix = name.substr(dot, string::npos);
+		out << postfix;
+	}
+	else {
+		out << get_actual_name();
+	}
+}
+
+// --------------------------------------------------------------
+void
+Variable::OutputLowerBound(std::ostream &out) const
+{
+	if (isFieldVarOf_) {
+		isFieldVarOf_->OutputLowerBound(out);
+		size_t dot = name.find_last_of(".");
+		assert(dot != string::npos);
+		string postfix = name.substr(dot, string::npos);
+		out << postfix;
+	}
+	else {
+		out << get_actual_name();
+	}
+}
+
+// --------------------------------------------------------------
+void
+Variable::setup_ctrl_vars(void) 
+{
+	char name[2] = "i";
+	int i;
+	if (ctrl_vars.empty()) {
+		CVQualifiers dummy;
+		dummy.add_qualifiers(false, false);
+		for (i=0; i<CGOptions::max_array_dimensions(); i++) { 
+			Variable *v = new Variable(name, 0, 0, &dummy);
+			ctrl_vars.push_back(v);
+			name[0] = name[0] + 1;
+		}
+	}
+}
+
+// ------------------------------------------------------------
+void
+Variable::doFinalization(void)
+{
+	for (size_t i=0; i<ctrl_vars.size(); i++) {
+		delete ctrl_vars[i];
+	}
+	ctrl_vars.clear();
+}
+
+// --------------------------------------------------------------
+void
+MapVariableList(const vector<Variable*> &var, std::ostream &out,
+				int (*func)(Variable *var, std::ostream *pOut))
+{
+	for_each(var.begin(), var.end(), std::bind2nd(std::ptr_fun(func), &out));
+}
+
+// --------------------------------------------------------------
+void
+OutputArrayCtrlVars(std::ostream &out, size_t dimen, int indent)
+{
+	assert(dimen <= Variable::ctrl_vars.size());
+	output_tab(out, indent);
+	out << "int ";
+	for (size_t i=0; i<dimen; i++) {
+		out << Variable::ctrl_vars[i]->get_actual_name();
+		out << ((i==dimen-1) ? "" : ", ");
+	}
+	out << ";";
+	outputln(out);
+}
+
+size_t
+Variable::GetMaxArrayDimension(const vector<Variable*>& vars)
+{
+	// find the largest dimension of arrays, if there is any
+	size_t dimen = 0; 
+	// setup control vars if necessary 
+	Variable::setup_ctrl_vars();
+
+	for (size_t i=0; i<vars.size(); i++) {
+		if (vars[i]->isArray) {
+			ArrayVariable* av = (ArrayVariable*)(vars[i]);
+			// const Array members were initialzed in ArrayVariable::OutputDef 
+			if (av->get_dimension() > dimen) {
+				dimen = av->get_dimension();
+			} 
+		}
+	}
+	return dimen;
+}
+
+void
+OutputArrayInitializers(const vector<Variable*>& vars, std::ostream &out, int indent)
+{
+	size_t i, dimen;  
+	dimen = Variable::GetMaxArrayDimension(vars);
+	if (dimen) {
+		OutputArrayCtrlVars(out, dimen, indent);
+		for (i=0; i<vars.size(); i++) {
+			if (vars[i]->isArray) {
+				ArrayVariable* av = (ArrayVariable*)(vars[i]);
+				if (!av->no_loop_initializer()) {
+					av->output_init(out, av->init, Variable::ctrl_vars, indent);
+				}
+			}
+		}
+	}
+}
+
+void OutputVolatileAddress(const vector<Variable*> &vars, std::ostream &out, int indent, const string &fp_string)
+{
+	std::vector<Variable*>::const_iterator i;
+	std::vector<std::string> seen_names;
+
+	for(i = vars.begin(); i != vars.end(); ++i) {
+		(*i)->output_volatile_address(out, indent, fp_string, seen_names);
+	}
+}
+
+// --------------------------------------------------------------
+void
+OutputVariableList(const vector<Variable*> &vars, std::ostream &out, int indent)
+{
+	size_t i;
+	// have to use iterator instead of map because we need indent as paramter
+	for (i=0; i<vars.size(); i++) {
+		vars[i]->OutputDef(out, indent);
+	} 
+	if (!vars.empty() && !vars[0]->is_global()) {
+		OutputArrayInitializers(vars, out, indent);
+	}
+}
+
+void
+OutputVariableDeclList(const vector<Variable*> &var, std::ostream &out, std::string prefix, int indent)
+{
+	// have to use iterator instead of map because we need indent as paramter
+	for (size_t i=0; i<var.size(); i++) {
+		output_tab(out, indent);
+		out << prefix;
+		var[i]->OutputDecl(out);
+		out << ";";
+		outputln(out);
+	}
+}
+
+bool 
+Variable::compatible(const Variable *v) const 
+{
+	if (is_volatile() || v->is_volatile())
+		return false;
+	else if (this == v)
+		return true;
+	else if (CGOptions::expand_struct())
+		return (!v->is_field_var() && !is_field_var());
+	else
+		return false;
+}
+
+void
+Variable::hash(std::ostream& out) const
+{  
+    if (type->eType == eStruct) {
+        size_t i;
+		for (i=0; i<field_vars.size(); i++) {
+			field_vars[i]->hash(out);
+		}
+    } 
+	else if (type->eType == eSimple) {
+		if (CGOptions::compute_hash()) {
+			out << "    transparent_crc(";
+			Output(out);
+			out << ", \"" << name << "\", print_hash_value);" << endl;
+		}
+		else {
+			out << "    " << Variable::sink_var_name << " = ";
+			Output(out);
+			out << ";" << endl;
+		}
+    }
+	else if (type->eType == ePointer) {
+	}
+}
+
+// --------------------------------------------------------------
+int
+HashVariable(Variable *var, std::ostream *pOut)
+{
+	std::ostream &out = *pOut;
+	var->hash(out);
+    return 0;
+}	
+
+std::string 
+Variable::to_string(void) const
+{
+	string ret;
+	size_t i;
+	if (is_virtual() && isArray) {
+		vector<intvec> all_indices;
+		const ArrayVariable* av = (const ArrayVariable*)this;
+		expand_within_ranges(av->get_sizes(), all_indices);
+		//ret = "(";
+		for (i=0; i<all_indices.size(); i++) {
+			intvec& indices = all_indices[i];
+			ArrayVariable* member = av->itemize(indices);
+			if (i > 0) ret += ", ";
+			ret += member->to_string();
+		}
+		//ret += ")";
+		return ret;
+	}
+	switch (type->eType) { 
+	case eUnion:   
+	case eStruct:  
+		//ret = "(";
+		for (i=0; i<field_vars.size(); i++) {
+			if (i > 0) ret += ", ";
+			ret += field_vars[i]->to_string();
+		}
+		//ret += ")"; 
+		break;
+	default:
+		ostringstream oss;
+		Output(oss);
+		ret = oss.str();
+		break;
+	}
+	return ret;
+}
+
+int
+Variable::output_runtime_value(ostream &out, string prefix, string suffix, int indent, bool multi_lines) const
+{
+	string directive = type->printf_directive();
+	ostringstream oss;
+	// for field of struct arrays, create an itemized variable for each member and output the printf individually
+	// JYTODO: if all members are the same value, consolidate into one printf?
+	if (is_virtual()) {
+		assert (!is_field_var());
+		// var must be a virtual array, duplicate the directive for all members 
+		int j, k;
+		const ArrayVariable* av = (const ArrayVariable*)this; 
+		for (k=av->get_sizes().size()-1; k>=0; k--) {
+			int len = av->get_sizes()[k];
+			oss.str("");
+			oss << "{";
+			for (j=0; j<len; j++) {
+				oss << directive;
+				if (j<len-1) {
+					oss << ", ";
+				}
+			}
+			oss << "}";
+			directive = oss.str();
+		}
+	} 
+		
+	output_tab(out, indent);
+	if (multi_lines) {
+		out << "printf(\"" << prefix << "\");" << endl;
+		output_tab(out, indent);
+		out << "printf(\"" << directive << suffix << "\", " << to_string() <<");";
+	}
+	else {
+		out <<"printf(\"";
+		out << prefix; 
+		// distinguish signed and unsigned integers (unnecessary?)
+		out << directive;
+		//out << oss.str();
+		out << suffix;
+		out << "\", ";
+		out << to_string();
+		out <<");";
+	}
+	return 0;
+}
+
+int
+Variable::output_volatile_fprintf(ostream &out, int indent, const string &name, 
+		const string &sizeof_string, const string &fp_string) const
+{
+	std::string sz_symbol;
+	std::string mach = CGOptions::vol_tests_mach();
+
+	if (!mach.compare("x86")) {
+		sz_symbol = "d";
+	}
+	else if (!mach.compare("x86_64")) {
+		sz_symbol = "ld";
+	}
+	else {
+		assert("invalid mach!" && 0);
+	}
+
+	std::string str = "fprintf(" + fp_string + ", \"" + name + "; %p; %" + sz_symbol + "\\n\", ";
+	str += name;
+	str += ", ";
+
+	str += sizeof_string;
+	str += ");";
+	output_tab(out, indent);
+	out << str;
+	outputln(out);
+
+	return 0;
+}
+
+bool
+Variable::is_seen_name(vector<std::string> &seen_names, const std::string &name) const
+{
+	for (vector<string>::iterator i = seen_names.begin(); i != seen_names.end(); ++i) {
+		std::string n = (*i);
+		n += "[";
+		if (!name.compare(0, n.length(), n)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool 
+Variable::is_valid_volatile(void) const
+{
+	assert(init);
+	if (!is_const() || init->not_equals(0) || (type->eType != ePointer))
+		return true;
+
+	return false;
+}
+
+int
+Variable::output_volatile_address(ostream &out, int indent, const string &fp_string, vector<std::string> &seen_names) const
+{
+	size_t i;
+//    	bool is_vol = qfer.is_volatile_after_deref(0);
+	std::string sizeof_string;
+	type->get_type_sizeof_string(sizeof_string);
+
+	if (is_virtual()) {
+		assert(!is_field_var());
+		const ArrayVariable* av = (const ArrayVariable*)this;
+
+#if 0
+		if (is_vol && av->is_global()) {
+			std::string name = av->get_actual_name();
+			seen_names.push_back(name);
+			ostringstream ss;
+			ss << av->get_size() << " * " << sizeof_string;
+
+			output_volatile_fprintf(out, indent, name, ss.str(), fp_string);
+		}
+		else {
+#endif
+			vector<intvec> all_indices;
+			expand_within_ranges(av->get_sizes(), all_indices);
+			for (i=0; i<all_indices.size(); i++) {
+				ArrayVariable* member = av->itemize(all_indices[i]);
+				member->output_volatile_address(out, indent, fp_string, seen_names);
+			}
+//		}
+	}
+	else if ((type->eType == eSimple || type->eType == ePointer) && is_volatile() && is_global()) {
+		// handle a special case where clang put two vars at the same addr
+		// int32_t * const  volatile g_201 = 0;
+		// int * const g_369 = 0;
+		if (!is_valid_volatile())
+			return 0;
+		std::string name = to_string();
+#if 0
+		if (is_seen_name(seen_names, name)) {
+			return 0;
+		}
+		else {
+#endif
+			name = "&" + name;
+			output_volatile_fprintf(out, indent, name, sizeof_string, fp_string);
+//		}
+	}
+	else if (type->eType == eStruct) {
+#if 0
+		if (is_vol && is_global()) {
+			std::string name = "&" + get_actual_name();
+			output_volatile_fprintf(out, indent, name, sizeof_string, fp_string);
+		}
+		else {
+#endif
+			for (i=0; i<field_vars.size(); i++) {
+			// bit fields can not be taken address
+				if (!field_vars[i]->isBitfield_) {
+					field_vars[i]->output_volatile_address(out, indent, fp_string, seen_names);
+				}
+			}
+//		}
+	}
+	return 0;
+}
+
+int
+Variable::output_addressable_name(ostream &out, int indent) const
+{
+	size_t i;
+	if (is_virtual()) {
+		assert(!is_field_var());
+		const ArrayVariable* av = (const ArrayVariable*)this;
+		vector<intvec> all_indices;
+		expand_within_ranges(av->get_sizes(), all_indices);
+		for (i=0; i<all_indices.size(); i++) {
+			ArrayVariable* member = av->itemize(all_indices[i]);
+			member->output_addressable_name(out, indent);
+		}
+	}
+	else if (type->eType == eSimple || type->eType == ePointer) {
+		string str = "<0x%0x = &";
+		str += to_string();
+		str += ">\\n";
+		string str_value = "&";
+		str_value += to_string();
+		output_print_str(out, str, str_value, indent);
+		outputln(out);
+	}
+	else if (type->eType == eStruct) {
+		for (i=0; i<field_vars.size(); i++) {
+			// bit fields can not be taken address
+			if (!field_vars[i]->isBitfield_) {
+				field_vars[i]->output_addressable_name(out, indent);
+			}
+		}
+	}
+	return 0;
+}
+
+int
+Variable::output_value_dump(ostream &out, string prefix, int indent) const
+{
+	size_t i;
+	if (is_virtual()) {
+		assert(!is_field_var());
+		const ArrayVariable* av = (const ArrayVariable*)this;
+		vector<intvec> all_indices;
+		expand_within_ranges(av->get_sizes(), all_indices);
+		for (i=0; i<all_indices.size(); i++) {
+			ArrayVariable* member = av->itemize(all_indices[i]);
+			member->output_value_dump(out, prefix, indent);
+		}
+	}
+	else if (type->eType == eSimple) {
+		output_print_str(out, prefix + to_string() + " = %d\\n", to_string(), indent);
+		outputln(out);
+	}
+	else if (type->eType == eStruct) {
+		for (i=0; i<field_vars.size(); i++) {
+			// bit fields can not be taken address
+			field_vars[i]->output_value_dump(out, prefix, indent);
+		}
+	}
+	return 0;
+}
+
+const Variable*
+Variable::match_var_name(const string& vname) const
+{
+	// for simple variables
+	if (name == vname) {
+		return this;
+	}
+	// for array variables
+	if (isArray || is_array_field()) {
+		ostringstream oss;
+		Output(oss);
+		if (oss.str() == vname) {
+			return this;
+		}
+	}
+	// for struct variables 
+	size_t i;
+	for (i=0; i<field_vars.size(); i++) {
+		const Variable* v = field_vars[i]->match_var_name(vname);
+		if (v) {
+			return v;
+		}
+	}
+	return NULL;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+// Local Variables:
+// c-basic-offset: 4
+// tab-width: 4
+// End:
+
+// End of file.

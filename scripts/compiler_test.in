@@ -1,0 +1,5 @@
+gcc-4.0 -O0
+gcc-4.0 -O1
+gcc-4.0 -O2
+gcc-4.0 -O3
+gcc-4.0 -Os

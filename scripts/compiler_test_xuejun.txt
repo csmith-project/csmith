@@ -1,0 +1,57 @@
+# compiler implementations (long format)
+# /home/jason/compilers/gcc-420/install/bin/gcc-420 -O0
+# /home/jason/compilers/gcc-420/install/bin/gcc-420 -O1
+# /home/jason/compilers/gcc-420/install/bin/gcc-420 -O2
+# /home/jason/compilers/gcc-420/install/bin/gcc-420 -O3
+# /home/jason/compilers/gcc-420/install/bin/gcc-420 -Os
+# /home/jason/compilers/gcc-430/install/bin/gcc-430 -O0
+# /home/jason/compilers/gcc-430/install/bin/gcc-430 -O1
+#/home/jason/compilers/gcc-430/install/bin/gcc-430 -O2
+#/home/jason/compilers/gcc-430/install/bin/gcc-430 -O3
+#/home/jason/compilers/gcc-430/install/bin/gcc-430 -Os
+/home/jason/compilers/gcc-440/install/bin/gcc-440 -O0
+/home/jason/compilers/gcc-440/install/bin/gcc-440 -O1
+/home/jason/compilers/gcc-440/install/bin/gcc-440 -O2
+/home/jason/compilers/gcc-440/install/bin/gcc-440 -O3
+/home/jason/compilers/gcc-440/install/bin/gcc-440 -Os
+/home/jason/compilers/gcc-443/install/bin/gcc-443 -O0
+/home/jason/compilers/gcc-443/install/bin/gcc-443 -O1
+/home/jason/compilers/gcc-443/install/bin/gcc-443 -O2
+/home/jason/compilers/gcc-443/install/bin/gcc-443 -O3
+/home/jason/compilers/gcc-443/install/bin/gcc-443 -Os
+/home/jason/compilers/gcc-444/install/bin/gcc-444 -O0
+/home/jason/compilers/gcc-444/install/bin/gcc-444 -O1
+/home/jason/compilers/gcc-444/install/bin/gcc-444 -O2
+/home/jason/compilers/gcc-444/install/bin/gcc-444 -O3
+/home/jason/compilers/gcc-444/install/bin/gcc-444 -Os
+/home/jason/compilers/gcc-445/install/bin/gcc-445 -O0
+/home/jason/compilers/gcc-445/install/bin/gcc-445 -O1
+/home/jason/compilers/gcc-445/install/bin/gcc-445 -O2
+/home/jason/compilers/gcc-445/install/bin/gcc-445 -O3
+/home/jason/compilers/gcc-445/install/bin/gcc-445 -Os
+/home/jason/compilers/gcc-450/install/bin/gcc-450 -O0
+/home/jason/compilers/gcc-450/install/bin/gcc-450 -O1
+/home/jason/compilers/gcc-450/install/bin/gcc-450 -O2
+/home/jason/compilers/gcc-450/install/bin/gcc-450 -O3
+/home/jason/compilers/gcc-450/install/bin/gcc-450 -Os
+/home/jason/compilers/clang-27/install/bin/clang-27 -O0
+/home/jason/compilers/clang-27/install/bin/clang-27 -O1
+/home/jason/compilers/clang-27/install/bin/clang-27 -O2
+/home/jason/compilers/clang-27/install/bin/clang-27 -O3
+/home/jason/compilers/clang-27/install/bin/clang-27 -Os
+/home/jason/compilers/clang-28/install/bin/clang-28 -O0
+/home/jason/compilers/clang-28/install/bin/clang-28 -O1
+/home/jason/compilers/clang-28/install/bin/clang-28 -O2
+/home/jason/compilers/clang-28/install/bin/clang-28 -O3
+/home/jason/compilers/clang-28/install/bin/clang-28 -Os
+
+# compiler implementations (short format: if you set your pathes before testing)
+# gcc -O0
+# gcc -O1
+# gcc -O2
+# gcc -O3
+# gcc -Os
+# M$ compilers
+# cl -Od
+# cl -O1
+# cl -Ox

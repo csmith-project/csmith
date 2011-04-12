@@ -1,0 +1,9 @@
+-*- mode: Text -*-
+
+Csmith should build on most any modern machine with a C++ compiler.
+
+The primary documentation is here:
+
+  http://embed.cs.utah.edu/csmith/
+
+## End of file.
