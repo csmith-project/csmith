@@ -7,7 +7,7 @@ use File::stat;
 my $MIN_PROGRAM_SIZE = 8000;
 my $EXTRA_OPTIONS = "";
 my $CSMITH_PATH = $ENV{"CSMITH_PATH"};
-my $COMPILER = "gcc -w";  
+my $COMPILER = "icc -w";  
 
 #######################################################################
 
@@ -53,6 +53,7 @@ sub run_tests ($) {
 
     my $accum_percentage = 0;
     my $n_good = 0; 
+    my $n_simd = 0;
     my $cfile = "test.c";
     my $ofile = "test.exe";
     while ($n_tests == -1 || $n_good < $n_tests) {
@@ -101,14 +102,16 @@ sub run_tests ($) {
         # Also use line number as the approximation of the instruction number
         my $instr_cnt = match_in_file($ofile,  "^(\\s+p[a-s][a-z]+.*%xmm)", @simd_instructions);
         if (scalar @simd_instructions) {
-            my $percentage = @simd_instructions / $instr_cnt;
-            print "found SIMD instruction: $simd_instructions[0], simd accounts for $percentage%% of total instruction\n";
+            my $percentage = @simd_instructions / $instr_cnt * 100;
+            print "found SIMD instruction: $simd_instructions[0], simd accounts for $percentage% of total instruction\n";
             $accum_percentage += $percentage;
+            $n_simd++;
         }  
 	    $n_good++;
 	    print "test case $n_good\n";
     }
-    print "average simd percentage: ($accum_percentage/$n_good)\n";
+    my $avg_percentage = $accum_percentage / $n_good;
+    print "average SIMD percentage: $avg_percentage ($n_simd out of $n_good programs)\n";
 }
 
 ########################### main ##################################
