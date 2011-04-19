@@ -34,6 +34,7 @@
 #include <iostream>
 #include <sstream>
 #include <cmath>
+#include <climits>
 
 #include "CGContext.h"
 #include "Type.h"
@@ -179,6 +180,8 @@ GenerateRandomConstantInRange(const Type* type, int bound)
 	}
 	else if (type->simple_type == eUInt) {
 		int b = static_cast<int>(pow(2, static_cast<double>(bound) / 2));
+		if (b < 0)
+			b = INT_MAX;
 		int num = pure_rnd_upto(b);
 		ERROR_GUARD("");
 		oss << num;
