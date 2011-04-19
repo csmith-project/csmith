@@ -23,7 +23,7 @@ die "please set VOLATILE_PATH env first!" if (!defined($VOLATILE));
 $ENV{"PATH"} = "$ENV{VOLATILE_PATH}:$ENV{PATH}";
 
 my $COMPILER_TIMEOUT = 600;
-my $PROG_TIMEOUT = 3;
+my $PROG_TIMEOUT = 2;
 
 if (@ARGV != 4 && @ARGV != 3) {
     die "usage: simple_delta.pl <seed> <compiler1> <compiler2> <csmith-options>\n\n";
@@ -77,7 +77,7 @@ sub read_file($\@$) {
     }
     close INF;
     return $cnt;
-}
+	      }
 
 sub compile($$$$) {
     my ($compiler, $src_file, $exe, $out) = @_;
@@ -106,13 +106,10 @@ sub run_exe ($$$) {
     my ($exe, $out, $param) = @_;
     my $res = 0;
     my $dur;
-    my $command = "RunSafely.sh $PROG_TIMEOUT 1 /dev/null $out ./$exe $param";
+    my $command = "RunSafely.sh $PROG_TIMEOUT 1 /dev/null $out ./$exe $param >/dev/null 2>&1";
     ($res, $dur) = runit($command);
-    # my $ret = read_line($out, "exit ", 0);
-	# $ret =~ /^exit (.*)/;
-	# $res = $1;
-
     if ($res) {
+	# print "res = $res\n";
         # timeout
         if ($res == 137) {
             print "$indent Running $exe FAILURE: TIMEOUT\n";
@@ -124,6 +121,7 @@ sub run_exe ($$$) {
         }
         else { 
             # print "$indent Running $exe FAILURE: return code $res\n";
+	    return 3;
         } 
     }
     return 0;
@@ -153,50 +151,50 @@ sub compare($\@$\@$$) {
 }
 
 my $test_count = 0;
-my $ARGS="-g -DINLINE=inline -Wmissing-prototypes -Werror=missing-prototypes -Wreturn-type -Werror=return-type -Wstrict-prototypes -Werror=strict-prototypes $HEADER";	
+my $ARGS="-g -Wmissing-prototypes -Werror=missing-prototypes -Wreturn-type -Werror=return-type -Wstrict-prototypes -Werror=strict-prototypes $HEADER";	
 my $EXTRA='-Wuninitialized -Werror=uninitialized';
 # flag1 == 1: we check if two outputs have the same lines. 
 # flag2 == 1: we check the line which is "checksum = xxxx". 
 sub run_test ($$$) {
     my ($test_file, $flag1, $match) = @_;
-	system "rm -f gcc.txt";
-	system "gcc $ARGS $EXTRA -O0 $test_file -o a.out > gcc.txt 2>&1";
-	my @tmp = ();
-	if (read_file("gcc.txt", @tmp, "no return statement") || 
-	    read_file("gcc.txt", @tmp, "control reaches") ||
-	    # read_file("gcc.txt", @tmp, "initia") ||
-	    read_file("gcc.txt", @tmp, "proto")) {
-	    system("cp $test_file gcc_fail.c");
-		print "$indent compiler error! Can't compile $test_file with gcc\n";
-		return 0;
-	}
-	
+    system "rm -f gcc.txt";
+    system "gcc $ARGS $EXTRA -O0 $test_file -o a.out > gcc.txt 2>&1";
+    my @tmp = ();
+    if (read_file("gcc.txt", @tmp, "no return statement") || 
+	read_file("gcc.txt", @tmp, "control reaches") ||
+	# read_file("gcc.txt", @tmp, "initia") ||
+	read_file("gcc.txt", @tmp, "proto")) {
+	system("cp $test_file gcc_fail.c");
+	print "$indent compiler error! Can't compile $test_file with gcc\n";
+	return 0;
+    }
+    
     $test_count++;
     my $res;
     $res = compile($COMPILER1, $test_file, "$EXE1$test_count", "$COMPILER_OUT1$test_count");
     if ($res) {
-		print "$indent compiler error! Can't compile $test_file with $COMPILER1\n";
-		return 0;
-	}
+	print "$indent compiler error! Can't compile $test_file with $COMPILER1\n";
+	return 0;
+    }
 
     $res = compile($COMPILER2, $test_file, "$EXE2$test_count", "$COMPILER_OUT2$test_count");
     if ($res) {
-		print "$indent compiler error! Can't compile $test_file with $COMPILER2\n";
-		return 0;
-	}
+	print "$indent compiler error! Can't compile $test_file with $COMPILER2\n";
+	return 0;
+    }
 
     $res = run_exe("$EXE1$test_count", "$PROG_OUT1$test_count", "");
     if ($res) {
-		print "$indent can't run the program: $EXE1$test_count\n";
-		return 0;
-	}
-
+	#print "$indent can't run the program: $EXE1$test_count\n";
+	return 0;
+    }
+    
     $res = run_exe("$EXE2$test_count", "$PROG_OUT2$test_count", "");
     if ($res) {
-		print "$indent can't run the program: $EXE2$test_count\n";
-		return 0;
-	}
-	
+	#print "$indent can't run the program: $EXE2$test_count\n";
+	return 0;
+    }
+    
     my @OUTPUT1 = ();
     my @OUTPUT2 = ();
     $res = compare("$PROG_OUT1$test_count", @OUTPUT1, "$PROG_OUT2$test_count", @OUTPUT2, $flag1, $match);
@@ -214,10 +212,10 @@ sub get_score ($) {
     # open INF, "<$fn" or die;
     # my $score = 0;
     # while (my $line = <INF>) {
-	# if ($line =~ /safe_/) {
-	#    $score += 500;
-	# }
-	# $score += length($line);
+    # if ($line =~ /safe_/) {
+    #    $score += 500;
+    # }
+    # $score += length($line);
     # }
     # close INF;
     # return $score;
@@ -257,34 +255,34 @@ while (1) {
 
     $n++;
     if ($n > $STOP_AFTER) {
-		last;
-	}
+	last;
+    }
 
     system "${CSMITH_PATH}/src/csmith $OPTS --go-delta simple --delta-input ${backup_deltafile} --delta-output ${deltafile} > $cfile";
     my $new_sz = get_score ($cfile);
 
     my $success = 0;
-	
+    
     if ($new_sz < $sz) {
-		my $pct = sprintf "%.1f", 100*(1.0-((0.0+$new_sz)/$orig_sz));
-		my $r2 = run_test($cfile, 0, "checksum ");
-		if ($r2) {
-			print "$n : get_score = $new_sz (reduced by $pct %) : ";
-			print "test succeeded\n";
-			print "success!!! new score = $new_sz($pct)\n";
-			$success = 1;
-		} else {
-			# print "test failed\n";
-		}
+	my $pct = sprintf "%.1f", 100*(1.0-((0.0+$new_sz)/$orig_sz));
+	my $r2 = run_test($cfile, 0, "checksum ");
+	if ($r2) {
+	    print "$n : get_score = $new_sz (reduced by $pct %) : ";
+	    print "test succeeded\n";
+	    print "success!!! new score = $new_sz($pct)\n";
+	    $success = 1;
+	} else {
+	    # print "test failed\n";
+	}
     } else {
-		# print "not smaller\n";
+	# print "not smaller\n";
     }
 
     if (!$success) {
-		system "cp ${backup_cfile} $cfile";
-		system "cp ${backup_deltafile} $deltafile";
+	system "cp ${backup_cfile} $cfile";
+	system "cp ${backup_deltafile} $deltafile";
     } else {
-		$sz = $new_sz;
+	$sz = $new_sz;
     }
 }
 system "cp $cfile simple$seed.c";
