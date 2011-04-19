@@ -5,7 +5,8 @@ use File::stat;
 
 # TODO: 
 #
-# run out of temp dirs 
+# use temp dirs 
+# also handle crash bugs
 #
 # support systematic exploration of the space, instead of random?
 # support a bit of backtracking: explore the best N results instead of
