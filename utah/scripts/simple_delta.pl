@@ -5,7 +5,8 @@ use File::stat;
 
 # TODO: 
 #
-# support the null-delta which just re-runs csmith
+# run out of temp dirs 
+#
 # support systematic exploration of the space, instead of random?
 # support a bit of backtracking: explore the best N results instead of
 #   the best 1
@@ -267,9 +268,9 @@ while (1) {
 	my $pct = sprintf "%.1f", 100*(1.0-((0.0+$new_sz)/$orig_sz));
 	my $r2 = run_test($cfile, 0, "checksum ");
 	if ($r2) {
-	    print "$n : get_score = $new_sz (reduced by $pct %) : ";
+	    print "$n : new score = $new_sz (reduced by $pct %) : ";
 	    print "test succeeded\n";
-	    print "success!!! new score = $new_sz($pct)\n";
+	    #print "success!!! new score = $new_sz($pct)\n";
 	    $success = 1;
 	} else {
 	    # print "test failed\n";
