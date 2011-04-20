@@ -6,12 +6,12 @@ use File::stat;
 # TODO: 
 #
 # use temp dirs 
-# also handle crash bugs
+# handle compiler crash bugs and program crash bugs
+# break ties using execution time
+#   could get exact cycle count from a simulator or PIN 
 #
-# support systematic exploration of the space, instead of random?
-# support a bit of backtracking: explore the best N results instead of
-#   the best 1
-# support running on multiple cores
+# more sophisticated search: simulated annealing, backtracking, etc.
+# running on multiple cores
 # log results to a file that can be gnuplotted
 
 ##############################################################
@@ -46,7 +46,7 @@ my $deltafile = "delta.out";
 my $backup_deltafile = "works.out";
 my $indent = "    ";
 my $HEADER = "-I$CSMITH_PATH/runtime";
-my $STOP_AFTER = 100000;
+my $STOP_AFTER = 250000;
 my $SUFFIX1 = "_a";
 my $SUFFIX2 = "_b";
 my $EXE1 = "$cfile$SUFFIX1";
@@ -258,6 +258,9 @@ while (1) {
     $n++;
     if ($n > $STOP_AFTER) {
 	last;
+    }
+    if (($n % 10000) == 0) {
+	print "$n reps done\n";
     }
 
     system "${CSMITH_PATH}/src/csmith $OPTS --go-delta simple --delta-input ${backup_deltafile} --delta-output ${deltafile} > $cfile";

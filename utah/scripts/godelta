@@ -1,0 +1,14 @@
+FILE=small.c
+
+multidelta -level=0 ./test1.sh $FILE
+multidelta -level=0 ./test1.sh $FILE
+multidelta -level=1 ./test1.sh $FILE
+multidelta -level=1 ./test1.sh $FILE
+multidelta -level=2 ./test1.sh $FILE
+multidelta -level=2 ./test1.sh $FILE
+multidelta -level=10 ./test1.sh $FILE
+multidelta -level=10 ./test1.sh $FILE
+multidelta -level=20 ./test1.sh $FILE
+multidelta -level=20 ./test1.sh $FILE
+
+# indent $FILE
