@@ -13,7 +13,8 @@ if
   ! grep uninitialized outa.txt &&\
   ! grep 'control reaches end' outa.txt &&\
   ! grep 'incompatible implicit' outa.txt &&\
-  clang -Wall -O0 -c small.c  >out.txt 2>&1 &&\
+  clang -pedantic -Wall -O0 -c small.c  >out.txt 2>&1 &&\
+  ! grep 'eliding middle term' out.txt &&\
   ! grep 'end of non-void function' out.txt &&\
   ! grep 'invalid in C99' out.txt &&\
   ! grep 'should return a value' out.txt &&\
