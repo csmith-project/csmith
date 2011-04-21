@@ -10,6 +10,7 @@ rm -f out*.txt
 if 
   echo here1 &&\
   current-gcc -Wall -O small.c  >outa.txt 2>&1 &&\
+  echo here2 &&\
   ! grep uninitialized outa.txt &&\
   ! grep 'control reaches end' outa.txt &&\
   ! grep 'incompatible implicit' outa.txt &&\
@@ -23,20 +24,20 @@ if
   ! grep uninitialized out.txt &&\
   ! grep 'incompatible pointer' out.txt &&\
   ! grep 'type specifier missing' out.txt &&\
-  echo here2 &&\
+  echo here3 &&\
   $CC1 small.c -o small1 > cc_out1.txt 2>&1 &&\
   RunSafely.sh 3 1 /dev/null out1.txt ./small1 >/dev/null 2>&1 &&\
   $CC2 small.c -o small2 > cc_out2.txt 2>&1 &&\
   RunSafely.sh 3 1 /dev/null out2.txt ./small2 >/dev/null 2>&1 &&\
   ! diff out1.txt out2.txt &&\
-  echo here3 &&\
+  echo here4 &&\
   ~/c-semantics-bundle-0.1/c-semantics/dist/kcc -s small.c >/dev/null 2>&1 &&\
-  echo here4 
+  echo here5 
 then
   if 
     ./a.out 
   then
-    echo here5
+    echo here6
     exit 0
   else
     TMPF="undefined_$$.c"
