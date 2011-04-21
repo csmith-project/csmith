@@ -7,8 +7,8 @@ use File::stat;
 #
 # use temp dirs 
 # handle compiler crash bugs and program crash bugs
-# break ties using execution time
-#   could get exact cycle count from a simulator or PIN 
+# optionally optimize for reduced execution time using PIN
+#   to count insns
 #
 # more sophisticated search: simulated annealing, backtracking, etc.
 # running on multiple cores
@@ -46,7 +46,7 @@ my $deltafile = "delta.out";
 my $backup_deltafile = "works.out";
 my $indent = "    ";
 my $HEADER = "-I$CSMITH_PATH/runtime";
-my $STOP_AFTER = 250000;
+my $STOP_AFTER = 300000;
 my $SUFFIX1 = "_a";
 my $SUFFIX2 = "_b";
 my $EXE1 = "$cfile$SUFFIX1";
