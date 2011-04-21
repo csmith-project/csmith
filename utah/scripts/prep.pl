@@ -1,5 +1,8 @@
 #!/usr/bin/perl -w
 
+### this script preps a testcase for reduction and calls the result
+### small.c; it takes the same arguments as Csmith
+
 use strict;
 
 my $CSMITH_PATH = $ENV{"CSMITH_PATH"};
