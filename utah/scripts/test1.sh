@@ -36,10 +36,11 @@ then
     echo here5
     exit 0
   else
-    cp small.c "undefined_$$.c"
+    TMPF="undefined_$$.c"
+    echo copying C file to $TMPF
+    cp small.c $TMPF
     exit 1
   fi
 else
   exit 1
 fi
-
