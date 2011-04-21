@@ -2,8 +2,8 @@
 
 use strict;
 
+# debug lines 155 and 182
 # debug tok and comma 
-
 # use named backreferences
 # turn short, char, long into int
 # replace tok and comma with 0 and 1
