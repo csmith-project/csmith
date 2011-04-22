@@ -58,9 +58,9 @@ StatementBreak::make_random(CGContext &cg_context)
 	// quick fix: don't generate break statement for nested loops (this including multi-dimension array operations)
 	// JYTODO: treat "break" for nested loops as "continue", because it's effect is going back to the 
 	// head of loop body, same as continue
-	if (cg_context.focus_var && cg_context.focus_var->get_dimension() > 1) {
-		return 0;
-	}
+	//if (cg_context.focus_var && cg_context.focus_var->get_dimension() > 1) {
+	//	return 0;
+	//}
 	//FactMgr* fm = get_fact_mgr(&cg_context); 
 	// find the closest looping parent block: the one "continue"
 	// would apply to

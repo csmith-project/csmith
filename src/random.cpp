@@ -112,6 +112,7 @@ std::string PureRandomDigits( int num )
 unsigned int
 pure_rnd_upto(const unsigned int n, const Filter *f, const std::string* where)
 {
+	if (n==0) return 0;		// not a random choice, but we still need to handle it though
 	if (!CGOptions::is_random()) {
 		RNDNUM_GENERATOR old;
 	    	old = RandomNumber::SwitchRndNumGenerator(rDefaultRndNumGenerator);

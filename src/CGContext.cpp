@@ -51,53 +51,38 @@ using namespace std;
 /*
  * Declare "the" empty set of variables.
  */
-const CGContext::VariableSet CGContext::empty_variable_set(0);
+const VariableSet CGContext::empty_variable_set(0);
 const CGContext CGContext::empty_context(0, Effect::get_empty_effect(), 0);
 
 ///////////////////////////////////////////////////////////////////////////////
-
-#if 0
 /*
- * 
+ * A convenience constructor.  Set `stmt_depth' and `flags' to zero, and set
+ * `no_read_vars' and `no_write_vars' each to be an empty set.
  */
-CGContext::CGContext(void)
-	: current_func(0),
+CGContext::CGContext(Function *current_func, const Effect &eff_context, Effect *eff_accum)
+	: current_func(current_func),
 	  stmt_depth(0),
 	  expr_depth(0),
 	  flags(0),
 	  curr_blk(0),
-	  no_read_vars(),
-	  no_write_vars(),
-	  effect_context(),
-	  effect_accum(0)
+	  rw_directive(NULL),
+	  iv_bounds(),
+	  effect_context(eff_context),
+	  effect_accum(eff_accum)
 {
 	// Nothing else to do.
 }
-#endif
 
-/*
- *
- */
-CGContext::CGContext(Function *current_func,
-					 int stmt_depth,
-					 int expr_depth,
-					 unsigned int flags,
-					 const std::vector<const Block*>& callers,
-					 const Block* blk,
-					 ArrayVariable* fvar,
-					 const VariableSet &no_read_vars,
-					 const VariableSet &no_write_vars,
-					 const Effect &eff_context,
-					 Effect *eff_accum)
-	: current_func(current_func),
-	  stmt_depth(stmt_depth),
-	  expr_depth(expr_depth),
-	  flags(flags),
-	  call_chain(callers),
-	  curr_blk(blk),
-	  focus_var(fvar),
-	  no_read_vars(no_read_vars),
-	  no_write_vars(no_write_vars),
+// adapt current context to create context of parameters
+CGContext::CGContext(const CGContext &cgc, const Effect &eff_context, Effect *eff_accum)
+	: current_func(cgc.current_func),
+	  stmt_depth(cgc.stmt_depth),
+	  expr_depth(cgc.expr_depth),
+	  flags(cgc.flags),
+	  call_chain(cgc.call_chain),
+	  curr_blk(cgc.curr_blk),
+	  rw_directive(cgc.rw_directive),
+	  iv_bounds(cgc.iv_bounds),
 	  effect_context(eff_context),
 	  effect_accum(eff_accum),
 	  effect_stm()
@@ -105,44 +90,39 @@ CGContext::CGContext(Function *current_func,
 	// Nothing else to do.
 }
 
-/*
- * A convenience constructor.  Set `stmt_depth' and `flags' to zero, and set
- * `no_read_vars' and `no_write_vars' each to be an empty set.
- */
-CGContext::CGContext(Function *current_func,
-					 const Effect &eff_context,
-					 Effect *eff_accum)
-	: current_func(current_func),
-	  stmt_depth(0),
-	  expr_depth(0),
-	  flags(0),
-	  curr_blk(0),
-	  focus_var(0),
-	  no_read_vars(CGContext::empty_variable_set),
-	  no_write_vars(CGContext::empty_variable_set),
-	  effect_context(eff_context),
-	  effect_accum(eff_accum)
-{
-	// Nothing else to do.
-}
-
-/*
- * 
- */
-CGContext::CGContext(const CGContext &cgc)
-	: current_func(cgc.current_func),
+// adapt current context to create context of callee
+CGContext::CGContext(const CGContext &cgc, Function* f, const Effect &eff_context, Effect *eff_accum)
+	: current_func(f),
 	  stmt_depth(cgc.stmt_depth),
 	  expr_depth(cgc.expr_depth),
 	  flags(cgc.flags),
 	  call_chain(cgc.call_chain),
 	  curr_blk(cgc.curr_blk),
-	  focus_var(cgc.focus_var),
-	  no_read_vars(cgc.no_read_vars),
-	  no_write_vars(cgc.no_write_vars),
+	  rw_directive(cgc.rw_directive),
+	  iv_bounds(cgc.iv_bounds),
+	  effect_context(eff_context),
+	  effect_accum(eff_accum)
+{
+	extend_call_chain(cgc);
+}
+
+// adapt current context to create context of loop body
+CGContext::CGContext(const CGContext &cgc, RWDirective* rwd, const Variable* iv, unsigned int bound)
+	: current_func(cgc.current_func),
+	  stmt_depth(cgc.stmt_depth),
+	  expr_depth(cgc.expr_depth),
+	  flags(cgc.flags | IN_LOOP),
+	  call_chain(cgc.call_chain),
+	  curr_blk(cgc.curr_blk),
+	  rw_directive(rwd), 
+	  iv_bounds(cgc.iv_bounds),
 	  effect_context(cgc.effect_context),
 	  effect_accum(cgc.effect_accum)
 {
-	// Nothing else to do.
+	// add loop induction variable 
+	if (iv) {
+		iv_bounds[iv] = bound;
+	}
 }
 
 /*
@@ -159,13 +139,15 @@ CGContext::~CGContext(void)
 bool
 CGContext::is_nonreadable(const Variable *v) const
 {
-	VariableSet::size_type len = no_read_vars.size();
+	if (rw_directive) {
+		VariableSet::size_type len = rw_directive->no_read_vars.size();
 	VariableSet::size_type i;
 
 	for (i = 0; i < len; ++i) {
-		if (no_read_vars[i]->match(v)) {
+			if (rw_directive->no_read_vars[i]->match(v)) {
 			return true;
 		}
+	}
 	}
 	return false;
 }
@@ -176,14 +158,16 @@ CGContext::is_nonreadable(const Variable *v) const
 bool
 CGContext::is_nonwritable(const Variable *v) const
 {
-	VariableSet::size_type len = no_write_vars.size();
-	VariableSet::size_type i;
-
-	for (i = 0; i < len; ++i) {
-		if (no_write_vars[i]->match(v)) {
+	if (rw_directive) {
+		VariableSet::size_type len = rw_directive->no_write_vars.size(); 
+		for (size_t i = 0; i < len; ++i) {
+			if (rw_directive->no_write_vars[i]->match(v)) {
 			return true;
 		}
 	}
+	}
+	// not writing to loop IVs (to avoid infinite loops)
+	if (iv_bounds.find(v) != iv_bounds.end()) return true;
 	return false;
 }
 
@@ -493,9 +477,6 @@ void CGContext::extend_call_chain(const CGContext& cg_context)
 	if (b) {
 		call_chain.push_back(b);
 	}
-	if ((cg_context.flags & IN_LOOP) || (cg_context.flags & IN_CALL_CHAIN_LOOP)) {
-		flags |= IN_CALL_CHAIN_LOOP;
-	}
 }
 
 void 
@@ -579,6 +560,25 @@ CGContext::in_conflict(const Effect& eff) const
 		}
 	}
 	return false;
+}
+
+void
+RWDirective::find_must_use_arrays(vector<const Variable*>& avs) const
+{
+	avs.clear(); 
+	size_t i;
+	for (i=0; i<must_read_vars.size(); i++) {
+		const Variable* v = must_read_vars[i];
+		if (v->isArray && !is_variable_in_set(avs, v)) {
+			avs.push_back(v);
+		}
+	}
+	for (i=0; i<must_write_vars.size(); i++) {
+		const Variable* v = must_write_vars[i];
+		if (v->isArray && !is_variable_in_set(avs, v)) {
+			avs.push_back(v);
+		}
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////

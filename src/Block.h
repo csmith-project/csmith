@@ -98,6 +98,8 @@ public:
 	bool must_break_or_return(void) const;
 	virtual bool must_jump(void) const;
 	bool from_tail_to_head(void) const;
+	bool need_nested_loop(const CGContext& cg_context);
+	Statement* append_nested_loop(CGContext& cg_context);
 
 	virtual bool visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const;
 

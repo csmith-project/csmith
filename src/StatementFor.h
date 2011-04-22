@@ -50,6 +50,10 @@ class StatementFor : public Statement
 public:
 	// Factory method.
 	static StatementFor *make_random(CGContext &cg_context);
+	
+	static StatementFor *make_random_array_loop(const CGContext &cg_context);
+
+	static const Variable* make_iteration(CGContext& cg_context, StatementAssign*& begin, Expression*& exit_cond, StatementAssign*& step, unsigned int& bound);
 
 	StatementFor(const StatementAssign &init,
 				 const Expression &test,
@@ -57,6 +61,7 @@ public:
 				 const Block &body);
 	virtual ~StatementFor(void);
 
+	void post_loop_analysis(CGContext& cg_context, vector<const Fact*>& pre_facts, Effect& pre_effect);
 	const StatementAssign* get_init(void) const { return &init;};
 	const Expression* get_test(void) const { return &test; };
 	const StatementAssign* get_incr(void) const { return &incr; };

@@ -93,6 +93,8 @@ SafeOpFlags::flags_to_type(bool sign, enum SafeOpSize size)
 		default: assert(0);
 		}
 	}
+	assert(0);
+	return eInt;
 }
 
 const Type*

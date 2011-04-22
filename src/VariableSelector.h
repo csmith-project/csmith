@@ -83,9 +83,11 @@ public:
 
 	static Expression* make_init_value(Effect::Access access, const CGContext &cg_context, const Type* t, const CVQualifiers* qfer, Block* b);
 	static ArrayVariable* create_mutated_array_var(const ArrayVariable* av, const vector<const Expression*>& new_indices);
+	static const Variable* select_must_use_var(Effect::Access access, CGContext &cg_context, const Type* type, const CVQualifiers* qfer);
 
 	static ArrayVariable* select_array(const CGContext &cg_context);
-	static const ArrayVariable* select_random_focus_var(Effect::Access access, const CGContext &cg_context, const Type* type, const CVQualifiers* qfer, const vector<const Variable*>& invalid_vars, eMatchType mt);
+	static ArrayVariable*  itemize_array(CGContext &cg_context, const ArrayVariable* av);
+	//static const ArrayVariable* select_random_focus_var(Effect::Access access, const CGContext &cg_context, const Type* type, const CVQualifiers* qfer, const vector<const Variable*>& invalid_vars, eMatchType mt);
 
 	~VariableSelector(void);  
 	///////////////////////////////////////////////////////////////////////  
@@ -178,3 +180,4 @@ void HashGlobalVariables(std::ostream &);
 // End:
 
 // End of file.
+

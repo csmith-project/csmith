@@ -33,6 +33,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <vector> 
+#include <map>
 #include "Effect.h"
 using namespace std;
 
@@ -41,7 +42,6 @@ using namespace std;
 #define IN_LOOP (2)
 #define DO_HASH (4)
 #define NO_DANGLING_PTR (8)
-#define IN_CALL_CHAIN_LOOP (16)
 #define INVISIBLE (9999)
 #define INACTIVE (8888)
 
@@ -57,36 +57,50 @@ class Statement;
 class ExpressionVariable; 
 class ArrayVariable;
 
+typedef std::vector<const Variable *> VariableSet;
+
+class RWDirective
+{
+public:
+	RWDirective(const VariableSet& no_reads, const VariableSet& no_writes, VariableSet& reads, VariableSet& writes) 
+		: no_read_vars(no_reads),
+		  no_write_vars(no_writes),
+		  must_read_vars(reads), 
+		  must_write_vars(writes)
+	{};
+
+	void find_must_use_arrays(std::vector<const Variable*>& avs) const;
+
+	// The set of variables that should not be read/written. Currently not used
+	// could be useful for generating multi-thread functions with no data racing
+	const VariableSet &no_read_vars;
+	const VariableSet &no_write_vars;
+	// The set of variables that must be read/written.  Again, this is not
+	// about generating conforming code; it is simply about directing the
+	// code generator.
+	//
+	VariableSet& must_read_vars;
+	VariableSet& must_write_vars;
+};
+
 /*
  *
  */
 class CGContext
 {
 public:
-	typedef std::vector<const Variable *> VariableSet;
 	static const VariableSet empty_variable_set;
+ 
+	// original constructor, created at the beginning of generating a function
+	CGContext(Function *current_func, const Effect &eff_context, Effect *eff_accum);
+	// create a CGContext for parameters from an existing CGContext
+	CGContext(const CGContext &cgc, const Effect &eff_context, Effect *eff_accum);
+	// create a CGContext for callees from an existing CGContext
+	CGContext(const CGContext &cgc, Function* f, const Effect &eff_context, Effect *eff_accum);
+	// create a CGContext for loops from an existing CGContext
+	CGContext(const CGContext &cgc, RWDirective* lc, const Variable* iv, unsigned int bound);
 
-	// CGContext(void);
-	CGContext(Function *current_func,
-			  int stmt_depth,
-			  int expr_depth,
-			  unsigned int flags,
-			  const std::vector<const Block*>& callers,
-			  const Block* blk,
-			  ArrayVariable* fvar,
-			  const VariableSet &no_read_vars,
-			  const VariableSet &no_write_vars,
-			  const Effect &eff_context,
-			  Effect *eff_accum);
-	// A convenience constructor: `stmt_depth' and `flags' are set to zero,
-	// and `no_write_vars' is set to an empty set.
-	CGContext(Function *current_func,
-			  const Effect &eff_context,
-			  Effect *eff_accum);
-	CGContext(const CGContext &cgc);
 	~CGContext(void);
-
-	bool in_call_chain_loop(void) const { return (flags & IN_LOOP) || (flags & IN_CALL_CHAIN_LOOP);}
 
 	void output_call_chain(std::ostream &out);
 
@@ -98,10 +112,7 @@ public:
 
 	Block *get_current_block(void) const;
 
-	static const CGContext& get_empty_context(void) { return empty_context;}
-
-	const VariableSet &get_no_read_vars(void) const { return no_read_vars; }
-	const VariableSet &get_no_write_vars(void) const { return no_write_vars; }
+	static const CGContext& get_empty_context(void) { return empty_context;} 
 
 	const Effect &get_effect_context(void) const	{ return effect_context; }
 	Effect *get_effect_accum(void) const			{ return effect_accum; }
@@ -142,21 +153,11 @@ public: // XXX
 	unsigned int flags;
 	std::vector<const Block*> call_chain;
 	const Block* curr_blk; 
-	ArrayVariable* focus_var;
+	RWDirective* rw_directive; 
+	// induction variables for loops, with each IV controls one nested loop
+	map<const Variable*, unsigned int> iv_bounds;
 
 private:
-	// The set of variables that should not be read.  Listing a variable here
-	// is not about generating conforming code; it is simply about directing
-	// the code generator.
-	//
-	const VariableSet &no_read_vars;
-
-	// The set of variables that should not be written.  Again, this is not
-	// about generating conforming code; it is simply about directing the
-	// code generator.
-	//
-	const VariableSet &no_write_vars;
-
 	const Effect &effect_context;
 	Effect *effect_accum; // may be null!
 	Effect effect_stm;

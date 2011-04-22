@@ -129,10 +129,11 @@ DefaultRndNumGenerator::rnd_upto(const unsigned int n, const Filter *f, const st
 			v = genrand() % n;
 		}
 	}
+	if (where) {
 	std::ostringstream ss;
-	if (where)
 		ss << *where << "->";
 	trace_string_ += ss.str();
+	}
 	add_number(v, n, local_depth);
 	return v;
 }

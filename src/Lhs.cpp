@@ -81,17 +81,8 @@ Lhs::make_random(CGContext &cg_context, const Type* t, const CVQualifiers* qfer)
 			if (!(new_qfer.wildcard)) {
 				new_qfer.restrict(Effect::WRITE, cg_context);
 			} 
-			// try to use "focus variable" (array variable that is being indexed in array operations, 
-			// see StatementArrayOp::make_random)
-			if (cg_context.focus_var && t->match(cg_context.focus_var->type, eDerefExact)) { 
-				if (!qfer || qfer->match_indirect(cg_context.focus_var->qfer)) {
-					if (rnd_flipcoin(15)) {
-						ERROR_GUARD(NULL);
-						var = VariableSelector::select_random_focus_var(Effect::WRITE, cg_context, t, &new_qfer, dummy, eDerefExact);
-					}
-				}
-				ERROR_GUARD(NULL);
-			}
+			// try to use one of the "must_use" variables
+			var = VariableSelector::select_must_use_var(Effect::WRITE, cg_context, t, qfer);
 			if (var == NULL) {
 				var = VariableSelector::select(Effect::WRITE, cg_context, t, &new_qfer, dummy, eDerefExact);
 			}

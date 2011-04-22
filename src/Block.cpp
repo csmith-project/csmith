@@ -144,6 +144,11 @@ Block::make_random(CGContext &cg_context, bool looping)
 		return NULL;
 	}
 
+	// append nested loop if some must-read/write variables hasn't been accessed
+	if (b->need_nested_loop(cg_context)) {
+		b->append_nested_loop(cg_context);
+	}
+
 	// perform DFA analysis after creation
 	b->post_creation_analysis(cg_context, pre_effect);
 
@@ -410,6 +415,56 @@ Block::append_return_stmt(CGContext& cg_context)
 	fm->map_accum_effect[this] = *(cg_context.get_effect_accum());
 	fm->map_stm_effect[this].add_effect(fm->map_stm_effect[sr]);
 	return sr;
+}
+
+bool 
+Block::need_nested_loop(const CGContext& cg_context) 
+{
+	size_t i;
+	const Statement* s = get_last_stm();
+	if (looping && (s == NULL || !s->must_jump()) && cg_context.rw_directive) {
+		RWDirective* rwd = cg_context.rw_directive;  
+		for (i=0; i<rwd->must_read_vars.size(); i++) {
+			size_t dimen = rwd->must_read_vars[i]->get_dimension();
+			if (dimen > cg_context.iv_bounds.size()) {
+				return true;
+			} else if (dimen == cg_context.iv_bounds.size() && rnd_flipcoin(10)) {
+				return true;
+			}
+		}
+		for (i=0; i<rwd->must_write_vars.size(); i++) {
+			size_t dimen = rwd->must_write_vars[i]->get_dimension();
+			if (dimen > cg_context.iv_bounds.size()) {
+				return true;
+			} else if (dimen == cg_context.iv_bounds.size() && rnd_flipcoin(10)) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+Statement* 
+Block::append_nested_loop(CGContext& cg_context)
+{ 
+	FactMgr* fm = get_fact_mgr_for_func(func);
+	FactVec pre_facts = fm->global_facts;   
+	cg_context.get_effect_stm().clear();
+
+	Statement* sf = Statement::make_random(cg_context, eFor);
+	ERROR_GUARD(NULL);
+	stms.push_back(sf);
+	fm->makeup_new_var_facts(pre_facts, fm->global_facts);
+	//assert(sf->visit_facts(fm->global_facts, cg_context));
+
+	fm->set_fact_in(sf, pre_facts);
+	fm->set_fact_out(sf, fm->global_facts); 
+	fm->map_accum_effect[sf] = *(cg_context.get_effect_accum());
+	fm->map_visited[sf] = true;
+	//sf->post_creation_analysis(pre_facts, cg_context);
+	fm->map_accum_effect[this] = *(cg_context.get_effect_accum());
+	fm->map_stm_effect[this].add_effect(fm->map_stm_effect[sf]);
+	return sf;
 }
 
 /* return true is var is local variable of this block or parent block,

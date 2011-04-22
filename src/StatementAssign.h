@@ -87,7 +87,7 @@ public:
 						 eAssignOps op,
 						 const Expression &e);
 
-	StatementAssign(const Lhs &l, const Expression &e, const SafeOpFlags *flags);
+	StatementAssign(const Lhs &l, const Expression &e, eAssignOps op = eSimpleAssign, const SafeOpFlags *flags = NULL);
 
 	StatementAssign(const Lhs &l, eAssignOps op, const Expression &e, 
 			const Expression *er, const SafeOpFlags *flags,

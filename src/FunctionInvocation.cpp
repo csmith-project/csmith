@@ -129,8 +129,8 @@ FunctionInvocation::make_random(bool bStandardFunc,
 		fiu->build_invocation(callee, cg_context); 
 		ERROR_GUARD_AND_DEL1(NULL, fiu);
 		fi = fiu;
-		if (!fiu->failed) {
-			cg_context.get_current_func()->fact_changed |= fiu->func->fact_changed;    
+		if (!fiu->failed) { 
+			cg_context.get_current_func()->fact_changed |= fiu->func->fact_changed;
 		}
 	} 
 
@@ -204,17 +204,7 @@ FunctionInvocation::make_random_binary(CGContext &cg_context, const Type* type)
 	FunctionInvocationBinary *fi = FunctionInvocationBinary::CreateFunctionInvocationBinary(cg_context, op, flags);
 
 	Effect lhs_eff_accum;
-	CGContext lhs_cg_context(cg_context.get_current_func(),
-							 cg_context.stmt_depth,
-							 cg_context.expr_depth,
-							 cg_context.flags,
-							 cg_context.call_chain,
-							 cg_context.curr_blk,
-							 cg_context.focus_var,
-							 cg_context.get_no_read_vars(),
-							 cg_context.get_no_write_vars(),
-							 cg_context.get_effect_context(),
-							 &lhs_eff_accum);
+	CGContext lhs_cg_context(cg_context, cg_context.get_effect_context(), &lhs_eff_accum);
 
 	// Generate an expression with the correct type required by safe math operands
 	const Type* lhs_type = flags->get_lhs_type();
@@ -241,17 +231,7 @@ FunctionInvocation::make_random_binary(CGContext &cg_context, const Type* type)
 		rhs_eff_context.add_effect(lhs_eff_accum);
 		Effect rhs_eff_accum;
 
-		CGContext rhs_cg_context(cg_context.get_current_func(),
-								 cg_context.stmt_depth,
-								 cg_context.expr_depth,
-								 cg_context.flags,
-								 cg_context.call_chain,
-								 cg_context.curr_blk,
-								 cg_context.focus_var,
-								 cg_context.get_no_read_vars(),
-								 cg_context.get_no_write_vars(),
-								 rhs_eff_context,
-								 &rhs_eff_accum);
+		CGContext rhs_cg_context(cg_context, rhs_eff_context, &rhs_eff_accum);
 		if (op == eLShift || op == eRShift) {
 			eTermType tt = MAX_TERM_TYPES;
 			bool not_constant = rnd_flipcoin(ShiftByNonConstantProb);
@@ -312,18 +292,8 @@ FunctionInvocation::make_random_binary_ptr_comparison(CGContext &cg_context)
 	ERROR_GUARD_AND_DEL1(NULL, fi);
 
 	Effect lhs_eff_accum;
-	CGContext lhs_cg_context(cg_context.get_current_func(),
-							 cg_context.stmt_depth,
-							 cg_context.expr_depth,
-							 cg_context.flags | NO_DANGLING_PTR,
-							 cg_context.call_chain,
-							 cg_context.curr_blk,
-							 cg_context.focus_var,
-							 cg_context.get_no_read_vars(),
-							 cg_context.get_no_write_vars(),
-							 cg_context.get_effect_context(),
-							 &lhs_eff_accum);
- 
+	CGContext lhs_cg_context(cg_context, cg_context.get_effect_context(), &lhs_eff_accum);
+	lhs_cg_context.flags |= NO_DANGLING_PTR;
 	Expression *lhs = Expression::make_random(lhs_cg_context, type, true);
 	ERROR_GUARD_AND_DEL1(NULL, fi);
 	cg_context.add_effect(lhs_eff_accum);
@@ -353,17 +323,8 @@ FunctionInvocation::make_random_binary_ptr_comparison(CGContext &cg_context)
 		rhs_eff_context.add_effect(lhs_eff_accum);
 		Effect rhs_eff_accum;
 
-		CGContext rhs_cg_context(cg_context.get_current_func(),
-								 cg_context.stmt_depth,
-								 cg_context.expr_depth,
-								 cg_context.flags | NO_DANGLING_PTR,
-								 cg_context.call_chain,
-								 cg_context.curr_blk,
-								 cg_context.focus_var,
-								 cg_context.get_no_read_vars(),
-								 cg_context.get_no_write_vars(),
-								 rhs_eff_context,
-								 &rhs_eff_accum);
+		CGContext rhs_cg_context(cg_context, rhs_eff_context, &rhs_eff_accum);
+		rhs_cg_context.flags |= NO_DANGLING_PTR;
 		rhs = Expression::make_random(rhs_cg_context, type, true, false, tt);
 		cg_context.add_effect(rhs_eff_accum);
 	}
@@ -549,17 +510,7 @@ FunctionInvocation::visit_facts(vector<const Fact*>& inputs, CGContext& cg_conte
 		for (size_t i=0; i<param_value.size(); i++) {
 			Effect param_eff_accum;
 			//int h = g++;
-			CGContext param_cg_context(cg_context.get_current_func(),
-								   cg_context.stmt_depth,
-								   cg_context.expr_depth,
-								   flags,
-								   cg_context.call_chain,
-								   cg_context.curr_blk,
-								   cg_context.focus_var,
-								   cg_context.get_no_read_vars(),
-								   cg_context.get_no_write_vars(),
-								   running_eff_context,
-								   &param_eff_accum);
+			CGContext param_cg_context(cg_context, running_eff_context, &param_eff_accum);
 			// the parameters might be function calls
 			const Expression* value = param_value[i];
 			if (!value->visit_facts(inputs, param_cg_context)) { 
@@ -582,18 +533,7 @@ FunctionInvocation::visit_facts(vector<const Fact*>& inputs, CGContext& cg_conte
 		const FunctionInvocationUser* func_call = dynamic_cast<const FunctionInvocationUser*>(this);
 		Effect effect_accum;  
 		//CGContext new_context(func_call->func, cg_context.get_effect_context(), &effect_accum);
-		CGContext new_context(func_call->func,
-							 cg_context.stmt_depth,
-							 cg_context.expr_depth,
-							 cg_context.flags,
-							 cg_context.call_chain,
-							 cg_context.curr_blk,
-							 cg_context.focus_var,
-							 cg_context.get_no_read_vars(),
-							 cg_context.get_no_write_vars(),
-							 cg_context.get_effect_context(),
-							 &effect_accum);
-		new_context.extend_call_chain(cg_context);
+		CGContext new_context(cg_context, func_call->func, cg_context.get_effect_context(), &effect_accum);
 		ok = func_call->revisit(inputs, new_context); 
 		if (ok) {
 			assert(cg_context.curr_blk);

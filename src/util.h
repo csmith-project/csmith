@@ -41,7 +41,7 @@ std::string gensym(const char *basename);
 std::string gensym(const std::string &basename);
 void reset_gensym();
 std::vector<intvec> permute(intvec in);
-int expand_within_ranges(intvec in, std::vector<intvec>& out);
+int expand_within_ranges(std::vector<unsigned int>, std::vector<intvec>& out);
 void outputln(std::ostream &out);
 void really_outputln(std::ostream &out);
 void output_comment_line(std::ostream &out, const std::string &comment);

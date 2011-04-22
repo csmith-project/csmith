@@ -61,5 +61,3 @@ VectorFilter::filter(int v) const
 	bool re = std::find(vs_.begin(), vs_.end(), static_cast<unsigned int>(v)) != vs_.end();
 	return (flag_ == FILTER_OUT) ? re : !re;
 }
-
-

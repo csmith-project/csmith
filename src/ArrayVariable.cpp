@@ -142,12 +142,12 @@ ArrayVariable::CreateArrayVariable(Block* blk, const std::string &name, const Ty
 	if (dimension > CGOptions::max_array_dimensions()) {
 		dimension = CGOptions::max_array_dimensions();
 	}
-	vector<int> sizes;
+	vector<unsigned int> sizes;
 	int total_size = 1;
 	for (int i=0; i<dimension; i++) {
-		int dimen_size = rnd_upto(CGOptions::max_array_length_per_dimension()) + 1;
+		unsigned int dimen_size = rnd_upto(CGOptions::max_array_length_per_dimension()) + 1;
 		ERROR_GUARD(NULL);
-		if (total_size * dimen_size > CGOptions::max_array_length()) {
+		if (total_size * dimen_size > (unsigned int)CGOptions::max_array_length()) {
 			dimen_size = 1;
 		}
 		total_size *= dimen_size;
@@ -175,7 +175,7 @@ ArrayVariable::CreateArrayVariable(Block* blk, const std::string &name, const Ty
 /*
  *
  */
-ArrayVariable::ArrayVariable(Block* blk, const std::string &name, const Type *type, const Expression* init, const CVQualifiers* qfer, const vector<int>& sizes, const Variable* isFieldVarOf)
+ArrayVariable::ArrayVariable(Block* blk, const std::string &name, const Type *type, const Expression* init, const CVQualifiers* qfer, const vector<unsigned int>& sizes, const Variable* isFieldVarOf)
 	: Variable(name, type, init, qfer, isFieldVarOf, true),  
 	  collective(NULL),
 	  parent(blk),
@@ -283,7 +283,7 @@ ArrayVariable::itemize(const vector<int>& const_indices) const
 }
 
 ArrayVariable* 
-ArrayVariable::itemize(const std::vector<const Variable*>& indices, Block* blk)
+ArrayVariable::itemize(const std::vector<const Variable*>& indices, Block* blk) const
 {
 	size_t i;
 	assert(collective == 0);
@@ -291,6 +291,26 @@ ArrayVariable::itemize(const std::vector<const Variable*>& indices, Block* blk)
 	VariableSelector::AllVars.push_back(av);
 	for (i=0; i<sizes.size(); i++) {
 		av->add_index(new ExpressionVariable(*indices[i]));
+	}
+	av->collective = this;
+	av->parent = blk;
+	// only expand struct for itemized array variable
+	if (type->eType == eStruct) {
+		av->create_field_vars(type);
+	}
+	blk->local_vars.push_back(av);
+	return av;
+}
+
+ArrayVariable* 
+ArrayVariable::itemize(const std::vector<const Expression*>& indices, Block* blk) const
+{
+	size_t i;
+	assert(collective == 0);
+	ArrayVariable* av = new ArrayVariable(*this); 
+	VariableSelector::AllVars.push_back(av);
+	for (i=0; i<sizes.size(); i++) {
+		av->add_index(indices[i]);
 	}
 	av->collective = this;
 	av->parent = blk;
@@ -496,7 +516,7 @@ ArrayVariable::Output(std::ostream &out) const
 		assert(!indices.empty());
 		size_t i;
 		for (i=0; i<indices.size(); i++) {
-			if (indices[i]->less_than(sizes[i])) {
+			if (1) { //indices[i]->less_than(sizes[i])) {
 				out << "[";
 				indices[i]->Output(out);
 				out << "]";

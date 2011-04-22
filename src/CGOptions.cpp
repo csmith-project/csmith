@@ -152,6 +152,7 @@ DEFINE_GETTER_SETTER_BOOL(const_as_condition)
 DEFINE_GETTER_SETTER_BOOL(match_exact_qualifiers)
 DEFINE_GETTER_SETTER_BOOL(blind_check_global)
 DEFINE_GETTER_SETTER_BOOL(no_return_dead_ptr)
+DEFINE_GETTER_SETTER_INT (max_array_num_in_loop)
 DEFINE_GETTER_SETTER_BOOL(identify_wrappers)
 DEFINE_GETTER_SETTER_BOOL(mark_mutable_const)
 
@@ -225,6 +226,7 @@ CGOptions::set_default_settings(void)
 	no_return_dead_ptr(true);
 	identify_wrappers(false);
 	mark_mutable_const(false);
+	max_array_num_in_loop(CGOPTIONS_DEFAULT_MAX_ARRAY_NUM_IN_LOOP);
 }
 
 #define MAX_INTEGER_LENGTH 64

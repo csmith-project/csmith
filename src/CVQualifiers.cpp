@@ -375,7 +375,7 @@ CVQualifiers::random_stricter_consts(void) const
 		}
 		else {
 			DEPTH_GUARD_BY_DEPTH_RETURN(1, consts);
-			int index = rnd_flipcoin(StricterConstProb);
+			bool index = rnd_flipcoin(StricterConstProb);
 			ERROR_GUARD(consts);
 			consts.push_back(index);
 		}
@@ -401,7 +401,7 @@ CVQualifiers::random_stricter_volatiles(void) const
 		}
 		else {
 			DEPTH_GUARD_BY_DEPTH_RETURN(1, volatiles);
-			int index = rnd_flipcoin(RegularVolatileProb);
+			bool index = rnd_flipcoin(RegularVolatileProb);
 			ERROR_GUARD(volatiles);
 			volatiles.push_back(index);
 		}
@@ -424,7 +424,7 @@ CVQualifiers::random_looser_consts(void) const
 		}
 		else {
 			DEPTH_GUARD_BY_DEPTH_RETURN(1, consts);
-			int index = rnd_flipcoin(LooserConstProb);
+			bool index = rnd_flipcoin(LooserConstProb);
 			ERROR_GUARD(consts);
 			consts.push_back(index);
 		}
@@ -445,7 +445,7 @@ CVQualifiers::random_looser_volatiles(void) const
 		}
 		else {
 			DEPTH_GUARD_BY_DEPTH_RETURN(1, volatiles);
-			int index = rnd_flipcoin(RegularVolatileProb);
+			bool index = rnd_flipcoin(RegularVolatileProb);
 			ERROR_GUARD(volatiles);
 			volatiles.push_back(index);
 		}

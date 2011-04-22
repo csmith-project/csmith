@@ -48,6 +48,7 @@
 #include "Bookkeeper.h"
 #include "DepthSpec.h"
 #include "StatementBreak.h"
+#include "StatementFor.h"
 #include "CFGEdge.h"
 #include "ArrayVariable.h"
 #include "random.h"
@@ -74,85 +75,16 @@ StatementArrayOp::make_random_iter_ctrl(int size, int &init, int &incr)
 /*
  *
  */
-StatementArrayOp *
+Statement*
 StatementArrayOp::make_random(CGContext &cg_context)
 { 
-	//int static g = 0;
-	//int h = g++;
-	bool ary_init = rnd_flipcoin(10);
+	bool ary_init = rnd_flipcoin(5);
 	ERROR_GUARD(NULL);
 	if (ary_init) { 
 		return make_random_array_init(cg_context);
 	}
-
-	// save a copy of facts env and context
-	FactMgr* fm = get_fact_mgr(&cg_context);
-	vector<const Fact*> facts_copy = fm->global_facts;
-	cg_context.get_effect_stm().clear();
-
-	// select the array to manipulate
-	ArrayVariable* av = VariableSelector::select_array(cg_context);
-	//cg_context.write_var(av);
-	ERROR_GUARD(NULL);
-	int init, incr;
-	vector<int> inits, incrs;
-	vector<const Variable*> cvs;
-	size_t i;
-	vector<const Variable*> invalid_vars;
-	for (i=0; i<av->get_dimension(); i++) {
-		Variable *cv = VariableSelector::SelectLoopCtrlVar(cg_context, invalid_vars);
-		assert(cv);
-		invalid_vars.push_back(cv);
-		assert(cg_context.read_indices(cv, fm->global_facts));
-		cg_context.write_var(cv);
-		make_random_iter_ctrl(av->get_sizes()[i], init, incr);
-		ERROR_GUARD(NULL);
-		cvs.push_back(cv);
-		inits.push_back(init);
-		incrs.push_back(incr);
-	}
-	// find the highest block in which all control vars and array variable itself are visible
-	/*vector<const Variable*> tmp_vars = cvs;
-	tmp_vars.push_back(av);
-	Block* b = VariableSelector::lower_block_for_vars(cg_context.get_current_func()->stack, tmp_vars);*/
-	Effect eff = cg_context.get_effect_stm();
-	Block* b = cg_context.get_current_block();
-
-	vector<const Variable*> body_no_read_vars;
-	CGContext body_cg_context(cg_context.get_current_func(),
-							  cg_context.stmt_depth,
-							  cg_context.expr_depth,
-							  (cg_context.flags | IN_LOOP),
-							  cg_context.call_chain,
-							  cg_context.curr_blk,
-							  cg_context.focus_var,
-							  body_no_read_vars,
-							  invalid_vars,
-							  cg_context.get_effect_context(),
-							  cg_context.get_effect_accum()); 
-	body_cg_context.focus_var = av->itemize(cvs, b);
-	Block* body = Block::make_random(body_cg_context, true); 
-	body_cg_context.focus_var = 0;
-	cg_context.add_effect(*body_cg_context.get_effect_accum());
-	StatementArrayOp* sa = new StatementArrayOp(av, cvs, inits, incrs, body);
-
-	// flow analysis:
-	// if the control reached the post-point of a loop ending with must-return statement, it means
-	// the loop is never entered. restore facts to pre-loop env
-	fm->global_facts = fm->map_facts_in[body];
-	if (body->must_return()) {
-		fm->restore_facts(facts_copy);
-	}	
-	// add forward edges introduced by "break"
-	for (size_t i=0; i<body->break_stms.size(); i++) {
-		const StatementBreak* stm = dynamic_cast<const StatementBreak*>(body->break_stms[i]);
-		fm->create_cfg_edge(stm, sa, true, false);
-		merge_jump_facts(fm->global_facts, fm->map_facts_out[stm]);
-	}
-	// compute accumulated effect
-	sa->set_accumulated_effect_after_block(eff, body, cg_context);
-
-	return sa;
+	StatementFor* sf = StatementFor::make_random_array_loop(cg_context); 
+	return sf;
 }
 
 StatementArrayOp *

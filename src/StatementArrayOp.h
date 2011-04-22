@@ -50,7 +50,7 @@ class StatementArrayOp : public Statement
 {
 public:
 	// Factory method.
-	static StatementArrayOp *make_random(CGContext &cg_context); 
+	static Statement *make_random(CGContext &cg_context); 
 	static StatementArrayOp *make_random_array_init(CGContext &cg_context); 
 	StatementArrayOp(const ArrayVariable* av, 
 				   const std::vector<const Variable*>& cvs, 

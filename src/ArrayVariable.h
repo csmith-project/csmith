@@ -30,6 +30,8 @@
 #ifndef ARRAY_VARIABLE_H
 #define ARRAY_VARIABLE_H
 
+#define INVALID_BOUND 0xFFFFFFFF
+
 ///////////////////////////////////////////////////////////////////////////////
 #include <vector>
 #include "Variable.h"
@@ -49,13 +51,14 @@ public:
 	virtual size_t get_dimension(void) const { return sizes.size();} 
 	unsigned long size_in_bytes(void) const;
 	unsigned long get_size(void) const;
-	std::vector<int> get_sizes(void) const { return sizes;}
+	std::vector<unsigned int> get_sizes(void) const { return sizes;}
 	const std::vector<const Expression*>& get_indices(void) const { return indices;}
 	bool no_loop_initializer(void) const;
 
 	ArrayVariable* itemize(void) const; 
 	ArrayVariable* itemize(const vector<int>& const_indices) const;
-	ArrayVariable* itemize(const std::vector<const Variable*>& indices, Block* blk);
+	ArrayVariable* itemize(const std::vector<const Variable*>& indices, Block* blk) const;
+	ArrayVariable* itemize(const std::vector<const Expression*>& indices, Block* blk) const;
 	ArrayVariable* rnd_mutate(void);
 	bool is_variant(const Variable* v) const;
 	virtual bool is_global(void) const; 
@@ -79,10 +82,10 @@ public:
 	const ArrayVariable* collective;
 	Block* parent;
 private:
-	ArrayVariable(Block* blk, const std::string &name, const Type *type, const Expression* init, const CVQualifiers* qfer, const vector<int>& sizes, const Variable* isFieldVarOf);
+	ArrayVariable(Block* blk, const std::string &name, const Type *type, const Expression* init, const CVQualifiers* qfer, const vector<unsigned int>& sizes, const Variable* isFieldVarOf);
 	
 
-	const std::vector<int> sizes;
+	const std::vector<unsigned int> sizes;
 	std::vector<const Expression*> indices;
 	std::vector<const Expression*> init_values;
 };

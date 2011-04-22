@@ -55,6 +55,7 @@ using namespace std;
 #define CGOPTIONS_DEFAULT_MAX_ARRAY_DIMENSIONS	(3)
 #define CGOPTIONS_DEFAULT_MAX_ARRAY_LENGTH_PER_DIMENSION (10)
 #define CGOPTIONS_DEFAULT_MAX_ARRAY_LENGTH	(100)
+#define CGOPTIONS_DEFAULT_MAX_ARRAY_NUM_IN_LOOP	(4)
 #define CGOPTIONS_DEFAULT_MAX_EXHAUSTIVE_DEPTH	(-1) 
 // 0 means we output to the standard output
 #define CGOPTIONS_DEFAULT_MAX_SPLIT_FILES	(0)
@@ -335,6 +336,9 @@ public:
 	static bool match_exact_qualifiers(void);
 	static bool match_exact_qualifiers(bool p);
 
+	static int max_array_num_in_loop();
+	static int max_array_num_in_loop(int p);
+
 	static void init_reducer(std::string fname) { reducer_ = new Reducer(fname);}
 	static Reducer* get_reducer(void) { return reducer_; } 
 
@@ -446,6 +450,7 @@ private:
 	static std::string conflict_msg_;
 	static bool match_exact_qualifiers_;
 
+	static int max_array_num_in_loop_;
 	static bool identify_wrappers_;
 	static vector<int> safe_math_wrapper_ids_;
 	static bool mark_mutable_const_;

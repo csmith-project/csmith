@@ -153,17 +153,7 @@ StatementAssign::make_random(CGContext &cg_context)
 	
 	Effect running_eff_context(cg_context.get_effect_context());
 	Effect rhs_accum, lhs_accum;  
-	CGContext rhs_cg_context(cg_context.get_current_func(),
-							   cg_context.stmt_depth,
-							   cg_context.expr_depth,
-							   cg_context.flags,
-							   cg_context.call_chain,
-							   cg_context.curr_blk,
-							   cg_context.focus_var,
-							   cg_context.get_no_read_vars(),
-							   cg_context.get_no_write_vars(),
-							   running_eff_context,
-							   &rhs_accum);
+	CGContext rhs_cg_context(cg_context, running_eff_context, &rhs_accum);
 	e = Expression::make_random(rhs_cg_context, t);
 	ERROR_GUARD_AND_DEL1(NULL, e);
 	CVQualifiers qfer = e->get_qualifiers();
@@ -177,17 +167,7 @@ StatementAssign::make_random(CGContext &cg_context)
 		qfer.set_volatile(false);
 	}
 	cg_context.add_effect(rhs_accum);
-	CGContext lhs_cg_context(cg_context.get_current_func(),
-							   cg_context.stmt_depth,
-							   cg_context.expr_depth,
-							   cg_context.flags,
-							   cg_context.call_chain,
-							   cg_context.curr_blk,
-							   cg_context.focus_var,
-							   cg_context.get_no_read_vars(),
-							   cg_context.get_no_write_vars(),
-							   running_eff_context,
-							   &lhs_accum);
+	CGContext lhs_cg_context(cg_context, running_eff_context, &lhs_accum);
 	lhs_cg_context.get_effect_stm() = rhs_cg_context.get_effect_stm();
 	lhs = Lhs::make_random(lhs_cg_context, t, &qfer);
 	ERROR_GUARD_AND_DEL2(NULL, e, lhs);
@@ -328,17 +308,7 @@ StatementAssign::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context)
 	// LHS and RHS can be evaludated in arbitrary order, try RHS first
 	Effect running_eff_context(cg_context.get_effect_context());
 	Effect rhs_accum, lhs_accum;  
-	CGContext rhs_cg_context(cg_context.get_current_func(),
-							   cg_context.stmt_depth,
-							   cg_context.expr_depth,
-							   cg_context.flags,
-							   cg_context.call_chain,
-							   cg_context.curr_blk,
-							   cg_context.focus_var,
-							   cg_context.get_no_read_vars(),
-							   cg_context.get_no_write_vars(),
-							   running_eff_context,
-							   &rhs_accum);
+	CGContext rhs_cg_context(cg_context, running_eff_context, &rhs_accum);
 	if (!expr.visit_facts(inputs, rhs_cg_context)) {
 		return false;
 	}
@@ -348,17 +318,7 @@ StatementAssign::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context)
 		running_eff_context.add_effect(rhs_accum);
 	}
 	cg_context.add_effect(rhs_accum);
-	CGContext lhs_cg_context(cg_context.get_current_func(),
-							   cg_context.stmt_depth,
-							   cg_context.expr_depth,
-							   cg_context.flags,
-							   cg_context.call_chain,
-							   cg_context.curr_blk,
-							   cg_context.focus_var,
-							   cg_context.get_no_read_vars(),
-							   cg_context.get_no_write_vars(),
-							   running_eff_context,
-							   &lhs_accum);
+	CGContext lhs_cg_context(cg_context, running_eff_context, &lhs_accum);
 	lhs_cg_context.get_effect_stm() = rhs_cg_context.get_effect_stm(); 
 	if (!lhs.visit_facts(inputs, lhs_cg_context)) {
 		return false;
@@ -389,9 +349,10 @@ StatementAssign::has_uncertain_call_recursive(void) const
  */
 StatementAssign::StatementAssign(const Lhs &l,
 				 const Expression &e,
+				 eAssignOps op,
 				 const SafeOpFlags *flags)
 	: Statement(eAssign),
-	  op(eSimpleAssign),
+	  op(op),
 	  lhs(l),
 	  expr(e),
 	  rhs(&expr),
@@ -520,7 +481,7 @@ StatementAssign::OutputSimple(std::ostream &out) const
 void
 StatementAssign::OutputAsExpr(std::ostream &out) const
 {
-	if (CGOptions::avoid_signed_overflow()) {
+	if (CGOptions::avoid_signed_overflow() && op_flags) {
 		switch (op) {
 
 		case eSimpleAssign:

@@ -42,6 +42,7 @@
 #include "FunctionInvocation.h"
 #include "FunctionInvocationBinary.h"
 #include "VariableSelector.h"
+#include "ArrayVariable.h"
 #include "FactMgr.h"
 #include "Lhs.h"
 #include "SafeOpFlags.h"
@@ -100,16 +101,37 @@ make_random_loop_control(int &init, int &limit, int &incr,
 }
 
 /*
- *
+ * Randomly determine the parameters for an array-travering loop
  */
-StatementFor *
-StatementFor::make_random(CGContext &cg_context)
+static unsigned int
+make_random_array_control(unsigned int bound, int &init, int &limit, int &incr, eBinaryOps &test_op, eAssignOps &incr_op, bool is_signed)
 {
-	DEPTH_GUARD_BY_TYPE_RETURN(dtStatementFor, NULL);
-	// Generate a somewhat-trivial `for' loop.
-	Function *curr_func = cg_context.get_current_func();
-	assert(curr_func);
-	FactMgr* fm = get_fact_mgr(&cg_context);
+	// choose either increment or decrement
+	test_op = is_signed ? (rnd_flipcoin(50) ? eCmpLe : eCmpGe) : eCmpLe;
+	if (test_op == eCmpLe) {
+		// increment, start near index 0 
+		init  = pure_rnd_flipcoin(50) ? 0 : pure_rnd_upto(bound/2);
+		limit = bound;  
+		incr_op = eAddAssign; 
+		incr = pure_rnd_flipcoin(50) ? 1 : pure_rnd_upto(bound/4);
+		if (incr == 0) incr = 1;
+		bound = ((bound - init) / incr) * incr + init;
+	} else {
+		// decrement, start near last index
+		init = pure_rnd_flipcoin(50) ? (bound) : (bound - pure_rnd_upto(bound/2));
+		limit = pure_rnd_flipcoin(50) ? 0 : pure_rnd_upto(bound/2);  
+		incr_op = eSubAssign; 
+		incr = pure_rnd_flipcoin(50) ? 1 : pure_rnd_upto(bound/4);
+		if (incr == 0) incr = 1;
+		bound = init;
+	}
+	return bound;
+}
+
+const Variable*
+StatementFor::make_iteration(CGContext& cg_context, StatementAssign*& init, Expression*& test, StatementAssign*& incr, unsigned int& bound)
+{
+	FactMgr* fm = get_fact_mgr(&cg_context); 
 	assert(fm);
 	Block* blk = cg_context.get_current_block();
 	assert(blk);
@@ -139,9 +161,29 @@ StatementFor::make_random(CGContext &cg_context)
 	int        init_n, limit_n, incr_n;
 	eBinaryOps test_op;
 	eAssignOps incr_op;
+	bound = INVALID_BOUND;
 	
-	assert(var->type);
-	make_random_loop_control(init_n, limit_n, incr_n, test_op, incr_op, var->type->is_signed());
+	// choose a random array from must use variables, and find the dimension with shortest length
+	// JYTODO: be more aggressive?
+	if (cg_context.rw_directive) {
+		vector<const Variable*> arrays;
+		cg_context.rw_directive->find_must_use_arrays(arrays);
+		if (!arrays.empty()) {
+			const ArrayVariable* av = dynamic_cast<const ArrayVariable*>(VariableSelector::choose_ok_var(arrays));
+			assert(av);
+			for (size_t i=0; i<av->get_dimension(); i++) {
+				if (av->get_sizes()[i] < bound) {
+					bound = av->get_sizes()[i];
+				}
+			}
+		}
+	}
+	if (bound != INVALID_BOUND) {
+		bound = make_random_array_control(--bound, init_n, limit_n, incr_n, test_op, incr_op, var->type->is_signed());
+	} else { 
+		assert(var->type);
+		make_random_loop_control(init_n, limit_n, incr_n, test_op, incr_op, var->type->is_signed());
+	}
 	ERROR_GUARD(NULL);
 
 	// Build the IR for the subparts of the loop.
@@ -155,7 +197,7 @@ StatementFor::make_random(CGContext &cg_context)
 	SafeOpFlags *flags1 = SafeOpFlags::make_random(sOpAssign);
 	ERROR_GUARD_AND_DEL2(NULL, c_init, lhs);
 
-	StatementAssign *init = new StatementAssign(*lhs, *c_init, flags1);
+	init = new StatementAssign(*lhs, *c_init, eSimpleAssign, flags1);
 	ERROR_GUARD_AND_DEL3(NULL, c_init, lhs, flags1);
 	assert(init->visit_facts(fm->global_facts, cg_context));
 
@@ -170,7 +212,7 @@ StatementFor::make_random(CGContext &cg_context)
 	FunctionInvocation *invocation = FunctionInvocation::make_binary(cg_context, test_op, v, c_limit);
 	ERROR_GUARD_AND_DEL3(NULL, init, v, c_limit);
 
-	Expression *test = new ExpressionFuncall(*invocation);
+	test = new ExpressionFuncall(*invocation);
 
 	// canonize before validation
 	//const ExpressionVariable exp_var(*var);
@@ -183,53 +225,97 @@ StatementFor::make_random(CGContext &cg_context)
 	Constant * c_incr = Constant::make_int(incr_n);
 	ERROR_GUARD_AND_DEL3(NULL, init, test, lhs1);
 
-	StatementAssign *incr = StatementAssign::make_possible_compound_assign(cg_context, *lhs1, incr_op, *c_incr);
-	//StatementAssign *incr = new StatementAssign(*lhs1, incr_op, *c_incr, flags2);
-
-	// With some probability, generate the loop under the restriction that we
-	// not read and/or write to the loop control variable.
-	CGContext::VariableSet body_no_read_vars(cg_context.get_no_read_vars());
-	CGContext::VariableSet body_no_write_vars(cg_context.get_no_write_vars());
-	if (rnd_flipcoin(90)) {
-		body_no_write_vars.push_back(var->get_collective());
+	if (bound != INVALID_BOUND) {
+		incr = new StatementAssign(*lhs1, *c_incr, incr_op);
+	} else {
+		incr = StatementAssign::make_possible_compound_assign(cg_context, *lhs1, incr_op, *c_incr);
 	}
-	ERROR_GUARD_AND_DEL3(NULL, init, test, incr);
-	Effect eff = cg_context.get_effect_stm();
+	return var;
+}
 
-	// TODO: actually do something with the no-read set.
-	CGContext body_cg_context(cg_context.get_current_func(),
-							  cg_context.stmt_depth,
-							  cg_context.expr_depth,
-							  (cg_context.flags | IN_LOOP),
-							  cg_context.call_chain,
-							  cg_context.curr_blk,
-							  cg_context.focus_var,
-							  body_no_read_vars,
-							  body_no_write_vars,
-							  cg_context.get_effect_context(),
-							  cg_context.get_effect_accum());
-	
-	// for debugging
-	//static int g = 0;
+/*
+ * Generate a somewhat-trivial `for' loop
+ */
+StatementFor *
+StatementFor::make_random(CGContext &cg_context)
+{
+	FactMgr* fm = get_fact_mgr(&cg_context);
+	assert(fm);
+	// save a copy of facts env and context
+	vector<const Fact*> pre_facts = fm->global_facts;
+	cg_context.get_effect_stm().clear();
+
+	StatementAssign* init = NULL;
+	StatementAssign* incr = NULL;
+	Expression* test = NULL;
+	unsigned int bound = 0;
+	const Variable* iv = make_iteration(cg_context, init, test, incr, bound);
+	// record the effect before loop body
+	Effect pre_effects = cg_context.get_effect_stm();
+	// create CGContext for body
+	CGContext body_cg_context(cg_context, cg_context.rw_directive, iv, bound);  
 	Block *body = Block::make_random(body_cg_context, true);
 	ERROR_GUARD_AND_DEL3(NULL, init, test, incr);
 
 	StatementFor* sf = new StatementFor(*init, *test, *incr, *body);
+	sf->post_loop_analysis(cg_context, pre_facts, pre_effects);
+	return sf;
+}
+
+/* generate loop traversing array(s) */
+StatementFor *
+StatementFor::make_random_array_loop(const CGContext &cg_context)
+{
+	// select the number of arrays to manipulate, default maximum = 4; 
+	unsigned int aryno = rnd_upto(CGOptions::max_array_num_in_loop());
+	// choose arrays to manipulate, create new ones if necessary
+	VariableSet must_reads, must_writes;  
+	for (size_t i=0; i<aryno; i++) {
+		const ArrayVariable* av = VariableSelector::select_array(cg_context); 
+		// random access choice: 0 = must read, 1 = must write, 2 = both
+		int access = rnd_upto(3);
+		if (access == 0 || access == 2) { 
+			add_variable_to_set(must_reads, (const Variable*)av);
+		}
+		if (access == 1 || access == 2) {
+			add_variable_to_set(must_writes, (const Variable*)av);
+		}
+	} 
+	// create read/write directive from existing context and incoming directives
+	VariableSet all_must_reads, all_must_writes;
+	if (cg_context.rw_directive) {
+		combine_variable_sets(cg_context.rw_directive->must_read_vars, must_reads, all_must_reads);
+		combine_variable_sets(cg_context.rw_directive->must_write_vars, must_writes, all_must_writes);
+	} else {
+		all_must_reads = must_reads;
+		all_must_writes = must_writes;
+	}
+	RWDirective rwd(CGContext::empty_variable_set, CGContext::empty_variable_set, all_must_reads, all_must_writes); 
+	// create CGContext for loop
+	CGContext loop_cg_context(cg_context, &rwd, NULL, 0);  
+	StatementFor* sf = make_random(loop_cg_context);
+	return sf;
+}
+
+void 
+StatementFor::post_loop_analysis(CGContext& cg_context, vector<const Fact*>& pre_facts, Effect& pre_effect)
+{
+	FactMgr* fm = get_fact_mgr(&cg_context);
+	assert(fm);
 	// if the control reached the end of this for-loop with must-return body, it means
 	// the loop is never entered. restore facts to pre-loop env
-	fm->global_facts = fm->map_facts_in[sf->get_body()];
-	if (sf->get_body()->must_return()) {
-		fm->restore_facts(facts_copy);
+	fm->global_facts = fm->map_facts_in[&body];
+	if (body.must_return()) {
+		fm->restore_facts(pre_facts);
 	}	
 	// add forward edges introduced by "break"
-	for (size_t i=0; i<sf->get_body()->break_stms.size(); i++) {
-		const StatementBreak* stm = dynamic_cast<const StatementBreak*>(sf->get_body()->break_stms[i]);
-		fm->create_cfg_edge(stm, sf, true, false);
+	for (size_t i=0; i<body.break_stms.size(); i++) {
+		const StatementBreak* stm = dynamic_cast<const StatementBreak*>(body.break_stms[i]);
+		fm->create_cfg_edge(stm, this, true, false);
 		merge_jump_facts(fm->global_facts, fm->map_facts_out[stm]);
 	}
 	// compute accumulated effect
-	sf->set_accumulated_effect_after_block(eff, body, cg_context);
-	return sf;
+	set_accumulated_effect_after_block(pre_effect, &body, cg_context);
 }
 
 /*

@@ -113,7 +113,7 @@ vector<intvec> permute(intvec in)
  *     (1, 0, 0), (1, 0, 1), (1, 1, 0), (1, 1, 1)
  * return: the size of the expanded array of arrays
  */
-int expand_within_ranges(intvec in, vector<intvec>& out)
+int expand_within_ranges(vector<unsigned int> in, vector<intvec>& out)
 {
 	int i, j;
 	int dimension = static_cast<int>(in.size());

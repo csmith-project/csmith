@@ -190,17 +190,7 @@ FunctionInvocationUser::build_invocation(Function *target, CGContext &cg_context
 
 	for (i = 0; i < func->param.size(); i++) { 
 		Effect param_eff_accum;  
-		CGContext param_cg_context(cg_context.get_current_func(),
-								   cg_context.stmt_depth,
-								   cg_context.expr_depth,
-								   cg_context.flags,
-								   cg_context.call_chain,
-								   cg_context.curr_blk,
-								   cg_context.focus_var,
-								   cg_context.get_no_read_vars(),
-								   cg_context.get_no_write_vars(),
-								   running_eff_context,
-								   &param_eff_accum);
+		CGContext param_cg_context(cg_context, running_eff_context, &param_eff_accum);
 		Variable* v = func->param[i];
 		// to avoid too much function invocations as parameters
 		Expression *p = Expression::make_random_param(param_cg_context, v->type, &v->qfer);   
@@ -223,18 +213,7 @@ FunctionInvocationUser::build_invocation(Function *target, CGContext &cg_context
 		// retrive the context effect in prev. visits, and include them for this visit
 		Effect effect_context = cg_context.get_effect_context();
 		effect_context.add_effect(func->accum_eff_context);
-		CGContext new_context(func,
-							 cg_context.stmt_depth,
-							 cg_context.expr_depth,
-							 cg_context.flags,
-							 cg_context.call_chain,
-							 cg_context.curr_blk,
-							 cg_context.focus_var,
-							 cg_context.get_no_read_vars(),
-							 cg_context.get_no_write_vars(),
-							 effect_context,
-							 &effect_accum);
-		new_context.extend_call_chain(cg_context);
+		CGContext new_context(cg_context, func, effect_context, &effect_accum); 
 		failed = !revisit(fm->global_facts, new_context);  
 		// incorporate facts from revisit
 		if (!failed) { 

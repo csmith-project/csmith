@@ -33,6 +33,7 @@
 
 #include "VariableSelector.h"
 #include <cassert>
+#include <map>
 
 #include "Common.h"
 #include "Block.h"
@@ -49,6 +50,7 @@
 #include "util.h"
 #include "Lhs.h"
 #include "ExpressionVariable.h"
+#include "ExpressionFuncall.h"
 #include "Bookkeeper.h"
 #include "Filter.h"
 #include "Error.h"
@@ -57,6 +59,7 @@
 #include "ArrayVariable.h"
 #include "Probabilities.h"
 #include "ProbabilityTable.h"
+#include "StringUtils.h"
 
 using namespace std;
 
@@ -408,7 +411,7 @@ VariableSelector::choose_var(vector<Variable *> vars,
 		expand_struct_vars(vars, type); 
 
 	bool found = has_dereferenceable_var(vars, type, cg_context);
-	if (found) {// && !cg_context.in_call_chain_loop()) {
+	if (found) {
 		Bookkeeper::pointer_avail_for_dereference++;
 	}
 	// check availability of volatiles
@@ -1298,7 +1301,7 @@ VariableSelector::create_array_and_itemize(Block* blk, string name, const CGCont
 ArrayVariable*
 VariableSelector::create_random_array(const CGContext& cg_context)
 {
-	bool as_global = rnd_flipcoin(30);
+	bool as_global = rnd_flipcoin(25);
 	ERROR_GUARD(NULL);
 	string name;
 	Block* blk = 0;
@@ -1325,6 +1328,15 @@ VariableSelector::create_random_array(const CGContext& cg_context)
 	Expression* init = Constant::make_random(type);
 	ArrayVariable* av = ArrayVariable::CreateArrayVariable(blk, name, type, init, &qfer, NULL);
 	AllVars.push_back(av);
+
+	// make the points-to fact known to DFA
+	FactMgr* fm = get_fact_mgr(&cg_context);
+	if (as_global) {
+		fm->add_new_global_var_fact(av);
+		cg_context.get_current_func()->new_globals.push_back(av);
+	} else {
+		fm->add_new_local_var_fact(blk, av);
+	}
 	return av;
 }
 
@@ -1334,8 +1346,6 @@ VariableSelector::create_random_array(const CGContext& cg_context)
 ArrayVariable*
 VariableSelector::select_array(const CGContext &cg_context)
 {
-	//static int g = 0;
-	//int h = g++;
 	const Block* b = cg_context.get_current_block();
 	vector<Variable*> vars = find_all_visible_vars(b);
 	vector<ArrayVariable*> array_vars;
@@ -1379,30 +1389,106 @@ VariableSelector::select_array(const CGContext &cg_context)
  *
  * 2) for focus var that is a struct, we can select any field of it
  *******************************************************************************/
-const ArrayVariable*
-VariableSelector::select_random_focus_var(Effect::Access access,
-			   const CGContext &cg_context,
-               const Type* type,
-			   const CVQualifiers* /*qfer*/, 
-			   const vector<const Variable*>& invalid_vars,
-			   eMatchType /*mt*/)
+//const ArrayVariable*
+//VariableSelector::select_random_focus_var(Effect::Access access,
+//			   const CGContext &cg_context,
+//               const Type* type,
+//			   const CVQualifiers* /*qfer*/, 
+//			   const vector<const Variable*>& invalid_vars,
+//			   eMatchType /*mt*/)
+//{
+//	ArrayVariable* av = cg_context.focus_var;
+//	int deref_level = av->type->get_indirect_level() - type->get_indirect_level();
+//	// check with constraints on const and volatile qualification of the array variable
+//	if (access == Effect::WRITE && av->is_const_after_deref(deref_level)) {
+//		return 0;
+//	}
+//	if (!cg_context.get_effect_context().is_side_effect_free() && av->is_volatile_after_deref(deref_level)) {
+//		return 0;
+//	}
+//	if (find_variable_in_set(invalid_vars, av->get_collective()) != -1) {
+//		return 0;
+//	}
+//	if (av) {
+//		return av->rnd_mutate();
+//	}
+//	return 0;
+//}
+
+/* given a collective array, create a member out of induction variables in the context */
+ArrayVariable*
+VariableSelector::itemize_array(CGContext& cg_context, const ArrayVariable* av)
+{ 
+	if (av->get_dimension() > cg_context.iv_bounds.size()) return NULL;
+	vector<const Expression*> indices;
+
+	for (size_t i=0; i<av->get_dimension(); i++) {
+		// choose which induction variables to be used as indices, prefer the ones within array bound
+		vector<const Variable*> ok_ivs;
+		unsigned int dimen_len = av->get_sizes()[i];
+		map<const Variable*, unsigned int>::iterator iter;
+		for(iter = cg_context.iv_bounds.begin(); iter != cg_context.iv_bounds.end(); ++iter) {  
+			if (iter->second != INVALID_BOUND && iter->second < dimen_len) {
+				ok_ivs.push_back(iter->first);
+			}
+		} 
+		const Variable* v = choose_ok_var(ok_ivs);
+		// this could happen if the context contained 2 or more array to be used, but the longer one(s) has
+		// been removed, and leaving the shorter one that is too short for the induction variable's range
+		if (v == NULL) return NULL;	 
+
+		const Expression* ev = new ExpressionVariable(*v);;
+		// add random offset to the chosen induction variable
+		unsigned int offset = 0;
+		if (dimen_len - cg_context.iv_bounds[v] > 1) {
+			offset = rnd_upto(dimen_len - cg_context.iv_bounds[v]);
+		}
+		if (offset) {
+			const FunctionInvocation* fi = new FunctionInvocationBinary(eAdd, ev, new Constant(get_int_type(), StringUtils::int2str(offset)), 0);
+			ev = new ExpressionFuncall(*fi);
+		}
+		indices.push_back(ev);
+	}
+	return av->itemize(indices, cg_context.get_current_block());
+}
+
+const Variable*
+VariableSelector::select_must_use_var(Effect::Access access, CGContext &cg_context, const Type* type, const CVQualifiers* qfer) 
 {
-	ArrayVariable* av = cg_context.focus_var;
-	int deref_level = av->type->get_indirect_level() - type->get_indirect_level();
-	// check with constraints on const and volatile qualification of the array variable
-	if (access == Effect::WRITE && av->is_const_after_deref(deref_level)) {
-		return 0;
+	if (cg_context.rw_directive == NULL) return NULL;
+
+	const Variable* var = 0;
+	VariableSet& vars = (access == Effect::READ) ? cg_context.rw_directive->must_read_vars : cg_context.rw_directive->must_write_vars;
+	eMatchType mt = (access == Effect::READ) ? eFlexible : eDerefExact;
+	for (size_t i=0; i<vars.size(); i++) {
+		const Variable* v = vars[i];  
+		if (type->match(v->type, mt) && (!qfer || qfer->match(v->qfer))) { 
+			int deref_level = v->type->get_indirect_level() - type->get_indirect_level();
+			// for LHS, make sure the array type is not constant after dereference
+			if (access == Effect::WRITE && v->qfer.is_const_after_deref(deref_level)) {
+				continue;
+			}
+
+			if (v->isArray) {
+				const ArrayVariable* av = dynamic_cast<const ArrayVariable*>(v);
+				var = VariableSelector::itemize_array(cg_context, av);
+			} else {
+				var = v;
+			}
+		} 
+		else if (0) {//var = v->match_field(type, mt)) { // JYTODO: match a field of array of structs
+			if (v->isArray) {
+				//var = VariableSelector::select_random_array_var(var, cg_context.ivs);
+			}
+		}
+		if (var) {
+			if (rnd_flipcoin(75)) {
+				vars.erase(vars.begin() + i);
+			}
+			break;
+		}
 	}
-	if (!cg_context.get_effect_context().is_side_effect_free() && av->is_volatile_after_deref(deref_level)) {
-		return 0;
-	}
-	if (find_variable_in_set(invalid_vars, av->get_collective()) != -1) {
-		return 0;
-	}
-	if (av) {
-		return av->rnd_mutate();
-	}
-	return 0;
+	return var;
 }
 
 ArrayVariable*
