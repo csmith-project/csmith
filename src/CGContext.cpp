@@ -141,13 +141,12 @@ CGContext::is_nonreadable(const Variable *v) const
 {
 	if (rw_directive) {
 		VariableSet::size_type len = rw_directive->no_read_vars.size();
-	VariableSet::size_type i;
-
-	for (i = 0; i < len; ++i) {
+		VariableSet::size_type i;
+		for (i = 0; i < len; ++i) {
 			if (rw_directive->no_read_vars[i]->match(v)) {
-			return true;
+				return true;
+			}
 		}
-	}
 	}
 	return false;
 }
@@ -162,12 +161,17 @@ CGContext::is_nonwritable(const Variable *v) const
 		VariableSet::size_type len = rw_directive->no_write_vars.size(); 
 		for (size_t i = 0; i < len; ++i) {
 			if (rw_directive->no_write_vars[i]->match(v)) {
+				return true;
+			}
+		}
+	}
+	// not writing to loop IVs (to avoid infinite loops)
+	map<const Variable*, unsigned int>::const_iterator iter;
+	for (iter = iv_bounds.begin(); iter != iv_bounds.end(); ++iter) {  
+		if (v->match(iter->first)) {
 			return true;
 		}
 	}
-	}
-	// not writing to loop IVs (to avoid infinite loops)
-	if (iv_bounds.find(v) != iv_bounds.end()) return true;
 	return false;
 }
 
