@@ -35,11 +35,12 @@ if
   echo here5 
 then
   if 
-    ./a.out 
+    RunSafely.sh 600 1 /dev/null out_k.txt ./a.out >/dev/null 2>&1
   then
     echo here6
     exit 0
   else
+    cat out_k.txt
     TMPF="undefined_$$.c"
     echo copying C file to $TMPF
     cp small.c $TMPF
