@@ -27,20 +27,21 @@ if
   echo here3 &&\
   $CC1 small.c -o small1 > cc_out1.txt 2>&1 &&\
   RunSafely.sh 3 1 /dev/null out1.txt ./small1 >/dev/null 2>&1 &&\
+  valgrind -q --error-exitcode=1 ./small1 >/dev/null 2>&1 &&\
+  echo here4 &&\
   $CC2 small.c -o small2 > cc_out2.txt 2>&1 &&\
   RunSafely.sh 3 1 /dev/null out2.txt ./small2 >/dev/null 2>&1 &&\
   ! diff out1.txt out2.txt &&\
-  echo here4 &&\
+  echo here5 &&\
   ~/c-semantics-bundle-0.1/c-semantics/dist/kcc -s small.c >/dev/null 2>&1 &&\
-  echo here5 
+  echo here6 
 then
   if 
-    RunSafely.sh 600 1 /dev/null out_k.txt ./a.out >/dev/null 2>&1
+    RunSafely.sh 600 1 /dev/null out_kcc.txt ./a.out >/dev/null 2>&1
   then
-    echo here6
+    echo here7
     exit 0
   else
-    cat out_k.txt
     TMPF="undefined_$$.c"
     echo copying C file to $TMPF
     cp small.c $TMPF
