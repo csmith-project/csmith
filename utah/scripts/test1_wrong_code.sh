@@ -33,15 +33,16 @@ if
   RunSafely.sh 3 1 /dev/null out2.txt ./small2 >/dev/null 2>&1 &&\
   ! diff out1.txt out2.txt &&\
   echo here5 &&\
-  ~/c-semantics-bundle-0.1/c-semantics/dist/kcc -s small.c >/dev/null 2>&1 &&\
+  ~/c-semantics-read-only/dist/kcc -s small.c >/dev/null 2>&1 &&\
   echo here6 
 then
   if 
-    RunSafely.sh 600 1 /dev/null out_kcc.txt ./a.out >/dev/null 2>&1
+    RunSafely.sh 1000 1 /dev/null out_kcc.txt ./a.out >/dev/null 2>&1
   then
     echo here7
     exit 0
   else
+    cat out_kcc.txt
     TMPF="undefined_$$.c"
     echo copying C file to $TMPF
     cp small.c $TMPF

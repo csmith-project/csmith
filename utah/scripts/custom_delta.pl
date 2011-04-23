@@ -9,6 +9,9 @@ use strict;
 # replace tok and comma with 0 and 1
 # transform a function to return void
 # inline a function call
+# sort functions in order to eliminate prototypes
+# replace complex assignments like ^= with =
+# un-nest nested calls
 
 # add methods for removing
 #   labels
