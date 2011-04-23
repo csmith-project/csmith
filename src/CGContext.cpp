@@ -168,7 +168,7 @@ CGContext::is_nonwritable(const Variable *v) const
 	// not writing to loop IVs (to avoid infinite loops)
 	map<const Variable*, unsigned int>::const_iterator iter;
 	for (iter = iv_bounds.begin(); iter != iv_bounds.end(); ++iter) {  
-		if (v->match(iter->first)) {
+		if (v->match(iter->first->get_collective())) {
 			return true;
 		}
 	}
