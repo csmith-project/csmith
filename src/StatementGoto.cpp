@@ -318,6 +318,8 @@ Block*
 StatementGoto::find_good_jump_block(vector<Block*>& blocks, const Block* blk, bool as_dest)
 {
 	if (blocks.empty()) return NULL;
+	// if the current block is in array-traversing loop, we don't want any jumps into it
+	if (blk->in_array_loop && !as_dest) return NULL;
 	// if the current block hasn't generated any statement, we can not create a "goto" targeted to this block
 	if (blk->stms.empty() && !as_dest) return NULL;
 	const Statement* last_stm = blk->get_last_stm();
