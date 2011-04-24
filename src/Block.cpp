@@ -107,6 +107,8 @@ Block::make_random(CGContext &cg_context, bool looping)
 	b->func = curr_func;
 	b->parent = cg_context.get_current_block();
 	b->looping = looping;
+	// if there are induction variables, we are in a loop that traverses array(s)
+	b->in_array_loop = !(cg_context.iv_bounds.empty());
 	//b->stm_id = bid++;
 	
 	++cg_context.stmt_depth;
@@ -126,6 +128,8 @@ Block::make_random(CGContext &cg_context, bool looping)
 		delete b;
 		return NULL;
 	}
+	if (b->stm_id == 3)
+		int h = 0;
 	unsigned int i;
 	for (i = 0; i <= max; ++i) {
 		Statement *s = Statement::make_random(cg_context);  

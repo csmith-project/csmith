@@ -325,6 +325,11 @@ StatementGoto::find_good_jump_block(vector<Block*>& blocks, const Block* blk, bo
 
 	size_t index = rnd_upto(blocks.size());
 	ERROR_GUARD(NULL);
+	// disallow jumping to a block that is inside an array traversing loop
+	if (blocks[index]->in_array_loop && as_dest) {
+		blocks.erase(blocks.begin() + index);
+		return find_good_jump_block(blocks, blk, as_dest);
+	}
 	// if block has no statement, delete it and throw dice again
 	if (blocks[index]->stms.empty()) {
 		blocks.erase(blocks.begin() + index);

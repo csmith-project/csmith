@@ -113,6 +113,8 @@ public:
 	
 	bool looping;
 
+	bool in_array_loop;
+
 	bool need_revisit;
 
 	std::vector<const Statement*> break_stms;
