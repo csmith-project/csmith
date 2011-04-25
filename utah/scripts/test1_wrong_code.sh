@@ -15,6 +15,7 @@ if
   ! grep 'control reaches end' outa.txt &&\
   ! grep 'ordered comparison of pointer with integer' outa.txt &&\
   ! grep 'incompatible implicit' outa.txt &&\
+  ! grep 'excess elements in struct initializer' outa.txt &&\
   ! grep 'comparison between pointer and integer' outa.txt &&\
   clang -pedantic -Wall -O0 -c small.c  >out.txt 2>&1 &&\
   ! grep 'incompatible redeclaration' out.txt &&\
@@ -27,6 +28,9 @@ if
   ! grep 'incompatible pointer to' out.txt &&\
   ! grep 'incompatible integer to' out.txt &&\
   ! grep 'type specifier missing' out.txt &&\
+  clang --analyze small.c > out_analyze.txt &&\
+  ! grep garbage out_analyze.txt &&\
+  ! grep undefined out_analyze.txt &&\
   echo here3 &&\
   $CC1 small.c -o small1 > cc_out1.txt 2>&1 &&\
   RunSafely.sh 3 1 /dev/null out1.txt ./small1 >/dev/null 2>&1 &&\
