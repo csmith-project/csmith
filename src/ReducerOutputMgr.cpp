@@ -109,7 +109,7 @@ ReducerOutputMgr::OutputHeader(int argc, char *argv[], unsigned long /*seed*/)
 		}
 	}
 	out << endl;
-	out << "#include \"random_runtime.h\"" << endl << endl;
+	out << "#include \"csmith.h\"" << endl << endl;
 }
 
 void
