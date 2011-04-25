@@ -28,7 +28,7 @@ if
   ! grep 'incompatible pointer to' out.txt &&\
   ! grep 'incompatible integer to' out.txt &&\
   ! grep 'type specifier missing' out.txt &&\
-  clang --analyze small.c > out_analyze.txt &&\
+  clang --analyze small.c > out_analyze.txt 2>&1 &&\
   ! grep garbage out_analyze.txt &&\
   ! grep undefined out_analyze.txt &&\
   echo here3 &&\
