@@ -282,15 +282,14 @@ RandomReturnType(void)
  * Choose a function from `funcs' to invoke.
  * Return null if no suitable function can be found.
  */
-static Function *
-choose_func(vector<Function *> funcs,
+Function *
+Function::choose_func(vector<Function *> funcs,
 			const CGContext& cg_context,
             const Type* type, 
 			const CVQualifiers* qfer)
 {
 	vector<Function *> ok_funcs;
-	vector<Function *>::iterator i;
-	const Effect &effect_context = cg_context.get_effect_context();
+	vector<Function *>::iterator i; 
 
 	for (i = funcs.begin(); i != funcs.end(); ++i) {
         // skip any function which has incompatible return type
@@ -304,17 +303,19 @@ choose_func(vector<Function *> funcs,
 		if ((*i)->is_effect_known() == false) {
 			continue;
 		}
-		// We cannot call a function with a side-effect if the current context
-		// already has a side-effect.
-		// TODO: is this too strong for what we want?
-		if (!((*i)->get_feffect().is_side_effect_free())
-			&& !effect_context.is_side_effect_free()) {
+		// We cannot call a function with a side-effect that is in conflict with the current context 
+		if (cg_context.in_conflict((*i)->get_feffect())) {
 			continue;
 		}
-		// We cannot call a function that has a race with the current context.
-		if ((*i)->get_feffect().has_race_with(effect_context)) {
-			continue;
-		}
+		//// TODO: is this too strong for what we want?
+		//if (!((*i)->get_feffect().is_side_effect_free())
+		//	&& !effect_context.is_side_effect_free()) {
+		//	continue;
+		//}
+		//// We cannot call a function that has a race with the current context.
+		//if ((*i)->get_feffect().has_race_with(effect_context)) {
+		//	continue;
+		//}
 		// Otherwise, this is an acceptable choice.
 		ok_funcs.push_back(*i);
 	}
@@ -350,7 +351,7 @@ SelectFunction(bool &isBackLink, CGContext &cg_context, const Type* type, const 
 		// Try to link to a previously defined function.
 		// (This may cause cycles in the call graph!)
 		// TODO: get rid of recursive calls
-		Function *callee = choose_func(available_funcs, cg_context, type, qfer);
+		Function *callee = Function::choose_func(available_funcs, cg_context, type, qfer);
 		ERROR_GUARD(NULL);
 		if (!callee) {
 			// TODO: Maybe should generate a new function?
@@ -414,14 +415,11 @@ Function::Function(const string &name, const Type *return_type)
 	FuncList.push_back(this);			// Add to global list of functions.
 }
 
-/*
- *
- */
 Function *
-Function::make_random(const CGContext& cg_context, const Type* type, const CVQualifiers* qfer)
+Function::make_random_signature(const CGContext& cg_context, const Type* type, const CVQualifiers* qfer)
 {
 	if (type == 0)
-        	type = RandomReturnType();
+        type = RandomReturnType();
 
 	DEPTH_GUARD_BY_TYPE_RETURN(dtFunction, NULL);
 	ERROR_GUARD(NULL);
@@ -432,14 +430,21 @@ Function::make_random(const CGContext& cg_context, const Type* type, const CVQua
 	CVQualifiers ret_qfer = qfer==0 ? CVQualifiers::random_qualifiers(type, Effect::READ, cg_context, true) 
 		                            : qfer->random_qualifiers(true, Effect::READ, cg_context);
 	ERROR_GUARD(NULL);
-	f->rv = VariableSelector::make_dummy_variable(rvname, &ret_qfer); 
-
+	f->rv = VariableSelector::make_dummy_variable(rvname, &ret_qfer);
+	GenerateParameterList(*f);
 	// create a fact manager for this function, with global facts copied from parent
 	FactMgr* parent_fm = get_fact_mgr(&cg_context);
 	FMList.push_back(new FactMgr(f, parent_fm->global_facts));
+	return f;
+}
 
-	// Select a set of vars to operate on.
-	GenerateParameterList(*f);
+/*
+ *
+ */
+Function *
+Function::make_random(const CGContext& cg_context, const Type* type, const CVQualifiers* qfer)
+{
+	Function* f = make_random_signature(cg_context, type, qfer); 
 	ERROR_GUARD(NULL);
 	f->GenerateBody(cg_context);
 	ERROR_GUARD(NULL);
@@ -633,6 +638,46 @@ Function::GenerateBody(const CGContext &prev_context)
 			fm->global_facts.push_back(FactPointTo::make_fact(param[i], FactPointTo::tbd_ptr));
 		}
 	}
+	// Fill in the Function body. 
+	body = Block::make_random(cg_context); 
+	ERROR_RETURN();
+	body->set_depth_protect(true);
+
+	// compute the pointers that are statically referenced in the function
+	// including ones referenced by its callees
+	body->get_referenced_ptrs(referenced_ptrs);
+
+	// Compute the function's externally visible effect.  Currently, this
+	// is just the effect on globals.
+	//effect.add_external_effect(*cg_context.get_effect_accum());
+	feffect.add_external_effect(fm->map_stm_effect[body]);
+	
+	make_return_const();
+	ERROR_RETURN();
+	
+	// Mark this function as built.
+	build_state = BUILT;
+}
+
+void
+Function::generate_body_with_known_params(const CGContext &prev_context, Effect& effect_accum)
+{
+	if (build_state != UNBUILT) {
+		cerr << "warning: ignoring attempt to regenerate func" << endl;
+		return;
+	}
+
+	build_state = BUILDING;
+	CGContext cg_context(this, prev_context.get_effect_context(), &effect_accum);
+	cg_context.extend_call_chain(prev_context);
+	VariableSet no_reads, no_writes, must_reads, must_writes;
+	// inherit proper no-read/write directives from caller
+	prev_context.get_external_no_reads_writes(no_reads, no_writes);
+	RWDirective rwd(no_reads, no_writes, must_reads, must_writes);
+	cg_context.rw_directive = &rwd; 
+	cg_context.flags = 0;  
+
+	FactMgr* fm = get_fact_mgr_for_func(this); 
 	// Fill in the Function body. 
 	body = Block::make_random(cg_context); 
 	ERROR_RETURN();

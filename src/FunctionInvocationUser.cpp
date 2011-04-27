@@ -174,6 +174,79 @@ FunctionInvocationUser::clone() const
 	return new FunctionInvocationUser(*this);
 }
 
+/* build parameters first, then the function body. this way the generation order is in sync 
+   with execution order, and the dataflow analyzer doesn't need to visit the function twice 
+ */
+FunctionInvocationUser*
+FunctionInvocationUser::build_invocation_and_function(CGContext &cg_context, const Type* type, const CVQualifiers* qfer)
+{
+	assert(type);		// return type must be provided
+	FactMgr* caller_fm = get_fact_mgr(&cg_context);
+	Effect running_eff_context(cg_context.get_effect_context()); 
+	Function* func = Function::make_random_signature(cg_context, type, qfer);
+ 
+	if (func->name == "func_29")
+		int h = 0;
+	vector<const Expression*> param_values;
+	size_t i;
+	for (i = 0; i < func->param.size(); i++) { 
+		Effect param_eff_accum;  
+		CGContext param_cg_context(cg_context, running_eff_context, &param_eff_accum);
+		Variable* v = func->param[i];
+		// to avoid too much function invocations as parameters
+		Expression *p = Expression::make_random_param(param_cg_context, v->type, &v->qfer); 
+		param_values.push_back(p);
+		// Update the "running effect context": the context that we must use
+		// when we generate subsequent parameters within this invocation.
+		running_eff_context.add_effect(param_eff_accum);
+		// Update the total effect of this invocation, too.
+		cg_context.add_effect(param_eff_accum);  
+	}  
+	  
+	FunctionInvocationUser* fiu = new FunctionInvocationUser(func, false, NULL);
+	fiu->param_value = param_values;
+	// hand-over from caller to callee 
+	FactMgr* fm = get_fact_mgr_for_func(func);
+	fm->global_facts = caller_fm->global_facts;
+	add_param_facts(fiu, fm->global_facts);
+	func->remove_irrelevant_facts(fm->global_facts); 
+
+	// create function body
+	Effect effect_accum; 
+	func->generate_body_with_known_params(cg_context, effect_accum); 
+
+	// post creation processing
+	FactVec ret_facts;
+	func->body->add_back_return_facts(fm, ret_facts);
+	fiu->save_return_fact(ret_facts); 
+	// incorporate early return facts   
+	merge_facts(fm->global_facts, ret_facts); 
+	 
+	// remove facts related to passing parameters
+	update_facts_for_oos_vars(func->param, fm->global_facts); 
+	fm->setup_in_out_maps(true);
+	// hand-over from callee to caller: points-to facts
+	renew_facts(caller_fm->global_facts, fm->global_facts); 
+
+	// hand-over from callee to caller: effects
+	func->accum_eff_context.add_external_effect(cg_context.get_effect_context()); 
+	Effect& func_effect = func->feffect;
+	func_effect.add_external_effect(effect_accum, cg_context.call_chain);
+	cg_context.add_visible_effect(effect_accum, cg_context.get_current_block());
+
+	// hand-over from callee to caller: new global variables
+	Function* caller_func = cg_context.get_current_func();
+	caller_func->new_globals.insert(caller_func->new_globals.end(), func->new_globals.begin(), func->new_globals.end());
+	// include facts for globals just created 
+	for (i=0; i<func->new_globals.size(); i++) {
+		const Variable* var = func->new_globals[i];
+		caller_fm->add_new_global_var_fact(var);
+	}
+
+	func->visited_cnt = 1;
+	return fiu; 
+}
+
 /*
  * Internal helper function.
  */

@@ -119,6 +119,8 @@ public:
 	Effect get_accum_effect(void) const				{ Effect e; return effect_accum ? *effect_accum : e; }
 	Effect& get_effect_stm(void) 					{ return effect_stm; }
 
+	void get_external_no_reads_writes(VariableSet& no_reads, VariableSet& no_writes) const;
+
 	bool is_nonreadable(const Variable *v) const;
 	bool is_nonwritable(const Variable *v) const;
 

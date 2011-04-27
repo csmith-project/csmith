@@ -282,15 +282,17 @@ StatementFor::make_random_array_loop(const CGContext &cg_context)
 		}
 	} 
 	// create read/write directive from existing context and incoming directives
-	VariableSet all_must_reads, all_must_writes;
+	VariableSet all_must_reads, all_must_writes, no_reads, no_writes;
 	if (cg_context.rw_directive) {
 		combine_variable_sets(cg_context.rw_directive->must_read_vars, must_reads, all_must_reads);
 		combine_variable_sets(cg_context.rw_directive->must_write_vars, must_writes, all_must_writes);
+		no_reads = cg_context.rw_directive->no_read_vars;
+		no_writes = cg_context.rw_directive->no_write_vars;
 	} else {
 		all_must_reads = must_reads;
 		all_must_writes = must_writes;
 	}
-	RWDirective rwd(CGContext::empty_variable_set, CGContext::empty_variable_set, all_must_reads, all_must_writes); 
+	RWDirective rwd(no_reads, no_writes, all_must_reads, all_must_writes); 
 	// create CGContext for loop
 	CGContext loop_cg_context(cg_context, &rwd, NULL, 0);  
 	StatementFor* sf = make_random(loop_cg_context);

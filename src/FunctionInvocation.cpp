@@ -63,6 +63,7 @@
 #include "CompatibleChecker.h"
 #include "DepthSpec.h"
 #include "Constant.h"
+#include "CGOptions.h"
 
 using namespace std; 
 
@@ -72,70 +73,45 @@ using namespace std;
  * XXX
  */
 FunctionInvocation *
-FunctionInvocation::make_random(bool bStandardFunc,
+FunctionInvocation::make_random(bool is_std_func,
 								CGContext &cg_context, 
                                 const Type* type,
 								const CVQualifiers* qfer)
 {
-	Function *curr_func = cg_context.get_current_func();
-	assert(curr_func);
-	Block* blk = cg_context.get_current_block();
-	assert(blk);
-
-	FunctionInvocation *fi = 0;
-	bool is_std_func = bStandardFunc;
-	bool is_back_link = false;
-
-	// If we are looking for a program-defined function, try to find one.
-	// If we cannot find one, fall back to calling a "standard" function.
-	Function *callee = 0;
+	FunctionInvocation *fi = 0;  
+	// If we are looking for a program-defined function, try to find one. 
 	if (!is_std_func) { 
-		callee = SelectFunction(is_back_link, cg_context, type, qfer);   
-		ERROR_GUARD(NULL);
-		if (!callee) {
+		Function* callee = NULL;
+		if (pure_rnd_flipcoin(50)) {
+			callee = Function::choose_func(get_all_functions(), cg_context, type, qfer);
+		}
+		if (callee != NULL) {
+			FunctionInvocationUser *fiu = new FunctionInvocationUser(callee, true, NULL);
+			fiu->build_invocation(callee, cg_context);  
+			fi = fiu;
+			if (!fiu->failed) { 
+				cg_context.get_current_func()->fact_changed |= fiu->func->fact_changed;
+			}
+		} 
+		else if (FuncListSize() < CGOptions::max_funcs()) {
+			fi = FunctionInvocationUser::build_invocation_and_function(cg_context, type, qfer); 
+		} else {
 			// we can not find/create a function for struct/pointer type,
 			// and we can not do binary/unary operation on them either, so give up
-			if (type && (type->eType == eStruct || type->eType == ePointer)) {
-				fi = new FunctionInvocationUser(NULL, false, NULL);
-				fi->failed = true;
-				return fi;
-			}
-			is_std_func = true;
-		} 
-		else if (!is_back_link) {		
-			//cout << "created function " << callee->name << " with facts" << endl;
-			// include new globals created during callee creation
-			curr_func->new_globals.insert(curr_func->new_globals.end(), callee->new_globals.begin(), callee->new_globals.end());
-			// include facts for globals just created
-			FactMgr* fm = get_fact_mgr(&cg_context);
-			for (size_t i=0; i<callee->new_globals.size(); i++) {
-				const Variable* var = callee->new_globals[i];
-				fm->add_new_global_var_fact(var);
-			}
+			fi = new FunctionInvocationUser(NULL, false, NULL);
+			fi->failed = true;
+			return fi;
 		}
 	}
-	if (is_std_func) {
-		DEPTH_GUARD_BY_TYPE_RETURN(dtFunctionInvocationStdFunc, NULL);
-		int rnd_flag = rnd_flipcoin(StdUnaryFuncProb);
-		ERROR_GUARD(NULL);
+	// now use standard functions, i.e., binary/unary operators to create an invocation
+	if (fi == NULL) { 
+		int rnd_flag = rnd_flipcoin(StdUnaryFuncProb); 
 		if (rnd_flag) {
 			fi = make_random_unary(cg_context, type);
 		} else {
 			fi = make_random_binary(cg_context, type);
 		}
-	} else {
-		FunctionInvocationUser *fiu;
-		fiu = new FunctionInvocationUser(callee, is_back_link, NULL);
-		fiu->build_invocation(callee, cg_context); 
-		ERROR_GUARD_AND_DEL1(NULL, fiu);
-		fi = fiu;
-		if (!fiu->failed) { 
-			cg_context.get_current_func()->fact_changed |= fiu->func->fact_changed;
-		}
-	} 
-
-	ERROR_GUARD_AND_DEL1(NULL, fi);
-
+	}
 	assert(fi != 0);
 	return fi;
 }

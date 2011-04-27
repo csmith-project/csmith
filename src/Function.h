@@ -70,8 +70,14 @@ public:
 	static Function *make_first(void);
 	// type = 0 means we don't care about the return type
 	static Function *make_random(const CGContext& cg_context, const Type* type = 0, const CVQualifiers* qfer=0);
+	// generate the signature, but not the body
+	static Function* make_random_signature(const CGContext& cg_context, const Type* type, const CVQualifiers* qfer=0);
+
+	static Function* choose_func(vector<Function *> funcs, const CGContext& cg_context, const Type* type, const CVQualifiers* qfer);
 
 	static void doFinalization();
+
+	void generate_body_with_known_params(const CGContext &prev_context, Effect& effect_accum);
 
 	void Output(std::ostream &);
 	void OutputForwardDecl(std::ostream &);

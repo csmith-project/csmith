@@ -567,6 +567,35 @@ CGContext::in_conflict(const Effect& eff) const
 }
 
 void
+CGContext::get_external_no_reads_writes(VariableSet& no_reads, VariableSet& no_writes) const
+{  
+	no_reads.clear();
+	no_writes.clear();
+	size_t i;
+	if (rw_directive) {
+		for (i=0; i<rw_directive->no_read_vars.size(); i++) {
+			const Variable* v = rw_directive->no_read_vars[i];
+			if (v->is_global()) {
+				no_reads.push_back(v);
+			}
+		}
+		for (i=0; i<rw_directive->no_write_vars.size(); i++) {
+			const Variable* v = rw_directive->no_write_vars[i];
+			if (v->is_global()) {
+				no_writes.push_back(v);
+			}
+		} 
+	} 
+	// convert global IVs into non-writables
+	map<const Variable*, unsigned int>::const_iterator iter;
+	for (iter = iv_bounds.begin(); iter != iv_bounds.end(); ++iter) {
+		if (iter->first->is_global()) {
+			no_writes.push_back(iter->first);
+		}
+	}
+}
+
+void
 RWDirective::find_must_use_arrays(vector<const Variable*>& avs) const
 {
 	avs.clear(); 

@@ -59,6 +59,9 @@ class FunctionInvocationUser: public FunctionInvocation
 	friend class FunctionInvocation;
 
 public:
+	// factory method
+	static FunctionInvocationUser* build_invocation_and_function(CGContext &cg_context, const Type* type, const CVQualifiers* qfer);
+
 	virtual ~FunctionInvocationUser(void);
 
 	virtual FunctionInvocation* clone() const;

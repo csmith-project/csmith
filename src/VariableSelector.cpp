@@ -1462,23 +1462,25 @@ VariableSelector::select_must_use_var(Effect::Access access, CGContext &cg_conte
 	eMatchType mt = (access == Effect::READ) ? eFlexible : eDerefExact;
 	for (size_t i=0; i<vars.size(); i++) {
 		const Variable* v = vars[i];  
-		if (type->match(v->type, mt) && (!qfer || qfer->match(v->qfer))) { 
-			int deref_level = v->type->get_indirect_level() - type->get_indirect_level();
-			// for LHS, make sure the array type is not constant after dereference
-			if (access == Effect::WRITE && v->qfer.is_const_after_deref(deref_level)) {
-				continue;
-			}
+		if (v->is_visible(cg_context.get_current_block())) {
+			if (type->match(v->type, mt) && (!qfer || qfer->match(v->qfer))) { 
+				int deref_level = v->type->get_indirect_level() - type->get_indirect_level();
+				// for LHS, make sure the array type is not constant after dereference
+				if (access == Effect::WRITE && v->qfer.is_const_after_deref(deref_level)) {
+					continue;
+				}
 
-			if (v->isArray) {
-				const ArrayVariable* av = dynamic_cast<const ArrayVariable*>(v);
-				var = VariableSelector::itemize_array(cg_context, av);
-			} else {
-				var = v;
-			}
-		} 
-		else if (0) {//var = v->match_field(type, mt)) { // JYTODO: match a field of array of structs
-			if (v->isArray) {
-				//var = VariableSelector::select_random_array_var(var, cg_context.ivs);
+				if (v->isArray) {
+					const ArrayVariable* av = dynamic_cast<const ArrayVariable*>(v);
+					var = VariableSelector::itemize_array(cg_context, av);
+				} else {
+					var = v;
+				}
+			} 
+			else if (0) {//var = v->match_field(type, mt)) { // JYTODO: match a field of array of structs
+				if (v->isArray) {
+					//var = VariableSelector::select_random_array_var(var, cg_context.ivs);
+				}
 			}
 		}
 		if (var) {
