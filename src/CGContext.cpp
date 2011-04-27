@@ -160,7 +160,8 @@ CGContext::is_nonwritable(const Variable *v) const
 	if (rw_directive) {
 		VariableSet::size_type len = rw_directive->no_write_vars.size(); 
 		for (size_t i = 0; i < len; ++i) {
-			if (rw_directive->no_write_vars[i]->match(v)) {
+			const Variable* no_write_var = rw_directive->no_write_vars[i];
+			if (no_write_var->loose_match(v) || v->loose_match(no_write_var)) {
 				return true;
 			}
 		}
@@ -168,7 +169,7 @@ CGContext::is_nonwritable(const Variable *v) const
 	// not writing to loop IVs (to avoid infinite loops)
 	map<const Variable*, unsigned int>::const_iterator iter;
 	for (iter = iv_bounds.begin(); iter != iv_bounds.end(); ++iter) {  
-		if (v->match(iter->first->get_collective())) {
+		if (v->loose_match(iter->first)) {
 			return true;
 		}
 	}

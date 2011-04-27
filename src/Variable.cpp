@@ -203,7 +203,16 @@ void remove_field_vars(vector<const Variable*>& set)
 }
 
 /*
- *
+ * examples: array[0] "loose matches" array[1]; array[3] "loose matches" array[x].f1...
+ */
+bool 
+Variable::loose_match(const Variable* v) const
+{
+	return get_collective()->match(v->get_collective());
+}
+
+/*
+ * a struct variable "matches" it's field variable
  */
 bool 
 Variable::match(const Variable* v) const

@@ -91,6 +91,7 @@ public:
 	bool is_array_field(void) const;
 	bool is_virtual(void) const;
 	bool match(const Variable* v) const;
+	bool loose_match(const Variable* v) const;
 	bool is_pointer(void) const { return type && type->eType == ePointer;}
 	int get_seq_num(void) const;
 
