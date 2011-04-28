@@ -20,3 +20,4 @@ system "${CSMITH_PATH}/src/csmith @ARGV";
 
 system "gcc -E -I${CSMITH_PATH}/runtime -DCSMITH_MINIMAL $outfile | ${CSMITH_PATH}/scripts/shorten.pl > small.c";
 
+system "indent small.c";
