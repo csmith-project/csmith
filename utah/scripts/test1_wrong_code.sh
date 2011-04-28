@@ -40,7 +40,7 @@ if
   RunSafely.sh 3 1 /dev/null out2.txt ./small2 >/dev/null 2>&1 &&\
   ! diff out1.txt out2.txt &&\
   echo here5 &&\
-  ~/c-semantics-read-only/dist/kcc -s small.c >/dev/null 2>&1 &&\
+  kcc -s small.c >/dev/null 2>&1 &&\
   echo here6 
 then
   if 
