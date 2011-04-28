@@ -2,6 +2,13 @@
 
 use strict;
 
+# assumption: we're processing code that has been run through 'indent'
+# which adds white space around operators and in other places
+
+# goal: completely dismantle a preprocessed csmith output
+
+# todo: use a real C lexer
+
 # easy
 #   also make replace with 0, 1, nothing include the suffix
 #   remove bitfield specifiers like :3
@@ -21,9 +28,6 @@ use strict;
 #   remove level of pointer indirection
 #   remove arary dimension
 #   remove argument from function, including all calls
-
-# assumption: we're processing code that has been run through 'indent'
-# which adds white space around operators and in other places
 
 my $INIT = "1";
 
@@ -61,11 +65,41 @@ my @delete_strs = (
     "extern",
     "+",
     "-",
+    "!",
+    "~",
     "inline", 
     "signed", 
     "unsigned", 
     "short", 
-    "long");
+    "long"
+    );
+
+my $num = "\\-?[xX0-9a-fA-F]+[UL]*";
+my $var1a = "(\&*\\**)[lgpt]_[0-9]+(\\\[($num)|i|j|k|l\\\])*";
+my $var1b = "(\&*\\**)[lgpt]_[0-9]+(\\.f[0-9]+)*";
+my $var2 = "si1|si2|ui1|ui2|left|right|val|crc32_context|func_([0-9]+)";
+my $var = "($var1a)|($var1b)|($var2)";
+my $arith = "\\+|\\-|\\%|\\/|\\*";
+my $comp = "\\<\\=|\\>\\=|\\<|\\>|\\=\\=|\\!\\=|\\=";
+my $logic = "\\&\\&|\\|\\|";
+my $bit = "\\||\\&|\\^|\\<\\<|\\>\\>";
+my $binop = "($arith)|($comp)|($logic)|($bit)";
+my $varnum = "($var)|($num)";
+my $pref = "[\\{\\s\\(\\[\\:]";
+my $suf = "[\\}\\s\\)\\]\\;\\,]";
+
+# print " $pref $suf $var1a $var1b \n";
+
+my %replace_regexes = (
+    "\;" => "",
+    "($varnum)(\\s*)\;" => "",
+    "($varnum)(\\s*)\," => "",
+    "char" => "int",
+    "short" => "int",
+    "long" => "int",
+    "signed" => "int",
+    "unsigned" => "int",
+    );
 
 my $prog;
 
@@ -77,7 +111,7 @@ sub find_match ($$$) {
 	return -1 if ($p2 >= (length ($prog)-1));
 	my $s = substr($prog, $p2, 1);
 	if (!defined($s)) {
-	    my $l = length($prog);
+	    my $l = length ($prog);
 	    print "$p2 $l\n";
 	    die;
 	}
@@ -108,7 +142,7 @@ sub killit ($$) {
     my $p2 = $pos;
     $p2++ while (
 		 substr($prog, $p2, 1) ne "(" &&
-		 $p2 <= (length($prog)-1)
+		 $p2 <= (length ($prog)-1)
 		 );
     $p2 = find_match ($p2+1,"(",")");
     return -1 if ($p2 == -1);
@@ -139,37 +173,21 @@ sub write_file ($)
     close OUTF;
 }
 
-my $num = "\\-?[xX0-9a-fA-F]+[UL]*";
-my $var1a = "(\&*\\**)[lgpt]_[0-9]+(\\\[$num\\\])*";
-my $var1b = "(\&*\\**)[lgpt]_[0-9]+(\\.f[0-9]+)*";
-my $var2 = "si1|si2|ui1|ui2|left|right|val|crc32_context|func_([0-9]+)";
-my $var = "($var1a)|($var1b)|($var2)";
-my $arith = "\\+|\\-|\\%|\\/|\\*";
-my $comp = "\\<\\=|\\>\\=|\\<|\\>|\\=\\=|\\!\\=|\\=";
-my $logic = "\\&\\&|\\|\\|";
-my $bit = "\\||\\&|\\^|\\<\\<|\\>\\>";
-my $binop = "($arith)|($comp)|($logic)|($bit)";
-my $varnum = "($var)|($num)";
-my $pref = "[\\s\\(\\[\\:]";
-my $suf = "[\\s\\)\\]\\;\\,]";
-
-# print " $pref $suf $var1a $var1b \n";
-
 sub match_binop ($$) {
     (my $prog, my $pos) = @_;
     my $s = substr ($prog, $pos, -1);
     if (
 	$s =~ /^(?<pref>$pref)(?<var>$varnum)(?<spc>\s+)(?<op>$binop)/
 	) {
-	$pos += length($+{pref});
+	$pos += length ($+{pref});
 	my $s2 = $+{var}.$+{spc}.$+{op};
-	return (1, $pos, $pos+length($s2),"");
+	return (1, $pos, $pos+length ($s2),"");
     }
     if (
 	$s =~ /^(?<op>$binop)(?<spc>\s+)(?<var>$varnum)$suf/ 
 	) {
 	my $s2 = $+{op}.$+{spc}.$+{var};
-	return (1, $pos, $pos+length($s2));
+	return (1, $pos, $pos+length ($s2));
     }
     return (0,0,0);
 }
@@ -183,7 +201,7 @@ sub match_id ($$) {
 	my $s = $+{pref};
 	my $v = $+{var};
 	if (($v ne "1") && ($v ne "0")) {
-	    return (1, $pos+1, $pos+length($s.$v));
+	    return (1, $pos+1, $pos+length ($s.$v));
 	}
     }
     if (
@@ -215,7 +233,7 @@ sub try_delete_one ($$$$$) {
 
     my $n = 0;
 
-    for (my $pos=0; $pos < length($prog); $pos++) {
+    for (my $pos=0; $pos < length ($prog); $pos++) {
 
 	if ($method eq "binop") {
 	    (my $success, my $start, my $end) = 
@@ -271,21 +289,6 @@ sub try_delete_one ($$$$$) {
 		    substr ($prog, $start, $end-$start) = "0";
 		    ($del =~ s/\s/ /g);
 		    print "[$pass repl_with_0 s:$good_cnt f:$bad_cnt] ";
-		    print "replacing '$del' at $start--$end : ";
-		    return 1;
-		} else {
-		    $n++;
-		}
-	    }	    
-	} elsif ($method eq "repl_with_-1") {
-	    (my $success, my $start, my $end) = 
-		match_id ($prog, $pos);
-	    if ($success) {
-		if ($n == $number_to_delete) {
-		    my $del = substr ($prog, $start, $end-$start);
-		    substr ($prog, $start, $end-$start) = "-1";
-		    ($del =~ s/\s/ /g);
-		    print "[$pass repl_with_-1 s:$good_cnt f:$bad_cnt] ";
 		    print "replacing '$del' at $start--$end : ";
 		    return 1;
 		} else {
@@ -374,7 +377,7 @@ sub try_delete_one ($$$$$) {
 	    }
 	} elsif ($method eq "calls_wargs") {
 	    foreach my $pref (keys %function_prefixes) {
-		my $s = substr ($prog, $pos, length($pref));
+		my $s = substr ($prog, $pos, length ($pref));
 		if ($s eq $pref) {
 		    if ($n == $number_to_delete) {
 			my $c = killit ($pos, $pref);
@@ -389,7 +392,7 @@ sub try_delete_one ($$$$$) {
 	    }
 	} elsif ($method eq "calls_woargs") {
 	    foreach my $pref (keys %function_prefixes) {
-		my $s = substr ($prog, $pos, length($pref));
+		my $s = substr ($prog, $pos, length ($pref));
 		if ($s eq $pref) {
 		    if ($n == $number_to_delete) {
 			my $p2 = $pos;
@@ -435,27 +438,32 @@ sub try_delete_one ($$$$$) {
 	    }
 	} elsif ($method eq "delete_str") {
 	    foreach my $str (@delete_strs) {
-		if (substr($prog, $pos, length($str)) eq $str) {
+		if (substr($prog, $pos, length ($str)) eq $str) {
 		    if ($n == $number_to_delete) {
 			print "[$pass delete_str s:$good_cnt f:$bad_cnt] ";
 			print "deleting $str at $pos : ";
-			substr($prog, $pos, length($str)) = "";
+			substr($prog, $pos, length ($str)) = "";
 			return 1;
 		    } else {
 			$n++;
 		    }
 		}
 	    }
-	} elsif ($method eq "double_semic") {
-	    my $rest = substr($prog, $pos, -1);
-	    if ($rest =~ /^\;\s*;/) {
-		if ($n == $number_to_delete) {
-		    print "[$pass double_semic s:$good_cnt f:$bad_cnt] ";
-		    print "deleting at $pos : ";
-		    substr($prog, $pos, 1) = "";
-		    return 1;
-		} else {
-		    $n++;
+	} elsif ($method eq "replace_regex") {
+	    foreach my $str (keys %replace_regexes) {
+		my $rest = substr($prog, $pos, -1);
+		if ($rest =~ /^(?<pref>$pref)(?<str>$str)/) {
+		    if ($n == $number_to_delete) {
+			my $repl = $+{str};
+			print "[$pass replace_regex s:$good_cnt f:$bad_cnt] ";
+			print "replacing '$+{str}' at $pos : ";
+			substr ($prog, 
+				$pos + length ($+{pref}), 
+				length ($repl)) = $replace_regexes{$str};
+			return 1;
+		    } else {
+			$n++;
+		    }
 		}
 	    }
 	} elsif ($method =~ /^normalize_types_([0-9]+)$/) {
@@ -521,7 +529,7 @@ sub try_delete_one ($$$$$) {
 		if ($n == $number_to_delete) {
 		    print "[$pass normalize_types s:$good_cnt f:$bad_cnt] ";
 		    print "replacing $orig with $new at $pos : ";
-		    substr($prog, $pos, length($orig)+1) = " $new";
+		    substr($prog, $pos, length ($orig)+1) = " $new";
 		    return 1;
 		} else {
 		    $n++;
@@ -589,7 +597,6 @@ my @all_methods = (
     "useless_parens",
     "repl_with_0",
     "elim_mod_div",
-    "double_semic",
     "delete_str",
     "repl_with_1",
     "repl_with_nothing",
@@ -602,6 +609,7 @@ my @all_methods = (
     "normalize_types_5",
     "normalize_types_6",
     "normalize_types_7",
+    "replace_regex",
     );
  
 #################### main #####################
@@ -623,12 +631,14 @@ if (!(-x $test)) {
 }
 
 my $cfile = shift @ARGV;
+usage if (!defined($cfile));
 if (!(-e $cfile)) {
     print "'$cfile' not found\n";
     usage();
 }
 
 my %methods = ();
+usage if (!defined(@ARGV));
 foreach my $arg (@ARGV) {
     if ($arg eq "--all") {
 	foreach my $method (@all_methods) {
@@ -664,7 +674,7 @@ system "cp $cfile $cfile.bak";
 my $pass = 0;
 while (1) {
     my $success = 0;
-    foreach my $method (keys %methods) {
+    foreach my $method (sort keys %methods) {
 	$success |= delete_loop ($cfile, $test, $method, $pass);
     }
     last if (!$success);
