@@ -15,7 +15,7 @@ use strict;
 
 # add methods for removing
 #   labels
-#   replace a?b:c with b or c
+#   replace a?b:c with b or c -- but see existing code in match_id
 #   += -= *= /= ++ -- etc.
 #   lonely variables and numbers
 #   U and L from constants
@@ -141,7 +141,7 @@ sub write_file ($)
 }
 
 my $num = "\\-?[xX0-9a-fA-F]+[UL]*";
-my $var1 = "\\**[lgpt]_[0-9]+(\\\[$num\\\])*";
+my $var1 = "\&*\\**[lgpt]_[0-9]+(\\\[$num\\\])*";
 my $var2 = "si1|si2|ui1|ui2";
 my $var = "($var1)|($var2)";
 my $arith = "\\+|\\-|\\%|\\/|\\*";
@@ -174,24 +174,24 @@ sub match_id ($$) {
     (my $prog, my $pos) = @_;
     my $s = substr ($prog, $pos, -1);
     if (
-	$s =~ /^([\s\(])($varnum)[\s\)\;]/
+	$s =~ /^(?<pref>[\s\(])(?<var>$varnum)[\s\)\;]/
 	) {
-	my $s = $1;
-	my $v = $2;
+	my $s = $+{pref};
+	my $v = $+{var};
 	if (($v ne "1") && ($v ne "0")) {
 	    return (1, $pos+1, $pos+length($s.$v));
 	}
     }
     if (
-	$s =~ /^([\s\(])($varnum)(\s+)($binop)(\s+)($varnum)[\s\)\;]/
+	$s =~ /^(?<pref>[\s\(])(?<var1>$varnum)(?<s1>\s+)(?<op>$binop)(?<s2>\s+)(?<var2>$varnum)[\s\)\;]/
 	) {
-	my $s2 = $1.$2.$3.$4.$5.$6;
+	my $s2 = $+{pref}.$+{var1}.$+{s1}.$+{op}.$+{s2}.$+{var2};
 	return (1, $pos+1, $pos+length ($s2));
     }
     if (
-	$s =~ /^($varnum)(\s*\?\s*)($varnum)(\s*\:\s*)($varnum)/
+	$s =~ /^(?<var1>$varnum)(?<ques>\s*\?\s*)(?<var2>$varnum)(?<colon>\s*\:\s*)(?<var3>$varnum)/
 	) {
-	my $s2 = $1.$2.$3.$4.$5;
+	my $s2 = $+{var1}.$+{ques}.$+{var2}.$+{colon}.$+{var3};
 	return (1, $pos+1, $pos+length ($s2));
     }
     return (0,0,0);
