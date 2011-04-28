@@ -75,7 +75,7 @@ my @delete_strs = (
     );
 
 my $num = "\\-?[xX0-9a-fA-F]+[UL]*";
-my $var1a = "(\&*\\**)[lgpt]_[0-9]+(\\\[($num)|i|j|k|l\\\])*";
+my $var1a = "(\&*\\**)[lgpt]_[0-9]+(\\\[(($num)|i|j|k|l)\\\])*";
 my $var1b = "(\&*\\**)[lgpt]_[0-9]+(\\.f[0-9]+)*";
 my $var2 = "si1|si2|ui1|ui2|left|right|val|crc32_context|func_([0-9]+)";
 my $var = "($var1a)|($var1b)|($var2)";
