@@ -139,9 +139,10 @@ sub write_file ($)
 }
 
 my $num = "\\-?[xX0-9a-fA-F]+[UL]*";
-my $var1 = "\&*\\**[lgpt]_[0-9]+(\\\[$num\\\])*";
+my $var1a = "(\&*\\**)[lgpt]_[0-9]+(\\\[$num\\\])*";
+my $var1b = "(\&*\\**)[lgpt]_[0-9]+(\\.f[0-9]+)*";
 my $var2 = "si1|si2|ui1|ui2|func_([0-9]+)";
-my $var = "($var1)|($var2)";
+my $var = "($var1a)|($var1b)|($var2)";
 my $arith = "\\+|\\-|\\%|\\/|\\*";
 my $comp = "\\<\\=|\\>\\=|\\<|\\>|\\=\\=|\\!\\=|\\=";
 my $logic = "\\&\\&|\\|\\|";
@@ -151,7 +152,7 @@ my $varnum = "($var)|($num)";
 my $pref = "[\\s\\(\\[\\:]";
 my $suf = "[\\s\\)\\]\\;\\,]";
 
-print " $pref $suf \n";
+# print " $pref $suf $var1a $var1b \n";
 
 sub match_binop ($$) {
     (my $prog, my $pos) = @_;
@@ -614,8 +615,9 @@ sub usage() {
 }
 
 my $test = shift @ARGV;
+usage if (!defined($test));
 if (!(-x $test)) {
-    print "'$test' not found, or not executable\n";
+    print "test script '$test' not found, or not executable\n";
     usage();
 }
 
