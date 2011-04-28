@@ -2,9 +2,8 @@
 
 use strict;
 
-# debug lines 155 and 182
+# finish using named backreferences
 # debug tok and comma 
-# use named backreferences
 # turn short, char, long into int
 # replace tok and comma with 0 and 1
 # transform a function to return void
@@ -12,10 +11,11 @@ use strict;
 # sort functions in order to eliminate prototypes
 # replace complex assignments like ^= with =
 # un-nest nested calls
+# move arguments and locals to global scope
 
 # add methods for removing
 #   labels
-#   ?:
+#   replace a?b:c with b or c
 #   += -= *= /= ++ -- etc.
 #   lonely variables and numbers
 #   U and L from constants
@@ -59,6 +59,7 @@ my @delete_strs = (
     "volatile", 
     "const", 
     "static", 
+    "extern",
     "+",
     "-",
     "inline", 
