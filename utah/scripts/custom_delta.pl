@@ -7,7 +7,10 @@ use strict;
 
 # goal: completely dismantle a preprocessed csmith output
 
-# todo: use a real C lexer
+# todo: always check for a prefix when doing matching, to avoid
+#   mangling tokens
+
+# todo: use a real C lexer?
 
 # easy
 #   also make replace with 0, 1, nothing include the suffix
