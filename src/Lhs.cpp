@@ -66,26 +66,25 @@ Lhs::make_random(CGContext &cg_context, const Type* t, const CVQualifiers* qfer)
 	do {
 		DEPTH_GUARD_BY_TYPE_RETURN(dtLhs, NULL);
 		const Variable* var = 0;
-		//bool flag = !CGOptions::bitfields() || rnd_flipcoin(80);
-		bool flag = rnd_flipcoin(SelectDerefPointerProb);
-		if (flag) { //rnd_flipcoin(90)) {
-			var = VariableSelector::select_deref_pointer(Effect::WRITE, cg_context, t, qfer, dummy);
-			ERROR_GUARD(NULL);
-			if (var) {
-				int deref_level = var->type->get_indirect_level() - t->get_indirect_level();
-				assert(!var->qfer.is_const_after_deref(deref_level));
+		// try to use one of the "must_use" variables
+		var = VariableSelector::select_must_use_var(Effect::WRITE, cg_context, t, qfer);
+		if (var == NULL) {
+			bool flag = rnd_flipcoin(SelectDerefPointerProb);
+			if (flag) { //rnd_flipcoin(90)) {
+				var = VariableSelector::select_deref_pointer(Effect::WRITE, cg_context, t, qfer, dummy);
+				ERROR_GUARD(NULL);
+				if (var) {
+					int deref_level = var->type->get_indirect_level() - t->get_indirect_level();
+					assert(!var->qfer.is_const_after_deref(deref_level));
+				}
 			}
 		}
 		if (var==0) {
 			CVQualifiers new_qfer(*qfer);
 			if (!(new_qfer.wildcard)) {
 				new_qfer.restrict(Effect::WRITE, cg_context);
-			} 
-			// try to use one of the "must_use" variables
-			var = VariableSelector::select_must_use_var(Effect::WRITE, cg_context, t, qfer);
-			if (var == NULL) {
-				var = VariableSelector::select(Effect::WRITE, cg_context, t, &new_qfer, dummy, eDerefExact);
-			}
+			}  
+			var = VariableSelector::select(Effect::WRITE, cg_context, t, &new_qfer, dummy, eDerefExact);
 			ERROR_GUARD(NULL);
 			int deref_level = var->type->get_indirect_level() - t->get_indirect_level();
 			assert(!var->qfer.is_const_after_deref(deref_level));

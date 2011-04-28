@@ -395,8 +395,18 @@ StatementFor::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) co
 	} 
 	//print_facts(inputs);
 	FactVec facts_copy = inputs;
-	Effect eff = cg_context.get_effect_stm();
+	Effect eff = cg_context.get_effect_stm(); 
+
+	const Variable* iv = init.get_lhs()->get_var();
+	// the indction variable should be scalar, and shouldn't be the IV of an outer loop
+	assert(iv->type->eType == eSimple);
+	assert(cg_context.iv_bounds.find(iv) == cg_context.iv_bounds.end());
+	// give an arbitrary bound that we don't check against
+	cg_context.iv_bounds[iv] = 0;
+
 	if (!body.visit_facts(inputs, cg_context)) {
+		// remove IV from context
+		cg_context.iv_bounds.erase(iv);
 		return false;
 	}
 	FactMgr* fm = get_fact_mgr(&cg_context);
@@ -418,6 +428,8 @@ StatementFor::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) co
 	}
 	// compute accumulated effect
 	set_accumulated_effect_after_block(eff, &body, cg_context);
+	// remove IV from context
+	cg_context.iv_bounds.erase(iv);
 	return true;
 } 
 
