@@ -140,28 +140,30 @@ sub write_file ($)
 }
 
 my $num = "\\-?[xX0-9a-fA-F]+[UL]*";
-my $var = "\\**[lgpt]_[0-9]+(\\\[$num\\\])*";
+my $var1 = "\\**[lgpt]_[0-9]+(\\\[$num\\\])*";
+my $var2 = "si1|si2|ui1|ui2";
+my $var = "($var1)|($var2)";
 my $arith = "\\+|\\-|\\%|\\/|\\*";
 my $comp = "\\<\\=|\\>\\=|\\<|\\>|\\=\\=|\\!\\=|\\=";
 my $logic = "\\&\\&|\\|\\|";
 my $bit = "\\||\\&|\\^|\\<\\<|\\>\\>";
-my $binop = "$arith|$comp|$logic|$bit";
-my $varnum = "$var|$num";
+my $binop = "($arith)|($comp)|($logic)|($bit)";
+my $varnum = "($var)|($num)";
 
 sub match_binop ($$) {
     (my $prog, my $pos) = @_;
     my $s = substr ($prog, $pos, -1);
     if (
-	$s =~ /^([\s\(])($varnum)(\s+)($binop)/
+	$s =~ /^(?<pref>[\s\(\[])(?<var>$varnum)(?<spc>\s+)(?<op>$binop)/
 	) {
-	$pos += length($1);
-	my $s2 = $2.$3.$4;
+	$pos += length($+{pref});
+	my $s2 = $+{var}.$+{spc}.$+{op};
 	return (1, $pos, $pos+length($s2),"");
     }
     if (
-	$s =~ /^($binop)(\s+)($varnum)[\s\)\;]/ 
+	$s =~ /^(?<op>$binop)(?<spc>\s+)(?<var>$varnum)[\s\)\]\;]/ 
 	) {
-	my $s2 = $1.$2.$3;
+	my $s2 = $+{op}.$+{spc}.$+{var};
 	return (1, $pos, $pos+length($s2));
     }
     return (0,0,0);
