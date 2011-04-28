@@ -2,26 +2,24 @@
 
 use strict;
 
-# finish using named backreferences
-# debug tok and comma 
-# turn short, char, long into int
-# replace tok and comma with 0 and 1
-# transform a function to return void
-# inline a function call
-# sort functions in order to eliminate prototypes
-# replace complex assignments like ^= with =
-# un-nest nested calls
-# move arguments and locals to global scope
+# easy
+#   remove bitfield specifiers like :3
+#   turn short, char, long into int
+#   replace complex assignments like ^= with =
+#   remove labels
+#   replace a?b:c with b or c 
+#   deal with += -= *= /= ++ -- etc.
+#   remove U and L from constants
 
-# add methods for removing
-#   labels
-#   replace a?b:c with b or c -- but see existing code in match_id
-#   += -= *= /= ++ -- etc.
-#   lonely variables and numbers
-#   U and L from constants
-#   array dimension
-#   pointer level of indirection
-#   argument from function, including all calls
+# hard
+#   transform a function to return void
+#   inline a function call
+#   sort functions in order to eliminate prototypes
+#   un-nest nested calls
+#   move arguments and locals to global scope
+#   remove level of pointer indirection
+#   remove arary dimension
+#   remove argument from function, including all calls
 
 # assumption: we're processing code that has been run through 'indent'
 # which adds white space around operators and in other places
@@ -142,7 +140,7 @@ sub write_file ($)
 
 my $num = "\\-?[xX0-9a-fA-F]+[UL]*";
 my $var1 = "\&*\\**[lgpt]_[0-9]+(\\\[$num\\\])*";
-my $var2 = "si1|si2|ui1|ui2";
+my $var2 = "si1|si2|ui1|ui2|func_([0-9]+)";
 my $var = "($var1)|($var2)";
 my $arith = "\\+|\\-|\\%|\\/|\\*";
 my $comp = "\\<\\=|\\>\\=|\\<|\\>|\\=\\=|\\!\\=|\\=";
@@ -150,19 +148,23 @@ my $logic = "\\&\\&|\\|\\|";
 my $bit = "\\||\\&|\\^|\\<\\<|\\>\\>";
 my $binop = "($arith)|($comp)|($logic)|($bit)";
 my $varnum = "($var)|($num)";
+my $pref = "[\\s\\(\\[\\:]";
+my $suf = "[\\s\\)\\]\\;\\,]";
+
+print " $pref $suf \n";
 
 sub match_binop ($$) {
     (my $prog, my $pos) = @_;
     my $s = substr ($prog, $pos, -1);
     if (
-	$s =~ /^(?<pref>[\s\(\[])(?<var>$varnum)(?<spc>\s+)(?<op>$binop)/
+	$s =~ /^(?<pref>$pref)(?<var>$varnum)(?<spc>\s+)(?<op>$binop)/
 	) {
 	$pos += length($+{pref});
 	my $s2 = $+{var}.$+{spc}.$+{op};
 	return (1, $pos, $pos+length($s2),"");
     }
     if (
-	$s =~ /^(?<op>$binop)(?<spc>\s+)(?<var>$varnum)[\s\)\]\;]/ 
+	$s =~ /^(?<op>$binop)(?<spc>\s+)(?<var>$varnum)$suf/ 
 	) {
 	my $s2 = $+{op}.$+{spc}.$+{var};
 	return (1, $pos, $pos+length($s2));
@@ -174,7 +176,7 @@ sub match_id ($$) {
     (my $prog, my $pos) = @_;
     my $s = substr ($prog, $pos, -1);
     if (
-	$s =~ /^(?<pref>[\s\(])(?<var>$varnum)[\s\)\;]/
+	$s =~ /^(?<pref>$pref)(?<var>$varnum)$suf/
 	) {
 	my $s = $+{pref};
 	my $v = $+{var};
@@ -183,7 +185,7 @@ sub match_id ($$) {
 	}
     }
     if (
-	$s =~ /^(?<pref>[\s\(])(?<var1>$varnum)(?<s1>\s+)(?<op>$binop)(?<s2>\s+)(?<var2>$varnum)[\s\)\;]/
+	$s =~ /^(?<pref>$pref)(?<var1>$varnum)(?<s1>\s+)(?<op>$binop)(?<s2>\s+)(?<var2>$varnum)$suf/
 	) {
 	my $s2 = $+{pref}.$+{var1}.$+{s1}.$+{op}.$+{s2}.$+{var2};
 	return (1, $pos+1, $pos+length ($s2));
@@ -193,19 +195,6 @@ sub match_id ($$) {
 	) {
 	my $s2 = $+{var1}.$+{ques}.$+{var2}.$+{colon}.$+{var3};
 	return (1, $pos+1, $pos+length ($s2));
-    }
-    return (0,0,0);
-}
-
-# FIXME!
-sub match_tok_and_comma ($$) {
-    (my $prog, my $pos) = @_;
-    my $s = substr ($prog, $pos, -1);
-    if (
-	$s =~ /^(\s$varnum\s*\,)/
-	) {
-	my $v = $1;
-	return (1, $pos, 1+$pos+length($v));
     }
     return (0,0,0);
 }
@@ -241,21 +230,6 @@ sub try_delete_one ($$$$$) {
 		    $n++;
 		}
 	    }
-	} elsif ($method eq "tok_and_comma") {
-	    (my $success, my $start, my $end) = 
-		match_tok_and_comma ($prog, $pos);
-	    if ($success) {
-		if ($n == $number_to_delete) {
-		    my $del = substr ($prog, $start, $end-$start);
-		    substr ($prog, $start, $end-$start) = "";
-		    ($del =~ s/\s/ /g);
-		    print "[$pass del_tok_and_comma s:$good_cnt f:$bad_cnt] ";
-		    print "deleting '$del' at $start--$end : ";
-		    return 1;
-		} else {
-		    $n++;
-		}
-	    }	    
 	} elsif ($method eq "repl_with_1") {
 	    (my $success, my $start, my $end) = 
 		match_id ($prog, $pos);
@@ -265,6 +239,21 @@ sub try_delete_one ($$$$$) {
 		    substr ($prog, $start, $end-$start) = "1";
 		    ($del =~ s/\s/ /g);
 		    print "[$pass repl_with_1 s:$good_cnt f:$bad_cnt] ";
+		    print "replacing '$del' at $start--$end : ";
+		    return 1;
+		} else {
+		    $n++;
+		}
+	    }	    
+	} elsif ($method eq "repl_with_nothing") {
+	    (my $success, my $start, my $end) = 
+		match_id ($prog, $pos);
+	    if ($success) {
+		if ($n == $number_to_delete) {
+		    my $del = substr ($prog, $start, $end-$start);
+		    substr ($prog, $start, $end-$start) = "";
+		    ($del =~ s/\s/ /g);
+		    print "[$pass repl_with_nothing s:$good_cnt f:$bad_cnt] ";
 		    print "replacing '$del' at $start--$end : ";
 		    return 1;
 		} else {
@@ -601,9 +590,9 @@ my @all_methods = (
     "double_semic",
     "delete_str",
     "repl_with_1",
+    "repl_with_nothing",
     "parens_inclusive",
     "parens_exclusive",
-    # "tok_and_comma",
     "normalize_types_1",
     "normalize_types_2",
     "normalize_types_3",
