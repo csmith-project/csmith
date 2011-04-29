@@ -2,7 +2,7 @@
 
 use strict;
 
-# todo: how does "ssafe" get introduced??
+# todo: how does "plat" get introduced??
 
 # assumption: we're processing code that has been run through 'indent'
 # which adds white space around operators and in other places
@@ -64,12 +64,16 @@ my @delete_strs = (
     "-",
     "!",
     "~",
+    "continue", 
+    "break", 
     "inline", 
     "printf",
     "int;",
     "print_hash_value",
     "transparent_crc",
+    "platform_main_begin",
     "platform_main_end",
+    "crc32_gentab",
     "signed", 
     "unsigned", 
     "short", 
