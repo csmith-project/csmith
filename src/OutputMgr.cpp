@@ -183,9 +183,9 @@ OutputMgr::OutputMain(std::ostream &out)
 		else
 			HashGlobalVariables(out);
 		if (CGOptions::compute_hash()) {
-			out << "    platform_main_end(crc32_context ^ 0xFFFFFFFFUL);" << endl;
+			out << "    platform_main_end(crc32_context ^ 0xFFFFFFFFUL, print_hash_value);" << endl;
 		} else {
-			out << "    platform_main_end(0);" << endl;
+			out << "    platform_main_end(0,0);" << endl;
 		}
 		ExtensionMgr::OutputTail(out);
 	}

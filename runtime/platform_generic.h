@@ -47,7 +47,7 @@ platform_main_begin(void)
 }
 
 static void
-platform_main_end(uint32_t crc)
+platform_main_end(uint32_t crc, int flag)
 {
 #if defined (__FRAMAC)
     Frama_C_dump_assert_each();

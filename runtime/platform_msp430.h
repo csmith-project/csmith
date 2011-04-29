@@ -41,8 +41,8 @@ static void platform_main_begin(void)
 	/* Nothing to do. */
 }
 
-static void platform_main_end(uint32_t crc);
-static void platform_main_end(uint32_t crc)
+static void platform_main_end(uint32_t crc, int flag);
+static void platform_main_end(uint32_t crc, int flag)
 {
 	uint16_t crc16 = crc ^ (crc >> 16);
 
