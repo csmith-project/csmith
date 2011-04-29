@@ -55,6 +55,8 @@ int crc32_context;
 
 extern int printf (const char *, ...);
 
+extern int strcmp (const char *, const char *);
+
 static inline void 
 transparent_crc (uint32_t val, char* vname, int flag)
 {

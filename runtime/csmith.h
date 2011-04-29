@@ -37,9 +37,7 @@
 
 /*****************************************************************************/
 
-#if defined(__COMPCERT__)
 #include <string.h>
-#endif
 
 #define __STDC_LIMIT_MACROS
 #include "random_inc.h"
