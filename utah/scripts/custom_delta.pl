@@ -10,7 +10,7 @@ use strict;
 # todo: always check for a prefix when doing matching, to avoid
 #   mangling tokens
 
-# todo: use a real C lexer?
+# todo: rewrite this tool at the AST level
 
 # easy
 #   also make replace with 0, 1, nothing include the suffix
@@ -71,6 +71,11 @@ my @delete_strs = (
     "!",
     "~",
     "inline", 
+    "printf",
+    "int;",
+    "print_hash_value",
+    "transparent_crc",
+    "platform_main_end",
     "signed", 
     "unsigned", 
     "short", 
@@ -80,7 +85,7 @@ my @delete_strs = (
 my $num = "\\-?[xX0-9a-fA-F]+[UL]*";
 my $var1a = "(\&*\\**)[lgpt]_[0-9]+(\\\[(($num)|i|j|k|l)\\\])*";
 my $var1b = "(\&*\\**)[lgpt]_[0-9]+(\\.f[0-9]+)*";
-my $var2 = "si1|si2|ui1|ui2|left|right|val|crc32_context|func_([0-9]+)";
+my $var2 = "si|ui|si1|si2|ui1|ui2|left|right|val|crc32_context|func_([0-9]+)";
 my $var = "($var1a)|($var1b)|($var2)";
 my $arith = "\\+|\\-|\\%|\\/|\\*";
 my $comp = "\\<\\=|\\>\\=|\\<|\\>|\\=\\=|\\!\\=|\\=";
@@ -162,8 +167,8 @@ sub read_file ($)
     (my $cfile) = @_;
     open INF, "<$cfile" or die;
     $prog = "";
-    while (<INF>) {
-	$prog .= $_;
+    while (my $line = <INF>) {
+	$prog .= $line;
     }
     close INF;
 }
