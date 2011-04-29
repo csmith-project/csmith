@@ -220,7 +220,7 @@ sub match_binop ($$) {
     return (0,0,0);
 }
 
-sub match_id ($$) {
+sub match_subexp ($$) {
     (my $prog, my $pos) = @_;
     my $s = substr ($prog, $pos, -1);
     if (
@@ -280,7 +280,7 @@ sub try_delete_one ($$$$$) {
 	    }
 	} elsif ($method eq "repl_with_1") {
 	    (my $success, my $start, my $end) = 
-		match_id ($prog, $pos);
+		match_subexp ($prog, $pos);
 	    if ($success) {
 		if ($n == $number_to_delete) {
 		    my $del = substr ($prog, $start, $end-$start);
@@ -295,7 +295,7 @@ sub try_delete_one ($$$$$) {
 	    }	    
 	} elsif ($method eq "repl_with_nothing") {
 	    (my $success, my $start, my $end) = 
-		match_id ($prog, $pos);
+		match_subexp ($prog, $pos);
 	    if ($success) {
 		if ($n == $number_to_delete) {
 		    my $del = substr ($prog, $start, $end-$start);
@@ -310,7 +310,7 @@ sub try_delete_one ($$$$$) {
 	    }	    
 	} elsif ($method eq "repl_with_0") {
 	    (my $success, my $start, my $end) = 
-		match_id ($prog, $pos);
+		match_subexp ($prog, $pos);
 	    if ($success) {
 		if ($n == $number_to_delete) {
 		    my $del = substr ($prog, $start, $end-$start);
