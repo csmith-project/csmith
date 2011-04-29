@@ -111,6 +111,11 @@ public:
 
 	void output_assertions(std::ostream &out, const Statement* stm, int indent, bool post_condition);
 
+	/* remove facts related to return variables (except rv of this function) from env */
+	void remove_rv_facts(FactVec& facts);
+
+	void sanity_check_map() const;
+
 	static std::vector<Fact*> meta_facts; 
 
 	std::map<const Statement*, FactVec> map_facts_in;
@@ -183,9 +188,6 @@ void add_new_var_fact(const Variable* v, FactVec& facts);
 /* remove facts related to certain variables from env */
 void update_facts_for_oos_vars(const vector<Variable*>& vars, FactVec& facts);
 void update_facts_for_oos_vars(const vector<const Variable*>& vars, FactVec& facts);
-
-/* remove facts related to return variables from env */
-void remove_rv_facts(FactVec& facts);
 
 /* add paramters facts to env */
 void add_param_facts(const FunctionInvocationUser* fiu, FactVec& facts);

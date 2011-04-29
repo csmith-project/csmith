@@ -637,11 +637,8 @@ Statement::validate_and_update_facts(vector<const Fact*>& inputs, CGContext& cg_
 	vector<const Fact*> inputs_copy = inputs; 
 	if (!stm_visit_facts(inputs, cg_context)) {
 		return false;
-	} 
-	// remove "xxx_rv" facts unless this is a return statement
-	if (eType != eReturn) {
-		remove_rv_facts(inputs);
-	}
+	}  
+	fm->remove_rv_facts(inputs); 
 	fm->set_fact_in(this, inputs_copy);
 	fm->set_fact_out(this, inputs);
 	return true;
@@ -945,6 +942,7 @@ Statement::post_creation_analysis(vector<const Fact*>& pre_facts, const Effect& 
 			update_fact_for_return(sr, fm->global_facts);
 		}
 	}
+	fm->remove_rv_facts(fm->global_facts);
 	fm->set_fact_in(this, pre_facts);
 	fm->set_fact_out(this, fm->global_facts); 
 	fm->map_accum_effect[this] = *(cg_context.get_effect_accum());

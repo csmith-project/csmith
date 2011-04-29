@@ -310,6 +310,17 @@ remove_function_local_facts(std::vector<const Fact*>& inputs, const Statement* s
 			len--; 
 		}
 	}
+	// mark any remaining facts that may point to a local vars of this 
+	// function as "point to garbage"  
+	for (i=0; i<inputs.size(); i++) {
+		if (inputs[i]->eCat == ePointTo) {
+			FactPointTo* f = (FactPointTo*)(inputs[i]);
+			FactPointTo* new_fact = f->mark_func_end(stm);
+			if (new_fact) {
+				inputs[i] = new_fact;
+			}
+		}
+	}
 }
 
 void
@@ -346,6 +357,8 @@ FactMgr::setup_in_out_maps(bool first_time)
 			combine_facts(facts1, facts2);
 		}     
 	}
+	//JYTODO: beef up the sanity check
+	//sanity_check_map();
 }
 
 void 
@@ -373,21 +386,9 @@ FactMgr::set_fact_out(const Statement* s, const FactVec& facts)
 		update_facts_for_dest(facts, facts_copy, sg->dest); 
 		map_facts_out[s] = facts_copy;
 	}
-	else if (s->eType == eReturn) {
+	else if (s->eType == eReturn || s->parent==NULL) {
 		FactVec facts_copy = facts;
 		remove_function_local_facts(facts_copy, s);
-		// mark any remaining facts that may point to a local vars of this 
-		// function as "point to garbage" 
-		size_t i;
-		for (i=0; i<facts_copy.size(); i++) {
-			if (facts_copy[i]->eCat == ePointTo) {
-				FactPointTo* f = (FactPointTo*)(facts_copy[i]);
-				FactPointTo* new_fact = f->mark_func_end(s);
-				if (new_fact) {
-					facts_copy[i] = new_fact;
-				}
-			}
-		}
 		map_facts_out[s] = facts_copy;
 	} 
 	else {
@@ -428,13 +429,13 @@ FactMgr::add_fact_out(const Statement* stm, const Fact* fact)
 /*
  * remove facts related to return variables
  */
-void remove_rv_facts(FactVec& facts)
+void FactMgr::remove_rv_facts(FactVec& facts)
 {
 	size_t len = facts.size();
 	for (size_t i=0; i<len; i++) { 
 		const Fact* f = facts[i];
 		// type == 0 => return variable
-		if (f->get_var()->type == 0) {
+		if (f->get_var()->type == 0 && f->get_var() != func->rv) {
 			facts.erase(facts.begin() + i);
 			len--;
 			i--; 
@@ -996,6 +997,37 @@ print_var_fact(const FactVec& facts, const char* vname)
 		const Fact* f = facts[i];
 		if (f->get_var()->name == vname) {
 			f->OutputAssertion(cout);
+		}
+	}
+}
+
+void
+FactMgr::sanity_check_map() const
+{
+	map<const Statement*, vector<const Fact*> >::const_iterator iter; 
+	for(iter = map_facts_in.begin(); iter != map_facts_in.end(); ++iter) {
+		const Statement* stm = iter->first;
+		const vector<const Fact*>& facts = iter->second;
+		for (size_t i=0; i<facts.size(); i++) {
+			const Variable* v = facts[i]->get_var();
+			if (!v->is_visible(stm->parent)) {
+				// exception: the input facts to a function body could include the parameter facts 
+				if (stm->parent == 0 && find_variable_in_set(func->param, v) != -1) {
+					continue;
+				}
+				//assert(0);
+			}
+		}
+	} 
+		
+	for(iter = map_facts_out.begin(); iter != map_facts_out.end(); ++iter) {
+		const Statement* stm = iter->first;
+		const vector<const Fact*>& facts = iter->second;
+		for (size_t i=0; i<facts.size(); i++) {
+			const Variable* v = facts[i]->get_var();
+			if (!v->is_visible(stm->parent) && v != func->rv) {
+				//assert(0);
+			}
 		}
 	}
 }

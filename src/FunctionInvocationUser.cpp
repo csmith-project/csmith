@@ -216,17 +216,15 @@ FunctionInvocationUser::build_invocation_and_function(CGContext &cg_context, con
 	func->generate_body_with_known_params(cg_context, effect_accum); 
 
 	// post creation processing
-	FactVec ret_facts;
+	FactVec ret_facts = fm->map_facts_out[func->body];
 	func->body->add_back_return_facts(fm, ret_facts);
-	fiu->save_return_fact(ret_facts); 
-	// incorporate early return facts   
-	merge_facts(fm->global_facts, ret_facts); 
+	fiu->save_return_fact(ret_facts);  
 	 
 	// remove facts related to passing parameters
-	update_facts_for_oos_vars(func->param, fm->global_facts); 
+	//update_facts_for_oos_vars(func->param, fm->global_facts); 
 	fm->setup_in_out_maps(true);
 	// hand-over from callee to caller: points-to facts
-	renew_facts(caller_fm->global_facts, fm->global_facts); 
+	renew_facts(caller_fm->global_facts, ret_facts); 
 
 	// hand-over from callee to caller: effects
 	func->accum_eff_context.add_external_effect(cg_context.get_effect_context()); 

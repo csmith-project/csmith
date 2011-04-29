@@ -733,7 +733,7 @@ Block::post_creation_analysis(CGContext& cg_context, const Effect& pre_effect)
 	//fm->print_facts(fm->global_facts); 
 	vector<const Fact*> post_facts = fm->global_facts;
 	update_facts_for_oos_vars(local_vars, fm->global_facts); 
-	remove_rv_facts(fm->global_facts);
+	fm->remove_rv_facts(fm->global_facts);
 	fm->set_fact_out(this, fm->global_facts);
 
 	// find out if fixed-point-searching is required
