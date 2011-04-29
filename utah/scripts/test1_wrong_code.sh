@@ -9,10 +9,11 @@ rm -f out*.txt
 
 if 
   echo here1 &&\
-  current-gcc -Wall -Wextra -O small.c  >outa.txt 2>&1 &&\
+  current-gcc -Wall -Wextra -O2 small.c  >outa.txt 2>&1 &&\
   echo here2 &&\
   ! grep uninitialized outa.txt &&\
   ! grep 'control reaches end' outa.txt &&\
+  ! grep 'incompatible pointer' outa.txt &&\
   ! grep 'ordered comparison of pointer with integer' outa.txt &&\
   ! grep 'incompatible implicit' outa.txt &&\
   ! grep 'excess elements in struct initializer' outa.txt &&\

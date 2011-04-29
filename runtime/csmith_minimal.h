@@ -63,7 +63,7 @@ transparent_crc (uint32_t val, char* vname, int flag)
 }
 
 static inline void
-platform_main_end (int x)
+platform_main_end (int x, int flag)
 {
-  printf ("checksum = %x\n", x);
+  if (!flag) printf ("checksum = %x\n", x);
 }

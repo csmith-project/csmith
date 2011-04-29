@@ -2,7 +2,12 @@
 
 use strict;
 
+# todo: input file should print output separately instead of checksum
+#   probably do this via command line option?
+
 # todo: how does "plat" get introduced??
+
+# todo: eliminate ", j" in "int i,j;"
 
 # assumption: we're processing code that has been run through 'indent'
 # which adds white space around operators and in other places
@@ -83,7 +88,7 @@ my @delete_strs = (
 my $num = "\\-?[xX0-9a-fA-F]+[UL]*";
 my $var1a = "(\&*\\**)[lgpt]_[0-9]+(\\\[(($num)|i|j|k|l)\\\])*";
 my $var1b = "(\&*\\**)[lgpt]_[0-9]+(\\.f[0-9]+)*";
-my $var2 = "si|ui|si1|si2|ui1|ui2|left|right|val|crc32_context|func_([0-9]+)";
+my $var2 = "i|j|k|si|ui|si1|si2|ui1|ui2|left|right|val|crc32_context|func_([0-9]+)";
 my $var = "($var1a)|($var1b)|($var2)";
 my $arith = "\\+|\\-|\\%|\\/|\\*";
 my $comp = "\\<\\=|\\>\\=|\\<|\\>|\\=\\=|\\!\\=|\\=";
@@ -116,6 +121,7 @@ my %replace_regexes = (
     "lbl_[0-9]+:" => "",
     "($varnum)(\\s*)\;" => "",
     "($varnum)(\\s*)\," => "",
+    "\,(\\s*)($varnum)" => "",
     "char" => "int",
     "short" => "int",
     "long" => "int",
