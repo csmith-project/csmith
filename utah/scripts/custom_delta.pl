@@ -2,25 +2,19 @@
 
 use strict;
 
+# todo: how does "ssafe" get introduced??
+
 # assumption: we're processing code that has been run through 'indent'
 # which adds white space around operators and in other places
 
 # goal: completely dismantle a preprocessed csmith output
 
+# todo: need more minimal matching, probably
+
 # todo: always check for a prefix when doing matching, to avoid
 #   mangling tokens
 
 # todo: rewrite this tool at the AST level
-
-# easy
-#   also make replace with 0, 1, nothing include the suffix
-#   remove bitfield specifiers like :3
-#   turn short, char, long into int
-#   replace complex assignments like ^= with =
-#   remove labels
-#   replace a?b:c with b or c 
-#   deal with += -= *= /= ++ -- etc.
-#   remove U and L from constants
 
 # hard
 #   transform a function to return void
@@ -29,7 +23,7 @@ use strict;
 #   un-nest nested calls
 #   move arguments and locals to global scope
 #   remove level of pointer indirection
-#   remove arary dimension
+#   remove array dimension
 #   remove argument from function, including all calls
 
 my $INIT = "1";
@@ -98,8 +92,24 @@ my $suf = "[\\}\\s\\)\\]\\;\\,]";
 
 # print " $pref $suf $var1a $var1b \n";
 
+my %replace_regexes_nopref = (
+    "\\:\\s*[0-9]+\\s*;" => ";",
+    "\\;" => "",
+    );
+
 my %replace_regexes = (
-    "\;" => "",
+    "for\\s*\\(.*?\\)" => "",
+    "\\^\\=" => "=",
+    "\\|\\=" => "=",
+    "\\&\\=" => "=",
+    "\\+\\=" => "=",
+    "\\-\\=" => "=",
+    "\\*\\=" => "=",
+    "\\/\\=" => "=",
+    "\\%\\=" => "=",
+    "\\<\\<\\=" => "=",
+    "\\>\\>\\=" => "=",
+    "lbl_[0-9]+:" => "",
     "($varnum)(\\s*)\;" => "",
     "($varnum)(\\s*)\," => "",
     "char" => "int",
@@ -429,7 +439,7 @@ sub try_delete_one ($$$$$) {
 			my $middle = substr ($prog, $pos+1, $p2-$pos-1);
 			#print "<$middle>\n";
 			if (
-			    $middle =~ /^\s*\((.*)\)\s*$/ ||
+			    $middle =~ /^\s*\((.*?)\)\s*$/ ||
 			    $middle =~ /^\s*($var)\s*$/ ||
 			    $middle =~ /^\s*($num)\s*$/
 			    ) {
@@ -468,6 +478,22 @@ sub try_delete_one ($$$$$) {
 			substr ($prog, 
 				$pos + length ($+{pref}), 
 				length ($repl)) = $replace_regexes{$str};
+			return 1;
+		    } else {
+			$n++;
+		    }
+		}
+	    }
+	    foreach my $str (keys %replace_regexes_nopref) {
+		my $rest = substr($prog, $pos, -1);
+		if ($rest =~ /^(?<str>$str)/) {
+		    if ($n == $number_to_delete) {
+			my $repl = $+{str};
+			print "[$pass replace_regex s:$good_cnt f:$bad_cnt] ";
+			print "replacing '$+{str}' at $pos : ";
+			substr ($prog, 
+				$pos, 
+				length ($repl)) = $replace_regexes_nopref{$str};
 			return 1;
 		    } else {
 			$n++;
