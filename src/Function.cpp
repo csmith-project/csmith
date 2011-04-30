@@ -142,48 +142,6 @@ find_blk_for_var(const Variable* v)
 	return NULL;
 }
 
-/*
- * remove irrelevant facts
- * hint: relevant facts are those concerns variable visible at the beginning of this function
- */
-void 
-Function::remove_irrelevant_facts(std::vector<const Fact*>& inputs) const
-{
-	size_t i, j, cnt;
-	std::vector<const Fact*> keep_facts;
-	size_t len = inputs.size();
-	// remove global facts and parameter facts
-	for (i=0; i<len; i++) {
-		const Variable* v = inputs[i]->get_var();
-		if (v->is_global() || find_variable_in_set(param, v) >=0) {
-			keep_facts.push_back(inputs[i]);
-			inputs.erase(inputs.begin() + i);
-			i--;
-			len--;
-		}
-	}
-	// find all the facts for variables that might be pointed to by variables we already found.
-	// this include variables on stack (most likely locals of callers) but invisible to 
-	// this function
-	do {
-		cnt = keep_facts.size(); 
-		for (i=0; i<len; i++) {
-			const Fact* f = inputs[i]; 
-			// const Variable* v = f->get_var(); 
-			for (j=0; j<keep_facts.size(); j++) {
-				if (keep_facts[j]->is_relevant(*f)) {
-					keep_facts.push_back(f);
-					inputs.erase(inputs.begin() + i);
-					i--;
-					len--;
-					break;
-				}
-			}
-		}
-	} while (keep_facts.size() > cnt); 
-	inputs = keep_facts;
-}
-
 bool
 Function::is_var_on_stack(const Variable* var, const Statement* stm) const
 {  
@@ -334,44 +292,6 @@ Function::choose_func(vector<Function *> funcs,
 }
 
 /*
- * WARNING: this function may return null!
- */
-Function *
-SelectFunction(bool &isBackLink, CGContext &cg_context, const Type* type, const CVQualifiers* qfer)
-{
-	vector<Function*> available_funcs = FuncList; 
-	// Select between creating a new function, or calling an old function.
-	if ((FuncListSize() < CGOptions::max_funcs())
-		&& (available_funcs.empty() || rnd_flipcoin(50))) {
-		ERROR_GUARD(NULL);
-		isBackLink = false;
-		return Function::make_random(cg_context, type, qfer);
-		
-	} else {
-		// Try to link to a previously defined function.
-		// (This may cause cycles in the call graph!)
-		// TODO: get rid of recursive calls
-		Function *callee = Function::choose_func(available_funcs, cg_context, type, qfer);
-		ERROR_GUARD(NULL);
-		if (!callee) {
-			// TODO: Maybe should generate a new function?
-			// for function with return type of struct, we have to create them
-			// as the alternative unary/binary "functions" don't produce struct
-			// pointers are not produced by unary/binary operations for now.
-			if ((FuncListSize() < CGOptions::max_funcs()) && type && (type->eType == eStruct || type->eType == ePointer)) {
-				isBackLink = false;
-				return Function::make_random(cg_context, type, qfer);
-			}
-			return 0;
-		} 
-		// unsigned long idx = rnd_upto(FuncList.size());
-		// isBackLink = (idx <= cur_func_idx);
-		isBackLink = true; // XXX
-		return callee; 
-	}
-}
-
-/*
  *
  */
 static unsigned int
@@ -431,10 +351,8 @@ Function::make_random_signature(const CGContext& cg_context, const Type* type, c
 		                            : qfer->random_qualifiers(true, Effect::READ, cg_context);
 	ERROR_GUARD(NULL);
 	f->rv = VariableSelector::make_dummy_variable(rvname, &ret_qfer);
-	GenerateParameterList(*f);
-	// create a fact manager for this function, with global facts copied from parent
-	FactMgr* parent_fm = get_fact_mgr(&cg_context);
-	FMList.push_back(new FactMgr(f, parent_fm->global_facts));
+	GenerateParameterList(*f); 
+	FMList.push_back(new FactMgr(f));
 	return f;
 }
 
@@ -668,16 +586,18 @@ Function::generate_body_with_known_params(const CGContext &prev_context, Effect&
 	}
 
 	build_state = BUILDING;
+	FactMgr* fm = get_fact_mgr_for_func(this); 
 	CGContext cg_context(this, prev_context.get_effect_context(), &effect_accum);
 	cg_context.extend_call_chain(prev_context);
-	VariableSet no_reads, no_writes, must_reads, must_writes;
+
 	// inherit proper no-read/write directives from caller
-	prev_context.get_external_no_reads_writes(no_reads, no_writes);
+	VariableSet no_reads, no_writes, must_reads, must_writes, frame_vars;
+	prev_context.find_reachable_frame_vars(fm->global_facts, frame_vars);
+	prev_context.get_external_no_reads_writes(no_reads, no_writes, frame_vars);
 	RWDirective rwd(no_reads, no_writes, must_reads, must_writes);
 	cg_context.rw_directive = &rwd; 
 	cg_context.flags = 0;  
 
-	FactMgr* fm = get_fact_mgr_for_func(this); 
 	// Fill in the Function body. 
 	body = Block::make_random(cg_context); 
 	ERROR_RETURN();

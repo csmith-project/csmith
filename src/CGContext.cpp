@@ -498,6 +498,22 @@ CGContext::output_call_chain(std::ostream &out)
 	out << endl;
 }
 
+bool
+CGContext::is_frame_var(const Variable* v) const
+{
+	const Block* b = get_current_block();
+	assert(b);
+	if (v->is_visible_local(b)) return true;
+
+	for (size_t i=0; i<call_chain.size(); i++) {
+		const Block* b = call_chain[i];
+		if (v->is_visible_local(b)) {
+			return true;
+		}
+	}
+	return false;
+}
+
 Block *
 CGContext::get_current_block(void) const
 {
@@ -568,21 +584,39 @@ CGContext::in_conflict(const Effect& eff) const
 }
 
 void
-CGContext::get_external_no_reads_writes(VariableSet& no_reads, VariableSet& no_writes) const
+CGContext::find_reachable_frame_vars(vector<const Fact*>& facts, VariableSet& frame_vars) const
+{
+	size_t i, j;
+	for (i=0; i<facts.size(); i++) {
+		if (facts[i]->eCat == ePointTo) {
+			const FactPointTo* fp = (const FactPointTo*)(facts[i]);
+			for (j=0; j<fp->get_point_to_vars().size(); j++) {
+				const Variable* v = fp->get_point_to_vars()[j];
+				if (is_frame_var(v)) {
+					frame_vars.push_back(v);
+				}
+			}
+		}
+	}
+}
+
+void
+CGContext::get_external_no_reads_writes(VariableSet& no_reads, VariableSet& no_writes, const VariableSet& frame_vars) const
 {  
 	no_reads.clear();
 	no_writes.clear();
 	size_t i;
+	 
 	if (rw_directive) {
 		for (i=0; i<rw_directive->no_read_vars.size(); i++) {
 			const Variable* v = rw_directive->no_read_vars[i];
-			if (v->is_global()) {
+			if (v->is_global() || find_variable_in_set(frame_vars, v) != -1) {
 				no_reads.push_back(v);
 			}
 		}
 		for (i=0; i<rw_directive->no_write_vars.size(); i++) {
 			const Variable* v = rw_directive->no_write_vars[i];
-			if (v->is_global()) {
+			if (v->is_global() || find_variable_in_set(frame_vars, v) != -1) {
 				no_writes.push_back(v);
 			}
 		} 
@@ -590,7 +624,7 @@ CGContext::get_external_no_reads_writes(VariableSet& no_reads, VariableSet& no_w
 	// convert global IVs into non-writables
 	map<const Variable*, unsigned int>::const_iterator iter;
 	for (iter = iv_bounds.begin(); iter != iv_bounds.end(); ++iter) {
-		if (iter->first->is_global()) {
+		if (iter->first->is_global() || find_variable_in_set(frame_vars, iter->first) != -1) {
 			no_writes.push_back(iter->first);
 		}
 	}

@@ -145,12 +145,11 @@ FactMgr::add_new_local_var_fact(const Block* blk, const Variable* var)
 }
 
 void 
-add_param_facts(const FunctionInvocationUser* fiu, FactVec& facts)
-{
-	const Function* func = fiu->get_func(); 
+FactMgr::add_param_facts(const vector<const Expression*>& param_values, FactVec& facts)
+{ 
 	for (size_t i=0; i<func->param.size(); i++) {
 		const Variable* var = func->param[i];
-		const Expression* value = fiu->param_value[i]; 
+		const Expression* value = param_values[i]; 
 		Lhs lhs(*var); 
 		update_fact_for_assign(&lhs, value, facts);
 	}
@@ -427,6 +426,53 @@ FactMgr::add_fact_out(const Statement* stm, const Fact* fact)
 }
 
 /*
+ * add:			parameter facts
+ * remove:		facts concerning local variables
+ * exception:	facts can be indirectly accessed through pointers
+ *				for example: { int i; func(&i)}. The facts of i will not be removed
+ */
+void 
+FactMgr::caller_to_callee_handover(const FunctionInvocationUser* fiu, std::vector<const Fact*>& inputs)
+{
+	// add parameter facts
+	add_param_facts(fiu->param_value, inputs);
+
+	size_t i, j, cnt;
+	std::vector<const Fact*> keep_facts;
+	size_t len = inputs.size();
+	// move global facts and parameter facts to a separate "keep" list
+	for (i=0; i<len; i++) {
+		const Variable* v = inputs[i]->get_var();
+		if (v->is_global() || find_variable_in_set(func->param, v) >=0) {
+			keep_facts.push_back(inputs[i]);
+			inputs.erase(inputs.begin() + i);
+			i--;
+			len--;
+		}
+	}
+	// find all the facts for variables that might be pointed to by variables we already found.
+	// this include variables on stack (most likely locals of callers) but invisible to 
+	// this function
+	do {
+		cnt = keep_facts.size(); 
+		for (i=0; i<len; i++) {
+			const Fact* f = inputs[i]; 
+			// const Variable* v = f->get_var(); 
+			for (j=0; j<keep_facts.size(); j++) {
+				if (keep_facts[j]->is_relevant(*f)) {
+					keep_facts.push_back(f); 
+					inputs.erase(inputs.begin() + i);
+					i--;
+					len--;
+					break;
+				}
+			}
+		}
+	} while (keep_facts.size() > cnt); 
+	inputs = keep_facts;
+}
+
+/*
  * remove facts related to return variables
  */
 void FactMgr::remove_rv_facts(FactVec& facts)
@@ -538,16 +584,6 @@ FactMgr::FactMgr(const Function* f)
 : func(f)
 { 
 }
- 
-/*
- * 
- */
-FactMgr::FactMgr(const Function* f, const FactVec& facts)
-: func(f)
-{
-	global_facts = facts;
-	f->remove_irrelevant_facts(global_facts);
-}
 
 /*
  * 
@@ -575,21 +611,7 @@ FactMgr::add_interested_facts(int interests)
     //eIntRange=8, 
     //eEquality=16, 
     //eAlias=32 
-}
-
-#if 0
-FactMgr*
-FactMgr::clone()  
-{ 
-	FactMgr* fm = new FactMgr(func);
-	fm->fixed_facts = fixed_facts;
-	fm->global_facts = global_facts;
-	fm->return_facts = return_facts;
-	fm->map_facts_in = map_facts_in;
-	fm->map_facts_out = map_facts_out;
-	return fm;
-}
-#endif
+} 
 
 void 
 FactMgr::backup_facts(void) 

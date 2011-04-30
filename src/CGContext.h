@@ -104,6 +104,8 @@ public:
 
 	void output_call_chain(std::ostream &out);
 
+	bool is_frame_var(const Variable* v) const;
+
 	bool in_conflict(const Effect& eff) const;
 
 	bool accept_type(const Type* t) const;
@@ -119,7 +121,8 @@ public:
 	Effect get_accum_effect(void) const				{ Effect e; return effect_accum ? *effect_accum : e; }
 	Effect& get_effect_stm(void) 					{ return effect_stm; }
 
-	void get_external_no_reads_writes(VariableSet& no_reads, VariableSet& no_writes) const;
+	void find_reachable_frame_vars(vector<const Fact*>& facts, VariableSet& frame_vars) const;
+	void get_external_no_reads_writes(VariableSet& no_reads, VariableSet& no_writes, const VariableSet& frame_vars) const;
 
 	bool is_nonreadable(const Variable *v) const;
 	bool is_nonwritable(const Variable *v) const;

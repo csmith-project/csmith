@@ -208,8 +208,7 @@ FunctionInvocationUser::build_invocation_and_function(CGContext &cg_context, con
 	// hand-over from caller to callee 
 	FactMgr* fm = get_fact_mgr_for_func(func);
 	fm->global_facts = caller_fm->global_facts;
-	add_param_facts(fiu, fm->global_facts);
-	func->remove_irrelevant_facts(fm->global_facts); 
+	fm->caller_to_callee_handover(fiu, fm->global_facts); 
 
 	// create function body
 	Effect effect_accum; 
@@ -325,9 +324,7 @@ FunctionInvocationUser::revisit(std::vector<const Fact*>& inputs, CGContext& cg_
 	vector<const Fact*> inputs_copy = inputs;  
 	
 	// add facts related to pass parameters
-	add_param_facts(this, inputs);
- 
-	func->remove_irrelevant_facts(inputs); 
+	fm->caller_to_callee_handover(this, inputs);  
 
 	map<const Statement*, FactVec> facts_in_copy = fm->map_facts_in;
 	map<const Statement*, FactVec> facts_out_copy = fm->map_facts_out;

@@ -111,6 +111,10 @@ public:
 
 	void output_assertions(std::ostream &out, const Statement* stm, int indent, bool post_condition);
 
+	/* add paramters facts to env */
+	void add_param_facts(const vector<const Expression*>& param_values, FactVec& facts);
+	void caller_to_callee_handover(const FunctionInvocationUser* fiu, std::vector<const Fact*>& inputs);
+
 	/* remove facts related to return variables (except rv of this function) from env */
 	void remove_rv_facts(FactVec& facts);
 
@@ -188,9 +192,6 @@ void add_new_var_fact(const Variable* v, FactVec& facts);
 /* remove facts related to certain variables from env */
 void update_facts_for_oos_vars(const vector<Variable*>& vars, FactVec& facts);
 void update_facts_for_oos_vars(const vector<const Variable*>& vars, FactVec& facts);
-
-/* add paramters facts to env */
-void add_param_facts(const FunctionInvocationUser* fiu, FactVec& facts);
 
 /* remove facts localized to a given function up to a given return statement */
 void remove_function_local_facts(std::vector<const Fact*>& inputs, const Statement* stm);

@@ -132,7 +132,6 @@ private:
 
 void GenerateFunctions(void);
 Function *GetFirstFunction(void);
-Function *SelectFunction(bool &isBackLink, CGContext &cg_context, const Type* type, const CVQualifiers* qfer);
 // unsigned
 long FuncListSize(void);
 void OutputForwardDeclarations(std::ostream &out);
