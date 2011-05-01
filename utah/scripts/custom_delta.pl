@@ -96,7 +96,7 @@ my $logic = "\\&\\&|\\|\\|";
 my $bit = "\\||\\&|\\^|\\<\\<|\\>\\>";
 my $binop = "($arith)|($comp)|($logic)|($bit)";
 my $varnum = "($var)|($num)";
-my $pref = "[\\{\\s\\(\\[\\:]";
+my $pref = "[\\{\\s\\(\\[\\:\\,]";
 my $suf = "[\\}\\s\\)\\]\\;\\,]";
 
 # print " $pref $suf $var1a $var1b \n";

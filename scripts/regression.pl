@@ -30,6 +30,8 @@
 use strict; 
 use File::stat;
 
+## TODO: run kcc and execute output
+
 #######################################################################
 
 my $MIN_PROGRAM_SIZE = 8000;
