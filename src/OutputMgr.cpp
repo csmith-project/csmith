@@ -187,8 +187,8 @@ OutputMgr::OutputMain(std::ostream &out)
 		} else {
 			out << "    platform_main_end(0,0);" << endl;
 		}
-		ExtensionMgr::OutputTail(out);
 	}
+	ExtensionMgr::OutputTail(out);
 	out << "}" << endl;
 	delete invoke;
 }
