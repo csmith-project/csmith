@@ -1235,7 +1235,7 @@ Variable::output_value_dump(ostream &out, string prefix, int indent) const
 		}
 	}
 	else if (type->eType == eSimple) {
-		output_print_str(out, prefix + to_string() + " = %d\\n", to_string(), indent);
+		output_print_str(out, prefix + to_string() + " = " + type->printf_directive() + "\\n", to_string(), indent);
 		outputln(out);
 	}
 	else if (type->eType == eStruct) {

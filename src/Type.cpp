@@ -1584,7 +1584,11 @@ Type::printf_directive(void) const
 	size_t i;
 	switch (eType) {
 	case eSimple:
-		ret = is_signed() ? "%d" : "%u"; 
+		if (SizeInBytes() >= 8) {
+			ret = is_signed() ? "%lld" : "%llu";
+		} else {
+			ret = is_signed() ? "%d" : "%u";
+		}
 		break;
 	case ePointer:   
 		ret = "0x%0x"; 
