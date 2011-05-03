@@ -2,6 +2,12 @@
 
 use strict;
 
+# todo: be sure to test "match_substr" with and without separators
+# before and after
+
+
+
+
 # todo: input file should print output separately instead of checksum
 #   probably do this via command line option?
 
