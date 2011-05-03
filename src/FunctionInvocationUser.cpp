@@ -184,9 +184,7 @@ FunctionInvocationUser::build_invocation_and_function(CGContext &cg_context, con
 	FactMgr* caller_fm = get_fact_mgr(&cg_context);
 	Effect running_eff_context(cg_context.get_effect_context()); 
 	Function* func = Function::make_random_signature(cg_context, type, qfer);
- 
-	if (func->name == "func_29")
-		int h = 0;
+
 	vector<const Expression*> param_values;
 	size_t i;
 	for (i = 0; i < func->param.size(); i++) { 
