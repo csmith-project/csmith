@@ -482,7 +482,7 @@ FunctionInvocation::visit_facts(vector<const Fact*>& inputs, CGContext& cg_conte
 	//static int g = 0;
 	Effect running_eff_context(cg_context.get_effect_context());
 	if (!unordered) {  
-		unsigned int flags = ptr_cmp ? (cg_context.flags | NO_DANGLING_PTR) : cg_context.flags;
+		// unsigned int flags = ptr_cmp ? (cg_context.flags | NO_DANGLING_PTR) : cg_context.flags;
 		for (size_t i=0; i<param_value.size(); i++) {
 			Effect param_eff_accum;
 			//int h = g++;
