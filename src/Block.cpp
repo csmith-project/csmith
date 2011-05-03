@@ -128,8 +128,6 @@ Block::make_random(CGContext &cg_context, bool looping)
 		delete b;
 		return NULL;
 	}
-	if (b->stm_id == 3)
-		int h = 0;
 	unsigned int i;
 	for (i = 0; i <= max; ++i) {
 		Statement *s = Statement::make_random(cg_context);  
