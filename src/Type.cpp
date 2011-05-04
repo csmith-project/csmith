@@ -1372,12 +1372,12 @@ Type::SizeInBytes(void) const
 		case eInt:		return 4;
 		case eShort:	return 2;
 		case eChar:		return 1;
-		case eLong:		return CGOptions::x86_64() ? 8 : 4;
+		case eLong:		return 4;
 		case eLongLong:	return 8;
 		case eUChar:	return 1;
 		case eUInt:		return 4;
 		case eUShort:	return 2;
-		case eULong:	return CGOptions::x86_64() ? 8 : 4;
+		case eULong:	return 4;
 		case eULongLong:return 8;
 //		case eFloat:	return 4;
 //		case eDouble:	return 8;
