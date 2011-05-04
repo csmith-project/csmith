@@ -191,7 +191,8 @@ EXTRA_DIST = \
 	csmith.vcproj \
 	csmith.vcxproj
 
-SVN_FLAG = -DSVN_VERSION=\"`svnversion -n .`\"
+GIT_HASH := $(shell git show -s --format=%h . 2>/dev/null || echo exported)
+GIT_FLAG = -DGIT_VERSION=\"$(GIT_HASH)\"
 
 ## ENE: The idea of stuffing the target CPU name (a string) into a CPP symbol
 ## is kind of awful.  What we should do instead is use the name to modify the
@@ -200,7 +201,7 @@ SVN_FLAG = -DSVN_VERSION=\"`svnversion -n .`\"
 
 csmith_CPPFLAGS = \
 	-DTARGET_CPU_$(target_cpu)=1 \
-	$(SVN_FLAG) \
+	$(GIT_FLAG) \
 	$(BOOST_CPPFLAGS)
 
 csmith_LDFLAGS = $(BOOST_LDFLAGS)

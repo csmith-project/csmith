@@ -38,7 +38,8 @@ dnl AM_CONFIG_HEADER(config.h)
 
 AC_CANONICAL_TARGET
 
-AM_INIT_AUTOMAKE
+# `-Wno-portability': avoid warnings about using `:=' in `Makefile.am' files.
+AM_INIT_AUTOMAKE([-Wall -Wno-portability])
 
 # Avoid configure-time warnings about `--datarootdir' being ignored.
 # This can perhaps be removed in a few years after Autoconf 2.60.
