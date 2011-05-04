@@ -252,9 +252,10 @@ FunctionInvocationUser::build_invocation(Function *target, CGContext &cg_context
 	func = target;			// XXX: unnecessary; done by constructor
 	Effect running_eff_context(cg_context.get_effect_context()); 
 	FactMgr* fm = get_fact_mgr(&cg_context);
-	if (func->name == "func_43" && cg_context.get_current_func()->name=="func_1") {
-		i = 0;  
-	}
+	// XXX DEBUGGING
+	// if (func->name == "func_43" && cg_context.get_current_func()->name=="func_1") {
+	// 	i = 0; // Set breakpoint here.
+	// }
 
 	for (i = 0; i < func->param.size(); i++) { 
 		Effect param_eff_accum;  
