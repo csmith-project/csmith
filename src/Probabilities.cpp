@@ -650,6 +650,10 @@ Probabilities::set_default_simple_types_prob()
 	else {
 		SET_SINGLE_NAME("long_long_prob", LongLong, 0);
 		SET_SINGLE_NAME("ulong_long_prob", ULongLong, 0);
+		if (CGOptions::x86_64()) {
+			SET_SINGLE_NAME("long_long_prob", Long, 0);
+			SET_SINGLE_NAME("ulong_long_prob", ULong, 0);
+		}
 	}
 
 	set_group_prob(true, pSimpleTypesProb, m);

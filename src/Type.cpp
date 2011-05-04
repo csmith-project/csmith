@@ -1043,9 +1043,11 @@ Type::GenerateSimpleTypes(void)
     unsigned int st;
     for (st=eChar; st<MAX_SIMPLE_TYPES; st++)
     { 
+#if 0
         if ((st==eLongLong || st==eULongLong) && !CGOptions::allow_int64())
-            continue;
-	    AllTypes.push_back(new Type((enum eSimpleType)st));
+		continue;
+#endif
+	AllTypes.push_back(new Type((enum eSimpleType)st));
     }
     Type::void_type = new Type((enum eSimpleType)eVoid);
 }

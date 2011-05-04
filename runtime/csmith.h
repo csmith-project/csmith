@@ -87,7 +87,7 @@ transparent_crc (uint32_t val, char* vname, int flag)
 {
 	crc32_8bytes(val);
 	if (flag) {
-  		printf("...checksum after hashing %s : %X\n", vname, crc32_context ^ 0xFFFFFFFFUL);
+  		printf("...checksum after hashing %s : %X\n", vname, crc32_context ^ 0xFFFFFFFFU);
 	}
 }
 #else
