@@ -384,7 +384,7 @@ EXTRA_DIST = \
 	csmith.vcproj \
 	csmith.vcxproj
 
-GIT_HASH := $(shell git show -s --format=%h . 2>/dev/null || echo exported)
+GIT_HASH := $(shell (cd "$(top_srcdir)" && git show -s --format=%h . 2>/dev/null) || echo exported)
 GIT_FLAG = -DGIT_VERSION=\"$(GIT_HASH)\"
 csmith_CPPFLAGS = \
 	-DTARGET_CPU_$(target_cpu)=1 \
