@@ -30,7 +30,7 @@
 ###############################################################################
 
 m4_include([version.m4])
-AC_INIT(csmith, CSMITH_VERSION, CSMITH_BUGREPORT)
+AC_INIT(csmith, CSMITH_VERSION, CSMITH_BUGREPORT, csmith, CSMITH_URL)
 
 AC_CONFIG_SRCDIR(src/RandomProgramGenerator.cpp)
 AC_CONFIG_AUX_DIR(autoconf)

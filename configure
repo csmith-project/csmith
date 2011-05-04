@@ -562,7 +562,7 @@ PACKAGE_TARNAME='csmith'
 PACKAGE_VERSION='2.1.0'
 PACKAGE_STRING='csmith 2.1.0'
 PACKAGE_BUGREPORT='csmith-bugs@flux.utah.edu'
-PACKAGE_URL=''
+PACKAGE_URL='http://embed.cs.utah.edu/csmith/'
 
 ac_unique_file="src/RandomProgramGenerator.cpp"
 ac_subst_vars='am__EXEEXT_FALSE
@@ -1330,6 +1330,7 @@ Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
 
 Report bugs to <csmith-bugs@flux.utah.edu>.
+csmith home page: <http://embed.cs.utah.edu/csmith/>.
 _ACEOF
 ac_status=$?
 fi
@@ -4754,7 +4755,8 @@ $config_files
 Configuration commands:
 $config_commands
 
-Report bugs to <csmith-bugs@flux.utah.edu>."
+Report bugs to <csmith-bugs@flux.utah.edu>.
+csmith home page: <http://embed.cs.utah.edu/csmith/>."
 
 _ACEOF
 cat >>$CONFIG_STATUS <<_ACEOF || ac_write_fail=1
