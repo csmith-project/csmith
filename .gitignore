@@ -1,0 +1,16 @@
+# File made by `configure' and friends.
+Makefile
+autom4te.cache
+config.log
+config.status
+stamp-h.in
+
+# Files made by compilation.
+.deps/
+*.a
+*.o
+*.obj
+
+# Files made by Eclipse CDT.
+.cproject
+.project

@@ -1,0 +1,6 @@
+# Additions to the patterns specified in the root `.gitignore' file.
+
+# Files made by compilation.
+safe_math.h
+safe_math_macros.h
+safe_math_macros_notmp.h
