@@ -1970,6 +1970,7 @@ test -n "$target_alias" &&
     NONENONEs,x,x, &&
   program_prefix=${target_alias}-
 
+# `-Wno-portability': avoid warnings about using `:=' in `Makefile.am' files.
 am__api_version='1.11'
 
 # Find a good install program.  We prefer a C program (faster),
