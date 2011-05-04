@@ -41,6 +41,8 @@ AC_CANONICAL_TARGET
 # `-Wno-portability': avoid warnings about using `:=' in `Makefile.am' files.
 AM_INIT_AUTOMAKE([-Wall -Wno-portability])
 
+AM_MAINTAINER_MODE
+
 # Avoid configure-time warnings about `--datarootdir' being ignored.
 # This can perhaps be removed in a few years after Autoconf 2.60.
 # See <http://www.gnu.org/software/libtool/manual/autoconf/Changed-Directory-Variables.html>
