@@ -56,6 +56,8 @@ using namespace std ;
 #define INT64 long long
 #endif
 
+#define BREAK_NOP {int i=0; i++;}
+
 // ----------------------------------------------------------------
 // Forward class declarations
 class Block;

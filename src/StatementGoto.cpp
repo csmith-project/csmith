@@ -219,8 +219,6 @@ StatementGoto::StatementGoto(Block* blk, const Expression &test, const Statement
 	}
 	else {
 		label = gensym("lbl_");
-		//if (label == "lbl_8")
-			//int g = 0;
 		stm_labels[dest] = label;
 	}
 }
@@ -235,8 +233,6 @@ StatementGoto::StatementGoto(const StatementGoto &sg)
 	  label(sg.label),
 	  init_skipped_vars(sg.init_skipped_vars)
 {
-	//if (label == "lbl_8")
-		//int g = 0;
 	// Nothing else to do.
 }
 

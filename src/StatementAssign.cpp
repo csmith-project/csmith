@@ -30,7 +30,7 @@
 #include "StatementAssign.h"
 #include <cassert>
 #include <iostream>
-
+#include "Common.h"
 #include "CGContext.h"
 #include "CGOptions.h"
 #include "Expression.h"
@@ -303,7 +303,7 @@ StatementAssign::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context)
 	static int g = 0;
 	int h = g++;
 	if (h==57)
-		h = 57;
+		BREAK_NOP;
 	vector<const Fact*> inputs_copy = inputs;
 	// LHS and RHS can be evaludated in arbitrary order, try RHS first
 	Effect running_eff_context(cg_context.get_effect_context());
