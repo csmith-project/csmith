@@ -459,6 +459,12 @@ ArrayVariable::OutputDef(std::ostream &out, int indent) const
 			for (i=0; i<init_values.size(); i++) {
 				init_strings.push_back(init_values[i]->to_string());
 			}
+			
+			// force global variables to be static if necessary
+			if (CGOptions::force_globals_static() && is_global()) {
+				out << "static ";
+			}
+			
 			// print type, name, and dimensions
 			output_qualified_type(out);
 			out << get_actual_name();
@@ -495,6 +501,10 @@ ArrayVariable::OutputDef(std::ostream &out, int indent) const
 
 void ArrayVariable::OutputDecl(std::ostream &out) const
 {	
+	// force global variables to be static if necessary
+	if (CGOptions::force_globals_static() && is_global()) {
+		out << "static ";
+	}
 	output_qualified_type(out);
 	out << get_actual_name();
 	size_t i;

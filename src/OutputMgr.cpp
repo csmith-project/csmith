@@ -362,9 +362,9 @@ OutputMgr::OutputHeader(int argc, char *argv[], unsigned long seed)
 		out << " * This is a RANDOMLY GENERATED PROGRAM." << endl;
 		out << " *" << endl;
 		out << " * Generator: " << PACKAGE_STRING << endl;
-#ifdef GIT_VERSION
-		out << " * Git version: " << GIT_VERSION << endl;
-#endif
+	#ifdef SVN_VERSION
+		out << " * svn version: " << SVN_VERSION << endl;
+	#endif
 		out << " * Options:  ";
 		if (argc <= 1) {
 			out << " (none)";
@@ -391,9 +391,9 @@ OutputMgr::OutputHeader(int argc, char *argv[], unsigned long seed)
 	
 	if (!CGOptions::longlong()) {
 		out << endl;
-		//out << "#ifndef __x86_64__" << std::endl;
+		out << "#ifndef __x86_64__" << std::endl;
 		out << "#define NO_LONGLONG" << std::endl;
-		//out << "#endif" << std::endl;
+		out << "#endif" << std::endl;
 		out << endl;
 	}
 
@@ -417,7 +417,7 @@ OutputMgr::OutputHeader(int argc, char *argv[], unsigned long seed)
 	}
 	out << endl;
 
-	out << "int32_t __undefined;" << endl;
+	out << "static long __undefined;" << endl;
 	out << endl;
 
 	if (CGOptions::depth_protect()) {

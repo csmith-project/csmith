@@ -454,6 +454,10 @@ Function::OutputHeader(std::ostream &out)
 {
 	if (!CGOptions::return_structs() && return_type)
 		assert(return_type->eType != eStruct);
+	// force functions to be static if necessary
+	if (CGOptions::force_globals_static()) {
+		out << "static ";
+	}
 	rv->qfer.output_qualified_type(return_type, out);
 	out << " " << get_prefixed_name(name) << "(";
 	OutputFormalParamList( out );

@@ -107,9 +107,10 @@ static void
 print_version(void)
 {
 	cout << PACKAGE_STRING << endl;
-#ifdef GIT_VERSION
-	cout << "Git version: " << GIT_VERSION << endl;
+#ifdef SVN_VERSION
+	cout << "svn version: " << SVN_VERSION << endl;
 #endif
+	// XXX print svn rev!
 	// XXX print copyright, contact info, etc.?
 }
 
@@ -985,6 +986,11 @@ main(int argc, char **argv)
 
 		if (strcmp (argv[i], "--mark-mutable-const") == 0) {
 			CGOptions::mark_mutable_const(true);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--force-globals-static") == 0) {
+			CGOptions::force_globals_static(true);
 			continue;
 		}
 

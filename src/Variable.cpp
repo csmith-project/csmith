@@ -704,6 +704,10 @@ void
 Variable::OutputDef(std::ostream &out, int indent) const
 {
 	output_tab(out, indent);
+	// force global variables to be static if necessary
+	if (CGOptions::force_globals_static() && is_global()) {
+		out << "static ";
+	}
 	output_qualified_type(out);
 	out << get_actual_name() << " = ";
 	assert(init);
@@ -719,6 +723,10 @@ Variable::OutputDef(std::ostream &out, int indent) const
 
 void Variable::OutputDecl(std::ostream &out) const
 {
+	// force global variables to be static if necessary
+	if (CGOptions::force_globals_static() && is_global()) {
+		out << "static ";
+	}
 	output_qualified_type(out);
 	out << get_actual_name();
 }

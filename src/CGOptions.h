@@ -353,6 +353,9 @@ public:
 	static bool mark_mutable_const(void);
 	static bool mark_mutable_const(bool p);
 
+	static bool force_globals_static(void);
+	static bool force_globals_static(bool p);
+
 private:
 	static bool resolve_exhaustive_options();
 
@@ -454,6 +457,7 @@ private:
 	static bool identify_wrappers_;
 	static vector<int> safe_math_wrapper_ids_;
 	static bool mark_mutable_const_;
+	static bool force_globals_static_;
 	static Reducer* reducer_; 
 
 private:

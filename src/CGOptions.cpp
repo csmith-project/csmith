@@ -155,6 +155,7 @@ DEFINE_GETTER_SETTER_BOOL(no_return_dead_ptr)
 DEFINE_GETTER_SETTER_INT (max_array_num_in_loop)
 DEFINE_GETTER_SETTER_BOOL(identify_wrappers)
 DEFINE_GETTER_SETTER_BOOL(mark_mutable_const)
+DEFINE_GETTER_SETTER_BOOL(force_globals_static)
 
 void
 CGOptions::set_default_settings(void)
@@ -226,6 +227,7 @@ CGOptions::set_default_settings(void)
 	no_return_dead_ptr(true);
 	identify_wrappers(false);
 	mark_mutable_const(false);
+	force_globals_static(true);
 	max_array_num_in_loop(CGOPTIONS_DEFAULT_MAX_ARRAY_NUM_IN_LOOP);
 }
 
