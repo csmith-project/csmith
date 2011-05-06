@@ -1,0 +1,9 @@
+Changes since 2.0.0 release:
+
+	By default mark variables and functions as "static" since some
+	compilers can exploit this to optimize more aggressively.
+
+	Loop code generation is significantly generalized [Xuejun: please
+	give some details].
+
+	Several bugs were fixed.
