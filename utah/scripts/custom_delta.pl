@@ -3,6 +3,8 @@
 use strict;
 
 # todo: cache results!  or at least a hash of results
+#   can clear cache every time program gets smaller
+#   but enforce this policy
 
 # todo: input file should print output separately instead of checksum
 #   probably do this via command line option?
@@ -394,6 +396,9 @@ sub run_test ($) {
 
 my %method_worked = ();
 my %method_failed = ();
+my %cache = ();
+my $cache_hits = 0;
+my $old_size = 1000000000;
 
 sub main_loop ($$$) {
     (my $cfile, my $test, my $method) = @_;
@@ -413,16 +418,36 @@ sub main_loop ($$$) {
 	    print "no more to delete.\n";
 	    return $worked;
 	}
-	write_file ($cfile);
-	if (run_test ($test)) {
+	my $hit = 0;
+	my $result = $cache{$prog};
+	if (defined($result)) {
+	    $cache_hits++;
+	    $hit = 1;
+	    print "(hit) ";
+	} else {
+	    write_file ($cfile);
+	    $result = run_test ($test);
+	    $cache{$prog} = $result;
+	}
+	    
+	if ($result) {
 	    print "success\n";
+	    die if ($hit);
 	    system "cp $cfile $cfile.bak";
 	    $good_cnt++;
 	    $worked = 1;
 	    $method_worked{$method}++;
+	    my $size = length ($prog);
+	    die if ($size > $old_size);
+	    if ($size < $old_size) {
+		%cache = ();
+	    }
+	    $old_size = $size;
 	} else {
 	    print "failure\n";
-	    system "cp $cfile.bak $cfile";
+	    if (!$hit) {
+		system "cp $cfile.bak $cfile";
+	    }
 	    if ($newpos <= $filepos) {
 		$filepos++;
 	    } else {
@@ -538,3 +563,4 @@ foreach my $method (sort keys %methods) {
     $f=0 unless defined($f);
     print "  method $method worked $w times and failed $f times\n";
 }
+print "there were $cache_hits cache hits\n";
