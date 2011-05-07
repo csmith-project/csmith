@@ -57,9 +57,9 @@ non_empty_intersection(const vector<const Variable *> &va,
 	vector<const Variable *>::size_type va_len = va.size();
 	vector<const Variable *>::size_type vb_len = vb.size();
 	vector<const Variable *>::size_type i;
-	vector<const Variable *>::size_type j;
-	
+
 	for (i = 0; i < va_len; ++i) {
+		vector<const Variable *>::size_type j;
 		for (j = 0; j < vb_len; ++j) {
 			if (va[i]->match(vb[j]) || vb[j]->match(va[i])) {
 				return true;
@@ -240,7 +240,7 @@ Effect::add_external_effect(const Effect &e, std::vector<const Block*> call_chai
 	}
 	
 	vector<Variable *>::size_type len;
-	vector<Variable *>::size_type i, j;
+	vector<Variable *>::size_type i;
 
 	len = e.read_vars.size();
 	for (i = 0; i < len; ++i) {
@@ -249,6 +249,7 @@ Effect::add_external_effect(const Effect &e, std::vector<const Block*> call_chai
 			read_var(var);
 		}
 		else {
+			vector<Variable *>::size_type j;
 			for (j=0; j<call_chain.size(); j++) {
 				const Block* b = call_chain[j];
 				if (b->is_var_on_stack(var)) {
@@ -270,6 +271,7 @@ Effect::add_external_effect(const Effect &e, std::vector<const Block*> call_chai
 			pure = false;
 		}
 		else {
+			vector<Variable *>::size_type j;
 			for (j=0; j<call_chain.size(); j++) {
 				const Block* b = call_chain[j];
 				if (b->is_var_on_stack(var)) {
@@ -416,10 +418,10 @@ Effect::is_written(string vname) const
 bool
 Effect::field_is_read(const Variable *v) const
 { 
-	size_t j;
 	if (v->type->eType == eStruct) {  
+		size_t j;
 		for (j=0; j<v->field_vars.size(); j++) {
-			Variable* field_var = v->field_vars[j];
+			const Variable* const field_var = v->field_vars[j];
 			if (is_read(field_var) || field_is_read(field_var)) {
 				return true; 
 			}
@@ -434,8 +436,8 @@ Effect::field_is_read(const Variable *v) const
 bool
 Effect::field_is_written(const Variable *v) const
 { 
-	size_t j;
 	if (v->type->eType == eStruct) {  
+		size_t j;
 		for (j=0; j<v->field_vars.size(); j++) {
 			Variable* field_var = v->field_vars[j];
 			if (is_written(field_var) || field_is_written(field_var)) {
