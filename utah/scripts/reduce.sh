@@ -8,7 +8,7 @@ perl -pi.bak -e 's/^\s*\n//g' small.c
 ${DIR}/godelta
 cp small.c small-2.c
 indent small.c
-${DIR}/custom_delta.pl ./test1.sh ./small.c --all
+${DIR}/c_delta.pl ./test1.sh ./small.c --all
 cp small.c small-3.c
 perl -pi.bak -e 's/^\s*\n//g' small.c
 ${DIR}/godelta

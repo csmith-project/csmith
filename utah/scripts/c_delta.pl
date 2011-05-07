@@ -2,9 +2,9 @@
 
 use strict;
 
-# todo: cache results!  or at least a hash of results
-#   can clear cache every time program gets smaller
-#   but enforce this policy
+# todo: avoid duplicate tests
+
+# todo: find steps creating strings like "longp_20p_21"
 
 # todo: input file should print output separately instead of checksum
 #   probably do this via command line option?
@@ -485,7 +485,7 @@ my %all_methods = (
 #################### main #####################
 
 sub usage() {
-    print "usage: custom_delta.pl test_script.sh file.c [method [method ...]]\n";
+    print "usage: c_delta.pl test_script.sh file.c [method [method ...]]\n";
     print "available methods are --all or:\n";
     foreach my $method (keys %all_methods) {
 	print "  --$method\n";
