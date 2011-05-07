@@ -130,9 +130,9 @@ DefaultRndNumGenerator::rnd_upto(const unsigned int n, const Filter *f, const st
 		}
 	}
 	if (where) {
-	std::ostringstream ss;
+		std::ostringstream ss;
 		ss << *where << "->";
-	trace_string_ += ss.str();
+		trace_string_ += ss.str();
 	}
 	add_number(v, n, local_depth);
 	return v;
