@@ -182,8 +182,7 @@ DFSRndNumGenerator::make_rndnum_generator()
 void
 DFSRndNumGenerator::initialize_sequence(const vector<int> &v)
 {
-	size_t i = 0;
-	for (i = 0; i < v.size(); i++) {
+	for (size_t i = 0; i < v.size(); i++) {
 		seq_->add_number(v[i], 0, i);
 	} 
 }
