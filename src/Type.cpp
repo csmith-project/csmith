@@ -464,11 +464,9 @@ Type::struct_has_int_field() const
 		if (((*i)->eType == eSimple) && ((*i)->simple_type != eVoid))
 			return true;
 		else if ((*i)->eType == eStruct) {
-			bool rv = false;
 			vector<const Type*>::const_iterator j;
 			for (j = fields.begin(); j != fields.begin(); ++j) {
-				rv = (*j)->struct_has_int_field();
-				if (rv)
+				if ((*j)->struct_has_int_field())
 					return true;
 			}
 		}
@@ -496,10 +494,10 @@ Type::get_all_ok_struct_types(vector<Type *> &ok_types, bool no_const, bool no_v
 const Type*
 Type::choose_random_struct_type(vector<Type *> &ok_types)
 {
-	size_t sz = ok_types.size();
+	const size_t sz = ok_types.size();
 	assert(sz > 0);
 
-	int index = rnd_upto(ok_types.size());
+	const int index = rnd_upto(ok_types.size());
 	ERROR_GUARD(0);
 	assert(index >= 0);
 	Type *rv_type = ok_types[index];
@@ -602,11 +600,11 @@ Type::make_one_bitfield(size_t index, bool &last_is_zero,
 				vector<CVQualifiers> &qualifiers,
 				vector<int> &fields_length)
 {
-	int max_length = CGOptions::bitfields_length();
+	const int max_length = CGOptions::bitfields_length();
 
-	bool sign = rnd_flipcoin(BitFieldsSignedProb);
+	const bool sign = rnd_flipcoin(BitFieldsSignedProb);
 	ERROR_RETURN();
-	const Type *type = sign ? &Type::get_simple_type(eInt) : &Type::get_simple_type(eUInt);
+	const Type * const type = sign ? &Type::get_simple_type(eInt) : &Type::get_simple_type(eUInt);
        	random_fields.push_back(type);
 	CVQualifiers qual = CVQualifiers::random_qualifiers(type, FieldConstProb, FieldVolatileProb);
 	ERROR_RETURN();
@@ -1523,8 +1521,8 @@ void OutputStruct(Type* type, std::ostream &out)
 		size_t j = 0;
         for (i=0; i<type->fields.size(); i++) {
             out << "   ";
-			const Type *field = type->fields[i];
-			bool is_bitfield = type->is_bitfield(i);
+			const Type * const field = type->fields[i];
+			const bool is_bitfield = type->is_bitfield(i);
             if (is_bitfield) {
 				assert(field->eType == eSimple);
 				type->qfers_[i].OutputFirstQuals(out);
@@ -1534,7 +1532,7 @@ void OutputStruct(Type* type, std::ostream &out)
 					out << "unsigned";
 				else
 					assert(0);
-				int length = type->bitfields_length_[i];
+				const int length = type->bitfields_length_[i];
 				assert(length >= 0);
 				if (length == 0)
 					out << " : ";
@@ -1569,7 +1567,7 @@ OutputStructDeclarations(std::ostream &out)
     output_comment_line(out, "--- Struct/Union Declarations ---");
     for (i=0; i<AllTypes.size(); i++)
     {
-        Type* t = AllTypes[i];
+        const Type* const t = AllTypes[i];
         if (t->used && (t->eType == eStruct || t->eType == eUnion)) {
             OutputStruct(AllTypes[i], out);
         }
