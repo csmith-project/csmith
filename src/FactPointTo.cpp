@@ -62,8 +62,7 @@ std::vector<FactPointTo*> FactPointTo::facts_;
 bool
 FactPointTo::is_null() const 
 {
-    size_t i;
-    for (i=0; i<point_to_vars.size(); i++) {
+    for (size_t i=0; i<point_to_vars.size(); i++) {
         if (point_to_vars[i] == null_ptr) {
             return true;
         }
@@ -86,11 +85,10 @@ FactPointTo::is_dead() const
 bool 
 FactPointTo::has_invisible(const Function* func, const Statement* stm) const
 {
-    size_t i;
 	if (!func->is_var_visible(var, stm)) {
 		return true;
 	}
-    for (i=0; i<point_to_vars.size(); i++) {
+	for (size_t i=0; i<point_to_vars.size(); i++) {
 		const Variable* v = point_to_vars[i];
 		if (v != null_ptr && v != garbage_ptr && v != tbd_ptr) {
 			if (!func->is_var_visible(v, stm)) {
