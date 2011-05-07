@@ -66,9 +66,10 @@ using namespace std;
 Block* find_block_by_id(int blk_id)
 {
 	const vector<Function*>& funcs = get_all_functions();
-	size_t i, j; 
+	size_t i;
 	for (i=0; i<funcs.size(); i++) {
-		Function* f = funcs[i];
+		const Function* const f = funcs[i];
+		size_t j;
 		for (j=0; j<f->blocks.size(); j++) {
 			if (f->blocks[j]->stm_id == blk_id) {
 				return f->blocks[j]; 
@@ -422,12 +423,12 @@ Block::append_return_stmt(CGContext& cg_context)
 bool 
 Block::need_nested_loop(const CGContext& cg_context) 
 {
-	size_t i;
 	const Statement* s = get_last_stm();
 	if (looping && (s == NULL || !s->must_jump()) && cg_context.rw_directive) {
-		RWDirective* rwd = cg_context.rw_directive;  
+		size_t i;
+		const RWDirective* const rwd = cg_context.rw_directive;  
 		for (i=0; i<rwd->must_read_vars.size(); i++) {
-			size_t dimen = rwd->must_read_vars[i]->get_dimension();
+			const size_t dimen = rwd->must_read_vars[i]->get_dimension();
 			if (dimen > cg_context.iv_bounds.size()) {
 				return true;
 			} else if (dimen == cg_context.iv_bounds.size() && rnd_flipcoin(10)) {
@@ -435,7 +436,7 @@ Block::need_nested_loop(const CGContext& cg_context)
 			}
 		}
 		for (i=0; i<rwd->must_write_vars.size(); i++) {
-			size_t dimen = rwd->must_write_vars[i]->get_dimension();
+			const size_t dimen = rwd->must_write_vars[i]->get_dimension();
 			if (dimen > cg_context.iv_bounds.size()) {
 				return true;
 			} else if (dimen == cg_context.iv_bounds.size() && rnd_flipcoin(10)) {
