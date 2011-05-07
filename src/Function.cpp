@@ -402,7 +402,7 @@ Function::make_first(void)
 		// const pointers should never be dangling
 		if (v->is_const() || !v->is_global()) continue;  
 		if (fm->global_facts[i]->eCat == ePointTo) {
-			FactPointTo* fp = (FactPointTo*)(fm->global_facts[i]);
+			const FactPointTo* const fp = (const FactPointTo*)(fm->global_facts[i]);
 			if (fp->is_dead()) {
 				f->dead_globals.push_back(v);
 			}
