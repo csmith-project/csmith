@@ -98,8 +98,7 @@ get_fact_mgr(const CGContext* cg)
 const Function*
 find_function_by_name(const string& name)
 {
-	size_t i;
-	for (i=0; i<FuncList.size(); i++) {
+	for (size_t i=0; i<FuncList.size(); i++) {
 		if (FuncList[i]->name == name) {
 			return FuncList[i];
 		}
@@ -110,8 +109,7 @@ find_function_by_name(const string& name)
 int
 find_function_in_set(const vector<const Function*>& set, const Function* f)
 {
-	size_t i;
-	for (i=0; i<set.size(); i++) {
+	for (size_t i=0; i<set.size(); i++) {
 		if (set[i] == f) {
 			return i;
 		}
@@ -125,14 +123,13 @@ find_blk_for_var(const Variable* v)
 	if (v->is_global()) {
 		return NULL;
 	}
-	size_t i, j;
-	for (i=0; i<FuncList.size(); i++) {
+	for (size_t i=0; i<FuncList.size(); i++) {
 		const Function* func = FuncList[i];
 		// for a parameter of a function, pretend it's a variable belongs to the top block
 		if (v->is_argument() && find_variable_in_set(func->param, v) != -1) {
 			return func->body;
 		}
-		for (j=0; j<func->blocks.size(); j++) {
+		for (size_t j=0; j<func->blocks.size(); j++) {
 			const Block* blk = func->blocks[j];
 			if (find_variable_in_set(blk->local_vars, v) != -1) {
 				return blk;
@@ -145,8 +142,7 @@ find_blk_for_var(const Variable* v)
 bool
 Function::is_var_on_stack(const Variable* var, const Statement* stm) const
 {  
-    size_t i;
-    for (i=0; i<param.size(); i++) {
+    for (size_t i=0; i<param.size(); i++) {
         if (param[i]->match(var)) {
             return true;
         }
@@ -180,8 +176,7 @@ Function::is_var_oos(const Variable* var, const Statement* stm) const
 {
 	if (!is_var_visible(var, stm)) { 
 		//return true;
-		size_t i;
-		for (i=0; i<blocks.size(); i++) {
+		for (size_t i=0; i<blocks.size(); i++) {
 			if (find_variable_in_set(blocks[i]->local_vars, var) != -1) {
 				return true;
 			}
@@ -231,7 +226,7 @@ RandomFunctionName(void)
 static const Type*
 RandomReturnType(void)
 {
-	const Type* t = 0; 
+	const Type* t;
         t = Type::choose_random();
 	return t;
 }
@@ -396,8 +391,7 @@ Function::make_first(void)
 	fm->setup_in_out_maps(true);
 
 	// collect info about global dangling pointers
-	size_t i;
-	for (i=0; i<fm->global_facts.size(); i++) { 
+	for (size_t i=0; i<fm->global_facts.size(); i++) { 
 		const Variable* v = fm->global_facts[i]->get_var(); 
 		// const pointers should never be dangling
 		if (v->is_const() || !v->is_global()) continue;  
