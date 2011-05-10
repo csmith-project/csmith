@@ -74,9 +74,7 @@ my $CSMITH_PATH=$ENV{"CSMITH_PATH"};
 die "oops: CSMITH_PATH environment variable needs to be set"
     if (!defined($CSMITH_PATH));
 
-my $VOLATILE_PATH=$ENV{"VOLATILE_PATH"};
-die "oops: VOLATILE_PATH environment variable needs to be set"
-    if (!defined($VOLATILE_PATH));
+my $VOLATILE_PATH=$CSMITH_PATH."/utah/scripts/john_driver";
 
 my $LOCKFN = "/var/tmp/version_search_lockfile";
 
