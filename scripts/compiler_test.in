@@ -1,5 +1,10 @@
-gcc-4.0 -O0
-gcc-4.0 -O1
-gcc-4.0 -O2
-gcc-4.0 -O3
-gcc-4.0 -Os
+gcc -O0
+gcc -O1
+gcc -O2
+gcc -Os
+gcc -O3
+clang -O0
+clang -O1
+clang -O2
+clang -Os
+clang -O3
