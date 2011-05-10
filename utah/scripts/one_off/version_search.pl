@@ -1,0 +1,234 @@
+#!/usr/bin/perl -w
+
+use strict;
+use Env::Path;
+
+######################################################################
+
+# TODO: bail if last release and latest snapshot aren't already compiled
+
+######################################################################
+
+my $gcc_latest_release = 139673;
+
+my $llvm_latest_release = 58975;
+
+# svn info http://llvm.org/svn/llvm-project/llvm/tags/RELEASE_20
+
+my @llvm20 = ("llvm-gcc-2.0", 37313);
+my @llvm21 = ("llvm-gcc-2.1", 42401);
+my @llvm22 = ("llvm-gcc-2.2", 46994);
+my @llvm23 = ("llvm-gcc-2.3", 52171);
+my @llvm24 = ("llvm-gcc-2.4", 58975);
+
+my @llvm_releases = (
+    \@llvm20,
+    \@llvm21,
+    \@llvm22,
+    \@llvm23,
+    \@llvm24,
+    );
+
+my @gcc_releases = ();
+
+my %compilers = (
+    "llvm" => \@llvm_releases, 
+    "gcc" => \@gcc_releases,
+    );
+
+my $MAX_RETRY = 4;
+
+######################################################################
+
+# properly parse the return value from system()
+sub runit ($) {
+    my $cmd = shift;
+    my $res = (system "$cmd");
+    if ($res != 0) {
+	# print "system '$cmd': $?";
+	return -1;
+    }
+    my $exit_value  = $? >> 8;
+    return $exit_value;
+}
+
+my %results;
+my $COMP;
+my $COMP_PREF;
+
+sub check_results ($) {
+    (my $version) = @_;
+
+    print "checking version $version : ";
+
+    my $r = $results{$version};
+    if (defined($r)) {
+	print "cached result $r\n";
+	return $r;
+    }
+
+    my $res1 = runit "build_compiler.pl $COMP $version >build_log_${version} 2>&1";
+    if ($res1 != 0) {
+	my $x;
+	print "not buildable\n";
+	return $x;
+    }
+
+    my $res2 = runit "./test2.sh ${COMP_PREF}r${version}-gcc >/dev/null 2>&1";
+    if ($res2 == 0) {
+	$results{$version} = 0;
+    } else {
+	$results{$version} = 1;
+    }
+
+    $r = $results{$version};
+    print "test returned $r ";
+    if ($r == 0) {
+	print "(broken)";
+    } else {
+	print "(working)";
+    }
+    print "\n";
+    return $r;
+}
+
+################################ main ################################
+
+if (scalar(@ARGV) != 1) {
+    print "usage: version_search.pl COMPILER\n";
+    print "supported compilers:\n";
+    foreach my $compiler (sort keys %compilers) {
+	print "  $compiler\n";
+    }
+    exit -1;
+}
+
+$COMP = $ARGV[0];
+my @releases = @{$compilers{$COMP}};
+
+die "can't find executable test script!" if (!(-x "./test2.sh"));
+
+if ($COMP eq "llvm") {
+    $COMP_PREF = "llvm-";
+    # try all against all released versions
+    foreach my $release_ref (@releases) {
+	(my $compiler, my $ref) = @{$release_ref};
+	my $res = runit "./test2.sh $compiler >/dev/null 2>&1";
+	print "$compiler $res\n";
+    }
+} else {
+    $COMP_PREF = "";
+}
+
+my $last_working;
+my $first_broken;
+
+my $path = Env::Path->PATH;
+my @compilers = $path->Whence("${COMP_PREF}r*gcc");
+
+foreach my $compiler (sort @compilers) {
+    die if (!($compiler =~ /${COMP_PREF}r([0-9]+)\-gcc/));
+    my $version = $1;
+    my $res = check_results ($version);
+    die if (!(defined($res)));
+    if ($res != 0) {
+	# working
+	$last_working = $version;
+	undef ($first_broken);
+    } else {
+	# broken
+	if (!(defined ($first_broken))) {
+	    $first_broken = $version;
+	}
+    }
+}
+
+if (!defined($last_working)) {
+    print "no working version found, aborting.\n";
+    exit (0);
+}
+if (!defined($first_broken)) {
+    print "no broken version found, aborting.\n";
+    exit (0);
+}
+
+my $lo = $last_working;
+my $hi = $first_broken;
+
+print "starting binary search between $lo and $hi\n";
+
+OUTER: 
+while (1) {
+    die if ($lo >= $hi);
+
+    # standard binary search termination condition
+    last if (($hi-$lo)==1);
+
+    my $mid = int (($hi+$lo)/2);
+    goto CONTINUE_BINSRCH if (defined(check_results($mid)));
+    print "can't evaluate version $mid\n";
+
+    goto LINEAR_SCAN if (($hi-$lo)<12);
+
+    $mid = $lo + int (($hi-$lo)*0.750);
+    goto CONTINUE_BINSRCH if (defined(check_results($mid)));
+    print "can't evaluate version $mid\n";
+
+    $mid = $lo + int (($hi-$lo)*0.250);
+    goto CONTINUE_BINSRCH if (defined(check_results($mid)));
+    print "can't evaluate version $mid\n";
+
+    $mid = $lo + int (($hi-$lo)*0.125);
+    goto CONTINUE_BINSRCH if (defined(check_results($mid)));
+    print "can't evaluate version $mid\n";
+
+    $mid = $lo + int (($hi-$lo)*0.375);
+    goto CONTINUE_BINSRCH if (defined(check_results($mid)));
+    print "can't evaluate version $mid\n";
+
+    $mid = $lo + int (($hi-$lo)*0.625);
+    goto CONTINUE_BINSRCH if (defined(check_results($mid)));
+    print "can't evaluate version $mid\n";
+
+    $mid = $lo + int (($hi-$lo)*0.875);
+    goto CONTINUE_BINSRCH if (defined(check_results($mid)));
+    print "can't evaluate version $mid\n";
+
+  LINEAR_SCAN:
+    # linear scan to force termination
+    print "plan b: linear scan from $lo to $hi\n";
+    for (my $i=$lo+1; $i<=$hi; $i++) {
+	my $x = check_results ($i);
+	if (defined($x) &&
+	    $x != 0) {
+	    $lo = $i;
+	}
+	if (defined($x) &&
+	    $x == 0) {
+	    $hi = $i;
+	    last OUTER;
+	}
+    }
+    die "bug! linear scan failed";
+    
+  CONTINUE_BINSRCH:
+    print "lo = $lo, hi = $hi, mid = $mid\n";
+    die if ($mid <= $lo);
+    die if ($mid >= $hi);
+
+    my $r = check_results ($mid);
+    die if (!defined($r));
+    if ($r == 0) {
+	$hi = $mid;
+    } else {
+	$lo = $mid;
+    }
+}
+
+print "results:\n";
+print "  last working version: $lo\n";
+print "  first broken version: $hi\n"; 
+
+exit 0;
+
+######################################################################
