@@ -39,7 +39,7 @@ build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
 subdir = runtime
-DIST_COMMON = $(nobase_libcsmith_a_include_HEADERS) \
+DIST_COMMON = $(nobase_libcsmith_a_include_HEADERS) $(noinst_HEADERS) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
@@ -71,6 +71,7 @@ am__base_list = \
   sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
   sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
 am__installdirs = "$(DESTDIR)$(libdir)" \
+	"$(DESTDIR)$(libcsmith_a_includedir)" \
 	"$(DESTDIR)$(libcsmith_a_includedir)"
 LIBRARIES = $(lib_LIBRARIES)
 AR = ar
@@ -89,7 +90,8 @@ CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 SOURCES = $(libcsmith_a_SOURCES)
 DIST_SOURCES = $(libcsmith_a_SOURCES)
-HEADERS = $(nobase_libcsmith_a_include_HEADERS)
+HEADERS = $(nobase_libcsmith_a_include_HEADERS) \
+	$(nodist_libcsmith_a_include_HEADERS) $(noinst_HEADERS)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -224,9 +226,6 @@ nobase_libcsmith_a_include_HEADERS = \
 	platform_msp430.h \
 	random_inc.h \
 	safe_abbrev.h \
-	safe_math.m4 \
-	safe_math_macros.m4 \
-	safe_math_macros_notmp.m4 \
 	stdint_avr.h \
 	stdint_ia32.h \
 	stdint_ia64.h \
@@ -234,6 +233,16 @@ nobase_libcsmith_a_include_HEADERS = \
 	windows/stdint.h \
 	volatile_runtime.c \
 	volatile_runtime.h
+
+noinst_HEADERS = \
+	safe_math.m4 \
+	safe_math_macros.m4 \
+	safe_math_macros_notmp.m4
+
+nodist_libcsmith_a_include_HEADERS = \
+	safe_math.h \
+	safe_math_macros.h \
+	safe_math_macros_notmp.h
 
 BUILT_SOURCES = \
 	safe_math.h \
@@ -381,6 +390,26 @@ uninstall-nobase_libcsmith_a_includeHEADERS:
 	test -n "$$files" || exit 0; \
 	echo " ( cd '$(DESTDIR)$(libcsmith_a_includedir)' && rm -f" $$files ")"; \
 	cd "$(DESTDIR)$(libcsmith_a_includedir)" && rm -f $$files
+install-nodist_libcsmith_a_includeHEADERS: $(nodist_libcsmith_a_include_HEADERS)
+	@$(NORMAL_INSTALL)
+	test -z "$(libcsmith_a_includedir)" || $(MKDIR_P) "$(DESTDIR)$(libcsmith_a_includedir)"
+	@list='$(nodist_libcsmith_a_include_HEADERS)'; test -n "$(libcsmith_a_includedir)" || list=; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_HEADER) $$files '$(DESTDIR)$(libcsmith_a_includedir)'"; \
+	  $(INSTALL_HEADER) $$files "$(DESTDIR)$(libcsmith_a_includedir)" || exit $$?; \
+	done
+
+uninstall-nodist_libcsmith_a_includeHEADERS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(nodist_libcsmith_a_include_HEADERS)'; test -n "$(libcsmith_a_includedir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	test -n "$$files" || exit 0; \
+	echo " ( cd '$(DESTDIR)$(libcsmith_a_includedir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(libcsmith_a_includedir)" && rm -f $$files
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
@@ -469,7 +498,7 @@ check: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) check-am
 all-am: Makefile $(LIBRARIES) $(HEADERS)
 installdirs:
-	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(libcsmith_a_includedir)"; do \
+	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(libcsmith_a_includedir)" "$(DESTDIR)$(libcsmith_a_includedir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: $(BUILT_SOURCES)
@@ -522,7 +551,8 @@ info: info-am
 
 info-am:
 
-install-data-am: install-nobase_libcsmith_a_includeHEADERS
+install-data-am: install-nobase_libcsmith_a_includeHEADERS \
+	install-nodist_libcsmith_a_includeHEADERS
 
 install-dvi: install-dvi-am
 
@@ -568,7 +598,8 @@ ps: ps-am
 ps-am:
 
 uninstall-am: uninstall-libLIBRARIES \
-	uninstall-nobase_libcsmith_a_includeHEADERS
+	uninstall-nobase_libcsmith_a_includeHEADERS \
+	uninstall-nodist_libcsmith_a_includeHEADERS
 
 .MAKE: all check install install-am install-strip
 
@@ -579,13 +610,15 @@ uninstall-am: uninstall-libLIBRARIES \
 	install-data-am install-dvi install-dvi-am install-exec \
 	install-exec-am install-html install-html-am install-info \
 	install-info-am install-libLIBRARIES install-man \
-	install-nobase_libcsmith_a_includeHEADERS install-pdf \
+	install-nobase_libcsmith_a_includeHEADERS \
+	install-nodist_libcsmith_a_includeHEADERS install-pdf \
 	install-pdf-am install-ps install-ps-am install-strip \
 	installcheck installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic pdf pdf-am ps ps-am tags uninstall \
 	uninstall-am uninstall-libLIBRARIES \
-	uninstall-nobase_libcsmith_a_includeHEADERS
+	uninstall-nobase_libcsmith_a_includeHEADERS \
+	uninstall-nodist_libcsmith_a_includeHEADERS
 
 
 safe_math.h: safe_math.m4

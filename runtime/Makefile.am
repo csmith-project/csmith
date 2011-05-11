@@ -63,9 +63,6 @@ nobase_libcsmith_a_include_HEADERS = \
 	platform_msp430.h \
 	random_inc.h \
 	safe_abbrev.h \
-	safe_math.m4 \
-	safe_math_macros.m4 \
-	safe_math_macros_notmp.m4 \
 	stdint_avr.h \
 	stdint_ia32.h \
 	stdint_ia64.h \
@@ -73,6 +70,14 @@ nobase_libcsmith_a_include_HEADERS = \
 	windows/stdint.h \
 	volatile_runtime.c \
 	volatile_runtime.h
+noinst_HEADERS = \
+	safe_math.m4 \
+	safe_math_macros.m4 \
+	safe_math_macros_notmp.m4
+nodist_libcsmith_a_include_HEADERS = \
+	safe_math.h \
+	safe_math_macros.h \
+	safe_math_macros_notmp.h
 
 ## XXX should we put `volatile_runtime.c' in _DATA?
 
