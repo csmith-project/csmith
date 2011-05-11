@@ -32,17 +32,8 @@
 dist_bin_SCRIPTS = \
 	compiler_test.in \
 	compiler_test.pl \
-	crash_compilers.pl \
-	launchn.pl
-
-# Not currently distributed:
-#	compiler_test_xuejun.txt
-#	nonterm.pl
-#	regression.pl
-#	runit_test.pl
-#	shorten.pl
-#	test_framac.pl
-#	unwrap_math.pl
+	launchn.pl \
+	test_csmith.pl
 
 ###############################################################################
 
