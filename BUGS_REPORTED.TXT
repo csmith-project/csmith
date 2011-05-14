@@ -1,0 +1,899 @@
+===================================================================
+
+05/14/2011 (total 374)
+  1 gcc crash bug reported by Arthur O'Dwyer
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=49000
+
+05/12/2011 (total 373)
+  1 gcc crash bug reported by Arthur O'Dwyer
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=48975
+
+05/11/2011 (total 372)
+  1 gcc wrong code bug reported by Arthur O'Dwyer
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=48973
+
+05/09/2011 (total 371)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=9883
+
+05/06/2011 (total 370)
+  1 gcc wrong code bug reported by Arthur O'Dwyer
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=48921
+
+05/06/2011 (total 369)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=9856
+
+05/05/2011 (total 368)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=9846
+
+05/04/2011 (total 367)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=9845
+
+05/02/2011 (total 366)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=9831
+
+05/01/2011 (total 365)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=9823
+
+04/30/2011 (total 364)
+  1 clang wrong code bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=9820
+
+04/29/2011 (total 363)
+  1 clang wrong code bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=9815
+
+04/28/2011 (total 362)
+  1 gcc crash bug reported by Arthur O'Dwyer
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=48813
+
+04/27/2011 (total 361)
+  1 gcc wrong code bug reported by Arthur O'Dwyer
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=48784
+
+04/26/2011 (total 360)
+  1 gcc wrong code bug reported by Arthur O'Dwyer
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=48766
+
+04/23/2011 (total 359)
+  1 gcc crash bug reported by Arthur O'Dwyer
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=48739
+
+04/22/2011 (total 358)
+  1 gcc crash bug reported by Arthur O'Dwyer
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=48723
+
+04/22/2011 (total 357)
+  1 gcc crash bug reported by Arthur O'Dwyer
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=48722
+
+04/22/2011 (total 356)
+  1 gcc crash bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=48734
+
+04/21/2011 (total 355)
+  1 gcc wrong code bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=48717
+
+04/19/2011 (total 354)
+  1 gcc memory hog bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=48694
+
+04/06/2011 (total 353)
+  1 clang wrong code bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=9634
+
+04/05/2011 (total 352)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=9633
+
+04/04/2011 (total 351)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=9630
+
+04/02/2011 (total 350)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=9609
+
+03/31/2011 (total 349)
+  1 clang wrong code bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=9604
+
+03/30/2011 (total 348)
+  1 gcc crash bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=48381
+
+03/28/2011 (total 347)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=9578
+
+03/27/2011 (total 346)
+  1 gcc crash bug reported (-O0)
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=48305
+
+03/18/2011 (total 345)
+  1 gcc wrong code bug reported (-O0)
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=48197
+
+03/15/2011 (total 344)
+  1 gcc crash bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=48146
+
+03/15/2011 (total 343)
+  1 gcc crash bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=48136
+
+03/14/2011 (total 342)
+  1 gcc wrong code bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=48124
+
+03/10/2011 (total 341)
+  1 icc (Version 12.0 Build 20110112) wrong code bug reported
+
+03/10/2011 (total 340)
+  1 icc (Version 12.0 Build 20110112) crash bug reported
+
+03/10/2011 (total 339)
+  1 clang wrong code bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=9454
+
+03/10/2011 (total 338)
+  1 clang dragonegg wrong code bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=9448
+
+03/09/2011 (total 337)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=9446
+
+03/08/2011 (total 336)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=9429
+
+03/08/2011 (total 335)
+  1 clang "memory pathology" bug
+  http://llvm.org/bugs/show_bug.cgi?id=9428
+
+03/07/2011 (total 334)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=9420
+
+02/28/2011 (total 333)
+  1 clang wrong code bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=9346
+
+02/25/2011 (total 332)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=9331
+
+02/25/2011 (total 331)
+  1 gcc crash bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=47899
+
+02/24/2011 (total 330)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=9324
+
+02/14/2011 (total 329)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=9223
+
+02/03/2011 (total 328)
+  1 clang wrong code bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=9133
+
+01/31/2011 (total 327)
+  1 clang wrong code bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=9113
+
+01/31/2011 (total 326)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=9112
+
+01/25/2011 (total 325)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=9055
+
+01/24/2011 (total 324)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=9046
+
+01/23/2011 (total 323)
+  1 gcc crash bug reproted
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=47428
+
+01/23/2011 (total 322)
+  1 gcc crash bug reproted
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=47427
+
+01/21/2011 (total 321)
+  1 gcc volatile bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=47409
+
+01/21/2011 (total 320)
+  1 clang volatile bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=9027
+
+01/21/2011 (total 319)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=9017
+
+01/20/2011 (total 318)
+  1 gcc volatile bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=47391
+
+01/20/2011 (total 317)
+  1 clang wrong code bug reported (clang loops forever)
+  http://llvm.org/bugs/show_bug.cgi?id=9013
+
+01/19/2011 (total 316)
+  1 gcc crash bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=47370
+
+01/18/2011 (total 315)
+  1 gcc wrong code bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=47337
+
+01/10/2011 (total 314)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=8955
+
+01/09/2011 (total 313)
+  1 gcc wrong code bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=47228
+
+01/03/2011 (total 312)
+  1 dragonegg nondeterministic wrong code bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=8898
+
+01/03/2011 (total 311)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=8896
+
+01/02/2011 (total 310)
+  1 gcc wrong code bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=47155
+
+01/01/2011 (total 309)
+  1 gcc wrong code bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=47148
+
+12/31/2010 (total 308)
+  1 gcc crash bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=47141
+
+12/31/2010 (total 307)
+  1 gcc crash bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=47140
+
+12/31/2010 (total 306)
+  1 gcc crash bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=47139
+
+12/25/2010 (total 305)
+  1 clang wrong code bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=8854
+
+12/14/2010 (total 304)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=8790
+
+12/07/2010 (total 303)
+  1 clang wrong code bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=8757
+
+12/02/2010 (total 302)
+  1 clang wrong code bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=8728
+
+11/23/2010 (total 301)
+  1 clang wrong code bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=8677
+
+11/17/2010 (total 300)
+  1 clang wrong code bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=8642
+  
+11/15/2010 (total 299)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=8622
+
+11/15/2010 (total 298)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=8620
+
+11/14/2010 (total 297)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=8604
+
+11/14/2010 (total 296)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=8602
+
+11/10/2010 (total 295)
+  1 clang wrong code bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=8585
+
+11/10/2010 (total 294)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=8582
+
+11/09/2010 (total 293)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=8578
+
+11/04/2010 (total 292)
+  1 clang wrong code bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=8547
+
+10/30/2010 (total 291)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=8514
+
+10/30/2010 (total 290)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=8513
+
+10/29/2010 (total 289)
+  1 clang wrong code bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=8511
+
+10/29/2010 (total 288)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=8506
+
+10/02/2010 (total 287)
+  1 CompCert volatile bug reported
+
+10/02/2010 (total 286)
+  1 clang volatile bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=8279
+
+9/30/2010 (total 285)
+  1 gcc volatile bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=45852
+
+9/30/2010 (total 284)
+  1 clang volatile bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=8267
+
+9/30/2010 (total 283)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=8266
+
+9/27/2010 (total 282)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=8250
+
+9/27/2010 (total 281)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=8249
+
+9/27/2010 (total 280)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=8247
+
+9/27/2010 (total 279)
+  1 clang wrong code bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=8244
+
+9/23/2010 (total 278)
+  1 CompCert-1.8 and r1513 bug reported
+  
+9/16/2010 (total 277)
+  1 gcc wrong code bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=45687
+
+9/15/2010 (total 276)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=8162
+
+9/15/2010 (total 275)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=8161
+
+9/2/2010 (total 274)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=8068
+
+9/2/2010 (total 273)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=8067
+
+8/22/2010 (total 272)
+  1 CompCert-svn (r1475) wrong code bug reported
+
+8/22/2010 (total 271)
+  1 CompCert-svn (r1475) crash bug reported
+
+8/08/2010 (total 270)
+  1 clang wrong code bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=7845
+
+8/08/2010 (total 269)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=7844
+
+8/05/2010 (total 268)
+  1 clang wrong code bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=7833
+
+8/04/2010 (total 267)
+  1 clang wrong code bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=7814
+
+7/31/2010 (total 266)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=7771
+
+7/30/2010 (total 265)
+  1 clang wrong code bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=7768
+
+7/30/2010 (total 264)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=7755
+
+7/29/2010 (total 263)
+  1 clang wrong code bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=7750
+
+7/26/2010 (total 262)
+  1 clang wrong code bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=7714
+
+7/24/2010 (total 261)
+  1 gcc crash bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=45059
+
+7/18/2010 (total 260)
+  1 gcc crash bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=44977
+
+7/17/2010 (total 259)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=7661
+
+7/14/2010 (total 258)
+  1 clang crash bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=44937
+
+7/14/2010 (total 257)
+  1 gcc crash bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=44937
+
+7/8/2010 (total 256)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=7601
+
+7/7/2010 (total 255)
+  1 CompCert-1.7/svn wrong code bug reported
+
+7/7/2010 (total 254)
+  1 clang wrong code bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=7586
+
+7/7/2010 (total 253)
+  1 gcc wrong code bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=44858
+
+7/6/2010 (total 252)
+  1 gcc wrong code bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=44828
+
+7/1/2010 (total 251)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=7542
+
+7/1/2010 (total 250)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=7540
+
+6/30/2010 (total 249)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=7535
+
+6/30/2010 (total 248)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=7530
+
+6/29/2010 (total 247)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=7521
+
+6/28/2010 (total 246)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=7514
+
+6/28/2010 (total 245)
+  1 gcc crash bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=44695
+
+6/28/2010 (total 244)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=7513
+
+6/25/2010 (total 243)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=7498
+
+6/9/2010 (total 242)
+  1 gcc crash bug reported 
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=44485
+
+5/25/2010 (total 241)
+  1 CompCert-1.7 bug reported
+
+5/13/2010 (total 240)
+  1 gcc crash bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=44119
+
+5/7/2010 (total 239)
+  1 gcc crash bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=44031
+
+5/7/2010 (total 238)
+  1 gcc crash bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=44030
+
+5/2/2010 (total 237)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=7018
+
+4/24/2010 (total 236)
+  1 clang wrong code bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=6929
+
+4/23/2010 (total 235)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=6914
+
+4/21/2010 (total 234)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=6889
+
+4/21/2010 (total 233)
+  1 gcc crash bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=43842
+
+4/17/2010 (total 232)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=6879
+
+4/17/2010 (total 231)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=6862
+
+4/17/2010 (total 230)
+  1 gcc crash bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=43781
+
+4/17/2010 (total 229)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=6861
+
+4/17/2010 (total 228)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=6860
+
+4/7/2010 (total 227)
+  1 gcc crash bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=43679
+
+4/7/2010 (total 226)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=6802
+
+4/7/2010 (total 225)
+  1 CompCert-1.7 bug reported
+
+4/6/2010 (total 224)
+  1 gcc crash bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=43661
+
+4/4/2010 (total 223)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=6779
+
+4/2/2010 (total 222)
+  3 Diab C (Wind River) 5.8.0.0 for ARM wrong-code bugs reported
+  2 crash bugs reported for same compiler
+
+4/1/2010 (total 217)
+  1 CompCert-1.7 wrong code bug reported
+
+3/31/2010 (total 216)
+  3 Lance compiler bugs reported to Rainer Leupers
+  1 crash, 2 wrong code
+
+3/31/2010 (total 213)
+  1 CompCert-1.7 wrong code bug reported
+
+3/31/2010 (total 212)
+  1 gcc crash bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=43614
+
+3/30/2010 (total 211)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=6743
+
+3/28/2010 (total 210)
+  1 gcc wrong code bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=43560
+
+3/18/2010 (total 209)
+  1 gcc wrong code bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=43438
+
+3/14/2010 (total 208)
+  1 gcc crash bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=43367
+
+3/13/2010 (total 207)
+  1 gcc wrong code bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=43360
+
+3/12/2010 (total 206)
+  1 clang crash bug reported.
+  http://llvm.org/bugs/show_bug.cgi?id=6605
+
+3/10/2010 (total 205)
+  1 CompCert-1.6 wrong-code bug reported
+
+3/7/2010 (total 204)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=6533
+
+3/6/2010 (total 203)
+  1 clang wrong code bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=6525
+
+3/5/2010 (total 202)
+  1 gcc wrong code bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=43269
+
+3/4/2010 (total 201)
+  1 llvm crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=6503
+
+3/4/2010 (total 200)
+  1 gcc crash bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=43255
+
+3/3/2010 (total 199)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=6489
+
+3/3/2010 (total 198)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=6487
+
+3/3/2010 (total 197)
+  1 clang wrong code bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=6486
+
+2/26/2010 (total 196)
+  1 gcc crash bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=43191
+
+2/24/2010 (total 195)
+  1 gcc crash bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=43165
+
+2/24/2010 (total 194)
+  1 gcc crash bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=43164
+
+2/22/2010 (total 193)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=6395
+
+2/22/2010 (total 192)
+  1 clang crash bug reported
+  http://www.llvm.org/bugs/show_bug.cgi?id=6387
+
+1/25/2010 (total 191)
+  1 gcc wrong code bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=42952
+
+1/25/2010 (total 190)
+  1 compcert 1.6 crash bug reported
+
+01/24/2010 (total 189)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=6126
+
+01/12/2010 (total 188)
+  1 gcc wrong code bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=42721
+
+01/12/2010 (total 187)
+  1 gcc crash bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=42717
+
+01/12/2010 (total 186)
+  1 gcc crash bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=42716
+
+01/01/2010 (total 185)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=5927
+
+12/26/2009 (total 184)
+  1 gcc wrong code bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=42512
+
+12/25/2009 (total 183)
+  1 clang wrong code bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=5886
+
+11/30/2009 (total 182)
+  1 gcc crash bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=42234
+
+11/30/2009 (total 181)
+  1 clang wrong code bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=5644
+
+11/29/2009 (total 180)
+  1 clang out-of-memory bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=5640
+
+11/22/2009 (total 179)
+  1 llvm wrong code bug reported
+  incorrect packed bitfields assignment.
+  http://llvm.org/bugs/show_bug.cgi?id=5591
+
+11/21/2009 (total 178)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=5586
+
+11/21/2009 (total 177)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=5584
+
+11/20/2009 (total 176)
+  1 llvm-gcc wrong code bug reported
+  bitfields related
+  http://llvm.org/bugs/show_bug.cgi?id=5579
+
+11/18/2009 (total 175)
+  1 clang wrong code bug reported
+  bitfields related
+  http://llvm.org/bugs/show_bug.cgi?id=5554
+
+11/17/2009 (total 174)
+  1 gcc wrong code bug reported
+  Linux kernel options related
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=42084
+
+11/12/2009 (total 173)
+  1 clang crash reported
+  http://llvm.org/bugs/show_bug.cgi?id=5474
+
+11/10/2009 (total 172)
+  1 gcc wrong code bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=42006
+
+11/10/2009 (total 171)
+  1 llvm crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=5459
+
+11/02/2009 (total 170)
+  1 gcc wrong code bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=41919
+
+11/02/2009 (total 169)
+  1 gcc wrong code bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=41917
+
+11/02/2009 (total 168)
+  1 clang wrong code bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=5373
+
+10/30/2009 (total 167)
+  1 clang crash bug reported
+
+10/24/2009 (total 166)
+  1 clang crash bug reported
+
+10/23/2009 (total 165)
+  1 clang wrong code bug reported 
+
+10/22/2009 (total 164)
+  1 gcc LTO termination bug reported
+
+10/3/2009 (total 163)
+  1 gcc wrong code bug reported
+
+9/29/2009
+  1 gcc wrong code bug reported
+
+9/22/2009
+  1 llvm crash bug reported  
+
+9/16/2009
+  1 llvm crash bug reported  
+
+8/25/2009 (total 159):
+  1 llvm crash bug reported
+
+8/23/2009 (total 158):
+  1 llvm crash bug reported
+
+8/18/2009 (total 157):
+  1 llvm crash bug, 1 wrong code bug reported
+
+8/17/2009 (total 155):
+  2 llvm crash bugs reported
+
+7/15/09 (total 153):
+  1 gcc wrong code reported
+
+7/13/09 (total 152):
+  3 llvm-gcc crash bugs reported
+
+5/31/09 (total 149):
+  1 suncc miscompilation (at all optimization levels)
+
+5/10/09 (total 148):
+  1 llvm crash
+
+5/2/09 (total 147):
+  1 llvm crash
+
+5/1/09 (total 146):
+  2 llvm crashes
+  1 clang crash
+  1 gcc wrong code
+
+4/24/09 (total 142):
+  6 llvm crashes
+  1 llvm wrong code
+  1 gcc crash
+
+genuine bugs that have been reported (total 134):
+  CW/CF: 2
+  gcc: 31
+  icc: 3
+  armcc: 8
+  llvm: 85
+  tcc: 1
+  cil: 1
+  avr-gcc: 3
+
+===================================================================
+
+Internal errors reported to ARM:
+  [0x87ecef:400483]
+  [0x2732f5:400483]
+  [0x9ab6dd:400483]
+  [0xc854a4:400400]
+  [0x3f08c3:400400]
+  [0x5593a7:400400]
+
+===================================================================
+
+llvm-msp430 backend bugs:
+
+3/12/2010 (total 5)
+  1 msp430 backend: wrong addressing mode for 'br' instruction reported
+  http://llvm.org/bugs/show_bug.cgi?id=6603
+
+3/10/2010 (total 4)
+  1 msp430 backend: arguments passed in wrong registers reported
+  http://llvm.org/bugs/show_bug.cgi?id=6573
+  (Actual bug: 2 bugs, codegen and optimization)
+
+2/18/2010 (total 2)
+  1 llvm-msp430 wrong code bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=6348
+
+2/18/2010 (total 1)
+  1 miscompilation of volatile variables in msp430 backend reported
+  http://llvm.org/bugs/show_bug.cgi?id=6349
+  (Actual bug: wrong addressing mode used by llvm in assembly.)
