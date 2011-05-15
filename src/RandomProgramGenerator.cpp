@@ -107,10 +107,9 @@ static void
 print_version(void)
 {
 	cout << PACKAGE_STRING << endl;
-#ifdef SVN_VERSION
-	cout << "svn version: " << SVN_VERSION << endl;
+#ifdef GIT_VERSION
+	cout << "Git version: " << GIT_VERSION << endl;
 #endif
-	// XXX print svn rev!
 	// XXX print copyright, contact info, etc.?
 }
 
