@@ -1,13 +1,17 @@
-# File made by `configure' and friends.
+# Files made by `configure' and friends.
 Makefile
 autom4te.cache
 config.log
 config.status
+libtool
 stamp-h.in
 
 # Files made by compilation.
 .deps/
+.libs/
 *.a
+*.la
+*.lo
 *.o
 *.obj
 

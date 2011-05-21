@@ -30,14 +30,17 @@
 ###############################################################################
 
 lib_LIBRARIES = libcsmith.a
+libcsmith_a_SOURCES = \
+	volatile_runtime.c
 
 # XXX --- This does not work; the library is still installed to $(libdir).
 # libcsmith_a_libdir = \
 # 	$(libdir)/$(PACKAGE)-$(VERSION)
 
-# XXX --- Yuck!
-libcsmith_a_SOURCES = \
-	volatile_runtime.c
+# Build a shared library, too, in case someone wants this.
+lib_LTLIBRARIES = libcsmith.la
+libcsmith_la_SOURCES = \
+	$(libcsmith_a_SOURCES)
 
 GIT_HASH := $(shell (cd "$(top_srcdir)" && git show -s --format=%h . 2>/dev/null) || echo exported)
 GIT_FLAG = -DGIT_VERSION=\"$(GIT_HASH)\"
@@ -50,6 +53,8 @@ GIT_FLAG = -DGIT_VERSION=\"$(GIT_HASH)\"
 libcsmith_a_CPPFLAGS = \
 	-DTARGET_CPU_$(target_cpu)=1 \
 	$(GIT_FLAG)
+libcsmith_la_CPPFLAGS = \
+	$(libcsmith_a_CPPFLAGS)
 
 libcsmith_a_includedir = \
 	$(includedir)/$(PACKAGE)-$(VERSION)
