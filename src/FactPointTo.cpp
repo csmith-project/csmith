@@ -62,8 +62,7 @@ std::vector<FactPointTo*> FactPointTo::facts_;
 bool
 FactPointTo::is_null() const 
 {
-    size_t i;
-    for (i=0; i<point_to_vars.size(); i++) {
+    for (size_t i=0; i<point_to_vars.size(); i++) {
         if (point_to_vars[i] == null_ptr) {
             return true;
         }
@@ -86,11 +85,10 @@ FactPointTo::is_dead() const
 bool 
 FactPointTo::has_invisible(const Function* func, const Statement* stm) const
 {
-    size_t i;
 	if (!func->is_var_visible(var, stm)) {
 		return true;
 	}
-    for (i=0; i<point_to_vars.size(); i++) {
+	for (size_t i=0; i<point_to_vars.size(); i++) {
 		const Variable* v = point_to_vars[i];
 		if (v != null_ptr && v != garbage_ptr && v != tbd_ptr) {
 			if (!func->is_var_visible(v, stm)) {
@@ -214,7 +212,7 @@ FactPointTo::abstract_fact_for_assign(const std::vector<const Fact*>& facts, con
             } 
             // otherwise use the analysis for the existing pointer
             else {
-                FactPointTo* f2 = (FactPointTo*)exist_fact;
+                const FactPointTo* const f2 = (const FactPointTo*)exist_fact;
                 return FactPointTo::make_facts(lvars, f2->get_point_to_vars());
             } 
         }
@@ -229,7 +227,7 @@ FactPointTo::abstract_fact_for_assign(const std::vector<const Fact*>& facts, con
             case eFuncCall: {
 				const FunctionInvocationUser* fiu = dynamic_cast<const FunctionInvocationUser*>(fi);
 				// find the fact regarding return variable
-				FactPointTo* rv_fact = (FactPointTo*)get_return_fact_for_invocation(fiu); 
+				const FactPointTo* const rv_fact = (const FactPointTo*)get_return_fact_for_invocation(fiu);
 				assert(rv_fact);
 				return FactPointTo::make_facts(lvars, rv_fact->get_point_to_vars());
             }
@@ -242,7 +240,7 @@ Fact*
 FactPointTo::abstract_fact_for_return(const std::vector<const Fact*>& facts, const ExpressionVariable* var, const Function* func)
 { 
     if (func->return_type->eType == ePointer) {
-		int indirect_level = var->get_indirect_level();
+		const int indirect_level = var->get_indirect_level();
 		// if > -2, means we "return &(&v)", which shouldn't happen in current impl.
 	    assert(indirect_level > -2);  
 		if (indirect_level == -1) {
@@ -257,7 +255,7 @@ FactPointTo::abstract_fact_for_return(const std::vector<const Fact*>& facts, con
 				assert(0);
 			}
 			else { 
-				return FactPointTo::make_fact(func->rv, ((FactPointTo*)exist_fact)->get_point_to_vars());
+				return FactPointTo::make_fact(func->rv, ((const FactPointTo*)exist_fact)->get_point_to_vars());
 			}
 		}
 		else {

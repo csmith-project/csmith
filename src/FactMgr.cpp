@@ -221,12 +221,11 @@ void
 update_facts_for_oos_vars(const vector<Variable*>& vars, FactVec& facts)
 {
 	//print_facts(facts);
-	size_t i, j;
 	// remove all facts related to vars, as they become irrelevant going out of scope
-	for (i=0; i<vars.size(); i++) {
+	for (size_t i=0; i<vars.size(); i++) {
 		const Variable* var = vars[i];
 		size_t len = facts.size();
-		for (j=0; j<len; j++) {
+		for (size_t j=0; j<len; j++) {
 			//print_facts(facts);
 			// remove all facts related to this variable
 			const Fact* f = facts[j];
@@ -238,11 +237,11 @@ update_facts_for_oos_vars(const vector<Variable*>& vars, FactVec& facts)
 		}
 	}
 	// mark any remaining facts that may point to a out-of-scope variable as "point to garbage"
-	for (i=0; i<vars.size(); i++) {
+	for (size_t i=0; i<vars.size(); i++) {
 		const Variable* var = vars[i];
-		for (j=0; j<facts.size(); j++) {
+		for (size_t j=0; j<facts.size(); j++) {
 			if (facts[j]->eCat == ePointTo) {
-				FactPointTo* f = (FactPointTo*)(facts[j]);
+				FactPointTo* const f = (FactPointTo*)(facts[j]);
 				FactPointTo* new_fact = f->mark_dead_var(var);
 				if (new_fact) {
 					facts[j] = new_fact;

@@ -452,7 +452,7 @@ ArrayVariable::OutputDef(std::ostream &out, int indent) const
 		else {
 			// use string initializer for arrays
 			// create the strings for initial values
-			size_t i, j;
+			size_t i;
 			vector<string> init_strings;
 			assert(init);
 			init_strings.push_back(init->to_string());
@@ -477,7 +477,8 @@ ArrayVariable::OutputDef(std::ostream &out, int indent) const
 			int k;
 			string str_initializer, str_dimen;
 			for (k=sizes.size()-1; k>=0; k--) {
-				size_t len = sizes[k];
+				const size_t len = sizes[k];
+				size_t j;
 				str_dimen = "{";
 				for (j=0; j<len; j++) {
 					// for last dimension, use magic number to choose an initial value
@@ -728,7 +729,7 @@ ArrayVariable::hash(std::ostream& out) const
 	// if not a suitable type for hashing, give up
 	if (field_names.size() == 0) return;
 
-	size_t i, j;
+	size_t i;
 	int indent = 1;
 	const vector<const Variable*>& cvs = Variable::ctrl_vars;
 	for (i=0; i<get_dimension(); i++) {
@@ -748,6 +749,7 @@ ArrayVariable::hash(std::ostream& out) const
 	output_with_indices(oss, cvs);
 	vname = oss.str();
 	if (CGOptions::compute_hash()) {
+		size_t j;
 		for (j=0; j<field_names.size(); j++) {
 			output_tab(out, indent);
 			out << "transparent_crc(" << vname << field_names[j] << ", \"" << vname << field_names[j] << "\", print_hash_value);" << endl;

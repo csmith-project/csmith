@@ -257,7 +257,6 @@ bool CGContext::read_pointed(const ExpressionVariable* v, const std::vector<cons
 
 bool CGContext::write_pointed(const Lhs* v, const std::vector<const Fact*>& facts)
 {
-	size_t i;
 	Effect effect_accum_copy = *effect_accum;
 	int indirect = v->get_indirect_level(); 
 	assert(indirect > 0);
@@ -271,6 +270,7 @@ bool CGContext::write_pointed(const Lhs* v, const std::vector<const Fact*>& fact
 	tmp.push_back(v->get_var()->get_collective());
 	// recursively trace the pointer(s) to find real variables they point to 
 	while (indirect-- > 0) {
+		size_t i;
 		tmp = FactPointTo::merge_pointees_of_pointers(tmp, facts);
 		// make sure there is no null/dead pointers
 		if (tmp.size()==0 || find_variable_in_set(tmp, FactPointTo::null_ptr)!=-1 || find_variable_in_set(tmp, FactPointTo::garbage_ptr) != -1) {
@@ -586,10 +586,11 @@ CGContext::in_conflict(const Effect& eff) const
 void
 CGContext::find_reachable_frame_vars(vector<const Fact*>& facts, VariableSet& frame_vars) const
 {
-	size_t i, j;
+	size_t i;
 	for (i=0; i<facts.size(); i++) {
 		if (facts[i]->eCat == ePointTo) {
 			const FactPointTo* fp = (const FactPointTo*)(facts[i]);
+			size_t j;
 			for (j=0; j<fp->get_point_to_vars().size(); j++) {
 				const Variable* v = fp->get_point_to_vars()[j];
 				if (is_frame_var(v)) {
@@ -605,9 +606,9 @@ CGContext::get_external_no_reads_writes(VariableSet& no_reads, VariableSet& no_w
 {  
 	no_reads.clear();
 	no_writes.clear();
-	size_t i;
-	 
+
 	if (rw_directive) {
+		size_t i;
 		for (i=0; i<rw_directive->no_read_vars.size(); i++) {
 			const Variable* v = rw_directive->no_read_vars[i];
 			if (v->is_global() || find_variable_in_set(frame_vars, v) != -1) {

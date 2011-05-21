@@ -291,8 +291,8 @@ Bookkeeper::record_pointer_comparisons(const Expression* lhs, const Expression* 
 			cmp_ptr_to_null++;
 		}
 		else if (lhs->term_type==eVariable && rhs->term_type==eVariable) {
-			const ExpressionVariable* left = (ExpressionVariable*)lhs;
-			const ExpressionVariable* right = (ExpressionVariable*)rhs;
+			const ExpressionVariable* const left = (const ExpressionVariable*)lhs;
+			const ExpressionVariable* const right = (const ExpressionVariable*)rhs;
 			if (left->get_indirect_level() == right->get_indirect_level()) {
 				cmp_ptr_to_ptr++;
 			}
