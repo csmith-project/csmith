@@ -5,20 +5,20 @@ use File::Basename;
 use strict;
 
 
-my $COV_BASE_PATH = $ENV{"COV_BASE_PATH"};
+my $COV_BASE_HOME = $ENV{"COV_BASE_HOME"};
 
-#die "please set env $COV_BASE_PATH first!"
-#    if (!defined($COV_BASE_PATH));
+#die "please set env $COV_BASE_HOME first!"
+#    if (!defined($COV_BASE_HOME));
 
 # for my convenience
-if (!defined($COV_BASE_PATH)) {
-    $COV_BASE_PATH = "/uusoc/exports/scratch/chenyang/branch-test/test_data";
+if (!defined($COV_BASE_HOME)) {
+    $COV_BASE_HOME = "/uusoc/exports/scratch/chenyang/branch-test/test_data";
 }
 
-my $COV_DATA_PATH = "$COV_BASE_PATH";
-my $LN_OUT = "$COV_BASE_PATH/ln.out";
-my $FN_OUT = "$COV_BASE_PATH/fn.out";
-my $BR_OUT = "$COV_BASE_PATH/br.out";
+my $COV_DATA_HOME = "$COV_BASE_HOME";
+my $LN_OUT = "$COV_BASE_HOME/ln.out";
+my $FN_OUT = "$COV_BASE_HOME/fn.out";
+my $BR_OUT = "$COV_BASE_HOME/br.out";
 
 my %base_overall_info = ();
 my %ext_overall_info = ();
@@ -233,7 +233,7 @@ sub analyze($$$) {
 
 ###########################################################
 
-die "$COV_DATA_PATH doesn't exist!" if (!(-d $COV_DATA_PATH));
+die "$COV_DATA_HOME doesn't exist!" if (!(-d $COV_DATA_HOME));
 
 if (@ARGV != 3) {
     help();

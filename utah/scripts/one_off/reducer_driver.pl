@@ -3,18 +3,18 @@ use strict;
 use Net::Domain qw(hostname hostfqdn hostdomain);
 use Cwd; 
 
-my $CSMITH_PATH = $ENV{"CSMITH_PATH"};
-die "please set CSMITH_PATH env first!"
-    if (!defined($CSMITH_PATH));
+my $CSMITH_HOME = $ENV{"CSMITH_HOME"};
+die "please set CSMITH_HOME env first!"
+    if (!defined($CSMITH_HOME));
 
-my $VOLATILE = $ENV{"VOLATILE_PATH"};
-die "please set VOLATILE_PATH env first!"
+my $VOLATILE = $ENV{"VOLATILE_HOME"};
+die "please set VOLATILE_HOME env first!"
     if (!defined($VOLATILE));
 
-$ENV{"PATH"} = "$ENV{VOLATILE_PATH}:$ENV{PATH}";
+$ENV{"PATH"} = "$ENV{VOLATILE_HOME}:$ENV{PATH}";
 
 my $host = hostname();
-my $TEST_ROOT = "$CSMITH_PATH/reducer";
+my $TEST_ROOT = "$CSMITH_HOME/reducer";
 if (@ARGV != 1 && @ARGV != 2 && @ARGV != 3) {
     die "usage: reducer_driver.pl <output-file> [test-root-dir] [eager-blind-simple-berkeley]\n\n";
 }
@@ -81,7 +81,7 @@ sub prepare_berkeley($) {
     
     system "rm -f t1.sh t2.sh t3.sh";
     if (!(-e "pre_reduction.c") || !(-s "pre_reduction.c")) {
-		my $csmith_cmd = "$CSMITH_PATH/src/csmith --concise -s $seed $OPT > pre_reduction.c";
+		my $csmith_cmd = "$CSMITH_HOME/src/csmith --concise -s $seed $OPT > pre_reduction.c";
 		system $csmith_cmd;
 	}
     return 1;
@@ -216,7 +216,7 @@ sub reduce_testcase($$$) {
 }
 
 #####################################################################
-#  loop through the test directories under $CSMITH_PATH/reducer, and
+#  loop through the test directories under $CSMITH_HOME/reducer, and
 #  run various kinds of reduction on the test cases, the results are
 #  written into $RESULT_FILE
 #####################################################################

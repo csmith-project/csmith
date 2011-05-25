@@ -57,9 +57,9 @@ my $PIN_MODE = "";
 
 if ($use_pintool) {
     # Before you could use pintool to test volatile accesses, change the pintool location when necessary!
-    my $PIN_PATH = $ENV{"PIN_PATH"};
-    die "oops: PIN_PATH environment variable needs to be set"
-        if (!defined($PIN_PATH));
+    my $PIN_HOME = $ENV{"PIN_HOME"};
+    die "oops: PIN_HOME environment variable needs to be set"
+        if (!defined($PIN_HOME));
 
     $XTRA .= " --enable-volatile-tests $platform --vol-addr-file $PINTOOL_VOL_ADDR ";
     my $pin_cmd;
@@ -68,10 +68,10 @@ if ($use_pintool) {
     # i.e., obj-ia32/pinatrace.so for x86 and obj-intel64/pinatrace.so for x86_64. 
     # For testing compcert, we use the ia32 version
     if (($platform eq "x86") || (not ($CSMITH_CCOMP eq ""))) {
-        $pin_cmd = "$PIN_PATH/ia32/bin/pinbin -t $PIN_PATH/source/tools/ManualExamples/obj-ia32/pinatrace.so -vol_input $PINTOOL_VOL_ADDR $PIN_MODE --";
+        $pin_cmd = "$PIN_HOME/ia32/bin/pinbin -t $PIN_HOME/source/tools/ManualExamples/obj-ia32/pinatrace.so -vol_input $PINTOOL_VOL_ADDR $PIN_MODE --";
     }
     elsif ($platform eq "x86_64") {
-        $pin_cmd = "$PIN_PATH/intel64/bin/pinbin -t $PIN_PATH/source/tools/ManualExamples/obj-intel64/pinatrace.so -vol_input $PINTOOL_VOL_ADDR $PIN_MODE --";
+        $pin_cmd = "$PIN_HOME/intel64/bin/pinbin -t $PIN_HOME/source/tools/ManualExamples/obj-intel64/pinatrace.so -vol_input $PINTOOL_VOL_ADDR $PIN_MODE --";
     }
     else {
         die "Invalid platform[$platform] for pintool!";
@@ -82,7 +82,7 @@ if ($use_pintool) {
 
 ##################################################################
 
-my $CSMITH_PATH = $ENV{"CSMITH_PATH"};
+my $CSMITH_HOME = $ENV{"CSMITH_HOME"};
 
 my $good = 0;
 
@@ -135,10 +135,10 @@ sub doit ($$) {
 
     my $cmd;
     if ($CSMITH_CCOMP eq "") {
-        $cmd = "$CSMITH_PATH/src/csmith $SEED $BF $PACK $XTRA --output $cfile";
+        $cmd = "$CSMITH_HOME/src/csmith $SEED $BF $PACK $XTRA --output $cfile";
     }
     else {
-        $cmd = "$CSMITH_PATH/src/csmith $SEED $CSMITH_CCOMP --output $cfile";
+        $cmd = "$CSMITH_HOME/src/csmith $SEED $CSMITH_CCOMP --output $cfile";
     }
     if ($PROVIDE_SEED) {
 	print "$cmd\n";
@@ -203,7 +203,7 @@ sub doit ($$) {
     if ($CSMITH_CCOMP ne "") {
         # ccomp doesn't like asserts, regenerate random programs without asserts.
         my $noparanoid_cfile = "${fn}_small.c";
-        my $cmd1 = "$CSMITH_PATH/src/csmith $CSMITH_CCOMP -s $seed  --output $noparanoid_cfile";
+        my $cmd1 = "$CSMITH_HOME/src/csmith $CSMITH_CCOMP -s $seed  --output $noparanoid_cfile";
         my $res1 = runit ("RunSafely.sh $CSMITH_TIMEOUT 1 /dev/zero randprog_output.txt $cmd1");
     }
 

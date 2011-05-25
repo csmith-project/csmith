@@ -16,13 +16,13 @@ use File::stat;
 
 ##############################################################
 
-my $CSMITH_PATH = $ENV{"CSMITH_PATH"};
-die "please set CSMITH_PATH env first!" if (!defined($CSMITH_PATH));
+my $CSMITH_HOME = $ENV{"CSMITH_HOME"};
+die "please set CSMITH_HOME env first!" if (!defined($CSMITH_HOME));
 
-my $VOLATILE = $ENV{"VOLATILE_PATH"};
-die "please set VOLATILE_PATH env first!" if (!defined($VOLATILE));
+my $VOLATILE = $ENV{"VOLATILE_HOME"};
+die "please set VOLATILE_HOME env first!" if (!defined($VOLATILE));
 
-$ENV{"PATH"} = "$ENV{VOLATILE_PATH}:$ENV{PATH}";
+$ENV{"PATH"} = "$ENV{VOLATILE_HOME}:$ENV{PATH}";
 
 my $COMPILER_TIMEOUT = 600;
 my $PROG_TIMEOUT = 2;
@@ -45,7 +45,7 @@ my $backup_cfile = "works.c";
 my $deltafile = "delta.out";
 my $backup_deltafile = "works.out";
 my $indent = "    ";
-my $HEADER = "-DCSMITH_MINIMAL -I$CSMITH_PATH/runtime";
+my $HEADER = "-DCSMITH_MINIMAL -I$CSMITH_HOME/runtime";
 my $STOP_AFTER = 300000;
 my $SUFFIX1 = "_a";
 my $SUFFIX2 = "_b";
@@ -227,7 +227,7 @@ sub get_score ($) {
 
 print "seed = $seed\n";
 
-system "${CSMITH_PATH}/src/csmith -s $seed $OPTS --delta-monitor simple --delta-output $deltafile > $cfile";
+system "${CSMITH_HOME}/src/csmith -s $seed $OPTS --delta-monitor simple --delta-output $deltafile > $cfile";
 
 my $res = run_test($cfile, 0, "checksum ");
 if (!$res) {
@@ -235,7 +235,7 @@ if (!$res) {
 }
 print "initial test 1 succeeds\n";
 
-system "${CSMITH_PATH}/src/csmith $OPTS --go-delta simple --delta-input $deltafile --no-delta-reduction > $cfile";
+system "${CSMITH_HOME}/src/csmith $OPTS --go-delta simple --delta-input $deltafile --no-delta-reduction > $cfile";
 
 $res = run_test($cfile, 0, "checksum ");
 if (!$res) {
@@ -263,7 +263,7 @@ while (1) {
 	print "$n reps done\n";
     }
 
-    system "${CSMITH_PATH}/src/csmith $OPTS --go-delta simple --delta-input ${backup_deltafile} --delta-output ${deltafile} > $cfile";
+    system "${CSMITH_HOME}/src/csmith $OPTS --go-delta simple --delta-input ${backup_deltafile} --delta-output ${deltafile} > $cfile";
     my $new_sz = get_score ($cfile);
 
     my $success = 0;

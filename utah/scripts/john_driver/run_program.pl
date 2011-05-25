@@ -298,9 +298,9 @@ sub print_size ($) {
 
 ############################## main ###########################
 
-my $VOLATILE_PATH=$ENV{"CSMITH_PATH"}."/utah/scripts/john_driver";
-die "oops: VOLATILE_PATH environment variable needs to be set"
-    if (!defined($VOLATILE_PATH));
+my $VOLATILE_HOME=$ENV{"CSMITH_HOME"}."/utah/scripts/john_driver";
+die "oops: VOLATILE_HOME environment variable needs to be set"
+    if (!defined($VOLATILE_HOME));
 
 my $nargs = scalar(@ARGV);
 
@@ -401,7 +401,7 @@ if ($arch eq "ia32") {
 
 } elsif ($arch eq "arm") {
 
-    my $arm_cmd = "rvdebug --batch --script=${VOLATILE_PATH}/rvd_script_1";
+    my $arm_cmd = "rvdebug --batch --script=${VOLATILE_HOME}/rvd_script_1";
     system "rm -f armul.trc";
     system "cp -f $exe __image.axf";
     # extra long time out-- this is just to cover up stupid bugs, the 

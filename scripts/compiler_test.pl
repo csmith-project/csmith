@@ -66,14 +66,14 @@ my $CSMITH_USER_OPTIONS = " --bitfields --packed-struct";
 
 my $RUN_PROGRAM = 0;
 
-my $CSMITH_PATH = $ENV{"CSMITH_PATH"}; 
+my $CSMITH_HOME = $ENV{"CSMITH_HOME"}; 
 my $good = 0; 
 my $crash_bug = 0;
 my $wrongcode_bug = 0;
 my $csmith_bug = 0;
 
-my $HEADER = "-I$CSMITH_PATH/runtime";
-my $CYGWIN_HEADER = "-I`cygpath -d ${CSMITH_PATH}/runtime`";
+my $HEADER = "-I$CSMITH_HOME/runtime";
+my $CYGWIN_HEADER = "-I`cygpath -d ${CSMITH_HOME}/runtime`";
 my $COMPILE_OPTIONS = "";
 my @COMPILERS;
 
@@ -237,7 +237,7 @@ sub test_one ($) {
     # run Csmith until generate a big enough program
     while (1) {
         unlink $cfile;
-        my $cmd = "$CSMITH_PATH/src/csmith $CSMITH_USER_OPTIONS --output $cfile";
+        my $cmd = "$CSMITH_HOME/src/csmith $CSMITH_USER_OPTIONS --output $cfile";
         my ($res, $exitcode) = runit($cmd, $CSMITH_TIMEOUT,  "csmith.out"); 
         # print "after run csmith: $res, $exitcode\n";
 	
@@ -288,8 +288,8 @@ sub usage () {
 
 ########################### main ##################################
 
-if (!(-f "$CSMITH_PATH/runtime/csmith.h")) {
-    print "Please point the environment variable CSMITH_PATH to the top-level\n";
+if (!(-f "$CSMITH_HOME/runtime/csmith.h")) {
+    print "Please point the environment variable CSMITH_HOME to the top-level\n";
     print "directory of your Csmith tree before running this script.\n";
     exit(-1);
 }

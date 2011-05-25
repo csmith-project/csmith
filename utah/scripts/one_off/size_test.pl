@@ -3,7 +3,7 @@
 use strict;
 use File::stat;
 
-my $CSMITH = $ENV{"CSMITH_PATH"}."/src/csmith";
+my $CSMITH = $ENV{"CSMITH_HOME"}."/src/csmith";
 
 my $N = 1000;
 

@@ -38,7 +38,7 @@ use File::stat;
 
 my $MIN_PROGRAM_SIZE = 8000;
 my $EXTRA_OPTIONS = "";
-my $CSMITH_PATH = $ENV{"CSMITH_PATH"};
+my $CSMITH_HOME = $ENV{"CSMITH_HOME"};
 my $COMPILER = "gcc -w -O0";
 my $VALGRIND = "";
 #my $VALGRIND = "valgrind -q --error-exitcode=66 ";
@@ -47,7 +47,7 @@ my $RUN_PROGRAM = 0;
 
 #######################################################################
 
-my $HEADER = "-I${CSMITH_PATH}/runtime";
+my $HEADER = "-I${CSMITH_HOME}/runtime";
 
 # properly parse the return value from system()
 sub runit ($$) {
@@ -98,7 +98,7 @@ sub run_tests ($) {
 	$CSMITH_OPTIONS .= yesno ("bitfields");
 	$CSMITH_OPTIONS .= yesno ("argc");
 
-	my $cmd = "$VALGRIND $CSMITH_PATH/src/csmith $CSMITH_OPTIONS $EXTRA_OPTIONS --output $cfile";
+	my $cmd = "$VALGRIND $CSMITH_HOME/src/csmith $CSMITH_OPTIONS $EXTRA_OPTIONS --output $cfile";
 	my $res = runit ($cmd, "csmith.out"); 
 	if ($res != 0 || !(-f $cfile) ) {
 		print "Failed to generate program: $cmd\n";
@@ -137,8 +137,8 @@ sub run_tests ($) {
 
 ########################### main ##################################
 
-if (!(-f "$CSMITH_PATH/runtime/csmith.h")) {
-    print "Please point the environment variable CSMITH_PATH to the top-level\n";
+if (!(-f "$CSMITH_HOME/runtime/csmith.h")) {
+    print "Please point the environment variable CSMITH_HOME to the top-level\n";
     print "directory of your Csmith tree before running this script.\n";
     exit(-1);
 }
