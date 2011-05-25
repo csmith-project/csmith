@@ -298,7 +298,7 @@ sub print_size ($) {
 
 ############################## main ###########################
 
-my $VOLATILE_PATH=$ENV{"CSMITH_PATH"}."/utah/scripts/john_driver";
+my $VOLATILE_PATH=$ENV{"CSMITH_HOME"}."/utah/scripts/john_driver";
 die "oops: VOLATILE_PATH environment variable needs to be set"
     if (!defined($VOLATILE_PATH));
 

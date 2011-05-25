@@ -32,8 +32,8 @@
 #my $VERBOSE = 1;
 my $VERBOSE = 0;
 
-my $CSMITH_PATH = $ENV{"CSMITH_PATH"};
-die if (!defined($CSMITH_PATH));
+my $CSMITH_HOME = $ENV{"CSMITH_HOME"};
+die if (!defined($CSMITH_HOME));
 
 sub runit ($$)
 {
@@ -64,8 +64,8 @@ sub go() {
     
     my $seed = int(rand(1000000000));
 
-    runit ("$CSMITH_PATH/src/csmith -s $seed", "foo.c");
-    runit ("$CSMITH_PATH/src/csmith -s $seed --identify-wrappers", "foo_id.c");
+    runit ("$CSMITH_HOME/src/csmith -s $seed", "foo.c");
+    runit ("$CSMITH_HOME/src/csmith -s $seed --identify-wrappers", "foo_id.c");
     open INF, "<wrapper.h" or die;
     my $line = <INF>;
     chomp $line;
@@ -79,12 +79,12 @@ sub go() {
 
     print "seed = $seed\n";
 
-    runit ("current-gcc -O0 foo.c -o foo -I${CSMITH_PATH}/runtime", "gcc-out.txt");
+    runit ("current-gcc -O0 foo.c -o foo -I${CSMITH_HOME}/runtime", "gcc-out.txt");
     my $res = run_timeout ("./foo", "out.txt");
     return if ($res != 0);
     system "cat out.txt | grep checksum";
 
-    runit ("current-gcc -O0 foo_id.c -o foo_id -DLOG_WRAPPERS -I. -I${CSMITH_PATH}/runtime", "gcc-out.txt");
+    runit ("current-gcc -O0 foo_id.c -o foo_id -DLOG_WRAPPERS -I. -I${CSMITH_HOME}/runtime", "gcc-out.txt");
     $res = run_timeout ("./foo_id", "out.txt");
     return if ($res != 0);
     system "cat out.txt";
@@ -133,9 +133,9 @@ sub go() {
 	$failed = "0";
     }
 
-    runit ("$CSMITH_PATH/src/csmith -s $seed --safe-math-wrappers $failed", "foo_unwrap.c");
+    runit ("$CSMITH_HOME/src/csmith -s $seed --safe-math-wrappers $failed", "foo_unwrap.c");
 
-    runit ("current-gcc -O0 foo_unwrap.c -o foo_unwrap -I${CSMITH_PATH}/runtime", "gcc-out.txt");
+    runit ("current-gcc -O0 foo_unwrap.c -o foo_unwrap -I${CSMITH_HOME}/runtime", "gcc-out.txt");
     $res = run_timeout ("./foo_unwrap", "out.txt");
     return if ($res != 0);
     system "grep checksum out.txt";

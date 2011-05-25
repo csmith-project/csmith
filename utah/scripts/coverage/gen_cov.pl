@@ -35,8 +35,8 @@ else {
     $ENV{"LD_LIBRARY_PATH"} = "$EXPECT_BASE_PATH/lib";
 }
 
-my $CSMITH_PATH = "$COMPILER_SOURCES_PATH/csmith";
-my $CSMITH = "$CSMITH_PATH/src/csmith";
+my $CSMITH_HOME = "$COMPILER_SOURCES_PATH/csmith";
+my $CSMITH = "$CSMITH_HOME/src/csmith";
 
 my $LCOV_PATH = "$COMPILER_SOURCES_PATH/lcov-1.8/bin";
 my $LCOV = "$LCOV_PATH/lcov";
@@ -214,7 +214,7 @@ sub test_compilers($) {
             my $out = "rand.out";
             my $compilerout = "${exe}_compiler.out";
 
-            my $command = "RunSafely.sh $COMPILER_TIMEOUT 1 /dev/null $compilerout $compiler_exec $opt $extra_opts $cfile -o $exe -I${CSMITH_PATH}/runtime";
+            my $command = "RunSafely.sh $COMPILER_TIMEOUT 1 /dev/null $compilerout $compiler_exec $opt $extra_opts $cfile -o $exe -I${CSMITH_HOME}/runtime";
 
             my $res = runit ($command);
             if (($res != 0) || (!(-e $exe))) {
@@ -240,7 +240,7 @@ sub do_one_test() {
     chdir $CSMITH_OUT or die;
 
     system "rm -rf ./*";
-    my $cmd = "$CSMITH_PATH/src/csmith $CSMITH_OPTS --output $cfile";
+    my $cmd = "$CSMITH_HOME/src/csmith $CSMITH_OPTS --output $cfile";
     #print "$cmd\n";
     my $res = runit ("RunSafely.sh $CSMITH_TIMEOUT 1 /dev/zero csmith_output.txt $cmd");
 

@@ -5,8 +5,8 @@
 
 use strict;
 
-my $CSMITH_PATH = $ENV{"CSMITH_PATH"};
-die if (!defined($CSMITH_PATH));
+my $CSMITH_HOME = $ENV{"CSMITH_HOME"};
+die if (!defined($CSMITH_HOME));
 
 my $outfile = "orig_csmith_output.c";
 for (my $i=0; $i<scalar(@ARGV); $i++) {
@@ -16,8 +16,8 @@ for (my $i=0; $i<scalar(@ARGV); $i++) {
 }
 die if (!defined($outfile)); 
 
-system "${CSMITH_PATH}/src/csmith @ARGV";
+system "${CSMITH_HOME}/src/csmith @ARGV";
 
-system "gcc -E -I${CSMITH_PATH}/runtime -DCSMITH_MINIMAL $outfile | ${CSMITH_PATH}/utah/scripts/reduce/shorten.pl > small.c";
+system "gcc -E -I${CSMITH_HOME}/runtime -DCSMITH_MINIMAL $outfile | ${CSMITH_HOME}/utah/scripts/reduce/shorten.pl > small.c";
 
 system "indent small.c";

@@ -2,7 +2,7 @@ echo > delta.log
 
 date >> delta.log
 
-${CSMITH_PATH}/utah/scripts/reduce.sh >> delta.log
+${CSMITH_HOME}/utah/scripts/reduce.sh >> delta.log
 
 echo here1
 grep -c here1 delta.log >> delta.log

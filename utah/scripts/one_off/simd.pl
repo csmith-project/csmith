@@ -6,12 +6,12 @@ use File::stat;
 
 my $MIN_PROGRAM_SIZE = 8000;
 my $EXTRA_OPTIONS = "";
-my $CSMITH_PATH = $ENV{"CSMITH_PATH"};
+my $CSMITH_HOME = $ENV{"CSMITH_HOME"};
 my $COMPILER = "icc -w";  
 
 #######################################################################
 
-my $HEADER = "-I${CSMITH_PATH}/runtime";
+my $HEADER = "-I${CSMITH_HOME}/runtime";
 
 # find lines in a file that match a given pattern, return line# in the file
 sub match_in_file($$\@) {
@@ -74,7 +74,7 @@ sub run_tests ($) {
 	    $CSMITH_OPTIONS .= yesno ("divs");
 	    $CSMITH_OPTIONS .= yesno ("muls");
 
-	    my $cmd = "$CSMITH_PATH/src/csmith $CSMITH_OPTIONS $EXTRA_OPTIONS --output $cfile";
+	    my $cmd = "$CSMITH_HOME/src/csmith $CSMITH_OPTIONS $EXTRA_OPTIONS --output $cfile";
 	    my $res = runit ($cmd, "csmith.out"); 
 	    if ($res != 0 || !(-f $cfile) ) {
 	        print "Failed to generate program: $cmd\n";
@@ -116,8 +116,8 @@ sub run_tests ($) {
 
 ########################### main ##################################
 
-if (!(-f "$CSMITH_PATH/runtime/csmith.h")) {
-    print "Please point the environment variable CSMITH_PATH to the top-level\n";
+if (!(-f "$CSMITH_HOME/runtime/csmith.h")) {
+    print "Please point the environment variable CSMITH_HOME to the top-level\n";
     print "directory of your Csmith tree before running this script.";
     exit(-1);
 }

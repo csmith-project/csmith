@@ -1,7 +1,7 @@
 # optionally preprocess
 # save sequential backup versions instead of hardcoding these
 
-DIR=${CSMITH_PATH}/utah/scripts/reduce
+DIR=${CSMITH_HOME}/utah/scripts/reduce
 
 cp small.c small-1.c
 perl -pi.bak -e 's/^\s*\n//g' small.c

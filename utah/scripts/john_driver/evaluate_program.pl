@@ -70,11 +70,11 @@ my $BAIL_ON_ZERO_WRITES = 0;
 
 ####################################################################
 
-my $CSMITH_PATH=$ENV{"CSMITH_PATH"};
-die "oops: CSMITH_PATH environment variable needs to be set"
-    if (!defined($CSMITH_PATH));
+my $CSMITH_HOME=$ENV{"CSMITH_HOME"};
+die "oops: CSMITH_HOME environment variable needs to be set"
+    if (!defined($CSMITH_HOME));
 
-my $VOLATILE_PATH=$CSMITH_PATH."/utah/scripts/john_driver";
+my $VOLATILE_PATH=$CSMITH_HOME."/utah/scripts/john_driver";
 
 my $LOCKFN = "/var/tmp/version_search_lockfile";
 
@@ -677,8 +677,8 @@ sub compile_and_run ($$$$$$$) {
     my $compilerout = "${exe}_compiler.out";
 
     # ccomp doesn't allow -I option appearing after $srcfile
-    #my $command = "RunSafely.sh $COMPILER_TIMEOUT 1 /dev/null $compilerout $valgrind $compiler $opt $xtra $srcfile -o $exe $custom_options $wrapstr $notmp -I${CSMITH_PATH}/runtime";
-    my $command = "RunSafely.sh $COMPILER_TIMEOUT 1 /dev/null $compilerout $valgrind $compiler $opt $xtra $xxtra $notmp -I${CSMITH_PATH}/runtime $srcfile -o $exe $custom_options $wrapstr $notmp ";
+    #my $command = "RunSafely.sh $COMPILER_TIMEOUT 1 /dev/null $compilerout $valgrind $compiler $opt $xtra $srcfile -o $exe $custom_options $wrapstr $notmp -I${CSMITH_HOME}/runtime";
+    my $command = "RunSafely.sh $COMPILER_TIMEOUT 1 /dev/null $compilerout $valgrind $compiler $opt $xtra $xxtra $notmp -I${CSMITH_HOME}/runtime $srcfile -o $exe $custom_options $wrapstr $notmp ";
 
     print "$command\n";
     

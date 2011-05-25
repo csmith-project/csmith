@@ -82,7 +82,7 @@ if ($use_pintool) {
 
 ##################################################################
 
-my $CSMITH_PATH = $ENV{"CSMITH_PATH"};
+my $CSMITH_HOME = $ENV{"CSMITH_HOME"};
 
 my $good = 0;
 
@@ -135,10 +135,10 @@ sub doit ($$) {
 
     my $cmd;
     if ($CSMITH_CCOMP eq "") {
-        $cmd = "$CSMITH_PATH/src/csmith $SEED $BF $PACK $XTRA --output $cfile";
+        $cmd = "$CSMITH_HOME/src/csmith $SEED $BF $PACK $XTRA --output $cfile";
     }
     else {
-        $cmd = "$CSMITH_PATH/src/csmith $SEED $CSMITH_CCOMP --output $cfile";
+        $cmd = "$CSMITH_HOME/src/csmith $SEED $CSMITH_CCOMP --output $cfile";
     }
     if ($PROVIDE_SEED) {
 	print "$cmd\n";
@@ -203,7 +203,7 @@ sub doit ($$) {
     if ($CSMITH_CCOMP ne "") {
         # ccomp doesn't like asserts, regenerate random programs without asserts.
         my $noparanoid_cfile = "${fn}_small.c";
-        my $cmd1 = "$CSMITH_PATH/src/csmith $CSMITH_CCOMP -s $seed  --output $noparanoid_cfile";
+        my $cmd1 = "$CSMITH_HOME/src/csmith $CSMITH_CCOMP -s $seed  --output $noparanoid_cfile";
         my $res1 = runit ("RunSafely.sh $CSMITH_TIMEOUT 1 /dev/zero randprog_output.txt $cmd1");
     }
 

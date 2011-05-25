@@ -59,8 +59,8 @@ $FC .= "--no-pointers ";
 
 ############################################################
 
-my $CSMITH=$ENV{"CSMITH_PATH"};
-die "please export environment variable CSMITH_PATH" if (!defined($CSMITH));
+my $CSMITH=$ENV{"CSMITH_HOME"};
+die "please export environment variable CSMITH_HOME" if (!defined($CSMITH));
 
 my $FRAMAC=$ENV{"FRAMAC_PATH"};
 die "please export environment variable FRAMAC_PATH" if (!defined($FRAMAC));

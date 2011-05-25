@@ -15,7 +15,7 @@ my $QUIET = "--quiet";
 my $platform = "x86";
 
 ##################################################################
-my $CSMITH_PATH = $ENV{"CSMITH_PATH"};
+my $CSMITH_HOME = $ENV{"CSMITH_HOME"};
 my $good = 0; 
 my $bug = 0;
 my @COMPILERS = (
@@ -29,7 +29,7 @@ my @COMPILERS = (
     "cl -Ox",
     "cl -Oy",
 );
-my $HEADER = "-I$CSMITH_PATH/runtime";
+my $HEADER = "-I$CSMITH_HOME/runtime";
 
 sub read_value_from_file($$) {
     my ($fn, $match) = @_;
@@ -147,7 +147,7 @@ sub test_one ($$) {
     my $cfile = "${fn}.c";
    
     # run Csmith
-    my $cmd = "$CSMITH_PATH/src/csmith $BF $PACK $XTRA --output $cfile";
+    my $cmd = "$CSMITH_HOME/src/csmith $BF $PACK $XTRA --output $cfile";
     my ($res, $exitcode) = runit($cmd, $CSMITH_TIMEOUT,  "csmith.out"); 
     # print "after run csmith: $res, $exitcode\n";
 
