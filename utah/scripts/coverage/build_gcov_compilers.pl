@@ -10,19 +10,19 @@ my $NICE = "nice -10";
 
 my $CPUS = Sys::CPU::cpu_count();    
 
-my $COV_BASE_PATH = $ENV{"COV_BASE_PATH"};
+my $COV_BASE_HOME = $ENV{"COV_BASE_HOME"};
 
 ########################################################
 
-#die "please set env $COV_BASE_PATH first!"
-#    if (!defined($COV_BASE_PATH));
+#die "please set env $COV_BASE_HOME first!"
+#    if (!defined($COV_BASE_HOME));
 
 # for my convenience
-if (!defined($COV_BASE_PATH)) {
-    $COV_BASE_PATH = "/uusoc/exports/scratch/chenyang/tmp/branch_test";
+if (!defined($COV_BASE_HOME)) {
+    $COV_BASE_HOME = "/uusoc/exports/scratch/chenyang/tmp/branch_test";
 }
 
-my $COMPILER_SOURCES_PATH = "$COV_BASE_PATH/sources";
+my $COMPILER_SOURCES_HOME = "$COV_BASE_HOME/sources";
 
 my @compilers = (
     "gcc",
@@ -32,12 +32,12 @@ my @compilers = (
 );
 
 my %paths = (
-    "gcc" => ["$COMPILER_SOURCES_PATH", "current-gcc"],
-    "llvm" => ["$COMPILER_SOURCES_PATH", "llvm"],
-    "llvm-regular" => ["$COMPILER_SOURCES_PATH", "llvm-regular"],
-    "llvm-gcc" => ["$COMPILER_SOURCES_PATH", "llvm-gcc-4.2"],
-    "clang" => ["$COMPILER_SOURCES_PATH/llvm/tools", "clang"],
-    "llvm-testsuite" => ["$COMPILER_SOURCES_PATH/llvm/projects", "test-suite"],
+    "gcc" => ["$COMPILER_SOURCES_HOME", "current-gcc"],
+    "llvm" => ["$COMPILER_SOURCES_HOME", "llvm"],
+    "llvm-regular" => ["$COMPILER_SOURCES_HOME", "llvm-regular"],
+    "llvm-gcc" => ["$COMPILER_SOURCES_HOME", "llvm-gcc-4.2"],
+    "clang" => ["$COMPILER_SOURCES_HOME/llvm/tools", "clang"],
+    "llvm-testsuite" => ["$COMPILER_SOURCES_HOME/llvm/projects", "test-suite"],
 );
 
 my %svn_dependencies = (
@@ -67,12 +67,12 @@ my %programs = (
 my $enable_optimized = "";
 
 my %config_options = (
-    "gcc" => "--prefix=$COV_BASE_PATH --program-prefix=current- --enable-languages=c,c++ --enable-lto --enable-coverage --disable-bootstrap",
-    "gcc-opt" => "--prefix=$COV_BASE_PATH --program-prefix=current- --enable-languages=c,c++ --enable-lto --enable-coverage=opt --disable-bootstrap",
-    "llvm" => "--prefix=$COV_BASE_PATH",
-    "llvm-opt" => "--prefix=$COV_BASE_PATH --enable-optimized",
-    "llvm-regular" => "--prefix=$COV_BASE_PATH --enable-optimized",
-    "llvm-gcc" => "--prefix=$COV_BASE_PATH --enable-languages=c,c++ --program-prefix=llvm- --enable-checking --enable-llvm=$COMPILER_SOURCES_PATH/llvm-regular/build --disable-bootstrap --disable-multilib",
+    "gcc" => "--prefix=$COV_BASE_HOME --program-prefix=current- --enable-languages=c,c++ --enable-lto --enable-coverage --disable-bootstrap",
+    "gcc-opt" => "--prefix=$COV_BASE_HOME --program-prefix=current- --enable-languages=c,c++ --enable-lto --enable-coverage=opt --disable-bootstrap",
+    "llvm" => "--prefix=$COV_BASE_HOME",
+    "llvm-opt" => "--prefix=$COV_BASE_HOME --enable-optimized",
+    "llvm-regular" => "--prefix=$COV_BASE_HOME --enable-optimized",
+    "llvm-gcc" => "--prefix=$COV_BASE_HOME --enable-languages=c,c++ --program-prefix=llvm- --enable-checking --enable-llvm=$COMPILER_SOURCES_HOME/llvm-regular/build --disable-bootstrap --disable-multilib",
 );
 
 my %make_options = (
@@ -245,7 +245,7 @@ sub prepare_testsuites() {
 
     download($program, $path, $dir, $svn_repo);
 
-    my $working_dir = "$COMPILER_SOURCES_PATH/llvm/build";
+    my $working_dir = "$COMPILER_SOURCES_HOME/llvm/build";
     print "chaning to $working_dir\n";
     chdir $working_dir or die;
 
@@ -261,7 +261,7 @@ sub prepare_testsuites() {
     my $res = runit($cp_cmd);
     die "Can't exec $cp_cmd" if ($res != 0);
 
-    $ENV{"PATH"} = "$COV_BASE_PATH/bin:$ENV{'PATH'}";
+    $ENV{"PATH"} = "$COV_BASE_HOME/bin:$ENV{'PATH'}";
     my $opt = "";
     $opt = "--enable-optimized" if (not ($enable_optimized eq ""));
     $res = runit("../configure $opt");
@@ -310,11 +310,11 @@ sub main() {
     go_build();
 }
 
-if (!(-d $COV_BASE_PATH)) {
-    mkdir $COV_BASE_PATH or die;
+if (!(-d $COV_BASE_HOME)) {
+    mkdir $COV_BASE_HOME or die;
 }
-if (!(-d "$COMPILER_SOURCES_PATH")) {
-    mkdir "$COMPILER_SOURCES_PATH" or die;
+if (!(-d "$COMPILER_SOURCES_HOME")) {
+    mkdir "$COMPILER_SOURCES_HOME" or die;
 }
 
 main();

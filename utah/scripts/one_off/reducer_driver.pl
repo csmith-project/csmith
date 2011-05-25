@@ -7,11 +7,11 @@ my $CSMITH_HOME = $ENV{"CSMITH_HOME"};
 die "please set CSMITH_HOME env first!"
     if (!defined($CSMITH_HOME));
 
-my $VOLATILE = $ENV{"VOLATILE_PATH"};
-die "please set VOLATILE_PATH env first!"
+my $VOLATILE = $ENV{"VOLATILE_HOME"};
+die "please set VOLATILE_HOME env first!"
     if (!defined($VOLATILE));
 
-$ENV{"PATH"} = "$ENV{VOLATILE_PATH}:$ENV{PATH}";
+$ENV{"PATH"} = "$ENV{VOLATILE_HOME}:$ENV{PATH}";
 
 my $host = hostname();
 my $TEST_ROOT = "$CSMITH_HOME/reducer";

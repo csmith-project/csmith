@@ -57,9 +57,9 @@ my $PIN_MODE = "";
 
 if ($use_pintool) {
     # Before you could use pintool to test volatile accesses, change the pintool location when necessary!
-    my $PIN_PATH = $ENV{"PIN_PATH"};
-    die "oops: PIN_PATH environment variable needs to be set"
-        if (!defined($PIN_PATH));
+    my $PIN_HOME = $ENV{"PIN_HOME"};
+    die "oops: PIN_HOME environment variable needs to be set"
+        if (!defined($PIN_HOME));
 
     $XTRA .= " --enable-volatile-tests $platform --vol-addr-file $PINTOOL_VOL_ADDR ";
     my $pin_cmd;
@@ -68,10 +68,10 @@ if ($use_pintool) {
     # i.e., obj-ia32/pinatrace.so for x86 and obj-intel64/pinatrace.so for x86_64. 
     # For testing compcert, we use the ia32 version
     if (($platform eq "x86") || (not ($CSMITH_CCOMP eq ""))) {
-        $pin_cmd = "$PIN_PATH/ia32/bin/pinbin -t $PIN_PATH/source/tools/ManualExamples/obj-ia32/pinatrace.so -vol_input $PINTOOL_VOL_ADDR $PIN_MODE --";
+        $pin_cmd = "$PIN_HOME/ia32/bin/pinbin -t $PIN_HOME/source/tools/ManualExamples/obj-ia32/pinatrace.so -vol_input $PINTOOL_VOL_ADDR $PIN_MODE --";
     }
     elsif ($platform eq "x86_64") {
-        $pin_cmd = "$PIN_PATH/intel64/bin/pinbin -t $PIN_PATH/source/tools/ManualExamples/obj-intel64/pinatrace.so -vol_input $PINTOOL_VOL_ADDR $PIN_MODE --";
+        $pin_cmd = "$PIN_HOME/intel64/bin/pinbin -t $PIN_HOME/source/tools/ManualExamples/obj-intel64/pinatrace.so -vol_input $PINTOOL_VOL_ADDR $PIN_MODE --";
     }
     else {
         die "Invalid platform[$platform] for pintool!";

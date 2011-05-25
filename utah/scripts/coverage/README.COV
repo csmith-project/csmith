@@ -3,11 +3,11 @@
 
 ************************************************************
 - Quick start to build optimized compilers:
-  * setup $COV_BASE_PATH environment, e.g in bash:
-    export COV_BASE_PATH=/uusoc/exports/scratch/chenyang/branch-test,
+  * setup $COV_BASE_HOME environment, e.g in bash:
+    export COV_BASE_HOME=/uusoc/exports/scratch/chenyang/branch-test,
     where holds all coverage stuff
 
-  * cd $COV_BASE_PATH
+  * cd $COV_BASE_HOME
     mkdir sources
 
     and check out csmith:
@@ -18,17 +18,17 @@
 
   * ./build_gcov_compilers.pl -enable-opt
 
-  * optimized gcc and clang were installed in $COV_BASE_PATH/bin
+  * optimized gcc and clang were installed in $COV_BASE_HOME/bin
 
 ************************************************************
 
 - Coverage test steps:
 
-  * setup $COV_BASE_PATH environment, e.g in bash:
-    export COV_BASE_PATH=/uusoc/exports/scratch/chenyang/branch-test,
+  * setup $COV_BASE_HOME environment, e.g in bash:
+    export COV_BASE_HOME=/uusoc/exports/scratch/chenyang/branch-test,
     where holds all coverage stuff
 
-  * cd $COV_BASE_PATH
+  * cd $COV_BASE_HOME
     mkdir sources
 
     and check out csmith:
@@ -41,11 +41,11 @@
 
   * run build_gcov_compilers.pl script, which will:
 
-    - download compilers sources to $COV_BASE_PATH/sources;
+    - download compilers sources to $COV_BASE_HOME/sources;
 
     - build compilers with appropriate options
 
-    - install compilers to $COV_BASE_PATH
+    - install compilers to $COV_BASE_HOME
 
   * run gen_cov.pl, which will run coverage tests for llvm and gcc. 
     For each tested compilers, the script will:

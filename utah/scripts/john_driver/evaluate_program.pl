@@ -74,7 +74,7 @@ my $CSMITH_HOME=$ENV{"CSMITH_HOME"};
 die "oops: CSMITH_HOME environment variable needs to be set"
     if (!defined($CSMITH_HOME));
 
-my $VOLATILE_PATH=$CSMITH_HOME."/utah/scripts/john_driver";
+my $VOLATILE_HOME=$CSMITH_HOME."/utah/scripts/john_driver";
 
 my $LOCKFN = "/var/tmp/version_search_lockfile";
 
@@ -697,7 +697,7 @@ sub compile_and_run ($$$$$$$) {
     }
     
     if (1) {
-	system "cat $compilerout >> ${VOLATILE_PATH}/compiler_output.txt";
+	system "cat $compilerout >> ${VOLATILE_HOME}/compiler_output.txt";
     }
 
     if ($VALGRIND_ON_COMPILER) {
@@ -969,7 +969,7 @@ sub test_compiler ($$$$$) {
 		    system "touch ../../${NOTEFILE_PREFIX}checksum_$compiler.txt";
 		    $interesting = 1;
 		    triage($compiler, 
-			   "$VOLATILE_PATH/test-${arch}-${base_compiler}-wrong-code-template.sh", 
+			   "$VOLATILE_HOME/test-${arch}-${base_compiler}-wrong-code-template.sh", 
 			   $opt1, $opt, $root, $base_compiler, $arch);
 		    $consistent = 0;
 		    last;
@@ -983,7 +983,7 @@ sub test_compiler ($$$$$) {
 			print "INTERNAL VOLATILE FAILURE${write_problem} $compiler $opt WRAP=$wrap\n";
 			$interesting = 1;
 			triage($compiler, 
-			       "$VOLATILE_PATH/test-${arch}-${base_compiler}-volatile-template.sh", 
+			       "$VOLATILE_HOME/test-${arch}-${base_compiler}-volatile-template.sh", 
 			       $opt1, $opt, $root, $base_compiler, $arch);
 			$consistent = 0;
 			last;

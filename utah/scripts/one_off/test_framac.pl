@@ -62,8 +62,8 @@ $FC .= "--no-pointers ";
 my $CSMITH=$ENV{"CSMITH_HOME"};
 die "please export environment variable CSMITH_HOME" if (!defined($CSMITH));
 
-my $FRAMAC=$ENV{"FRAMAC_PATH"};
-die "please export environment variable FRAMAC_PATH" if (!defined($FRAMAC));
+my $FRAMAC=$ENV{"FRAMAC_HOME"};
+die "please export environment variable FRAMAC_HOME" if (!defined($FRAMAC));
 
 sub one_test($) {
     (my $seed) = @_;

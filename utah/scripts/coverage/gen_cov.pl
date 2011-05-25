@@ -5,59 +5,59 @@ use warnings;
 use Digest::MD5 qw(md5);
 use File::stat;
 
-my $COV_BASE_PATH = $ENV{"COV_BASE_PATH"};
+my $COV_BASE_HOME = $ENV{"COV_BASE_HOME"};
 
-#die "please set env $COV_BASE_PATH first!"
-#    if (!defined($COV_BASE_PATH));
+#die "please set env $COV_BASE_HOME first!"
+#    if (!defined($COV_BASE_HOME));
 
 # for my convenience
-if (!defined($COV_BASE_PATH)) {
-    $COV_BASE_PATH = "/uusoc/exports/scratch/chenyang/branch-test";
+if (!defined($COV_BASE_HOME)) {
+    $COV_BASE_HOME = "/uusoc/exports/scratch/chenyang/branch-test";
 }
 
-my $PATH = "$COV_BASE_PATH/bin";
-my $COMPILER_SOURCES_PATH = "$COV_BASE_PATH/sources";
+my $PATH = "$COV_BASE_HOME/bin";
+my $COMPILER_SOURCES_HOME = "$COV_BASE_HOME/sources";
 
 # tmp setting on bethe where expect was installed locally
 # we don't need those if expect was installed via apt-get, etc
-my $EXPECT_BASE_PATH = "$COV_BASE_PATH/expect/usr";
+my $EXPECT_BASE_HOME = "$COV_BASE_HOME/expect/usr";
 
-my $VOLATILE_PATH = "$COMPILER_SOURCES_PATH/volatile";
+my $VOLATILE_HOME = "$COMPILER_SOURCES_HOME/volatile";
 
-$PATH = "$EXPECT_BASE_PATH/bin:$VOLATILE_PATH:$PATH";
+$PATH = "$EXPECT_BASE_HOME/bin:$VOLATILE_HOME:$PATH";
 
 $ENV{"PATH"} = "$PATH:$ENV{'PATH'}";
 
 if (defined($ENV{'LD_LIBRARY_PATH'})) {
-    $ENV{"LD_LIBRARY_PATH"} = "$EXPECT_BASE_PATH/lib:$ENV{'LD_LIBRARY_PATH'}";
+    $ENV{"LD_LIBRARY_PATH"} = "$EXPECT_BASE_HOME/lib:$ENV{'LD_LIBRARY_PATH'}";
 }
 else {
-    $ENV{"LD_LIBRARY_PATH"} = "$EXPECT_BASE_PATH/lib";
+    $ENV{"LD_LIBRARY_PATH"} = "$EXPECT_BASE_HOME/lib";
 }
 
-my $CSMITH_HOME = "$COMPILER_SOURCES_PATH/csmith";
+my $CSMITH_HOME = "$COMPILER_SOURCES_HOME/csmith";
 my $CSMITH = "$CSMITH_HOME/src/csmith";
 
-my $LCOV_PATH = "$COMPILER_SOURCES_PATH/lcov-1.8/bin";
-my $LCOV = "$LCOV_PATH/lcov";
-my $LCOV_GEN_HTML = "$LCOV_PATH/genhtml";
-my $COV_DATA_PATH = "$COV_BASE_PATH/test_data";
+my $LCOV_HOME = "$COMPILER_SOURCES_HOME/lcov-1.8/bin";
+my $LCOV = "$LCOV_HOME/lcov";
+my $LCOV_GEN_HTML = "$LCOV_HOME/genhtml";
+my $COV_DATA_HOME = "$COV_BASE_HOME/test_data";
 
 my %compilers = (
-    "gcc" => "$COV_BASE_PATH/bin/current-gcc",
-    #"clang" => "$COV_BASE_PATH/bin/clang",
-    "llvm" => "$COV_BASE_PATH/bin/clang",
+    "gcc" => "$COV_BASE_HOME/bin/current-gcc",
+    #"clang" => "$COV_BASE_HOME/bin/clang",
+    "llvm" => "$COV_BASE_HOME/bin/clang",
 );
 
 my %compiler_build_paths = (
-    "gcc" => "$COMPILER_SOURCES_PATH/current-gcc/build",
-    "llvm" => "$COMPILER_SOURCES_PATH/llvm/build",
-    "clang" => "$COMPILER_SOURCES_PATH/llvm/build/tools/clang",
-    "llvm-testsuite" => "$COMPILER_SOURCES_PATH/llvm/build/projects/test-suite",
+    "gcc" => "$COMPILER_SOURCES_HOME/current-gcc/build",
+    "llvm" => "$COMPILER_SOURCES_HOME/llvm/build",
+    "clang" => "$COMPILER_SOURCES_HOME/llvm/build/tools/clang",
+    "llvm-testsuite" => "$COMPILER_SOURCES_HOME/llvm/build/projects/test-suite",
 );
 
 my %base_cov_dirs = (
-    "gcc" => "$COMPILER_SOURCES_PATH/current-gcc/build/gcc",
+    "gcc" => "$COMPILER_SOURCES_HOME/current-gcc/build/gcc",
 );
 
 my %base_checks = (
@@ -97,9 +97,9 @@ my $COMPILER_TIMEOUT = 600;
 
 my $MIN_PROGRAM_SIZE = 10000;
 
-my $CSMITH_OUT = "$COV_DATA_PATH/csmith_out";
+my $CSMITH_OUT = "$COV_DATA_HOME/csmith_out";
 
-my $TEST_FAILS_OUT = "$COV_DATA_PATH/compilers_fail_out.txt";
+my $TEST_FAILS_OUT = "$COV_DATA_HOME/compilers_fail_out.txt";
 
 my %prog_checksums = ();
 
@@ -308,9 +308,9 @@ sub gen_lcov_html($$$) {
 sub gen_extended_cov() {
     foreach my $compiler (keys %compilers) {
         my $build_path = $compiler_build_paths{$compiler};
-        my $extended_lcov_info = "$COV_DATA_PATH/$compiler" . "_extended.info";
-        my $html_outdir = "$COV_DATA_PATH/${compiler}_html_ext";
-        my $summary = "$COV_DATA_PATH/${compiler}_summary_ext.txt";
+        my $extended_lcov_info = "$COV_DATA_HOME/$compiler" . "_extended.info";
+        my $html_outdir = "$COV_DATA_HOME/${compiler}_html_ext";
+        my $summary = "$COV_DATA_HOME/${compiler}_summary_ext.txt";
 
         gen_lcov_info($compiler, $build_path, $extended_lcov_info);
         gen_lcov_html($summary, $html_outdir, $extended_lcov_info);
@@ -320,9 +320,9 @@ sub gen_extended_cov() {
 sub gen_base_cov() {
     foreach my $compiler (keys %compilers) {
         my $build_path = $compiler_build_paths{$compiler};
-        my $base_lcov_info = "$COV_DATA_PATH/$compiler.info";
-        my $html_outdir = "$COV_DATA_PATH/${compiler}_html";
-        my $summary = "$COV_DATA_PATH/${compiler}_summary.txt";
+        my $base_lcov_info = "$COV_DATA_HOME/$compiler.info";
+        my $html_outdir = "$COV_DATA_HOME/${compiler}_html";
+        my $summary = "$COV_DATA_HOME/${compiler}_summary.txt";
 
         gen_base_cov_data($compiler);
         gen_lcov_info($compiler, $build_path, $base_lcov_info);
@@ -330,8 +330,8 @@ sub gen_base_cov() {
     }
 }
 
-if (!(-d $COV_DATA_PATH)) {
-    mkdir "$COV_DATA_PATH";
+if (!(-d $COV_DATA_HOME)) {
+    mkdir "$COV_DATA_HOME";
 }
 
 gen_base_cov();
