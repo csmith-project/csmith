@@ -308,6 +308,12 @@ sub delta_step ($$) {
 		    return (1, $pos);
 		}
 	    }
+	} elsif ($method eq "del_blanks_all") {
+	    if ($prog =~ s/\s{2,}/ /g) {
+		return (1, $pos);
+	    } else {
+		return 0;
+	    }
 	} elsif ($method eq "del_blanks") {
 	    if ($rest =~ /^(\s{2,})/) {
 		my $len = length ($1);
@@ -461,6 +467,7 @@ sub main_loop ($$$) {
 
 my %all_methods = (
 
+    "del_blanks_all" => -1,
     "del_blanks" => 0,
 
     "brackets_inclusive" => 1,
