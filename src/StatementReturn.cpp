@@ -36,6 +36,7 @@
 #include "Variable.h"
 #include "ExpressionVariable.h"
 #include "FactMgr.h"
+#include "FactPointTo.h"
 #include "Bookkeeper.h"
 #include "Error.h"
 #include "util.h"
@@ -76,6 +77,16 @@ StatementReturn::get_dereferenced_ptrs(void) const
 bool 
 StatementReturn::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const
 { 
+	if (CGOptions::no_return_dead_ptr()) {
+		const Variable* v = var.get_var();
+		int indirection = var.get_indirect_level();
+		const Block* b = cg_context.curr_blk;
+		assert(b);
+		if (FactPointTo::is_pointing_to_locals(v, b, indirection, inputs)) {
+			return false;
+		}
+	}
+			
 	if (!var.visit_facts(inputs, cg_context)) {
 		return false;
 	}
