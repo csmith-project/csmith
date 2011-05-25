@@ -594,7 +594,6 @@ Statement::shortcut_analysis(vector<const Fact*>& inputs, CGContext& cg_context)
 			return 1;
 		}
 		inputs = fm->map_facts_out[this];
-		//add_back_return_facts(fm);
 		cg_context.add_effect(fm->map_stm_effect[this]);
 		fm->map_accum_effect[this] = *(cg_context.get_effect_accum());
 		return 0;
@@ -827,6 +826,16 @@ Statement::contains_unfixed_goto(void) const
 	size_t i, j;
 	for (i=0; i<fm->cfg_edges.size(); i++) {
 		const CFGEdge* edge = fm->cfg_edges[i];
+		/* the following for-loop has to be analyzed at least once 
+		   label: ...
+		   ...
+		   for (...) {
+		      goto label;
+		   }
+		*/      
+		if (edge->src->eType == eGoto && contains_stmt(edge->src) && !fm->map_visited[edge->src] && !contains_stmt(edge->dest)) {
+			return true;
+		}
 		if (edge->src->eType == eGoto && fm->map_visited[edge->src] && contains_stmt(edge->dest)) {
 			// take care the special case caused by StatementGoto::visit_facts
 			if (!fm->map_facts_out[edge->src].empty() && fm->map_facts_in[edge->dest].empty()) {
