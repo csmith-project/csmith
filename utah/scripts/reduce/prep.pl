@@ -18,6 +18,6 @@ die if (!defined($outfile));
 
 system "${CSMITH_PATH}/src/csmith @ARGV";
 
-system "gcc -E -I${CSMITH_PATH}/runtime -DCSMITH_MINIMAL $outfile | ${CSMITH_PATH}/utah/scripts/shorten.pl > small.c";
+system "gcc -E -I${CSMITH_PATH}/runtime -DCSMITH_MINIMAL $outfile | ${CSMITH_PATH}/utah/scripts/reduce/shorten.pl > small.c";
 
 system "indent small.c";
