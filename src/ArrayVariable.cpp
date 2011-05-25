@@ -148,10 +148,12 @@ ArrayVariable::CreateArrayVariable(Block* blk, const std::string &name, const Ty
 		unsigned int dimen_size = rnd_upto(CGOptions::max_array_length_per_dimension()) + 1;
 		ERROR_GUARD(NULL);
 		if (total_size * dimen_size > (unsigned int)CGOptions::max_array_length()) {
-			dimen_size = 1;
+			dimen_size = CGOptions::max_array_length() / total_size;
 		}
-		total_size *= dimen_size;
-		sizes.push_back(dimen_size);
+		if (dimen_size) {
+			total_size *= dimen_size;
+			sizes.push_back(dimen_size);
+		}
 	}
 	ArrayVariable *var = new ArrayVariable(blk, name, type, init, qfer, sizes, isFieldVarOf);
 	ERROR_GUARD_AND_DEL1(NULL, var);
