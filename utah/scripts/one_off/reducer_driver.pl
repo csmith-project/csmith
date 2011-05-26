@@ -295,12 +295,12 @@ create_log();
 if (-e "$RESULT_FILE") {
 	open OUT, ">table.tex" or die;
 	open INF, "<$RESULT_FILE" or die;
-	print OUT '\documentclass[english]{article}', "\n"; 
+	print OUT '\documentclass[english]{article}', "\n";
 	print OUT '\begin{document}', "\n";
 	print OUT '\begin{table}\small', "\n";
 	print OUT '\caption{Performance of reduction techniques}', "\n";
 	print OUT '\begin{tabular}{| c | c | c | c | c | c | c | c | c |}', "\n";
-	print OUT '\hline', "\n"; 
+	print OUT '\hline', "\n";
 	print OUT 'id & seed & platform & compiler & manual & eager & blind & simple & berkeley \\\\', "\n";
 	while (my $line = <INF>) {
 		print OUT $line, ' \\\\', "\n";
