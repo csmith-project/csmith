@@ -52,13 +52,17 @@ my $bit = "\\||\\&|\\^|\\<\\<|\\>\\>";
 my $binop = "($arith)|($comp)|($logic)|($bit)";
 my $varnum = "($var)|($num)";
 my $border = "[\\*\\{\\(\\[\\:\\,\\}\\)\\]\\;\\,]";
-my $borderspc = "(\\s+|$border)";
+my $borderorspc = "(($border)|(\\s))";
+my $borderspc = "($border\\s)";
+my $spcborder = "(\\s$border)";
 
 #print "$field\n";
 #print "$index\n";
 #print "$border\n";
 #print "$var1\n";
 #print "$var2\n";
+print "$borderspc\n";
+print "$spcborder\n";
 
 my %replace_regexes = (
     "\\:\\s*[0-9]+\\s*;" => ";",
@@ -170,27 +174,36 @@ sub write_file ($)
 }
 
 sub match_subexp ($$) {
-    (my $prog, my $pos) = @_;
-
-    my $s = substr ($prog, $pos, -1);
+    (my $rest, my $pos) = @_;
 
     if (
-	$s =~ /^(?<pref>$borderspc)(?<var>$varnum)(?<spc2>\s*)(?<op>$binop)/
+	$rest =~ /^(?<pref>$borderorspc)(?<var1>$varnum)(?<s1>\s+)(?<op>$binop)(?<s2>\s+)(?<var2>$varnum)$borderorspc/
 	) {
+	print "case 4 ";
+	my $s2 = $+{pref}.$+{var1}.$+{s1}.$+{op}.$+{s2}.$+{var2};
+	return (1, $pos + length ($+{pref}), $pos + length ($s2));
+    }
+
+    if (
+	$rest =~ /^(?<pref>$borderorspc)(?<var>$varnum)(?<spc2>\s*)(?<op>$binop)/
+	) {
+	print "case 1 ";
 	my $s2 = $+{pref}.$+{var}.$+{spc2}.$+{op};
 	return (1, $pos + length($+{pref}), $pos+length ($s2));
     }
 
     if (
-	$s =~ /^(?<op>$binop)(?<spc1>\s*)(?<var>$varnum)$borderspc/ 
+	$rest =~ /^(?<op>$binop)(?<spc1>\s*)(?<var>$varnum)$borderorspc/ 
 	) {
+	print "case 2 ";
 	my $s2 = $+{op}.$+{spc1}.$+{var};
 	return (1, $pos, $pos+length ($s2));
     }
 
     if (
-	$s =~ /^(?<pref>$borderspc)(?<var>$varnum)$borderspc/
+	$rest =~ /^(?<pref>$borderorspc)(?<var>$varnum)$borderorspc/
 	) {
+	print "case 3 ";
 	my $s = $+{pref};
 	my $v = $+{var};
 	if (($v ne "1") && ($v ne "0")) {
@@ -199,18 +212,20 @@ sub match_subexp ($$) {
     }
 
     if (
-	$s =~ /^(?<pref>$borderspc)(?<var1>$varnum)(?<s1>\s+)(?<op>$binop)(?<s2>\s+)(?<var2>$varnum)$borderspc/
+	$rest =~ /^(?<pref>$borderorspc)(?<var1>$varnum)(?<ques>\s*\?\s*)(?<var2>$varnum)(?<colon>\s*\:\s*)(?<var3>$varnum)$borderorspc/
 	) {
-	my $s2 = $+{pref}.$+{var1}.$+{s1}.$+{op}.$+{s2}.$+{var2};
-	return (1, $pos + length ($+{pref}), $pos + length ($s2));
-    }
-
-    if (
-	$s =~ /^(?<pref>$borderspc)(?<var1>$varnum)(?<ques>\s*\?\s*)(?<var2>$varnum)(?<colon>\s*\:\s*)(?<var3>$varnum)$borderspc/
-	) {
+	print "case 5 ";
 	my $prefl = length ($+{pref});
 	my $s2 = $+{var1}.$+{ques}.$+{var2}.$+{colon}.$+{var3};
 	return (1, $pos + $prefl, $pos + $prefl + length ($s2));
+    }
+
+    if (0) {
+	if ($rest =~ /^($border)/) {
+	    print "case 6 ";
+	    my $s2 = $1;
+	    return (1, $pos, $pos+length ($s2));
+	}
     }
 
     return (0,0,0);
@@ -232,7 +247,7 @@ sub delta_step ($$) {
 
 	if ($method eq "replace_with_1") {
 	    (my $success, my $start, my $end) = 
-		match_subexp ($prog, $pos);
+		match_subexp ($rest, $pos);
 	    if ($success) {
 		my $del = substr ($prog, $start, $end-$start);
 		substr ($prog, $start, $end-$start) = "1";
@@ -242,7 +257,7 @@ sub delta_step ($$) {
 	    } 
 	} elsif ($method eq "replace_with_0") {
 	    (my $success, my $start, my $end) = 
-		match_subexp ($prog, $pos);
+		match_subexp ($rest, $pos);
 	    if ($success) {
 		my $del = substr ($prog, $start, $end-$start);
 		substr ($prog, $start, $end-$start) = "0";
@@ -252,7 +267,7 @@ sub delta_step ($$) {
 	    }
 	} elsif ($method eq "replace_with_nothing") {
 	    (my $success, my $start, my $end) = 
-		match_subexp ($prog, $pos);
+		match_subexp ($rest, $pos);
 	    if ($success) {
 		my $del = substr ($prog, $start, $end-$start);
 		substr ($prog, $start, $end-$start) = "";
@@ -262,7 +277,7 @@ sub delta_step ($$) {
 	    }
 	} elsif ($method eq "replace_regex1") {
 	    foreach my $str (keys %replace_regexes) {
-		if ($rest =~ /^(?<pref>$borderspc)(?<str>$str)(?<suf>$borderspc)/) {
+		if ($rest =~ /^(?<pref>$borderspc)(?<str>$str)(?<suf>$spcborder)/) {
 		    my $repl = $+{str};
 		    print "replacing '$repl' at $pos : ";
 		    substr ($prog, 
@@ -274,7 +289,8 @@ sub delta_step ($$) {
 	    }
 	} elsif ($method eq "replace_regex2") {
 	    foreach my $str (keys %replace_regexes) {
-		if ($rest =~ /^(?<pref>$borderspc)(?<str>$str)(?<suf>$borderspc)/) {
+		#print "rest = '$rest'\n";
+		if ($rest =~ /^(?<pref>$borderspc)(?<str>$str)(?<suf>$spcborder)/) {
 		    my $repl = $+{pref}.$+{str};
 		    print "replacing '$repl' at $pos : ";
 		    substr ($prog, 
@@ -286,7 +302,7 @@ sub delta_step ($$) {
 	    }
 	} elsif ($method eq "replace_regex3") {
 	    foreach my $str (keys %replace_regexes) {
-		if ($rest =~ /^(?<pref>$borderspc)(?<str>$str)(?<suf>$borderspc)/) {
+		if ($rest =~ /^(?<pref>$borderspc)(?<str>$str)(?<suf>$spcborder)/) {
 		    my $repl = $+{pref}.$+{str}.$+{suf};
 		    print "replacing '$repl' at $pos : ";
 		    substr ($prog, 
@@ -298,7 +314,7 @@ sub delta_step ($$) {
 	    }
 	} elsif ($method eq "replace_regex4") {
 	    foreach my $str (keys %replace_regexes) {
-		if ($rest =~ /^(?<pref>$borderspc)(?<str>$str)(?<suf>$borderspc)/) {
+		if ($rest =~ /^(?<pref>$borderspc)(?<str>$str)(?<suf>$spcborder)/) {
 		    my $repl = $+{str}.$+{suf};
 		    print "replacing '$repl' at $pos : ";
 		    substr ($prog, 
