@@ -2,6 +2,16 @@
 
 use strict;
 
+# make sure file starts with a blank 
+
+# avoid the problem where match_subexp fails on the first match,
+# preventing subsequent patterns from firing; same for regular
+# expression matching
+
+# remove digits from numbers to make them smaller
+
+# figure out regexp for deleting matching brackets/parens/curlies
+
 # todo: run indent speculatively
 
 # todo: avoid deleting stuff along with regexes! if this is needed,
