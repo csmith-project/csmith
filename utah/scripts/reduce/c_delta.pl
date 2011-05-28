@@ -2,39 +2,29 @@
 
 use strict;
 
+# do everything with search and replace instead of substr
+
+# do everything with regexes-- need to specify matching parens, brackets, etc.
+
+# build up the regexes programmatically to support multiple replacement options
+
+# enumerate regrexes so that they're all tried for each position, even
+# when an earlier one matches and then fails
+
 # make sure file starts with a blank 
 
-# avoid the problem where match_subexp fails on the first match,
-# preventing subsequent patterns from firing; same for regular
-# expression matching
+# add passes to 
+#   remove digits from numbers to make them smaller
+#   run indent speculatively
+#   turn checksum calls into regular printfs
 
-# remove digits from numbers to make them smaller
+# to regexes, add a way to specify border characters that won't be removed
 
-# figure out regexp for deleting matching brackets/parens/curlies
+# avoid testing the same thing twice
 
-# todo: run indent speculatively
+# avoid mangling strings
 
-# todo: avoid deleting stuff along with regexes! if this is needed,
-# roll the stuff into the regex
-
-# todo: to regexes, add a way to specify border characters that won't be
-# removed
-
-# todo: avoid duplicate tests
-
-# todo: find steps creating strings like "longp_20p_21"
-
-# todo: input file should print output separately instead of checksum
-#   probably do this via command line option?
-
-# assumption: we're processing code that has been run through 'indent'
-# which adds white space around operators and in other places
-
-# goal: completely dismantle a preprocessed csmith output
-
-# todo: need more minimal matching, probably
-
-# hard
+# harder
 #   transform a function to return void
 #   inline a function call
 #   sort functions in order to eliminate prototypes
@@ -444,7 +434,7 @@ my %cache = ();
 my $cache_hits = 0;
 my $old_size = 1000000000;
 
-sub main_loop ($$$) {
+sub delta_pass ($$$) {
     (my $cfile, my $test, my $method) = @_;
     
     my $worked = 0;
@@ -593,7 +583,7 @@ sub bymethod {
 while (1) {
     my $success = 0;
     foreach my $method (sort bymethod keys %methods) {
-	$success |= main_loop ($cfile, $test, $method);
+	$success |= delta_pass ($cfile, $test, $method);
     }
     $pass_num++;
     last if (!$success);
