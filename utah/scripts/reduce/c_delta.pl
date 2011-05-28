@@ -2,6 +2,13 @@
 
 use strict;
 
+# flip the flow of control so delta_step calls a test routine
+
+# when doing search and replace, how to specify a larger matching context
+# for what is actually replaced
+
+# if there's a way to match starting at a specified position, use it
+
 # do everything with search and replace instead of substr
 
 # do everything with regexes-- need to specify matching parens, brackets, etc.
@@ -17,6 +24,7 @@ use strict;
 #   remove digits from numbers to make them smaller
 #   run indent speculatively
 #   turn checksum calls into regular printfs
+#   delete a complete function
 
 # to regexes, add a way to specify border characters that won't be removed
 
@@ -28,7 +36,7 @@ use strict;
 #   transform a function to return void
 #   inline a function call
 #   sort functions in order to eliminate prototypes
-#   un-nest nested calls
+#   un-nest nested calls in expressions
 #   move arguments and locals to global scope
 #   remove level of pointer indirection
 #   remove array dimension
@@ -166,9 +174,12 @@ sub del_up_to_matching_parens ($$) {
     return ($p2-$pos);
 }
 
-sub read_file ($)
+# these are set at startup time and never change
+my $cfile;
+my $test;
+
+sub read_file ()
 {
-    (my $cfile) = @_;
     open INF, "<$cfile" or die;
     $prog = "";
     while (my $line = <INF>) {
@@ -179,7 +190,6 @@ sub read_file ($)
 
 sub write_file ($)
 {
-    (my $cfile) = @_;
     open OUTF, ">$cfile" or die;
     print OUTF $prog;
     close OUTF;
@@ -255,6 +265,7 @@ sub delta_step ($$) {
     while (1) {
 	return 0 if ($pos >= length ($prog));
 
+	my $first = substr($prog, 0, $pos);
 	my $rest = substr($prog, $pos, -1);
 
 	if ($method eq "replace_with_1") {
@@ -287,52 +298,11 @@ sub delta_step ($$) {
 		print "replacing '$del' at $start--$end : ";
 		return (1, $pos);
 	    }
-	} elsif ($method eq "replace_regex1") {
+	} elsif ($method eq "replace_regex") {
 	    foreach my $str (keys %replace_regexes) {
-		if ($rest =~ /^(?<pref>$borderorspc)(?<str>$str)(?<suf>$borderorspc)/) {
-		    my $repl = $+{str};
-		    print "replacing '$repl' at $pos : ";
-		    substr ($prog, 
-			    $pos + length ($+{pref}), 
-			    length ($repl)) 
-			= $replace_regexes{$str};
-		    return (1, $pos);
-		}
-	    }
-	} elsif ($method eq "replace_regex2") {
-	    foreach my $str (keys %replace_regexes) {
-		#print "rest = '$rest'\n";
-		if ($rest =~ /^(?<pref>$borderorspc)(?<str>$str)(?<suf>$borderorspc)/) {
-		    my $repl = $+{pref}.$+{str};
-		    print "replacing '$repl' at $pos : ";
-		    substr ($prog, 
-			    $pos, 
-			    length ($repl)) 
-			= $replace_regexes{$str};
-		    return (1, $pos);
-		} 
-	    }
-	} elsif ($method eq "replace_regex3") {
-	    foreach my $str (keys %replace_regexes) {
-		if ($rest =~ /^(?<pref>$borderorspc)(?<str>$str)(?<suf>$borderorspc)/) {
-		    my $repl = $+{pref}.$+{str}.$+{suf};
-		    print "replacing '$repl' at $pos : ";
-		    substr ($prog, 
-			    $pos,
-			    length ($repl))
-			= $replace_regexes{$str};
-		    return (1, $pos);
-		} 
-	    }
-	} elsif ($method eq "replace_regex4") {
-	    foreach my $str (keys %replace_regexes) {
-		if ($rest =~ /^(?<pref>$borderorspc)(?<str>$str)(?<suf>$borderorspc)/) {
-		    my $repl = $+{str}.$+{suf};
-		    print "replacing '$repl' at $pos : ";
-		    substr ($prog, 
-			    $pos + length ($+{pref}), 
-			    length ($repl)) 
-			= $replace_regexes{$str};
+		my $repl = $replace_regexes{$str};
+		if ($rest =~ s/^$str/$repl/) {
+		    $prog = $first.$rest;
 		    return (1, $pos);
 		}
 	    }
@@ -420,22 +390,38 @@ sub runit ($) {
     return ($? >> 8);
 }
 
-sub run_test ($) {
-    (my $test) = @_;
+sub run_test () {
     my $res = runit "./$test";
     return ($res == 0);
+}
+
+my %cache = ();
+my $cache_hits = 0;
+
+sub cached_test () {
+    my $result = $cache{$prog};
+    my $hit;
+    if (defined($result)) {
+	$cache_hits++;
+	print "(hit) ";
+	$hit = 1;
+    } else {
+	write_file ($cfile);
+	$result = run_test ();
+	$cache{$prog} = $result;
+	$hit = 0;
+    }
+    return ($result, $hit);
 }
 
 # invariant: test always succeeds for $cfile.bak
 
 my %method_worked = ();
 my %method_failed = ();
-my %cache = ();
-my $cache_hits = 0;
 my $old_size = 1000000000;
 
-sub delta_pass ($$$) {
-    (my $cfile, my $test, my $method) = @_;
+sub delta_pass ($) {
+    (my $method) = @_;
     
     my $worked = 0;
     my $filepos=0;
@@ -444,7 +430,7 @@ sub delta_pass ($$$) {
     $bad_cnt = 0;
     
     while (1) {
-	read_file ($cfile);    
+	read_file ();    
 	my $len = length ($prog);
 	print "[$pass_num $method ($filepos / $len) s:$good_cnt f:$bad_cnt] ";
 	(my $delete_res, my $newpos) = delta_step ($method, $filepos);
@@ -452,17 +438,7 @@ sub delta_pass ($$$) {
 	    print "no more to delete.\n";
 	    return $worked;
 	}
-	my $hit = 0;
-	my $result = $cache{$prog};
-	if (defined($result)) {
-	    $cache_hits++;
-	    $hit = 1;
-	    print "(hit) ";
-	} else {
-	    write_file ($cfile);
-	    $result = run_test ($test);
-	    $cache{$prog} = $result;
-	}
+	(my $result, my $hit) = cached_test();
 	    
 	if ($result) {
 	    print "success\n";
@@ -510,10 +486,7 @@ my %all_methods = (
     "replace_with_1" => 6,
     "replace_with_nothing" => 6,
 
-    "replace_regex1" => 7,
-    "replace_regex2" => 7,
-    "replace_regex3" => 7,
-    "replace_regex4" => 7,
+    "replace_regex" => 7,
 
     );
  
@@ -528,14 +501,14 @@ sub usage() {
     die;
 }
 
-my $test = shift @ARGV;
+$test = shift @ARGV;
 usage if (!defined($test));
 if (!(-x $test)) {
     print "test script '$test' not found, or not executable\n";
     usage();
 }
 
-my $cfile = shift @ARGV;
+$cfile = shift @ARGV;
 usage if (!defined($cfile));
 if (!(-e $cfile)) {
     print "'$cfile' not found\n";
@@ -566,7 +539,7 @@ foreach my $arg (@ARGV) {
 }
 
 print "making sure test succeeds on initial input...\n";
-my $res = run_test ($test);
+my $res = run_test ();
 if (!$res) {
     die "test fails!";
 }
@@ -583,7 +556,7 @@ sub bymethod {
 while (1) {
     my $success = 0;
     foreach my $method (sort bymethod keys %methods) {
-	$success |= delta_pass ($cfile, $test, $method);
+	$success |= delta_pass ($method);
     }
     $pass_num++;
     last if (!$success);
