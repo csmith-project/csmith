@@ -2,6 +2,14 @@
 
 use strict;
 
+# todo: run indent speculatively
+
+# todo: avoid deleting stuff along with regexes! if this is needed,
+# roll the stuff into the regex
+
+# todo: to regexes, add a way to specify border characters that won't be
+# removed
+
 # todo: avoid duplicate tests
 
 # todo: find steps creating strings like "longp_20p_21"
@@ -61,8 +69,8 @@ my $spcborder = "(\\s$border)";
 #print "$border\n";
 #print "$var1\n";
 #print "$var2\n";
-print "$borderspc\n";
-print "$spcborder\n";
+#print "$borderspc\n";
+#print "$spcborder\n";
 
 my %replace_regexes = (
     "\\:\\s*[0-9]+\\s*;" => ";",
@@ -101,14 +109,18 @@ my %replace_regexes = (
     "\\-" => "",
     "\\!" => "",
     "\\~" => "",
+    "=\\s*\{\\s*\}" => "",
     "continue" => "", 
     "return" => "",
+    "int argc, char \\*argv\\[\\]" => "void",
+    "int.*?;" => "",
     "for" => "",
+    "if\\s+\\(.*?\\)" => "",
+    "struct.*?;" => "",
     "if" => "",
     "break" => "", 
     "inline" => "", 
     "printf" => "",
-    "int\\s*;" => "",
     "print_hash_value" => "",
     "transparent_crc" => "",
     "platform_main_begin" => "",
@@ -277,7 +289,7 @@ sub delta_step ($$) {
 	    }
 	} elsif ($method eq "replace_regex1") {
 	    foreach my $str (keys %replace_regexes) {
-		if ($rest =~ /^(?<pref>$borderspc)(?<str>$str)(?<suf>$spcborder)/) {
+		if ($rest =~ /^(?<pref>$borderorspc)(?<str>$str)(?<suf>$borderorspc)/) {
 		    my $repl = $+{str};
 		    print "replacing '$repl' at $pos : ";
 		    substr ($prog, 
@@ -290,7 +302,7 @@ sub delta_step ($$) {
 	} elsif ($method eq "replace_regex2") {
 	    foreach my $str (keys %replace_regexes) {
 		#print "rest = '$rest'\n";
-		if ($rest =~ /^(?<pref>$borderspc)(?<str>$str)(?<suf>$spcborder)/) {
+		if ($rest =~ /^(?<pref>$borderorspc)(?<str>$str)(?<suf>$borderorspc)/) {
 		    my $repl = $+{pref}.$+{str};
 		    print "replacing '$repl' at $pos : ";
 		    substr ($prog, 
@@ -302,7 +314,7 @@ sub delta_step ($$) {
 	    }
 	} elsif ($method eq "replace_regex3") {
 	    foreach my $str (keys %replace_regexes) {
-		if ($rest =~ /^(?<pref>$borderspc)(?<str>$str)(?<suf>$spcborder)/) {
+		if ($rest =~ /^(?<pref>$borderorspc)(?<str>$str)(?<suf>$borderorspc)/) {
 		    my $repl = $+{pref}.$+{str}.$+{suf};
 		    print "replacing '$repl' at $pos : ";
 		    substr ($prog, 
@@ -314,7 +326,7 @@ sub delta_step ($$) {
 	    }
 	} elsif ($method eq "replace_regex4") {
 	    foreach my $str (keys %replace_regexes) {
-		if ($rest =~ /^(?<pref>$borderspc)(?<str>$str)(?<suf>$spcborder)/) {
+		if ($rest =~ /^(?<pref>$borderorspc)(?<str>$str)(?<suf>$borderorspc)/) {
 		    my $repl = $+{str}.$+{suf};
 		    print "replacing '$repl' at $pos : ";
 		    substr ($prog, 
