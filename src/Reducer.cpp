@@ -114,9 +114,13 @@ Reducer::configure(void)
 			getline(conf, line);
 			StringUtils::chop(line);
 			// make sure the focus var is marked as used var
-			const Variable* v = VariableSelector::find_var_by_name(line);
-			assert(v);
-			used_vars.push_back(v);
+			vector<string> vnames;
+			StringUtils::split_string(line, vnames, ", ");
+			for (size_t i=0; i<vnames.size(); i++) {
+				const Variable* v = VariableSelector::find_var_by_name(vnames[i]);
+				assert(v);
+				used_vars.push_back(v);
+			}
 		}
 		else if (line.find("drop parameters") == 0) {
 			getline(conf, line);
