@@ -106,6 +106,22 @@ Reducer::configure(void)
 			StringUtils::chop(line);
 			// make sure the focus var is marked as used var
 			const Variable* key = VariableSelector::find_var_by_name(line);
+			if (key == NULL) {
+				// it's possible an array variable that is not specifically itemized in the 
+				// program that is the focus var. we manually itemize it here
+				vector<string> strs;
+				StringUtils::split_string(line, strs, "[]");
+				const Variable* ary = VariableSelector::find_var_by_name(strs[0]);
+				assert(ary && ary->isArray);
+				const ArrayVariable* av = (const ArrayVariable*)ary; 
+				vector<int> indices;
+				for (size_t k=0; k<av->get_dimension(); k++) {
+					assert(k + 1 < strs.size());
+					indices.push_back(StringUtils::str2int(strs[k+1]));
+				}
+				av->itemize(indices);
+			}
+			key = VariableSelector::find_var_by_name(line);
 			assert(key);
 			monitored_var = key;
 			used_vars.push_back(key->get_named_var());
