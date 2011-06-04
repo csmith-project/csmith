@@ -164,6 +164,8 @@ DefaultExpressionFilter::filter(int v) const
 	eTermType tt = number_to_termtype(v, Expression::exprTable_);
 	if (!CGOptions::return_structs() && tt == eFunction && type_.eType == eStruct)
 		return true;
+	if (!CGOptions::return_unions() && tt == eFunction && type_.eType == eUnion)
+		return true;
 	if (tt == eConstant && no_const_) {
 		return true;
 	}
@@ -177,22 +179,11 @@ DefaultExpressionFilter::filter(int v) const
 ///////////////////////////////////////////////////
 class ParamExpressionFilter : public ExpressionFilter {
 public:
-	ParamExpressionFilter();
-
-	virtual ~ParamExpressionFilter();
-
+	ParamExpressionFilter(const Type* t) : type_(t) {} 
 	virtual bool filter(int v) const;
+private:
+	const Type* type_;
 };
-
-ParamExpressionFilter::ParamExpressionFilter()
-{
-
-}
-
-ParamExpressionFilter::~ParamExpressionFilter()
-{
-
-}
 
 bool
 ParamExpressionFilter::filter(int v) const
@@ -204,12 +195,14 @@ ParamExpressionFilter::filter(int v) const
 		return true;
 
 	eTermType tt = number_to_termtype(v, Expression::exprTable_);
-	// constant struct variables can not be a parameters
 	if (tt == eConstant) {
 		return true;
 	}
-	if (!CGOptions::return_structs() && tt == eFunction)
-		return true;
+	if (tt == eFunction) {
+		if (type_->eType == eStruct && !CGOptions::return_structs() ||
+			type_->eType == eUnion && !CGOptions::return_unions())
+			return true;
+	}
 	return false;
 }
 
@@ -346,12 +339,7 @@ Expression::make_random_param(CGContext &cg_context, const Type* type, const CVQ
 	assert(type);
 	// if a term type is provided, no need to choose random term type
 	if (tt == MAX_TERM_TYPES) {
-		tt = ParameterTypeProbability(cg_context);
-	}
-	ERROR_GUARD(NULL);
-
-	if (type->eType == eStruct) {
-		ParamExpressionFilter filter;
+		ParamExpressionFilter filter(type);
 		tt = ExpressionTypeProbability(cg_context, &filter);
 	}
 	 

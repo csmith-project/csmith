@@ -83,7 +83,7 @@ DFSProgramGenerator::goGenerator()
 		dynamic_cast<DFSRndNumGenerator*>(RandomNumber::GetRndNumGenerator());
 	//unsigned long long count = 0;
 	GenerateAllTypes();
-	output_mgr_->OutputStructs(cout);
+	output_mgr_->OutputStructUnions(cout);
 	while(!impl->get_all_done()) {
 		Error::set_error(SUCCESS);
 		GenerateFunctions();

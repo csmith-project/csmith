@@ -161,10 +161,10 @@ VariableSelector::new_variable(const std::string &name, const Type *type, const 
 }
 
 /* 
- *expand each struct field to a single variable
+ *expand each struct/union field to a single variable
  */
 void
-VariableSelector::expand_struct_vars(vector<Variable *>& vars, const Type* type)
+VariableSelector::expand_struct_union_vars(vector<Variable *>& vars, const Type* type)
 {
     size_t i;
     size_t len = vars.size();
@@ -173,7 +173,7 @@ VariableSelector::expand_struct_vars(vector<Variable *>& vars, const Type* type)
 		// don't expand virtual variables
 		if (tmpvar->is_virtual()) continue;
         // don't break up a struct if it matches the given type
-        if (tmpvar->type->eType == eStruct && (tmpvar->type != type)) {
+		if (tmpvar->is_aggregate() && (tmpvar->type != type)) {
             vars.erase(vars.begin() + i);
             vars.insert(vars.end(), tmpvar->field_vars.begin(), tmpvar->field_vars.end());
             i--;
@@ -186,7 +186,7 @@ VariableSelector::expand_struct_vars(vector<Variable *>& vars, const Type* type)
  *expand each struct field to a single variable
  */
 void
-VariableSelector::expand_struct_vars(vector<const Variable *>& vars, const Type* type)
+VariableSelector::expand_struct_union_vars(vector<const Variable *>& vars, const Type* type)
 {
     size_t i;
     size_t len = vars.size();
@@ -195,7 +195,7 @@ VariableSelector::expand_struct_vars(vector<const Variable *>& vars, const Type*
 		// don't expand virtual variables
 		if (tmpvar->is_virtual()) continue;
         // don't break up a struct if it matches the given type
-        if (tmpvar->type->eType == eStruct && (tmpvar->type != type)) {
+		if (tmpvar->is_aggregate() && (tmpvar->type != type)) {
             vars.erase(vars.begin() + i);
             vars.insert(vars.end(), tmpvar->field_vars.begin(), tmpvar->field_vars.end());
             i--;
@@ -365,7 +365,7 @@ VariableSelector::choose_visible_written_var(const Block* b, vector<const Variab
 	size_t i;
 	vector<const Variable*> ok_vars;
 	// include the fields of structs
-	expand_struct_vars(written_vars, type);
+	expand_struct_union_vars(written_vars, type);
 
 	for (i=0; i<written_vars.size(); i++) {
 		const Variable* v = written_vars[i];
@@ -402,13 +402,13 @@ VariableSelector::choose_var(vector<Variable *> vars,
 		   eMatchType mt,
 		   const vector<const Variable*>& invalid_vars,
 		   bool no_bitfield,
-		   bool no_expand_struct)
+		   bool no_expand_struct_union)
 {
 	vector<Variable *> ok_vars;
 	vector<Variable *>::iterator i;
 
-	if (!no_expand_struct && type && (type->eType == eSimple || type->eType == eStruct))
-		expand_struct_vars(vars, type); 
+	if (!no_expand_struct_union && type && (type->eType == eSimple || type->is_aggregate()))
+		expand_struct_union_vars(vars, type); 
 
 	bool found = has_dereferenceable_var(vars, type, cg_context);
 	if (found) {
@@ -908,8 +908,8 @@ VariableSelector::GenerateNewParentLocal(Block &block,
 {
 	ERROR_GUARD(NULL);
 	assert(t);
-	// if this is for a struct with volatile field(s), create a global variable instead
-	if (t->eType==eStruct && !Type::is_nonvolatile_struct(t)) {
+	// if this is for a struct/union with volatile field(s), create a global variable instead
+	if (t->is_aggregate() && t->is_volatile_struct_union()) {
 		return GenerateNewGlobal(access, cg_context, t, qfer);  
 	}
 	// if there are "goto" in block (and sub-blocks), find the jump source statement,
@@ -1321,7 +1321,7 @@ VariableSelector::create_random_array(const CGContext& cg_context)
 		// don't make life complicated, restrict local variables to non-volatile
 		type = as_global ? Type::choose_random_nonvoid() : Type::choose_random_nonvoid_nonvolatile();
 		ERROR_GUARD(NULL);
-	} while (type->is_const_struct() || !cg_context.accept_type(type));
+	} while (type->is_const_struct_union() || !cg_context.accept_type(type));
 	CVQualifiers qfer;
 	qfer.add_qualifiers(false, false);
 
@@ -1361,7 +1361,7 @@ VariableSelector::select_array(const CGContext &cg_context)
 					(cg_context.get_effect_context().is_side_effect_free() || !av->is_volatile()) &&
 					!av->is_const() &&
 					!cg_context.is_nonwritable(av) &&
-					!av->type->is_const_struct()) {
+					!av->type->is_const_struct_union()) {
 					array_vars.push_back(av);
 				}
 			}
@@ -1376,44 +1376,6 @@ VariableSelector::select_array(const CGContext &cg_context)
 	ERROR_GUARD(NULL);
 	return array_vars[index];
 }	
-
-/******************************************************************************
- * focus variable is used to direct the generation of array operations. A focus
- * variable denotes which member of which array when are interested to read and/or 
- * write.
- *
- * focus var can be selected with choices: 
- *
- * 1) For focus var "ary[i]", we could select neighboring array members, or
- * any member whose index depends on i, for example "ary[i-1]"
- *
- * 2) for focus var that is a struct, we can select any field of it
- *******************************************************************************/
-//const ArrayVariable*
-//VariableSelector::select_random_focus_var(Effect::Access access,
-//			   const CGContext &cg_context,
-//               const Type* type,
-//			   const CVQualifiers* /*qfer*/, 
-//			   const vector<const Variable*>& invalid_vars,
-//			   eMatchType /*mt*/)
-//{
-//	ArrayVariable* av = cg_context.focus_var;
-//	int deref_level = av->type->get_indirect_level() - type->get_indirect_level();
-//	// check with constraints on const and volatile qualification of the array variable
-//	if (access == Effect::WRITE && av->is_const_after_deref(deref_level)) {
-//		return 0;
-//	}
-//	if (!cg_context.get_effect_context().is_side_effect_free() && av->is_volatile_after_deref(deref_level)) {
-//		return 0;
-//	}
-//	if (find_variable_in_set(invalid_vars, av->get_collective()) != -1) {
-//		return 0;
-//	}
-//	if (av) {
-//		return av->rnd_mutate();
-//	}
-//	return 0;
-//}
 
 /* given a collective array, create a member out of induction variables in the context */
 ArrayVariable*

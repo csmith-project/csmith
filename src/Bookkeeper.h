@@ -73,7 +73,7 @@ public:
 
 	static void record_volatile_access(const Variable* var, int deref_level, bool write);
 
-	static void record_bitfields_structs(const Type* typ);
+	static void record_type_with_bitfields(const Type* typ);
 
 	static void record_vars_with_bitfields(const Type *type);
 

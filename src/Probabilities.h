@@ -58,6 +58,7 @@ enum ProbName {
 	pShiftByNonConstantProb,
 	pPointerAsLTypeProb,
 	pStructAsLTypeProb,
+	pUnionAsLTypeProb,
 	pNewArrayVariableProb,
 
 	// group for statement
@@ -187,6 +188,9 @@ enum ProbName {
 
 #define StructAsLTypeProb \
 	Probabilities::get_prob(pStructAsLTypeProb)
+
+#define UnionAsLTypeProb \
+	Probabilities::get_prob(pUnionAsLTypeProb)
 
 #define NewArrayVariableProb \
 	Probabilities::get_prob(pNewArrayVariableProb)

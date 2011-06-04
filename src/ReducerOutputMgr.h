@@ -84,7 +84,7 @@ public:
 	void output_global_state_for_func(const Function* f, std::ostream &out, int indent);
 	void output_artificial_globals(ostream& out);
 
-	virtual void OutputStructs(ostream& out);
+	virtual void OutputStructUnions(ostream& out);
 	void OutputGlobals(ostream& out);
 
 private:

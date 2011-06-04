@@ -96,8 +96,7 @@ FunctionInvocation::make_random(bool is_std_func,
 		else if (FuncListSize() < CGOptions::max_funcs()) {
 			fi = FunctionInvocationUser::build_invocation_and_function(cg_context, type, qfer); 
 		} else {
-			// we can not find/create a function for struct/pointer type,
-			// and we can not do binary/unary operation on them either, so give up
+			// we can not find/create a function because we reach the limit, so give up
 			fi = new FunctionInvocationUser(NULL, false, NULL);
 			fi->failed = true;
 			return fi;

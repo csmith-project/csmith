@@ -230,6 +230,20 @@ GenerateRandomStructConstant(const Type* type)
 	return value;
 }
 
+// --------------------------------------------------------------
+  /* generate an union initializer: unlike struct, initializing
+     the first field is enough 
+   *************************************************************/
+static string
+GenerateRandomUnionConstant(const Type* type)
+{ 
+	string value = "{"; 
+	assert(type->eType == eUnion && type->fields.size() == type->bitfields_length_.size());
+	value += GenerateRandomConstant(type->fields[0]);
+	value += "}"; 
+	return value;
+}
+
 static string
 GenerateRandomConstant(const Type* type)
 {
@@ -239,7 +253,11 @@ GenerateRandomConstant(const Type* type)
 	}
     else if (type->eType == eStruct) {
         v = GenerateRandomStructConstant(type);
-	ERROR_GUARD("");
+		ERROR_GUARD("");
+    }
+	else if (type->eType == eUnion) {
+        v = GenerateRandomUnionConstant(type);
+		ERROR_GUARD("");
     }
     // the only possible constant for a pointer is "0"
     else if (type->eType == ePointer) {

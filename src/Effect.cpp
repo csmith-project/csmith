@@ -129,12 +129,6 @@ Effect::read_var(const Variable *v)
 {
 	if (!is_read(v)) {
 		read_vars.push_back(v);
-        //if (v->type->eType == eStruct) {
-        //    for (size_t i=0; i<v->field_vars.size(); i++) {
-        //        read_var(v->field_vars[i]);
-        //    }
-        //    //read_vars.insert(read_vars.end(), v->field_vars.begin(), v->field_vars.end());
-        //}
 	}
 	pure &= (v->is_const() && !v->is_volatile());
 	side_effect_free &= !v->is_volatile();
@@ -148,12 +142,6 @@ Effect::write_var(const Variable *v)
 {
 	if (!is_written(v)) {
 		write_vars.push_back(v);
-        //if (v->type->eType == eStruct) {
-        //    for (size_t i=0; i<v->field_vars.size(); i++) {
-        //        write_var(v->field_vars[i]);
-        //    }
-        //    //write_vars.insert(write_vars.end(), v->field_vars.begin(), v->field_vars.end());
-        //}
 	}
 	// pure = pure;
 	// TODO: not quite correct below ---
@@ -300,7 +288,7 @@ Effect::is_read(const Variable *v) const
 			return true;
 		}
 	}
-	// if we read a struct, presumingly all the fields are read too
+	// if we read a struct/union, presumingly all the fields are read too
 	if (v->isFieldVarOf_) {
 		return is_read(v->isFieldVarOf_);
 	}
@@ -362,7 +350,7 @@ Effect::is_written(const Variable *v) const
 			return true;
 		}
 	}
-	// if we write a struct, presumingly all the fields are written too
+	// if we write a struct/union, presumingly all the fields are written too
 	if (v->isFieldVarOf_) {
 		return is_written(v->isFieldVarOf_);
 	}
@@ -411,13 +399,13 @@ Effect::is_written(string vname) const
 }
 
 /*
- * whether any field of a struct is been read
+ * whether any field of a struct/union is been read
  */
 bool
 Effect::field_is_read(const Variable *v) const
 { 
 	size_t j;
-	if (v->type->eType == eStruct) {  
+	if (v->is_aggregate()) {  
 		for (j=0; j<v->field_vars.size(); j++) {
 			Variable* field_var = v->field_vars[j];
 			if (is_read(field_var) || field_is_read(field_var)) {
@@ -429,13 +417,13 @@ Effect::field_is_read(const Variable *v) const
 }
 
 /*
- * whether any field of a struct is been written
+ * whether any field of a struct/union is been written
  */
 bool
 Effect::field_is_written(const Variable *v) const
 { 
 	size_t j;
-	if (v->type->eType == eStruct) {  
+	if (v->is_aggregate()) {  
 		for (j=0; j<v->field_vars.size(); j++) {
 			Variable* field_var = v->field_vars[j];
 			if (is_written(field_var) || field_is_written(field_var)) {

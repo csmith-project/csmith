@@ -541,7 +541,7 @@ CGContext::allow_const(Effect::Access access) const
 bool
 CGContext::accept_type(const Type* t) const
 {
-	return get_effect_context().is_side_effect_free() || !t->is_volatile_struct();
+	return get_effect_context().is_side_effect_free() || !t->is_volatile_struct_union();
 }
 
 /* return true if an incoming effect is in conflict with current context */

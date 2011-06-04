@@ -81,7 +81,7 @@ public:
 
 	virtual void OutputHeader(int argc, char *argv[], unsigned long seed) = 0;
 
-	virtual void OutputStructs(ostream& /* out */) {};
+	virtual void OutputStructUnions(ostream& /* out */) {};
 
 	virtual void Output() = 0;
 

@@ -225,7 +225,7 @@ RandomFunctionName(void)
 }
 
 /*-------------------------------------------------------------
- *  choose a random return type. only structs and integer types 
+ *  choose a random return type. only struct/unions and integer types 
  *  (not incl. void)  are qualified, (no arrays)
  *************************************************************/
 static const Type*
@@ -423,6 +423,8 @@ OutputFormalParam(Variable *var, std::ostream *pOut)
 	//var->type->Output( out );
 	if (!CGOptions::arg_structs() && var->type)
 		assert(var->type->eType != eStruct);
+	if (!CGOptions::arg_unions() && var->type)
+		assert(var->type->eType != eUnion);
 		
 	var->output_qualified_type(out);
 	out << " " << var->name;
@@ -454,6 +456,8 @@ Function::OutputHeader(std::ostream &out)
 {
 	if (!CGOptions::return_structs() && return_type)
 		assert(return_type->eType != eStruct);
+	if (!CGOptions::return_unions() && return_type)
+		assert(return_type->eType != eUnion);
 	// force functions to be static if necessary
 	if (CGOptions::force_globals_static()) {
 		out << "static ";

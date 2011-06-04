@@ -420,7 +420,7 @@ Probabilities::set_single_name_maps()
 	// for single field in exhaustive mode
 	set_single_name("exhaustive_bitfield_prob", pExhaustiveBitFieldsProb);
 
-	// for signed flag of struct fields. 
+	// for signed flag of struct/union fields. 
 	set_single_name("bitfields_signed_prob", pBitFieldsSignedProb);
 
 	// for signed flag of safe ops
@@ -458,6 +458,9 @@ Probabilities::set_single_name_maps()
 
 	// for choosing struct as LType
 	set_single_name("struct_as_ltype_prob", pStructAsLTypeProb);
+
+	// for choosing union as LType
+	set_single_name("union_as_ltype_prob", pUnionAsLTypeProb);
 
 	// for creating new array var 
 	set_single_name("new_array_var_prob", pNewArrayVariableProb);
@@ -549,6 +552,7 @@ Probabilities::initialize_single_probs()
 	m[pStdUnaryFuncProb] = 5;
 	m[pShiftByNonConstantProb] = 50;
 	m[pStructAsLTypeProb] = 30;
+	m[pUnionAsLTypeProb] = 25;
 	if (CGOptions::arrays()) 
 		m[pNewArrayVariableProb] = 20;
 	else

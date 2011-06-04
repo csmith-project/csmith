@@ -103,7 +103,7 @@ NonVoidTypeFilter::filter(int v) const
 		return true;
 
 	if (!type->used) {
-		Bookkeeper::record_bitfields_structs(type);
+		Bookkeeper::record_type_with_bitfields(type);
 		type->used = true;
 	}
 
@@ -158,15 +158,19 @@ NonVoidNonVolatileTypeFilter::filter(int v) const
 	if (type->eType == eSimple && type->simple_type == eVoid)
 		return true;
 
-	if (type->eType == eStruct && !Type::is_nonvolatile_struct(type))
+	if (type->is_aggregate() && type->is_volatile_struct_union())
 		return true;
 
 	if ((type->eType == eStruct) && (!CGOptions::arg_structs())) {
 		return true;
 	}
 
+	if ((type->eType == eUnion) && (!CGOptions::arg_unions())) {
+		return true;
+	}
+
 	if (!type->used) {
-		Bookkeeper::record_bitfields_structs(type);
+		Bookkeeper::record_type_with_bitfields(type);
 		type->used = true;
 	}
 
@@ -396,97 +400,64 @@ Type::find_pointer_type(const Type* t, bool add)
     return 0;
 }
 
-/*
- * flag == 0, test const;
- * flag == 1, test volatile;
- */
 bool
-Type::is_nonconst_or_nonvolatile_struct(const Type *ty, const int flag)
+Type::is_const_struct_union() const
 {
-	if (ty->eType != eStruct)
-		return false;
-	assert(ty->fields.size() == ty->qfers_.size());
+	if (!is_aggregate()) return false;
+	assert(fields.size() == qfers_.size());
 
-	for (size_t i = 0; i < ty->fields.size(); ++i) {
-		const Type *field = ty->fields[i];
-		if (field->eType == eStruct) {
-			bool flag2 = Type::is_nonconst_or_nonvolatile_struct(field, flag);
-			if (!flag2)
-				return false;
-		}
-
-		CVQualifiers cf = ty->qfers_[i];
-		if (flag == 0) {
-			if (cf.is_const())
-				return false;
-		}
-		else if (flag == 1) {
-			if (cf.is_volatile())
-				return false;
-		}
-		else {
-			assert(0);
-		}
-	}
-	return true;
-}
-
-bool
-Type::is_nonconst_struct(const Type *ty)
-{
-	return Type::is_nonconst_or_nonvolatile_struct(ty, 0);
-}
-
-bool
-Type::is_nonvolatile_struct(const Type *ty)
-{
-	return Type::is_nonconst_or_nonvolatile_struct(ty, 1);
-}
-
-bool
-Type::is_const_struct() const
-{
-	return eType==eStruct && !Type::is_nonconst_or_nonvolatile_struct(this, 0);
-}
-
-bool
-Type::is_volatile_struct() const
-{
-	return eType==eStruct && !Type::is_nonconst_or_nonvolatile_struct(this, 1);
-}
-
-bool
-Type::struct_has_int_field() const
-{
-	assert(eType == eStruct);
-	vector<const Type*>::const_iterator i;
-	for (i = fields.begin(); i != fields.end(); ++i) {
-		if (((*i)->eType == eSimple) && ((*i)->simple_type != eVoid))
+	for (size_t i = 0; i < fields.size(); ++i) {
+		const Type *field = fields[i];
+		if (field->is_const_struct_union()) {
 			return true;
-		else if ((*i)->eType == eStruct) {
-			bool rv = false;
-			vector<const Type*>::const_iterator j;
-			for (j = fields.begin(); j != fields.begin(); ++j) {
-				rv = (*j)->struct_has_int_field();
-				if (rv)
-					return true;
-			}
 		}
+		const CVQualifiers& cf = qfers_[i]; 
+		if (cf.is_const()) return true;
+	}
+	return false; 
+}
+
+bool
+Type::is_volatile_struct_union() const
+{
+	if (!is_aggregate()) return false;
+	assert(fields.size() == qfers_.size());
+
+	for (size_t i = 0; i < fields.size(); ++i) {
+		const Type *field = fields[i];
+		if (field->is_volatile_struct_union()) {
+			return true;
+		}
+		const CVQualifiers& cf = qfers_[i]; 
+		if (cf.is_volatile()) 
+			return true;
+	}
+	return false; 
+}
+
+bool
+Type::has_int_field() const
+{
+	if (!is_aggregate()) return false; 
+	for (size_t i=0; i<fields.size(); ++i) {
+		const Type* t = fields[i];
+		if (t->is_int()) return true;
+		if (t->has_int_field()) return true;
 	}
 	return false;
 }
 
 void
-Type::get_all_ok_struct_types(vector<Type *> &ok_types, bool no_const, bool no_volatile, bool need_int_field)
+Type::get_all_ok_struct_union_types(vector<Type *> &ok_types, bool no_const, bool no_volatile, bool need_int_field, bool bStruct)
 {
-	vector<Type *>::iterator i;
-
+	vector<Type *>::iterator i; 
 	for(i = AllTypes.begin(); i != AllTypes.end(); ++i) {
 		Type* t = (*i);
-		if ((t->eType != eStruct) ||
-			(no_const && t->is_const_struct()) ||
-			(no_volatile && t->is_volatile_struct()) ||
-			(need_int_field && (!t->struct_has_int_field()))) {
+		if (bStruct && t->eType != eStruct) continue;
+		if (!bStruct && t->eType != eUnion) continue;
+		if ((no_const && t->is_const_struct_union()) ||
+			(no_volatile && t->is_volatile_struct_union()) ||
+			(need_int_field && (!t->has_int_field()))) {
 			continue;
 		}
 		ok_types.push_back(t);
@@ -494,7 +465,7 @@ Type::get_all_ok_struct_types(vector<Type *> &ok_types, bool no_const, bool no_v
 }
 
 const Type*
-Type::choose_random_struct_type(vector<Type *> &ok_types)
+Type::choose_random_struct_union_type(vector<Type *> &ok_types)
 {
 	size_t sz = ok_types.size();
 	assert(sz > 0);
@@ -504,7 +475,7 @@ Type::choose_random_struct_type(vector<Type *> &ok_types)
 	assert(index >= 0);
 	Type *rv_type = ok_types[index];
 	if (!rv_type->used) {
-		Bookkeeper::record_bitfields_structs(rv_type);
+		Bookkeeper::record_type_with_bitfields(rv_type);
 		rv_type->used = true;
 	}
 	return rv_type;
@@ -524,6 +495,7 @@ Type::has_pointer_type(void)
 	return derived_types.size() > 0;
 }
 
+/* for exhaustive mode only */
 const Type*
 Type::choose_random_struct_from_type(const Type* type, bool no_volatile)
 {
@@ -531,14 +503,13 @@ Type::choose_random_struct_from_type(const Type* type, bool no_volatile)
 		return NULL;
 
 	const Type* t = type;
-	
 	vector<Type *> ok_struct_types;
-	get_all_ok_struct_types(ok_struct_types, no_volatile, false, true);
+	get_all_ok_struct_union_types(ok_struct_types, no_volatile, false, true, true);
 
 	if (ok_struct_types.size() > 0) {
 		DEPTH_GUARD_BY_DEPTH_RETURN(1, NULL);
 
-		t = Type::choose_random_struct_type(ok_struct_types);
+		t = Type::choose_random_struct_union_type(ok_struct_types);
 		ERROR_GUARD(NULL);
 	}
 	return t;
@@ -597,35 +568,27 @@ Type::choose_random_nonvoid_simple(void)
 }
 
 void
-Type::make_one_bitfield(size_t index, bool &last_is_zero,
-				vector<const Type*> &random_fields,
-				vector<CVQualifiers> &qualifiers,
-				vector<int> &fields_length)
+Type::make_one_bitfield(vector<const Type*> &random_fields, vector<CVQualifiers> &qualifiers, vector<int> &fields_length)
 {
 	int max_length = CGOptions::bitfields_length();
-
 	bool sign = rnd_flipcoin(BitFieldsSignedProb);
 	ERROR_RETURN();
+
 	const Type *type = sign ? &Type::get_simple_type(eInt) : &Type::get_simple_type(eUInt);
-       	random_fields.push_back(type);
+	random_fields.push_back(type);
 	CVQualifiers qual = CVQualifiers::random_qualifiers(type, FieldConstProb, FieldVolatileProb);
 	ERROR_RETURN();
 	qualifiers.push_back(qual);
-	int length = rnd_upto(CGOptions::bitfields_length());
-	//while (i == 0 && length == 0)
-		//length = rnd_upto(CGOptions::bitfields_length());
+	int length = rnd_upto(max_length); 
 	ERROR_RETURN();
-	if (index==0 || last_is_zero) {
-		if (max_length <= 2)
-			length = 1;
-		else
-			length = rnd_upto(max_length - 1) + 1;
-	}
-	else {
-		length = rnd_upto(max_length);
-	}
-	ERROR_RETURN();
-	last_is_zero = (length == 0) ? true : false;
+
+	bool no_zero_len = fields_length.empty() || (fields_length.back() == 0);
+	// force length to be non-zero is required
+	if (length == 0 && no_zero_len) {
+		if (max_length <= 2) length = 1;
+		else length = rnd_upto(max_length - 1) + 1;
+	} 
+	ERROR_RETURN(); 
 	fields_length.push_back(length);
 }
 
@@ -635,30 +598,27 @@ Type::make_full_bitfields_struct_fields(size_t field_cnt, vector<const Type*> &r
 					vector<CVQualifiers> &qualifiers,
 					vector<int> &fields_length)
 {
-	bool last_is_zero = false;
-
 	for (size_t i=0; i<field_cnt; i++) {
 		bool is_non_bitfield = rnd_flipcoin(ScalarFieldInFullBitFieldsProb);
 		if (is_non_bitfield) {
-			make_one_struct_field(i, random_fields, qualifiers, fields_length);
-			last_is_zero = false;
+			make_one_struct_field(random_fields, qualifiers, fields_length);
 		}
 		else {
-			make_one_bitfield(i, last_is_zero, random_fields, qualifiers, fields_length);
+			make_one_bitfield(random_fields, qualifiers, fields_length);
 		}
 	}
 }
 
 void
-Type::make_one_struct_field(size_t, vector<const Type*> &random_fields, 
+Type::make_one_struct_field(vector<const Type*> &random_fields, 
 					vector<CVQualifiers> &qualifiers,
 					vector<int> &fields_length)
 {
 	ChooseRandomTypeFilter f;
 	unsigned int i = rnd_upto(AllTypes.size(), &f);
 	ERROR_RETURN();
-        const Type* type = AllTypes[i];
-        random_fields.push_back(type);
+	const Type* type = AllTypes[i];
+	random_fields.push_back(type);
 	CVQualifiers qual = CVQualifiers::random_qualifiers(type, FieldConstProb, FieldVolatileProb);
 	ERROR_RETURN();
 	qualifiers.push_back(qual);
@@ -666,33 +626,50 @@ Type::make_one_struct_field(size_t, vector<const Type*> &random_fields,
 }
 
 void
+Type::make_one_union_field(vector<const Type*> &fields, vector<CVQualifiers> &qfers, vector<int> &lens)
+{
+	bool is_bitfield = CGOptions::bitfields() && rnd_flipcoin(BitFieldInNormalStructProb);
+	if (is_bitfield) {
+		make_one_bitfield(fields, qfers, lens);
+	} 
+	else {
+		vector<Type*> ok_types = AllTypes;
+		ok_types.insert(ok_types.end(), derived_types.begin(), derived_types.end());
+		const Type* type = NULL;
+		do {
+			unsigned int i = pure_rnd_upto(ok_types.size()); 
+			const Type* t = ok_types[i];
+			// no union in union?
+			if (t->eType == eUnion || t->eType == eSimple && SIMPLE_TYPES_PROB_FILTER->filter(t->simple_type)) {
+				continue;
+			}
+			type = t; 
+		} while (type == NULL); 
+	
+		fields.push_back(type);
+		CVQualifiers qual = CVQualifiers::random_qualifiers(type, FieldConstProb, FieldVolatileProb);
+		ERROR_RETURN();
+		qfers.push_back(qual);
+		lens.push_back(-1);
+	}
+}
+
+void
 Type::make_normal_struct_fields(size_t field_cnt, vector<const Type*> &random_fields, 
 					vector<CVQualifiers> &qualifiers,
 					vector<int> &fields_length)
 {
-    bool last_is_zero = false;
-
-    for (size_t i=0; i<field_cnt; i++)
-    {
-	bool is_bitfield = CGOptions::bitfields() && rnd_flipcoin(BitFieldInNormalStructProb);
-	if (is_bitfield) {
-		make_one_bitfield(i, last_is_zero, random_fields, qualifiers, fields_length);
+	for (size_t i=0; i<field_cnt; i++)
+	{
+		bool is_bitfield = CGOptions::bitfields() && rnd_flipcoin(BitFieldInNormalStructProb);
+		if (is_bitfield) {
+			make_one_bitfield(random_fields, qualifiers, fields_length);
+		}
+		else {
+			make_one_struct_field(random_fields, qualifiers, fields_length);
+		}
 	}
-	else {
-		make_one_struct_field(i, random_fields, qualifiers, fields_length);
-		last_is_zero = false;
-	}
-    }
-}
-
-void
-Type::make_all_full_bitfields_struct_types()
-{
-/*
-	bool sign = false;
-	if (Probabilities::zero_probability(BitFieldsSignedProb)) 
-*/
-}
+} 
 
 #define ZERO_BITFIELD 0
 #define RANDOM_BITFIELD 1
@@ -973,7 +950,7 @@ Type::make_all_struct_union_types(void)
 }
 
 Type*
-Type::make_random_struct_union_type(void)
+Type::make_random_struct_type(void)
 { 
     size_t field_cnt = 0;
     size_t max_cnt = CGOptions::max_struct_fields();
@@ -1002,6 +979,24 @@ Type::make_random_struct_union_type(void)
     }
 
     Type* new_type = new Type(random_fields, true, packed, qualifiers, fields_length);
+    return new_type;
+}
+
+Type*
+Type::make_random_union_type(void)
+{ 
+    size_t max_cnt = CGOptions::max_union_fields(); 
+    size_t field_cnt = rnd_upto(max_cnt) + 1;
+    ERROR_GUARD(NULL);
+
+    vector<const Type*> fields;
+    vector<CVQualifiers> qfers;
+    vector<int> lens;
+    
+	for (size_t i=0; i<field_cnt; i++) {
+		make_one_union_field(fields, qfers, lens);
+	} 
+    Type* new_type = new Type(fields, false, false, qfers, lens);
     return new_type;
 }
 
@@ -1043,11 +1038,7 @@ Type::GenerateSimpleTypes(void)
     unsigned int st;
     for (st=eChar; st<MAX_SIMPLE_TYPES; st++)
     { 
-#if 0
-        if ((st==eLongLong || st==eULongLong) && !CGOptions::allow_int64())
-		continue;
-#endif
-	AllTypes.push_back(new Type((enum eSimpleType)st));
+		AllTypes.push_back(new Type((enum eSimpleType)st));
     }
     Type::void_type = new Type((enum eSimpleType)eVoid);
 }
@@ -1059,26 +1050,26 @@ GenerateAllTypes(void)
 	// In the exhaustive mode, we want to generate all type first. 
 	// We don't support struct for now
 	if (CGOptions::dfs_exhaustive()) {
-        	Type::GenerateSimpleTypes();
+		Type::GenerateSimpleTypes();
 		if (CGOptions::use_struct() && CGOptions::expand_struct())
 			Type::make_all_struct_union_types();
 		return;
 	}
 
-    if (!CGOptions::use_struct())
-    {
-       	while (AllTypesProbability()) {
-	    AllTypes.push_back(new Type(Type::choose_random_nonvoid_simple()));
-    	}
-    	Type::void_type = new Type((enum eSimpleType)eVoid);
+	Type::GenerateSimpleTypes();
+    if (CGOptions::use_struct()) {
+        while (AllTypesProbability()) { 
+		    Type *ty = Type::make_random_struct_type(); 
+		    AllTypes.push_back(ty);
+	    }
     }
-    else
-    {
-        Type::GenerateSimpleTypes();
-	    while (AllTypesProbability()) {
-		    ERROR_RETURN();
-		    Type *ty = Type::make_random_struct_union_type();
-		    ERROR_RETURN();
+	if (CGOptions::use_union()) {
+		// create some pointer types to be the fields of unions
+		while (derived_types.size() < 10 && pure_rnd_flipcoin(50)) {
+			Type::find_pointer_type(Type::choose_random(), true);
+		}
+        while (AllTypesProbability()) { 
+		    Type *ty = Type::make_random_union_type(); 
 		    AllTypes.push_back(ty);
 	    }
     }
@@ -1093,7 +1084,7 @@ Type::choose_random()
 	ERROR_GUARD(NULL);
 	Type *rv_type = f.get_type();
 	if (!rv_type->used) {
-		Bookkeeper::record_bitfields_structs(rv_type);
+		Bookkeeper::record_type_with_bitfields(rv_type);
 		rv_type->used = true;
 	}
 	return rv_type;
@@ -1167,12 +1158,10 @@ bool
 Type::is_unamed_padding(size_t index) const
 {
 	size_t sz = bitfields_length_.size();
-	
 	if (sz == 0)
 		return false;
 
 	assert(index < sz);
-
 	return (bitfields_length_[index] == 0);
 }
 
@@ -1197,7 +1186,7 @@ Type::has_bitfields() const
 bool
 Type::is_full_bitfields_struct() const
 {
-	//return (bitfields_length_.size() > 0);
+	if (eType != eStruct) return false;
 	size_t i;
 	for (i = 0; i < bitfields_length_.size(); ++i) {
 		if (bitfields_length_[i] < 0)
@@ -1386,13 +1375,16 @@ Type::SizeInBytes(void) const
 	case eUnion: { 
         unsigned int max_size = 0;
         for (i=0; i<fields.size(); i++) { 
-            if (fields[i]->SizeInBytes() > max_size) {
-                max_size = fields[i]->SizeInBytes();
+			unsigned int sz = fields[i]->SizeInBytes();
+			if (sz == SIZE_UNKNOWN) return sz;
+            if (sz > max_size) {
+                max_size = sz;
             }
         }
         return max_size;
     }
     case eStruct: { 
+		if (!this->packed_) return SIZE_UNKNOWN;
         unsigned int total_size = 0;
         for (i=0; i<fields.size(); i++) { 
             total_size += fields[i]->SizeInBytes();
@@ -1405,7 +1397,7 @@ Type::SizeInBytes(void) const
 }
 
 // --------------------------------------------------------------
- /* Select a left hand type
+ /* Select a left hand type for assignments
   ************************************************************/
 const Type *
 Type::SelectLType(bool no_volatile, eAssignOps op)
@@ -1419,23 +1411,29 @@ Type::SelectLType(bool no_volatile, eAssignOps op)
 		ERROR_GUARD(NULL);
 		type = Type::make_random_pointer_type(); 
 	}
-
 	ERROR_GUARD(NULL);
-	// allow struct as LValue
-	vector<Type *> ok_struct_types;
-	get_all_ok_struct_types(ok_struct_types, true, no_volatile, false);
 
-	if ((ok_struct_types.size() > 0) && !type && (op == eSimpleAssign) && rnd_flipcoin(StructAsLTypeProb)) {
-		ERROR_GUARD(NULL);
-		type = Type::choose_random_struct_type(ok_struct_types);
+	// JYTODO: choose a union type as LHS type, this mean RHS can't be constant
+	/*if (!type) {
+		vector<Type *> ok_union_types;
+		get_all_ok_struct_union_types(ok_union_types, true, no_volatile, false, false);
+		if ((ok_union_types.size() > 0) && (op == eSimpleAssign) && rnd_flipcoin(UnionAsLTypeProb)) {
+			type = Type::choose_random_struct_union_type(ok_union_types);
+		}
+	}*/
+	// choose a struct type as LHS type
+	if (!type) {
+		vector<Type *> ok_struct_types;
+		get_all_ok_struct_union_types(ok_struct_types, true, no_volatile, false, true);
+		if ((ok_struct_types.size() > 0) && (op == eSimpleAssign) && rnd_flipcoin(StructAsLTypeProb)) {
+			type = Type::choose_random_struct_union_type(ok_struct_types);
+		}
 	}
 
-	ERROR_GUARD(NULL);
 	// default is any integer type
-	if (!type)
+	if (!type) {
 		type = get_int_type();
-	ERROR_GUARD(NULL);
- 
+	}
 	return type;
 }
 
@@ -1445,7 +1443,7 @@ Type::get_int_subfield_names(string prefix, vector<string>& names) const
 	if (eType == eSimple) {
 		names.push_back(prefix);
 	}
-	else if (eType == eStruct) {
+	else if (is_aggregate()) {
 		size_t i;
 		size_t j = 0;
 		for (i=0; i<fields.size(); i++) {
@@ -1493,17 +1491,17 @@ Type::get_type_sizeof_string(std::string &s) const
 // ---------------------------------------------------------------------
 /* print struct definition (fields etc)
  *************************************************************/
-void OutputStruct(Type* type, std::ostream &out)
+void OutputStructUnion(Type* type, std::ostream &out)
 {
     size_t i;
     // sanity check
-    assert (type->eType==eStruct || type->eType==eUnion);
+    assert (type->is_aggregate());
 
     if (!type->printed) { 
         // output dependent structs, if any
         for (i=0; i<type->fields.size(); i++) { 
-            if (type->fields[i]->eType==eStruct || type->fields[i]->eType==eUnion) {
-                OutputStruct((Type*)type->fields[i], out);
+			if (type->fields[i]->is_aggregate()) {
+                OutputStructUnion((Type*)type->fields[i], out);
             }
         } 
         // output myself
@@ -1517,10 +1515,8 @@ void OutputStruct(Type* type, std::ostream &out)
         out << " {";
 		really_outputln(out);
 
-		assert(type->fields.size() == type->qfers_.size());
-		//if (is_full_bitfields)
-		//assert(type->fields.size() == type->bitfields_length_.size());
-		size_t j = 0;
+		assert(type->fields.size() == type->qfers_.size()); 
+		unsigned int j = 0;
         for (i=0; i<type->fields.size(); i++) {
             out << "   ";
 			const Type *field = type->fields[i];
@@ -1563,7 +1559,7 @@ void OutputStruct(Type* type, std::ostream &out)
 /* print all struct definitions (fields etc)
  *************************************************************/
 void
-OutputStructDeclarations(std::ostream &out)
+OutputStructUnionDeclarations(std::ostream &out)
 {
     size_t i;
     output_comment_line(out, "--- Struct/Union Declarations ---");
@@ -1571,7 +1567,7 @@ OutputStructDeclarations(std::ostream &out)
     {
         Type* t = AllTypes[i];
         if (t->used && (t->eType == eStruct || t->eType == eUnion)) {
-            OutputStruct(AllTypes[i], out);
+            OutputStructUnion(AllTypes[i], out);
         }
     }
 }

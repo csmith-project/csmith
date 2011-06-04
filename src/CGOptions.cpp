@@ -83,11 +83,13 @@ DEFINE_GETTER_SETTER_BOOL(wrap_volatiles)
 DEFINE_GETTER_SETTER_BOOL(allow_const_volatile)
 DEFINE_GETTER_SETTER_BOOL(avoid_signed_overflow)
 DEFINE_GETTER_SETTER_INT (max_struct_fields)
+DEFINE_GETTER_SETTER_INT (max_union_fields)
 DEFINE_GETTER_SETTER_INT (max_nested_struct_level)
 DEFINE_GETTER_SETTER_STRING_REF(struct_output)
 DEFINE_GETTER_SETTER_BOOL (fixed_struct_fields)
 DEFINE_GETTER_SETTER_BOOL (expand_struct)
 DEFINE_GETTER_SETTER_BOOL (use_struct)
+DEFINE_GETTER_SETTER_BOOL (use_union)
 DEFINE_GETTER_SETTER_INT (max_indirect_level)
 DEFINE_GETTER_SETTER_INT (max_array_dimensions)
 DEFINE_GETTER_SETTER_INT (max_array_length_per_dimension)
@@ -131,6 +133,8 @@ DEFINE_GETTER_SETTER_BOOL(strict_const_arrays)
 DEFINE_GETTER_SETTER_BOOL(jumps)
 DEFINE_GETTER_SETTER_BOOL(return_structs)
 DEFINE_GETTER_SETTER_BOOL(arg_structs)
+DEFINE_GETTER_SETTER_BOOL(return_unions)
+DEFINE_GETTER_SETTER_BOOL(arg_unions)
 DEFINE_GETTER_SETTER_BOOL(volatiles)
 DEFINE_GETTER_SETTER_BOOL(volatile_pointers)
 DEFINE_GETTER_SETTER_BOOL(enable_vol_tests)
@@ -168,6 +172,7 @@ CGOptions::set_default_settings(void)
 	max_stmt_depth(CGOPTIONS_DEFAULT_MAX_STMT_DEPTH);
 	max_expr_depth(CGOPTIONS_DEFAULT_MAX_EXPR_DEPTH);
 	max_struct_fields(CGOPTIONS_DEFAULT_MAX_STRUCT_FIELDS);
+	max_union_fields(CGOPTIONS_DEFAULT_MAX_UNION_FIELDS);
 	max_nested_struct_level(CGOPTIONS_DEFAULT_MAX_NESTED_STRUCT_LEVEL);
 	fixed_struct_fields(false);
 	expand_struct(false);
@@ -186,6 +191,7 @@ CGOptions::set_default_settings(void)
 	CGOptions::nomain(false);
 	random_based(true);
 	use_struct(true);
+	use_union(true);
 	compact_output(false);
 	msp(false);
 	func1_max_params(CGOPTIONS_DEFAULT_FUNC1_MAX_PARAMS);
@@ -210,6 +216,8 @@ CGOptions::set_default_settings(void)
 	jumps(true);
 	return_structs(true);
 	arg_structs(true);
+	return_unions(true);
+	arg_unions(true);
 	volatiles(true);
 	volatile_pointers(true);
 	vol_addr_file(CGOPTIONS_DEFAULT_VOL_ADDR_FILE);

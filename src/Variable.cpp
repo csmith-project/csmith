@@ -96,7 +96,7 @@ int find_variable_in_set(const vector<Variable*>& set, const Variable* v)
 int find_field_variable_in_set(const vector<const Variable*>& set, const Variable* v)
 {
     size_t i;
-	if (v->type->eType == eStruct) {
+	if (v->is_aggregate()) {
 		for (i=0; i<v->field_vars.size(); i++) {
 			const Variable* field = v->field_vars[i];
 			int pos = find_variable_in_set(set, field);
@@ -217,7 +217,7 @@ Variable::loose_match(const Variable* v) const
 bool 
 Variable::match(const Variable* v) const
 {
-	if (type && v->type && type->eType == eStruct) {
+	if (type && v->type && type->is_aggregate()) {
 		return (this == v) || has_field_var(v);
 	}
 	return this == v;
@@ -263,7 +263,7 @@ Variable::is_virtual(void) const
   ************************************************************************/
 bool Variable::has_field_var(const Variable* v) const
 {
-    if (type->eType == eStruct) {
+	if (type->is_aggregate()) {
 		const Variable* tmp = v;
 		while (tmp) {
 			if (tmp == this) {
@@ -280,12 +280,14 @@ bool Variable::has_field_var(const Variable* v) const
   ************************************************************************/
 void Variable::create_field_vars(const Type *type)
 {
-    assert(type->eType == eStruct);
+	assert(type->is_aggregate());
     size_t i, j;
     assert(type->fields.size() == type->qfers_.size());
 	j = 0;
-    bool is_vol_struct = qfer.is_volatile_after_deref(0);
-    bool is_const_struct = qfer.is_const_after_deref(0);
+	if (name == "g_371")
+		j = 0;
+    bool is_vol_var = qfer.is_volatile();
+    bool is_const_var = qfer.is_const();
     for (i=0; i<type->fields.size(); i++) {
 		if (type->is_unamed_padding(i))
 			continue;
@@ -297,15 +299,13 @@ void Variable::create_field_vars(const Type *type)
 			ss << name;
 		}
 		ss << ".f" << j++;
-		CVQualifiers quals = type->qfers_[i];
-		//bool isConst = is_const() || quals.is_const();
-		//bool isVolatile = is_volatile() || quals.is_volatile();
-		bool isConst = is_const_struct || quals.is_const();
-		bool isVolatile = is_vol_struct || quals.is_volatile();
+		CVQualifiers quals = type->qfers_[i];  
+		quals.set_const(is_const_var || quals.is_const());
+		quals.set_volatile(is_vol_var || quals.is_volatile());
 		bool isBitfield = type->is_bitfield(i);
 		Variable *var = Variable::CreateVariable(ss.str(), type->fields[i],
-					isConst, isVolatile, false, false, false, isBitfield, this);
-		ERROR_RETURN();
+			quals.get_consts(), quals.get_volatiles(), false, false, false, isBitfield, this);
+		assert(var->qfer.sanity_check(var->type));
 		field_vars.push_back(var);
     }
 }
@@ -336,7 +336,7 @@ Variable::CreateVariable(const std::string &name, const Type *type,
 	var->init = Constant::make_random(type);
 
 	ERROR_GUARD_AND_DEL1(NULL, var);
-	if (type->eType == eStruct) {
+	if (type->is_aggregate()) {
 		var->create_field_vars(type);
 	}
 	ERROR_GUARD_AND_DEL1(NULL, var);
@@ -351,7 +351,7 @@ Variable::CreateVariable(const std::string &name, const Type *type, const Expres
 		assert(type->simple_type != eVoid);
 
 	Variable *var = new Variable(name, type, init, qfer);
-	if (type->eType == eStruct) {
+	if (type->is_aggregate()) {
 		var->create_field_vars(type);
 	}
 	ERROR_GUARD_AND_DEL1(NULL, var);
@@ -488,14 +488,14 @@ Variable::is_const_after_deref(int deref_level) const
 		return true;
 	}
 	if (type) {
-		// check struct type
+		// check struct/union type
 		int i;
 		const Type* t = type;
 		for (i=0; i<deref_level; i++) {
 			t = t->ptr_type;
 		}
 		assert(t);
-		return t->is_const_struct();
+		return t->is_const_struct_union();
 	}
 	return false;
 }
@@ -511,14 +511,14 @@ Variable::is_volatile_after_deref(int deref_level) const
 		return true;
 	}
 	if (type) {
-		// check struct type
+		// check struct/union type
 		int i;
 		const Type* t = type;
 		for (i=0; i<deref_level; i++) {
 			t = t->ptr_type;
 		}
 		assert(t);
-		return t->is_volatile_struct();
+		return t->is_volatile_struct_union();
 	}
 	return false;
 }
@@ -958,7 +958,7 @@ Variable::compatible(const Variable *v) const
 void
 Variable::hash(std::ostream& out) const
 {  
-    if (type->eType == eStruct) {
+	if (type->is_aggregate()) {
         size_t i;
 		for (i=0; i<field_vars.size(); i++) {
 			field_vars[i]->hash(out);
@@ -1175,7 +1175,7 @@ Variable::output_volatile_address(ostream &out, int indent, const string &fp_str
 			output_volatile_fprintf(out, indent, name, sizeof_string, fp_string);
 //		}
 	}
-	else if (type->eType == eStruct) {
+		else if (type->is_aggregate()) {
 #if 0
 		if (is_vol && is_global()) {
 			std::string name = "&" + get_actual_name();
@@ -1217,11 +1217,13 @@ Variable::output_addressable_name(ostream &out, int indent) const
 		output_print_str(out, str, str_value, indent);
 		outputln(out);
 	}
-	else if (type->eType == eStruct) {
+	else if (type->eType == eStruct || type->eType == eUnion) {
 		for (i=0; i<field_vars.size(); i++) {
 			// bit fields can not be taken address
 			if (!field_vars[i]->isBitfield_) {
 				field_vars[i]->output_addressable_name(out, indent);
+				// Unions fields all start from the same location
+				if (type->eType == eUnion) break;
 			}
 		}
 	}
@@ -1246,7 +1248,7 @@ Variable::output_value_dump(ostream &out, string prefix, int indent) const
 		output_print_str(out, prefix + to_string() + " = " + type->printf_directive() + "\\n", to_string(), indent);
 		outputln(out);
 	}
-	else if (type->eType == eStruct) {
+	else if (type->eType == eStruct || type->eType == eUnion) {
 		for (i=0; i<field_vars.size(); i++) {
 			// bit fields can not be taken address
 			field_vars[i]->output_value_dump(out, prefix, indent);

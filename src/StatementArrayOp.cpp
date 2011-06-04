@@ -118,7 +118,7 @@ StatementArrayOp::make_random_array_init(CGContext &cg_context)
 	
 	// JYTODO: initialize only field(s) of array members if they are of type struct
 	Block* b = cg_context.get_current_block()->random_parent_block();
-	Expression* init = VariableSelector::make_init_value(Effect::READ, cg_context, av->type, &av->qfer, b);//Expression::make_random(cg_context, av->type, true);
+	Expression* init = VariableSelector::make_init_value(Effect::READ, cg_context, av->type, &av->qfer, b);
 	if (CGOptions::strict_const_arrays())
 		assert(av->type->eType != ePointer);
 	assert(init->visit_facts(fm->global_facts, cg_context));
@@ -226,8 +226,8 @@ StatementArrayOp::Output(std::ostream &out, FactMgr* fm, int indent) const
 		output_tab(out, indent);
 		out << "{";
 		outputln(out);
-		// cannot assign array members to a struct constant directly, has to create a "fake" struct var first
-		if (init_value->term_type == eConstant && array_var->type->eType == eStruct) {
+		// cannot assign array members to a struct/union constant directly, has to create a "fake" struct var first
+		if (init_value->term_type == eConstant && array_var->is_aggregate()) {
 			output_tab(out, indent+1);
 			array_var->type->Output(out);
 			out << " tmp = ";

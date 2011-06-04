@@ -157,7 +157,7 @@ ArrayVariable::CreateArrayVariable(Block* blk, const std::string &name, const Ty
 	}
 	ArrayVariable *var = new ArrayVariable(blk, name, type, init, qfer, sizes, isFieldVarOf);
 	ERROR_GUARD_AND_DEL1(NULL, var);
-	if (type->eType == eStruct) {
+	if (type->is_aggregate()) {
 		var->create_field_vars(type);
 	}
 	// create a list of alternative initial values. now only support integer arrays
@@ -257,8 +257,8 @@ ArrayVariable::itemize(void) const
 		av->add_index(new Constant(get_int_type(), StringUtils::int2str(index)));
 	}
 	av->collective = this; 
-	// only expand struct for itemized array variable
-	if (type->eType == eStruct) {
+	// only expand struct/union for itemized array variable
+	if (type->is_aggregate()) {
 		av->create_field_vars(type);
 	}
 	return av;
@@ -277,8 +277,8 @@ ArrayVariable::itemize(const vector<int>& const_indices) const
 		av->add_index(new Constant(get_int_type(), StringUtils::int2str(index)));
 	}
 	av->collective = this; 
-	// only expand struct for itemized array variable
-	if (type->eType == eStruct) {
+	// only expand struct/union for itemized array variable
+	if (type->is_aggregate()) {
 		av->create_field_vars(type);
 	}
 	return av;
@@ -296,8 +296,8 @@ ArrayVariable::itemize(const std::vector<const Variable*>& indices, Block* blk) 
 	}
 	av->collective = this;
 	av->parent = blk;
-	// only expand struct for itemized array variable
-	if (type->eType == eStruct) {
+	// only expand struct/union for itemized array variable
+	if (type->is_aggregate()) {
 		av->create_field_vars(type);
 	}
 	blk->local_vars.push_back(av);
@@ -316,8 +316,8 @@ ArrayVariable::itemize(const std::vector<const Expression*>& indices, Block* blk
 	}
 	av->collective = this;
 	av->parent = blk;
-	// only expand struct for itemized array variable
-	if (type->eType == eStruct) {
+	// only expand struct/union for itemized array variable
+	if (type->is_aggregate()) {
 		av->create_field_vars(type);
 	}
 	blk->local_vars.push_back(av);

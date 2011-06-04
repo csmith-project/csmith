@@ -96,7 +96,7 @@ public:
 	static Variable* GenerateParameterVariable(const Type *type, const CVQualifiers *qfer);
 	static std::vector<Variable *>* GetGlobalVariables(void) {return &GlobalList;}
 	static void doFinalization(void); 
-	static void expand_struct_vars(vector<const Variable *>& vars, const Type* type);
+	static void expand_struct_union_vars(vector<const Variable *>& vars, const Type* type);
 
 	static ProbabilityTable<unsigned int, eVariableScope> * scopeTable_;
 	static void InitScopeTable();
@@ -140,7 +140,7 @@ private:
 
 	static void find_all_non_array_visible_vars(const Block* b, vector<Variable*> &vars);
 
-	static void expand_struct_vars(vector<Variable *>& vars, const Type* type);
+	static void expand_struct_union_vars(vector<Variable *>& vars, const Type* type);
 
 	static bool has_dereferenceable_var(const vector<Variable *>& vars, const Type* type, const CGContext& cg_context);
 

@@ -49,8 +49,9 @@
 #include "CVQualifiers.h"
 
 template <class Name> class Enumerator;
-
 using namespace std;
+
+#define SIZE_UNKNOWN 0xFFFF
 
 /*
  *
@@ -114,19 +115,13 @@ public:
 
 	static const Type *choose_random_struct_from_type(const Type* type, bool no_volatile);
 
-	static void get_all_ok_struct_types(vector<Type *> &ok_types, bool no_const, bool no_volatile, bool need_int_field);
+	static void get_all_ok_struct_union_types(vector<Type *> &ok_types, bool no_const, bool no_volatile, bool need_int_field, bool bStruct);
 
-	bool struct_has_int_field() const;
+	bool has_int_field() const;
 
-	static const Type* choose_random_struct_type(vector<Type *> &ok_types);
+	static const Type* choose_random_struct_union_type(vector<Type *> &ok_types);
 
 	static const Type * choose_random_nonvoid_nonvolatile(void);
-
-	static bool is_nonconst_struct(const Type *ty);
-
-	static bool is_nonvolatile_struct(const Type *ty);
-
-	static bool is_nonconst_or_nonvolatile_struct(const Type *ty, const int flag);
 
 	static bool has_pointer_type(void);
 
@@ -166,22 +161,21 @@ public:
 					vector<const Type*> &accum_types, vector<const Type*> &all_types,
 					vector<CVQualifiers> &all_quals, vector<CVQualifiers> &all_bitfield_quals);
 
-	static void make_all_full_bitfields_struct_types();
-
 	static void make_all_struct_types(int level, vector<const Type*> &accum_types);
 
 	static void make_all_struct_union_types();
 
 	// make a random struct or union type
-	static Type* make_random_struct_union_type(void);
+	static Type* make_random_struct_type(void);
+	static Type* make_random_union_type(void);
 
-	static void make_one_bitfield(size_t index, bool &last_is_zero,
-				vector<const Type*> &random_fields,
+	static void make_one_bitfield(vector<const Type*> &random_fields,
 				vector<CVQualifiers> &qualifiers,
 				vector<int> &fields_length);
 
-	static void make_one_struct_field(size_t index, vector<const Type*> &random_fields, 
+	static void make_one_struct_field(vector<const Type*> &random_fields, 
 					vector<CVQualifiers> &qualifiers, vector<int> &fields_length);
+	static void make_one_union_field(vector<const Type*> &fields, vector<CVQualifiers> &qfers, vector<int> &lens);
 
 	static void make_full_bitfields_struct_fields(size_t field_cnt, vector<const Type*> &random_fields, 
 					vector<CVQualifiers> &qualifiers,
@@ -230,8 +224,9 @@ public:
 	bool is_full_bitfields_struct() const;
 	bool is_bitfield(size_t index) const ;
 	bool has_bitfields() const;
-	bool is_const_struct() const;
-	bool is_volatile_struct() const;
+	bool is_const_struct_union() const;
+	bool is_volatile_struct_union() const;
+	bool is_int(void) const { return eType == eSimple && simple_type != eVoid;}
 	bool is_aggregate(void) const { return eType == eStruct || eType == eUnion;}
 	bool match(const Type* t, enum eMatchType mt) const;
 	unsigned long SizeInBytes(void) const;
@@ -244,18 +239,17 @@ public:
 	eTypeDesc eType;
 	const Type *ptr_type;
 	eSimpleType simple_type;
-	vector<unsigned int> dimensions;             // for array types
+	vector<unsigned int> dimensions;    // for array types
 	vector<const Type*> fields;         // for struct/union types
 	unsigned int sid;                   // sequence id, for struct/union types
     
 	bool used;                          // whether any variable declared with this type
 	bool printed;                       // whether this struct/union has been printed in the random program
-	const bool packed_;			    // whether this struct/union should be packed
-	vector<CVQualifiers> qfers_;	// conresponds to each element of fields 
+	const bool packed_;					// whether this struct/union should be packed
+	vector<CVQualifiers> qfers_;		// conresponds to each element of fields 
 					// It's a tradeoff between the current implementation and the
 					// need of struct's level type qualifiers. 
-	// -1 means it's a regular field
-	vector<int> bitfields_length_;
+	vector<int> bitfields_length_;		// -1 means it's a regular field
 
 	static Type *void_type;
 private:	
@@ -269,8 +263,8 @@ private:
 
 void GenerateAllTypes(void);
 const Type * get_int_type(void);
-void OutputStructDeclarations(std::ostream &);
-void OutputStruct(Type* type, std::ostream &out);
+void OutputStructUnionDeclarations(std::ostream &);
+void OutputStructUnion(Type* type, std::ostream &out);
 
 ///////////////////////////////////////////////////////////////////////////////
 

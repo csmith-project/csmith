@@ -783,8 +783,8 @@ ReducerOutputMgr::rewrite_func_calls(const Statement* stm, std::ostream &out, in
 		if (!calls.empty()) {
 			size_t i;
 			for (i=0; i<calls.size(); i++) {
-				// exclude calls that return struct for now because struct const is not accepted as parameter value
-				if (calls[i]->get_type().eType == eStruct) {
+				// exclude calls that return struct/union for now because struct const is not accepted as parameter value
+				if (calls[i]->get_type().is_aggregate()) {
 					continue;
 				}
 				output_tab(out, indent);
@@ -919,15 +919,15 @@ ReducerOutputMgr::output_global_values(string header, std::ostream& out, int ind
 }
 
 void 
-ReducerOutputMgr::OutputStructs(ostream& out) 
+ReducerOutputMgr::OutputStructUnions(ostream& out) 
 {
 	size_t i;
 	for (i=0; i<reducer->used_vars.size(); i++) {
 		const Type* t = reducer->used_vars[i]->type;
-		if (t->eType == eStruct) {
+		if (t->is_aggregate()) {
 			Type* type = Type::find_type(t);
 			assert(type);
-			OutputStruct(type, out);
+			OutputStructUnion(type, out);
 		}
 	}
 }
@@ -984,7 +984,7 @@ ReducerOutputMgr::Output()
 	reducer->expand_used_vars();
 
 	std::ostream &out = get_main_out(); 
-	OutputStructs(out);
+	OutputStructUnions(out);
 	output_vars(*VariableSelector::GetGlobalVariables(), out, 0);
 	output_artificial_globals(out);
 	size_t i;

@@ -163,6 +163,7 @@ static void print_help()
 	cout << "  --main | --nomain: enable | disable to generate main function (enabled by default)." << endl <<  endl;  
 	cout << "  --compound-assignment | --no-compound-assignment: enable | disable compound assignments (enabled by default)." << endl << endl; 
 	cout << "  --structs | --no-structs: enable | disable to generate structs (enable by default)." << endl << endl;
+	cout << "  --unions | --no-unions: enable | disable to generate unions (enable by default)." << endl << endl;
 	cout << "  --packed-struct | --no-packed-struct: enable | disable packed structs by adding #pragma pack(1) before struct definition (disabled by default)." << endl << endl; 
 	cout << "  --bitfields | --no-bitfields: enable | disable full-bitfields structs (disabled by default)." << endl << endl;
 	cout << "  --argc | --no-argc: genereate main function with/without argv and argc being passed (enabled by default)." << endl << endl; 
@@ -171,6 +172,7 @@ static void print_help()
 	cout << "  --max-block-size <size>: limit the number of non-return statements in a block to <size> (default 4)." << endl << endl; 
 	cout << "  --max-funcs <num>: limit the number of functions (besides main) to <num>  (default 10)." << endl << endl;
 	cout << "  --max-struct-fields <num>: limit the number of struct fields to <num> (default 10). " << endl << endl;
+	cout << "  --max-union-fields <num>: limit the number of union fields to <num> (default 5). " << endl << endl;
 	cout << "  --max-pointer-depth <depth>: limit the indirect depth of pointers to <depth> (default 2)." << endl << endl;
 	cout << "  --max-array-dim <num>: limit array dimensions to <num>. (default 3)" << endl << endl;
 	cout << "  --max-array-len-per-dim <num>: limit array length per dimension to <num> (default 10)." << endl << endl;
@@ -224,10 +226,12 @@ static void print_advanced_help()
 	cout << "  --func1_max_params <num>: specify the number of symbolic variables passed to func_1 (default 3). ";
 	cout << "Only used when --splat | --crest | --klee | --coverage-test is enabled." << endl << endl;
 	 
-	// struct related options
+	// struct/union related options
 	cout << "  --fixed-struct-fields: fix the size of struct fields to max-struct-fields (default 10)." << endl << endl; 
 	cout << "  --return-structs | --no-return-structs: enable | disable return structs from a function (enabled by default)." << endl << endl; 
 	cout << "  --arg-structs | --no-arg-structs: enable | disable structs being used as args (enabled by default)." << endl << endl; 
+	cout << "  --return-unions | --no-return-unions: enable | disable return unions from a function (enabled by default)." << endl << endl; 
+	cout << "  --arg-unions | --no-arg-unions: enable | disable unions being used as args (enabled by default)." << endl << endl; 
 
 	// delta related options
 	cout << "  --delta-monitor [simple]: specify the type of delta monitor. Only [simple] type is supported now." << endl << endl;
@@ -521,6 +525,16 @@ main(int argc, char **argv)
 			continue;
 		}
 
+		if (strcmp (argv[i], "--unions") == 0) {
+			CGOptions::use_union(true);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--no-unions") == 0) {
+			CGOptions::use_union(false);
+			continue;
+		}
+
 		if (strcmp (argv[i], "--argc") == 0) {
 			CGOptions::accept_argc(true);
 			continue;
@@ -548,6 +562,16 @@ main(int argc, char **argv)
 			if (!parse_int_arg(argv[i], &ret))
 				exit(-1);
 			CGOptions::max_struct_fields(ret);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--max-union-fields") ==0 ) {
+			unsigned long ret;
+			i++;
+			arg_check(argc, i);
+			if (!parse_int_arg(argv[i], &ret))
+				exit(-1);
+			CGOptions::max_union_fields(ret);
 			continue;
 		}
 
@@ -750,6 +774,26 @@ main(int argc, char **argv)
 
 		if (strcmp (argv[i], "--no-arg-structs") == 0) {
 			CGOptions::arg_structs(false);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--return-unions") == 0) {
+			CGOptions::return_unions(true);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--no-return-unions") == 0) {
+			CGOptions::return_unions(false);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--arg-unions") == 0) {
+			CGOptions::arg_unions(true);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--no-arg-unions") == 0) {
+			CGOptions::arg_unions(false);
 			continue;
 		}
 

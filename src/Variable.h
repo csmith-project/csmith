@@ -54,7 +54,6 @@ using namespace std;
 class CGContext;
 class Expression;
 class Function;
-class Type;
 class Block;
 class Lhs;
 class ArrayVariable;
@@ -90,6 +89,7 @@ public:
 	bool is_field_var(void) const { return isFieldVarOf_ != 0; };
 	bool is_array_field(void) const;
 	bool is_virtual(void) const;
+	bool is_aggregate(void) const { return type && type->is_aggregate(); }
 	bool match(const Variable* v) const;
 	bool loose_match(const Variable* v) const;
 	bool is_pointer(void) const { return type && type->eType == ePointer;}
@@ -129,7 +129,7 @@ public:
 
 	static size_t GetMaxArrayDimension(const vector<Variable*>& vars);
 
-	vector<Variable *> field_vars;    // field variables for structs
+	vector<Variable *> field_vars;    // field variables for struct/unions
 	const std::string name;
 	const Type *type;
 	const Expression *init;
@@ -140,7 +140,7 @@ public:
 	const bool isStatic;
 	const bool isRegister; 
 	const bool isBitfield_; // expanded from a full-bitfield struct var
-	const Variable* isFieldVarOf_; //expanded from a struct
+	const Variable* isFieldVarOf_; //expanded from a struct/union
 	const bool isArray;
     const CVQualifiers qfer;
 	static std::vector<const Variable*> ctrl_vars;

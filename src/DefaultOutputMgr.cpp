@@ -121,7 +121,7 @@ DefaultOutputMgr::OutputGlobals()
 	string prefix = "extern ";
 	OutputGlobalVariablesDecls(ofile, prefix);
 
-	OutputStructDeclarations(ofile);
+	OutputStructUnionDeclarations(ofile);
 	ofile << "#endif" << std::endl;
 	ofile.close();
 }
@@ -204,7 +204,7 @@ DefaultOutputMgr::Output()
 		RandomOutputDefs();
 	}
 	else {
-		OutputStructDeclarations(out);
+		OutputStructUnionDeclarations(out);
 		OutputGlobalVariables(out);
 		OutputForwardDeclarations(out);
 		OutputFunctions(out);

@@ -50,6 +50,7 @@ using namespace std;
 #define CGOPTIONS_DEFAULT_MAX_STMT_DEPTH	(5)
 #define CGOPTIONS_DEFAULT_MAX_EXPR_DEPTH	(5)
 #define CGOPTIONS_DEFAULT_MAX_STRUCT_FIELDS	(10)
+#define CGOPTIONS_DEFAULT_MAX_UNION_FIELDS	(5)
 #define CGOPTIONS_DEFAULT_MAX_NESTED_STRUCT_LEVEL	(0)
 #define CGOPTIONS_DEFAULT_MAX_INDIRECT_LEVEL (2)
 #define CGOPTIONS_DEFAULT_MAX_ARRAY_DIMENSIONS	(3)
@@ -110,6 +111,9 @@ public:
 	static int max_struct_fields();
 	static int max_struct_fields(int p);
 
+	static int max_union_fields();
+	static int max_union_fields(int p);
+
 	static int max_nested_struct_level();
 	static int max_nested_struct_level(int p);
 
@@ -124,6 +128,9 @@ public:
 
 	static bool use_struct();
 	static bool use_struct(bool p);
+
+	static bool use_union();
+	static bool use_union(bool p);
 
 	static int max_indirect_level();
 	static int max_indirect_level(int p);
@@ -254,8 +261,14 @@ public:
 	static bool return_structs(void);
 	static bool return_structs(bool p);
 
+	static bool return_unions(void);
+	static bool return_unions(bool p);
+
 	static bool arg_structs(void);
 	static bool arg_structs(bool p);
+
+	static bool arg_unions(void);
+	static bool arg_unions(bool p);
 
 	static bool volatiles(void);
 	static bool volatiles(bool p);
@@ -380,11 +393,13 @@ private:
 	static bool	allow_const_volatile_;
 	static bool avoid_signed_overflow_;
 	static int  max_struct_fields_;
+	static int  max_union_fields_;
 	static int  max_nested_struct_level_;
 	static std::string struct_output_;
 	static bool  fixed_struct_fields_;
 	static bool  expand_struct_;
 	static bool use_struct_;
+	static bool use_union_;
 	static int  max_indirect_level_;
 	static int  max_array_dimensions_;
 	static int  max_array_length_per_dimension_;
@@ -433,6 +448,8 @@ private:
 	static bool	jumps_;
 	static bool	return_structs_;
 	static bool	arg_structs_;
+	static bool	return_unions_;
+	static bool	arg_unions_;
 	static bool	volatiles_;
 	static bool	volatile_pointers_;
 	static bool	enable_vol_tests_;

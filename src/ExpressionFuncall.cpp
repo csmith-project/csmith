@@ -71,8 +71,7 @@ ExpressionFuncall::make_random(CGContext &cg_context, const Type* type, const CV
 	++cg_context.stmt_depth;
 	bool std_func = ExpressionFunctionProbability(cg_context);
 	ERROR_GUARD(NULL);
-    // unary/binary "functions" don't yield void or struct type, 
-    // therefore they are taken out of consideration
+    // unary/binary "functions" produce scalar types only
 	if (type && (type->eType != eSimple || type->simple_type == eVoid))
 		std_func = false;
 

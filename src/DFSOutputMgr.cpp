@@ -75,10 +75,10 @@ DFSOutputMgr::OutputHeader(int argc, char *argv[], unsigned long seed)
 }
 
 void
-DFSOutputMgr::OutputStructs(ostream& /*out*/)
+DFSOutputMgr::OutputStructUnions(ostream& /*out*/)
 {
 	ofstream o_struct(struct_output_.c_str());
-	OutputStructDeclarations(o_struct);
+	OutputStructUnionDeclarations(o_struct);
 	o_struct.close();
 }
 

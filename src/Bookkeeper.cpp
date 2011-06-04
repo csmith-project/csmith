@@ -382,7 +382,7 @@ Bookkeeper::record_vars_with_bitfields(const Type *type)
 {
 	assert(type);
 	const Type *base_type = type->get_base_type();
-	if ((base_type->eType != eStruct) ||
+	if (!base_type->is_aggregate() ||
 		(!base_type->has_bitfields()))
 		return;
 
@@ -393,10 +393,9 @@ Bookkeeper::record_vars_with_bitfields(const Type *type)
 }
 
 void
-Bookkeeper::record_bitfields_structs(const Type *typ)
+Bookkeeper::record_type_with_bitfields(const Type *typ)
 {
-	if (typ->eType != eStruct)
-		return;	
+	if (!typ->is_aggregate()) return;	
 
 	if (typ->has_bitfields()) {
 		Bookkeeper::structs_with_bitfields++;
