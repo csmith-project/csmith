@@ -696,10 +696,6 @@ sub compile_and_run ($$$$$$$) {
 	return (-2,"",-1);
     }
     
-    if (1) {
-	system "cat $compilerout >> ${VOLATILE_HOME}/compiler_output.txt";
-    }
-
     if ($VALGRIND_ON_COMPILER) {
 	open INF, "<$compilerout" or die;
 	while (my $line = <INF>) { 
