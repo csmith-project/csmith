@@ -79,35 +79,39 @@ if (0) {
 
 if (1) {
 
-    my $inside = 0;
+    for (my $zz=0; $zz<20; $zz++) {
     
-    for (my $rep = 0; $rep < $REPS; $rep++) {
+	my $inside = 0;
+	my $rep;
 	
-	my $fail = 0;
-	
-	for (my $i=0; $i<$N; $i++) {
-	    my $r = rand();
-	    if ($r < $PROB) {
-		$fail++;
+	for ($rep = 0; $rep < $REPS; $rep++) {
+	    
+	    my $fail = 0;
+	    
+	    for (my $i=0; $i<$N; $i++) {
+		my $r = rand();
+		if ($r < $PROB) {
+		    $fail++;
+		} else {
+		}
+	    }
+	    my $rate = 1.0 * $fail / $N;
+	    #(my $lo, my $hi) = normal_approx ($fail, $N);
+	    (my $lo, my $hi) = wilson_score ($fail, $N);
+	    #print "$fail / $N failures for internal $lo .. $hi  ";
+	    if ($PROB >= $lo &&
+		$PROB <= $hi) {
+		$inside++;
+		#print ("inside!\n");
 	    } else {
+		#print ("outside!\n");
 	    }
 	}
-	my $rate = 1.0 * $fail / $N;
-	#(my $lo, my $hi) = normal_approx ($fail, $N);
-	(my $lo, my $hi) = wilson_score ($fail, $N);
-	#print "$fail / $N failures for internal $lo .. $hi  ";
-	if ($PROB >= $lo &&
-	    $PROB <= $hi) {
-	    $inside++;
-	    #print ("inside!\n");
-	} else {
-	    #print ("outside!\n");
-	}
-    }
-    
+	
     my $pct = 100.0 * $inside / $REPS;
-    
-    print "actual probability was inside the confidence interval $pct % of the time\n";
+	
+	print "actual probability was inside the confidence interval $pct % of the time\n";
+    }
 }
 
 #############################################################
