@@ -434,6 +434,50 @@ Effect::field_is_written(const Variable *v) const
 	return false;
 }
 
+bool
+Effect::sibling_field_is_read(const Variable *v) const
+{   
+	// check other fields of union/struct
+	if (v->isFieldVarOf_) {
+		for (size_t j=0; j<v->isFieldVarOf_->field_vars.size(); j++) {
+			Variable* field_var = v->isFieldVarOf_->field_vars[j];
+			if (field_var == v) continue;
+			if (is_read(field_var) || field_is_read(field_var)) {
+				return true; 
+			}
+		}
+	}
+	return false;
+}
+
+bool
+Effect::sibling_field_is_written(const Variable *v) const
+{   
+	// check other fields of union/struct
+	if (v->isFieldVarOf_) {
+		for (size_t j=0; j<v->isFieldVarOf_->field_vars.size(); j++) {
+			Variable* field_var = v->isFieldVarOf_->field_vars[j];
+			if (field_var == v) continue;
+			if (is_written(field_var) || field_is_written(field_var)) {
+				return true; 
+			}
+		}
+	}
+	return false;
+}
+
+bool 
+Effect::is_read_partially(const Variable* v) const
+{
+	return is_read(v) || field_is_read(v) || (v->is_union_field() && sibling_field_is_read(v));
+}
+
+bool 
+Effect::is_written_partially(const Variable* v) const
+{
+	return is_written(v) || field_is_written(v) || (v->is_union_field() && sibling_field_is_written(v));
+}
+
 /*
  * consolidate the read/write set 
  */

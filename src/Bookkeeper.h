@@ -50,7 +50,7 @@ public:
 
 	static void output_statistics(std::ostream &out);
 
-	static void output_struct_statistics(std::ostream &out);
+	static void output_struct_union_statistics(std::ostream &out);
 
 	static void output_expr_statistics(std::ostream &out);
 
@@ -85,7 +85,9 @@ public:
 
 	static void output_var_freshness(std::ostream &out);
 
-	static std::vector<int> struct_depth_cnts;  
+	static std::vector<int> struct_depth_cnts; 
+
+	static int union_var_cnt; 
 
 	static std::vector<int> expr_depth_cnts;
 

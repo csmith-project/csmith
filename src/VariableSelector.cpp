@@ -225,10 +225,6 @@ VariableSelector::has_dereferenceable_var(const vector<Variable *>& vars, const 
 bool
 VariableSelector::is_eligible_var(const Variable* var, int deref_level, Effect::Access access, const CGContext& cg_context)
 {
-	// JYTODO: integrate this into get_collective?
-	//if (var->isFieldVarOf_ && var->is_array_field()) {
-	//	var = var->isFieldVarOf_->get_collective();
-	//}
 	const Variable* coll = var->get_collective();
 	if (coll != var) {
 		CGContext cg_tmp(cg_context);
@@ -256,7 +252,7 @@ VariableSelector::is_eligible_var(const Variable* var, int deref_level, Effect::
 	// We can neither read nor write a variable that is being written in
 	// the current effect context.
 	if (((access == Effect::READ) || (access == Effect::WRITE))
-		&& (effect_context.is_written(var) || effect_context.field_is_written(var))) {
+		&& (effect_context.is_written_partially(var))) {
 		return false;
 	}
 	// ISSUE: generating "strictly conforming" programs.
@@ -264,7 +260,7 @@ VariableSelector::is_eligible_var(const Variable* var, int deref_level, Effect::
 	// We cannot write a variable that is being read in the current effect context. 
 	// JYTODO: this is too restrictive, with dereference, var is not the variable 
 	// being written, but the pointed variable. Nevertheless, we excluded var here
-	if ((access == Effect::WRITE && deref_level==0) && (effect_context.is_read(var) || effect_context.field_is_read(var))) {
+	if ((access == Effect::WRITE && deref_level==0) && effect_context.is_read_partially(var)) {
 		return false;
 	}
 	// ISSUE: generating correct C programs.
@@ -532,8 +528,6 @@ VariableSelector::GenerateNewGlobal(Effect::Access access, const CGContext &cg_c
 	tmp_count++;
 	Variable* var = create_and_initialize(access, cg_context, t, &var_qfer, 0, name);
 
-	Bookkeeper::record_vars_with_bitfields(t);
-	incr_counter(Bookkeeper::struct_depth_cnts, t->get_struct_depth());
 	GlobalList.push_back(var);
 	// for DFA 
 	FactMgr* fm = get_fact_mgr(&cg_context);
@@ -562,8 +556,6 @@ VariableSelector::GenerateNewNonArrayGlobal(Effect::Access access, const CGConte
 	ERROR_GUARD(NULL);
 	Variable *var = new_variable(name, t, init, qfer);
 
-	Bookkeeper::record_vars_with_bitfields(t);
-	incr_counter(Bookkeeper::struct_depth_cnts, t->get_struct_depth());
 	GlobalList.push_back(var);
 	// for DFA 
 	FactMgr* fm = get_fact_mgr(&cg_context);
@@ -927,9 +919,6 @@ VariableSelector::GenerateNewParentLocal(Block &block,
 	string name = RandomLocalName();
 
 	Variable* var = create_and_initialize(access, cg_context, t, &var_qfer, blk, name);
-
-	Bookkeeper::record_vars_with_bitfields(t);
-	incr_counter(Bookkeeper::struct_depth_cnts, t->get_struct_depth());
 	blk->local_vars.push_back(var);
 	FactMgr* fm = get_fact_mgr(&cg_context);
 	fm->add_new_local_var_fact(blk, var->get_collective());
@@ -1206,10 +1195,17 @@ VariableSelector::select(Effect::Access access,
 	if (var && !cg_context.get_effect_context().is_side_effect_free()) {
 		assert(!var->is_volatile());
 	}
-	if (var_created) {
-		Bookkeeper::use_new_var_cnt++;
-	} else {
-		Bookkeeper::use_old_var_cnt++;
+	// record statistics
+	if (var) {
+		if (var_created) {
+			const Type* t = var->type;
+			Bookkeeper::use_new_var_cnt++; 
+			Bookkeeper::record_vars_with_bitfields(t);
+			incr_counter(Bookkeeper::struct_depth_cnts, t->get_struct_depth());
+			if (t->eType == eUnion) Bookkeeper::union_var_cnt++;
+		} else {
+			Bookkeeper::use_old_var_cnt++;
+		}
 	}
 	return var;
 }
@@ -1355,8 +1351,7 @@ VariableSelector::select_array(const CGContext &cg_context)
 			ArrayVariable* av = dynamic_cast<ArrayVariable*>(vars[i]);
 			assert(av);
 			if (av->collective == 0) {
-				if (!cg_context.get_effect_context().is_read(av) && 
-					!cg_context.get_effect_context().field_is_read(av) &&
+				if (!cg_context.get_effect_context().is_read_partially(av) && 
 					!cg_context.get_effect_context().is_written(av) &&
 					(cg_context.get_effect_context().is_side_effect_free() || !av->is_volatile()) &&
 					!av->is_const() &&

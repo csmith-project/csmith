@@ -87,6 +87,7 @@ public:
 	bool is_volatile_after_deref(int deref_level) const;
 	bool has_field_var(const Variable* v) const; 
 	bool is_field_var(void) const { return isFieldVarOf_ != 0; };
+	bool is_union_field(void) const { return isFieldVarOf_ != 0 && isFieldVarOf_->type->eType == eUnion; };
 	bool is_array_field(void) const;
 	bool is_virtual(void) const;
 	bool is_aggregate(void) const { return type && type->is_aggregate(); }

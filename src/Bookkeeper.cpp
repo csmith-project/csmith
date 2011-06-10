@@ -51,7 +51,7 @@ using namespace std;
  
 // counter for all levels of struct depth
 std::vector<int> Bookkeeper::struct_depth_cnts; 
-
+int Bookkeeper::union_var_cnt = 0;
 std::vector<int> Bookkeeper::expr_depth_cnts;
 std::vector<int> Bookkeeper::dereference_level_cnts;
 int Bookkeeper::address_taken_cnt = 0;
@@ -136,7 +136,7 @@ Bookkeeper::output_stmts_statistics(std::ostream &out)
 void
 Bookkeeper::output_statistics(std::ostream &out)
 {
-	output_struct_statistics(out);
+	output_struct_union_statistics(out);
 	out << endl;
 	output_expr_statistics(out);
 	out << endl;
@@ -152,13 +152,14 @@ Bookkeeper::output_statistics(std::ostream &out)
 }
 
 void
-Bookkeeper::output_struct_statistics(std::ostream &out)
+Bookkeeper::output_struct_union_statistics(std::ostream &out)
 {
 	formated_output(out, "max struct depth: ", (struct_depth_cnts.size()-1));
 	out << "breakdown:" << endl;
 	for (size_t i=0; i<struct_depth_cnts.size(); i++) {
 		out << "   depth: " << i << ", occurrence: " << struct_depth_cnts[i] << endl;
 	}
+	formated_output(out, "total union variables: ", union_var_cnt);
 	Bookkeeper::output_bitfields(out);
 }
 

@@ -207,7 +207,7 @@ CGContext::check_read_var(const Variable *v, const std::vector<const Fact*>& fac
 	if (is_nonreadable(v)) {
 		return false;
 	} 
-	if (effect_context.is_written(v) || effect_context.field_is_written(v)) {
+	if (effect_context.is_written_partially(v)) {
 		return false;
 	}
 	if (v->is_volatile() && !effect_context.is_side_effect_free()) {
@@ -329,10 +329,10 @@ CGContext::check_write_var(const Variable *v, const std::vector<const Fact*>& fa
 	if (is_nonwritable(v) || v->is_const()) {
 		return false;
 	}
-	if (effect_context.is_written(v) || effect_context.field_is_written(v)) {
+	if (effect_context.is_written_partially(v)) {
 		return false;
 	}
-	if (effect_context.is_read(v) || effect_context.field_is_read(v)) {
+	if (effect_context.is_read_partially(v)) {
 		return false;
 	}
 	if (v->is_volatile() && !effect_context.is_side_effect_free()) {
@@ -556,7 +556,7 @@ CGContext::in_conflict(const Effect& eff) const
 		if (is_nonreadable(v)) {
 			return true;
 		}
-		if (effect_context.is_written(v) || effect_context.field_is_written(v)) {
+		if (effect_context.is_written_partially(v)) {
 			return true;
 		} 
 		// Yang: do we need to consider deref level here?
@@ -570,10 +570,10 @@ CGContext::in_conflict(const Effect& eff) const
 		if (is_nonwritable(v) || v->is_const()) {
 			return true;
 		}
-		if (effect_context.is_written(v) || effect_context.field_is_written(v)) {
+		if (effect_context.is_written_partially(v)) {
 			return true;
 		}
-		if (effect_context.is_read(v) || effect_context.field_is_read(v)) {
+		if (effect_context.is_read_partially(v)) {
 			return true;
 		}
 		if (v->is_volatile() && !effect_context.is_side_effect_free()) {

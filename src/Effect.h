@@ -65,6 +65,10 @@ public:
 	bool is_written(std::string vname) const;
 	bool field_is_read(const Variable *v) const;
 	bool field_is_written(const Variable *v) const;
+	bool sibling_field_is_read(const Variable *v) const;
+	bool sibling_field_is_written(const Variable *v) const;
+	bool is_read_partially(const Variable* v) const;  
+	bool is_written_partially(const Variable* v) const;
 	bool has_race_with(const Effect &e) const;
 	bool is_empty(void) const;
 	void consolidate(void);
