@@ -489,24 +489,19 @@ VariableSelector::create_and_initialize(Effect::Access access, const CGContext &
 {
 	const Expression* init = NULL;
 	Variable* var = NULL;
-
-	if (t->eType == ePointer && CGOptions::strict_const_arrays()) {
-		init = make_init_value(access, cg_context, t, qfer, blk);
-		ERROR_GUARD(NULL);
-		var = new_variable(name, t, init, qfer);
-	}
-	else {
-		init = make_init_value(access, cg_context, t, qfer, blk);
-		if (rnd_flipcoin(NewArrayVariableProb)) {
-			ERROR_GUARD(NULL);
-			var = create_array_and_itemize(blk, name, cg_context, t, init, qfer);
+ 
+	if (rnd_flipcoin(NewArrayVariableProb)) {
+		if (CGOptions::strict_const_arrays()) {
+			init = Constant::make_random(t);
+		} else { 
+			init = make_init_value(access, cg_context, t, qfer, blk);
 		}
-		else {
-			ERROR_GUARD(NULL);
-			var = new_variable(name, t, init, qfer);
-		}	
+		var = create_array_and_itemize(blk, name, cg_context, t, init, qfer);
 	}
-	ERROR_GUARD(NULL);
+	else { 
+		init = make_init_value(access, cg_context, t, qfer, blk);
+		var = new_variable(name, t, init, qfer);
+	}	
 	assert(var);
 	return var;
 }

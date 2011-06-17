@@ -254,7 +254,7 @@ static void print_advanced_help()
 	// other options
 	cout << "  --math-notmp: make csmith generate code for safe_math_macros_notmp." << endl << endl;
 	 
-	cout << "  --strict-const-arrays: restrict const array elements to integer constants." << endl << endl;
+	cout << "  --strict-const-arrays: restrict array elements to constants." << endl << endl;
 	
 	cout << "  --partial-expand <assignment[,for[,block[,if-else[,invoke[,return]]]]]: ";
 	cout <<"partial-expand controls which what kind of statements should be generated first. ";

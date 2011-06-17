@@ -119,8 +119,6 @@ StatementArrayOp::make_random_array_init(CGContext &cg_context)
 	// JYTODO: initialize only field(s) of array members if they are of type struct
 	Block* b = cg_context.get_current_block()->random_parent_block();
 	Expression* init = VariableSelector::make_init_value(Effect::READ, cg_context, av->type, &av->qfer, b);
-	if (CGOptions::strict_const_arrays())
-		assert(av->type->eType != ePointer);
 	assert(init->visit_facts(fm->global_facts, cg_context));
 	StatementArrayOp* sa = new StatementArrayOp(cg_context.get_current_block(), av, cvs, inits, incrs, init);
 	Lhs lhs(*av);
