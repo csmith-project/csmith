@@ -283,6 +283,8 @@ static void print_advanced_help()
 	cout << "  --safe-math-wrappers <id1,id2...>: specifiy ids of wrapper functions that are necessary to avoid undefined behaviors, use 0 to specify none." << endl << endl;
 				
 	cout << "  --mark-mutable-const: mark constants that can be mutated with parentheses (disabled by default)." << endl << endl; 
+
+	cout << "  --force-non-uniform-arrays: force integer arrays to be initialized with multiple values (disabled by default)." << endl << endl; 
 }
 
 void arg_check(int argc, int i)
@@ -1034,6 +1036,11 @@ main(int argc, char **argv)
 
 		if (strcmp (argv[i], "--force-globals-static") == 0) {
 			CGOptions::force_globals_static(true);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--force-non-uniform-arrays") == 0) {
+			CGOptions::force_non_uniform_array_init(true);
 			continue;
 		}
 

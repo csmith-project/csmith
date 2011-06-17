@@ -34,6 +34,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 #include <vector>
+#include <string>
 #include "Variable.h"
 class Expression;
 class Block;
@@ -78,6 +79,8 @@ public:
 	void output_init(std::ostream &out, const Expression* init, const vector<const Variable*>& cvs, int indent) const;
 	void output_addr_checks(std::ostream &out, const Variable* var, string field_name, int indent) const;
 	void add_init_value(const Expression* e) { init_values.push_back(e);}
+	string build_initializer_str(const vector<string>& init_strings) const;
+	string build_init_recursive(size_t dimen, const vector<string>& init_strings) const;
 
 	const ArrayVariable* collective;
 	Block* parent;

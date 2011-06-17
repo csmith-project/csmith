@@ -160,10 +160,9 @@ ArrayVariable::CreateArrayVariable(Block* blk, const std::string &name, const Ty
 	if (type->is_aggregate()) {
 		var->create_field_vars(type);
 	}
-	// create a list of alternative initial values. now only support integer arrays
-	int last_dimen_size = sizes[sizes.size() - 1];
-	if (type->eType == eSimple && last_dimen_size > 1) {
-		unsigned int init_num = pure_rnd_upto(last_dimen_size - 1);
+	// create a list of alternative initial values. now only support integer arrays 
+	if (type->eType == eSimple) {
+		unsigned int init_num = pure_rnd_upto(total_size - 1);
 		for (size_t i=0; i<init_num; i++) {
 			Expression* e = Constant::make_random(type);
 			var->add_init_value(e);
@@ -439,6 +438,55 @@ ArrayVariable::no_loop_initializer(void) const
 	return type->eType==eStruct || type->eType==eUnion || is_const() || is_global() || (init_values.size() > 0);
 }
 
+// print the initializer recursively for multi-dimension arrays
+// this is based on John's idea
+string 
+ArrayVariable::build_init_recursive(size_t dimen, const vector<string>& init_strings) const
+{
+	assert (dimen < get_dimension());
+	string ret = "{";
+	for (size_t i=0; i<sizes[dimen]; i++) {
+		if (dimen == sizes.size() - 1) {
+			// use magic number to choose an initial value 
+			size_t rnd_index = ((dimen + (i+7) * (i+13)) * 52369) % (init_strings.size()); 
+			ret += init_strings[rnd_index];
+		 } else {
+			ret += build_init_recursive(dimen + 1, init_strings);
+		 }
+		 if (i != sizes[dimen]-1) ret += ",";
+	}
+	ret += "}";
+	return ret;
+}
+
+// build the string initializer in form of "{...}"
+string
+ArrayVariable::build_initializer_str(const vector<string>& init_strings) const
+{ 
+	string str, str_dimen;
+	if (CGOptions::force_non_uniform_array_init()) {
+		return build_init_recursive(0, init_strings);
+	}
+		
+	for (int i=sizes.size()-1; i>=0; i--) {
+		size_t len = sizes[i];
+		str_dimen = "{";
+		for (size_t j=0; j<len; j++) {
+			// for last dimension, use magic number to choose an initial value
+			if (i == ((int)sizes.size()) - 1) {
+				unsigned int rnd_index = ((i + (j+7) * (j+13)) * 52369) % (init_strings.size());  
+				str_dimen += init_strings[rnd_index];
+			} else {
+				str_dimen += str;
+			} 
+			str_dimen += ((j<len-1) ? ", " : "");
+		}
+		str_dimen += "}";
+		str = str_dimen;
+	}
+	return str;
+}
+
 // --------------------------------------------------------------
 void
 ArrayVariable::OutputDef(std::ostream &out, int indent) const
@@ -454,7 +502,7 @@ ArrayVariable::OutputDef(std::ostream &out, int indent) const
 		else {
 			// use string initializer for arrays
 			// create the strings for initial values
-			size_t i, j;
+			size_t i;
 			vector<string> init_strings;
 			assert(init);
 			init_strings.push_back(init->to_string());
@@ -473,29 +521,7 @@ ArrayVariable::OutputDef(std::ostream &out, int indent) const
 			for (i=0; i<sizes.size(); i++) {
 				out << "[" << sizes[i] << "]";
 			}
-			out << " = ";
- 			
-			// print initializer string
-			int k;
-			string str_initializer, str_dimen;
-			for (k=sizes.size()-1; k>=0; k--) {
-				size_t len = sizes[k];
-				str_dimen = "{";
-				for (j=0; j<len; j++) {
-					// for last dimension, use magic number to choose an initial value
-					if (k == ((int)sizes.size()) - 1) {
-						unsigned int rnd_index = ((k + (j+7) * (j+13)) * 52369) % (init_strings.size());  
-						str_dimen += init_strings[rnd_index];
-					} else {
-						str_dimen += str_initializer;
-					} 
-					str_dimen += ((j<len-1) ? ", " : "");
-				}
-				str_dimen += "}";
-				str_initializer = str_dimen;
-			}
-			out << str_initializer;
-			out << ";";
+			out << " = " << build_initializer_str(init_strings) << ";";
 			outputln(out);
 		}
 	}

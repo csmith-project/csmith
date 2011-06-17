@@ -160,6 +160,7 @@ DEFINE_GETTER_SETTER_INT (max_array_num_in_loop)
 DEFINE_GETTER_SETTER_BOOL(identify_wrappers)
 DEFINE_GETTER_SETTER_BOOL(mark_mutable_const)
 DEFINE_GETTER_SETTER_BOOL(force_globals_static)
+DEFINE_GETTER_SETTER_BOOL(force_non_uniform_array_init)
 
 void
 CGOptions::set_default_settings(void)
@@ -236,6 +237,7 @@ CGOptions::set_default_settings(void)
 	identify_wrappers(false);
 	mark_mutable_const(false);
 	force_globals_static(true);
+	force_non_uniform_array_init(false);
 	max_array_num_in_loop(CGOPTIONS_DEFAULT_MAX_ARRAY_NUM_IN_LOOP);
 }
 

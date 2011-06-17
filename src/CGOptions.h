@@ -369,6 +369,9 @@ public:
 	static bool force_globals_static(void);
 	static bool force_globals_static(bool p);
 
+	static bool force_non_uniform_array_init(void);
+	static bool force_non_uniform_array_init(bool p);
+
 private:
 	static bool resolve_exhaustive_options();
 
@@ -475,6 +478,7 @@ private:
 	static vector<int> safe_math_wrapper_ids_;
 	static bool mark_mutable_const_;
 	static bool force_globals_static_;
+	static bool force_non_uniform_array_init_;
 	static Reducer* reducer_; 
 
 private:
