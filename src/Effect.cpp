@@ -288,8 +288,11 @@ Effect::is_read(const Variable *v) const
 			return true;
 		}
 	}
-	// if we read a struct/union, presumingly all the fields are read too
-	if (v->isFieldVarOf_) {
+	// if we read a struct, presumingly all the fields are read too
+	// however we can not say the same thing for unions: reading a particular
+	// unions field can cause unspecified behaviors, while reading the whole
+	// union won't
+	if (v->isFieldVarOf_ && v->isFieldVarOf_->type->eType == eStruct) {
 		return is_read(v->isFieldVarOf_);
 	}
 	return false;
@@ -599,6 +602,20 @@ Effect::has_global_effect(void) const
 	len = write_vars.size();
 	for (i = 0; i < len; ++i) {
 		if (write_vars[i]->is_global()) {
+			return true;
+		}
+	}
+	return false;
+}
+
+/*
+ * whether any field of an union is been read
+ */
+bool
+Effect::union_field_is_read(void) const
+{ 
+	for (size_t i=0; i<read_vars.size(); i++) {
+		if (read_vars[i]->is_union_field()) {
 			return true;
 		}
 	}

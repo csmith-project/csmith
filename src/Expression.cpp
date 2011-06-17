@@ -199,8 +199,8 @@ ParamExpressionFilter::filter(int v) const
 		return true;
 	}
 	if (tt == eFunction) {
-		if (type_->eType == eStruct && !CGOptions::return_structs() ||
-			type_->eType == eUnion && !CGOptions::return_unions())
+		if ((type_->eType == eStruct && !CGOptions::return_structs()) ||
+			(type_->eType == eUnion && !CGOptions::return_unions()))
 			return true;
 	}
 	return false;
@@ -226,20 +226,6 @@ ExpressionTypeProbability(const CGContext &cg_context, const ExpressionFilter *f
 	int i = rnd_upto(100, filter);
 	ERROR_GUARD(MAX_TERM_TYPES);
 	return filter->number_to_termtype(i, Expression::exprTable_);
-}
-
-/*
- *
- */
-static eTermType
-ParameterTypeProbability(const CGContext &cg_context)
-{
-	if (cg_context.expr_depth > CGOptions::max_expr_depth())
-		return eVariable;
-
-	int i = rnd_upto(100);  
-	ERROR_GUARD(MAX_TERM_TYPES);
-	return Expression::paramTable_->get_value(i);
 }
 
 unsigned int

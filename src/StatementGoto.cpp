@@ -112,11 +112,15 @@ StatementGoto::make_random(CGContext &cg_context)
 		cg_context.get_effect_stm().clear();
 		//Expression* test = Expression::make_random(cg_context, get_int_type(), true, true, eVariable);
 		// use a variable that is already read in the context to avoid introducing conflict by the condition
-		const vector<const Variable*>& write_vars = back_edge ? 
-											  cg_context.get_effect_accum()->get_read_vars() : 
-											  fm->map_accum_effect[other_stm].get_read_vars();
-		const Block* b = back_edge ? curr_blk : ok_blk;
-		const Variable* cond_var = VariableSelector::choose_visible_written_var(b, write_vars, get_int_type());
+		const Variable* cond_var = NULL;
+		if (back_edge) {
+			cond_var = VariableSelector::choose_visible_read_var(curr_blk, 
+				cg_context.get_effect_accum()->get_read_vars(), get_int_type(), fm->global_facts);
+		} else {
+			// travel in time, find a suitable variable read at generation time of the other statement
+			cond_var = VariableSelector::choose_visible_read_var(ok_blk, 
+				fm->map_accum_effect[other_stm].get_read_vars(), get_int_type(), fm->map_facts_out[other_stm]);
+		}
 		if (cond_var == 0) {
 			return NULL;
 		}
@@ -147,8 +151,7 @@ StatementGoto::make_random(CGContext &cg_context)
 			bool ok = true;
 			bool found_new_facts = false;
 			// JYTODO: don't assume facts_in == facts_out for control statements
-			FactVec& goto_in = other_stm->is_ctrl_stmt() ? fm->map_facts_in[other_stm] : fm->map_facts_out[other_stm]; 
-			fm->remove_rv_facts(goto_in);
+			FactVec& goto_in = other_stm->is_ctrl_stmt() ? fm->map_facts_in[other_stm] : fm->map_facts_out[other_stm];
 			update_facts_for_dest(goto_in, goto_out, stm);
 			stm_in = fm->map_facts_in[stm];
 			Effect pre_effect = cg_context.get_accum_effect();
@@ -206,14 +209,12 @@ StatementGoto::make_random(CGContext &cg_context)
 /*
  *
  */
-StatementGoto::StatementGoto(Block* blk, const Expression &test, const Statement* dest, const std::vector<const Variable*>& vars)
-	: Statement(eGoto),
+StatementGoto::StatementGoto(Block* b, const Expression &test, const Statement* dest, const std::vector<const Variable*>& vars)
+	: Statement(eGoto, b),
 	  test(test),
 	  dest(dest),
 	  init_skipped_vars(vars)
 {
-	parent = blk; 
-	func = dest->func;
 	if (stm_labels.find(dest) != stm_labels.end()){
 		label = stm_labels[dest];
 	}
@@ -227,7 +228,7 @@ StatementGoto::StatementGoto(Block* blk, const Expression &test, const Statement
  *
  */
 StatementGoto::StatementGoto(const StatementGoto &sg)
-	: Statement(sg.get_type()),
+: Statement(sg.get_type(), sg.parent),
 	  test(sg.test),
 	  dest(sg.dest),
 	  label(sg.label),

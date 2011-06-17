@@ -64,7 +64,7 @@ StatementReturn::make_random(CGContext &cg_context)
 	ERROR_GUARD(NULL);
 	incr_counter(Bookkeeper::expr_depth_cnts, cg_context.expr_depth);
 
-	StatementReturn* sr = new StatementReturn(*ev);
+	StatementReturn* sr = new StatementReturn(cg_context.get_current_block(), *ev);
 	return sr;
 }
 
@@ -99,8 +99,8 @@ StatementReturn::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context)
 /*
  *
  */
-StatementReturn::StatementReturn(const ExpressionVariable &v)
-	: Statement(eReturn),
+StatementReturn::StatementReturn(Block* b, const ExpressionVariable &v)
+	: Statement(eReturn, b),
 	  var(v)
 {
 	// Nothing else to do.
@@ -110,7 +110,7 @@ StatementReturn::StatementReturn(const ExpressionVariable &v)
  *
  */
 StatementReturn::StatementReturn(const StatementReturn &sr)
-	: Statement(sr.get_type()),
+	: Statement(sr.get_type(), sr.parent),
 	  var(sr.var)
 {
 	// Nothing else to do.

@@ -51,7 +51,7 @@ public:
 	// Factory method.
 	static StatementGoto *make_random(CGContext &cg_context);
 
-	StatementGoto(Block* blk, const Expression &test, const Statement* dest, const std::vector<const Variable*>& vars);
+	StatementGoto(Block* b, const Expression &test, const Statement* dest, const std::vector<const Variable*>& vars);
 	StatementGoto(const StatementGoto &sg);
 	virtual ~StatementGoto(void);
 	//

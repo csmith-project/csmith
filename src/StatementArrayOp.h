@@ -52,12 +52,12 @@ public:
 	// Factory method.
 	static Statement *make_random(CGContext &cg_context); 
 	static StatementArrayOp *make_random_array_init(CGContext &cg_context); 
-	StatementArrayOp(const ArrayVariable* av, 
+	StatementArrayOp(Block* b, const ArrayVariable* av, 
 				   const std::vector<const Variable*>& cvs, 
 				   const std::vector<int>& inits,
 				   const std::vector<int>& incrs, 
 				   const Block *body);
-	StatementArrayOp(const ArrayVariable* av, 
+	StatementArrayOp(Block* b, const ArrayVariable* av, 
 				   const std::vector<const Variable*>& cvs, 
 				   const std::vector<int>& inits,
 				   const std::vector<int>& incrs, 

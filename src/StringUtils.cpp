@@ -261,6 +261,15 @@ StringUtils::breakup_assigns(const string& assigns, vector<string>& vars, vector
 	}
 }
 
+bool
+StringUtils::end_with(string s, string tail) 
+{
+	if (tail.length() < s.length()) {
+		s = s.substr(s.length() - tail.length());
+	}
+	return s == tail;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 StringUtils::StringUtils()
 {

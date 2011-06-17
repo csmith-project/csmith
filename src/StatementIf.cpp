@@ -97,7 +97,7 @@ StatementIf::make_random(CGContext &cg_context)
 	Block *if_false = Block::make_random(cg_context); 
 	ERROR_GUARD_AND_DEL2(NULL, expr, if_true);
 
-	StatementIf* si = new StatementIf(*expr, *if_true, *if_false);
+	StatementIf* si = new StatementIf(cg_context.get_current_block(), *expr, *if_true, *if_false);
 	// compute accumulated effect for this statement
 	si->set_accumulated_effect_after_block(eff, if_true, cg_context);
 	si->set_accumulated_effect_after_block(eff, if_false, cg_context);
@@ -107,9 +107,9 @@ StatementIf::make_random(CGContext &cg_context)
 /*
  *
  */
-StatementIf::StatementIf(const Expression &test,
+StatementIf::StatementIf(Block* b, const Expression &test,
 						 const Block &if_true, const Block &if_false)
-	: Statement(eIfElse),
+	: Statement(eIfElse, b),
 	  test(test),
 	  if_true(if_true),
 	  if_false(if_false)
@@ -121,7 +121,7 @@ StatementIf::StatementIf(const Expression &test,
  *
  */
 StatementIf::StatementIf(const StatementIf &si)
-	: Statement(si.get_type()),
+	: Statement(si.get_type(), si.parent),
 	  test(si.test),
 	  if_true(si.if_true),
 	  if_false(si.if_false)

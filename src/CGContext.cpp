@@ -39,6 +39,7 @@
 #include "Fact.h"
 #include "FactMgr.h"
 #include "FactPointTo.h"
+#include "FactUnion.h"
 #include "Lhs.h"
 #include "Statement.h"
 #include "Bookkeeper.h"
@@ -200,6 +201,9 @@ CGContext::read_var(const Variable *v)
 bool
 CGContext::check_read_var(const Variable *v, const std::vector<const Fact*>& facts)
 {
+	if (v->is_union_field() && FactUnion::is_nonreadable_field(v, facts)) {
+		return false;
+	}
 	if (!read_indices(v, facts)) {
 		return false;
 	}

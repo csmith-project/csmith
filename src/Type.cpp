@@ -39,6 +39,7 @@
 #include "Type.h"
 #include <sstream>
 #include <assert.h>
+#include <math.h>
 #include "Common.h"
 #include "CGOptions.h"
 #include "random.h"
@@ -536,13 +537,13 @@ Type::random_type_from_type(const Type* type, bool no_volatile, bool strict_simp
 
 // ---------------------------------------------------------------------
 static bool
-AllTypesProbability(void)
+MoreTypesProbability(void)
 {
 	// Always have at least 10 types in the program.
 	if (AllTypes.size() < 10)
 		return true;
-	// 50% probability for each additional type.
-	return rnd_flipcoin(50);
+	// 60% probability for each additional type.
+	return rnd_flipcoin(60);
 }
 
 // ---------------------------------------------------------------------
@@ -634,16 +635,36 @@ Type::make_one_union_field(vector<const Type*> &fields, vector<CVQualifiers> &qf
 	} 
 	else {
 		vector<Type*> ok_types = AllTypes;
-		ok_types.insert(ok_types.end(), derived_types.begin(), derived_types.end());
+		// find locations of struct types
+		int start_index = -1;
+		int end_index = -1;
+		for (size_t i=0; i<ok_types.size(); i++) {
+			if (ok_types[i]->eType == eStruct) {
+				if (start_index == -1) start_index = i;
+				end_index = i;
+			}
+		}
 		const Type* type = NULL;
 		do {
-			unsigned int i = pure_rnd_upto(ok_types.size()); 
-			const Type* t = ok_types[i];
-			// no union in union?
-			if (t->eType == eUnion || t->eType == eSimple && SIMPLE_TYPES_PROB_FILTER->filter(t->simple_type)) {
-				continue;
+			// 10% chance to be struct field
+			if (start_index != -1 && pure_rnd_flipcoin(10)) { 
+				type = ok_types[start_index + pure_rnd_upto(end_index - start_index + 1)];
+				assert(type->eType == eStruct);
 			}
-			type = t; 
+			// 10% chance to be char*
+			else if (pure_rnd_flipcoin(10)) {
+				type = find_pointer_type(&get_simple_type(eChar), true);
+			}
+			else {
+				unsigned int i = pure_rnd_upto(ok_types.size()); 
+				const Type* t = ok_types[i];
+				// no union in union?
+				if (t->eType == eUnion || 
+					(t->eType == eSimple && SIMPLE_TYPES_PROB_FILTER->filter(t->simple_type))) {
+					continue;
+				}
+				type = t; 
+			}
 		} while (type == NULL); 
 	
 		fields.push_back(type);
@@ -1058,17 +1079,13 @@ GenerateAllTypes(void)
 
 	Type::GenerateSimpleTypes();
     if (CGOptions::use_struct()) {
-        while (AllTypesProbability()) { 
+        while (MoreTypesProbability()) { 
 		    Type *ty = Type::make_random_struct_type(); 
 		    AllTypes.push_back(ty);
 	    }
     }
 	if (CGOptions::use_union()) {
-		// create some pointer types to be the fields of unions
-		while (derived_types.size() < 10 && pure_rnd_flipcoin(50)) {
-			Type::find_pointer_type(Type::choose_random(), true);
-		}
-        while (AllTypesProbability()) { 
+        while (MoreTypesProbability()) { 
 		    Type *ty = Type::make_random_union_type(); 
 		    AllTypes.push_back(ty);
 	    }
@@ -1374,8 +1391,14 @@ Type::SizeInBytes(void) const
 		break;
 	case eUnion: { 
         unsigned int max_size = 0;
-        for (i=0; i<fields.size(); i++) { 
-			unsigned int sz = fields[i]->SizeInBytes();
+        for (i=0; i<fields.size(); i++) {
+			unsigned int sz = 0;
+			if (is_bitfield(i)) {
+				assert(i >= 0 && i < bitfields_length_.size());
+				sz = ceil(bitfields_length_[i] / 8.0) * 8;
+			} else {
+				sz = fields[i]->SizeInBytes();
+			}
 			if (sz == SIZE_UNKNOWN) return sz;
             if (sz > max_size) {
                 max_size = sz;
@@ -1385,9 +1408,12 @@ Type::SizeInBytes(void) const
     }
     case eStruct: { 
 		if (!this->packed_) return SIZE_UNKNOWN;
+		// give up if there are bitfields, too much compiler-dependence and machine-dependence
+		if (this->has_bitfields()) return SIZE_UNKNOWN;
         unsigned int total_size = 0;
         for (i=0; i<fields.size(); i++) { 
-            total_size += fields[i]->SizeInBytes();
+			unsigned int sz = fields[i]->SizeInBytes();
+            total_size += sz;
         }
         return total_size;
     }

@@ -122,7 +122,7 @@ StatementArrayOp::make_random_array_init(CGContext &cg_context)
 	if (CGOptions::strict_const_arrays())
 		assert(av->type->eType != ePointer);
 	assert(init->visit_facts(fm->global_facts, cg_context));
-	StatementArrayOp* sa = new StatementArrayOp(av, cvs, inits, incrs, init);
+	StatementArrayOp* sa = new StatementArrayOp(cg_context.get_current_block(), av, cvs, inits, incrs, init);
 	Lhs lhs(*av);
 	if (update_fact_for_assign(&lhs, init, fm->global_facts)) {
 		cg_context.get_current_func()->fact_changed = true;
@@ -134,12 +134,12 @@ StatementArrayOp::make_random_array_init(CGContext &cg_context)
 /*
  *
  */
-StatementArrayOp::StatementArrayOp(const ArrayVariable* av, 
+StatementArrayOp::StatementArrayOp(Block* b, const ArrayVariable* av, 
 				   const std::vector<const Variable*>& cvs, 
 				   const std::vector<int>& inits,
 				   const std::vector<int>& incrs, 
 				   const Block *body)
-	: Statement(eArrayOp),
+	: Statement(eArrayOp, b),
 	  array_var(av),
 	  ctrl_vars(cvs),
 	  inits(inits),
@@ -153,12 +153,12 @@ StatementArrayOp::StatementArrayOp(const ArrayVariable* av,
 /*
  *
  */
-StatementArrayOp::StatementArrayOp(const ArrayVariable* av, 
+StatementArrayOp::StatementArrayOp(Block* b, const ArrayVariable* av, 
 				   const std::vector<const Variable*>& cvs, 
 				   const std::vector<int>& inits,
 				   const std::vector<int>& incrs, 
 				   const Expression *e)
-	: Statement(eArrayOp),
+	: Statement(eArrayOp, b),
 	  array_var(av),
 	  ctrl_vars(cvs),
 	  inits(inits),

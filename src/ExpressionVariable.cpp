@@ -239,11 +239,7 @@ bool
 ExpressionVariable::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const
 { 
 	int deref_level = get_indirect_level();
-	const Variable* v = get_var();  //->get_collective();
-	// JYTODO: integrate this into get_collective?
-	// if (v->isFieldVarOf_ && v->is_array_field()) {
-	//	v = v->isFieldVarOf_->get_collective();
-	//}
+	const Variable* v = get_var();   
 	if (deref_level > 0) { 
 		if (!FactPointTo::is_valid_ptr(v, inputs)) {
 			return false;

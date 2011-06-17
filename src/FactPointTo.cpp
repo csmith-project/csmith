@@ -57,7 +57,6 @@ const Variable* FactPointTo::garbage_ptr = VariableSelector::make_dummy_static_v
 const Variable* FactPointTo::tbd_ptr = VariableSelector::make_dummy_static_variable("tbd");
 vector<const Variable*> FactPointTo::all_ptrs;
 vector<vector<const Variable*> > FactPointTo::all_aliases;
-std::vector<FactPointTo*> FactPointTo::facts_;
 
 bool
 FactPointTo::is_null() const 
@@ -84,18 +83,16 @@ FactPointTo::is_dead() const
 }
 
 bool 
-FactPointTo::has_invisible(const Function* func, const Statement* stm) const
+FactPointTo::has_invisible(const Statement* stm) const
 {
     size_t i;
-	if (!func->is_var_visible(var, stm)) {
+	if (!var->is_visible(stm->parent)) { 
 		return true;
 	}
     for (i=0; i<point_to_vars.size(); i++) {
 		const Variable* v = point_to_vars[i];
-		if (v != null_ptr && v != garbage_ptr && v != tbd_ptr) {
-			if (!func->is_var_visible(v, stm)) {
-				return true;
-			}
+		if (v != null_ptr && v != garbage_ptr && v != tbd_ptr && !v->is_visible(stm->parent)) { 
+			return true;
 		}
     }
     return false;
@@ -229,7 +226,7 @@ FactPointTo::abstract_fact_for_assign(const std::vector<const Fact*>& facts, con
             case eFuncCall: {
 				const FunctionInvocationUser* fiu = dynamic_cast<const FunctionInvocationUser*>(fi);
 				// find the fact regarding return variable
-				FactPointTo* rv_fact = (FactPointTo*)get_return_fact_for_invocation(fiu); 
+				const FactPointTo* rv_fact = (const FactPointTo*)(get_return_fact_for_invocation(fiu, ePointTo)); 
 				assert(rv_fact);
 				return FactPointTo::make_facts(lvars, rv_fact->get_point_to_vars());
             }
@@ -384,28 +381,17 @@ FactPointTo::~FactPointTo(void)
 {
 	// Nothing else to do.
 }
- 
-/*
- * return 1 if both facts are concerning about the nullness of the same pointer
- */
-bool 
-FactPointTo::is_related(const Fact& f) const
-{
-    if (eCat == f.eCat) {
-        const FactPointTo& fact = (const FactPointTo&)f;
-        return (var == fact.get_var());
-    }
-    return false;
-}
 
 /*
- * return 1 if given facts is for a variable in this point-to set
+ * return 1 if v (or a field of v) is in the point-to set
  */
 bool 
-FactPointTo::is_relevant(const Fact& f) const 
-{
-	if (eCat == f.eCat) {
-		return is_variable_in_set(point_to_vars, f.get_var());
+FactPointTo::point_to(const Variable* v) const 
+{ 
+	for (size_t i=0; i<point_to_vars.size(); i++) {
+		if (v->match(point_to_vars[i])) {
+			return true;
+		}
 	}
 	return false;
 }
@@ -470,10 +456,9 @@ FactPointTo::is_dangling_expr(const Expression* e, const std::vector<const Fact*
 			const ExpressionFuncall* ef = (const ExpressionFuncall*)e;
 			if (ef->get_invoke()->invoke_type == eFuncCall) {
 				const FunctionInvocationUser* fiu = (const FunctionInvocationUser*)(ef->get_invoke());
-				const Fact* fact = get_return_fact_for_invocation(fiu);
+				const FactPointTo* fact = (const FactPointTo*)(get_return_fact_for_invocation(fiu, ePointTo));
 				if (fact) {
-					assert(fact->eCat == ePointTo);
-					return ((const FactPointTo*)fact)->is_dead();
+					return fact->is_dead();
 				}
 			}
 		}
@@ -603,17 +588,15 @@ FactPointTo::join_visits(const Fact& f)
  * return false if point-to already contains point-to-set in f, true otherwise
  */
 bool 
-FactPointTo::conflict_with(const Fact& f) const
+FactPointTo::imply(const Fact& f) const
 {
-    // right now, only consider facts of same category.
-    // compare diff. categories of facts later?
     if (is_related(f)) {
         const FactPointTo& fact = (const FactPointTo&)f; 
         if (sub_variable_sets(fact.get_point_to_vars(), point_to_vars)) {
-            return false;
+            return true;
         }
     }
-    return true;
+    return false;
 }
  
 void output_var(const Variable* var, std::ostream &out)
@@ -672,22 +655,12 @@ FactPointTo::Output(std::ostream &out) const
     }
 }
 
-/*
- * output assertion to random program, to check the correctness of compiler 
- */
-void 
-FactPointTo::OutputAssertion(std::ostream &out) const
+bool 
+FactPointTo::is_assertable(const Statement* stm) const
 {
-	if (point_to_vars.size() > 0) { 
-		// put in comment if the assertion doesn't make sense to compiler
-		if (is_variable_in_set(point_to_vars, garbage_ptr) ||
-			is_variable_in_set(point_to_vars, tbd_ptr)) {  
-				out << "//";
-		}
-        out << "assert ("; 
-        Output(out);
-        out << ");" << endl;
-    }
+	return !is_variable_in_set(point_to_vars, garbage_ptr) &&
+		   !is_variable_in_set(point_to_vars, tbd_ptr) && 
+		   !has_invisible(stm);
 }
 
 std::vector<const Variable*>
@@ -832,16 +805,6 @@ FactPointTo::aggregate_all_pointto_sets(void)
 		} 
 	}
 	assert(all_ptrs.size() == all_aliases.size());
-}
-
-void
-FactPointTo::doFinalization()
-{
-	std::vector<FactPointTo*>::iterator i;
-	for( i = FactPointTo::facts_.begin(); i != FactPointTo::facts_.end(); ++i) {
-		delete (*i);
-	}
-	FactPointTo::facts_.clear();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

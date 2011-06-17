@@ -72,7 +72,7 @@ StatementContinue::make_random(CGContext &cg_context)
 	cg_context.get_effect_stm().clear();
 	Expression *expr = Expression::make_random(cg_context, get_int_type(), true, true, eVariable);
 	ERROR_GUARD(NULL); 
-	StatementContinue* sc = new StatementContinue(*expr, *b); 
+	StatementContinue* sc = new StatementContinue(cg_context.get_current_block(), *expr, *b); 
 	fm->create_cfg_edge(sc, b, false, true);  
     return sc;
 }
@@ -80,8 +80,8 @@ StatementContinue::make_random(CGContext &cg_context)
 /*
  *
  */
-StatementContinue::StatementContinue(const Expression &test, const Block &b)
-	: Statement(eContinue),
+StatementContinue::StatementContinue(Block* parent, const Expression &test, const Block &b)
+	: Statement(eContinue, parent),
 	  test(test),
 	  loop_blk(b)
 {
@@ -92,7 +92,7 @@ StatementContinue::StatementContinue(const Expression &test, const Block &b)
  *
  */
 StatementContinue::StatementContinue(const StatementContinue &sc)
-	: Statement(sc.get_type()),
+: Statement(sc.get_type(), sc.parent),
 	  test(sc.test),
 	  loop_blk(sc.loop_blk)
 {

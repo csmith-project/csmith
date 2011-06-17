@@ -50,6 +50,7 @@ using namespace std;
 #include "Effect.h"
 #include "Type.h"
 #include "CVQualifiers.h"
+#include "StringUtils.h"
 
 class CGContext;
 class Expression;
@@ -87,6 +88,7 @@ public:
 	bool is_volatile_after_deref(int deref_level) const;
 	bool has_field_var(const Variable* v) const; 
 	bool is_field_var(void) const { return isFieldVarOf_ != 0; };
+	int  get_field_id(void) const;
 	bool is_union_field(void) const { return isFieldVarOf_ != 0 && isFieldVarOf_->type->eType == eUnion; };
 	bool is_array_field(void) const;
 	bool is_virtual(void) const;
@@ -94,6 +96,7 @@ public:
 	bool match(const Variable* v) const;
 	bool loose_match(const Variable* v) const;
 	bool is_pointer(void) const { return type && type->eType == ePointer;}
+	bool is_rv(void) const { return StringUtils::end_with(name, "_rv"); }
 	int get_seq_num(void) const;
 
 	virtual std::string get_actual_name() const;

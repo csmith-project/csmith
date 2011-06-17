@@ -46,7 +46,7 @@ public:
 	// Factory method.
 	static StatementContinue *make_random(CGContext &cg_context);
 
-	StatementContinue(const Expression &test, const Block& b);
+	StatementContinue(Block* parent, const Expression &test, const Block& b);
 	StatementContinue(const StatementContinue &sc);
 	virtual ~StatementContinue(void);
 	//

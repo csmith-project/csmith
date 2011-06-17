@@ -66,7 +66,7 @@ public:
 	bool is_null(void) const;
 	bool is_tbd_only(void) const;
 	bool is_dead(void) const;
-	bool has_invisible(const Function* func, const Statement* stm) const;
+	bool has_invisible(const Statement* stm) const;
 	int  size() const;
 	virtual std::vector<const Fact*> abstract_fact_for_assign(const std::vector<const Fact*>& facts, const Lhs* lhs, const Expression* rhs);
 	virtual Fact* abstract_fact_for_return(const std::vector<const Fact*>& facts, const ExpressionVariable* var, const Function* func);
@@ -75,17 +75,21 @@ public:
 	FactPointTo* mark_func_end(const Statement* stm);
 	const FactPointTo* update_with_modified_index(const Variable* index_var) const;
 
+	// lattice functions
+	virtual bool is_top(void) const { return point_to_vars.empty();}
+	virtual bool is_bottom(void) const { return false;} // there is no bottom, we just grow the points-to set
+	virtual void set_top(void) { point_to_vars.clear();}
+	virtual void set_bottom(void) {};
+
 	virtual int join(const Fact& fact);  
 	virtual int join_visits(const Fact& fact); 
 	virtual Fact* clone(void) const;
-	virtual bool conflict_with(const Fact& fact) const;
-	virtual bool is_related(const Fact& fact) const;
-	virtual bool is_relevant(const Fact& f) const;
+	virtual bool imply(const Fact& fact) const;
+	virtual bool point_to(const Variable* v) const;
 	virtual bool equal(const Fact& fact) const;
 	virtual void Output(std::ostream &out) const;
+	virtual bool is_assertable(const Statement* s) const;
 
-	virtual void OutputAssertion(std::ostream &out) const;
-    
 	static std::vector<const Variable*> merge_pointees_of_pointer(const Variable* ptr, int indirect, const std::vector<const Fact*>& facts);
 	static std::vector<const Variable*> merge_pointees_of_pointers(const std::vector<const Variable*>& ptrs, const std::vector<const Fact*>& facts);
 	static void update_facts_with_modified_index(std::vector<const Fact*>& facts, const Variable* var);
@@ -112,7 +116,6 @@ private:
 
 	const Variable* var;
 	vector<const Variable*> point_to_vars; 
-	static std::vector<FactPointTo*> facts_;
 	
 	static void update_ptr_aliases(const vector<Fact*>& facts, vector<const Variable*>& ptrs, vector<vector<const Variable*> >& aliases);
 

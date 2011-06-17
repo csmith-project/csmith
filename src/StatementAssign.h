@@ -87,9 +87,9 @@ public:
 						 eAssignOps op,
 						 const Expression &e);
 
-	StatementAssign(const Lhs &l, const Expression &e, eAssignOps op = eSimpleAssign, const SafeOpFlags *flags = NULL);
+	StatementAssign(Block* b, const Lhs &l, const Expression &e, eAssignOps op = eSimpleAssign, const SafeOpFlags *flags = NULL);
 
-	StatementAssign(const Lhs &l, eAssignOps op, const Expression &e, 
+	StatementAssign(Block* b, const Lhs &l, eAssignOps op, const Expression &e, 
 			const Expression *er, const SafeOpFlags *flags,
 			std::string &tmp_name1, std::string &tmp_name2);
 

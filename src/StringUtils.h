@@ -41,6 +41,8 @@ public:
 	
 	static bool is_space(const char c);
 
+	static bool end_with(string s, string tail);
+
 	static void ignore_spaces(const std::string &str, size_t &pos);
 
 	static std::string get_substring(const std::string &s, const char open_delim, const char close_delim);

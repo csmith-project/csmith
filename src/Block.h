@@ -64,8 +64,7 @@ public:
 	// Factory method.
 	static Block *make_random(CGContext &cg_context, bool looping = false);
 	 
-
-	Block(int block_size);
+	Block(Block* b, int block_size);
 	virtual ~Block(void);
 
 	//

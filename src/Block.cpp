@@ -103,9 +103,8 @@ Block::make_random(CGContext &cg_context, bool looping)
 	Function *curr_func = cg_context.get_current_func();
 	assert(curr_func);
 
-	Block *b = new Block(CGOptions::max_block_size());
+	Block *b = new Block(cg_context.get_current_block(), CGOptions::max_block_size()); 
 	b->func = curr_func;
-	b->parent = cg_context.get_current_block();
 	b->looping = looping;
 	// if there are induction variables, we are in a loop that traverses array(s)
 	b->in_array_loop = !(cg_context.iv_bounds.empty());
@@ -129,6 +128,8 @@ Block::make_random(CGContext &cg_context, bool looping)
 		return NULL;
 	}
 	unsigned int i;
+	if (b->stm_id == 1)
+		BREAK_NOP;			// for debugging
 	for (i = 0; i <= max; ++i) {
 		Statement *s = Statement::make_random(cg_context);  
 		// In the exhaustive mode, Statement::make_random could return NULL;
@@ -178,8 +179,8 @@ Block::make_random(CGContext &cg_context, bool looping)
 /*
  *
  */
-Block::Block(int block_size)
-	: Statement(eBlock), 
+Block::Block(Block* b, int block_size)
+	: Statement(eBlock, b), 
 	  need_revisit(false),
 	  depth_protect(false),
 	  block_size_(block_size)
@@ -503,7 +504,6 @@ bool
 Block::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const
 {  
 	int dummy;
-	//static int g = 0;
 	FactMgr* fm = get_fact_mgr(&cg_context);
 	vector<const Fact*> dummy_facts;
 	Effect pre_effect = cg_context.get_accum_effect();
@@ -556,6 +556,7 @@ Block::find_fixed_point(vector<const Fact*> inputs, vector<const Fact*>& post_fa
 	FactMgr* fm = get_fact_mgr(&cg_context);  
 	// include outputs from all back edges leading to this block
 	size_t i;
+	static int g = 0;
 	vector<const CFGEdge*> edges;
 	int cnt = 0;
 	do {
@@ -587,7 +588,9 @@ Block::find_fixed_point(vector<const Fact*> inputs, vector<const Fact*>& post_fa
 		
 		// revisit statements with new inputs
 		for (i=0; i<stms.size(); i++) {
-			//int hh = g++; 
+			int h = g++; 
+			if (h == 2585)
+				BREAK_NOP;		// for debugging
 			if (!stms[i]->analyze_with_edges_in(outputs, cg_context)) {
 				fail_index = i;
 				return false;

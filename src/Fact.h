@@ -35,20 +35,19 @@
 #include <ostream>
 #include <vector>
 
-enum eFactCategory {
-    eNullPtr=1, 
-    eDeadPtr=2,
-    ePointTo=4,
-    //ePointToSize=4, 
-    eIntRange=8, 
+enum eFactCategory { 
+    ePointTo=1,
+	eUnionWrite=2, 
+    /* todo
+	eIntRange=8, 
     eEquality=16, 
     eAlias=32,
+	*/
 };
 
+class Statement;
 class StatementAssign;
 class StatementReturn;
-class Block;
-class CGContext;
 class Variable;
 class Expression;
 class Lhs;
@@ -70,17 +69,23 @@ public:
 
 	virtual int join_visits(const Fact& fact) { return join(fact);}
 
-	virtual bool conflict_with(const Fact& /*fact*/) const { return false;}; 
+	virtual bool imply(const Fact& /*fact*/) const = 0; 
 
-	virtual bool is_related(const Fact& fact) const = 0;
+	// lattice functions
+	virtual bool is_top(void) const = 0;
+	virtual bool is_bottom(void) const = 0;
+	virtual void set_top(void) = 0;
+	virtual void set_bottom(void) = 0;
+	
+	virtual bool is_assertable(const Statement* s) const = 0;
 
-	virtual bool is_relevant(const Fact& ) const {return false;}
+	virtual bool is_related(const Fact& fact) const { return eCat == fact.eCat && get_var() == fact.get_var();}
 
 	virtual bool equal(const Fact& fact) const { return this == &fact; };
 
 	virtual void Output(std::ostream &out) const = 0;
 
-	virtual void OutputAssertion(std::ostream &out) const = 0; 
+	virtual void OutputAssertion(std::ostream &out, const Statement* s = NULL) const; 
 
 	virtual const Variable* get_var(void) const { return 0;};
 
@@ -88,9 +93,13 @@ public:
 
 	virtual Fact* abstract_fact_for_return(const std::vector<const Fact*>& /*facts*/, const ExpressionVariable* /*var*/, const Function* /*func*/) {return 0;};
 
+	static void doFinalization();
+
 	enum eFactCategory eCat;
 
-	bool no_more_update;
+protected: 
+	// keep track all created facts. used for releasing memory in doFinalization
+	static std::vector<Fact*> facts_;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

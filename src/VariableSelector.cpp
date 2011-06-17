@@ -46,6 +46,7 @@
 #include "Fact.h"
 #include "FactMgr.h"
 #include "FactPointTo.h"
+#include "FactUnion.h"
 #include "random.h"
 #include "util.h"
 #include "Lhs.h"
@@ -356,19 +357,20 @@ VariableSelector::choose_ok_var(const vector<const Variable *> &vars)
 }
 
 const Variable *
-VariableSelector::choose_visible_written_var(const Block* b, vector<const Variable*> written_vars, const Type* type)
+VariableSelector::choose_visible_read_var(const Block* b, vector<const Variable*> read_vars, const Type* type, const FactVec& facts)
 {
 	size_t i;
 	vector<const Variable*> ok_vars;
-	// include the fields of structs
-	expand_struct_union_vars(written_vars, type);
+	// include the fields of struct/unions
+	expand_struct_union_vars(read_vars, type);
 
-	for (i=0; i<written_vars.size(); i++) {
-		const Variable* v = written_vars[i];
+	for (i=0; i<read_vars.size(); i++) {
+		const Variable* v = read_vars[i];
 		if (type->match(v->type, eConvert) && 
 			(b->is_var_on_stack(v) || v->is_global()) &&
 			!v->is_virtual() &&
-			!v->is_volatile()) {
+			!v->is_volatile() &&
+			!FactUnion::is_nonreadable_field(v, facts)) {
 			ok_vars.push_back(v);
 		}
 	}
@@ -723,40 +725,6 @@ VariableSelector::find_all_visible_vars(const Block* b)
 		b = b->parent;
 	} 
 	return vars;
-}
-
-/* remove not-qualified variables from candidate list, not used for now */
-void 
-VariableSelector::remove_non_qualified_vars(vector<Variable*>& vars, Effect::Access access, const CGContext &cg_context)
-{
-	size_t i;
-	size_t len = vars.size();
-	const Effect& eff = cg_context.get_effect_context();
-	for (i=0; i<len; i++) {
-		const Variable* v = vars[i];
-		bool ok = true;
-		if (access==Effect::WRITE) {
-			if (cg_context.is_nonwritable(v) || v->is_const()) {
-				ok = false;
-			}
-			if (eff.is_read(v) || eff.is_written(v)) {
-				ok = false;
-			}
-		}
-		else if (access==Effect::READ) {
-			if (eff.is_written(v)) {
-				ok = false;
-			}
-		}
-		if (!eff.is_side_effect_free() && v->is_volatile()) {
-			ok = false;
-		}
-		if (!ok) {
-			vars.erase(vars.begin() + i);
-			i--;
-			len--;
-		}
-	}
 }
 
 /* 
@@ -1465,9 +1433,9 @@ VariableSelector::create_mutated_array_var(const ArrayVariable* av, const vector
 }
 
 Variable *
-VariableSelector::make_dummy_variable(const string &name, const CVQualifiers* qfer)
+VariableSelector::make_dummy_variable(const string &name, const Type* t, const CVQualifiers* qfer)
 {
-	Variable *var = new Variable(name, 0, 0, qfer);
+	Variable *var = new Variable(name, t, 0, qfer);
 	AllVars.push_back(var);
 	return var;
 }

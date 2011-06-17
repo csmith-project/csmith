@@ -204,11 +204,20 @@ void remove_field_vars(vector<const Variable*>& set)
 
 /*
  * examples: array[0] "loose matches" array[1]; array[3] "loose matches" array[x].f1...
+ * union.f1 "loose matches" union.f2
  */
 bool 
 Variable::loose_match(const Variable* v) const
 {
-	return get_collective()->match(v->get_collective());
+	const Variable* me = get_collective();
+	const Variable* you = v->get_collective();
+	if (me->match(you)) {
+		return true;
+	}
+	if (me->isFieldVarOf_== you->isFieldVarOf_ && me->is_union_field()) {
+		return true;
+	}
+	return false;
 }
 
 /*
@@ -273,6 +282,19 @@ bool Variable::has_field_var(const Variable* v) const
 		}
     }
     return false;
+}
+
+int  
+Variable::get_field_id(void) const
+{ 
+	if (isFieldVarOf_) {
+		for (size_t i=0; i<isFieldVarOf_->field_vars.size(); i++) {
+			if (isFieldVarOf_->field_vars[i] == this) {
+				return i;
+			}
+		}
+	}
+	return -1;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

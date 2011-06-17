@@ -110,6 +110,10 @@ public:
 	void reset_stm_fact_maps(const Statement* stm);
 
 	void output_assertions(std::ostream &out, const Statement* stm, int indent, bool post_condition);
+	void find_updated_final_facts(const Statement* stm, vector<Fact*>& facts);
+	void find_updated_facts(const Statement* stm, vector<const Fact*>& facts);
+
+	void find_dangling_global_ptrs(Function* f);
 
 	/* add paramters facts to env */
 	void add_param_facts(const vector<const Expression*>& param_values, FactVec& facts);
@@ -158,9 +162,6 @@ bool merge_jump_facts(FactVec& facts, const FactVec& jump_facts);
 
 /* merge one env with a prev env that may miss new variables created recently */
 bool merge_prev_facts(FactVec& facts, FactVec& old_facts);
-
-/* check if two facts env are in conflicts */
-bool are_facts_in_conflict(const FactVec& facts1, const FactVec& facts2);
 
 /* check if two facts env are identical */
 bool same_facts(const FactVec& facts1, const FactVec& facts2);

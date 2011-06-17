@@ -46,7 +46,7 @@ public:
 	// Factory method.
 	static StatementBreak *make_random(CGContext &cg_context);
 
-	StatementBreak(const Expression &test, const Block& b);
+	StatementBreak(Block* parent, const Expression &test, const Block& b);
 	StatementBreak(const StatementBreak &sc);
 	virtual ~StatementBreak(void);
 	//

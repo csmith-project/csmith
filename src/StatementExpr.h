@@ -52,7 +52,7 @@ public:
 	// Factory method.
 	static StatementExpr *make_random(CGContext &cg_context);
 
-	StatementExpr(const FunctionInvocation &e);
+	StatementExpr(Block* b, const FunctionInvocation &e);
 	StatementExpr(const StatementExpr &se);
 	virtual ~StatementExpr(void);
 

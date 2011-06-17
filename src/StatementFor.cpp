@@ -197,7 +197,7 @@ StatementFor::make_iteration(CGContext& cg_context, StatementAssign*& init, Expr
 	SafeOpFlags *flags1 = SafeOpFlags::make_random(sOpAssign);
 	ERROR_GUARD_AND_DEL2(NULL, c_init, lhs);
 
-	init = new StatementAssign(*lhs, *c_init, eSimpleAssign, flags1);
+	init = new StatementAssign(cg_context.get_current_block(), *lhs, *c_init, eSimpleAssign, flags1);
 	ERROR_GUARD_AND_DEL3(NULL, c_init, lhs, flags1);
 	assert(init->visit_facts(fm->global_facts, cg_context));
 
@@ -226,7 +226,7 @@ StatementFor::make_iteration(CGContext& cg_context, StatementAssign*& init, Expr
 	ERROR_GUARD_AND_DEL3(NULL, init, test, lhs1);
 
 	if (bound != INVALID_BOUND) {
-		incr = new StatementAssign(*lhs1, *c_incr, incr_op);
+		incr = new StatementAssign(cg_context.get_current_block(), *lhs1, *c_incr, incr_op);
 	} else {
 		incr = StatementAssign::make_possible_compound_assign(cg_context, *lhs1, incr_op, *c_incr);
 	}
@@ -241,8 +241,6 @@ StatementFor::make_random(CGContext &cg_context)
 {
 	FactMgr* fm = get_fact_mgr(&cg_context);
 	assert(fm);
-	// save a copy of facts env and context
-	vector<const Fact*> pre_facts = fm->global_facts;
 	cg_context.get_effect_stm().clear();
 
 	StatementAssign* init = NULL;
@@ -250,14 +248,16 @@ StatementFor::make_random(CGContext &cg_context)
 	Expression* test = NULL;
 	unsigned int bound = 0;
 	const Variable* iv = make_iteration(cg_context, init, test, incr, bound);
-	// record the effect before loop body
+	// record the effect and facts before loop body
 	Effect pre_effects = cg_context.get_effect_stm();
+	vector<const Fact*> pre_facts = fm->global_facts;
+
 	// create CGContext for body
 	CGContext body_cg_context(cg_context, cg_context.rw_directive, iv, bound);  
 	Block *body = Block::make_random(body_cg_context, true);
 	ERROR_GUARD_AND_DEL3(NULL, init, test, incr);
 
-	StatementFor* sf = new StatementFor(*init, *test, *incr, *body);
+	StatementFor* sf = new StatementFor(cg_context.get_current_block(), *init, *test, *incr, *body);
 	sf->post_loop_analysis(cg_context, pre_facts, pre_effects);
 	return sf;
 }
@@ -323,11 +323,11 @@ StatementFor::post_loop_analysis(CGContext& cg_context, vector<const Fact*>& pre
 /*
  *
  */
-StatementFor::StatementFor(const StatementAssign &init,
+StatementFor::StatementFor(Block* b, const StatementAssign &init,
 						   const Expression &test,
 						   const StatementAssign &incr,
 						   const Block &body)
-	: Statement(eFor),
+	: Statement(eFor, b),
 	  init(init),
 	  test(test),
 	  incr(incr),

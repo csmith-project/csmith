@@ -64,14 +64,14 @@ StatementExpr::make_random(CGContext &cg_context)
 		delete invoke; 
 		return 0; 
 	}
-	return new StatementExpr(*invoke);
+	return new StatementExpr(cg_context.get_current_block(), *invoke);
 }
 
 /*
  *
  */
-StatementExpr::StatementExpr(const FunctionInvocation &e)
-	: Statement(eInvoke),
+StatementExpr::StatementExpr(Block* b, const FunctionInvocation &e)
+	: Statement(eInvoke, b),
 	  expr(e)
 {
 	// Nothing else to do.
@@ -81,7 +81,7 @@ StatementExpr::StatementExpr(const FunctionInvocation &e)
  *
  */
 StatementExpr::StatementExpr(const StatementExpr &se)
-	: Statement(se.get_type()),
+: Statement(se.get_type(), se.parent),
 	  expr(*se.get_invoke())
 {
 	// Nothing else to do.

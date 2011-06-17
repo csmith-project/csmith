@@ -40,6 +40,7 @@
 
 #include "Fact.h"
 #include "FactPointTo.h"
+#include "FactUnion.h"
 #include "Variable.h"
 #include "Block.h"
 #include "StatementFor.h"
@@ -62,42 +63,6 @@ using namespace std;
  
 std::vector<Fact*> FactMgr::meta_facts;
 
-//////////////////////////////////////////////////////////////////////////////
-/* check the incoming fact against existing fixed facts
-   return false if inviolation with fixed facts
- ****************************************************************************/
-bool 
-FactMgr::validate_fact(const Fact* f, const FactVec& facts)
-{
-    for (size_t j=0; j<facts.size(); j++) {
-        if (facts[j]->conflict_with(*f)) { 
-			//f->Output(cout);
-            return false;
-        }
-    }
-    return true;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-/* check the incoming assignment against existing fixed facts
-   return false if inviolation with fixed facts
- ****************************************************************************/
-bool 
-FactMgr::validate_assign(const Lhs* lhs, const Expression* e)
-{ 
-    /* canonize. todo:  do this before this function call */
-    for (size_t i=0; i<meta_facts.size(); i++) {
-        vector<const Fact*> facts = meta_facts[i]->abstract_fact_for_assign(global_facts, lhs, e); 
-        for (size_t j=0; j<facts.size(); j++) {
-			if (!validate_fact(facts[j], fixed_facts)) {
-				//delete f;
-				return false;
-			}
-        }
-    }
-    return true;
-}
-
 void
 FactMgr::add_new_local_var_fact(const Block* blk, const Variable* var)
 {
@@ -111,7 +76,7 @@ FactMgr::add_new_local_var_fact(const Block* blk, const Variable* var)
 		size_t j, k; 
 		const vector<Fact*>& meta_facts = FactMgr::meta_facts;
 		// TODO: consider facts related to struct or arrays
-		if (var->type->eType == eSimple || var->type->eType == ePointer) { 
+		if (var->type->eType == eSimple || var->type->eType == ePointer || var->type->eType == eUnion) { 
 			FactVec facts;
 			for (j=0; j<meta_facts.size(); j++) {
 				Lhs lhs(*var);
@@ -162,7 +127,7 @@ add_new_var_fact(const Variable* v, FactVec& facts)
 	const vector<Fact*>& meta_facts = FactMgr::meta_facts;
 	assert(v);
 	// TODO: consider facts related to struct or arrays
-	if (v->type && (v->type->eType == eSimple || v->type->eType == ePointer) && v->init) { 
+	if (v->type && (v->type->eType == eSimple || v->type->eType == ePointer || v->type->eType == eUnion) && v->init) { 
 		FactVec tmp_facts;
 		for (j=0; j<meta_facts.size(); j++) {
 			Lhs lhs(*v);
@@ -184,11 +149,11 @@ FactMgr::add_new_global_var_fact(const Variable* v)
 {
 	size_t j, k;
 	assert(v->is_global());
-	if (v->name == "g_8") 
+	if (v->name == "g_39") 
 		j = 0;
 	const vector<Fact*>& meta_facts = FactMgr::meta_facts;
 	// TODO: consider facts related to struct or arrays
-	if (v->type->eType == eSimple || v->type->eType == ePointer) { 
+	if (v->type->eType == eSimple || v->type->eType == ePointer || v->type->eType == eUnion) { 
 		FactVec facts;
 		for (j=0; j<meta_facts.size(); j++) {
 			Lhs lhs(*v);
@@ -303,7 +268,7 @@ remove_function_local_facts(std::vector<const Fact*>& inputs, const Statement* s
 		const Variable* v = inputs[i]->get_var();
 		// if it's fact for a local variable of this function, or return variable
 		// of another function, we are not interested in them after exit function
-		if (func->is_var_on_stack(v, stm) || (v->type==0 && v != func->rv)) { 
+		if (func->is_var_on_stack(v, stm) || (v->is_rv() && v != func->rv)) { 
 			inputs.erase(inputs.begin() + i);
 			i--;
 			len--; 
@@ -459,12 +424,15 @@ FactMgr::caller_to_callee_handover(const FunctionInvocationUser* fiu, std::vecto
 			const Fact* f = inputs[i]; 
 			// const Variable* v = f->get_var(); 
 			for (j=0; j<keep_facts.size(); j++) {
-				if (keep_facts[j]->is_relevant(*f)) {
-					keep_facts.push_back(f); 
-					inputs.erase(inputs.begin() + i);
-					i--;
-					len--;
-					break;
+				if (keep_facts[j]->eCat == ePointTo) {
+					const FactPointTo* fp = dynamic_cast<const FactPointTo*>(keep_facts[j]);
+					if (fp->point_to(f->get_var())) {
+						keep_facts.push_back(f); 
+						inputs.erase(inputs.begin() + i);
+						i--;
+						len--;
+						break;
+					}
 				}
 			}
 		}
@@ -473,15 +441,14 @@ FactMgr::caller_to_callee_handover(const FunctionInvocationUser* fiu, std::vecto
 }
 
 /*
- * remove facts related to return variables
+ * remove facts related to return variables of other functions
  */
 void FactMgr::remove_rv_facts(FactVec& facts)
 {
 	size_t len = facts.size();
 	for (size_t i=0; i<len; i++) { 
-		const Fact* f = facts[i];
-		// type == 0 => return variable
-		if (f->get_var()->type == 0 && f->get_var() != func->rv) {
+		const Fact* f = facts[i]; 
+		if (f->get_var()->is_rv() && f->get_var() != func->rv) {
 			facts.erase(facts.begin() + i);
 			len--;
 			i--; 
@@ -552,15 +519,16 @@ update_facts_for_dest(const FactVec& facts_in, FactVec& facts_out, const Stateme
 	// oos variables are those not on stack and not global
 	for (i=0; i<facts_in.size(); i++) { 
 		const Fact* f = facts_in[i];
-		// type == 0 => return variable, target site don't need them
-		if (f->get_var()->type == 0) continue;
-		if (f->eCat == ePointTo) {
-			const FactPointTo* fp = dynamic_cast<const FactPointTo*>(f); 
-			if (func->is_var_oos(fp->get_var(), dest)) {
-				if (find_variable_in_set(oos_vars, fp->get_var()) == -1) {
-					oos_vars.push_back(fp->get_var());
-				}
+		const Variable* var = f->get_var();
+		// return variable, target site don't need them
+		if (!var || var->is_rv()) continue; 
+		if (func->is_var_oos(var, dest)) {
+			if (find_variable_in_set(oos_vars, var) == -1) {
+				oos_vars.push_back(var);
 			}
+		}
+		if (f->eCat == ePointTo) {
+			const FactPointTo* fp = dynamic_cast<const FactPointTo*>(f);
 			for (j=0; j<fp->get_point_to_vars().size(); j++) {
 				const Variable* v = fp->get_point_to_vars()[j];
 				if (!FactPointTo::is_special_ptr(v) && func->is_var_oos(v, dest)) {
@@ -604,13 +572,13 @@ FactMgr::add_interested_facts(int interests)
     if (interests & ePointTo) {
         //meta_facts.push_back(new FactPointTo(0));
         //meta_facts.push_back(FactPointTo::make_fact(0));
-        FactPointTo *fact = FactPointTo::make_fact(0);
-        meta_facts.push_back(fact);
+        FactPointTo *fp = FactPointTo::make_fact(0);
+        meta_facts.push_back(fp);
+	}
+	if (interests & eUnionWrite) {
+		FactUnion *fu = FactUnion::make_fact(0, 0);
+		meta_facts.push_back(fu);
     } 
-    //ePointToSize=4, 
-    //eIntRange=8, 
-    //eEquality=16, 
-    //eAlias=32 
 } 
 
 void 
@@ -757,7 +725,7 @@ merge_fact(FactVec& facts, const Fact* new_fact)
     for (i=0; i<facts.size(); i++) {
         const Fact* f = facts[i]; 
         if (f->is_related(*new_fact)) {
-            if (f->conflict_with(*new_fact)) {
+            if (!f->imply(*new_fact)) {
 				Fact* copy_fact = new_fact->clone();
                 copy_fact->join(*f);    
                 facts[i] = copy_fact;
@@ -817,14 +785,19 @@ merge_jump_facts(FactVec& facts, const FactVec& jump_facts)
     size_t i;
     bool changed = false;
     for (i=0; i<facts.size(); i++) {
-		const Fact* f = facts[i];
-		// type == 0 => return variable, skip them
-		if (f->get_var()->type != 0) {
+		const Fact* f = facts[i]; 
+		if (!f->get_var()->is_rv()) {
 			const Fact* jump_f = find_related_fact(jump_facts, f);
+			// this should not happen: jump over initializers
 			if (jump_f == 0) {
-				jump_f = FactPointTo::make_fact(f->get_var(), FactPointTo::garbage_ptr);
+				if (f->eCat == ePointTo) {
+					jump_f = FactPointTo::make_fact(f->get_var(), FactPointTo::garbage_ptr);
+				} 
+				else if (f->eCat == eUnionWrite) {
+					jump_f = FactUnion::make_fact(f->get_var(), FactUnion::BOTTOM);
+				}
 			}
-			if (merge_fact(facts, jump_f)) {
+			if (jump_f && merge_fact(facts, jump_f)) {
 				changed = true;
 			}
 		}
@@ -883,27 +856,13 @@ combine_facts(vector<Fact*>& facts1, const FactVec& facts2)
     for (i=0; i<facts2.size(); i++) {
 		const Fact* new_fact = facts2[i];
 		for (j=0; j<facts1.size(); j++) {
-			Fact* old_fact = facts1[j]; 
+			Fact* old_fact = facts1[j];
 			if (old_fact->is_related(*new_fact)) {
 				old_fact->join_visits(*new_fact);
 				break;
 			}
 		}
 	}
-}
-
-bool 
-are_facts_in_conflict(const FactVec& facts1, const FactVec& facts2)
-{
-	for (size_t i=0; i<facts1.size(); i++) {
-		const Fact* f = facts1[i];
-		for (size_t j=0; j<facts2.size(); j++) {
-			if (f->conflict_with(*facts2[j])) {
-				return true;
-			}
-		}
-	}
-	return false;
 }
 
 bool 
@@ -929,7 +888,7 @@ subset_facts(const FactVec& facts1, const FactVec& facts2)
 		for (i=0; i<facts1.size(); i++) {
 			const Fact* f1 = facts1[i];
 			const Fact* f2 = find_related_fact(facts2, f1);
-			if (f2 == 0 || f2->conflict_with(*f1)) {
+			if (f2 == 0 || !f2->imply(*f1)) {
 				return false;
 			} 
 		}
@@ -964,17 +923,21 @@ remove_loop_local_facts(const Statement* s, FactVec& facts)
 void
 FactMgr::output_assertions(std::ostream &out, const Statement* stm, int indent, bool post_condition)
 {
-	vector<Fact*>& facts = map_facts_out_final[stm];
+	vector<Fact*> facts;  
 	if (!post_condition) {
 		facts = map_facts_in_final[stm];
-	} 
-	if (facts.size() && (stm->eType == eFor || stm->eType == eIfElse)) {
+	} else {
+		find_updated_final_facts(stm, facts);
+	}
+	if (facts.empty()) return;
+
+	if (stm->eType == eFor || stm->eType == eIfElse) {
 		output_tab(out, indent);
 		std::ostringstream ss; 
 		ss << "facts after " << (stm->eType == eFor ? "for loop" : "branching");
 		output_comment_line(out, ss.str());
 	}
-	if (facts.size() && (stm->eType == eAssign || stm->eType == eInvoke || stm->eType == eReturn)) {
+	if (stm->eType == eAssign || stm->eType == eInvoke || stm->eType == eReturn) {
 		output_tab(out, indent);
 		std::ostringstream ss; 
 		ss << "statement id: " << stm->stm_id;
@@ -989,17 +952,63 @@ FactMgr::output_assertions(std::ostream &out, const Statement* stm, int indent, 
 		if (v->is_global() && !eff.is_read(v) && !eff.is_written(v)) {
 			continue;
 		}
-		output_tab(out, indent);
-		// special case for pointto facts, deduce deadness info before print
-		// todo: use a polymorphism solution if possible
-		if (f->eCat == ePointTo) {
-			const FactPointTo* fp = (const FactPointTo*)f;
-			bool has_invisible = fp->has_invisible(func, stm);
-			if (has_invisible && fp->get_point_to_vars().size() > 0) {
-				out << "// ";
+		output_tab(out, indent); 
+		f->OutputAssertion(out, stm);
+	}
+}
+
+void 
+FactMgr::find_updated_facts(const Statement* stm, vector<const Fact*>& facts)
+{
+	const FactVec& facts_in = map_facts_in[stm]; 
+	const FactVec& facts_out = map_facts_out[stm]; 
+	  
+	for (size_t i=0; i<facts_out.size(); i++) {
+		const Fact* f = facts_out[i];
+		const Fact* prev_f = find_related_fact(facts_in, f);
+		assert(prev_f);
+		if (!f->equal(*prev_f)) {
+			facts.push_back(f);
+		}
+	}
+}
+
+void 
+FactMgr::find_updated_final_facts(const Statement* stm, vector<Fact*>& facts)
+{
+	vector<Fact*>& facts_in = map_facts_in_final[stm]; 
+	vector<Fact*>& facts_out = map_facts_out_final[stm]; 
+	  
+	for (size_t i=0; i<facts_out.size(); i++) {
+		Fact* f = facts_out[i];
+		// sometimes there is no pre-facts for return variables, so we don't
+		// check the difference
+		if (f->get_var() == func->rv) {
+			facts.push_back(f);
+		} 
+		else {
+			const Fact* prev_f = find_related_fact(facts_in, f);
+			assert(prev_f);
+			if (!f->equal(*prev_f)) {
+				facts.push_back(f);
 			}
 		}
-		f->OutputAssertion(out);
+	}
+}
+
+void
+FactMgr::find_dangling_global_ptrs(Function* f)
+{
+	for (size_t i=0; i<global_facts.size(); i++) { 
+		if (global_facts[i]->eCat == ePointTo) {
+			FactPointTo* fp = (FactPointTo*)(global_facts[i]);
+			const Variable* v = fp->get_var(); 
+			// const pointers should never be dangling
+			if (v->is_const() || !v->is_global()) continue;   
+			if (fp->is_dead()) {
+				f->dead_globals.push_back(v);
+			}
+		}
 	}
 }
 
@@ -1057,7 +1066,7 @@ FactMgr::sanity_check_map() const
 void
 FactMgr::doFinalization()
 {
-	FactPointTo::doFinalization();
+	Fact::doFinalization();
 	meta_facts.clear();
 }
 

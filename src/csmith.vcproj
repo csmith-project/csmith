@@ -735,6 +735,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\FactUnion.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Filter.cpp"
 				>
 				<FileConfiguration
@@ -1545,6 +1549,10 @@
 			</File>
 			<File
 				RelativePath=".\FactPointTo.h"
+				>
+			</File>
+			<File
+				RelativePath=".\FactUnion.h"
 				>
 			</File>
 			<File

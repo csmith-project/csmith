@@ -70,15 +70,16 @@ static vector<const FunctionInvocationUser*> invocations;   // list of function 
 static vector<const Fact*> return_facts;              // list of return facts
 
 const Fact*
-get_return_fact_for_invocation(const FunctionInvocationUser* fiu) 
+get_return_fact_for_invocation(const FunctionInvocationUser* fiu, enum eFactCategory cat) 
 {
-	size_t i;
 	assert(invocations.size() == return_facts.size());
-	for (i=0; i<invocations.size(); i++) {
-		if (invocations[i] == fiu) {
-			const Variable* v = return_facts[i]->get_var();
-			assert(v == fiu->get_func()->rv);
-			return return_facts[i];
+	for (size_t i=0; i<return_facts.size(); i++) {
+		if (return_facts[i]->eCat == cat) {
+			if (invocations[i] == fiu) {
+				const Variable* v = return_facts[i]->get_var();
+				assert(v == fiu->get_func()->rv);
+				return return_facts[i];
+			}
 		}
 	}
 	return 0;
@@ -276,7 +277,7 @@ FunctionInvocationUser::build_invocation(Function *target, CGContext &cg_context
 	// in addition, the hack (calling func_1 in a func_1 context) we used would
 	// ruin DFA
 	failed = false;
-	if (target != GetFirstFunction() && (target->fact_changed || target->is_pointer_referenced())) {
+	if (target != GetFirstFunction() && (target->fact_changed || target->union_field_read || target->is_pointer_referenced())) {
 		// revisit with a new context
 		Effect effect_accum; 
 		// retrive the context effect in prev. visits, and include them for this visit
@@ -313,7 +314,8 @@ FunctionInvocationUser::revisit(std::vector<const Fact*>& inputs, CGContext& cg_
 	if (func->visited_cnt++ == 0) {
 		fm->setup_in_out_maps(true);
 	}
-	if (func->name=="func_8" && (func->visited_cnt==23)) {
+	// for debugging
+	if (func->name=="func_8" && func->visited_cnt==2) {
 		//cout << func->visited_cnt << endl;
 		//func->Output(cout);
 		//cout << endl;

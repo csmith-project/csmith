@@ -43,6 +43,7 @@ class Expression;
 class Function;
 class Block;
 class Lhs;
+class Fact;
 class CVQualifiers;
 class ArrayVariable;
 
@@ -61,7 +62,7 @@ class VariableSelector
 public:
 	VariableSelector(void) {};
 	static Variable* new_variable(const std::string &name, const Type *type, const Expression* init, const CVQualifiers* qfer);
-	static Variable *make_dummy_variable(const string &name, const CVQualifiers* qfer);
+	static Variable *make_dummy_variable(const string &name, const Type* t, const CVQualifiers* qfer);
 	// ISSUE: use it only when you want to create a static variable
 	static Variable *make_dummy_static_variable(const string &name);
 	
@@ -71,7 +72,7 @@ public:
 			 eVariableScope scope=MAX_VAR_SCOPE);
 	static Variable* choose_ok_var(const vector<Variable *> &vars);
 	static const Variable* choose_ok_var(const vector<const Variable *> &vars);
-	static const Variable* choose_visible_written_var(const Block* b, vector<const Variable*> written_vars, const Type* type);
+	static const Variable* choose_visible_read_var(const Block* b, vector<const Variable*> written_vars, const Type* type, const vector<const Fact*>& facts);
 	static Variable* choose_var(vector<Variable *> vars, Effect::Access access,
 		   const CGContext &cg_context, const Type* type, const CVQualifiers* qfer,
 		   eMatchType mt, const vector<const Variable*>& invalid_vars, bool no_bitfield = false, bool no_expand_struct = false);
@@ -147,8 +148,6 @@ private:
 	static bool has_eligible_volatile_var(const vector<Variable *>& vars, const Type* type, const CVQualifiers* qfer, Effect::Access access, const CGContext& cg_context);
 
 	static bool is_eligible_var(const Variable* var, int deref_level, Effect::Access access, const CGContext& cg_context);
-	
-	static void remove_non_qualified_vars(vector<Variable*>& vars, Effect::Access access, const CGContext &cg_context);
 	
 	static Variable * create_and_initialize(Effect::Access access, const CGContext &cg_context, const Type* t, 
 					const CVQualifiers* qfer, Block *blk, std::string name);

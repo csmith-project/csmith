@@ -184,7 +184,6 @@ StatementAssign::make_random(CGContext &cg_context)
 
 	cg_context.add_effect(lhs_accum);
 	cg_context.get_effect_stm() = lhs_cg_context.get_effect_stm();
-	//} while (fm->validate_assign(lhs, e)==false); 
 	
 	// book keeping
 	incr_counter(Bookkeeper::expr_depth_cnts, cg_context.expr_depth);
@@ -268,7 +267,7 @@ StatementAssign::make_possible_compound_assign(CGContext &cg_context,
 			ERROR_GUARD(NULL);
 		}
 	}
-	StatementAssign *sa = new StatementAssign(l, op, e, rhs, fs, tmp1, tmp2);
+	StatementAssign *sa = new StatementAssign(cg_context.get_current_block(), l, op, e, rhs, fs, tmp1, tmp2);
 	return sa;
 }
 
@@ -299,11 +298,7 @@ StatementAssign::compound_to_binary_ops(eAssignOps op)
 
 bool 
 StatementAssign::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const
-{ 
-	static int g = 0;
-	int h = g++;
-	if (h==57)
-		BREAK_NOP;
+{
 	vector<const Fact*> inputs_copy = inputs;
 	// LHS and RHS can be evaludated in arbitrary order, try RHS first
 	Effect running_eff_context(cg_context.get_effect_context());
@@ -347,11 +342,11 @@ StatementAssign::has_uncertain_call_recursive(void) const
 /*
  *
  */
-StatementAssign::StatementAssign(const Lhs &l,
+StatementAssign::StatementAssign(Block* b, const Lhs &l,
 				 const Expression &e,
 				 eAssignOps op,
 				 const SafeOpFlags *flags)
-	: Statement(eAssign),
+	: Statement(eAssign, b),
 	  op(op),
 	  lhs(l),
 	  expr(e),
@@ -364,14 +359,14 @@ StatementAssign::StatementAssign(const Lhs &l,
 /*
  *
  */
-StatementAssign::StatementAssign(const Lhs &l,
+StatementAssign::StatementAssign(Block* b, const Lhs &l,
 				 eAssignOps op,
 				 const Expression &e,
 				 const Expression *er,
 				 const SafeOpFlags *flags,
 				 std::string &tmp_name1,
 				 std::string &tmp_name2)
-	: Statement(eAssign),
+	: Statement(eAssign, b),
 	  op(op),
 	  lhs(l),
 	  expr(e),

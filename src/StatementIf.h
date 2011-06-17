@@ -50,7 +50,7 @@ public:
 	// Factory method.
 	static StatementIf *make_random(CGContext &cg_context);
 
-	StatementIf(const Expression &test,
+	StatementIf(Block* b, const Expression &test,
 				const Block &if_true, const Block &if_false);
 	StatementIf(const StatementIf &si);
 	virtual ~StatementIf(void);

@@ -478,16 +478,18 @@ FunctionInvocation::visit_facts(vector<const Fact*>& inputs, CGContext& cg_conte
 {   
 	bool unordered = false; //has_uncertain_call();  
 	bool ok = false;
-	//static int g = 0;
+	static int g = 0;
 	Effect running_eff_context(cg_context.get_effect_context());
 	if (!unordered) {  
 		// unsigned int flags = ptr_cmp ? (cg_context.flags | NO_DANGLING_PTR) : cg_context.flags;
 		for (size_t i=0; i<param_value.size(); i++) {
 			Effect param_eff_accum;
-			//int h = g++;
+			int h = g++;
 			CGContext param_cg_context(cg_context, running_eff_context, &param_eff_accum);
 			// the parameters might be function calls
 			const Expression* value = param_value[i];
+			if (h == 3659)
+				BREAK_NOP;		// for debugging
 			if (!value->visit_facts(inputs, param_cg_context)) { 
 				return false;
 			}

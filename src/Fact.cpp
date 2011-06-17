@@ -33,6 +33,7 @@
 #include "StatementReturn.h"
 
 using namespace std; 
+std::vector<Fact*> Fact::facts_;
  
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -40,8 +41,7 @@ using namespace std;
  * 
  */
 Fact::Fact(eFactCategory e) :
-    eCat(e),
-	no_more_update(false)
+    eCat(e)
 {
 	// Nothing else to do.
 }
@@ -52,6 +52,33 @@ Fact::Fact(eFactCategory e) :
 Fact::~Fact(void)
 {
 	// Nothing else to do.
+}
+
+/*
+ * output an assertion about the fact to check the correctness of compiler 
+ * or generation time analysis 
+ */
+void 
+Fact::OutputAssertion(std::ostream &out, const Statement* s) const
+{
+	if (!is_top()) {
+		if (s && !is_assertable(s)) {
+			out << "//";
+		}
+        out << "assert ("; 
+        Output(out);
+        out << ");" << endl;
+    }
+}
+
+void
+Fact::doFinalization()
+{
+	std::vector<Fact*>::iterator i;
+	for( i = facts_.begin(); i != facts_.end(); ++i) {
+		delete (*i);
+	}
+	facts_.clear();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

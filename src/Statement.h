@@ -182,7 +182,7 @@ public:
 
 	static ProbabilityTable<unsigned int, ProbName> *stmtTable_;
 protected:
-	Statement(eStatementType st);
+	Statement(eStatementType st, Block* parent);
 
 private:
 	static int sid;

@@ -51,7 +51,7 @@ public:
 	// Factory method.
 	static StatementReturn *make_random(CGContext &cg_context);
 
-	StatementReturn(const ExpressionVariable &v);
+	StatementReturn(Block* b, const ExpressionVariable &v);
 	StatementReturn(const StatementReturn &sr);
 	virtual ~StatementReturn(void);
  

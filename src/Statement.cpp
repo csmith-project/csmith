@@ -347,10 +347,10 @@ Statement::is_ptr_used(void) const
 /*
  *
  */
-Statement::Statement(eStatementType st)
+Statement::Statement(eStatementType st, Block* b)
 	: eType(st),
-	func(0),
-	parent(0)
+	func(b ? b->func : 0),
+	parent(b)
 {
 	stm_id = Statement::sid;
 	Statement::sid++;
@@ -377,40 +377,6 @@ Statement::in_block(const Block* b) const
 	}
 	return false;
 }
-//
-//int 
-//Statement::get_blocks(std::vector<const Block*>& blks) const
-//{
-//	blks.clear();
-//	switch (eType) 
-//	{
-//	case eBlock: 
-//		blks.push_back((const Block*)this);
-//		break;
-//	case eIfElse:{
-//		const StatementIf* si = (const StatementIf*)this;
-//		blks.push_back(si->get_true_branch());
-//		blks.push_back(si->get_false_branch());
-//		break;
-//	}
-//	case eFor: {
-//		const StatementFor* sf = (const StatementFor*)this;
-//		blks.push_back(sf->get_body());
-//		break;
-//	}
-//	case eArrayOp: {
-//		const StatementArrayOp* sa = (const StatementArrayOp*)this;
-//		if (sa->body) {
-//			blks.push_back(sa->body);
-//		}
-//		break;
-//	}
-//	default:
-//		break;
-//	}
-//	return blks.size();
-//}
-
 
 /*
  * return true if this statement dominates s
@@ -637,7 +603,6 @@ Statement::validate_and_update_facts(vector<const Fact*>& inputs, CGContext& cg_
 	if (!stm_visit_facts(inputs, cg_context)) {
 		return false;
 	}  
-	fm->remove_rv_facts(inputs); 
 	fm->set_fact_in(this, inputs_copy);
 	fm->set_fact_out(this, inputs);
 	return true;
@@ -653,11 +618,13 @@ Statement::stm_visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) c
 	//int h = g++;
 	bool ok = visit_facts(inputs, cg_context);
 	
+	
 	if (!ok && !is_compound(eType)) {
 		failed_stm = this;
 	}
 	//if (!FactPointTo::is_valid_ptr("g_75", inputs))
 	//	Output(cout, fm);
+	fm->remove_rv_facts(inputs); 
 	fm->map_accum_effect[this] = *(cg_context.get_effect_accum());
 	fm->map_visited[this] = true;
 	return ok;
@@ -844,14 +811,9 @@ Statement::contains_unfixed_goto(void) const
 			for (j=0; j<fm->map_facts_in[edge->dest].size(); j++) {
 				const Fact* f = fm->map_facts_in[edge->dest][j];
 				// ignore return variable facts
-				if (f->get_var()->type != 0) {
+				if (!f->get_var()->is_rv()) {
 					const Fact* jump_src_f = find_related_fact(fm->map_facts_out[edge->src], f);
-					// JYTODO: cover all fact categories
-					FactPointTo tmp(f->get_var());
-					if (jump_src_f == 0) {
-						jump_src_f = &tmp;
-					}
-					if (f->conflict_with(*jump_src_f)) {
+					if (jump_src_f && !f->imply(*jump_src_f)) {
 						return true;
 					}
 				}
@@ -923,13 +885,14 @@ Statement::post_creation_analysis(vector<const Fact*>& pre_facts, const Effect& 
 		if (has_uncertain_call_recursive()) { 
 			FactVec outputs = pre_facts;
 			cg_context.reset_effect_accum(pre_effect); 
-			//if (stm_id==848) {
-			//	if (this->eType == eAssign) {
-			//		((const StatementAssign*)this)->get_rhs()->indented_output(cout, 0);
-			//	}
-			//	Output(cout, fm);
-			//}
+			//if (stm_id == 573)
+			//	BREAK_NOP;
 			if (!validate_and_update_facts(outputs, cg_context)) { 
+				/*if (this->eType == eAssign) {
+					((const StatementAssign*)this)->get_rhs()->indented_output(cout, 0);
+				}
+				cout << endl;
+				Output(cout, fm);*/
 				assert(0);
 			}
 			fm->global_facts = outputs;

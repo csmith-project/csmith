@@ -113,6 +113,7 @@ public:
 	std::vector<const Variable*> new_globals;  // collection of global variables created in this function
 	std::vector<const Variable*> dead_globals; // collection of global variables that is dangling at the end of this function
 	bool fact_changed;
+	bool union_field_read;
 	int  visited_cnt;
 	Effect accum_eff_context;
 

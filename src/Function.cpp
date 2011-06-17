@@ -329,6 +329,7 @@ Function::Function(const string &name, const Type *return_type)
 	  return_type(return_type),
 	  body(0),
 	  fact_changed(false),
+	  union_field_read(false),
 	  visited_cnt(0),
 	  build_state(UNBUILT)
 {
@@ -350,7 +351,7 @@ Function::make_random_signature(const CGContext& cg_context, const Type* type, c
 	CVQualifiers ret_qfer = qfer==0 ? CVQualifiers::random_qualifiers(type, Effect::READ, cg_context, true) 
 		                            : qfer->random_qualifiers(true, Effect::READ, cg_context);
 	ERROR_GUARD(NULL);
-	f->rv = VariableSelector::make_dummy_variable(rvname, &ret_qfer);
+	f->rv = VariableSelector::make_dummy_variable(rvname, type, &ret_qfer);
 	GenerateParameterList(*f); 
 	FMList.push_back(new FactMgr(f));
 	return f;
@@ -383,7 +384,7 @@ Function::make_first(void)
 	string rvname = f->name + "_" + "rv"; 
 	CVQualifiers ret_qfer = CVQualifiers::random_qualifiers(ty); 
 	ERROR_GUARD(NULL);
-	f->rv = VariableSelector::make_dummy_variable(rvname, &ret_qfer);
+	f->rv = VariableSelector::make_dummy_variable(rvname, ty, &ret_qfer);
 
 	// create a fact manager for this function, with empty global facts 
 	FactMgr* fm = new FactMgr(f);
@@ -396,18 +397,7 @@ Function::make_first(void)
 	fm->setup_in_out_maps(true);
 
 	// collect info about global dangling pointers
-	size_t i;
-	for (i=0; i<fm->global_facts.size(); i++) { 
-		const Variable* v = fm->global_facts[i]->get_var(); 
-		// const pointers should never be dangling
-		if (v->is_const() || !v->is_global()) continue;  
-		if (fm->global_facts[i]->eCat == ePointTo) {
-			FactPointTo* fp = (FactPointTo*)(fm->global_facts[i]);
-			if (fp->is_dead()) {
-				f->dead_globals.push_back(v);
-			}
-		}
-	}
+	fm->find_dangling_global_ptrs(f);
 	return f;
 }
 
@@ -500,7 +490,7 @@ Function::Output(std::ostream &out)
 
 	FactMgr* fm = get_fact_mgr_for_func(this);
 	// if nothing interesting happens, we don't want to see facts for statements
-	if (!fact_changed && !is_pointer_referenced()) {
+	if (!fact_changed && !union_field_read && !is_pointer_referenced()) {
 		fm = 0;
 	}
 	body->Output(out, fm);
@@ -619,6 +609,7 @@ Function::generate_body_with_known_params(const CGContext &prev_context, Effect&
 	// is just the effect on globals.
 	//effect.add_external_effect(*cg_context.get_effect_accum());
 	feffect.add_external_effect(fm->map_stm_effect[body]);
+	union_field_read = fm->map_stm_effect[body].union_field_is_read();
 	
 	make_return_const();
 	ERROR_RETURN();

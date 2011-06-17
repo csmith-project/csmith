@@ -72,7 +72,7 @@ StatementBreak::make_random(CGContext &cg_context)
 	cg_context.get_effect_stm().clear();
 	Expression *expr = Expression::make_random(cg_context, get_int_type(), true, true, eVariable);
 	ERROR_GUARD(NULL);    
-	StatementBreak* sc = new StatementBreak(*expr, *b); 
+	StatementBreak* sc = new StatementBreak(cg_context.get_current_block(), *expr, *b); 
 	b->break_stms.push_back(sc);
     return sc;
 }
@@ -80,8 +80,8 @@ StatementBreak::make_random(CGContext &cg_context)
 /*
  *
  */
-StatementBreak::StatementBreak(const Expression &test, const Block &b)
-	: Statement(eBreak),
+StatementBreak::StatementBreak(Block* parent, const Expression &test, const Block &b)
+	: Statement(eBreak, parent),
 	  test(test),
 	  loop_blk(b)
 {
@@ -92,7 +92,7 @@ StatementBreak::StatementBreak(const Expression &test, const Block &b)
  *
  */
 StatementBreak::StatementBreak(const StatementBreak &sc)
-	: Statement(sc.get_type()),
+: Statement(sc.get_type(), sc.parent),
 	  test(sc.test),
 	  loop_blk(sc.loop_blk)
 {

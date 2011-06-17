@@ -55,7 +55,8 @@ public:
 
 	static const Variable* make_iteration(CGContext& cg_context, StatementAssign*& begin, Expression*& exit_cond, StatementAssign*& step, unsigned int& bound);
 
-	StatementFor(const StatementAssign &init,
+	StatementFor(Block* b, 
+				 const StatementAssign &init,
 				 const Expression &test,
 				 const StatementAssign &incr,
 				 const Block &body);
