@@ -100,6 +100,8 @@ csmith_SOURCES = \
 	FactMgr.h \
 	FactPointTo.cpp \
 	FactPointTo.h \
+	FactUnion.cpp \
+	FactUnion.h \
 	Filter.cpp \
 	Filter.h \
 	Finalization.cpp \
