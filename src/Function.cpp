@@ -601,21 +601,29 @@ Function::generate_body_with_known_params(const CGContext &prev_context, Effect&
 	ERROR_RETURN();
 	body->set_depth_protect(true);
 
-	// compute the pointers that are statically referenced in the function
-	// including ones referenced by its callees
-	body->get_referenced_ptrs(referenced_ptrs);
-
-	// Compute the function's externally visible effect.  Currently, this
-	// is just the effect on globals.
-	//effect.add_external_effect(*cg_context.get_effect_accum());
-	feffect.add_external_effect(fm->map_stm_effect[body]);
-	union_field_read = fm->map_stm_effect[body].union_field_is_read();
+	compute_summary();
 	
 	make_return_const();
 	ERROR_RETURN();
 	
 	// Mark this function as built.
 	build_state = BUILT;
+}
+
+void
+Function::compute_summary(void) 
+{
+	FactMgr* fm = get_fact_mgr_for_func(this); 
+	// compute the pointers that are statically referenced in the function
+	// including ones referenced by its callees
+	body->get_referenced_ptrs(referenced_ptrs);
+
+	// Compute the function's externally visible effect.  
+	//effect.add_external_effect(*cg_context.get_effect_accum());
+	feffect.add_external_effect(fm->map_stm_effect[body]);
+	
+	// determine whether an union field is read
+	union_field_read = body->read_union_field();
 }
 
 /*

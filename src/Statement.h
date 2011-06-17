@@ -145,6 +145,8 @@ public:
 
 	bool is_jump_target_from_other_blocks(void) const;
 
+	bool read_union_field(void) const;
+
 	virtual void get_blocks(std::vector<const Block*>& /* blks */) const = 0;
 	virtual void get_exprs(std::vector<const Expression*>& /* exps */) const = 0;
 

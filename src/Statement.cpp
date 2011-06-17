@@ -51,6 +51,7 @@
 #include "Expression.h"
 #include "ExpressionFuncall.h"
 #include "FunctionInvocation.h"
+#include "FunctionInvocationUser.h"
 #include "FactPointTo.h"
 
 #include "Block.h" // temporary; don't want to depend on subclases!
@@ -672,6 +673,24 @@ Statement::is_jump_target_from_other_blocks(void) const
 	return false;
 }
 
+bool 
+Statement::read_union_field(void) const
+{
+	FactMgr* fm = get_fact_mgr_for_func(func);
+	assert(fm);
+	if (fm->map_stm_effect[this].union_field_is_read()) {
+		return true;
+	}
+	vector<const FunctionInvocationUser*> calls;
+	get_called_funcs(calls);
+	for (size_t i=0; i<calls.size(); i++) {
+		if (calls[i]->get_func()->union_field_read) {
+			return true;
+		}
+	}
+	return false;
+}
+
 /*
  * return true if s is contained inside this statement
  */
@@ -750,33 +769,18 @@ Statement::get_direct_invocation(void) const
 void 
 Statement::get_called_funcs(std::vector<const FunctionInvocationUser*>& funcs) const
 { 
-	if (eType == eAssign) {
-		((const StatementAssign*)this)->get_rhs()->get_called_funcs(funcs);
+	size_t i;
+	vector<const Expression*> exprs;
+	vector<const Block*> blks;
+	get_exprs(exprs);
+	get_blocks(blks);
+	for (i=0; i<exprs.size(); i++) {
+		exprs[i]->get_called_funcs(funcs);
 	}
-	else if (eType == eInvoke) {
-		((const StatementExpr*)this)->get_invoke()->get_called_funcs(funcs);
-	}
-	else if (eType == eBlock) {
-		const Block* b = (const Block*)this;
-		size_t i;
-		for (i=0; i<b->stms.size(); i++) {
-			b->stms[i]->get_called_funcs(funcs);
-		}
-	}
-	else if (eType == eIfElse) {
-		const StatementIf* si = (const StatementIf*)this;
-		si->get_test()->get_called_funcs(funcs);
-		si->get_true_branch()->get_called_funcs(funcs);
-		si->get_false_branch()->get_called_funcs(funcs);
-	}
-	else if (eType == eFor) {
-		const StatementFor* sf = (const StatementFor*)this;
-		sf->get_body()->get_called_funcs(funcs);
-	}
-	else if (eType == eArrayOp) {
-		const StatementArrayOp* sa = (const StatementArrayOp*)this;
-		if (sa->body) {
-			sa->body->get_called_funcs(funcs);
+	for (i=0; i<blks.size(); i++) {
+		for (size_t j=0; j<blks[i]->stms.size(); j++) {
+			const Statement* s = blks[i]->stms[j];
+			s->get_called_funcs(funcs);
 		}
 	}
 }

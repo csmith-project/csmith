@@ -78,6 +78,7 @@ public:
 	static void doFinalization();
 
 	void generate_body_with_known_params(const CGContext &prev_context, Effect& effect_accum);
+	void compute_summary(void);
 
 	void Output(std::ostream &);
 	void OutputForwardDecl(std::ostream &);
