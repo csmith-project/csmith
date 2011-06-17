@@ -71,9 +71,9 @@ am_csmith_OBJECTS = csmith-AbsExtension.$(OBJEXT) \
 	csmith-ExpressionVariable.$(OBJEXT) \
 	csmith-ExtensionMgr.$(OBJEXT) csmith-ExtensionValue.$(OBJEXT) \
 	csmith-Fact.$(OBJEXT) csmith-FactMgr.$(OBJEXT) \
-	csmith-FactPointTo.$(OBJEXT) csmith-Filter.$(OBJEXT) \
-	csmith-Finalization.$(OBJEXT) csmith-Function.$(OBJEXT) \
-	csmith-FunctionInvocation.$(OBJEXT) \
+	csmith-FactPointTo.$(OBJEXT) csmith-FactUnion.$(OBJEXT) \
+	csmith-Filter.$(OBJEXT) csmith-Finalization.$(OBJEXT) \
+	csmith-Function.$(OBJEXT) csmith-FunctionInvocation.$(OBJEXT) \
 	csmith-FunctionInvocationBinary.$(OBJEXT) \
 	csmith-FunctionInvocationUnary.$(OBJEXT) \
 	csmith-FunctionInvocationUser.$(OBJEXT) \
@@ -293,6 +293,8 @@ csmith_SOURCES = \
 	FactMgr.h \
 	FactPointTo.cpp \
 	FactPointTo.h \
+	FactUnion.cpp \
+	FactUnion.h \
 	Filter.cpp \
 	Filter.h \
 	Finalization.cpp \
@@ -507,6 +509,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-Fact.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-FactMgr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-FactPointTo.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-FactUnion.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-Filter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-Finalization.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-Function.Po@am__quote@
@@ -1011,6 +1014,20 @@ csmith-FactPointTo.obj: FactPointTo.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='FactPointTo.cpp' object='csmith-FactPointTo.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-FactPointTo.obj `if test -f 'FactPointTo.cpp'; then $(CYGPATH_W) 'FactPointTo.cpp'; else $(CYGPATH_W) '$(srcdir)/FactPointTo.cpp'; fi`
+
+csmith-FactUnion.o: FactUnion.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-FactUnion.o -MD -MP -MF $(DEPDIR)/csmith-FactUnion.Tpo -c -o csmith-FactUnion.o `test -f 'FactUnion.cpp' || echo '$(srcdir)/'`FactUnion.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/csmith-FactUnion.Tpo $(DEPDIR)/csmith-FactUnion.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='FactUnion.cpp' object='csmith-FactUnion.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-FactUnion.o `test -f 'FactUnion.cpp' || echo '$(srcdir)/'`FactUnion.cpp
+
+csmith-FactUnion.obj: FactUnion.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-FactUnion.obj -MD -MP -MF $(DEPDIR)/csmith-FactUnion.Tpo -c -o csmith-FactUnion.obj `if test -f 'FactUnion.cpp'; then $(CYGPATH_W) 'FactUnion.cpp'; else $(CYGPATH_W) '$(srcdir)/FactUnion.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/csmith-FactUnion.Tpo $(DEPDIR)/csmith-FactUnion.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='FactUnion.cpp' object='csmith-FactUnion.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-FactUnion.obj `if test -f 'FactUnion.cpp'; then $(CYGPATH_W) 'FactUnion.cpp'; else $(CYGPATH_W) '$(srcdir)/FactUnion.cpp'; fi`
 
 csmith-Filter.o: Filter.cpp
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-Filter.o -MD -MP -MF $(DEPDIR)/csmith-Filter.Tpo -c -o csmith-Filter.o `test -f 'Filter.cpp' || echo '$(srcdir)/'`Filter.cpp
