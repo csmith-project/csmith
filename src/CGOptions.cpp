@@ -161,6 +161,8 @@ DEFINE_GETTER_SETTER_BOOL(identify_wrappers)
 DEFINE_GETTER_SETTER_BOOL(mark_mutable_const)
 DEFINE_GETTER_SETTER_BOOL(force_globals_static)
 DEFINE_GETTER_SETTER_BOOL(force_non_uniform_array_init)
+DEFINE_GETTER_SETTER_INT(null_pointer_dereference_prob)
+DEFINE_GETTER_SETTER_INT(dead_pointer_dereference_prob)
 
 void
 CGOptions::set_default_settings(void)
@@ -239,6 +241,8 @@ CGOptions::set_default_settings(void)
 	force_globals_static(true);
 	force_non_uniform_array_init(false);
 	max_array_num_in_loop(CGOPTIONS_DEFAULT_MAX_ARRAY_NUM_IN_LOOP);
+	null_pointer_dereference_prob(0);
+	dead_pointer_dereference_prob(0);
 }
 
 #define MAX_INTEGER_LENGTH 64

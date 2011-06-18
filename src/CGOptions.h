@@ -372,6 +372,12 @@ public:
 	static bool force_non_uniform_array_init(void);
 	static bool force_non_uniform_array_init(bool p);
 
+	static int null_pointer_dereference_prob(void);
+	static int null_pointer_dereference_prob(int p);
+
+	static int dead_pointer_dereference_prob(void);
+	static int dead_pointer_dereference_prob(int p);
+
 private:
 	static bool resolve_exhaustive_options();
 
@@ -479,6 +485,8 @@ private:
 	static bool mark_mutable_const_;
 	static bool force_globals_static_;
 	static bool force_non_uniform_array_init_;
+	static int null_pointer_dereference_prob_;
+	static int dead_pointer_dereference_prob_;
 	static Reducer* reducer_; 
 
 private:

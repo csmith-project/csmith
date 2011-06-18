@@ -30,6 +30,7 @@
 #include <cassert>
 
 #include "CGContext.h"
+#include "CGOptions.h"
 #include "Effect.h"
 #include "Variable.h"
 #include "Function.h"
@@ -232,6 +233,8 @@ bool CGContext::read_pointed(const ExpressionVariable* v, const std::vector<cons
 	assert(indirect > 0);
 	incr_counter(Bookkeeper::dereference_level_cnts, indirect);
 
+	bool allow_null_ptr = CGOptions::null_pointer_dereference_prob() > 0;
+	bool allow_dead_ptr = CGOptions::dead_pointer_dereference_prob() > 0;
 	if (!read_indices(v->get_var(), facts)) {
 		return false;
 	}
@@ -241,14 +244,16 @@ bool CGContext::read_pointed(const ExpressionVariable* v, const std::vector<cons
 	while (indirect-- > 0) {
 		tmp = FactPointTo::merge_pointees_of_pointers(tmp, facts);
 		// make sure there is no null/dead pointers
-		if (tmp.size()==0 || find_variable_in_set(tmp, FactPointTo::null_ptr)!=-1 || find_variable_in_set(tmp, FactPointTo::garbage_ptr) != -1) {
+		if (tmp.size()==0 || 
+			(!allow_null_ptr && is_variable_in_set(tmp, FactPointTo::null_ptr)) || 
+			(!allow_dead_ptr && is_variable_in_set(tmp, FactPointTo::garbage_ptr))) {
 			*effect_accum = effect_accum_copy;
 			return false;
 		}
 		// make sure the remaining pointee are readable in context
 		for (i=0; i<tmp.size(); i++) {
 			const Variable* pointee = tmp[i];
-			if (pointee != FactPointTo::tbd_ptr) {
+			if (!FactPointTo::is_special_ptr(pointee)) {
 				if (!check_read_var(pointee, facts)) {
 					*effect_accum = effect_accum_copy;
 					return false;
@@ -273,18 +278,23 @@ bool CGContext::write_pointed(const Lhs* v, const std::vector<const Fact*>& fact
 
 	vector<const Variable*> tmp;
 	tmp.push_back(v->get_var()->get_collective());
+
+	bool allow_null_ptr = CGOptions::null_pointer_dereference_prob() > 0;
+	bool allow_dead_ptr = CGOptions::dead_pointer_dereference_prob() > 0;
 	// recursively trace the pointer(s) to find real variables they point to 
 	while (indirect-- > 0) {
 		tmp = FactPointTo::merge_pointees_of_pointers(tmp, facts);
 		// make sure there is no null/dead pointers
-		if (tmp.size()==0 || find_variable_in_set(tmp, FactPointTo::null_ptr)!=-1 || find_variable_in_set(tmp, FactPointTo::garbage_ptr) != -1) {
+		if (tmp.size()==0 || 
+			(!allow_null_ptr && is_variable_in_set(tmp, FactPointTo::null_ptr)) || 
+			(!allow_dead_ptr && is_variable_in_set(tmp, FactPointTo::garbage_ptr))) {
 			*effect_accum = effect_accum_copy;
 			return false;
 		}
 		// make sure the remaining pointee are readable or writable(if it is the ultimate pointee) in context
 		for (i=0; i<tmp.size(); i++) {
 			const Variable* pointee = tmp[i];
-			if (pointee != FactPointTo::tbd_ptr) {
+			if (!FactPointTo::is_special_ptr(pointee)) {
 				bool succ = false;
 				if (indirect==0) {
 					succ = check_write_var(pointee, facts);

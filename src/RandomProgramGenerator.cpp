@@ -285,6 +285,10 @@ static void print_advanced_help()
 	cout << "  --mark-mutable-const: mark constants that can be mutated with parentheses (disabled by default)." << endl << endl; 
 
 	cout << "  --force-non-uniform-arrays: force integer arrays to be initialized with multiple values (disabled by default)." << endl << endl; 
+ 
+	cout << "  --null-ptr-deref-prob <N>: allow null pointers to be dereferenced with probability N% (0 by default)." << endl << endl;
+
+	cout << "  --dangling-ptr-deref-prob <N>: allow dangling pointers to be dereferenced with probability N% (0 by default)." << endl << endl; 
 }
 
 void arg_check(int argc, int i)
@@ -1041,6 +1045,26 @@ main(int argc, char **argv)
 
 		if (strcmp (argv[i], "--force-non-uniform-arrays") == 0) {
 			CGOptions::force_non_uniform_array_init(true);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--null-ptr-deref-prob") ==0 ) {
+			unsigned long prob;
+			i++;
+			arg_check(argc, i);
+			if (!parse_int_arg(argv[i], &prob))
+				exit(-1);
+			CGOptions::null_pointer_dereference_prob(prob);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--dangling-ptr-deref-prob") ==0 ) {
+			unsigned long prob;
+			i++;
+			arg_check(argc, i);
+			if (!parse_int_arg(argv[i], &prob))
+				exit(-1);
+			CGOptions::dead_pointer_dereference_prob(prob);
 			continue;
 		}
 

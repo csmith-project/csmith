@@ -86,17 +86,20 @@ ExpressionVariable::make_random(CGContext &cg_context, const Type* type, const C
 			FactPointTo::is_pointing_to_locals(var, cg_context.get_current_block(), indirection, fm->global_facts)) {
 			continue;
 		}
-		ExpressionVariable tmp(*var, type);
-		if (tmp.visit_facts(fm->global_facts, cg_context)) { 
-			ev = tmp.get_indirect_level() == 0 ? new ExpressionVariable(*var) : new ExpressionVariable(*var, type); 
-			cg_context.curr_blk = cg_context.get_current_block();
-			break;
-		} 
-		else {
-			cg_context.reset_effect_accum(eff_accum);
-			cg_context.reset_effect_stm(eff_stmt);
-			dummy.push_back(var);
+		int valid = FactPointTo::opportunistic_validate(var, type, fm->global_facts);
+		if (valid) {
+			ExpressionVariable tmp(*var, type);
+			if (tmp.visit_facts(fm->global_facts, cg_context)) { 
+				ev = tmp.get_indirect_level() == 0 ? new ExpressionVariable(*var) : new ExpressionVariable(*var, type); 
+				cg_context.curr_blk = cg_context.get_current_block();
+				break;
+			}  
+			else {
+				cg_context.reset_effect_accum(eff_accum);
+				cg_context.reset_effect_stm(eff_stmt);
+			}
 		}
+		dummy.push_back(var);
 	} while (true);
 
 	// statistics

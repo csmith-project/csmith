@@ -40,6 +40,7 @@ class Variable;
 class Function;
 class Statement;
 class Block;
+class Type;
 class StatementAssign;
 class StatementReturn;
 
@@ -95,10 +96,10 @@ public:
 	static void update_facts_with_modified_index(std::vector<const Fact*>& facts, const Variable* var);
 	static void aggregate_all_pointto_sets(void);
 
+	static int opportunistic_validate(const Variable* var, const Type* type, const std::vector<const Fact*>& facts);
 	static bool is_valid_ptr(const Variable* p, const std::vector<const Fact*>& facts);
 	static bool is_valid_ptr(const char* name, const std::vector<const Fact*>& facts);
-	static bool is_dangling_ptr(const Variable* p, const std::vector<const Fact*>& facts); 
-	static bool is_dangling_expr(const Expression* e, const std::vector<const Fact*>& facts);
+	static bool is_dangling_ptr(const Variable* p, const std::vector<const Fact*>& facts);
 	static bool is_special_ptr(const Variable* p) { return p==null_ptr || p==garbage_ptr || p==tbd_ptr;}
 	static bool is_pointing_to_locals(const Variable* v, const Block* b, int indirection, const vector<const Fact*>& facts); 
 

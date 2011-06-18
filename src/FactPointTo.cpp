@@ -29,6 +29,7 @@
  
 #include "FactPointTo.h"
 #include <iostream>
+#include "CGOptions.h"
 #include "Fact.h"
 #include "Type.h"
 #include "VariableSelector.h"
@@ -44,6 +45,7 @@
 #include "FunctionInvocationUser.h"
 #include "FactMgr.h"
 #include "Lhs.h"
+#include "random.h"
 
 #include <assert.h>
 
@@ -398,13 +400,16 @@ FactPointTo::point_to(const Variable* v) const
 
 /*
  * return true if ptr is either null nore dangling in the given context
+ * tell the analyzer sometimes it's ok to dereference null/dead pointers
  */ 
 bool 
 FactPointTo::is_valid_ptr(const Variable* p, const std::vector<const Fact*>& facts)
 { 
-	FactPointTo fp(p);
+	FactPointTo fp(p); 
 	const FactPointTo* fact = (const FactPointTo*)find_related_fact(facts, &fp); 
-	return (fact && !fact->is_null() && !fact->is_dead());
+	return fact && 
+		(CGOptions::null_pointer_dereference_prob() > 0 || !fact->is_null()) && 
+		(CGOptions::dead_pointer_dereference_prob() > 0 || !fact->is_dead());
 }
 
 /*
@@ -426,6 +431,40 @@ FactPointTo::is_valid_ptr(const char* name, const std::vector<const Fact*>& fact
 }
 
 /*
+ *  validate the pointer with some chance of overlooking safety check
+ *  this can create some null/dangling pointer dereferences, which 
+ *  are used to test static analyzers (not compilers)
+ */
+int
+FactPointTo::opportunistic_validate(const Variable* var, const Type* type, const std::vector<const Fact*>& facts)
+{  
+	if (var->type->get_indirect_level() <= type->get_indirect_level()) {
+		return 1;
+	}
+	FactPointTo tmp(var->get_collective()); 
+	const FactPointTo* fp = dynamic_cast<const FactPointTo*>(find_related_fact(facts, &tmp)); 
+	if (fp == 0) return 0;
+	int ret = 0;
+	if (fp->is_null()) {
+		if (rnd_flipcoin(CGOptions::null_pointer_dereference_prob())) {
+			ret = 2;
+		} else {
+			return 0;
+		}
+	} else {
+		ret = 1;
+	}
+	if (fp->is_dead()) {
+		if (rnd_flipcoin(CGOptions::dead_pointer_dereference_prob())) {
+			ret = 2;
+		} else {
+			return 0;
+		}
+	} 
+	return ret;
+}
+
+/*
  * return true if ptr is dangling in the given context
  */ 
 bool 
@@ -433,37 +472,7 @@ FactPointTo::is_dangling_ptr(const Variable* p, const std::vector<const Fact*>& 
 {
 	FactPointTo fp(p);
 	const FactPointTo* fact = (const FactPointTo*)find_related_fact(facts, &fp);
-	return (fact && fact->is_dead());
-}
-
-/*
- * return true if expression is a dangling expression
- */
-bool 
-FactPointTo::is_dangling_expr(const Expression* e, const std::vector<const Fact*>& facts)
-{
-	const Type& type = e->get_type(); 
-	if (type.eType == ePointer) {
-		if (e->term_type == eVariable) {
-			const ExpressionVariable* ev = (const ExpressionVariable*)e;
-			if (ev->get_indirect_level()==0) {
-				FactPointTo fp(ev->get_var());
-				const FactPointTo* fact = (const FactPointTo*)find_related_fact(facts, &fp);
-				return (fact && fact->is_dead());
-			}
-		}
-		else if (e->term_type == eFunction) {
-			const ExpressionFuncall* ef = (const ExpressionFuncall*)e;
-			if (ef->get_invoke()->invoke_type == eFuncCall) {
-				const FunctionInvocationUser* fiu = (const FunctionInvocationUser*)(ef->get_invoke());
-				const FactPointTo* fact = (const FactPointTo*)(get_return_fact_for_invocation(fiu, ePointTo));
-				if (fact) {
-					return fact->is_dead();
-				}
-			}
-		}
-	}
-	return false;
+	return (fact && (fact->is_dead() && CGOptions::dead_pointer_dereference_prob() == 0));
 }
 
 /* return true if the variable has any chance to be a local variable after dereference */

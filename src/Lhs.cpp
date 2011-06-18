@@ -90,11 +90,9 @@ Lhs::make_random(CGContext &cg_context, const Type* t, const CVQualifiers* qfer)
 			assert(!var->qfer.is_const_after_deref(deref_level));
 		}
 		ERROR_GUARD(NULL);
-		assert(var); 
-		bool valid = true;
-		if (var->type->get_indirect_level() > t->get_indirect_level()) {
-			valid = FactPointTo::is_valid_ptr(var, fm->global_facts) && FactPointTo::is_valid_ptr(var, fm->shadow_facts);
-		}
+		assert(var);  
+		bool valid = FactPointTo::opportunistic_validate(var, t, fm->global_facts) && 
+					 FactPointTo::opportunistic_validate(var, t, fm->shadow_facts);
 		if (valid) {
 			assert(var); 
 			Lhs* lhs = new Lhs(*var, t);
