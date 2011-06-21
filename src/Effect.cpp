@@ -438,33 +438,39 @@ Effect::field_is_written(const Variable *v) const
 }
 
 bool
-Effect::sibling_field_is_read(const Variable *v) const
+Effect::sibling_union_field_is_read(const Variable *v) const
 {   
-	// check other fields of union/struct
-	if (v->isFieldVarOf_) {
-		for (size_t j=0; j<v->isFieldVarOf_->field_vars.size(); j++) {
-			Variable* field_var = v->isFieldVarOf_->field_vars[j];
-			if (field_var == v) continue;
-			if (is_read(field_var) || field_is_read(field_var)) {
-				return true; 
+	while (v->isFieldVarOf_) {
+		// check other fields of the union
+		if (v->isFieldVarOf_->type->eType == eUnion) {
+			for (size_t j=0; j<v->isFieldVarOf_->field_vars.size(); j++) {
+				Variable* field_var = v->isFieldVarOf_->field_vars[j];
+				if (field_var == v) continue;
+				if (is_read(field_var) || field_is_read(field_var)) {
+					return true; 
+				}
 			}
 		}
+		v = v->isFieldVarOf_;
 	}
 	return false;
 }
 
 bool
-Effect::sibling_field_is_written(const Variable *v) const
+Effect::sibling_union_field_is_written(const Variable *v) const
 {   
-	// check other fields of union/struct
-	if (v->isFieldVarOf_) {
-		for (size_t j=0; j<v->isFieldVarOf_->field_vars.size(); j++) {
-			Variable* field_var = v->isFieldVarOf_->field_vars[j];
-			if (field_var == v) continue;
-			if (is_written(field_var) || field_is_written(field_var)) {
-				return true; 
+	while (v->isFieldVarOf_) {
+		// check other fields of the union
+		if (v->isFieldVarOf_->type->eType == eUnion) {
+			for (size_t j=0; j<v->isFieldVarOf_->field_vars.size(); j++) {
+				Variable* field_var = v->isFieldVarOf_->field_vars[j];
+				if (field_var == v) continue;
+				if (is_written(field_var) || field_is_written(field_var)) {
+					return true; 
+				}
 			}
 		}
+		v = v->isFieldVarOf_;
 	}
 	return false;
 }
@@ -472,13 +478,13 @@ Effect::sibling_field_is_written(const Variable *v) const
 bool 
 Effect::is_read_partially(const Variable* v) const
 {
-	return is_read(v) || field_is_read(v) || (v->is_union_field() && sibling_field_is_read(v));
+	return is_read(v) || field_is_read(v) || sibling_union_field_is_read(v);
 }
 
 bool 
 Effect::is_written_partially(const Variable* v) const
 {
-	return is_written(v) || field_is_written(v) || (v->is_union_field() && sibling_field_is_written(v));
+	return is_written(v) || field_is_written(v) || sibling_union_field_is_written(v);
 }
 
 /*
