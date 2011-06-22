@@ -87,9 +87,9 @@ public:
 	bool is_const_after_deref(int deref_level) const;
 	bool is_volatile_after_deref(int deref_level) const;
 	bool has_field_var(const Variable* v) const; 
-	bool is_field_var(void) const { return isFieldVarOf_ != 0; };
+	bool is_field_var(void) const { return field_var_of != 0; };
 	int  get_field_id(void) const;
-	bool is_union_field(void) const { return isFieldVarOf_ != 0 && isFieldVarOf_->type->eType == eUnion; };
+	bool is_union_field(void) const { return field_var_of != 0 && field_var_of->type->eType == eUnion; };
 	bool is_array_field(void) const;
 	bool is_virtual(void) const;
 	bool is_aggregate(void) const { return type && type->is_aggregate(); }
@@ -97,6 +97,7 @@ public:
 	bool loose_match(const Variable* v) const;
 	bool is_pointer(void) const { return type && type->eType == ePointer;}
 	bool is_rv(void) const { return StringUtils::end_with(name, "_rv"); }
+	int  compare_field(const Variable* v) const;
 	int get_seq_num(void) const;
 
 	virtual std::string get_actual_name() const;
@@ -144,7 +145,7 @@ public:
 	const bool isStatic;
 	const bool isRegister; 
 	const bool isBitfield_; // expanded from a full-bitfield struct var
-	const Variable* isFieldVarOf_; //expanded from a struct/union
+	const Variable* field_var_of; //expanded from a struct/union
 	const bool isArray;
     const CVQualifiers qfer;
 	static std::vector<const Variable*> ctrl_vars;

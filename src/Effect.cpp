@@ -292,8 +292,8 @@ Effect::is_read(const Variable *v) const
 	// however we can not say the same thing for unions: reading a particular
 	// unions field can cause unspecified behaviors, while reading the whole
 	// union won't
-	if (v->isFieldVarOf_ && v->isFieldVarOf_->type->eType == eStruct) {
-		return is_read(v->isFieldVarOf_);
+	if (v->field_var_of && v->field_var_of->type->eType == eStruct) {
+		return is_read(v->field_var_of);
 	}
 	return false;
 }
@@ -354,8 +354,8 @@ Effect::is_written(const Variable *v) const
 		}
 	}
 	// if we write a struct/union, presumingly all the fields are written too
-	if (v->isFieldVarOf_) {
-		return is_written(v->isFieldVarOf_);
+	if (v->field_var_of) {
+		return is_written(v->field_var_of);
 	}
 	return false;
 }
@@ -440,18 +440,18 @@ Effect::field_is_written(const Variable *v) const
 bool
 Effect::sibling_union_field_is_read(const Variable *v) const
 {   
-	while (v->isFieldVarOf_) {
+	while (v->field_var_of) {
 		// check other fields of the union
-		if (v->isFieldVarOf_->type->eType == eUnion) {
-			for (size_t j=0; j<v->isFieldVarOf_->field_vars.size(); j++) {
-				Variable* field_var = v->isFieldVarOf_->field_vars[j];
+		if (v->field_var_of->type->eType == eUnion) {
+			for (size_t j=0; j<v->field_var_of->field_vars.size(); j++) {
+				Variable* field_var = v->field_var_of->field_vars[j];
 				if (field_var == v) continue;
 				if (is_read(field_var) || field_is_read(field_var)) {
 					return true; 
 				}
 			}
 		}
-		v = v->isFieldVarOf_;
+		v = v->field_var_of;
 	}
 	return false;
 }
@@ -459,18 +459,18 @@ Effect::sibling_union_field_is_read(const Variable *v) const
 bool
 Effect::sibling_union_field_is_written(const Variable *v) const
 {   
-	while (v->isFieldVarOf_) {
+	while (v->field_var_of) {
 		// check other fields of the union
-		if (v->isFieldVarOf_->type->eType == eUnion) {
-			for (size_t j=0; j<v->isFieldVarOf_->field_vars.size(); j++) {
-				Variable* field_var = v->isFieldVarOf_->field_vars[j];
+		if (v->field_var_of->type->eType == eUnion) {
+			for (size_t j=0; j<v->field_var_of->field_vars.size(); j++) {
+				Variable* field_var = v->field_var_of->field_vars[j];
 				if (field_var == v) continue;
 				if (is_written(field_var) || field_is_written(field_var)) {
 					return true; 
 				}
 			}
 		}
-		v = v->isFieldVarOf_;
+		v = v->field_var_of;
 	}
 	return false;
 }
@@ -497,7 +497,7 @@ Effect::consolidate(void)
 	size_t len = read_vars.size();
 	for (i=0; i<len; i++) {
 		const Variable* tmp = read_vars[i];
-		if (tmp->is_field_var() && is_read(tmp->isFieldVarOf_)) {
+		if (tmp->is_field_var() && is_read(tmp->field_var_of)) {
 			read_vars.erase(read_vars.begin() + i);
 			i--;
 			len--;
@@ -506,7 +506,7 @@ Effect::consolidate(void)
 	len = write_vars.size();
 	for (i=0; i<len; i++) {
 		const Variable* tmp = write_vars[i];
-		if (tmp->is_field_var() && is_written(tmp->isFieldVarOf_)) {
+		if (tmp->is_field_var() && is_written(tmp->field_var_of)) {
 			write_vars.erase(write_vars.begin() + i);
 			i--;
 			len--;

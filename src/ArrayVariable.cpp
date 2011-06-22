@@ -186,7 +186,7 @@ ArrayVariable::ArrayVariable(Block* blk, const std::string &name, const Type *ty
 }
 
 ArrayVariable::ArrayVariable(const ArrayVariable& av)
-	: Variable(av.name, av.type, av.init, &(av.qfer), av.isFieldVarOf_, true), 
+	: Variable(av.name, av.type, av.init, &(av.qfer), av.field_var_of, true), 
 	collective(av.collective),
 	parent(av.parent), 
 	sizes(av.sizes),

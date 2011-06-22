@@ -719,12 +719,10 @@ FactPointTo::update_with_modified_index(const Variable* index_var) const
 	size_t j, k;
 	vector<const Variable*> pointees = point_to_vars;
 	bool changed = false;
-	if (index_var->name == "p_4") 
-		j = 0;
 	for (j=0; j<point_to_vars.size(); j++) {
 		const Variable* v = point_to_vars[j];
-		while (v->isFieldVarOf_) {
-			v = v->isFieldVarOf_;
+		while (v->field_var_of) {
+			v = v->field_var_of;
 		}
 		// if v is an itemized array variable, check it's indices
 		if (v->isArray && v->get_collective() != v) {

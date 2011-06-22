@@ -122,7 +122,7 @@ FactUnion::abstract_fact_for_assign(const std::vector<const Fact*>& facts, const
 		const Variable* v = lvars[i];
 		const FactUnion* fu = 0;
 		if (v->is_union_field()) { 
-			fu = make_fact(v->isFieldVarOf_, v->get_field_id());
+			fu = make_fact(v->field_var_of, v->get_field_id());
 		}
 		if (fu) {
 			ret_facts.push_back(fu);
@@ -179,7 +179,7 @@ bool
 FactUnion::is_nonreadable_field(const Variable *v, const std::vector<const Fact*>& facts)
 {
 	if (v->is_union_field()) {
-		FactUnion tmp(v->isFieldVarOf_, v->get_field_id());
+		FactUnion tmp(v->field_var_of, v->get_field_id());
 		const FactUnion* fu = dynamic_cast<const FactUnion*>(find_related_fact(facts, &tmp));
 		if (fu && !tmp.imply(*fu)) {
 			return true;

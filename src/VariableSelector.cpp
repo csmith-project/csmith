@@ -1349,9 +1349,21 @@ VariableSelector::itemize_array(CGContext& cg_context, const ArrayVariable* av)
 		map<const Variable*, unsigned int>::iterator iter;
 		for(iter = cg_context.iv_bounds.begin(); iter != cg_context.iv_bounds.end(); ++iter) {  
 			if (iter->second != INVALID_BOUND && iter->second < dimen_len) {
-				ok_ivs.push_back(iter->first);
+				const Variable* iv = iter->first;
+				// unfortunately different std::map implementations give us diff. order, we 
+				// have to sort them to generate consistant outputs across diff. platforms
+				bool insert_middle = false;
+				for (size_t j=0; j<ok_ivs.size(); j++) {
+					if (ok_ivs[j]->compare_field(iv) > 0) {
+						ok_ivs.insert(ok_ivs.begin() + j, iv);
+						insert_middle = true;
+						break;
+					}
+				}
+				if (!insert_middle) ok_ivs.push_back(iv);
 			}
-		} 
+		}  
+		
 		const Variable* v = choose_ok_var(ok_ivs);
 		// this could happen if the context contained 2 or more array to be used, but the longer one(s) has
 		// been removed, and leaving the shorter one that is too short for the induction variable's range

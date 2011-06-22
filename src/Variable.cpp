@@ -191,8 +191,8 @@ void remove_field_vars(vector<const Variable*>& set)
 	for (i=0; i<len; i++) {
 		const Variable* v = set[i];
 		if (v->is_field_var()) {
-			while (v->isFieldVarOf_) {
-				v = v->isFieldVarOf_;
+			while (v->field_var_of) {
+				v = v->field_var_of;
 			}
 			set.erase(set.begin() + i);
 			add_variable_to_set(set, v);
@@ -204,7 +204,7 @@ void remove_field_vars(vector<const Variable*>& set)
 
 /*
  * examples: array[0] "loose matches" array[1]; array[3] "loose matches" array[x].f1...
- * union.f1 "loose matches" union.f2
+ * union.f1 "loose matches" union.f2.f3
  */
 bool 
 Variable::loose_match(const Variable* v) const
@@ -214,10 +214,12 @@ Variable::loose_match(const Variable* v) const
 	if (me->match(you)) {
 		return true;
 	}
-	if (me->isFieldVarOf_== you->isFieldVarOf_ && me->is_union_field()) {
-		return true;
-	}
-	return false;
+	// find the union variable(s) that contain me and you
+	for (me = me->field_var_of; me && me->type->eType != eUnion; me = me->field_var_of)
+		;
+	for (you = you->field_var_of; you && you->type->eType != eUnion; you = you->field_var_of)
+		;
+	return you && me && (you == me);
 }
 
 /*
@@ -246,8 +248,8 @@ Variable::get_seq_num(void) const
 bool 
 Variable::is_array_field(void) const 
 { 
-	if (isFieldVarOf_) {
-		return isFieldVarOf_->is_array_field();
+	if (field_var_of) {
+		return field_var_of->is_array_field();
 	}
 	return isArray;
 }
@@ -258,8 +260,8 @@ Variable::is_array_field(void) const
 bool 
 Variable::is_virtual(void) const 
 { 
-	if (isFieldVarOf_) {
-		return isFieldVarOf_->is_virtual();
+	if (field_var_of) {
+		return field_var_of->is_virtual();
 	}
 	if (isArray) {
 		return ((const ArrayVariable*)this)->collective==0;
@@ -278,7 +280,7 @@ bool Variable::has_field_var(const Variable* v) const
 			if (tmp == this) {
 				return true;
 			}
-			tmp = tmp->isFieldVarOf_;
+			tmp = tmp->field_var_of;
 		}
     }
     return false;
@@ -287,9 +289,9 @@ bool Variable::has_field_var(const Variable* v) const
 int  
 Variable::get_field_id(void) const
 { 
-	if (isFieldVarOf_) {
-		for (size_t i=0; i<isFieldVarOf_->field_vars.size(); i++) {
-			if (isFieldVarOf_->field_vars[i] == this) {
+	if (field_var_of) {
+		for (size_t i=0; i<field_var_of->field_vars.size(); i++) {
+			if (field_var_of->field_vars[i] == this) {
 				return i;
 			}
 		}
@@ -389,7 +391,7 @@ Variable::Variable(const std::string &name, const Type *type,
 	: name(name), type(type),
 	  init(0),
 	  isAuto(isAuto), isStatic(isStatic), isRegister(isRegister),
-	  isBitfield_(isBitfield), isFieldVarOf_(isFieldVarOf), isArray(false),
+	  isBitfield_(isBitfield), field_var_of(isFieldVarOf), isArray(false),
 	  qfer(isConsts, isVolatiles)
 {
 	// nothing else to do
@@ -401,7 +403,7 @@ Variable::Variable(const std::string &name, const Type *type,
 Variable::Variable(const std::string &name, const Type *type, const Expression* init, const CVQualifiers* qfer)
 	: name(name), type(type),
 	  init(init),
-	  isAuto(false), isStatic(false), isRegister(false), isBitfield_(false), isFieldVarOf_(0), isArray(false),
+	  isAuto(false), isStatic(false), isRegister(false), isBitfield_(false), field_var_of(0), isArray(false),
 	  qfer(*qfer)
 {
 	// nothing else to do
@@ -411,7 +413,7 @@ Variable::Variable(const std::string &name, const Type *type, const Expression* 
 	: name(name), type(type),
 	  init(init),
 	  isAuto(false), isStatic(false), isRegister(false), isBitfield_(false),
-	  isFieldVarOf_(isFieldVarOf),
+	  field_var_of(isFieldVarOf),
 	  isArray(isArray),
 	  qfer(*qfer)
 {
@@ -439,7 +441,7 @@ bool
 Variable::is_global(void) const
 {
 	if (is_field_var()) {
-		return isFieldVarOf_->is_global();
+		return field_var_of->is_global();
 	}
 	return (name.find("g_") == 0);
 }
@@ -452,7 +454,7 @@ Variable::is_visible_local(const Block* blk) const
 		return is_global();
 	}
 	if (is_field_var()) {
-		return isFieldVarOf_->is_visible_local(blk);
+		return field_var_of->is_visible_local(blk);
 	}
     size_t i;
 	const Function* func = blk->func;
@@ -615,8 +617,8 @@ Variable::deputy_annotation(void) const
 				anno = oss.str();
 			} 
 			//if (pointee->is_array_field()) {
-			//	while (pointee->isFieldVarOf_) {
-			//		pointee = pointee->isFieldVarOf_;
+			//	while (pointee->field_var_of) {
+			//		pointee = pointee->field_var_of;
 			//	}
 			//	assert(pointee->isArray);
 			//}
@@ -658,8 +660,8 @@ Variable::get_collective(void) const
 	// special handling for array fields
 	if (is_array_field()) {
 		// find top-level parent, which should be an array
-		const Variable* parent = isFieldVarOf_;
-		for (; parent && !parent->isArray; parent = parent->isFieldVarOf_) {
+		const Variable* parent = field_var_of;
+		for (; parent && !parent->isArray; parent = parent->field_var_of) {
 			/* Empty. */
 		}
 		assert(parent);
@@ -691,8 +693,8 @@ const Variable*
 Variable::get_named_var(void) const
 {
 	const Variable* v = this;
-	while (v->isFieldVarOf_) {
-		v = v->isFieldVarOf_;
+	while (v->field_var_of) {
+		v = v->field_var_of;
 	}
 	return v->get_collective();
 }
@@ -703,8 +705,8 @@ Variable::get_array(string& field) const
 	// special handling for array fields
 	if (is_array_field()) {
 		// find top-level parent, which should be an array
-		const Variable* parent = isFieldVarOf_;
-		for (; parent && !parent->isArray; parent = parent->isFieldVarOf_) {
+		const Variable* parent = field_var_of;
+		for (; parent && !parent->isArray; parent = parent->field_var_of) {
 			/* Empty. */
 		}
 		assert(parent);
@@ -811,8 +813,8 @@ Variable::output_qualified_type(std::ostream &out) const
 void
 Variable::OutputUpperBound(std::ostream &out) const
 {
-	if (isFieldVarOf_) {
-		isFieldVarOf_->OutputUpperBound(out);
+	if (field_var_of) {
+		field_var_of->OutputUpperBound(out);
 		size_t dot = name.find_last_of(".");
 		assert(dot != string::npos);
 		string postfix = name.substr(dot, string::npos);
@@ -827,8 +829,8 @@ Variable::OutputUpperBound(std::ostream &out) const
 void
 Variable::OutputLowerBound(std::ostream &out) const
 {
-	if (isFieldVarOf_) {
-		isFieldVarOf_->OutputLowerBound(out);
+	if (field_var_of) {
+		field_var_of->OutputLowerBound(out);
 		size_t dot = name.find_last_of(".");
 		assert(dot != string::npos);
 		string postfix = name.substr(dot, string::npos);
@@ -1305,6 +1307,24 @@ Variable::match_var_name(const string& vname) const
 	return NULL;
 }
 
+/* order fields inside a struct/union variable */
+int 
+Variable::compare_field(const Variable* v) const
+{
+	if (is_field_var() && v->is_field_var()) {
+		const Variable* my_base = NULL;
+		const Variable* your_base = NULL;
+		for (my_base = this->field_var_of; my_base->field_var_of; my_base = my_base->field_var_of)
+			;
+		for (your_base = v->field_var_of; your_base->field_var_of; your_base = your_base->field_var_of)
+			;
+		if (my_base == your_base) {
+			return name.compare(v->name);
+		}
+	}
+	return 0;
+}
+	 
 ///////////////////////////////////////////////////////////////////////////////
 
 // Local Variables:

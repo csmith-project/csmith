@@ -376,14 +376,14 @@ CGContext::read_indices(const Variable* v, const vector<const Fact*>& facts)
 				return false;
 			}
 		}
-		if (av->isFieldVarOf_) {
-			return read_indices(av->isFieldVarOf_, facts);
+		if (av->field_var_of) {
+			return read_indices(av->field_var_of, facts);
 		}
 		return true;
 	}
 	else if	(v->is_array_field()) {
 		// find the parent that is an array
-		for (; v && !v->isArray; v = v->isFieldVarOf_) {
+		for (; v && !v->isArray; v = v->field_var_of) {
 			/* Empty. */
 		}
 		assert(v);
