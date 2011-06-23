@@ -2,7 +2,7 @@
 
 use strict;
 
-# flip the flow of control so delta_step calls a test routine
+# avoid extra calls to read_file-- stop modifying $prog!
 
 # when doing search and replace, how to specify a larger matching context
 # for what is actually replaced
@@ -80,60 +80,61 @@ my $spcborder = "(\\s$border)";
 #print "$borderspc\n";
 #print "$spcborder\n";
 
-my %replace_regexes = (
-    "\\:\\s*[0-9]+\\s*;" => ";",
-    "\\;" => "",
-    "\\{\\s*\\}" => ";",
-    "for\\s*\\(.*?\\)" => "",
-    "\\^\\=" => "=",
-    "\\|\\=" => "=",
-    "($barevar)" => "",
-    "\\&\\=" => "=",
-    "\\+\\=" => "=",
-    "\\-\\=" => "=",
-    "\\*\\=" => "=",
-    "\\/\\=" => "=",
-    "\\%\\=" => "=",
-    "\\<\\<\\=" => "=",
-    "\\>\\>\\=" => "=",
-    "lbl_[0-9]+:" => "",
-    "($varnum)" => "",
-    "char" => "int",
-    "char" => "",
-    "short" => "int",
-    "short" => "",
-    "long" => "int",
-    "long" => "",
-    "signed" => "int",
-    "signed" => "",
-    "unsigned" => "int",
-    "unsigned" => "",
-    "else" => "",
-    "volatile" => "",
-    "const" => "",
-    "static" => "",
-    "extern" => "",
-    "\\+" => "",
-    "\\-" => "",
-    "\\!" => "",
-    "\\~" => "",
-    "=\\s*\{\\s*\}" => "",
-    "continue" => "", 
-    "return" => "",
-    "int argc, char \\*argv\\[\\]" => "void",
-    "int.*?;" => "",
-    "for" => "",
-    "if\\s+\\(.*?\\)" => "",
-    "struct.*?;" => "",
-    "if" => "",
-    "break" => "", 
-    "inline" => "", 
-    "printf" => "",
-    "print_hash_value" => "",
-    "transparent_crc" => "",
-    "platform_main_begin" => "",
-    "platform_main_end" => "",
-    "crc32_gentab" => "",
+my @regexes_to_replace = (
+    ["\\:\\s*[0-9]+\\s*;", ";"],
+    ["\\;", ""],
+    ["\\{\\s*\\}", ";"],
+    ["for\\s*\\(.*?\\)", ""],
+    ["\\^\\=", "="],
+    ["\\|\\=", "="],
+    ["($barevar)", ""],
+    ["\\&\\=", "="],
+    ["\\+\\=", "="],
+    ["\\-\\=", "="],
+    ["\\*\\=", "="],
+    ["\\/\\=", "="],
+    ["\\%\\=", "="],
+    ["\\<\\<\\=", "="],
+    ["\\>\\>\\=", "="],
+    ["lbl_[0-9]+:", ""],
+    ["($varnum)", ""],
+    ["($varnum),", ""],
+    ["char", "int"],
+    ["char", ""],
+    ["short", "int"],
+    ["short", ""],
+    ["long", ""],
+    ["long", "int"],
+    ["signed", ""],
+    ["signed", "int"],
+    ["const", ""],
+    ["volatile", ""],
+    ["unsigned", "int"],
+    ["unsigned", ""],
+    ["else", ""],
+    ["static", ""],
+    ["extern", ""],
+    ["\\+", ""],
+    ["\\-", ""],
+    ["\\!", ""],
+    ["\\~", ""],
+    ["=\\s*\{\\s*\}", ""],
+    ["continue", ""], 
+    ["return", ""],
+    ["int argc, char \\*argv\\[\\]", "void"],
+    ["int.*?;", ""],
+    ["for", ""],
+    ["if\\s+\\(.*?\\)", ""],
+    ["struct.*?;", ""],
+    ["if", ""],
+    ["break", ""], 
+    ["inline", ""], 
+    ["printf", ""],
+    ["print_hash_value", ""],
+    ["transparent_crc", ""],
+    ["platform_main_begin", ""],
+    ["platform_main_end", ""],
+    ["crc32_gentab", ""],
     );
 
 my $prog;
@@ -158,8 +159,8 @@ sub find_match ($$$) {
 }
 
 sub del_up_to_matching_parens ($$) {
-    (my $pos, my $pref) = @_;
-    my $p2 = $pos;
+    (my $xpos, my $pref) = @_;
+    my $p2 = $xpos;
     $p2++ while (
 		 substr($prog, $p2, 1) ne "(" &&
 		 $p2 <= (length ($prog)-1)
@@ -167,11 +168,11 @@ sub del_up_to_matching_parens ($$) {
     $p2 = find_match ($p2+1,"(",")");
     return -1 if ($p2 == -1);
     $p2++;
-    my $xx = substr ($prog, $pos, $p2-$pos);
+    my $xx = substr ($prog, $xpos, $p2-$xpos);
     my $yy = $function_prefixes{$pref};
     print "replace '$xx' with '$yy' ";
-    substr ($prog, $pos, $p2-$pos) = $function_prefixes{$pref};
-    return ($p2-$pos);
+    substr ($prog, $xpos, $p2-$xpos) = $function_prefixes{$pref};
+    return ($p2-$xpos);
 }
 
 # these are set at startup time and never change
@@ -188,7 +189,7 @@ sub read_file ()
     close INF;
 }
 
-sub write_file ($)
+sub write_file ()
 {
     open OUTF, ">$cfile" or die;
     print OUTF $prog;
@@ -196,190 +197,56 @@ sub write_file ($)
 }
 
 sub match_subexp ($$) {
-    (my $rest, my $pos) = @_;
+    (my $rest, my $xpos) = @_;
 
     if (
 	$rest =~ /^(?<pref>$borderorspc)(?<var1>$varnum)(?<s1>\s+)(?<op>$binop)(?<s2>\s+)(?<var2>$varnum)$borderorspc/
 	) {
-	print "case 4 ";
 	my $s2 = $+{pref}.$+{var1}.$+{s1}.$+{op}.$+{s2}.$+{var2};
-	return (1, $pos + length ($+{pref}), $pos + length ($s2));
+	return (1, $xpos + length ($+{pref}), $xpos + length ($s2));
     }
 
     if (
 	$rest =~ /^(?<pref>$borderorspc)(?<var>$varnum)(?<spc2>\s*)(?<op>$binop)/
 	) {
-	print "case 1 ";
 	my $s2 = $+{pref}.$+{var}.$+{spc2}.$+{op};
-	return (1, $pos + length($+{pref}), $pos+length ($s2));
+	return (1, $xpos + length($+{pref}), $xpos+length ($s2));
     }
 
     if (
 	$rest =~ /^(?<op>$binop)(?<spc1>\s*)(?<var>$varnum)$borderorspc/ 
 	) {
-	print "case 2 ";
 	my $s2 = $+{op}.$+{spc1}.$+{var};
-	return (1, $pos, $pos+length ($s2));
+	return (1, $xpos, $xpos+length ($s2));
     }
 
     if (
 	$rest =~ /^(?<pref>$borderorspc)(?<var>$varnum)$borderorspc/
 	) {
-	print "case 3 ";
 	my $s = $+{pref};
 	my $v = $+{var};
 	if (($v ne "1") && ($v ne "0")) {
-	    return (1, $pos + length($s), $pos+length ($s.$v));
+	    return (1, $xpos + length($s), $xpos+length ($s.$v));
 	}
     }
 
     if (
 	$rest =~ /^(?<pref>$borderorspc)(?<var1>$varnum)(?<ques>\s*\?\s*)(?<var2>$varnum)(?<colon>\s*\:\s*)(?<var3>$varnum)$borderorspc/
 	) {
-	print "case 5 ";
 	my $prefl = length ($+{pref});
 	my $s2 = $+{var1}.$+{ques}.$+{var2}.$+{colon}.$+{var3};
-	return (1, $pos + $prefl, $pos + $prefl + length ($s2));
+	return (1, $xpos + $prefl, $xpos + $prefl + length ($s2));
     }
 
     if (0) {
 	if ($rest =~ /^($border)/) {
 	    print "case 6 ";
 	    my $s2 = $1;
-	    return (1, $pos, $pos+length ($s2));
+	    return (1, $xpos, $xpos+length ($s2));
 	}
     }
 
     return (0,0,0);
-}
-
-my $good_cnt;
-my $bad_cnt;
-my $pass_num = 0;
-
-sub delta_step ($$) {
-    (my $method, my $start_pos) = @_;
-
-    my $pos = $start_pos;
-
-    while (1) {
-	return 0 if ($pos >= length ($prog));
-
-	my $first = substr($prog, 0, $pos);
-	my $rest = substr($prog, $pos, -1);
-
-	if ($method eq "replace_with_1") {
-	    (my $success, my $start, my $end) = 
-		match_subexp ($rest, $pos);
-	    if ($success) {
-		my $del = substr ($prog, $start, $end-$start);
-		substr ($prog, $start, $end-$start) = "1";
-		($del =~ s/\s/ /g);
-		print "replacing '$del' at $start--$end : ";
-		return (1, $pos);
-	    } 
-	} elsif ($method eq "replace_with_0") {
-	    (my $success, my $start, my $end) = 
-		match_subexp ($rest, $pos);
-	    if ($success) {
-		my $del = substr ($prog, $start, $end-$start);
-		substr ($prog, $start, $end-$start) = "0";
-		($del =~ s/\s/ /g);
-		print "replacing '$del' at $start--$end : ";
-		return (1, $pos);
-	    }
-	} elsif ($method eq "replace_with_nothing") {
-	    (my $success, my $start, my $end) = 
-		match_subexp ($rest, $pos);
-	    if ($success) {
-		my $del = substr ($prog, $start, $end-$start);
-		substr ($prog, $start, $end-$start) = "";
-		($del =~ s/\s/ /g);
-		print "replacing '$del' at $start--$end : ";
-		return (1, $pos);
-	    }
-	} elsif ($method eq "replace_regex") {
-	    foreach my $str (keys %replace_regexes) {
-		my $repl = $replace_regexes{$str};
-		if ($rest =~ s/^$str/$repl/) {
-		    $prog = $first.$rest;
-		    return (1, $pos);
-		}
-	    }
-	} elsif ($method eq "del_blanks_all") {
-	    if ($prog =~ s/\s{2,}/ /g) {
-		return (1, $pos);
-	    } else {
-		return 0;
-	    }
-	} elsif ($method eq "del_blanks") {
-	    if ($rest =~ /^(\s{2,})/) {
-		my $len = length ($1);
-		substr ($prog, $pos, $len) =  " ";
-		return (1, $pos);
-	    }
-	} elsif ($method eq "parens_inclusive") {
-	    if (substr($prog, $pos, 1) eq "(") {
-		my $p2 = find_match ($pos+1,"(",")");
-		if ($p2 != -1) {
-		    die if (substr($prog, $pos, 1) ne "(");
-		    die if (substr($prog, $p2, 1) ne ")");
-		    substr ($prog, $pos, $p2-$pos+1) = "";
-		    print "deleting at $pos--$p2 : ";
-		    return (1, $pos);
-		}
-	    }
-	} elsif ($method eq "parens_exclusive") {
-	    if (substr($prog, $pos, 1) eq "(") {
-		my $p2 = find_match ($pos+1,"(",")");
-		if ($p2 != -1) {
-		    die if (substr($prog, $pos, 1) ne "(");
-		    die if (substr($prog, $p2, 1) ne ")");
-		    substr ($prog, $p2, 1) = "";
-		    substr ($prog, $pos, 1) = "";
-		    print "deleting at $pos--$p2 : ";
-		    return (1, $pos);
-		}
-	    }
-	} elsif ($method eq "brackets_inclusive") {
-	    if (substr($prog, $pos, 1) eq "{") {
-		my $p2 = find_match ($pos+1,"{","}");
-		if ($p2 != -1) {
-		    die if (substr($prog, $pos, 1) ne "{");
-		    die if (substr($prog, $p2, 1) ne "}");
-		    substr ($prog, $pos, $p2-$pos+1) = "";
-		    print "deleting at $pos--$p2 : ";
-		    return (1, $pos);
-		}
-	    }	    
-	} elsif ($method eq "brackets_exclusive") {
-	    if (substr($prog, $pos, 1) eq "{") {
-		my $p2 = find_match ($pos+1,"{","}");
-		if ($p2 != -1) {
-		    die if (substr($prog, $pos, 1) ne "{");
-		    die if (substr($prog, $p2, 1) ne "}");
-		    substr ($prog, $p2, 1) = "";
-		    substr ($prog, $pos, 1) = "";
-		    print "deleting at $pos--$p2 : ";
-		    return (1, $pos);
-		}
-	    }
-	} elsif ($method eq "calls") {
-	    foreach my $pref (keys %function_prefixes) {
-		my $s = substr ($prog, $pos, length ($pref));
-		if ($s eq $pref) {
-		    my $c = del_up_to_matching_parens ($pos, $pref);
-		    if ($c != -1) {
-			print " : ";
-			return (1, $pos);
-		    }
-		}
-	    }
-	} else {
-	    die "unknown reduction method";
-	}
-	$pos++;
-    }
 }
 
 sub runit ($) {
@@ -398,76 +265,198 @@ sub run_test () {
 my %cache = ();
 my $cache_hits = 0;
 
-sub cached_test () {
-    my $result = $cache{$prog};
-    my $hit;
+my $good_cnt = 0;
+my $bad_cnt = 0;
+my $pass_num = 0;
+my $pos;
+my %method_worked = ();
+my %method_failed = ();
+my $old_size = 1000000000;
+    
+sub delta_test ($) {
+    (my $method) = @_;
+    my $len = length ($prog);
+    print "[$pass_num $method ($pos / $len) s:$good_cnt f:$bad_cnt] ";
+
+    # my $result = $cache{$prog};
+    my $result;
+
+    my $hit = 0;
+
     if (defined($result)) {
 	$cache_hits++;
 	print "(hit) ";
 	$hit = 1;
     } else {
-	write_file ($cfile);
+	write_file ();
 	$result = run_test ();
 	$cache{$prog} = $result;
 	$hit = 0;
     }
-    return ($result, $hit);
+    
+    if ($result) {
+	print "success\n";
+	die if ($hit);
+	system "cp $cfile $cfile.bak";
+	$good_cnt++;
+	$method_worked{$method}++;
+	my $size = length ($prog);
+	die if ($size > $old_size);
+	if ($size < $old_size) {
+	    %cache = ();
+	}
+	$old_size = $size;
+	return 1;
+    } else {
+	print "failure\n";
+	if (!$hit) {
+	    system "cp $cfile.bak $cfile";
+	}
+	read_file ();    
+	$bad_cnt++;
+	$method_failed{$method}++;
+	return 0;
+    }
 }
-
-# invariant: test always succeeds for $cfile.bak
-
-my %method_worked = ();
-my %method_failed = ();
-my $old_size = 1000000000;
 
 sub delta_pass ($) {
     (my $method) = @_;
     
-    my $worked = 0;
-    my $filepos=0;
+    $pos = 0;
+    my $any_worked = 0;
 
-    $good_cnt = 0;
-    $bad_cnt = 0;
-    
     while (1) {
-	read_file ();    
-	my $len = length ($prog);
-	print "[$pass_num $method ($filepos / $len) s:$good_cnt f:$bad_cnt] ";
-	(my $delete_res, my $newpos) = delta_step ($method, $filepos);
-	if (!$delete_res) {
-	    print "no more to delete.\n";
-	    return $worked;
-	}
-	(my $result, my $hit) = cached_test();
-	    
-	if ($result) {
-	    print "success\n";
-	    die if ($hit);
-	    system "cp $cfile $cfile.bak";
-	    $good_cnt++;
-	    $worked = 1;
-	    $method_worked{$method}++;
-	    my $size = length ($prog);
-	    die if ($size > $old_size);
-	    if ($size < $old_size) {
-		%cache = ();
+	return $any_worked if ($pos >= length ($prog));
+	my $worked = 0;
+
+	if ($method eq "replace_with_1") {
+	    my $rest = substr($prog, $pos);
+	    (my $success, my $start, my $end) = 
+		match_subexp ($rest, $pos);
+	    if ($success) {
+		my $del = substr ($prog, $start, $end-$start);
+		substr ($prog, $start, $end-$start) = "1";
+		($del =~ s/\s/ /g);
+		print "replacing '$del' at $start--$end : ";
+		$worked |= delta_test ($method);
+	    } 
+	} elsif ($method eq "replace_with_0") {
+	    my $rest = substr($prog, $pos);
+	    (my $success, my $start, my $end) = 
+		match_subexp ($rest, $pos);
+	    if ($success) {
+		my $del = substr ($prog, $start, $end-$start);
+		substr ($prog, $start, $end-$start) = "0";
+		($del =~ s/\s/ /g);
+		print "replacing '$del' at $start--$end : ";
+		$worked |= delta_test ($method);
 	    }
-	    $old_size = $size;
-	} else {
-	    print "failure\n";
-	    if (!$hit) {
-		system "cp $cfile.bak $cfile";
+	} elsif ($method eq "replace_with_nothing") {
+	    my $rest = substr($prog, $pos);
+	    (my $success, my $start, my $end) = 
+		match_subexp ($rest, $pos);
+	    if ($success) {
+		my $del = substr ($prog, $start, $end-$start);
+		substr ($prog, $start, $end-$start) = "";
+		($del =~ s/\s/ /g);
+		print "replacing '$del' at $start--$end : ";
+		$worked |= delta_test ($method);
 	    }
-	    if ($newpos <= $filepos) {
-		$filepos++;
+	} elsif ($method eq "replace_regex") {
+	    foreach my $l (@regexes_to_replace) {
+		my $str = @{$l}[0];
+		my $repl = @{$l}[1];
+		my $first = substr($prog, 0, $pos);
+		my $rest = substr($prog, $pos);
+		if ($rest =~ s/(^$str)/$repl/) {
+		    print "replacing '$1' with '$repl' at $pos : ";
+		    $prog = $first.$rest;
+		    $worked |= delta_test ($method);
+		}
+	    }
+	} elsif ($method eq "del_blanks_all") {
+	    if ($prog =~ s/\s{2,}/ /g) {
+		$worked |= delta_test ($method);
 	    } else {
-		$filepos = $newpos;
+		return 0;
 	    }
-	    $bad_cnt++;
-	    $method_failed{$method}++;
+	} elsif ($method eq "del_blanks") {
+	    my $rest = substr($prog, $pos);
+	    if ($rest =~ /^(\s{2,})/) {
+		my $len = length ($1);
+		substr ($prog, $pos, $len) =  " ";
+		$worked |= delta_test ($method);
+	    }
+	} elsif ($method eq "parens_inclusive") {
+	    if (substr($prog, $pos, 1) eq "(") {
+		my $p2 = find_match ($pos+1,"(",")");
+		if ($p2 != -1) {
+		    die if (substr($prog, $pos, 1) ne "(");
+		    die if (substr($prog, $p2, 1) ne ")");
+		    substr ($prog, $pos, $p2-$pos+1) = "";
+		    print "deleting at $pos--$p2 : ";
+		    $worked |= delta_test ($method);
+		}
+	    }
+	} elsif ($method eq "parens_exclusive") {
+	    if (substr($prog, $pos, 1) eq "(") {
+		my $p2 = find_match ($pos+1,"(",")");
+		if ($p2 != -1) {
+		    die if (substr($prog, $pos, 1) ne "(");
+		    die if (substr($prog, $p2, 1) ne ")");
+		    substr ($prog, $p2, 1) = "";
+		    substr ($prog, $pos, 1) = "";
+		    print "deleting at $pos--$p2 : ";
+		    $worked |= delta_test ($method);
+		}
+	    }
+	} elsif ($method eq "brackets_inclusive") {
+	    if (substr($prog, $pos, 1) eq "{") {
+		my $p2 = find_match ($pos+1,"{","}");
+		if ($p2 != -1) {
+		    die if (substr($prog, $pos, 1) ne "{");
+		    die if (substr($prog, $p2, 1) ne "}");
+		    substr ($prog, $pos, $p2-$pos+1) = "";
+		    print "deleting at $pos--$p2 : ";
+		    $worked |= delta_test ($method);
+		}
+	    }	    
+	} elsif ($method eq "brackets_exclusive") {
+	    if (substr($prog, $pos, 1) eq "{") {
+		my $p2 = find_match ($pos+1,"{","}");
+		if ($p2 != -1) {
+		    die if (substr($prog, $pos, 1) ne "{");
+		    die if (substr($prog, $p2, 1) ne "}");
+		    substr ($prog, $p2, 1) = "";
+		    substr ($prog, $pos, 1) = "";
+		    print "deleting at $pos--$p2 : ";
+		    $worked |= delta_test ($method);
+		}
+	    }
+	} elsif ($method eq "calls") {
+	    foreach my $pref (keys %function_prefixes) {
+		my $s = substr ($prog, $pos, length ($pref));
+		if ($s eq $pref) {
+		    my $c = del_up_to_matching_parens ($pos, $pref);
+		    if ($c != -1) {
+			print " : ";
+			$worked |= delta_test ($method);
+		    }
+		}
+	    }
+	} else {
+	    die "unknown reduction method";
 	}
-    } 
+
+	if ($worked) {
+	    $any_worked = 1;
+	} else {
+	    $pos++;
+	}
+    }
 }
+
+# invariant: test always succeeds for $cfile.bak
 
 my %all_methods = (
 
@@ -552,6 +541,8 @@ sub bymethod {
 }
 
 # iterate to global fixpoint
+
+read_file ();    
 
 while (1) {
     my $success = 0;
