@@ -289,6 +289,9 @@ static void print_advanced_help()
 	cout << "  --null-ptr-deref-prob <N>: allow null pointers to be dereferenced with probability N% (0 by default)." << endl << endl;
 
 	cout << "  --dangling-ptr-deref-prob <N>: allow dangling pointers to be dereferenced with probability N% (0 by default)." << endl << endl; 
+
+	cout << "  --union-read-type-sensitive | --no-union-read-type-sensitive: allow | disallow reading an union field when there is no risk of "
+		 << "reading padding bits (enabled by default)." << endl << endl; 
 }
 
 void arg_check(int argc, int i)
@@ -1065,6 +1068,16 @@ main(int argc, char **argv)
 			if (!parse_int_arg(argv[i], &prob))
 				exit(-1);
 			CGOptions::dead_pointer_dereference_prob(prob);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--union-read-type-sensitive") == 0) {
+			CGOptions::union_read_type_sensitive(true);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--no-union-read-type-sensitive") == 0) {
+			CGOptions::union_read_type_sensitive(false);
 			continue;
 		}
 

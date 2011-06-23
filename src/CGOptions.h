@@ -378,6 +378,9 @@ public:
 	static int dead_pointer_dereference_prob(void);
 	static int dead_pointer_dereference_prob(int p);
 
+	static bool union_read_type_sensitive(void);
+	static bool union_read_type_sensitive(bool p);
+
 private:
 	static bool resolve_exhaustive_options();
 
@@ -487,6 +490,8 @@ private:
 	static bool force_non_uniform_array_init_;
 	static int null_pointer_dereference_prob_;
 	static int dead_pointer_dereference_prob_;
+	// flag that indicate the comformance level to C99. true means relaxed
+	static bool union_read_type_sensitive_;
 	static Reducer* reducer_; 
 
 private:

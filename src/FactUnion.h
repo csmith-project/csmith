@@ -81,8 +81,6 @@ public:
 	virtual void Output(std::ostream &out) const;
 	virtual void OutputAssertion(std::ostream &/*out*/, const Statement* /*s*/) const {};
    	
-	// flag that indicate the comformance level to C99. 1 means relaxted, 0 means strict
-	static bool type_sensitive;	
 	// constants to indicate lattice top/bottom
 	static const int TOP;
 	static const int BOTTOM;

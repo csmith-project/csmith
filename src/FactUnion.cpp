@@ -29,6 +29,7 @@
  
 #include "FactUnion.h"
 #include <iostream>
+#include "CGOptions.h"
 #include "Fact.h"
 #include "Type.h"
 #include "Common.h"
@@ -40,7 +41,6 @@
 #include "FunctionInvocationUser.h"
 #include <assert.h> 
 
-bool FactUnion::type_sensitive = true;
 const int  FactUnion::TOP = -2;
 const int  FactUnion::BOTTOM = -1;
 
@@ -252,7 +252,7 @@ FactUnion::imply(const Fact& f) const
 
 		// type sensitive lattice: bottom -> size-determined types -> wider size determined types 
 		//								  \-> char* -> other pointer types
-		if (type_sensitive) {
+		if (CGOptions::union_read_type_sensitive()) {
 			const Type* t = get_last_written_type();
 			const Type* other_t = fu.get_last_written_type();
 			if (t->eType == ePointer && other_t->eType == ePointer) {
