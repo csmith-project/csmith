@@ -2,10 +2,20 @@
 
 use strict;
 
+# turn caching back on, make sure it works
+
+# maybe structure regexes as
+#   starting context
+#   stuff to replace
+#   ending context
+#   stuff to replace with
+
 # avoid extra calls to read_file-- stop modifying $prog!
 
 # when doing search and replace, how to specify a larger matching context
-# for what is actually replaced
+# for what is actually replaced?
+
+# figure out how to named backreferences in regexp replacement
 
 # if there's a way to match starting at a specified position, use it
 
@@ -15,22 +25,20 @@ use strict;
 
 # build up the regexes programmatically to support multiple replacement options
 
-# enumerate regrexes so that they're all tried for each position, even
-# when an earlier one matches and then fails
+# make sure file starts and ends with a blank 
 
-# make sure file starts with a blank 
+# print stats for individual regexes
 
 # add passes to 
 #   remove digits from numbers to make them smaller
 #   run indent speculatively
 #   turn checksum calls into regular printfs
 #   delete a complete function
+#   delete an entire initializer
 
 # to regexes, add a way to specify border characters that won't be removed
 
-# avoid testing the same thing twice
-
-# avoid mangling strings
+# avoid mangling identifiers
 
 # harder
 #   transform a function to return void
@@ -42,7 +50,7 @@ use strict;
 #   remove array dimension
 #   remove argument from function, including all calls
 
-# long term todo: rewrite this tool at the AST level
+# long term todo: rewrite this tool to operate on ASTs
 
 my $INIT = "1";
 
@@ -179,8 +187,7 @@ sub del_up_to_matching_parens ($$) {
 my $cfile;
 my $test;
 
-sub read_file ()
-{
+sub read_file () {
     open INF, "<$cfile" or die;
     $prog = "";
     while (my $line = <INF>) {
@@ -189,8 +196,7 @@ sub read_file ()
     close INF;
 }
 
-sub write_file ()
-{
+sub write_file () {
     open OUTF, ">$cfile" or die;
     print OUTF $prog;
     close OUTF;
@@ -265,8 +271,8 @@ sub run_test () {
 my %cache = ();
 my $cache_hits = 0;
 
-my $good_cnt = 0;
-my $bad_cnt = 0;
+my $good_cnt;
+my $bad_cnt;
 my $pass_num = 0;
 my $pos;
 my %method_worked = ();
@@ -323,10 +329,11 @@ sub delta_pass ($) {
     (my $method) = @_;
     
     $pos = 0;
-    my $any_worked = 0;
+    $good_cnt = 0;
+    $bad_cnt = 0;
 
     while (1) {
-	return $any_worked if ($pos >= length ($prog));
+	return ($good_cnt > 0) if ($pos >= length ($prog));
 	my $worked = 0;
 
 	if ($method eq "replace_with_1") {
@@ -448,9 +455,7 @@ sub delta_pass ($) {
 	    die "unknown reduction method";
 	}
 
-	if ($worked) {
-	    $any_worked = 1;
-	} else {
+	if (!$worked) {
 	    $pos++;
 	}
     }
