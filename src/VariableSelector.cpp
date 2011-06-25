@@ -1354,7 +1354,7 @@ VariableSelector::itemize_array(CGContext& cg_context, const ArrayVariable* av)
 				// have to sort them to generate consistant outputs across diff. platforms
 				bool insert_middle = false;
 				for (size_t j=0; j<ok_ivs.size(); j++) {
-					if (ok_ivs[j]->compare_field(iv) > 0) {
+					if (ok_ivs[j]->name.compare(iv->name) > 0) {
 						ok_ivs.insert(ok_ivs.begin() + j, iv);
 						insert_middle = true;
 						break;
