@@ -76,6 +76,7 @@ DeltaMonitor::GetSequence()
 		break;
 	default:
 		assert("DeltaMonitor GetSequence error" && 0);
+		break;
 	}
 	assert(DeltaMonitor::seq_);
 	return DeltaMonitor::seq_;
@@ -97,6 +98,7 @@ DeltaMonitor::CreateRndNumInstance(const unsigned long seed)
 		break;
 	default:
 		assert("DeltaMonitor CreateRndNumInstance error" && 0);
+		break;
 	}
 }
 
@@ -168,6 +170,7 @@ DeltaMonitor::OutputStatistics(ostream &out)
 		break;
 	default:
 		assert(0);
+		break;
 	}
 }
 

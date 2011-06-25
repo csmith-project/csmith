@@ -545,7 +545,8 @@ StatementAssign::OutputAsExpr(std::ostream &out) const
 			break;
 
 		default:
-			assert (false);
+			assert(false);
+			break;
 		}
 	} else {
 		OutputSimple(out);

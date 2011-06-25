@@ -81,6 +81,7 @@ AbsRndNumGenerator::make_rndnum_generator(RNDNUM_GENERATOR impl, const unsigned 
 			break;
 		default:
 			assert(!"unknown random generator");
+			break;
 	}
 
 	return rImpl;

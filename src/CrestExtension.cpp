@@ -65,7 +65,7 @@ CrestExtension::type_to_string(const Type *t)
 	case eUInt: return "unsigned_int";
 	case eLong: return "int";
 	case eULong: return "unsigned_int";
-	default: assert(0);
+	default: assert(0); break;
 	}
 	assert(0);
 	return "";

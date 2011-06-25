@@ -424,6 +424,7 @@ int DepthSpec::depth_guard_by_type(enum dType ty, int extra_flag)
 		DEPTH_GUARD_CASE(dtSafeOpFlags, extra_flag)
 		default:
 			assert(0);
+			break;
 	}
 
 	return GOOD_DEPTH;
