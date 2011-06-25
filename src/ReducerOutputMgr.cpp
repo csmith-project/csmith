@@ -605,7 +605,7 @@ ReducerOutputMgr::output_reduced_stm(const Statement* stm, std::ostream &out, in
 		// insert printing value for focus variable
 		if (stm->eType == eReturn) {
 			// output value(s) of monitor variable(s) before return 
-			if (reducer->dump_monitored_var && stm->func->feffect.is_written(reducer->monitored_var)) { 
+			if (reducer->dump_monitored_var && stm->func->feffect.is_written_partially(reducer->monitored_var)) { 
 				output_tab(out, indent);
 				string vname = reducer->monitored_var->name;
 				out <<"printf(\"   " << vname << " = %d\", " << vname <<");";

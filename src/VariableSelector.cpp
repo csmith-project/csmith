@@ -1315,7 +1315,7 @@ VariableSelector::select_array(const CGContext &cg_context)
 			assert(av);
 			if (av->collective == 0) {
 				if (!cg_context.get_effect_context().is_read_partially(av) && 
-					!cg_context.get_effect_context().is_written(av) &&
+					!cg_context.get_effect_context().is_written_partially(av) &&
 					(cg_context.get_effect_context().is_side_effect_free() || !av->is_volatile()) &&
 					!av->is_const() &&
 					!cg_context.is_nonwritable(av) &&
