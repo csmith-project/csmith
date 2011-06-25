@@ -1394,7 +1394,7 @@ Type::SizeInBytes(void) const
         for (i=0; i<fields.size(); i++) {
 			unsigned int sz = 0;
 			if (is_bitfield(i)) {
-				assert(i >= 0 && i < bitfields_length_.size());
+				assert(i < bitfields_length_.size());
 				sz = ceil(bitfields_length_[i] / 8.0) * 8;
 			} else {
 				sz = fields[i]->SizeInBytes();
