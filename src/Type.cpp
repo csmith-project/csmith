@@ -765,6 +765,7 @@ Type::get_bitfield_length(int length_flag)
 		break;
 	default:
 		assert(0);
+		break;
 	}
 	return length;
 }

@@ -124,6 +124,7 @@ FunctionInvocationUnary::get_type(void) const
 	switch (eFunc) {
 	default:
 		assert(!"invalid operator in FunctionInvocationUnary::get_type()");
+		break;
 
 	case ePlus:
 	case eMinus:

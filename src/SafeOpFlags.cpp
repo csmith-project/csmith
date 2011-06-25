@@ -81,7 +81,7 @@ SafeOpFlags::flags_to_type(bool sign, enum SafeOpSize size)
 		case sInt16: return eShort;
 		case sInt32: return eInt;
 		case sInt64: return eLongLong;
-		default: assert(0);
+		default: assert(0); break;
 		}
 	}
 	else {
@@ -90,7 +90,7 @@ SafeOpFlags::flags_to_type(bool sign, enum SafeOpSize size)
 		case sInt16: return eUShort;
 		case sInt32: return eUInt;
 		case sInt64: return eULongLong;
-		default: assert(0);
+		default: assert(0); break;
 		}
 	}
 	assert(0);
@@ -174,6 +174,7 @@ SafeOpFlags::OutputSize(std::ostream &out) const
 		break;
 	default:
 		assert(!"invalid size!");
+		break;
 	}
 }
 
@@ -221,7 +222,7 @@ SafeOpFlags::to_string(enum eBinaryOps op) const
 		case eDiv: s = "safe_div_"; break;
 		case eLShift: s = "safe_lshift_"; break;
 		case eRShift: s = "safe_rshift_"; break;
-		default: ;
+		default: break;
 	} 
 	ostringstream oss;
 	OutputFuncOrMacro(oss);
@@ -239,7 +240,7 @@ SafeOpFlags::to_string(enum eUnaryOps op) const
 	string s;
 	switch (op) {
 		case eMinus: s = "safe_unary_minus_"; break; 
-		default: ;
+		default: break;
 	} 
 	ostringstream oss;
 	OutputFuncOrMacro(oss);

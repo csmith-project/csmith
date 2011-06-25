@@ -197,6 +197,7 @@ FunctionInvocationBinary::get_type(void) const
 	switch (eFunc) {
 	default:
 		assert(!"invalid operator in FunctionInvocationBinary::get_type()");
+		break;
 
 	case eAdd:
 	case eSub:
