@@ -113,6 +113,8 @@ StatementArrayOp::make_random_array_init(CGContext &cg_context)
 		cvs.push_back(cv);
 		assert(cg_context.read_indices(cv, fm->global_facts));
 		cg_context.write_var(cv);
+		// put in induction variable list so that later indices have no write-write conflict
+		cg_context.iv_bounds[cv] = av->get_sizes()[i];
 	}
 	cg_context.write_var(av);
 	
@@ -126,6 +128,11 @@ StatementArrayOp::make_random_array_init(CGContext &cg_context)
 		cg_context.get_current_func()->fact_changed = true;
 	}
 	fm->map_stm_effect[sa] = cg_context.get_effect_stm();
+	
+	// clear IV list from cg_context
+	for (i=0; i<cvs.size(); i++) {
+		cg_context.iv_bounds.erase(cvs[i]);
+	}
 	return sa;
 }
 
