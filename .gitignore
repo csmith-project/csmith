@@ -1,4 +1,4 @@
-# File made by `configure' and friends.
+# Files made by `configure' and friends.
 Makefile
 autom4te.cache
 config.log
@@ -12,5 +12,6 @@ stamp-h.in
 *.obj
 
 # Files made by Eclipse CDT.
+.autotools
 .cproject
 .project
