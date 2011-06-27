@@ -4,27 +4,6 @@ use strict;
 use Regexp::Common;
 use re 'eval';
 
-# delete strings
-
-# maybe structure regexes as
-#   starting context
-#   stuff to replace
-#   ending context
-#   stuff to replace with
-
-# avoid extra calls to read_file-- stop modifying $prog!
-
-# when doing search and replace, how to specify a larger matching context
-# for what is actually replaced?
-
-# figure out how to named backreferences in regexp replacement
-
-# if there's a way to match starting at a specified position, use it
-
-# do everything with search and replace instead of substr
-
-# do everything with regexes-- need to specify matching parens, brackets, etc.
-
 # build up the regexes programmatically to support multiple replacement options
 
 # make sure file starts and ends with a blank 
@@ -106,12 +85,8 @@ my @regexes_to_replace = (
     ['"(.*?)",', ""],
     );
 
-# these match when preceded by $borderorspc
+# these match when preceded and followed by $borderorspc
 my @delimited_regexes_to_replace = (
-    ["($barevar)", ""],
-    ["($barevar),", ""],
-    ["($varnum)", ""],
-    ["($varnum),", ""],
     ["($type)\\s+($var),", ""],
     ["($lbl)\\s*:", ""],
     ["goto\\s+($lbl);", ""],
@@ -168,12 +143,28 @@ foreach my $f (@function_prefixes) {
     push @delimited_regexes_to_replace, ["$f(.*?)$RE{balanced}{-parens=>'()'}", ""];
 }
 
+my @subexprs = (
+    "($varnum)(\\s*)($binop)(\\s*)($varnum)",
+    "($varnum)(\\s*)($binop)",
+    "($binop)(\\s*)($varnum)",
+    "($barevar)",
+    "($varnum)",
+    "($varnum)(\\s*\\?\\s*)($varnum)(\\s*\\:\\s*)($varnum)",
+    );
+
+foreach my $x (@subexprs) {
+    push @delimited_regexes_to_replace, ["$x", "0"];
+    push @delimited_regexes_to_replace, ["$x", "1"];
+    push @delimited_regexes_to_replace, ["$x", ""];
+    push @delimited_regexes_to_replace, ["$x,", ""];
+}
+
 my $prog;
 
 sub find_match ($$$) {
     (my $p2, my $s1, my $s2) = @_;
     my $count = 1;
-    die if (!(defined($p2)&&defined($s1)&&defined($s2)));
+    die if (!(defined($p2) && defined($s1) && defined($s2)));
     while ($count > 0) {
 	return -1 if ($p2 >= (length ($prog)-1));
 	my $s = substr($prog, $p2, 1);
@@ -208,59 +199,6 @@ sub write_file () {
     close OUTF;
 }
 
-sub match_subexp ($$) {
-    (my $rest, my $xpos) = @_;
-
-    if (
-	$rest =~ /^(?<pref>$borderorspc)(?<var1>$varnum)(?<s1>\s+)(?<op>$binop)(?<s2>\s+)(?<var2>$varnum)$borderorspc/
-	) {
-	my $s2 = $+{pref}.$+{var1}.$+{s1}.$+{op}.$+{s2}.$+{var2};
-	return (1, $xpos + length ($+{pref}), $xpos + length ($s2));
-    }
-
-    if (
-	$rest =~ /^(?<pref>$borderorspc)(?<var>$varnum)(?<spc2>\s*)(?<op>$binop)/
-	) {
-	my $s2 = $+{pref}.$+{var}.$+{spc2}.$+{op};
-	return (1, $xpos + length($+{pref}), $xpos+length ($s2));
-    }
-
-    if (
-	$rest =~ /^(?<op>$binop)(?<spc1>\s*)(?<var>$varnum)$borderorspc/ 
-	) {
-	my $s2 = $+{op}.$+{spc1}.$+{var};
-	return (1, $xpos, $xpos+length ($s2));
-    }
-
-    if (
-	$rest =~ /^(?<pref>$borderorspc)(?<var>$varnum)$borderorspc/
-	) {
-	my $s = $+{pref};
-	my $v = $+{var};
-	if (($v ne "1") && ($v ne "0")) {
-	    return (1, $xpos + length($s), $xpos+length ($s.$v));
-	}
-    }
-
-    if (
-	$rest =~ /^(?<pref>$borderorspc)(?<var1>$varnum)(?<ques>\s*\?\s*)(?<var2>$varnum)(?<colon>\s*\:\s*)(?<var3>$varnum)$borderorspc/
-	) {
-	my $prefl = length ($+{pref});
-	my $s2 = $+{var1}.$+{ques}.$+{var2}.$+{colon}.$+{var3};
-	return (1, $xpos + $prefl, $xpos + $prefl + length ($s2));
-    }
-
-    if (0) {
-	if ($rest =~ /^($border)/) {
-	    print "case 6 ";
-	    my $s2 = $1;
-	    return (1, $xpos, $xpos+length ($s2));
-	}
-    }
-
-    return (0,0,0);
-}
-
 sub runit ($) {
     (my $cmd) = @_;
     if ((system "$cmd") != 0) {
@@ -276,7 +214,6 @@ sub run_test () {
 
 my %cache = ();
 my $cache_hits = 0;
-
 my $good_cnt;
 my $bad_cnt;
 my $pass_num = 0;
@@ -342,40 +279,7 @@ sub delta_pass ($) {
 	return ($good_cnt > 0) if ($pos >= length ($prog));
 	my $worked = 0;
 
-	if ($method eq "replace_with_1") {
-	    my $rest = substr($prog, $pos);
-	    (my $success, my $start, my $end) = 
-		match_subexp ($rest, $pos);
-	    if ($success) {
-		my $del = substr ($prog, $start, $end-$start);
-		substr ($prog, $start, $end-$start) = "1";
-		($del =~ s/\s/ /g);
-		print "replacing '$del' at $start--$end : ";
-		$worked |= delta_test ($method);
-	    } 
-	} elsif ($method eq "replace_with_0") {
-	    my $rest = substr($prog, $pos);
-	    (my $success, my $start, my $end) = 
-		match_subexp ($rest, $pos);
-	    if ($success) {
-		my $del = substr ($prog, $start, $end-$start);
-		substr ($prog, $start, $end-$start) = "0";
-		($del =~ s/\s/ /g);
-		print "replacing '$del' at $start--$end : ";
-		$worked |= delta_test ($method);
-	    }
-	} elsif ($method eq "replace_with_nothing") {
-	    my $rest = substr($prog, $pos);
-	    (my $success, my $start, my $end) = 
-		match_subexp ($rest, $pos);
-	    if ($success) {
-		my $del = substr ($prog, $start, $end-$start);
-		substr ($prog, $start, $end-$start) = "";
-		($del =~ s/\s/ /g);
-		print "replacing '$del' at $start--$end : ";
-		$worked |= delta_test ($method);
-	    }
-	} elsif ($method eq "replace_regex") {
+	if ($method eq "replace_regex") {
 	    foreach my $l (@regexes_to_replace) {
 		my $str = @{$l}[0];
 		my $repl = @{$l}[1];
@@ -392,7 +296,12 @@ sub delta_pass ($) {
 		my $repl = @{$l}[1];
 		my $first = substr($prog, 0, $pos);
 		my $rest = substr($prog, $pos);
-		if ($rest =~ s/^(?<delim>$borderorspc)(?<str>$str)/$+{delim}$repl/) {
+		
+		# avoid infinite loops!
+		next if ($repl eq "0" && $rest =~ /($borderorspc)0$borderorspc/);
+		next if ($repl eq "1" && $rest =~ /($borderorspc)0$borderorspc/);
+
+		if ($rest =~ s/^(?<delim1>$borderorspc)(?<str>$str)(?<delim2>$borderorspc)/$+{delim1}$repl$+{delim2}/) {
 		    print "delimited replacing '$+{str}' with '$repl' at $pos : ";
 		    $prog = $first.$rest;
 		    $worked |= delta_test ($method);
@@ -401,9 +310,14 @@ sub delta_pass ($) {
 	} elsif ($method eq "del_blanks_all") {
 	    if ($prog =~ s/\s{2,}/ /g) {
 		$worked |= delta_test ($method);
-	    } else {
-		return 0;
 	    }
+	    return 0;
+	} elsif ($method eq "indent") {
+	    write_file();
+	    system "indent $cfile";
+	    read_file();
+	    $worked |= delta_test ($method);
+	    return 0;
 	} elsif ($method eq "del_blanks") {
 	    my $rest = substr($prog, $pos);
 	    if ($rest =~ /^(\s{2,})/) {
@@ -449,18 +363,12 @@ sub delta_pass ($) {
 
 my %all_methods = (
 
-    "del_blanks_all" => -1,
-    "del_blanks" => 0,
-
-    "brackets_exclusive" => 4,
-
-    "parens_exclusive" => 5,
-
-    "replace_with_0" => 6,
-    "replace_with_1" => 6,
-    "replace_with_nothing" => 6,
-
-    "replace_regex" => 7,
+    "del_blanks_all" => 0,
+    "del_blanks" => 1,
+    "brackets_exclusive" => 2,
+    "parens_exclusive" => 3,
+    "replace_regex" => 4,
+    "indent" => 5,
 
     );
  
