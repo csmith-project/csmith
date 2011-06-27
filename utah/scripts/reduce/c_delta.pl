@@ -1,8 +1,10 @@
 #!/usr/bin/perl -w
 
 use strict;
+use Regexp::Common;
+use re 'eval';
 
-# turn caching back on, make sure it works
+# delete strings
 
 # maybe structure regexes as
 #   starting context
@@ -41,9 +43,9 @@ use strict;
 # avoid mangling identifiers
 
 # harder
+#   move a function to top, eliminate prototype
 #   transform a function to return void
 #   inline a function call
-#   sort functions in order to eliminate prototypes
 #   un-nest nested calls in expressions
 #   move arguments and locals to global scope
 #   remove level of pointer indirection
@@ -54,20 +56,12 @@ use strict;
 
 my $INIT = "1";
 
-my %function_prefixes = (
-    "safe_" => $INIT,
-    "func_" => $INIT,
-    "sizeof" => $INIT,
-    "if" => "",
-    "for" => "",
-    );
-
 my $num = "\\-?[xX0-9a-fA-F]+[UL]*";
 my $field = "\\.f[0-9]+";
 my $index = "\\\[(($num)|i|j|k|l)\\\]";
-my $barevar = "[lgpt]_[0-9]+";
+my $barevar = "val|vname|flag|[lgpt]_[0-9]+";
 my $var1 = "([\\&\\*]*)($barevar)(($field)|($index))*";
-my $var2 = "i|j|k|si|ui|si1|si2|ui1|ui2|left|right|val|crc32_context|func_([0-9]+)|safe_([0-9]+)";
+my $var2 = "x|i|j|k|si|ui|si1|si2|ui1|ui2|vname|left|right|val|crc32_context|func_([0-9]+)|safe_([0-9]+)";
 my $var = "($var1)|($var2)";
 my $arith = "\\+|\\-|\\%|\\/|\\*";
 my $comp = "\\<\\=|\\>\\=|\\<|\\>|\\=\\=|\\!\\=|\\=";
@@ -77,25 +71,25 @@ my $binop = "($arith)|($comp)|($logic)|($bit)";
 my $varnum = "($var)|($num)";
 my $border = "[\\*\\{\\(\\[\\:\\,\\}\\)\\]\\;\\,]";
 my $borderorspc = "(($border)|(\\s))";
-my $borderspc = "($border\\s)";
-my $spcborder = "(\\s$border)";
+my $type = "int|void";
+my $lbl = "lbl_[0-9]+:";
 
 #print "$field\n";
 #print "$index\n";
 #print "$border\n";
 #print "$var1\n";
 #print "$var2\n";
-#print "$borderspc\n";
-#print "$spcborder\n";
 
+# these match without additional qualification
 my @regexes_to_replace = (
+    ["$RE{balanced}{-parens=>'()'}", ""],
+    ["$RE{balanced}{-parens=>'{}'}", ""],
+    ["=\\s*$RE{balanced}{-parens=>'{}'}", ""],
+    ["($type)\\s+($varnum)\\s+$RE{balanced}{-parens=>'()'}\\s+$RE{balanced}{-parens=>'{}'}", ""],
     ["\\:\\s*[0-9]+\\s*;", ";"],
     ["\\;", ""],
-    ["\\{\\s*\\}", ";"],
-    ["for\\s*\\(.*?\\)", ""],
     ["\\^\\=", "="],
     ["\\|\\=", "="],
-    ["($barevar)", ""],
     ["\\&\\=", "="],
     ["\\+\\=", "="],
     ["\\-\\=", "="],
@@ -104,29 +98,38 @@ my @regexes_to_replace = (
     ["\\%\\=", "="],
     ["\\<\\<\\=", "="],
     ["\\>\\>\\=", "="],
-    ["lbl_[0-9]+:", ""],
-    ["($varnum)", ""],
-    ["($varnum),", ""],
-    ["char", "int"],
-    ["char", ""],
-    ["short", "int"],
-    ["short", ""],
-    ["long", ""],
-    ["long", "int"],
-    ["signed", ""],
-    ["signed", "int"],
-    ["const", ""],
-    ["volatile", ""],
-    ["unsigned", "int"],
-    ["unsigned", ""],
-    ["else", ""],
-    ["static", ""],
-    ["extern", ""],
     ["\\+", ""],
     ["\\-", ""],
     ["\\!", ""],
     ["\\~", ""],
-    ["=\\s*\{\\s*\}", ""],
+    ['"(.*?)"', ""],
+    ['"(.*?)",', ""],
+    );
+
+# these match when preceded by $borderorspc
+my @delimited_regexes_to_replace = (
+    ["($barevar)", ""],
+    ["($barevar),", ""],
+    ["($varnum)", ""],
+    ["($varnum),", ""],
+    ["($type)\\s+($var),", ""],
+    ["($lbl)\\s*:", ""],
+    ["goto\\s+($lbl);", ""],
+    ["const", ""],
+    ["volatile", ""],
+    ["char", ""],
+    ["char", "int"],
+    ["short", ""],
+    ["short", "int"],
+    ["long", ""],
+    ["long", "int"],
+    ["signed", ""],
+    ["signed", "int"],
+    ["unsigned", ""],
+    ["unsigned", "int"],
+    ["else", ""],
+    ["static", ""],
+    ["extern", ""],
     ["continue", ""], 
     ["return", ""],
     ["int argc, char \\*argv\\[\\]", "void"],
@@ -138,12 +141,32 @@ my @regexes_to_replace = (
     ["break", ""], 
     ["inline", ""], 
     ["printf", ""],
-    ["print_hash_value", ""],
     ["transparent_crc", ""],
+    ["print_hash_value", ""],
     ["platform_main_begin", ""],
     ["platform_main_end", ""],
     ["crc32_gentab", ""],
     );
+
+my @function_prefixes = (
+    "safe_",
+    "func_",
+    "sizeof",
+    "transparent_crc",
+    "print_hash_value",
+    "platform_main_begin",
+    "platform_main_end",
+    "crc32_gentab",
+    "if",
+    "for",
+    );
+
+foreach my $f (@function_prefixes) {
+    push @delimited_regexes_to_replace, ["$f(.*?)$RE{balanced}{-parens=>'()'},", "0"];
+    push @delimited_regexes_to_replace, ["$f(.*?)$RE{balanced}{-parens=>'()'},", ""];
+    push @delimited_regexes_to_replace, ["$f(.*?)$RE{balanced}{-parens=>'()'}", "0"];
+    push @delimited_regexes_to_replace, ["$f(.*?)$RE{balanced}{-parens=>'()'}", ""];
+}
 
 my $prog;
 
@@ -164,23 +187,6 @@ sub find_match ($$$) {
 	$p2++;
     }
     return $p2-1;
-}
-
-sub del_up_to_matching_parens ($$) {
-    (my $xpos, my $pref) = @_;
-    my $p2 = $xpos;
-    $p2++ while (
-		 substr($prog, $p2, 1) ne "(" &&
-		 $p2 <= (length ($prog)-1)
-		 );
-    $p2 = find_match ($p2+1,"(",")");
-    return -1 if ($p2 == -1);
-    $p2++;
-    my $xx = substr ($prog, $xpos, $p2-$xpos);
-    my $yy = $function_prefixes{$pref};
-    print "replace '$xx' with '$yy' ";
-    substr ($prog, $xpos, $p2-$xpos) = $function_prefixes{$pref};
-    return ($p2-$xpos);
 }
 
 # these are set at startup time and never change
@@ -381,6 +387,17 @@ sub delta_pass ($) {
 		    $worked |= delta_test ($method);
 		}
 	    }
+	    foreach my $l (@delimited_regexes_to_replace) {
+		my $str = @{$l}[0];
+		my $repl = @{$l}[1];
+		my $first = substr($prog, 0, $pos);
+		my $rest = substr($prog, $pos);
+		if ($rest =~ s/^(?<delim>$borderorspc)(?<str>$str)/$+{delim}$repl/) {
+		    print "delimited replacing '$+{str}' with '$repl' at $pos : ";
+		    $prog = $first.$rest;
+		    $worked |= delta_test ($method);
+		}
+	    }
 	} elsif ($method eq "del_blanks_all") {
 	    if ($prog =~ s/\s{2,}/ /g) {
 		$worked |= delta_test ($method);
@@ -394,17 +411,6 @@ sub delta_pass ($) {
 		substr ($prog, $pos, $len) =  " ";
 		$worked |= delta_test ($method);
 	    }
-	} elsif ($method eq "parens_inclusive") {
-	    if (substr($prog, $pos, 1) eq "(") {
-		my $p2 = find_match ($pos+1,"(",")");
-		if ($p2 != -1) {
-		    die if (substr($prog, $pos, 1) ne "(");
-		    die if (substr($prog, $p2, 1) ne ")");
-		    substr ($prog, $pos, $p2-$pos+1) = "";
-		    print "deleting at $pos--$p2 : ";
-		    $worked |= delta_test ($method);
-		}
-	    }
 	} elsif ($method eq "parens_exclusive") {
 	    if (substr($prog, $pos, 1) eq "(") {
 		my $p2 = find_match ($pos+1,"(",")");
@@ -417,17 +423,6 @@ sub delta_pass ($) {
 		    $worked |= delta_test ($method);
 		}
 	    }
-	} elsif ($method eq "brackets_inclusive") {
-	    if (substr($prog, $pos, 1) eq "{") {
-		my $p2 = find_match ($pos+1,"{","}");
-		if ($p2 != -1) {
-		    die if (substr($prog, $pos, 1) ne "{");
-		    die if (substr($prog, $p2, 1) ne "}");
-		    substr ($prog, $pos, $p2-$pos+1) = "";
-		    print "deleting at $pos--$p2 : ";
-		    $worked |= delta_test ($method);
-		}
-	    }	    
 	} elsif ($method eq "brackets_exclusive") {
 	    if (substr($prog, $pos, 1) eq "{") {
 		my $p2 = find_match ($pos+1,"{","}");
@@ -438,17 +433,6 @@ sub delta_pass ($) {
 		    substr ($prog, $pos, 1) = "";
 		    print "deleting at $pos--$p2 : ";
 		    $worked |= delta_test ($method);
-		}
-	    }
-	} elsif ($method eq "calls") {
-	    foreach my $pref (keys %function_prefixes) {
-		my $s = substr ($prog, $pos, length ($pref));
-		if ($s eq $pref) {
-		    my $c = del_up_to_matching_parens ($pos, $pref);
-		    if ($c != -1) {
-			print " : ";
-			$worked |= delta_test ($method);
-		    }
 		}
 	    }
 	} else {
@@ -468,13 +452,9 @@ my %all_methods = (
     "del_blanks_all" => -1,
     "del_blanks" => 0,
 
-    "brackets_inclusive" => 1,
     "brackets_exclusive" => 4,
 
-    "parens_inclusive" => 2,
     "parens_exclusive" => 5,
-
-    "calls" => 1,
 
     "replace_with_0" => 6,
     "replace_with_1" => 6,
