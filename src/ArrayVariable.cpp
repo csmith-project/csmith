@@ -161,7 +161,7 @@ ArrayVariable::CreateArrayVariable(Block* blk, const std::string &name, const Ty
 		var->create_field_vars(type);
 	}
 	// create a list of alternative initial values. now only support integer arrays 
-	if (type->eType == eSimple) {
+	if (type->eType == eSimple || type->eType == eStruct) {
 		unsigned int init_num = pure_rnd_upto(total_size - 1);
 		for (size_t i=0; i<init_num; i++) {
 			Expression* e = Constant::make_random(type);
