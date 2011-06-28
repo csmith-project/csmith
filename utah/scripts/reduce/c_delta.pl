@@ -11,8 +11,8 @@
 # The first sense is that c_delta aims for maximum reduction and
 # specifically targets transformations not available to a
 # language-independent Delta debugger. For example, c_delta makes
-# coordinated changes across the whole program (remove an array
-# dimension, remove a function argument, reorder function calls).
+# coordinated changes across the whole program: remove an array
+# dimension, remove a function argument, reorder function calls.
 #
 # Second, c_delta is stupid in the sense that it generates a lot of
 # invalid code and also most of its changes do not reduce program size
@@ -24,7 +24,7 @@
 
 # TODO:
 
-# print stats for individual regexes
+# print percent reduction in "status bar"
 
 # watch for unexpected abnormal compiler outputs
 
@@ -111,11 +111,6 @@ my @regexes_to_replace = (
     ['"(.*?)",', ""],
     );
 
-my %regex_worked;
-my %regex_failed;
-my %delimited_regex_worked;
-my %delimited_regex_failed;
-
 # these match when preceded and followed by $borderorspc
 my @delimited_regexes_to_replace = (
     ["($barevar)\\s*:", ""],
@@ -154,6 +149,19 @@ foreach my $x (@subexprs) {
     push @delimited_regexes_to_replace, ["$x,", "0,"];
     push @delimited_regexes_to_replace, ["$x,", "1,"];
     push @delimited_regexes_to_replace, ["$x,", ""];
+}
+
+my %regex_worked;
+my %regex_failed;
+my %delimited_regex_worked;
+my %delimited_regex_failed;
+for (my $n=0; $n<scalar(@regexes_to_replace); $n++) {
+    $regex_worked{$n} = 0;
+    $regex_failed{$n} = 0;
+}
+for (my $n=0; $n<scalar(@delimited_regexes_to_replace); $n++) {
+    $delimited_regex_worked{$n} = 0;
+    $delimited_regex_failed{$n} = 0;
 }
 
 ######################################################################
@@ -334,9 +342,11 @@ sub delta_pass ($) {
 		
 		# avoid infinite loops!
 		next if ($repl eq "0" && $rest =~ /^($borderorspc)0$borderorspc/);
-		next if ($repl eq "1" && $rest =~ /^($borderorspc)0$borderorspc/);
 		next if ($repl eq "0," && $rest =~ /^($borderorspc)0,$borderorspc/);
+		next if ($repl eq "1" && $rest =~ /^($borderorspc)0$borderorspc/);
 		next if ($repl eq "1," && $rest =~ /^($borderorspc)0,$borderorspc/);
+		next if ($repl eq "1" && $rest =~ /^($borderorspc)1$borderorspc/);
+		next if ($repl eq "1," && $rest =~ /^($borderorspc)1,$borderorspc/);
 
 		if ($rest =~ s/^(?<delim1>$borderorspc)(?<str>$str)(?<delim2>$borderorspc)/$+{delim1}$repl$+{delim2}/) {
 		    print "num $n delimited replacing '$+{str}' with '$repl' : ";
@@ -520,17 +530,19 @@ foreach my $method (sort keys %methods) {
 
 print "\n";
 print "regex statistics:\n";
-foreach my $n (sort bynum keys %regex_failed) {
+for (my $n=0; $n<scalar(@regexes_to_replace); $n++) {
     my $a = $regex_worked{$n};
     my $b = $regex_failed{$n};
+    next if (($a+$b)==0);
     print "  $n s:$a f:$b\n";
 }
 
 print "\n";
 print "delimited regex statistics:\n";
-foreach my $n (sort bynum keys %delimited_regex_failed) {
+for (my $n=0; $n<scalar(@delimited_regexes_to_replace); $n++) {
     my $a = $delimited_regex_worked{$n};
     my $b = $delimited_regex_failed{$n};
+    next if (($a+$b)==0);
     print "  $n s:$a f:$b\n";
 }
 
@@ -538,4 +550,3 @@ print "\n";
 print "there were $cache_hits cache hits\n";
 
 ######################################################################
-
