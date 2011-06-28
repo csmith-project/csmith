@@ -14,17 +14,15 @@ use re 'eval';
 
 # add passes to 
 #   remove digits from numbers to make them smaller
-#   run indent speculatively
 #   turn checksum calls into regular printfs
-#   delete a complete function
-#   delete an entire initializer
 
-# to regexes, add a way to specify border characters that won't be removed
-
-# avoid mangling identifiers
+# write code to adapatively run multiple instances of a 
+#   transformation when this has good expected value
+#   measure cost of success vs. failure, take into account
+#   proabability of success
+# eventually back off to linear scan
 
 # harder
-#   move a function to top, eliminate prototype
 #   transform a function to return void
 #   inline a function call
 #   un-nest nested calls in expressions
@@ -35,31 +33,26 @@ use re 'eval';
 
 # long term todo: rewrite this tool to operate on ASTs
 
-my $DEBUG = 1;
+my $DEBUG = 0;
 
-my $num = "\\-?[xX0-9a-fA-F]+[UL]*";
-my $field = "\\.f[0-9]+";
-my $index = "\\\[(($num)|i|j|k|l)\\\]";
-my $barevar = "val|vname|flag|[lgpt]_[0-9]+";
-my $var1 = "([\\&\\*]*)($barevar)(($field)|($index))*";
-my $var2 = "x|i|j|k|si|ui|si1|si2|ui1|ui2|vname|left|right|val|crc32_context|func_([0-9]+)|safe_([0-9]+)";
-my $var = "($var1)|($var2)";
+my $barevar = "\\-?[0-9a-zA-Z\_]+";
+my $field = "\\.($barevar)";
+my $index = "\\\[($barevar)\\\]";
+my $var = "([\\&\\*]*)($barevar)(($field)|($index))*";
 my $arith = "\\+|\\-|\\%|\\/|\\*";
 my $comp = "\\<\\=|\\>\\=|\\<|\\>|\\=\\=|\\!\\=|\\=";
 my $logic = "\\&\\&|\\|\\|";
 my $bit = "\\||\\&|\\^|\\<\\<|\\>\\>";
 my $binop = "($arith)|($comp)|($logic)|($bit)";
-my $varnum = "($var)|($num)";
 my $border = "[\\*\\{\\(\\[\\:\\,\\}\\)\\]\\;\\,]";
 my $borderorspc = "(($border)|(\\s))";
-my $inttype = "int|void|short|long|char|signed|unsigned|const|static|(union\\s+U[0-9]+)|(struct\\s+S[0-9+])";
-my $functype = "(($inttype)\\s*|\\*\\s*)+";
-my $fname = "(?<fname>[a-zA-Z0-9\\_]+)";
-my $funcstart_orig = "$functype\\s+(?<fname>[a-zA-Z0-9\\_]+)\\s*$RE{balanced}{-parens=>'()'}";
+my $rettype = "int|void|short|long|char|signed|unsigned|const|static|(union\\s+U[0-9]+)|(struct\\s+S[0-9+])";
+my $functype = "(($rettype)\\s*|\\*\\s*)+";
+my $fname = "(?<fname>$barevar)";
+my $funcstart_orig = "$functype\\s+(?<fname>$barevar)\\s*$RE{balanced}{-parens=>'()'}";
 my $funcstart = "$functype\\s+XXX\\s*$RE{balanced}{-parens=>'()'}";
 my $proto = "$funcstart;";
 my $func = "$funcstart\\s*$RE{balanced}{-parens=>'{}'}";
-my $lbl = "lbl_[0-9]+:";
 
 #print "$field\n";
 #print "$index\n";
@@ -90,87 +83,49 @@ my @regexes_to_replace = (
     ["\\~", ""],
     ['"(.*?)"', ""],
     ['"(.*?)",', ""],
-    ["($lbl)\\s*:", ""],
-    ["goto\\s+($lbl)", ""],
     );
 
 # these match when preceded and followed by $borderorspc
 my @delimited_regexes_to_replace = (
-    ["($inttype)\\s+($var),", ""],
-    ["const", ""],
-    ["volatile", ""],
-    ["char", ""],
+    ["($barevar)\\s*:", ""],
+    ["goto\\s+($barevar);", ""],
     ["char", "int"],
-    ["short", ""],
     ["short", "int"],
-    ["long", ""],
     ["long", "int"],
-    ["signed", ""],
     ["signed", "int"],
-    ["unsigned", ""],
     ["unsigned", "int"],
-    ["else", ""],
-    ["static", ""],
-    ["extern", ""],
-    ["continue", ""], 
-    ["return", ""],
     ["int argc, char \\*argv\\[\\]", "void"],
     ["int.*?;", ""],
     ["for", ""],
     ["if\\s+\\(.*?\\)", ""],
     ["struct.*?;", ""],
     ["union.*?;", ""],
-    ["if", ""],
-    ["break", ""], 
-    ["inline", ""], 
-    ["printf", ""],
-    ["transparent_crc", ""],
-    ["print_hash_value", ""],
-    ["platform_main_begin", ""],
-    ["platform_main_end", ""],
-    ["crc32_gentab", ""],
+    ["($rettype)\\s+($var)\\s+$RE{balanced}{-parens=>'()'}\\s+$RE{balanced}{-parens=>'{}'}", ""],
+    ["($rettype)\\s+($barevar)\\s+$RE{balanced}{-parens=>'()'}\\s+$RE{balanced}{-parens=>'{}'}", ""],
+    ["$barevar\\s*$RE{balanced}{-parens=>'()'},", "0"],
+    ["$barevar\\s*$RE{balanced}{-parens=>'()'},", ""],
+    ["$barevar\\s*$RE{balanced}{-parens=>'()'}", "0"],
+    ["$barevar\\s*$RE{balanced}{-parens=>'()'}", ""],
     );
-
-my @function_prefixes = (
-    "safe_",
-    "func_",
-    "sizeof",
-    "transparent_crc",
-    "print_hash_value",
-    "platform_main_begin",
-    "platform_main_end",
-    "crc32_gentab",
-    "if",
-    "for",
-    );
-
-push @regexes_to_replace, ["($inttype)\\s+($varnum)\\s+$RE{balanced}{-parens=>'()'}\\s+$RE{balanced}{-parens=>'{}'}", ""];
-
-foreach my $f (@function_prefixes) {
-
-    push @regexes_to_replace, ["($inttype)\\s+($f)\\s+$RE{balanced}{-parens=>'()'}\\s+$RE{balanced}{-parens=>'{}'}", ""];
-
-    push @delimited_regexes_to_replace, ["$f(.*?)$RE{balanced}{-parens=>'()'},", "0"];
-    push @delimited_regexes_to_replace, ["$f(.*?)$RE{balanced}{-parens=>'()'},", ""];
-    push @delimited_regexes_to_replace, ["$f(.*?)$RE{balanced}{-parens=>'()'}", "0"];
-    push @delimited_regexes_to_replace, ["$f(.*?)$RE{balanced}{-parens=>'()'}", ""];
-}
 
 my @subexprs = (
-    "($varnum)(\\s*)($binop)(\\s*)($varnum)",
-    "($varnum)(\\s*)($binop)",
-    "($binop)(\\s*)($varnum)",
-    "($barevar)",
-    "($varnum)",
-    "($varnum)(\\s*\\?\\s*)($varnum)(\\s*\\:\\s*)($varnum)",
+    "($var)(\\s*)($binop)(\\s*)($var)",
+    "($var)(\\s*)($binop)",
+    "($binop)(\\s*)($var)",
+    "($var)",
+    "($var)(\\s*\\?\\s*)($var)(\\s*\\:\\s*)($var)",
     );
 
 foreach my $x (@subexprs) {
     push @delimited_regexes_to_replace, ["$x", "0"];
     push @delimited_regexes_to_replace, ["$x", "1"];
     push @delimited_regexes_to_replace, ["$x", ""];
+    push @delimited_regexes_to_replace, ["$x,", "0,"];
+    push @delimited_regexes_to_replace, ["$x,", "1,"];
     push @delimited_regexes_to_replace, ["$x,", ""];
 }
+
+#######################################################################
 
 my $prog;
 
@@ -292,34 +247,42 @@ sub delta_pass ($) {
     $good_cnt = 0;
     $bad_cnt = 0;
 
+    print "========== starting pass <$method> ==========\n";
+
     while (1) {
 	return ($good_cnt > 0) if ($pos >= length ($prog));
 	my $worked = 0;
 
 	if ($method eq "replace_regex") {
-	    foreach my $l (@regexes_to_replace) {
+	    my $n=-1;
+	    foreach my $l (@regexes_to_replace) {	       
+		$n++;
 		my $str = @{$l}[0];
 		my $repl = @{$l}[1];
 		my $first = substr($prog, 0, $pos);
 		my $rest = substr($prog, $pos);
 		if ($rest =~ s/(^$str)/$repl/) {
-		    print "replacing '$1' with '$repl' at $pos : ";
+		    print "num $n replacing '$1' with '$repl' : ";
 		    $prog = $first.$rest;
 		    $worked |= delta_test ($method, 0);
 		}
 	    }
+	    $n=-1;
 	    foreach my $l (@delimited_regexes_to_replace) {
+		$n++;
 		my $str = @{$l}[0];
 		my $repl = @{$l}[1];
 		my $first = substr($prog, 0, $pos);
 		my $rest = substr($prog, $pos);
 		
 		# avoid infinite loops!
-		next if ($repl eq "0" && $rest =~ /($borderorspc)0$borderorspc/);
-		next if ($repl eq "1" && $rest =~ /($borderorspc)0$borderorspc/);
+		next if ($repl eq "0" && $rest =~ /^($borderorspc)0$borderorspc/);
+		next if ($repl eq "1" && $rest =~ /^($borderorspc)0$borderorspc/);
+		next if ($repl eq "0," && $rest =~ /^($borderorspc)0,$borderorspc/);
+		next if ($repl eq "1," && $rest =~ /^($borderorspc)0,$borderorspc/);
 
 		if ($rest =~ s/^(?<delim1>$borderorspc)(?<str>$str)(?<delim2>$borderorspc)/$+{delim1}$repl$+{delim2}/) {
-		    print "delimited replacing '$+{str}' with '$repl' at $pos : ";
+		    print "num $n delimited replacing '$+{str}' with '$repl' : ";
 		    $prog = $first.$rest;
 		    $worked |= delta_test ($method, 0);
 		}
