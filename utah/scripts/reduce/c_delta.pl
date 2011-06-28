@@ -4,7 +4,9 @@ use strict;
 use Regexp::Common;
 use re 'eval';
 
-# build up the regexes programmatically to support multiple replacement options
+# run sanity check after each pass
+
+# save a copy after each complete iteration
 
 # make sure file starts and ends with a blank 
 
@@ -33,7 +35,7 @@ use re 'eval';
 
 # long term todo: rewrite this tool to operate on ASTs
 
-my $INIT = "1";
+my $DEBUG = 1;
 
 my $num = "\\-?[xX0-9a-fA-F]+[UL]*";
 my $field = "\\.f[0-9]+";
@@ -50,7 +52,13 @@ my $binop = "($arith)|($comp)|($logic)|($bit)";
 my $varnum = "($var)|($num)";
 my $border = "[\\*\\{\\(\\[\\:\\,\\}\\)\\]\\;\\,]";
 my $borderorspc = "(($border)|(\\s))";
-my $type = "int|void";
+my $inttype = "int|void|short|long|char|signed|unsigned|const|static|(union\\s+U[0-9]+)|(struct\\s+S[0-9+])";
+my $functype = "(($inttype)\\s*|\\*\\s*)+";
+my $fname = "(?<fname>[a-zA-Z0-9\\_]+)";
+my $funcstart_orig = "$functype\\s+(?<fname>[a-zA-Z0-9\\_]+)\\s*$RE{balanced}{-parens=>'()'}";
+my $funcstart = "$functype\\s+XXX\\s*$RE{balanced}{-parens=>'()'}";
+my $proto = "$funcstart;";
+my $func = "$funcstart\\s*$RE{balanced}{-parens=>'{}'}";
 my $lbl = "lbl_[0-9]+:";
 
 #print "$field\n";
@@ -64,7 +72,6 @@ my @regexes_to_replace = (
     ["$RE{balanced}{-parens=>'()'}", ""],
     ["$RE{balanced}{-parens=>'{}'}", ""],
     ["=\\s*$RE{balanced}{-parens=>'{}'}", ""],
-    ["($type)\\s+($varnum)\\s+$RE{balanced}{-parens=>'()'}\\s+$RE{balanced}{-parens=>'{}'}", ""],
     ["\\:\\s*[0-9]+\\s*;", ";"],
     ["\\;", ""],
     ["\\^\\=", "="],
@@ -83,13 +90,13 @@ my @regexes_to_replace = (
     ["\\~", ""],
     ['"(.*?)"', ""],
     ['"(.*?)",', ""],
+    ["($lbl)\\s*:", ""],
+    ["goto\\s+($lbl)", ""],
     );
 
 # these match when preceded and followed by $borderorspc
 my @delimited_regexes_to_replace = (
-    ["($type)\\s+($var),", ""],
-    ["($lbl)\\s*:", ""],
-    ["goto\\s+($lbl);", ""],
+    ["($inttype)\\s+($var),", ""],
     ["const", ""],
     ["volatile", ""],
     ["char", ""],
@@ -112,6 +119,7 @@ my @delimited_regexes_to_replace = (
     ["for", ""],
     ["if\\s+\\(.*?\\)", ""],
     ["struct.*?;", ""],
+    ["union.*?;", ""],
     ["if", ""],
     ["break", ""], 
     ["inline", ""], 
@@ -136,7 +144,12 @@ my @function_prefixes = (
     "for",
     );
 
+push @regexes_to_replace, ["($inttype)\\s+($varnum)\\s+$RE{balanced}{-parens=>'()'}\\s+$RE{balanced}{-parens=>'{}'}", ""];
+
 foreach my $f (@function_prefixes) {
+
+    push @regexes_to_replace, ["($inttype)\\s+($f)\\s+$RE{balanced}{-parens=>'()'}\\s+$RE{balanced}{-parens=>'{}'}", ""];
+
     push @delimited_regexes_to_replace, ["$f(.*?)$RE{balanced}{-parens=>'()'},", "0"];
     push @delimited_regexes_to_replace, ["$f(.*?)$RE{balanced}{-parens=>'()'},", ""];
     push @delimited_regexes_to_replace, ["$f(.*?)$RE{balanced}{-parens=>'()'}", "0"];
@@ -183,6 +196,7 @@ sub find_match ($$$) {
 # these are set at startup time and never change
 my $cfile;
 my $test;
+my $trial_num = 0;   
 
 sub read_file () {
     open INF, "<$cfile" or die;
@@ -194,6 +208,12 @@ sub read_file () {
 }
 
 sub write_file () {
+    if (defined($DEBUG) && $DEBUG) {
+	open OUTF, ">delta_tmp_${trial_num}.c" or die;
+	print OUTF $prog;
+	close OUTF;
+    }
+    $trial_num++;
     open OUTF, ">$cfile" or die;
     print OUTF $prog;
     close OUTF;
@@ -221,36 +241,35 @@ my $pos;
 my %method_worked = ();
 my %method_failed = ();
 my $old_size = 1000000000;
-    
-sub delta_test ($) {
-    (my $method) = @_;
+ 
+sub delta_test ($$) {
+    (my $method, my $ok_to_enlarge) = @_;
     my $len = length ($prog);
     print "[$pass_num $method ($pos / $len) s:$good_cnt f:$bad_cnt] ";
 
-    # my $result = $cache{$prog};
-    my $result;
-
-    my $hit = 0;
+    my $result = $cache{$prog};
 
     if (defined($result)) {
 	$cache_hits++;
 	print "(hit) ";
-	$hit = 1;
-    } else {
-	write_file ();
-	$result = run_test ();
-	$cache{$prog} = $result;
-	$hit = 0;
+	print "failure\n";
+	read_file ();    
+	$bad_cnt++;
+	$method_failed{$method}++;
+	return 0;
     }
+    
+    write_file ();
+    $result = run_test ();
+    $cache{$prog} = $result;
     
     if ($result) {
 	print "success\n";
-	die if ($hit);
 	system "cp $cfile $cfile.bak";
 	$good_cnt++;
 	$method_worked{$method}++;
 	my $size = length ($prog);
-	die if ($size > $old_size);
+	die if (($size > $old_size) && !$ok_to_enlarge);
 	if ($size < $old_size) {
 	    %cache = ();
 	}
@@ -258,9 +277,7 @@ sub delta_test ($) {
 	return 1;
     } else {
 	print "failure\n";
-	if (!$hit) {
-	    system "cp $cfile.bak $cfile";
-	}
+	system "cp $cfile.bak $cfile";
 	read_file ();    
 	$bad_cnt++;
 	$method_failed{$method}++;
@@ -288,7 +305,7 @@ sub delta_pass ($) {
 		if ($rest =~ s/(^$str)/$repl/) {
 		    print "replacing '$1' with '$repl' at $pos : ";
 		    $prog = $first.$rest;
-		    $worked |= delta_test ($method);
+		    $worked |= delta_test ($method, 0);
 		}
 	    }
 	    foreach my $l (@delimited_regexes_to_replace) {
@@ -304,26 +321,26 @@ sub delta_pass ($) {
 		if ($rest =~ s/^(?<delim1>$borderorspc)(?<str>$str)(?<delim2>$borderorspc)/$+{delim1}$repl$+{delim2}/) {
 		    print "delimited replacing '$+{str}' with '$repl' at $pos : ";
 		    $prog = $first.$rest;
-		    $worked |= delta_test ($method);
+		    $worked |= delta_test ($method, 0);
 		}
 	    }
 	} elsif ($method eq "del_blanks_all") {
 	    if ($prog =~ s/\s{2,}/ /g) {
-		$worked |= delta_test ($method);
+		$worked |= delta_test ($method, 0);
 	    }
 	    return 0;
-	} elsif ($method eq "indent") {
+	} elsif ($method eq "indent") {	    
 	    write_file();
 	    system "indent $cfile";
 	    read_file();
-	    $worked |= delta_test ($method);
+	    $worked |= delta_test ($method, 1);
 	    return 0;
 	} elsif ($method eq "del_blanks") {
 	    my $rest = substr($prog, $pos);
 	    if ($rest =~ /^(\s{2,})/) {
 		my $len = length ($1);
 		substr ($prog, $pos, $len) =  " ";
-		$worked |= delta_test ($method);
+		$worked |= delta_test ($method, 0);
 	    }
 	} elsif ($method eq "parens_exclusive") {
 	    if (substr($prog, $pos, 1) eq "(") {
@@ -334,9 +351,29 @@ sub delta_pass ($) {
 		    substr ($prog, $p2, 1) = "";
 		    substr ($prog, $pos, 1) = "";
 		    print "deleting at $pos--$p2 : ";
-		    $worked |= delta_test ($method);
+		    $worked |= delta_test ($method, 0);
 		}
 	    }
+	} elsif ($method eq "move_func") {
+	    my $first = substr($prog, 0, $pos);
+	    my $rest = substr($prog, $pos);
+	    my $proto2 = $proto;
+	    die if (!($proto2 =~ s/XXX/$fname/));
+	    if ($rest =~ /^($proto2)/) {
+		my $realproto = $1;
+		my $fname = $+{fname};
+		print "found prototype for '$fname'\n";
+		my $func2 = $func;
+		die if (!($func2 =~ s/XXX/$fname/));
+		if ($rest =~ s/($func2)//) {
+		    my $body = $1;
+		    print "got body!\n";
+		    print "replacing < $realproto > with < $body >\n";
+		    substr ($rest, 0, length($realproto)) = $body;
+		    $prog = $first.$rest;
+		    $worked |= delta_test ($method, 0);
+		}
+	    } 
 	} elsif ($method eq "brackets_exclusive") {
 	    if (substr($prog, $pos, 1) eq "{") {
 		my $p2 = find_match ($pos+1,"{","}");
@@ -346,7 +383,7 @@ sub delta_pass ($) {
 		    substr ($prog, $p2, 1) = "";
 		    substr ($prog, $pos, 1) = "";
 		    print "deleting at $pos--$p2 : ";
-		    $worked |= delta_test ($method);
+		    $worked |= delta_test ($method, 0);
 		}
 	    }
 	} else {
@@ -365,6 +402,7 @@ my %all_methods = (
 
     "del_blanks_all" => 0,
     "del_blanks" => 1,
+    "move_func" => 2,
     "brackets_exclusive" => 2,
     "parens_exclusive" => 3,
     "replace_regex" => 4,
