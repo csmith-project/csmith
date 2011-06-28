@@ -4,13 +4,9 @@ use strict;
 use Regexp::Common;
 use re 'eval';
 
-# run sanity check after each pass
-
-# save a copy after each complete iteration
-
-# make sure file starts and ends with a blank 
-
 # print stats for individual regexes
+
+# watch for unexpected abnormal compiler outputs
 
 # add passes to 
 #   remove digits from numbers to make them smaller
@@ -159,14 +155,25 @@ sub read_file () {
     while (my $line = <INF>) {
 	$prog .= $line;
     }
+    if (substr($prog, 0, 1) ne " ") {
+	$prog = " $prog";
+    }
+    if (substr ($prog, -1, 1) ne " ") {
+	$prog = "$prog ";
+    }
     close INF;
+}
+
+sub save_copy ($) {
+    (my $fn) = @_;
+    open OUTF, ">$fn" or die;
+    print OUTF $prog;
+    close OUTF;
 }
 
 sub write_file () {
     if (defined($DEBUG) && $DEBUG) {
-	open OUTF, ">delta_tmp_${trial_num}.c" or die;
-	print OUTF $prog;
-	close OUTF;
+	save_copy ("delta_tmp_${trial_num}.c");
     }
     $trial_num++;
     open OUTF, ">$cfile" or die;
@@ -240,12 +247,22 @@ sub delta_test ($$) {
     }
 }
 
+sub sanity_check () {
+    print "sanity check... ";
+    my $res = run_test ();
+    if (!$res) {
+	die "test (and sanity check) fails";
+    }
+}
+
 sub delta_pass ($) {
     (my $method) = @_;
     
     $pos = 0;
     $good_cnt = 0;
     $bad_cnt = 0;
+
+    sanity_check();
 
     print "========== starting pass <$method> ==========\n";
 
@@ -421,12 +438,6 @@ foreach my $arg (@ARGV) {
     }
 }
 
-print "making sure test succeeds on initial input...\n";
-my $res = run_test ();
-if (!$res) {
-    die "test fails!";
-}
-
 system "cp $cfile $cfile.orig";
 system "cp $cfile $cfile.bak";
 
@@ -440,6 +451,7 @@ read_file ();
 
 while (1) {
     my $success = 0;
+    save_copy ("delta_backup_${pass_num}.c");
     foreach my $method (sort bymethod keys %methods) {
 	$success |= delta_pass ($method);
     }
