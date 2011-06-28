@@ -1,49 +1,46 @@
 #!/usr/bin/perl -w
 
-use strict;
+######################################################################
+#
+# This Delta debugger specifically targets C code. Its design point --
+# in two different senses -- is to be complementary to a line-based
+# Delta like this one:
+#
+#   http://delta.tigris.org/
+#
+# The first sense is that c_delta aims for maximum reduction and
+# specifically targets transformations not available to a
+# language-independent Delta debugger. For example, c_delta makes
+# coordinated changes across the whole program (remove an array
+# dimension, remove a function argument, reorder function calls).
+#
+# Second, c_delta is stupid in the sense that it generates a lot of
+# invalid code and also most of its changes do not reduce program size
+# by a large amount. Thus, it is best used as a second pass with a
+# faster Delta like the Berkeley one trimming the obviously irrelevant
+# code.
+#
+####################################################################
 
-# turn caching back on, make sure it works
-
-# maybe structure regexes as
-#   starting context
-#   stuff to replace
-#   ending context
-#   stuff to replace with
-
-# avoid extra calls to read_file-- stop modifying $prog!
-
-# when doing search and replace, how to specify a larger matching context
-# for what is actually replaced?
-
-# figure out how to named backreferences in regexp replacement
-
-# if there's a way to match starting at a specified position, use it
-
-# do everything with search and replace instead of substr
-
-# do everything with regexes-- need to specify matching parens, brackets, etc.
-
-# build up the regexes programmatically to support multiple replacement options
-
-# make sure file starts and ends with a blank 
+# TODO:
 
 # print stats for individual regexes
 
+# watch for unexpected abnormal compiler outputs
+
 # add passes to 
 #   remove digits from numbers to make them smaller
-#   run indent speculatively
 #   turn checksum calls into regular printfs
-#   delete a complete function
-#   delete an entire initializer
 
-# to regexes, add a way to specify border characters that won't be removed
-
-# avoid mangling identifiers
+# write code to adapatively run multiple instances of a 
+#   transformation when this has good expected value
+#   measure cost of success vs. failure, take into account
+#   proabability of success
+# eventually back off to linear scan
 
 # harder
 #   transform a function to return void
 #   inline a function call
-#   sort functions in order to eliminate prototypes
 #   un-nest nested calls in expressions
 #   move arguments and locals to global scope
 #   remove level of pointer indirection
@@ -52,50 +49,52 @@ use strict;
 
 # long term todo: rewrite this tool to operate on ASTs
 
-my $INIT = "1";
+######################################################################
 
-my %function_prefixes = (
-    "safe_" => $INIT,
-    "func_" => $INIT,
-    "sizeof" => $INIT,
-    "if" => "",
-    "for" => "",
-    );
+use strict;
+use Regexp::Common;
+use re 'eval';
 
-my $num = "\\-?[xX0-9a-fA-F]+[UL]*";
-my $field = "\\.f[0-9]+";
-my $index = "\\\[(($num)|i|j|k|l)\\\]";
-my $barevar = "[lgpt]_[0-9]+";
-my $var1 = "([\\&\\*]*)($barevar)(($field)|($index))*";
-my $var2 = "i|j|k|si|ui|si1|si2|ui1|ui2|left|right|val|crc32_context|func_([0-9]+)|safe_([0-9]+)";
-my $var = "($var1)|($var2)";
+######################################################################
+
+my $DEBUG = 0;
+
+######################################################################
+
+my $barevar = "\\-?[0-9a-zA-Z\_]+";
+my $field = "\\.($barevar)";
+my $index = "\\\[($barevar)\\\]";
+my $var = "([\\&\\*]*)($barevar)(($field)|($index))*";
 my $arith = "\\+|\\-|\\%|\\/|\\*";
 my $comp = "\\<\\=|\\>\\=|\\<|\\>|\\=\\=|\\!\\=|\\=";
 my $logic = "\\&\\&|\\|\\|";
 my $bit = "\\||\\&|\\^|\\<\\<|\\>\\>";
 my $binop = "($arith)|($comp)|($logic)|($bit)";
-my $varnum = "($var)|($num)";
 my $border = "[\\*\\{\\(\\[\\:\\,\\}\\)\\]\\;\\,]";
 my $borderorspc = "(($border)|(\\s))";
-my $borderspc = "($border\\s)";
-my $spcborder = "(\\s$border)";
+my $rettype = "int|void|short|long|char|signed|unsigned|const|static|(union\\s+U[0-9]+)|(struct\\s+S[0-9+])";
+my $functype = "(($rettype)\\s*|\\*\\s*)+";
+my $fname = "(?<fname>$barevar)";
+my $funcstart_orig = "$functype\\s+(?<fname>$barevar)\\s*$RE{balanced}{-parens=>'()'}";
+my $funcstart = "$functype\\s+XXX\\s*$RE{balanced}{-parens=>'()'}";
+my $proto = "$funcstart;";
+my $func = "$funcstart\\s*$RE{balanced}{-parens=>'{}'}";
 
 #print "$field\n";
 #print "$index\n";
 #print "$border\n";
 #print "$var1\n";
 #print "$var2\n";
-#print "$borderspc\n";
-#print "$spcborder\n";
 
+# these match without additional qualification
 my @regexes_to_replace = (
+    ["$RE{balanced}{-parens=>'()'}", ""],
+    ["$RE{balanced}{-parens=>'{}'}", ""],
+    ["=\\s*$RE{balanced}{-parens=>'{}'}", ""],
     ["\\:\\s*[0-9]+\\s*;", ";"],
     ["\\;", ""],
-    ["\\{\\s*\\}", ";"],
-    ["for\\s*\\(.*?\\)", ""],
     ["\\^\\=", "="],
     ["\\|\\=", "="],
-    ["($barevar)", ""],
     ["\\&\\=", "="],
     ["\\+\\=", "="],
     ["\\-\\=", "="],
@@ -104,53 +103,67 @@ my @regexes_to_replace = (
     ["\\%\\=", "="],
     ["\\<\\<\\=", "="],
     ["\\>\\>\\=", "="],
-    ["lbl_[0-9]+:", ""],
-    ["($varnum)", ""],
-    ["($varnum),", ""],
-    ["char", "int"],
-    ["char", ""],
-    ["short", "int"],
-    ["short", ""],
-    ["long", ""],
-    ["long", "int"],
-    ["signed", ""],
-    ["signed", "int"],
-    ["const", ""],
-    ["volatile", ""],
-    ["unsigned", "int"],
-    ["unsigned", ""],
-    ["else", ""],
-    ["static", ""],
-    ["extern", ""],
     ["\\+", ""],
     ["\\-", ""],
     ["\\!", ""],
     ["\\~", ""],
-    ["=\\s*\{\\s*\}", ""],
-    ["continue", ""], 
-    ["return", ""],
+    ['"(.*?)"', ""],
+    ['"(.*?)",', ""],
+    );
+
+my %regex_worked;
+my %regex_failed;
+my %delimited_regex_worked;
+my %delimited_regex_failed;
+
+# these match when preceded and followed by $borderorspc
+my @delimited_regexes_to_replace = (
+    ["($barevar)\\s*:", ""],
+    ["goto\\s+($barevar);", ""],
+    ["char", "int"],
+    ["short", "int"],
+    ["long", "int"],
+    ["signed", "int"],
+    ["unsigned", "int"],
     ["int argc, char \\*argv\\[\\]", "void"],
     ["int.*?;", ""],
     ["for", ""],
     ["if\\s+\\(.*?\\)", ""],
     ["struct.*?;", ""],
-    ["if", ""],
-    ["break", ""], 
-    ["inline", ""], 
-    ["printf", ""],
-    ["print_hash_value", ""],
-    ["transparent_crc", ""],
-    ["platform_main_begin", ""],
-    ["platform_main_end", ""],
-    ["crc32_gentab", ""],
+    ["union.*?;", ""],
+    ["($rettype)\\s+($var)\\s+$RE{balanced}{-parens=>'()'}\\s+$RE{balanced}{-parens=>'{}'}", ""],
+    ["($rettype)\\s+($barevar)\\s+$RE{balanced}{-parens=>'()'}\\s+$RE{balanced}{-parens=>'{}'}", ""],
+    ["$barevar\\s*$RE{balanced}{-parens=>'()'},", "0"],
+    ["$barevar\\s*$RE{balanced}{-parens=>'()'},", ""],
+    ["$barevar\\s*$RE{balanced}{-parens=>'()'}", "0"],
+    ["$barevar\\s*$RE{balanced}{-parens=>'()'}", ""],
     );
+
+my @subexprs = (
+    "($var)(\\s*)($binop)(\\s*)($var)",
+    "($var)(\\s*)($binop)",
+    "($binop)(\\s*)($var)",
+    "($var)",
+    "($var)(\\s*\\?\\s*)($var)(\\s*\\:\\s*)($var)",
+    );
+
+foreach my $x (@subexprs) {
+    push @delimited_regexes_to_replace, ["$x", "0"];
+    push @delimited_regexes_to_replace, ["$x", "1"];
+    push @delimited_regexes_to_replace, ["$x", ""];
+    push @delimited_regexes_to_replace, ["$x,", "0,"];
+    push @delimited_regexes_to_replace, ["$x,", "1,"];
+    push @delimited_regexes_to_replace, ["$x,", ""];
+}
+
+######################################################################
 
 my $prog;
 
 sub find_match ($$$) {
     (my $p2, my $s1, my $s2) = @_;
     my $count = 1;
-    die if (!(defined($p2)&&defined($s1)&&defined($s2)));
+    die if (!(defined($p2) && defined($s1) && defined($s2)));
     while ($count > 0) {
 	return -1 if ($p2 >= (length ($prog)-1));
 	my $s = substr($prog, $p2, 1);
@@ -166,26 +179,10 @@ sub find_match ($$$) {
     return $p2-1;
 }
 
-sub del_up_to_matching_parens ($$) {
-    (my $xpos, my $pref) = @_;
-    my $p2 = $xpos;
-    $p2++ while (
-		 substr($prog, $p2, 1) ne "(" &&
-		 $p2 <= (length ($prog)-1)
-		 );
-    $p2 = find_match ($p2+1,"(",")");
-    return -1 if ($p2 == -1);
-    $p2++;
-    my $xx = substr ($prog, $xpos, $p2-$xpos);
-    my $yy = $function_prefixes{$pref};
-    print "replace '$xx' with '$yy' ";
-    substr ($prog, $xpos, $p2-$xpos) = $function_prefixes{$pref};
-    return ($p2-$xpos);
-}
-
 # these are set at startup time and never change
 my $cfile;
 my $test;
+my $trial_num = 0;   
 
 sub read_file () {
     open INF, "<$cfile" or die;
@@ -193,66 +190,30 @@ sub read_file () {
     while (my $line = <INF>) {
 	$prog .= $line;
     }
+    if (substr($prog, 0, 1) ne " ") {
+	$prog = " $prog";
+    }
+    if (substr ($prog, -1, 1) ne " ") {
+	$prog = "$prog ";
+    }
     close INF;
 }
 
-sub write_file () {
-    open OUTF, ">$cfile" or die;
+sub save_copy ($) {
+    (my $fn) = @_;
+    open OUTF, ">$fn" or die;
     print OUTF $prog;
     close OUTF;
 }
 
-sub match_subexp ($$) {
-    (my $rest, my $xpos) = @_;
-
-    if (
-	$rest =~ /^(?<pref>$borderorspc)(?<var1>$varnum)(?<s1>\s+)(?<op>$binop)(?<s2>\s+)(?<var2>$varnum)$borderorspc/
-	) {
-	my $s2 = $+{pref}.$+{var1}.$+{s1}.$+{op}.$+{s2}.$+{var2};
-	return (1, $xpos + length ($+{pref}), $xpos + length ($s2));
+sub write_file () {
+    if (defined($DEBUG) && $DEBUG) {
+	save_copy ("delta_tmp_${trial_num}.c");
     }
-
-    if (
-	$rest =~ /^(?<pref>$borderorspc)(?<var>$varnum)(?<spc2>\s*)(?<op>$binop)/
-	) {
-	my $s2 = $+{pref}.$+{var}.$+{spc2}.$+{op};
-	return (1, $xpos + length($+{pref}), $xpos+length ($s2));
-    }
-
-    if (
-	$rest =~ /^(?<op>$binop)(?<spc1>\s*)(?<var>$varnum)$borderorspc/ 
-	) {
-	my $s2 = $+{op}.$+{spc1}.$+{var};
-	return (1, $xpos, $xpos+length ($s2));
-    }
-
-    if (
-	$rest =~ /^(?<pref>$borderorspc)(?<var>$varnum)$borderorspc/
-	) {
-	my $s = $+{pref};
-	my $v = $+{var};
-	if (($v ne "1") && ($v ne "0")) {
-	    return (1, $xpos + length($s), $xpos+length ($s.$v));
-	}
-    }
-
-    if (
-	$rest =~ /^(?<pref>$borderorspc)(?<var1>$varnum)(?<ques>\s*\?\s*)(?<var2>$varnum)(?<colon>\s*\:\s*)(?<var3>$varnum)$borderorspc/
-	) {
-	my $prefl = length ($+{pref});
-	my $s2 = $+{var1}.$+{ques}.$+{var2}.$+{colon}.$+{var3};
-	return (1, $xpos + $prefl, $xpos + $prefl + length ($s2));
-    }
-
-    if (0) {
-	if ($rest =~ /^($border)/) {
-	    print "case 6 ";
-	    my $s2 = $1;
-	    return (1, $xpos, $xpos+length ($s2));
-	}
-    }
-
-    return (0,0,0);
+    $trial_num++;
+    open OUTF, ">$cfile" or die;
+    print OUTF $prog;
+    close OUTF;
 }
 
 sub runit ($) {
@@ -270,7 +231,6 @@ sub run_test () {
 
 my %cache = ();
 my $cache_hits = 0;
-
 my $good_cnt;
 my $bad_cnt;
 my $pass_num = 0;
@@ -278,36 +238,35 @@ my $pos;
 my %method_worked = ();
 my %method_failed = ();
 my $old_size = 1000000000;
-    
-sub delta_test ($) {
-    (my $method) = @_;
+ 
+sub delta_test ($$) {
+    (my $method, my $ok_to_enlarge) = @_;
     my $len = length ($prog);
     print "[$pass_num $method ($pos / $len) s:$good_cnt f:$bad_cnt] ";
 
-    # my $result = $cache{$prog};
-    my $result;
-
-    my $hit = 0;
+    my $result = $cache{$prog};
 
     if (defined($result)) {
 	$cache_hits++;
 	print "(hit) ";
-	$hit = 1;
-    } else {
-	write_file ();
-	$result = run_test ();
-	$cache{$prog} = $result;
-	$hit = 0;
+	print "failure\n";
+	read_file ();    
+	$bad_cnt++;
+	$method_failed{$method}++;
+	return 0;
     }
+    
+    write_file ();
+    $result = run_test ();
+    $cache{$prog} = $result;
     
     if ($result) {
 	print "success\n";
-	die if ($hit);
 	system "cp $cfile $cfile.bak";
 	$good_cnt++;
 	$method_worked{$method}++;
 	my $size = length ($prog);
-	die if ($size > $old_size);
+	die if (($size > $old_size) && !$ok_to_enlarge);
 	if ($size < $old_size) {
 	    %cache = ();
 	}
@@ -315,13 +274,19 @@ sub delta_test ($) {
 	return 1;
     } else {
 	print "failure\n";
-	if (!$hit) {
-	    system "cp $cfile.bak $cfile";
-	}
+	system "cp $cfile.bak $cfile";
 	read_file ();    
 	$bad_cnt++;
 	$method_failed{$method}++;
 	return 0;
+    }
+}
+
+sub sanity_check () {
+    print "sanity check... ";
+    my $res = run_test ();
+    if (!$res) {
+	die "test (and sanity check) fails";
     }
 }
 
@@ -332,78 +297,75 @@ sub delta_pass ($) {
     $good_cnt = 0;
     $bad_cnt = 0;
 
+    sanity_check();
+
+    print "========== starting pass <$method> ==========\n";
+
     while (1) {
 	return ($good_cnt > 0) if ($pos >= length ($prog));
 	my $worked = 0;
 
-	if ($method eq "replace_with_1") {
-	    my $rest = substr($prog, $pos);
-	    (my $success, my $start, my $end) = 
-		match_subexp ($rest, $pos);
-	    if ($success) {
-		my $del = substr ($prog, $start, $end-$start);
-		substr ($prog, $start, $end-$start) = "1";
-		($del =~ s/\s/ /g);
-		print "replacing '$del' at $start--$end : ";
-		$worked |= delta_test ($method);
-	    } 
-	} elsif ($method eq "replace_with_0") {
-	    my $rest = substr($prog, $pos);
-	    (my $success, my $start, my $end) = 
-		match_subexp ($rest, $pos);
-	    if ($success) {
-		my $del = substr ($prog, $start, $end-$start);
-		substr ($prog, $start, $end-$start) = "0";
-		($del =~ s/\s/ /g);
-		print "replacing '$del' at $start--$end : ";
-		$worked |= delta_test ($method);
-	    }
-	} elsif ($method eq "replace_with_nothing") {
-	    my $rest = substr($prog, $pos);
-	    (my $success, my $start, my $end) = 
-		match_subexp ($rest, $pos);
-	    if ($success) {
-		my $del = substr ($prog, $start, $end-$start);
-		substr ($prog, $start, $end-$start) = "";
-		($del =~ s/\s/ /g);
-		print "replacing '$del' at $start--$end : ";
-		$worked |= delta_test ($method);
-	    }
-	} elsif ($method eq "replace_regex") {
-	    foreach my $l (@regexes_to_replace) {
+	if ($method eq "replace_regex") {
+	    my $n=-1;
+	    foreach my $l (@regexes_to_replace) {	       
+		$n++;
 		my $str = @{$l}[0];
 		my $repl = @{$l}[1];
 		my $first = substr($prog, 0, $pos);
 		my $rest = substr($prog, $pos);
 		if ($rest =~ s/(^$str)/$repl/) {
-		    print "replacing '$1' with '$repl' at $pos : ";
+		    print "num $n replacing '$1' with '$repl' : ";
 		    $prog = $first.$rest;
-		    $worked |= delta_test ($method);
+		    if (delta_test ($method, 0)) {
+			$worked = 1;
+			$regex_worked{$n}++;
+		    } else {
+			$regex_failed{$n}++;
+		    }
+		}
+	    }
+	    $n=-1;
+	    foreach my $l (@delimited_regexes_to_replace) {
+		$n++;
+		my $str = @{$l}[0];
+		my $repl = @{$l}[1];
+		my $first = substr($prog, 0, $pos);
+		my $rest = substr($prog, $pos);
+		
+		# avoid infinite loops!
+		next if ($repl eq "0" && $rest =~ /^($borderorspc)0$borderorspc/);
+		next if ($repl eq "1" && $rest =~ /^($borderorspc)0$borderorspc/);
+		next if ($repl eq "0," && $rest =~ /^($borderorspc)0,$borderorspc/);
+		next if ($repl eq "1," && $rest =~ /^($borderorspc)0,$borderorspc/);
+
+		if ($rest =~ s/^(?<delim1>$borderorspc)(?<str>$str)(?<delim2>$borderorspc)/$+{delim1}$repl$+{delim2}/) {
+		    print "num $n delimited replacing '$+{str}' with '$repl' : ";
+		    $prog = $first.$rest;
+		    if (delta_test ($method, 0)) {
+			$worked = 1;
+			$delimited_regex_worked{$n}++;
+		    } else {
+			$delimited_regex_failed{$n}++;
+		    }
 		}
 	    }
 	} elsif ($method eq "del_blanks_all") {
 	    if ($prog =~ s/\s{2,}/ /g) {
-		$worked |= delta_test ($method);
-	    } else {
-		return 0;
+		$worked |= delta_test ($method, 0);
 	    }
+	    return 0;
+	} elsif ($method eq "indent") {	    
+	    write_file();
+	    system "indent $cfile";
+	    read_file();
+	    $worked |= delta_test ($method, 1);
+	    return 0;
 	} elsif ($method eq "del_blanks") {
 	    my $rest = substr($prog, $pos);
 	    if ($rest =~ /^(\s{2,})/) {
 		my $len = length ($1);
 		substr ($prog, $pos, $len) =  " ";
-		$worked |= delta_test ($method);
-	    }
-	} elsif ($method eq "parens_inclusive") {
-	    if (substr($prog, $pos, 1) eq "(") {
-		my $p2 = find_match ($pos+1,"(",")");
-		if ($p2 != -1) {
-		    die if (substr($prog, $pos, 1) ne "(");
-		    die if (substr($prog, $p2, 1) ne ")");
-		    substr ($prog, $pos, $p2-$pos+1) = "";
-		    print "deleting at $pos--$p2 : ";
-		    $worked |= delta_test ($method);
-		}
+		$worked |= delta_test ($method, 0);
 	    }
 	} elsif ($method eq "parens_exclusive") {
 	    if (substr($prog, $pos, 1) eq "(") {
@@ -414,20 +376,29 @@ sub delta_pass ($) {
 		    substr ($prog, $p2, 1) = "";
 		    substr ($prog, $pos, 1) = "";
 		    print "deleting at $pos--$p2 : ";
-		    $worked |= delta_test ($method);
+		    $worked |= delta_test ($method, 0);
 		}
 	    }
-	} elsif ($method eq "brackets_inclusive") {
-	    if (substr($prog, $pos, 1) eq "{") {
-		my $p2 = find_match ($pos+1,"{","}");
-		if ($p2 != -1) {
-		    die if (substr($prog, $pos, 1) ne "{");
-		    die if (substr($prog, $p2, 1) ne "}");
-		    substr ($prog, $pos, $p2-$pos+1) = "";
-		    print "deleting at $pos--$p2 : ";
-		    $worked |= delta_test ($method);
+	} elsif ($method eq "move_func") {
+	    my $first = substr($prog, 0, $pos);
+	    my $rest = substr($prog, $pos);
+	    my $proto2 = $proto;
+	    die if (!($proto2 =~ s/XXX/$fname/));
+	    if ($rest =~ /^($proto2)/) {
+		my $realproto = $1;
+		my $fname = $+{fname};
+		print "found prototype for '$fname'\n";
+		my $func2 = $func;
+		die if (!($func2 =~ s/XXX/$fname/));
+		if ($rest =~ s/($func2)//) {
+		    my $body = $1;
+		    print "got body!\n";
+		    print "replacing < $realproto > with < $body >\n";
+		    substr ($rest, 0, length($realproto)) = $body;
+		    $prog = $first.$rest;
+		    $worked |= delta_test ($method, 0);
 		}
-	    }	    
+	    } 
 	} elsif ($method eq "brackets_exclusive") {
 	    if (substr($prog, $pos, 1) eq "{") {
 		my $p2 = find_match ($pos+1,"{","}");
@@ -437,18 +408,7 @@ sub delta_pass ($) {
 		    substr ($prog, $p2, 1) = "";
 		    substr ($prog, $pos, 1) = "";
 		    print "deleting at $pos--$p2 : ";
-		    $worked |= delta_test ($method);
-		}
-	    }
-	} elsif ($method eq "calls") {
-	    foreach my $pref (keys %function_prefixes) {
-		my $s = substr ($prog, $pos, length ($pref));
-		if ($s eq $pref) {
-		    my $c = del_up_to_matching_parens ($pos, $pref);
-		    if ($c != -1) {
-			print " : ";
-			$worked |= delta_test ($method);
-		    }
+		    $worked |= delta_test ($method, 0);
 		}
 	    }
 	} else {
@@ -465,26 +425,17 @@ sub delta_pass ($) {
 
 my %all_methods = (
 
-    "del_blanks_all" => -1,
-    "del_blanks" => 0,
-
-    "brackets_inclusive" => 1,
-    "brackets_exclusive" => 4,
-
-    "parens_inclusive" => 2,
-    "parens_exclusive" => 5,
-
-    "calls" => 1,
-
-    "replace_with_0" => 6,
-    "replace_with_1" => 6,
-    "replace_with_nothing" => 6,
-
-    "replace_regex" => 7,
+    "del_blanks_all" => 0,
+    "del_blanks" => 1,
+    "move_func" => 2,
+    "brackets_exclusive" => 2,
+    "parens_exclusive" => 3,
+    "replace_regex" => 4,
+    "indent" => 5,
 
     );
  
-#################### main #####################
+############################### main #################################
 
 sub usage() {
     print "usage: c_delta.pl test_script.sh file.c [method [method ...]]\n";
@@ -532,12 +483,6 @@ foreach my $arg (@ARGV) {
     }
 }
 
-print "making sure test succeeds on initial input...\n";
-my $res = run_test ();
-if (!$res) {
-    die "test fails!";
-}
-
 system "cp $cfile $cfile.orig";
 system "cp $cfile $cfile.bak";
 
@@ -551,11 +496,16 @@ read_file ();
 
 while (1) {
     my $success = 0;
+    save_copy ("delta_backup_${pass_num}.c");
     foreach my $method (sort bymethod keys %methods) {
 	$success |= delta_pass ($method);
     }
     $pass_num++;
     last if (!$success);
+}
+
+sub bynum {
+    return $a <=> $b;
 }
 
 print "\n";
@@ -567,4 +517,25 @@ foreach my $method (sort keys %methods) {
     $f=0 unless defined($f);
     print "  method $method worked $w times and failed $f times\n";
 }
+
+print "\n";
+print "regex statistics:\n";
+foreach my $n (sort bynum keys %regex_failed) {
+    my $a = $regex_worked{$n};
+    my $b = $regex_failed{$n};
+    print "  $n s:$a f:$b\n";
+}
+
+print "\n";
+print "delimited regex statistics:\n";
+foreach my $n (sort bynum keys %delimited_regex_failed) {
+    my $a = $delimited_regex_worked{$n};
+    my $b = $delimited_regex_failed{$n};
+    print "  $n s:$a f:$b\n";
+}
+
+print "\n";
 print "there were $cache_hits cache hits\n";
+
+######################################################################
+
