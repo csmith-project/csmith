@@ -1,8 +1,26 @@
 #!/usr/bin/perl -w
 
+# This Delta debugger specifically targets C code. Its design point --
+# in two different senses -- is to be complementary to a line-based
+# Delta like this one:
+#
+#   http://delta.tigris.org/
+#
+# First, c_delta aims for maximum reduction and specifically targets
+# transformations not available to a language-independent Delta
+# debugger, such as reordering function calls.
+#
+# Second, c_delta is stupid in the sense that it generates a lot of
+# invalid code and also most of its changes do not reduce program size
+# by a large amount. Thus, it is best used as a second pass with a
+# faster Delta like the Berkeley one trimming the obviously irrelevant
+# code.
+
 use strict;
 use Regexp::Common;
 use re 'eval';
+
+# TODO:
 
 # print stats for individual regexes
 
