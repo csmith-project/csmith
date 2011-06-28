@@ -1,24 +1,26 @@
 #!/usr/bin/perl -w
 
+######################################################################
+#
 # This Delta debugger specifically targets C code. Its design point --
 # in two different senses -- is to be complementary to a line-based
 # Delta like this one:
 #
 #   http://delta.tigris.org/
 #
-# First, c_delta aims for maximum reduction and specifically targets
-# transformations not available to a language-independent Delta
-# debugger, such as reordering function calls.
+# The first sense is that c_delta aims for maximum reduction and
+# specifically targets transformations not available to a
+# language-independent Delta debugger. For example, c_delta makes
+# coordinated changes across the whole program (remove an array
+# dimension, remove a function argument, reorder function calls).
 #
 # Second, c_delta is stupid in the sense that it generates a lot of
 # invalid code and also most of its changes do not reduce program size
 # by a large amount. Thus, it is best used as a second pass with a
 # faster Delta like the Berkeley one trimming the obviously irrelevant
 # code.
-
-use strict;
-use Regexp::Common;
-use re 'eval';
+#
+####################################################################
 
 # TODO:
 
@@ -47,7 +49,17 @@ use re 'eval';
 
 # long term todo: rewrite this tool to operate on ASTs
 
+######################################################################
+
+use strict;
+use Regexp::Common;
+use re 'eval';
+
+######################################################################
+
 my $DEBUG = 0;
+
+######################################################################
 
 my $barevar = "\\-?[0-9a-zA-Z\_]+";
 my $field = "\\.($barevar)";
@@ -99,6 +111,11 @@ my @regexes_to_replace = (
     ['"(.*?)",', ""],
     );
 
+my %regex_worked;
+my %regex_failed;
+my %delimited_regex_worked;
+my %delimited_regex_failed;
+
 # these match when preceded and followed by $borderorspc
 my @delimited_regexes_to_replace = (
     ["($barevar)\\s*:", ""],
@@ -139,7 +156,7 @@ foreach my $x (@subexprs) {
     push @delimited_regexes_to_replace, ["$x,", ""];
 }
 
-#######################################################################
+######################################################################
 
 my $prog;
 
@@ -299,7 +316,12 @@ sub delta_pass ($) {
 		if ($rest =~ s/(^$str)/$repl/) {
 		    print "num $n replacing '$1' with '$repl' : ";
 		    $prog = $first.$rest;
-		    $worked |= delta_test ($method, 0);
+		    if (delta_test ($method, 0)) {
+			$worked = 1;
+			$regex_worked{$n}++;
+		    } else {
+			$regex_failed{$n}++;
+		    }
 		}
 	    }
 	    $n=-1;
@@ -319,7 +341,12 @@ sub delta_pass ($) {
 		if ($rest =~ s/^(?<delim1>$borderorspc)(?<str>$str)(?<delim2>$borderorspc)/$+{delim1}$repl$+{delim2}/) {
 		    print "num $n delimited replacing '$+{str}' with '$repl' : ";
 		    $prog = $first.$rest;
-		    $worked |= delta_test ($method, 0);
+		    if (delta_test ($method, 0)) {
+			$worked = 1;
+			$delimited_regex_worked{$n}++;
+		    } else {
+			$delimited_regex_failed{$n}++;
+		    }
 		}
 	    }
 	} elsif ($method eq "del_blanks_all") {
@@ -408,7 +435,7 @@ my %all_methods = (
 
     );
  
-#################### main #####################
+############################### main #################################
 
 sub usage() {
     print "usage: c_delta.pl test_script.sh file.c [method [method ...]]\n";
@@ -477,6 +504,10 @@ while (1) {
     last if (!$success);
 }
 
+sub bynum {
+    return $a <=> $b;
+}
+
 print "\n";
 print "statistics:\n";
 foreach my $method (sort keys %methods) {
@@ -486,4 +517,25 @@ foreach my $method (sort keys %methods) {
     $f=0 unless defined($f);
     print "  method $method worked $w times and failed $f times\n";
 }
+
+print "\n";
+print "regex statistics:\n";
+foreach my $n (sort bynum keys %regex_failed) {
+    my $a = $regex_worked{$n};
+    my $b = $regex_failed{$n};
+    print "  $n s:$a f:$b\n";
+}
+
+print "\n";
+print "delimited regex statistics:\n";
+foreach my $n (sort bynum keys %delimited_regex_failed) {
+    my $a = $delimited_regex_worked{$n};
+    my $b = $delimited_regex_failed{$n};
+    print "  $n s:$a f:$b\n";
+}
+
+print "\n";
 print "there were $cache_hits cache hits\n";
+
+######################################################################
+
