@@ -54,6 +54,7 @@
 #include "Fact.h"
 #include "FactMgr.h"
 #include "FactPointTo.h"
+#include "FactUnion.h"
 #include "random.h"
 #include "util.h"
 #include "Lhs.h"
@@ -983,8 +984,13 @@ void
 Variable::hash(std::ostream& out) const
 {  
 	if (type->is_aggregate()) {
-        size_t i;
+        size_t i; 
+		FactMgr* fm = get_fact_mgr_for_func(GetFirstFunction()); 
 		for (i=0; i<field_vars.size(); i++) {
+			if (type->eType == eUnion && !FactUnion::is_field_readable(this, i, fm->global_facts)) { 
+				// don't read union fields that is not last written into or have possible padding bits 
+				continue;
+			}
 			field_vars[i]->hash(out);
 		}
     } 
