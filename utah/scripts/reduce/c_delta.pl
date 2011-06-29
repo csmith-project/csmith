@@ -24,19 +24,10 @@
 
 # TODO:
 
-# print percent reduction in "status bar"
-
-# watch for unexpected abnormal compiler outputs
+# tweak options to "indent"
 
 # add passes to 
-#   remove digits from numbers to make them smaller
 #   turn checksum calls into regular printfs
-
-# write code to adapatively run multiple instances of a 
-#   transformation when this has good expected value
-#   measure cost of success vs. failure, take into account
-#   proabability of success
-# eventually back off to linear scan
 
 # harder
 #   transform a function to return void
@@ -46,6 +37,15 @@
 #   remove level of pointer indirection
 #   remove array dimension
 #   remove argument from function, including all calls
+
+# write code to adapatively run multiple instances of a 
+#   transformation when this has good expected value
+#   measure cost of success vs. failure, take into account
+#   proabability of success
+# eventually back off to linear scan
+# could run on multiple cores once randomization is added
+
+# watch for unexpected abnormal compiler outputs
 
 # long term todo: rewrite this tool to operate on ASTs
 
@@ -61,10 +61,10 @@ my $DEBUG = 0;
 
 ######################################################################
 
-my $barevar = "\\-?[0-9a-zA-Z\_]+";
-my $field = "\\.($barevar)";
-my $index = "\\\[($barevar)\\\]";
-my $var = "([\\&\\*]*)($barevar)(($field)|($index))*";
+my $varnum = "(\\-?|\\+?)[0-9a-zA-Z\_]+";
+my $field = "\\.($varnum)";
+my $index = "\\\[($varnum)\\\]";
+my $fullvar = "([\\&\\*]*)($varnum)(($field)|($index))*";
 my $arith = "\\+|\\-|\\%|\\/|\\*";
 my $comp = "\\<\\=|\\>\\=|\\<|\\>|\\=\\=|\\!\\=|\\=";
 my $logic = "\\&\\&|\\|\\|";
@@ -74,17 +74,11 @@ my $border = "[\\*\\{\\(\\[\\:\\,\\}\\)\\]\\;\\,]";
 my $borderorspc = "(($border)|(\\s))";
 my $rettype = "int|void|short|long|char|signed|unsigned|const|static|(union\\s+U[0-9]+)|(struct\\s+S[0-9+])";
 my $functype = "(($rettype)\\s*|\\*\\s*)+";
-my $fname = "(?<fname>$barevar)";
-my $funcstart_orig = "$functype\\s+(?<fname>$barevar)\\s*$RE{balanced}{-parens=>'()'}";
+my $fname = "(?<fname>$varnum)";
+my $funcstart_orig = "$functype\\s+(?<fname>$varnum)\\s*$RE{balanced}{-parens=>'()'}";
 my $funcstart = "$functype\\s+XXX\\s*$RE{balanced}{-parens=>'()'}";
 my $proto = "$funcstart;";
 my $func = "$funcstart\\s*$RE{balanced}{-parens=>'{}'}";
-
-#print "$field\n";
-#print "$index\n";
-#print "$border\n";
-#print "$var1\n";
-#print "$var2\n";
 
 # these match without additional qualification
 my @regexes_to_replace = (
@@ -113,8 +107,8 @@ my @regexes_to_replace = (
 
 # these match when preceded and followed by $borderorspc
 my @delimited_regexes_to_replace = (
-    ["($barevar)\\s*:", ""],
-    ["goto\\s+($barevar);", ""],
+    ["($varnum)\\s*:", ""],
+    ["goto\\s+($varnum);", ""],
     ["char", "int"],
     ["short", "int"],
     ["long", "int"],
@@ -126,20 +120,19 @@ my @delimited_regexes_to_replace = (
     ["if\\s+\\(.*?\\)", ""],
     ["struct.*?;", ""],
     ["union.*?;", ""],
-    ["($rettype)\\s+($var)\\s+$RE{balanced}{-parens=>'()'}\\s+$RE{balanced}{-parens=>'{}'}", ""],
-    ["($rettype)\\s+($barevar)\\s+$RE{balanced}{-parens=>'()'}\\s+$RE{balanced}{-parens=>'{}'}", ""],
-    ["$barevar\\s*$RE{balanced}{-parens=>'()'},", "0"],
-    ["$barevar\\s*$RE{balanced}{-parens=>'()'},", ""],
-    ["$barevar\\s*$RE{balanced}{-parens=>'()'}", "0"],
-    ["$barevar\\s*$RE{balanced}{-parens=>'()'}", ""],
+    ["($functype)\\s*($varnum)\\s*$RE{balanced}{-parens=>'()'}\\s*$RE{balanced}{-parens=>'{}'}", ""],
+    ["$varnum\\s*$RE{balanced}{-parens=>'()'},", "0"],
+    ["$varnum\\s*$RE{balanced}{-parens=>'()'},", ""],
+    ["$varnum\\s*$RE{balanced}{-parens=>'()'}", "0"],
+    ["$varnum\\s*$RE{balanced}{-parens=>'()'}", ""],
     );
 
 my @subexprs = (
-    "($var)(\\s*)($binop)(\\s*)($var)",
-    "($var)(\\s*)($binop)",
-    "($binop)(\\s*)($var)",
-    "($var)",
-    "($var)(\\s*\\?\\s*)($var)(\\s*\\:\\s*)($var)",
+    "($fullvar)(\\s*)($binop)(\\s*)($fullvar)",
+    "($fullvar)(\\s*)($binop)",
+    "($binop)(\\s*)($fullvar)",
+    "($fullvar)",
+    "($fullvar)(\\s*\\?\\s*)($fullvar)(\\s*\\:\\s*)($fullvar)",
     );
 
 foreach my $x (@subexprs) {
@@ -167,6 +160,12 @@ for (my $n=0; $n<scalar(@delimited_regexes_to_replace); $n++) {
 ######################################################################
 
 my $prog;
+my $orig_prog_len;
+
+sub print_pct () {
+    my $pct = length($prog)*100.0/$orig_prog_len;
+    printf "(%.1f %%)\n", $pct;
+}
 
 sub find_match ($$$) {
     (my $p2, my $s1, my $s2) = @_;
@@ -233,7 +232,7 @@ sub runit ($) {
 }
 
 sub run_test () {
-    my $res = runit "./$test";
+    my $res = runit "./$test >/dev/null 2>&1";
     return ($res == 0);
 }
 
@@ -269,7 +268,8 @@ sub delta_test ($$) {
     $cache{$prog} = $result;
     
     if ($result) {
-	print "success\n";
+	print "success ";
+	print_pct();
 	system "cp $cfile $cfile.bak";
 	$good_cnt++;
 	$method_worked{$method}++;
@@ -296,6 +296,7 @@ sub sanity_check () {
     if (!$res) {
 	die "test (and sanity check) fails";
     }
+    print "successful\n";
 }
 
 sub delta_pass ($) {
@@ -307,6 +308,7 @@ sub delta_pass ($) {
 
     sanity_check();
 
+    print "\n";
     print "========== starting pass <$method> ==========\n";
 
     while (1) {
@@ -340,7 +342,7 @@ sub delta_pass ($) {
 		my $first = substr($prog, 0, $pos);
 		my $rest = substr($prog, $pos);
 		
-		# avoid infinite loops!
+		# avoid infinite replacement loops!
 		next if ($repl eq "0" && $rest =~ /^($borderorspc)0$borderorspc/);
 		next if ($repl eq "0," && $rest =~ /^($borderorspc)0,$borderorspc/);
 		next if ($repl eq "1" && $rest =~ /^($borderorspc)0$borderorspc/);
@@ -409,6 +411,32 @@ sub delta_pass ($) {
 		    $worked |= delta_test ($method, 0);
 		}
 	    } 
+	} elsif ($method eq "shorten_ints") {
+	    my $first = substr($prog, 0, $pos);
+	    my $rest = substr($prog, $pos);
+	    if ($rest =~ s/^(?<pref>$borderorspc(\\-|\\+)?(0|(0[xX]))?)(?<del>[0-9a-fA-F])(?<numpart>[0-9a-fA-F]+)(?<suf>[ULul]*$borderorspc)/$+{pref}$+{numpart}$+{suf}/) {
+		$prog = $first.$rest;
+		my $n1 = "$+{pref}$+{del}$+{numpart}$+{suf}";
+		my $n2 = "$+{pref}$+{numpart}$+{suf}";
+		print "replacing $n1 with $n2\n";
+		$worked |= delta_test ($method, 0);
+	    }      
+	    my $orig_rest = $rest;
+	    if ($rest =~ s/^(?<pref1>$borderorspc)(?<pref2>(\\-|\\+)?(0|(0[xX]))?)(?<numpart>[0-9a-fA-F]+)(?<suf>[ULul]*$borderorspc)/$+{pref1}$+{numpart}$+{suf}/ && ($rest ne $orig_rest)) {
+		$prog = $first.$rest;
+		my $n1 = "$+{pref1}$+{pref2}$+{numpart}$+{suf}";
+		my $n2 = "$+{pref1}$+{numpart}$+{suf}";
+		print "replacing $n1 with $n2\n";
+		$worked |= delta_test ($method, 0);
+	    }     
+	    $orig_rest = $rest;
+	    if ($rest =~ s/^(?<pref>$borderorspc(\\-|\\+)?(0|(0[xX]))?)(?<numpart>[0-9a-fA-F]+)(?<suf1>[ULul]*)(?<suf2>$borderorspc)/$+{pref}$+{numpart}$+{suf2}/ && ($rest ne $orig_rest)) {
+		$prog = $first.$rest;
+		my $n1 = "$+{pref}$+{numpart}$+{suf1}$+{suf2}";
+		my $n2 = "$+{pref}$+{numpart}$+{suf2}";
+		print "replacing $n1 with $n2\n";
+		$worked |= delta_test ($method, 0);
+	    }      
 	} elsif ($method eq "brackets_exclusive") {
 	    if (substr($prog, $pos, 1) eq "{") {
 		my $p2 = find_match ($pos+1,"{","}");
@@ -441,7 +469,8 @@ my %all_methods = (
     "brackets_exclusive" => 2,
     "parens_exclusive" => 3,
     "replace_regex" => 4,
-    "indent" => 5,
+    "shorten_ints" => 5,
+    "indent" => 15,
 
     );
  
@@ -503,6 +532,7 @@ sub bymethod {
 # iterate to global fixpoint
 
 read_file ();    
+$orig_prog_len = length ($prog);
 
 while (1) {
     my $success = 0;
@@ -514,12 +544,14 @@ while (1) {
     last if (!$success);
 }
 
-sub bynum {
-    return $a <=> $b;
-}
+print "===================== done ====================\n";
 
 print "\n";
-print "statistics:\n";
+print "overall reduction: ";
+print_pct();
+
+print "\n";
+print "pass statistics:\n";
 foreach my $method (sort keys %methods) {
     my $w = $method_worked{$method};
     $w=0 unless defined($w);
