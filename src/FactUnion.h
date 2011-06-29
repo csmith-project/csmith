@@ -59,6 +59,7 @@ public:
 	virtual const Variable* get_var(void) const { return var;};
 	const Type* get_last_written_type(void) const;
 	int   get_last_written_fid(void) const { return last_written_fid; };
+	static bool is_field_readable(const Variable* v, int fid, const vector<const Fact*>& facts);
 	
 	// lattice functions
 	virtual bool is_top(void) const { return last_written_fid == TOP;}

@@ -275,6 +275,15 @@ FactUnion::imply(const Fact& f) const
 	return false;
 }
  
+bool
+FactUnion::is_field_readable(const Variable* v, int fid, const vector<const Fact*>& facts)
+{
+	assert(v->type->eType == eUnion && fid >=0 && fid < v->type->fields.size());
+	FactUnion tmp(v, fid);
+	const FactUnion* fu = dynamic_cast<const FactUnion*>(find_related_fact(facts, &tmp));
+	return (fu && tmp.imply(*fu)) ;
+}
+
 void 
 FactUnion::Output(std::ostream &out) const
 { 
