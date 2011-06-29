@@ -18,7 +18,10 @@
 # invalid code and also most of its changes do not reduce program size
 # by a large amount. Thus, it is best used as a second pass with a
 # faster Delta like the Berkeley one trimming the obviously irrelevant
-# code.
+# code. Actually, generating syntactically invalid code is not a
+# performance problem at all: these are discarded very quickly be a
+# typical "interestingness" script. The vast majority of a Delta's
+# time is spent checking interestingness of syntactically valid code.
 #
 ####################################################################
 
@@ -29,7 +32,7 @@
 # add passes to 
 #   turn checksum calls into regular printfs
 
-# harder
+# not so easy
 #   transform a function to return void
 #   inline a function call
 #   un-nest nested calls in expressions
@@ -37,6 +40,7 @@
 #   remove level of pointer indirection
 #   remove array dimension
 #   remove argument from function, including all calls
+#   turn a union type into a struct
 
 # write code to adapatively run multiple instances of a 
 #   transformation when this has good expected value
@@ -44,6 +48,8 @@
 #   proabability of success
 # eventually back off to linear scan
 # could run on multiple cores once randomization is added
+# also, run the more expensive test (with chucky's tool) even
+# less often
 
 # watch for unexpected abnormal compiler outputs
 
@@ -58,6 +64,7 @@ use re 'eval';
 ######################################################################
 
 my $DEBUG = 0;
+my $INDENT_OPTS = "-bad -bap -bc -cs -pcs -prs -saf -sai -saw -sob -ss -bl ";
 
 ######################################################################
 
@@ -165,7 +172,7 @@ my $prog;
 my $orig_prog_len;
 
 sub print_pct () {
-    my $pct = length($prog)*100.0/$orig_prog_len;
+    my $pct = 100 - (length($prog)*100.0/$orig_prog_len);
     printf "(%.1f %%)\n", $pct;
 }
 
@@ -363,14 +370,15 @@ sub delta_pass ($) {
 		    }
 		}
 	    }
-	} elsif ($method eq "blanks_all") {
-	    if ($prog =~ s/\s{2,}/ /g) {
+	} elsif ($method eq "all_blanks") {
+	    if ($prog =~ s/\s{2,}/ /g ||
+		$prog =~ s/:(\S)/:\n$1/g) {
 		$worked |= delta_test ($method, 0);
 	    }
 	    return 0;
 	} elsif ($method eq "indent") {	    
 	    write_file();
-	    system "indent $cfile";
+	    system "indent $INDENT_OPTS $cfile";
 	    read_file();
 	    $worked |= delta_test ($method, 1);
 	    return 0;
@@ -381,38 +389,40 @@ sub delta_pass ($) {
 		substr ($prog, $pos, $len) =  " ";
 		$worked |= delta_test ($method, 0);
 	    }
-	} elsif ($method eq "parens_exclusive") {
-	    if (substr($prog, $pos, 1) eq "(") {
-		my $p2 = find_match ($pos+1,"(",")");
-		if ($p2 != -1) {
-		    die if (substr($prog, $pos, 1) ne "(");
-		    die if (substr($prog, $p2, 1) ne ")");
-		    substr ($prog, $p2, 1) = "";
-		    substr ($prog, $pos, 1) = "";
-		    print "deleting at $pos--$p2 : ";
-		    $worked |= delta_test ($method, 0);
-		}
-	    }
 	} elsif ($method eq "move_func") {
 	    my $first = substr($prog, 0, $pos);
 	    my $rest = substr($prog, $pos);
 	    my $proto2 = $proto;
 	    die if (!($proto2 =~ s/XXX/$fname/));
-	    if ($rest =~ /^($proto2)/) {
+	    my $proto_start;
+	    my $proto_end;
+	    my $func_start;
+	    my $func_end;
+	    if ($rest =~ /^($borderorspc$proto2)/) {
 		my $realproto = $1;
+		$proto_start = length($first) + $-[0];
+		$proto_end = length($first) + $+[0];
 		my $fname = $+{fname};
 		print "found prototype for '$fname'\n";
 		my $func2 = $func;
 		die if (!($func2 =~ s/XXX/$fname/));
-		if ($rest =~ s/($func2)//) {
+		if ($rest =~ /($func2)/) {
 		    my $body = $1;
-		    print "got body!\n";
-		    print "replacing < $realproto > with < $body >\n";
-		    substr ($rest, 0, length($realproto)) = $body;
-		    $prog = $first.$rest;
-		    $worked |= delta_test ($method, 0);
+		    $func_start = length ($first) + $-[0];
+		    $func_end = length ($first) + $+[0];
+		    print "got body as well\n";
 		}
-	    } 
+	    }
+
+	    if (defined($proto_start) && defined($func_start)) {
+		my $proto = substr ($prog, $proto_start, $proto_end - $proto_start);
+		my $bod = substr ($prog, $func_start, $func_end - $func_start, "");
+		substr ($prog, $proto_start, $proto_end - $proto_start) = $bod;
+		print "replacing < $proto > with < $bod >\n";	       
+	        $worked |= delta_test ($method, 0);
+		$pos += $proto_end - $proto_start;
+	    }
+
 	} elsif ($method eq "ternary") {
 	    my $first = substr($prog, 0, $pos);
 	    my $rest = substr($prog, $pos);
@@ -462,16 +472,44 @@ sub delta_pass ($) {
 		print "replacing $n1 with $n2\n";
 		$worked |= delta_test ($method, 0);
 	    }      
-	} elsif ($method eq "brackets_exclusive") {
+	} elsif ($method eq "parens") {
+	    if (substr($prog, $pos, 1) eq "(") {
+		my $p2 = find_match ($pos+1,"(",")");
+		if ($p2 != -1) {
+		    die if (substr($prog, $pos, 1) ne "(");
+		    die if (substr($prog, $p2, 1) ne ")");
+
+		    my $del = substr ($prog, $pos, $p2-$pos+1, "");
+		    print "deleting '$del' at $pos--$p2 : ";
+		    my $res = delta_test ($method, 0);
+		    $worked |= $res;
+
+		    if (!$res) {
+			substr ($prog, $p2, 1) = "";
+			substr ($prog, $pos, 1) = "";
+			print "deleting at $pos--$p2 : ";
+			$worked |= delta_test ($method, 0);
+		    }
+		}
+	    }
+	} elsif ($method eq "brackets") {
 	    if (substr($prog, $pos, 1) eq "{") {
 		my $p2 = find_match ($pos+1,"{","}");
 		if ($p2 != -1) {
 		    die if (substr($prog, $pos, 1) ne "{");
 		    die if (substr($prog, $p2, 1) ne "}");
-		    substr ($prog, $p2, 1) = "";
-		    substr ($prog, $pos, 1) = "";
-		    print "deleting at $pos--$p2 : ";
-		    $worked |= delta_test ($method, 0);
+
+		    my $del = substr ($prog, $pos, $p2-$pos+1, "");
+		    print "deleting '$del' at $pos--$p2 : ";
+		    my $res = delta_test ($method, 0);
+		    $worked |= $res;
+
+		    if (!$res) {
+			substr ($prog, $p2, 1) = "";
+			substr ($prog, $pos, 1) = "";
+			print "deleting at $pos--$p2 : ";
+			$worked |= delta_test ($method, 0);
+		    }
 		}
 	    }
 	} else {
@@ -488,12 +526,12 @@ sub delta_pass ($) {
 
 my %all_methods = (
 
-    "blanks_all" => 0,
+    "all_blanks" => 0,
     "blanks" => 1,
     "move_func" => 2,
-    "brackets_exclusive" => 2,
+    "brackets" => 2,
     "ternary" => 2,
-    "parens_exclusive" => 3,
+    "parens" => 3,
     "replace_regex" => 4,
     "shorten_ints" => 5,
     "indent" => 15,
