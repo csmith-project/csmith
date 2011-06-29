@@ -62,9 +62,10 @@ my $DEBUG = 0;
 ######################################################################
 
 my $varnum = "(\\-?|\\+?)[0-9a-zA-Z\_]+";
+my $varnumexp = "($varnum)|($RE{balanced}{-parens=>'()'})";
 my $field = "\\.($varnum)";
 my $index = "\\\[($varnum)\\\]";
-my $fullvar = "([\\&\\*]*)($varnum)(($field)|($index))*";
+my $fullvar = "([\\&\\*]*)($varnumexp)(($field)|($index))*";
 my $arith = "\\+|\\-|\\%|\\/|\\*";
 my $comp = "\\<\\=|\\>\\=|\\<|\\>|\\=\\=|\\!\\=|\\=";
 my $logic = "\\&\\&|\\|\\|";
@@ -107,7 +108,7 @@ my @regexes_to_replace = (
 
 # these match when preceded and followed by $borderorspc
 my @delimited_regexes_to_replace = (
-    ["($varnum)\\s*:", ""],
+    ["($varnumexp)\\s*:", ""],
     ["goto\\s+($varnum);", ""],
     ["char", "int"],
     ["short", "int"],
@@ -139,9 +140,10 @@ foreach my $x (@subexprs) {
     push @delimited_regexes_to_replace, ["$x", "0"];
     push @delimited_regexes_to_replace, ["$x", "1"];
     push @delimited_regexes_to_replace, ["$x", ""];
-    push @delimited_regexes_to_replace, ["$x,", "0,"];
-    push @delimited_regexes_to_replace, ["$x,", "1,"];
-    push @delimited_regexes_to_replace, ["$x,", ""];
+    push @delimited_regexes_to_replace, ["$x\\s*,", "0,"];
+    push @delimited_regexes_to_replace, ["$x\\s*,", "1,"];
+    push @delimited_regexes_to_replace, ["$x\\s*,", ""];
+    push @delimited_regexes_to_replace, [",\\s*$x", ""];
 }
 
 my %regex_worked;
@@ -324,7 +326,7 @@ sub delta_pass ($) {
 		my $first = substr($prog, 0, $pos);
 		my $rest = substr($prog, $pos);
 		if ($rest =~ s/(^$str)/$repl/) {
-		    print "num $n replacing '$1' with '$repl' : ";
+		    print "regex $n replacing '$1' with '$repl' : ";
 		    $prog = $first.$rest;
 		    if (delta_test ($method, 0)) {
 			$worked = 1;
@@ -351,7 +353,7 @@ sub delta_pass ($) {
 		next if ($repl eq "1," && $rest =~ /^($borderorspc)1,$borderorspc/);
 
 		if ($rest =~ s/^(?<delim1>$borderorspc)(?<str>$str)(?<delim2>$borderorspc)/$+{delim1}$repl$+{delim2}/) {
-		    print "num $n delimited replacing '$+{str}' with '$repl' : ";
+		    print "regex $n delimited replacing '$+{str}' with '$repl' : ";
 		    $prog = $first.$rest;
 		    if (delta_test ($method, 0)) {
 			$worked = 1;
@@ -361,7 +363,7 @@ sub delta_pass ($) {
 		    }
 		}
 	    }
-	} elsif ($method eq "del_blanks_all") {
+	} elsif ($method eq "blanks_all") {
 	    if ($prog =~ s/\s{2,}/ /g) {
 		$worked |= delta_test ($method, 0);
 	    }
@@ -372,7 +374,7 @@ sub delta_pass ($) {
 	    read_file();
 	    $worked |= delta_test ($method, 1);
 	    return 0;
-	} elsif ($method eq "del_blanks") {
+	} elsif ($method eq "blanks") {
 	    my $rest = substr($prog, $pos);
 	    if ($rest =~ /^(\s{2,})/) {
 		my $len = length ($1);
@@ -411,6 +413,25 @@ sub delta_pass ($) {
 		    $worked |= delta_test ($method, 0);
 		}
 	    } 
+	} elsif ($method eq "ternary") {
+	    my $first = substr($prog, 0, $pos);
+	    my $rest = substr($prog, $pos);
+	    if ($rest =~ s/^(?<del1>$borderorspc)(?<a>$varnumexp)\s*\?\s*(?<b>$varnumexp)\s*:\s*(?<c>$varnumexp)(?<del2>$borderorspc)/$+{del1}$+{b}$+{del2}/) {
+		$prog = $first.$rest;
+		my $n1 = "$+{del1}$+{a} ? $+{b} : $+{c}$+{del2}";
+		my $n2 = "$+{del1}$+{b}$+{del2}";
+		print "replacing $n1 with $n2\n";
+		$worked |= delta_test ($method, 0);
+	    }	    
+	    $first = substr($prog, 0, $pos);
+	    $rest = substr($prog, $pos);
+	    if ($rest =~ s/^(?<del1>$borderorspc)(?<a>$varnumexp)\s*\?\s*(?<b>$varnumexp)\s*:\s*(?<c>$varnumexp)(?<del2>$borderorspc)/$+{del1}$+{c}$+{del2}/) {
+		$prog = $first.$rest;
+		my $n1 = "$+{del1}$+{a} ? $+{b} : $+{c}$+{del2}";
+		my $n2 = "$+{del1}$+{c}$+{del2}";
+		print "replacing $n1 with $n2\n";
+		$worked |= delta_test ($method, 0);
+	    }	    
 	} elsif ($method eq "shorten_ints") {
 	    my $first = substr($prog, 0, $pos);
 	    my $rest = substr($prog, $pos);
@@ -421,6 +442,8 @@ sub delta_pass ($) {
 		print "replacing $n1 with $n2\n";
 		$worked |= delta_test ($method, 0);
 	    }      
+	    $first = substr($prog, 0, $pos);
+	    $rest = substr($prog, $pos);
 	    my $orig_rest = $rest;
 	    if ($rest =~ s/^(?<pref1>$borderorspc)(?<pref2>(\\-|\\+)?(0|(0[xX]))?)(?<numpart>[0-9a-fA-F]+)(?<suf>[ULul]*$borderorspc)/$+{pref1}$+{numpart}$+{suf}/ && ($rest ne $orig_rest)) {
 		$prog = $first.$rest;
@@ -429,6 +452,8 @@ sub delta_pass ($) {
 		print "replacing $n1 with $n2\n";
 		$worked |= delta_test ($method, 0);
 	    }     
+	    $first = substr($prog, 0, $pos);
+	    $rest = substr($prog, $pos);
 	    $orig_rest = $rest;
 	    if ($rest =~ s/^(?<pref>$borderorspc(\\-|\\+)?(0|(0[xX]))?)(?<numpart>[0-9a-fA-F]+)(?<suf1>[ULul]*)(?<suf2>$borderorspc)/$+{pref}$+{numpart}$+{suf2}/ && ($rest ne $orig_rest)) {
 		$prog = $first.$rest;
@@ -463,10 +488,11 @@ sub delta_pass ($) {
 
 my %all_methods = (
 
-    "del_blanks_all" => 0,
-    "del_blanks" => 1,
+    "blanks_all" => 0,
+    "blanks" => 1,
     "move_func" => 2,
     "brackets_exclusive" => 2,
+    "ternary" => 2,
     "parens_exclusive" => 3,
     "replace_regex" => 4,
     "shorten_ints" => 5,
