@@ -171,6 +171,16 @@ std::vector<const Fact*>
 FactPointTo::abstract_fact_for_assign(const std::vector<const Fact*>& facts, const Lhs* lhs, const Expression* rhs)
 {   
 	std::vector<const Fact*> ret_facts;
+	// special case: the first union field is a pointer, and is initialized by a string initializer
+	// JYTODO: uncomment and fix an assertin failure it causes
+	if (lhs->get_var()->type->eType == eUnion && lhs->get_indirect_level() == 0) {
+		/*assert(!lhs->get_var()->field_vars.empty()); 
+		const Variable* f1 = lhs->get_var()->field_vars[0];
+		if (f1->type->eType == ePointer && rhs->term_type == eConstant) {
+			Lhs tmp(*f1);
+			return abstract_fact_for_assign(facts, &tmp, rhs);
+		}*/
+	}
 	// return empty set if lhs is not pointer
 	if (lhs->get_type().eType != ePointer) {
 		return ret_facts;

@@ -213,7 +213,7 @@ public:
 	const Type* get_base_type(void) const;
 	int get_indirect_level(void) const;
 	int get_struct_depth(void) const;
-	void get_int_subfield_names(string prefix, vector<string>& names) const;
+	void get_int_subfield_names(string prefix, vector<string>& names, const vector<int>& excluded_fields) const;
 	bool is_signed(void) const;
 	const Type* to_unsigned(void) const;
 	bool is_pointer_to_char(void) const { return ptr_type && ptr_type->eType == eSimple && (ptr_type->simple_type==eChar || ptr_type->simple_type==eUChar);}

@@ -1465,7 +1465,7 @@ Type::SelectLType(bool no_volatile, eAssignOps op)
 }
 
 void 
-Type::get_int_subfield_names(string prefix, vector<string>& names) const
+Type::get_int_subfield_names(string prefix, vector<string>& names, const vector<int>& excluded_fields) const
 {
 	if (eType == eSimple) {
 		names.push_back(prefix);
@@ -1475,12 +1475,14 @@ Type::get_int_subfield_names(string prefix, vector<string>& names) const
 		size_t j = 0;
 		for (i=0; i<fields.size(); i++) {
 			// skip 0 length bitfields
-			if (is_unamed_padding(i)) {
+			if (std::find(excluded_fields.begin(), excluded_fields.end(), i) != excluded_fields.end() ||
+				is_unamed_padding(i)) {
 				continue;
 			}
 			ostringstream oss;
 			oss << prefix << ".f" << j++;
-			fields[i]->get_int_subfield_names(oss.str(), names);
+			vector<int> empty;
+			fields[i]->get_int_subfield_names(oss.str(), names, empty);
 		}
 	}
 }
