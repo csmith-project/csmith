@@ -27,11 +27,6 @@
 
 # TODO:
 
-# tweak options to "indent"
-
-# add passes to 
-#   turn checksum calls into regular printfs
-
 # not so easy
 #   transform a function to return void
 #   inline a function call
@@ -308,6 +303,33 @@ sub sanity_check () {
     print "successful\n";
 }
 
+sub func_func () {
+    my $first = substr($prog, 0, $pos);
+    my $rest = substr($prog, $pos);
+    my $proto2 = $proto;
+    die if (!($proto2 =~ s/XXX/$fname/));
+    my $proto_start;
+    my $proto_end;
+    my $func_start;
+    my $func_end;
+    if ($rest =~ /^($borderorspc$proto2)/) {
+	my $realproto = $1;
+	$proto_start = length($first) + $-[0];
+	$proto_end = length($first) + $+[0];
+	my $fname = $+{fname};
+	print "found prototype for '$fname'\n";
+	my $func2 = $func;
+	die if (!($func2 =~ s/XXX/$fname/));
+	if ($rest =~ /($func2)/) {
+	    my $body = $1;
+	    $func_start = length ($first) + $-[0];
+	    $func_end = length ($first) + $+[0];
+	    print "got body as well\n";
+	}
+    }
+    return ($proto_start, $proto_end, $func_start, $func_end);
+}
+
 sub delta_pass ($) {
     (my $method) = @_;
     
@@ -332,14 +354,24 @@ sub delta_pass ($) {
 		my $repl = @{$l}[1];
 		my $first = substr($prog, 0, $pos);
 		my $rest = substr($prog, $pos);
+		my $rrest = $rest;
 		if ($rest =~ s/(^$str)/$repl/) {
-		    print "regex $n replacing '$1' with '$repl' : ";
-		    $prog = $first.$rest;
-		    if (delta_test ($method, 0)) {
-			$worked = 1;
-			$regex_worked{$n}++;
-		    } else {
-			$regex_failed{$n}++;
+		    my $before = $1;
+		    my $zz1 = $rest;
+		    my $zz2 = $rrest;
+		    ($zz1 =~ s/\s//g);
+		    ($zz2 =~ s/\s//g);
+		    if ($zz1 ne $zz2) {
+			print "regex $n replacing '$before' with '$repl' : ";
+			$prog = $first.$rest;
+			if (delta_test ($method, 0)) {
+			    #print "\n\n$zz1\n\n";
+			    #print "\n\n$zz2\n\n";
+			    $worked = 1;
+			    $regex_worked{$n}++;
+			} else {
+			    $regex_failed{$n}++;
+			}
 		    }
 		}
 	    }
@@ -353,67 +385,71 @@ sub delta_pass ($) {
 		
 		# avoid infinite replacement loops!
 		next if ($repl eq "0" && $rest =~ /^($borderorspc)0$borderorspc/);
-		next if ($repl eq "0," && $rest =~ /^($borderorspc)0,$borderorspc/);
+		next if ($repl =~ /0\s*,/ && $rest =~ /^($borderorspc)0\s*,$borderorspc/);
 		next if ($repl eq "1" && $rest =~ /^($borderorspc)0$borderorspc/);
-		next if ($repl eq "1," && $rest =~ /^($borderorspc)0,$borderorspc/);
+		next if ($repl =~ /1\s*,/ && $rest =~ /^($borderorspc)0\s*,$borderorspc/);
 		next if ($repl eq "1" && $rest =~ /^($borderorspc)1$borderorspc/);
-		next if ($repl eq "1," && $rest =~ /^($borderorspc)1,$borderorspc/);
+		next if ($repl =~ /1\s*,/ && $rest =~ /^($borderorspc)1,$borderorspc/);
 
+		my $rrest = $rest;
 		if ($rest =~ s/^(?<delim1>$borderorspc)(?<str>$str)(?<delim2>$borderorspc)/$+{delim1}$repl$+{delim2}/) {
-		    print "regex $n delimited replacing '$+{str}' with '$repl' : ";
-		    $prog = $first.$rest;
-		    if (delta_test ($method, 0)) {
-			$worked = 1;
-			$delimited_regex_worked{$n}++;
-		    } else {
-			$delimited_regex_failed{$n}++;
+		    my $before = $+{str};
+		    my $zz1 = $rest;
+		    my $zz2 = $rrest;
+		    ($zz1 =~ s/\s//g);
+		    ($zz2 =~ s/\s//g);
+		    if ($zz1 ne $zz2) {
+			print "regex $n delimited replacing '$before' with '$repl' : ";
+			$prog = $first.$rest;
+			if (delta_test ($method, 0)) {
+			    $worked = 1;
+			    $delimited_regex_worked{$n}++;
+			} else {
+			    $delimited_regex_failed{$n}++;
+			}
 		    }
 		}
 	    }
 	} elsif ($method eq "all_blanks") {
-	    if ($prog =~ s/\s{2,}/ /g ||
-		$prog =~ s/:(\S)/:\n$1/g) {
+	    if ($prog =~ s/\s{2,}/ /g) {
 		$worked |= delta_test ($method, 0);
 	    }
+	    if ($prog =~ s/:(\S)/:\n$1/g) {
+		$worked |= delta_test ($method, 1);
+	    }
+	    my $r1 = ($prog =~ s/,/ , /g);
+	    my $r2 = ($prog =~ s/\s{2,}/ /g);
+	    if ($r1 || $r2) {
+		$worked |= delta_test ($method, 1);
+	    }
 	    return 0;
+	} elsif ($method eq "blanks") {
+	    my $first = substr($prog, 0, $pos);
+	    my $rest = substr($prog, $pos);
+	    if ($rest =~ s/^(\s{2,})/ /) {
+		$prog = $first.$rest;
+		$worked |= delta_test ($method, 0);
+	    }
 	} elsif ($method eq "indent") {	    
 	    write_file();
 	    system "indent $INDENT_OPTS $cfile";
 	    read_file();
 	    $worked |= delta_test ($method, 1);
 	    return 0;
-	} elsif ($method eq "blanks") {
+	} elsif ($method eq "crc") {
+	    my $first = substr($prog, 0, $pos);
 	    my $rest = substr($prog, $pos);
-	    if ($rest =~ /^(\s{2,})/) {
-		my $len = length ($1);
-		substr ($prog, $pos, $len) =  " ";
+	    if ($rest =~ /^(?<all>transparent_crc\s*\((?<list>.*?)\))/) {
+		my @stuff = split /,/, $+{list};
+		my $var = $stuff[0];
+		my $repl = "printf (\"%d\\n\", (int)$var)";
+		print "crc call: < $+{all} > => < $repl > ";
+		substr ($rest, 0, length ($+{all})) = $repl;
+		$prog = $first.$rest;
 		$worked |= delta_test ($method, 0);
 	    }
 	} elsif ($method eq "move_func") {
-	    my $first = substr($prog, 0, $pos);
-	    my $rest = substr($prog, $pos);
-	    my $proto2 = $proto;
-	    die if (!($proto2 =~ s/XXX/$fname/));
-	    my $proto_start;
-	    my $proto_end;
-	    my $func_start;
-	    my $func_end;
-	    if ($rest =~ /^($borderorspc$proto2)/) {
-		my $realproto = $1;
-		$proto_start = length($first) + $-[0];
-		$proto_end = length($first) + $+[0];
-		my $fname = $+{fname};
-		print "found prototype for '$fname'\n";
-		my $func2 = $func;
-		die if (!($func2 =~ s/XXX/$fname/));
-		if ($rest =~ /($func2)/) {
-		    my $body = $1;
-		    $func_start = length ($first) + $-[0];
-		    $func_end = length ($first) + $+[0];
-		    print "got body as well\n";
-		}
-	    }
-
+	    (my $proto_start, my $proto_end, my $func_start, my $func_end) = find_func();
 	    if (defined($proto_start) && defined($func_start)) {
 		my $proto = substr ($prog, $proto_start, $proto_end - $proto_start);
 		my $bod = substr ($prog, $func_start, $func_end - $func_start, "");
@@ -528,6 +564,7 @@ my %all_methods = (
 
     "all_blanks" => 0,
     "blanks" => 1,
+    "crc" => 1,
     "move_func" => 2,
     "brackets" => 2,
     "ternary" => 2,
