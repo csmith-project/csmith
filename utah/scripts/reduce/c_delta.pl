@@ -78,10 +78,12 @@ my $borderorspc = "(($border)|(\\s))";
 my $rettype = "int|void|short|long|char|signed|unsigned|const|static|(union\\s+U[0-9]+)|(struct\\s+S[0-9+])";
 my $functype = "(($rettype)\\s*|\\*\\s*)+";
 my $fname = "(?<fname>$varnum)";
-my $funcstart_orig = "$functype\\s+(?<fname>$varnum)\\s*$RE{balanced}{-parens=>'()'}";
+my $funcstart_free = "$functype\\s+(?<fname>$varnum)\\s*$RE{balanced}{-parens=>'()'}";
 my $funcstart = "$functype\\s+XXX\\s*$RE{balanced}{-parens=>'()'}";
 my $proto = "$funcstart;";
 my $func = "$funcstart\\s*$RE{balanced}{-parens=>'{}'}";
+my $func_free = "$funcstart_free\\s*$RE{balanced}{-parens=>'{}'}";
+my $call = "$varnum\\s*$RE{balanced}{-parens=>'()'}";
 
 # these match without additional qualification
 my @regexes_to_replace = (
@@ -124,10 +126,10 @@ my @delimited_regexes_to_replace = (
     ["struct.*?;", ""],
     ["union.*?;", ""],
     ["($functype)\\s*($varnum)\\s*$RE{balanced}{-parens=>'()'}\\s*$RE{balanced}{-parens=>'{}'}", ""],
-    ["$varnum\\s*$RE{balanced}{-parens=>'()'},", "0"],
-    ["$varnum\\s*$RE{balanced}{-parens=>'()'},", ""],
-    ["$varnum\\s*$RE{balanced}{-parens=>'()'}", "0"],
-    ["$varnum\\s*$RE{balanced}{-parens=>'()'}", ""],
+    ["$call,", "0"],
+    ["$call,", ""],
+    ["$call", "0"],
+    ["$call", ""],
     );
 
 my @subexprs = (
@@ -303,7 +305,7 @@ sub sanity_check () {
     print "successful\n";
 }
 
-sub func_func () {
+sub find_func () {
     my $first = substr($prog, 0, $pos);
     my $rest = substr($prog, $pos);
     my $proto2 = $proto;
@@ -312,23 +314,34 @@ sub func_func () {
     my $proto_end;
     my $func_start;
     my $func_end;
-    if ($rest =~ /^($borderorspc$proto2)/) {
+    my $funcname;
+    if ($rest =~ /^($proto2)/) {
 	my $realproto = $1;
 	$proto_start = length($first) + $-[0];
 	$proto_end = length($first) + $+[0];
-	my $fname = $+{fname};
-	print "found prototype for '$fname'\n";
+	$funcname = $+{fname};
+	print "found prototype for '$funcname'\n";
 	my $func2 = $func;
-	die if (!($func2 =~ s/XXX/$fname/));
+	die if (!($func2 =~ s/XXX/$funcname/));
 	if ($rest =~ /($func2)/) {
 	    my $body = $1;
 	    $func_start = length ($first) + $-[0];
 	    $func_end = length ($first) + $+[0];
 	    print "got body as well\n";
 	}
+    } else {
+	if ($rest =~ /^($func_free)/) {
+	    my $body = $1;
+	    $funcname = $+{fname};
+	    $func_start = length ($first) + $-[0];
+	    $func_end = length ($first) + $+[0];
+	    print "got only body for $funcname\n";
+	}
     }
-    return ($proto_start, $proto_end, $func_start, $func_end);
+    return ($funcname, $proto_start, $proto_end, $func_start, $func_end);
 }
+
+my %funcs_seen;
 
 sub delta_pass ($) {
     (my $method) = @_;
@@ -336,6 +349,7 @@ sub delta_pass ($) {
     $pos = 0;
     $good_cnt = 0;
     $bad_cnt = 0;
+    %funcs_seen = ();
 
     sanity_check();
 
@@ -449,7 +463,7 @@ sub delta_pass ($) {
 		$worked |= delta_test ($method, 0);
 	    }
 	} elsif ($method eq "move_func") {
-	    (my $proto_start, my $proto_end, my $func_start, my $func_end) = find_func();
+	    (my $func_name, my $proto_start, my $proto_end, my $func_start, my $func_end) = find_func();
 	    if (defined($proto_start) && defined($func_start)) {
 		my $proto = substr ($prog, $proto_start, $proto_end - $proto_start);
 		my $bod = substr ($prog, $func_start, $func_end - $func_start, "");
@@ -458,7 +472,20 @@ sub delta_pass ($) {
 	        $worked |= delta_test ($method, 0);
 		$pos += $proto_end - $proto_start;
 	    }
-
+	} elsif ($method eq "del_args") {
+	    (my $func_name, my $proto_start, my $proto_end, my $func_start, my $func_end) = find_func();
+	    if (defined ($func_name) && !defined ($funcs_seen{$func_name})) {
+		$funcs_seen{$func_name} = 1;
+		if (defined($proto_start)) {
+		    my $proto = substr ($prog, $proto_start, $proto_end - $proto_start);
+		    die if (!($proto =~ /($RE{balanced}{-parens=>'()'})/));
+		    my $proto_args = $1;
+		    substr ($proto_args, 0, 1) = "";
+		    substr ($proto_args, 0, -1) = "";
+		    my @proto_list = split /,/, $proto_args;
+		    $pos += $proto_end - $proto_start;
+		}
+	    }
 	} elsif ($method eq "ternary") {
 	    my $first = substr($prog, 0, $pos);
 	    my $rest = substr($prog, $pos);
@@ -566,6 +593,7 @@ my %all_methods = (
     "blanks" => 1,
     "crc" => 1,
     "move_func" => 2,
+    "del_args" => 2,
     "brackets" => 2,
     "ternary" => 2,
     "parens" => 3,
