@@ -138,9 +138,9 @@ public:
 
 	static void record_dereference_level(int level); 
 
-	virtual bool compatible(const Expression *) const = 0;
+	virtual bool compatible(const Expression *) const { return false;}
 
-	virtual bool compatible(const Variable *) const = 0;
+	virtual bool compatible(const Variable *) const { return false;}
 
 	enum eTermType term_type;
 	int expr_id;

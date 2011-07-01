@@ -95,6 +95,8 @@ public:
 
 	static bool safe_assign(eAssignOps op);
 
+	bool is_simple_assign(void) const { return op == eSimpleAssign;}
+
 	const Lhs* get_lhs(void) const {return &lhs;};
 	const Expression* get_rhs(void) const { return rhs;};
 	const Expression* get_expr(void) const { return &expr;};
