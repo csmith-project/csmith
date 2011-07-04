@@ -1475,8 +1475,11 @@ Type::get_int_subfield_names(string prefix, vector<string>& names, const vector<
 		size_t j = 0;
 		for (i=0; i<fields.size(); i++) {
 			// skip 0 length bitfields
-			if (std::find(excluded_fields.begin(), excluded_fields.end(), i) != excluded_fields.end() ||
-				is_unamed_padding(i)) {
+			if (is_unamed_padding(i)) {
+				continue;
+			}
+			if (std::find(excluded_fields.begin(), excluded_fields.end(), i) != excluded_fields.end()) {
+				j++;
 				continue;
 			}
 			ostringstream oss;
