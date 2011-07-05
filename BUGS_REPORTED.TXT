@@ -1,5 +1,21 @@
 ===================================================================
 
+07/04/2011 (total 388)
+  1 gcc crash bug reported by Arthur O'Dwyer
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=49632
+
+07/03/2011 (total 387)
+  1 gcc crash bug reported by Arthur O'Dwyer
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=49619
+
+07/01/2011 (total 386)
+  1 gcc crash bug reported by Arthur O'Dwyer
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=49610
+
+06/30/2011 (total 385)
+  1 gcc crash bug reported by Arthur O'Dwyer
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=49602
+
 06/24/2011 (total 384)
   1 clang crash bug reported
   http://llvm.org/bugs/show_bug.cgi?id=10189
