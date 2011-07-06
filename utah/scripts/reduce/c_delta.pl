@@ -37,18 +37,17 @@
 #   remove argument from function, including all calls
 #   turn a union type into a struct
 
-# write code to adapatively run multiple instances of a 
-#   transformation when this has good expected value
-#   measure cost of success vs. failure, take into account
-#   proabability of success
-# eventually back off to linear scan
-# could run on multiple cores once randomization is added
-# also, run the more expensive test (with chucky's tool) even
-# less often
+# probably we want three kinds of test scripts:
+#   super-fast, just runs one compiler to look for syntactical correctness
+#      can also do multiple transformations before running this
+#   medium fast, perhaps runs the compiler
+#   include chucky's tool
+#   would be nice to have a principled way to decide when to do these
 
 # watch for unexpected abnormal compiler outputs
 
 # long term todo: rewrite this tool to operate on ASTs
+#   need a tool that can pretty-print almost exactly the original code
 
 ######################################################################
 
