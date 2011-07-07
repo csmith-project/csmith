@@ -27,26 +27,50 @@
 
 # TODO:
 
-# not so easy
-#   transform a function to return void
-#   inline a function call
-#   un-nest nested calls in expressions
-#   move arguments and locals to global scope
-#   remove level of pointer indirection
-#   remove array dimension
-#   remove argument from function, including all calls
-#   turn a union type into a struct
+# turn a union type into a struct
+# remove argument from function, including all calls
+# transform a function to return void
+# inline a function call
+#   only for small functions, and only when delta has already
+#   gotten pretty far
+# remove function call from its enclosing expression
+#   look for preceding semicolon or open curly brace
+# move arguments and locals to global scope
+# remove level of pointer indirection
+# remove array dimension
+# do copy propagation
+#   replace calls and things with available expressions
+# replace for-loops with expressions guessed from initializers
+#   guess that it executes 0 and 1 times
 
-# probably we want three kinds of test scripts:
-#   super-fast, just runs one compiler to look for syntactical correctness
-#      can also do multiple transformations before running this
-#   medium fast, perhaps runs the compiler
-#   include chucky's tool
-#   would be nice to have a principled way to decide when to do these
+# get speedup by adding fast bailouts from test scripts
+#   super-fast: just runs one compiler at -O0 look for syntactical correctness
+#   medium fast: looks for checksum differences, runs valgrind, etc.
+#   full: runs chucky's tool
+#   can also batch up transformations (like delete parens) that
+#     usually succeed without running any test
+
+# parameters
+#   Cp = cost of a passed test
+#   Cf = cost of a failed test, say half the cost of a passed test
+#   S  = fraction of transformations that succeed
+#   N  = number of attempted transformations
+#   assumption: test are independent
+#   assumption: c_delta has negligible running time
+
+# if test is run every time
+#  Cp*S*N + Cf*(1-S)*N
+
+# if K transformations are run before running any test
+# SS = S^K, NN = N/K
+# Cp*SS*NN + Cf(1-SS)*NN
+
+# test this and then work out the math when cheaper tests exist
+# need to measure some runs and estimate the values of constants
 
 # watch for unexpected abnormal compiler outputs
 
-# long term todo: rewrite this tool to operate on ASTs
+# long term: rewrite this tool to operate on ASTs
 #   need a tool that can pretty-print almost exactly the original code
 
 ######################################################################
