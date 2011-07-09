@@ -39,7 +39,7 @@
 # remove level of pointer indirection
 # remove array dimension
 # do copy propagation
-#   replace calls and things with available expressions
+#   especially try to replace calls and arguments with available exprs
 # replace for-loops with expressions guessed from initializers
 #   guess that it executes 0 and 1 times
 
