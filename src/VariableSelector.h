@@ -62,7 +62,6 @@ class VariableSelector
 public:
 	VariableSelector(void) {};
 	static Variable* new_variable(const std::string &name, const Type *type, const Expression* init, const CVQualifiers* qfer);
-	static Variable *make_dummy_variable(const string &name, const Type* t, const CVQualifiers* qfer);
 	// ISSUE: use it only when you want to create a static variable
 	static Variable *make_dummy_static_variable(const string &name);
 	

@@ -351,7 +351,7 @@ Function::make_random_signature(const CGContext& cg_context, const Type* type, c
 	CVQualifiers ret_qfer = qfer==0 ? CVQualifiers::random_qualifiers(type, Effect::READ, cg_context, true) 
 		                            : qfer->random_qualifiers(true, Effect::READ, cg_context);
 	ERROR_GUARD(NULL);
-	f->rv = VariableSelector::make_dummy_variable(rvname, type, &ret_qfer);
+	f->rv = Variable::CreateVariable(rvname, type, NULL, &ret_qfer);
 	GenerateParameterList(*f); 
 	FMList.push_back(new FactMgr(f));
 	return f;
@@ -384,7 +384,7 @@ Function::make_first(void)
 	string rvname = f->name + "_" + "rv"; 
 	CVQualifiers ret_qfer = CVQualifiers::random_qualifiers(ty); 
 	ERROR_GUARD(NULL);
-	f->rv = VariableSelector::make_dummy_variable(rvname, ty, &ret_qfer);
+	f->rv = Variable::CreateVariable(rvname, ty, NULL, &ret_qfer);
 
 	// create a fact manager for this function, with empty global facts 
 	FactMgr* fm = new FactMgr(f);

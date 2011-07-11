@@ -213,7 +213,7 @@ public:
 	const Type* get_base_type(void) const;
 	int get_indirect_level(void) const;
 	int get_struct_depth(void) const;
-	void get_int_subfield_names(string prefix, vector<string>& names) const;
+	void get_int_subfield_names(string prefix, vector<string>& names, const vector<int>& excluded_fields) const;
 	bool is_signed(void) const;
 	const Type* to_unsigned(void) const;
 	bool is_pointer_to_char(void) const { return ptr_type && ptr_type->eType == eSimple && (ptr_type->simple_type==eChar || ptr_type->simple_type==eUChar);}
@@ -225,6 +225,7 @@ public:
 	bool is_full_bitfields_struct() const;
 	bool is_bitfield(size_t index) const ;
 	bool has_bitfields() const;
+	bool contain_pointer_field(void) const;
 	bool is_const_struct_union() const;
 	bool is_volatile_struct_union() const;
 	bool is_int(void) const { return eType == eSimple && simple_type != eVoid;}

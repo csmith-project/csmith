@@ -627,6 +627,14 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\ExpressionAssign.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ExpressionComma.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ExpressionFuncall.cpp"
 				>
 				<FileConfiguration
@@ -1521,6 +1529,14 @@
 			</File>
 			<File
 				RelativePath=".\Expression.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ExpressionAssign.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ExpressionComma.h"
 				>
 			</File>
 			<File

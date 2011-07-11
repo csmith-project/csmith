@@ -202,13 +202,13 @@ CGContext::read_var(const Variable *v)
 bool
 CGContext::check_read_var(const Variable *v, const std::vector<const Fact*>& facts)
 {
-	if (v->is_union_field() && FactUnion::is_nonreadable_field(v, facts)) {
-		return false;
-	}
 	if (!read_indices(v, facts)) {
 		return false;
 	}
-	v = v->get_collective();
+	v = v->get_collective();	
+	if (FactUnion::is_nonreadable_field(v, facts)) {
+		return false;
+	}
 	if (is_nonreadable(v)) {
 		return false;
 	} 

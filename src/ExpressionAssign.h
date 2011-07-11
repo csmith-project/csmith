@@ -1,6 +1,6 @@
 // -*- mode: C++ -*-
 //
-// Copyright (c) 2007, 2008, 2009, 2010, 2011 The University of Utah
+// Copyright (c) 2007, 2008, 2010, 2011 The University of Utah
 // All rights reserved.
 //
 // This file is part of `csmith', a random generator of C programs.
@@ -27,70 +27,62 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef CONSTANT_H
-#define CONSTANT_H
+#ifndef EXPRESSION_ASSIGN_H
+#define EXPRESSION_ASSIGN_H
 
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <ostream>
-#include <string>
-
 #include "Expression.h"
-#include "Type.h"
+#include "StatementAssign.h"
 
 class CGContext;
-class Variable;
+class ExpressionVariable;
 
 /*
  *
  */
-class Constant : public Expression
+class ExpressionAssign : public Expression
 {
 public:
 	// Factory method.
-	static Constant *make_random(const Type* type);
-	static Constant *make_random_upto(unsigned int limit);
-	static Constant *make_random_nonzero(const Type* type);
+	static Expression *make_random(CGContext &cg_context, const Type* type, const CVQualifiers* qfer=0);  
 
-	virtual bool compatible(const Variable *v) const;
+	ExpressionAssign(const StatementAssign* sa);
+	virtual ~ExpressionAssign(void);  
 
-	virtual bool compatible(const Expression *exp) const;
+	virtual Expression *clone() const;
 
-	// Factory method.
-	static Constant *make_int(int v);
-	
-	Expression *clone() const;
+	virtual CVQualifiers get_qualifiers(void) const;  
 
-	CVQualifiers get_qualifiers(void) const { return CVQualifiers(true, false);} 
+	virtual const Type &get_type(void) const { return assign->get_lhs()->get_type();}
 
-	Constant(const Type *t, const std::string &v);
-	explicit Constant(const Constant &c);
-	virtual ~Constant(void);
+	virtual void get_called_funcs(std::vector<const FunctionInvocationUser*>& funcs) const { assign->get_called_funcs(funcs);}
 
-	//
+	virtual bool visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const;
 
-	virtual const Type &get_type(void) const;
-	// Unused:
-	const std::string &get_value(void) const { return value; }
-	
-	string get_field(size_t fid) const;
+	virtual bool has_uncertain_call_recursive(void) const { return assign->has_uncertain_call_recursive();} 
+ 
+	virtual bool use_var(const Variable* v) const;
 
-	virtual bool less_than(int num) const;
-	virtual bool not_equals(int num) const;
 	virtual bool equals(int num) const;
+	virtual bool is_0_or_1(void) const;
 
-	virtual void get_referenced_ptrs(std::vector<const Variable*>& /*ptrs*/) const {};
-	// unsigned long SizeInBytes(void) const;
-	virtual void Output(std::ostream &) const;
+	virtual std::vector<const ExpressionVariable*> get_dereferenced_ptrs(void) const { return assign->get_dereferenced_ptrs();}
+	virtual void get_referenced_ptrs(std::vector<const Variable*>& ptrs) const { assign->get_referenced_ptrs(ptrs);}
+	
+	const Expression* get_rhs(void) const { return assign->get_rhs();}
+	const Lhs* get_lhs(void) const { return assign->get_lhs();}
+	void Output(std::ostream &) const;
+	virtual void indented_output(std::ostream &out, int indent) const;
 
-private:	
-	const Type* type;
-	const std::string value;
+private:
+	const StatementAssign* assign;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#endif // CONSTANT_H
+#endif // EXPRESSION_ASSIGN_H
 
 // Local Variables:
 // c-basic-offset: 4

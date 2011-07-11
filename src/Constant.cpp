@@ -433,6 +433,17 @@ Constant::equals(int num) const
 	return StringUtils::str2int(value) == num;
 }
 
+string
+Constant::get_field(size_t fid) const
+{
+	vector<string> fields;
+	StringUtils::split_string(value, fields, "{},");
+	if (fid < fields.size()) {
+		return fields[fid];
+	}
+	return "";
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*

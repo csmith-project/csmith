@@ -540,8 +540,8 @@ my @compilers_to_test = (
     #\@gcc,
 
     \@clang,
-    #\@gcccurrent,
-
+    \@gcccurrent,
+    
     #\@clangpp,
     #\@gppcurrent,
 

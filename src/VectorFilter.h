@@ -32,6 +32,7 @@
 
 #include <vector>
 #include "Filter.h"
+#include "ProbabilityTable.h"
 
 // Filter out elements from the vector, i.e., elements in the vector
 // is invalid.
@@ -43,15 +44,20 @@ class VectorFilter : public Filter
 {
 public:
 	VectorFilter(void);
+	VectorFilter(ProbabilityTable<unsigned int, int> *table);
 	explicit VectorFilter(std::vector<unsigned int> &vs, int flag = FILTER_OUT);
 
 	VectorFilter& add(unsigned int item) { vs_.push_back(item); return *this;}
+
+	int lookup(int v) const;
 
 	virtual ~VectorFilter(void);
 
 	virtual bool filter(int v) const;
 private:
 	std::vector<unsigned int> vs_;
+
+	ProbabilityTable<unsigned int, int> *ptable;
 
 	int flag_;
 };

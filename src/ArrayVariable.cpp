@@ -44,6 +44,7 @@
 #include "Fact.h"
 #include "FactMgr.h"
 #include "FactPointTo.h"
+#include "FactUnion.h"
 #include "random.h"
 #include "util.h"
 #include "Lhs.h"
@@ -444,12 +445,14 @@ string
 ArrayVariable::build_init_recursive(size_t dimen, const vector<string>& init_strings) const
 {
 	assert (dimen < get_dimension());
+	static int seed = 0xABCDEF; 
 	string ret = "{";
 	for (size_t i=0; i<sizes[dimen]; i++) {
 		if (dimen == sizes.size() - 1) {
 			// use magic number to choose an initial value 
-			size_t rnd_index = ((dimen + (i+7) * (i+13)) * 52369) % (init_strings.size()); 
+			size_t rnd_index = ((seed * seed + (i+7) * (i+13)) * 52369) % (init_strings.size()); 
 			ret += init_strings[rnd_index];
+			seed++;
 		 } else {
 			ret += build_init_recursive(dimen + 1, init_strings);
 		 }
@@ -752,7 +755,18 @@ ArrayVariable::hash(std::ostream& out) const
 { 
 	if (collective != 0) return; 
 	vector<string> field_names;
- 	type->get_int_subfield_names("", field_names);
+	// for unions, find the fields that we don't want to hash due to union field read rules. So FactUnion.cpp
+	vector<int> excluded_fields;
+	if (type->eType == eUnion) {
+		FactMgr* fm = get_fact_mgr_for_func(GetFirstFunction()); 
+		assert(fm);
+		for (size_t i=0; i<field_vars.size(); i++) {
+			if (!FactUnion::is_field_readable(this, i, fm->global_facts)) {
+				excluded_fields.push_back(i);
+			}
+		}
+	}
+ 	type->get_int_subfield_names("", field_names, excluded_fields);
 	// if not a suitable type for hashing, give up
 	if (field_names.size() == 0) return;
 

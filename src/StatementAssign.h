@@ -80,7 +80,7 @@ class StatementAssign : public Statement
 {
 public:
 	// Factory method.
-	static StatementAssign *make_random(CGContext &cg_context);
+	static StatementAssign *make_random(CGContext &cg_context, const Type* type=0, const CVQualifiers* qfer=0);
 
 	static StatementAssign *make_possible_compound_assign(CGContext &cg_context,
 						 const Lhs &l,
@@ -94,6 +94,8 @@ public:
 			std::string &tmp_name1, std::string &tmp_name2);
 
 	static bool safe_assign(eAssignOps op);
+
+	bool is_simple_assign(void) const { return op == eSimpleAssign;}
 
 	const Lhs* get_lhs(void) const {return &lhs;};
 	const Expression* get_rhs(void) const { return rhs;};

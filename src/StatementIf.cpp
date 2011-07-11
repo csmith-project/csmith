@@ -66,7 +66,7 @@ StatementIf::make_random(CGContext &cg_context)
 		pre_facts = fm->global_facts;
 	}
 	cg_context.get_effect_stm().clear();
-	Expression *expr = Expression::make_random(cg_context, get_int_type(), false, !CGOptions::const_as_condition());
+	Expression *expr = Expression::make_random(cg_context, get_int_type(), NULL, false, !CGOptions::const_as_condition());
 	ERROR_GUARD(NULL);
 	// func_1 hacking, re-analyze for multiple function calls
 	if (cg_context.get_current_func()->name == "func_1" && !(cg_context.flags & IN_LOOP)) {

@@ -59,6 +59,7 @@ public:
 	virtual const Variable* get_var(void) const { return var;};
 	const Type* get_last_written_type(void) const;
 	int   get_last_written_fid(void) const { return last_written_fid; };
+	static bool is_field_readable(const Variable* v, int fid, const vector<const Fact*>& facts);
 	
 	// lattice functions
 	virtual bool is_top(void) const { return last_written_fid == TOP;}
@@ -72,7 +73,7 @@ public:
 	// transfer functions
 	vector<const Fact*> rhs_to_lhs_transfer(const vector<const Fact*>& facts, const vector<const Variable*>& lvars, const Expression* rhs);
 	virtual vector<const Fact*> abstract_fact_for_assign(const std::vector<const Fact*>& facts, const Lhs* lhs, const Expression* /*rhs*/);
-	virtual Fact* abstract_fact_for_return(const std::vector<const Fact*>& facts, const ExpressionVariable* rv, const Function* func);
+	virtual vector<const Fact*> abstract_fact_for_return(const std::vector<const Fact*>& facts, const ExpressionVariable* rv, const Function* func);
 	virtual Fact* join_var_facts(const vector<const Fact*>& facts, const vector<const Variable*>& vars) const;
 	virtual Fact* clone(void) const;
 

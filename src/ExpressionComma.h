@@ -1,6 +1,6 @@
 // -*- mode: C++ -*-
 //
-// Copyright (c) 2007, 2008, 2009, 2010, 2011 The University of Utah
+// Copyright (c) 2007, 2008, 2010, 2011 The University of Utah
 // All rights reserved.
 //
 // This file is part of `csmith', a random generator of C programs.
@@ -27,70 +27,58 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef CONSTANT_H
-#define CONSTANT_H
+#ifndef EXPRESSION_COMMA_H
+#define EXPRESSION_COMMA_H
 
 ///////////////////////////////////////////////////////////////////////////////
-
 #include <ostream>
-#include <string>
-
 #include "Expression.h"
-#include "Type.h"
-
-class CGContext;
-class Variable;
 
 /*
  *
  */
-class Constant : public Expression
+class ExpressionComma : public Expression
 {
 public:
 	// Factory method.
-	static Constant *make_random(const Type* type);
-	static Constant *make_random_upto(unsigned int limit);
-	static Constant *make_random_nonzero(const Type* type);
+	static ExpressionComma *make_random(CGContext &cg_context, const Type* type, const CVQualifiers* qfer=0);  
 
-	virtual bool compatible(const Variable *v) const;
+	virtual ~ExpressionComma(void);  
 
-	virtual bool compatible(const Expression *exp) const;
+	Expression* clone(void) const;
 
-	// Factory method.
-	static Constant *make_int(int v);
+	virtual CVQualifiers get_qualifiers(void) const { return rhs.get_qualifiers();}  
+
+	virtual const Type &get_type(void) const { return rhs.get_type();}
+
+	virtual void get_called_funcs(std::vector<const FunctionInvocationUser*>& funcs) const { lhs.get_called_funcs(funcs); rhs.get_called_funcs(funcs);}
+
+	virtual bool visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const;
+
+	virtual bool has_uncertain_call_recursive(void) const { return lhs.has_uncertain_call_recursive() || rhs.has_uncertain_call_recursive();} 
+ 
+	virtual bool use_var(const Variable* v) const { return lhs.use_var(v) || rhs.use_var(v);}
+
+	virtual bool equals(int num) const { return rhs.equals(num);}
+	virtual bool is_0_or_1(void) const { return rhs.is_0_or_1();}
+
+	virtual std::vector<const ExpressionVariable*> get_dereferenced_ptrs(void) const;
+	virtual void get_referenced_ptrs(std::vector<const Variable*>& ptrs) const { lhs.get_referenced_ptrs(ptrs); rhs.get_referenced_ptrs(ptrs);}
 	
-	Expression *clone() const;
+	const Expression* get_lhs(void) const { return &lhs;}
+	const Expression* get_rhs(void) const { return &rhs;}
+	void Output(std::ostream &) const;
+	virtual void indented_output(std::ostream &out, int indent) const;
 
-	CVQualifiers get_qualifiers(void) const { return CVQualifiers(true, false);} 
-
-	Constant(const Type *t, const std::string &v);
-	explicit Constant(const Constant &c);
-	virtual ~Constant(void);
-
-	//
-
-	virtual const Type &get_type(void) const;
-	// Unused:
-	const std::string &get_value(void) const { return value; }
-	
-	string get_field(size_t fid) const;
-
-	virtual bool less_than(int num) const;
-	virtual bool not_equals(int num) const;
-	virtual bool equals(int num) const;
-
-	virtual void get_referenced_ptrs(std::vector<const Variable*>& /*ptrs*/) const {};
-	// unsigned long SizeInBytes(void) const;
-	virtual void Output(std::ostream &) const;
-
-private:	
-	const Type* type;
-	const std::string value;
+private:
+	const Expression& lhs;
+	const Expression& rhs;
+	explicit ExpressionComma(const Expression& l, const Expression& r);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#endif // CONSTANT_H
+#endif // EXPRESSION_COMMA_H
 
 // Local Variables:
 // c-basic-offset: 4

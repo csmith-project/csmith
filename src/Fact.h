@@ -91,7 +91,7 @@ public:
 
 	virtual std::vector<const Fact*> abstract_fact_for_assign(const std::vector<const Fact*>& /*facts*/, const Lhs* /*lhs*/, const Expression* /*rhs*/) = 0;
 
-	virtual Fact* abstract_fact_for_return(const std::vector<const Fact*>& /*facts*/, const ExpressionVariable* /*var*/, const Function* /*func*/) {return 0;};
+	virtual std::vector<const Fact*> abstract_fact_for_return(const std::vector<const Fact*>& /*facts*/, const ExpressionVariable* /*var*/, const Function* /*func*/) = 0;
 
 	static void doFinalization();
 

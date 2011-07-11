@@ -40,7 +40,6 @@
 #include <cassert>
 
 #include "Common.h"
-
 #include "CGContext.h"
 #include "CGOptions.h"
 #include "Effect.h"
@@ -50,7 +49,8 @@
 #include "Constant.h" // temporary; don't want to depend on subclass!
 #include "ExpressionFuncall.h" // temporary; don't want to depend on subclass!
 #include "ExpressionVariable.h" // temporary; don't want to depend on subclass!
-
+#include "ExpressionAssign.h"
+#include "ExpressionComma.h"
 #include "Error.h"
 #include "ProbabilityTable.h"
 #include "PartialExpander.h"
@@ -60,28 +60,7 @@
 
 int eid = 0;
 
-class ExpressionFilter : public Filter {
-public:
-	ExpressionFilter();
-
-	virtual ~ExpressionFilter();
-
-	virtual bool filter(int v) const = 0;
-
-	eTermType number_to_termtype(unsigned int v, ProbabilityTable<unsigned int, eTermType> *table) const;
-};
-
-ExpressionFilter::ExpressionFilter()
-{
-
-}
-
-ExpressionFilter::~ExpressionFilter()
-{
-
-}
-
-ProbabilityTable<unsigned int, eTermType> *Expression::exprTable_ = NULL;
+ProbabilityTable<unsigned int, int> *Expression::exprTable_ = NULL;
 
 void
 Expression::InitExprProbabilityTable()
@@ -89,23 +68,27 @@ Expression::InitExprProbabilityTable()
 	if (Expression::exprTable_)
 		return;
 
-	Expression::exprTable_ = new ProbabilityTable<unsigned int, eTermType>();
-	Expression::exprTable_->add_elem(60, eFunction);
-	Expression::exprTable_->add_elem(70, eConstant);
-	Expression::exprTable_->add_elem(100, eVariable);
+	Expression::exprTable_ = new ProbabilityTable<unsigned int, int>();
+	Expression::exprTable_->add_elem(40, (int)eFunction);
+	Expression::exprTable_->add_elem(50, (int)eAssignment);
+	Expression::exprTable_->add_elem(60, (int)eCommaExpr);
+	Expression::exprTable_->add_elem(70, (int)eConstant);
+	Expression::exprTable_->add_elem(100, (int)eVariable);
 }
 
-ProbabilityTable<unsigned int, eTermType> *Expression::paramTable_ = NULL;
+ProbabilityTable<unsigned int, int> *Expression::paramTable_ = NULL;
 void
 Expression::InitParamProbabilityTable()
 {
 	if (Expression::paramTable_)
 		return;
 
-	Expression::paramTable_ = new ProbabilityTable<unsigned int, eTermType>();
-	Expression::paramTable_->add_elem(30, eFunction);
-	Expression::paramTable_->add_elem(40, eConstant);
-	Expression::paramTable_->add_elem(100, eVariable);
+	Expression::paramTable_ = new ProbabilityTable<unsigned int, int>();
+	Expression::paramTable_->add_elem(30, (int)eFunction);
+	Expression::paramTable_->add_elem(40, (int)eConstant);
+	Expression::paramTable_->add_elem(50, (int)eAssignment);
+	Expression::paramTable_->add_elem(60, (int)eCommaExpr);
+	Expression::paramTable_->add_elem(100, (int)eVariable);
 }
 
 void
@@ -115,105 +98,13 @@ Expression::InitProbabilityTables()
 	Expression::InitParamProbabilityTable();
 }
 
-eTermType
-ExpressionFilter::number_to_termtype(unsigned int i, ProbabilityTable<unsigned int, eTermType> *table) const
-{
-	assert(table);
-	return table->get_value(i);
-}
-
-/////////////////////////////////////////////////////////
-class DefaultExpressionFilter : public ExpressionFilter {
-public:
-	DefaultExpressionFilter(const Type &type, bool no_func, bool no_const);
-
-	virtual ~DefaultExpressionFilter();
-
-	virtual bool filter(int v) const;
-
-private:
-	const Type &type_;
-
-	const bool no_func_;
-	const bool no_const_;
-};
-
-
-DefaultExpressionFilter::DefaultExpressionFilter(const Type &type, bool no_func, bool no_const)
-	: type_(type),
-	  no_func_(no_func),
-	  no_const_(no_const)
-{
-
-}
-
-DefaultExpressionFilter::~DefaultExpressionFilter()
-{
-
-}
-
-bool
-DefaultExpressionFilter::filter(int v) const
-{
-	if (!this->valid_filter())
-		return false;
-
-	if (Expression::exprTable_->filter(v))
-		return true;
-
-	eTermType tt = number_to_termtype(v, Expression::exprTable_);
-	if (!CGOptions::return_structs() && tt == eFunction && type_.eType == eStruct)
-		return true;
-	if (!CGOptions::return_unions() && tt == eFunction && type_.eType == eUnion)
-		return true;
-	if (tt == eConstant && no_const_) {
-		return true;
-	}
-	if (!(no_func_ && tt == eFunction) &&
-			!(type_.eType == eStruct && tt == eConstant)) {
-		return false;
-	}
-	return true;
-}
-
-///////////////////////////////////////////////////
-class ParamExpressionFilter : public ExpressionFilter {
-public:
-	ParamExpressionFilter(const Type* t) : type_(t) {} 
-	virtual bool filter(int v) const;
-private:
-	const Type* type_;
-};
-
-bool
-ParamExpressionFilter::filter(int v) const
-{
-	if (!this->valid_filter())
-		return false;
-
-	if (Expression::exprTable_->filter(v))
-		return true;
-
-	eTermType tt = number_to_termtype(v, Expression::exprTable_);
-	if (tt == eConstant) {
-		return true;
-	}
-	if (tt == eFunction) {
-		if ((type_->eType == eStruct && !CGOptions::return_structs()) ||
-			(type_->eType == eUnion && !CGOptions::return_unions()))
-			return true;
-	}
-	return false;
-}
-
-
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
  *
  */
 static eTermType
-ExpressionTypeProbability(const CGContext &cg_context, const ExpressionFilter *filter)
+ExpressionTypeProbability(const CGContext &cg_context, const VectorFilter *filter)
 {
 	if (cg_context.expr_depth > CGOptions::max_expr_depth())
 		return eVariable;
@@ -225,7 +116,7 @@ ExpressionTypeProbability(const CGContext &cg_context, const ExpressionFilter *f
 
 	int i = rnd_upto(100, filter);
 	ERROR_GUARD(MAX_TERM_TYPES);
-	return filter->number_to_termtype(i, Expression::exprTable_);
+	return (eTermType)(filter->lookup(i));
 }
 
 unsigned int
@@ -263,13 +154,17 @@ Expression::indented_output(std::ostream &out, int indent) const
  *
  */
 Expression *
-Expression::make_random(CGContext &cg_context, const Type* type, bool no_func, bool no_const, enum eTermType tt)
+Expression::make_random(CGContext &cg_context, const Type* type, const CVQualifiers* qfer, bool no_func, bool no_const, enum eTermType tt)
 {
 	DEPTH_GUARD_BY_TYPE_RETURN_WITH_FLAG(dtExpression, tt, NULL);
 	Expression::InitProbabilityTables();
 
 	Expression *e = 0;  
-	assert(type);
+	if (type == NULL) {
+		do { 
+			type = cg_context.get_effect_context().is_side_effect_free() ? Type::choose_random_nonvoid() : Type::choose_random_nonvoid_nonvolatile();
+		} while (type->eType == eStruct && tt == eConstant);
+	}
 	assert(!(no_func && tt == eFunction));
 	assert(!(no_const && tt == eConstant));
 	// constant struct variables can not be a subexpression?
@@ -277,7 +172,19 @@ Expression::make_random(CGContext &cg_context, const Type* type, bool no_func, b
 	 
 	// if no term type is provided, choose a random term type with restrictions
 	if (tt == MAX_TERM_TYPES) {
-		DefaultExpressionFilter filter(*type, no_func, no_const);
+		VectorFilter filter(Expression::exprTable_);
+		if (no_func || 
+			(!CGOptions::return_structs() && type->eType == eStruct) ||
+			(!CGOptions::return_unions() && type->eType == eUnion)) {
+			filter.add(eFunction);
+		}
+		// struct constants can't be subexpressions (union constant can't either?) 
+		if (no_const || type->eType == eStruct || type->eType == eUnion) {
+			filter.add(eConstant);
+		}
+		if (type->is_const_struct_union()) {
+			filter.add(eAssignment);
+		}
 		tt = ExpressionTypeProbability(cg_context, &filter); 
 	}
 	    
@@ -290,16 +197,17 @@ Expression::make_random(CGContext &cg_context, const Type* type, bool no_func, b
 		e = Constant::make_random(type);
 		break;
 	case eVariable:
-		e = ExpressionVariable::make_random(cg_context, type);
+		e = ExpressionVariable::make_random(cg_context, type, qfer);
 		break;
-#if 0
-	case eBinaryExpr:
-		e = ExpressionBinary::make_random(cg_context);
-		break;
-#endif // 0
 	case eFunction:
 		cg_context.expr_depth++;
-		e = ExpressionFuncall::make_random(cg_context, type);
+		e = ExpressionFuncall::make_random(cg_context, type, qfer);
+		break;
+	case eAssignment:
+		e = ExpressionAssign::make_random(cg_context, type, qfer);
+		break;
+	case eCommaExpr: 
+		e = ExpressionComma::make_random(cg_context, type, qfer);
 		break;
 	default: break;
 	}
@@ -325,7 +233,15 @@ Expression::make_random_param(CGContext &cg_context, const Type* type, const CVQ
 	assert(type);
 	// if a term type is provided, no need to choose random term type
 	if (tt == MAX_TERM_TYPES) {
-		ParamExpressionFilter filter(type);
+		VectorFilter filter(Expression::paramTable_);
+		filter.add(eConstant);   // no constants as function call parameters
+		if ((!CGOptions::return_structs() && type->eType == eStruct) ||
+			(!CGOptions::return_unions() && type->eType == eUnion)) {
+			filter.add(eFunction);
+		}
+		if (type->is_const_struct_union()) {
+			filter.add(eAssignment);
+		}
 		tt = ExpressionTypeProbability(cg_context, &filter);
 	}
 	 
@@ -343,6 +259,12 @@ Expression::make_random_param(CGContext &cg_context, const Type* type, const CVQ
 	case eFunction:
 		cg_context.expr_depth++;
 		e = ExpressionFuncall::make_random(cg_context, type, qfer); 
+		break;
+	case eAssignment:
+		e = ExpressionAssign::make_random(cg_context, type, qfer);
+		break;
+	case eCommaExpr: 
+		e = ExpressionComma::make_random(cg_context, type, qfer);
 		break;
 	default: break;
 	} 

@@ -77,9 +77,11 @@ enum eTermType
 	// eUnaryExpr,
 	// eBinaryExpr,
 	eFunction,
+	eAssignment,
+	eCommaExpr,
 	eLhs
 };
-#define MAX_TERM_TYPES ((eTermType) (eFunction+1))
+#define MAX_TERM_TYPES ((eTermType) (eCommaExpr+1))
 
 template <class Key, class Value> 
 class ProbabilityTable;
@@ -91,7 +93,7 @@ class Expression
 {
 public:
 	// Factory method.
-	static Expression *make_random(CGContext &cg_context, const Type* type, bool no_func = false, bool no_const = false, enum eTermType tt=MAX_TERM_TYPES);
+	static Expression *make_random(CGContext &cg_context, const Type* type, const CVQualifiers* qfer=0, bool no_func = false, bool no_const = false, enum eTermType tt=MAX_TERM_TYPES);
 
 	static Expression *make_random_param(CGContext &cg_context, const Type* type, const CVQualifiers* qfer, enum eTermType tt=MAX_TERM_TYPES);
 
@@ -138,16 +140,16 @@ public:
 
 	static void record_dereference_level(int level); 
 
-	virtual bool compatible(const Expression *) const = 0;
+	virtual bool compatible(const Expression *) const { return false;}
 
-	virtual bool compatible(const Variable *) const = 0;
+	virtual bool compatible(const Variable *) const { return false;}
 
 	enum eTermType term_type;
 	int expr_id;
 
-	static ProbabilityTable<unsigned int, eTermType> *exprTable_;
+	static ProbabilityTable<unsigned int, int> *exprTable_;
 
-	static ProbabilityTable<unsigned int, eTermType> *paramTable_;
+	static ProbabilityTable<unsigned int, int> *paramTable_;
 private:
 
 	static void InitExprProbabilityTable();

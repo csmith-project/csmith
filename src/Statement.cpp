@@ -138,9 +138,6 @@ bool StatementFilter::filter(int value) const
 	if (!this->valid_filter())
 		return false;
 
-	if (Statement::stmtTable_->filter(value))
-		return true;
-
 	eStatementType type = Statement::number_to_type(value);
 
 	// If expand_check returns false, we filter out v. 
@@ -890,13 +887,13 @@ Statement::post_creation_analysis(vector<const Fact*>& pre_facts, const Effect& 
 			FactVec outputs = pre_facts;
 			cg_context.reset_effect_accum(pre_effect); 
 			//if (stm_id == 573)
-			//	BREAK_NOP;
-			if (!validate_and_update_facts(outputs, cg_context)) { 
 				/*if (this->eType == eAssign) {
 					((const StatementAssign*)this)->get_rhs()->indented_output(cout, 0);
 				}
 				cout << endl;
 				Output(cout, fm);*/
+			//}
+			if (!validate_and_update_facts(outputs, cg_context)) {
 				assert(0);
 			}
 			fm->global_facts = outputs;

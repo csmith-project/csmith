@@ -18,7 +18,7 @@ my $CSMITH_TIMEOUT = 180;
 my $PROVIDE_SEED = 1;
 
 my $XTRA = "";
-$XTRA .= " --force-globals-static ";
+$XTRA .= " --force-globals-static --no-unions --force-non-uniform-arrays";
 #$XTRA .= "--no-argc";
 #$XTRA .= "--concise ";
 #$XTRA .= "--no-paranoid ";

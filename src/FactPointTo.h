@@ -69,8 +69,9 @@ public:
 	bool is_dead(void) const;
 	bool has_invisible(const Statement* stm) const;
 	int  size() const;
-	virtual std::vector<const Fact*> abstract_fact_for_assign(const std::vector<const Fact*>& facts, const Lhs* lhs, const Expression* rhs);
-	virtual Fact* abstract_fact_for_return(const std::vector<const Fact*>& facts, const ExpressionVariable* var, const Function* func);
+	std::vector<const Fact*> rhs_to_lhs_transfer(const std::vector<const Fact*>& facts, const vector<const Variable*>& lvars, const Expression* rhs);
+	virtual vector<const Fact*> abstract_fact_for_assign(const std::vector<const Fact*>& facts, const Lhs* lhs, const Expression* rhs);
+	virtual vector<const Fact*> abstract_fact_for_return(const std::vector<const Fact*>& facts, const ExpressionVariable* var, const Function* func);
 
 	FactPointTo* mark_dead_var(const Variable* v);
 	FactPointTo* mark_func_end(const Statement* stm);
