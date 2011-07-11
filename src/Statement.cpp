@@ -892,7 +892,7 @@ Statement::post_creation_analysis(vector<const Fact*>& pre_facts, const Effect& 
 				}
 				cout << endl;
 				Output(cout, fm);*/
-			}
+			//}
 			if (!validate_and_update_facts(outputs, cg_context)) {
 				assert(0);
 			}
