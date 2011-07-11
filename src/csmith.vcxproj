@@ -217,6 +217,8 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="ExpressionAssign.cpp" />
+    <ClCompile Include="ExpressionComma.cpp" />
     <ClCompile Include="ExpressionFuncall.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -412,6 +414,8 @@
     <ClInclude Include="Effect.h" />
     <ClInclude Include="Error.h" />
     <ClInclude Include="Expression.h" />
+    <ClInclude Include="ExpressionAssign.h" />
+    <ClInclude Include="ExpressionComma.h" />
     <ClInclude Include="ExpressionFuncall.h" />
     <ClInclude Include="ExpressionVariable.h" />
     <ClInclude Include="ExtensionMgr.h" />

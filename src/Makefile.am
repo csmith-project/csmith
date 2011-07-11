@@ -90,6 +90,10 @@ csmith_SOURCES = \
 	ExpressionFuncall.h \
 	ExpressionVariable.cpp \
 	ExpressionVariable.h \
+	ExpressionAssign.cpp \
+	ExpressionAssign.h \
+	ExpressionComma.cpp \
+	ExpressionComma.h \
 	ExtensionMgr.cpp \
 	ExtensionMgr.h \
 	ExtensionValue.cpp \
