@@ -99,7 +99,7 @@ private:
 	bool build_invocation(Function *target, CGContext &cg_context);
 };
 
-const Fact* get_return_fact_for_invocation(const FunctionInvocationUser* fiu, enum eFactCategory cat);
+const Fact* get_return_fact_for_invocation(const FunctionInvocationUser* fiu, const Variable* var, enum eFactCategory cat);
 
 void calls_to_funcs(const vector<const FunctionInvocationUser*>& calls, vector<const Function*>& funcs);
 void calls_to_funcs_recursive(const vector<const FunctionInvocationUser*>& calls, vector<const Function*>& funcs);

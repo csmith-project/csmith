@@ -127,7 +127,7 @@ add_new_var_fact(const Variable* v, FactVec& facts)
 	const vector<Fact*>& meta_facts = FactMgr::meta_facts;
 	assert(v);
 	// TODO: consider facts related to struct or arrays
-	if (v->type && (v->type->eType == eSimple || v->type->eType == ePointer || v->type->eType == eUnion) && v->init) { 
+	if (v->type && (v->type->eType == eSimple || v->type->eType == ePointer || v->type->eType == eUnion)) { 
 		FactVec tmp_facts;
 		for (j=0; j<meta_facts.size(); j++) {
 			Lhs lhs(*v);
@@ -195,7 +195,7 @@ update_facts_for_oos_vars(const vector<Variable*>& vars, FactVec& facts)
 			//print_facts(facts);
 			// remove all facts related to this variable
 			const Fact* f = facts[j];
-			if (f->get_var() == var) {
+			if (var->match(f->get_var())) {
 				facts.erase(facts.begin() + j);
 				len--;
 				j--;
@@ -230,7 +230,7 @@ update_facts_for_oos_vars(const vector<const Variable*>& vars, FactVec& facts)
 			//print_facts(facts);
 			// remove all facts related to this variable
 			const Fact* f = facts[j];
-			if (f->get_var() == var) {
+			if (var->match(f->get_var())) {
 				facts.erase(facts.begin() + j);
 				len--;
 				j--;
@@ -268,7 +268,7 @@ remove_function_local_facts(std::vector<const Fact*>& inputs, const Statement* s
 		const Variable* v = inputs[i]->get_var();
 		// if it's fact for a local variable of this function, or return variable
 		// of another function, we are not interested in them after exit function
-		if (func->is_var_on_stack(v, stm) || (v->is_rv() && v != func->rv)) { 
+		if (func->is_var_on_stack(v, stm) || (v->is_rv() && !func->rv->match(v))) { 
 			inputs.erase(inputs.begin() + i);
 			i--;
 			len--; 
@@ -448,7 +448,7 @@ void FactMgr::remove_rv_facts(FactVec& facts)
 	size_t len = facts.size();
 	for (size_t i=0; i<len; i++) { 
 		const Fact* f = facts[i]; 
-		if (f->get_var()->is_rv() && f->get_var() != func->rv) {
+		if (f->get_var()->is_rv() && !func->rv->match(f->get_var())) {
 			facts.erase(facts.begin() + i);
 			len--;
 			i--; 
@@ -493,19 +493,19 @@ update_fact_for_assign(const StatementAssign* sa, FactVec& inputs)
 void 
 update_fact_for_return(const StatementReturn* sr, FactVec& inputs)
 {
-	size_t i;
+	size_t i, j;
     for (i=0; i<FactMgr::meta_facts.size(); i++) {
-        Fact* f = FactMgr::meta_facts[i]->abstract_fact_for_return(inputs, sr->get_var(), sr->func);
-		if (f) {
+        std::vector<const Fact*> facts = FactMgr::meta_facts[i]->abstract_fact_for_return(inputs, sr->get_var(), sr->func);
+		for (j=0; j<facts.size(); j++) {
 			// merge with other return statements
-			merge_fact(inputs, f);
-			sr->func->fact_changed = true;
+			if (merge_fact(inputs, facts[j])) {
+				sr->func->fact_changed = true;
+			}
 		}
     }
 	// incorporate current facts into return facts
 	FactMgr* fm = get_fact_mgr_for_func(sr->func);
 	fm->set_fact_out(sr, inputs);
-	//merge_facts(fm->return_facts, fm->map_facts_out[sr]);
 }
 
 void
@@ -606,11 +606,14 @@ FactMgr::makeup_new_var_facts(vector<const Fact*>& old_facts, const vector<const
     size_t i; 
     for (i=0; i<new_facts.size(); i++) { 
 		const Fact* f = new_facts[i];
-		// if there are variable facts not present in old facts,
-		// mean they are variables created after old_facts,
-		// manually add them
-		if (find_related_fact(old_facts, f) == 0) { 
-			add_new_var_fact(f->get_var(), old_facts);
+		const Variable* v = f->get_var();
+		if (v->is_global() || v->is_local()) { 
+			// if there are variable facts not present in old facts,
+			// mean they are variables created after old_facts,
+			// manually add them
+			if (find_related_fact(old_facts, f) == 0) { 
+				add_new_var_fact(v, old_facts);
+			}
 		}
 	}
 }
@@ -806,22 +809,6 @@ merge_jump_facts(FactVec& facts, const FactVec& jump_facts)
 }
 
 bool
-merge_prev_facts(FactVec& facts, FactVec& old_facts)
-{ 
-    size_t i; 
-    for (i=0; i<facts.size(); i++) { 
-		const Fact* f = facts[i];
-		// if there are variable facts not present in old facts,
-		// mean they are variables created after old_facts,
-		// manually add them before we do a merge
-		if (find_related_fact(old_facts, f) == 0) {
-			add_new_var_fact(f->get_var(), old_facts);
-		}
-	}
-	return merge_facts(facts, old_facts);
-}
-
-bool
 renew_facts(FactVec& facts, const FactVec& new_facts)
 { 
     size_t i;
@@ -983,7 +970,7 @@ FactMgr::find_updated_final_facts(const Statement* stm, vector<Fact*>& facts)
 		Fact* f = facts_out[i];
 		// sometimes there is no pre-facts for return variables, so we don't
 		// check the difference
-		if (f->get_var() == func->rv) {
+		if (func->rv->match(f->get_var())) {
 			facts.push_back(f);
 		} 
 		else {
@@ -1056,7 +1043,7 @@ FactMgr::sanity_check_map() const
 		const vector<const Fact*>& facts = iter->second;
 		for (size_t i=0; i<facts.size(); i++) {
 			const Variable* v = facts[i]->get_var();
-			if (!v->is_visible(stm->parent) && v != func->rv) {
+			if (!v->is_visible(stm->parent) && !func->rv->match(v)) {
 				//assert(0);
 			}
 		}

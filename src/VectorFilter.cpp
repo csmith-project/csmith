@@ -35,13 +35,22 @@
 using namespace std;
 
 VectorFilter::VectorFilter(void) 
-	:  flag_(FILTER_OUT) 
+	: ptable(NULL), 
+	  flag_(FILTER_OUT) 
+{
+	//Nothing to do
+}
+
+VectorFilter::VectorFilter(ProbabilityTable<unsigned int, int> *table) 
+	: ptable(table), 
+	  flag_(FILTER_OUT) 
 {
 	//Nothing to do
 }
 
 VectorFilter::VectorFilter(std::vector<unsigned int> &vs, int flag) 
 	: vs_(vs),
+	  ptable(NULL),
 	  flag_(flag) 
 {
 	//Nothing to do
@@ -58,6 +67,17 @@ VectorFilter::filter(int v) const
 	if (!this->valid_filter())
 		return false;
 
+	if (ptable) {
+		v = ptable->get_value(v);
+	}
 	bool re = std::find(vs_.begin(), vs_.end(), static_cast<unsigned int>(v)) != vs_.end();
 	return (flag_ == FILTER_OUT) ? re : !re;
+}
+
+int
+VectorFilter::lookup(int v) const
+{
+	if (!this->valid_filter() || ptable == NULL)
+		return v; 
+	return v = ptable->get_value(v);
 }

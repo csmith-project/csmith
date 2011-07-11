@@ -160,9 +160,6 @@ bool merge_facts(FactVec& facts, const FactVec& new_facts);
 /* merge two facts env */
 bool merge_jump_facts(FactVec& facts, const FactVec& jump_facts);
 
-/* merge one env with a prev env that may miss new variables created recently */
-bool merge_prev_facts(FactVec& facts, FactVec& old_facts);
-
 /* check if two facts env are identical */
 bool same_facts(const FactVec& facts1, const FactVec& facts2);
 

@@ -41,9 +41,11 @@ class ExpressionComma : public Expression
 {
 public:
 	// Factory method.
-	static Expression *make_random(CGContext &cg_context, const Type* type, const CVQualifiers* qfer=0);  
+	static ExpressionComma *make_random(CGContext &cg_context, const Type* type, const CVQualifiers* qfer=0);  
 
 	virtual ~ExpressionComma(void);  
+
+	Expression* clone(void) const;
 
 	virtual CVQualifiers get_qualifiers(void) const { return rhs.get_qualifiers();}  
 
@@ -63,13 +65,15 @@ public:
 	virtual std::vector<const ExpressionVariable*> get_dereferenced_ptrs(void) const;
 	virtual void get_referenced_ptrs(std::vector<const Variable*>& ptrs) const { lhs.get_referenced_ptrs(ptrs); rhs.get_referenced_ptrs(ptrs);}
 	
+	const Expression* get_lhs(void) const { return &lhs;}
+	const Expression* get_rhs(void) const { return &rhs;}
 	void Output(std::ostream &) const;
 	virtual void indented_output(std::ostream &out, int indent) const;
 
 private:
 	const Expression& lhs;
 	const Expression& rhs;
-	explicit ExpressionComma(const ExpressionComma &e);
+	explicit ExpressionComma(const Expression& l, const Expression& r);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

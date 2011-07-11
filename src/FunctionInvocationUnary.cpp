@@ -136,6 +136,8 @@ FunctionInvocationUnary::get_type(void) const
 		return Type::get_simple_type(eInt);
 		break;
 	}
+	assert(0);
+	return Type::get_simple_type(eInt);
 }
 
 /*

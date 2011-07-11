@@ -214,7 +214,7 @@ FunctionInvocation::make_random_binary(CGContext &cg_context, const Type* type)
 			if (!not_constant) {
 				rhs = Constant::make_random_upto(lhs_type->SizeInBytes() * 8);
 			} else {
-				rhs = Expression::make_random(rhs_cg_context, rhs_type, false, true, tt);
+				rhs = Expression::make_random(rhs_cg_context, rhs_type, NULL, false, true, tt);
 			}
 		}
 		else {
@@ -242,7 +242,8 @@ FunctionInvocation::make_random_binary(CGContext &cg_context, const Type* type)
 
 	// ordered operators such as "||" or "&&" may skip the 2nd parameter
 	if (IsOrderedStandardFunc(op)) {
-		merge_prev_facts(fm->global_facts, facts_copy);
+		fm->makeup_new_var_facts(facts_copy, fm->global_facts);
+		merge_facts(fm->global_facts, facts_copy);
 	}
 	// TODO: fix `rhs' for eLShift and eRShift and ...
 	// Currently, the "fix" is handled in `FunctionInvocationBinary::Output'.
@@ -269,7 +270,7 @@ FunctionInvocation::make_random_binary_ptr_comparison(CGContext &cg_context)
 	Effect lhs_eff_accum;
 	CGContext lhs_cg_context(cg_context, cg_context.get_effect_context(), &lhs_eff_accum);
 	lhs_cg_context.flags |= NO_DANGLING_PTR;
-	Expression *lhs = Expression::make_random(lhs_cg_context, type, true);
+	Expression *lhs = Expression::make_random(lhs_cg_context, type, 0, true);
 	ERROR_GUARD_AND_DEL1(NULL, fi);
 	cg_context.add_effect(lhs_eff_accum);
 
@@ -284,12 +285,12 @@ FunctionInvocation::make_random_binary_ptr_comparison(CGContext &cg_context)
 	// If we are guaranteed that the LHS will be evaluated before the RHS,
 	// or if the LHS is pure (not merely side-effect-free),
 	// then we can generate the RHS under the original effect context.
-	if (IsOrderedStandardFunc(op) || lhs_eff_accum.is_pure()) {
+	if (IsOrderedStandardFunc(op)) { //  lhs_eff_accum.is_pure())  JYTODO: purity needs to be redefined
 		// although we don't need care about other side effect, we do
 		// need to pass in NO_DANGLING_PTR flag
 		unsigned int old_flag = cg_context.flags;
 		cg_context.flags |= NO_DANGLING_PTR;
-		rhs = Expression::make_random(cg_context, type, true, false, tt);
+		rhs = Expression::make_random(cg_context, type, 0, true, false, tt);
 		cg_context.flags = old_flag;
 	} else {
 		// Otherwise, the RHS must be generated under the combined effect
@@ -300,7 +301,7 @@ FunctionInvocation::make_random_binary_ptr_comparison(CGContext &cg_context)
 
 		CGContext rhs_cg_context(cg_context, rhs_eff_context, &rhs_eff_accum);
 		rhs_cg_context.flags |= NO_DANGLING_PTR;
-		rhs = Expression::make_random(rhs_cg_context, type, true, false, tt);
+		rhs = Expression::make_random(rhs_cg_context, type, 0, true, false, tt);
 		cg_context.add_effect(rhs_eff_accum);
 	}
 	ERROR_GUARD_AND_DEL2(NULL, fi, lhs);
@@ -488,8 +489,8 @@ FunctionInvocation::visit_facts(vector<const Fact*>& inputs, CGContext& cg_conte
 			CGContext param_cg_context(cg_context, running_eff_context, &param_eff_accum);
 			// the parameters might be function calls
 			const Expression* value = param_value[i];
-			if (h == 3659)
-				BREAK_NOP;		// for debugging
+			if (h == 236)
+				BREAK_NOP;	// for debugging
 			if (!value->visit_facts(inputs, param_cg_context)) { 
 				return false;
 			}
@@ -497,7 +498,7 @@ FunctionInvocation::visit_facts(vector<const Fact*>& inputs, CGContext& cg_conte
 			// when we generate subsequent parameters within this invocation.
 			running_eff_context.add_effect(param_eff_accum);
 			// Update the total effect of this invocation, too.
-			cg_context.add_effect(param_eff_accum);  
+			cg_context.add_effect(param_eff_accum); 
 		}
 		ok = true;
 	} 

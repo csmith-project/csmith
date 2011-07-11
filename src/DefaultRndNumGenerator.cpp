@@ -33,6 +33,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <sstream>
+#include <fstream>
 
 #include "Filter.h"
 #include "SequenceFactory.h"
@@ -116,9 +117,15 @@ DefaultRndNumGenerator::add_number(int v, int bound, int k)
 unsigned int
 DefaultRndNumGenerator::rnd_upto(const unsigned int n, const Filter *f, const std::string *where)
 {
+	static int g = 0;
+	int h = g;
+	if (h == 440)
+		BREAK_NOP;   // for debugging
 	unsigned int v = genrand() % n;
 	unsigned INT64 local_depth = rand_depth_;
 	rand_depth_++;
+	//ofstream out("rnd.log", ios_base::app);
+	//out << g++ << ": " << v << "(" << n << ")" << endl;
 
 	if (f) {
 		while (f->filter(v)) {
@@ -127,8 +134,10 @@ DefaultRndNumGenerator::rnd_upto(const unsigned int n, const Filter *f, const st
 			// This will also overwrite the value added in the map.
 			rand_depth_ = local_depth+1;
 			v = genrand() % n;
+			/*out << g++ << ": " << v << "(" << n << ")" << endl;*/
 		}
 	}
+	//out.close();
 	if (where) {
 	std::ostringstream ss;
 		ss << *where << "->";

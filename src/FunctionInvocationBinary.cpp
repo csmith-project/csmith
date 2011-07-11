@@ -243,6 +243,8 @@ FunctionInvocationBinary::get_type(void) const
 		}
 		break;
 	}
+	assert(0);
+	return Type::get_simple_type(eInt);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

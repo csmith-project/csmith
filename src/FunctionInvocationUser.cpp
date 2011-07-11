@@ -70,15 +70,14 @@ static vector<const FunctionInvocationUser*> invocations;   // list of function 
 static vector<const Fact*> return_facts;              // list of return facts
 
 const Fact*
-get_return_fact_for_invocation(const FunctionInvocationUser* fiu, enum eFactCategory cat) 
+get_return_fact_for_invocation(const FunctionInvocationUser* fiu, const Variable* var, enum eFactCategory cat) 
 {
 	assert(invocations.size() == return_facts.size());
 	for (size_t i=0; i<return_facts.size(); i++) {
-		if (return_facts[i]->eCat == cat) {
-			if (invocations[i] == fiu) {
-				const Variable* v = return_facts[i]->get_var();
-				assert(v == fiu->get_func()->rv);
-				return return_facts[i];
+		if (invocations[i] == fiu) {
+			const Fact* fact = return_facts[i];
+			if (fact->eCat == cat && fact->get_var() == var) { 
+				return fact;
 			}
 		}
 	}
@@ -91,7 +90,7 @@ add_return_fact_for_invocation(const FunctionInvocationUser* fiu, const Fact* f)
 	size_t i;
 	assert(invocations.size() == return_facts.size());
 	for (i=0; i<invocations.size(); i++) {
-		if (invocations[i] == fiu) {
+		if (invocations[i] == fiu && return_facts[i]->is_related(*f)) {
 			return_facts[i] = f;
 			return;
 		}
@@ -186,6 +185,8 @@ FunctionInvocationUser::build_invocation_and_function(CGContext &cg_context, con
 	Effect running_eff_context(cg_context.get_effect_context()); 
 	Function* func = Function::make_random_signature(cg_context, type, qfer);
 
+	if (func->name == "func_51")
+		BREAK_NOP;		// for debugging
 	vector<const Expression*> param_values;
 	size_t i;
 	for (i = 0; i < func->param.size(); i++) { 
@@ -254,9 +255,9 @@ FunctionInvocationUser::build_invocation(Function *target, CGContext &cg_context
 	Effect running_eff_context(cg_context.get_effect_context()); 
 	FactMgr* fm = get_fact_mgr(&cg_context);
 	// XXX DEBUGGING
-	// if (func->name == "func_43" && cg_context.get_current_func()->name=="func_1") {
-	// 	i = 0; // Set breakpoint here.
-	// }
+	if (func->name == "func_10" && cg_context.get_current_func()->name=="func_1") {
+	 	i = 0; // Set breakpoint here.
+	}
 
 	for (i = 0; i < func->param.size(); i++) { 
 		Effect param_eff_accum;  
@@ -315,7 +316,7 @@ FunctionInvocationUser::revisit(std::vector<const Fact*>& inputs, CGContext& cg_
 		fm->setup_in_out_maps(true);
 	}
 	// for debugging
-	if (func->name=="func_8" && func->visited_cnt==2) {
+	if (func->name=="func_10" && func->visited_cnt==19) {
 		//cout << func->visited_cnt << endl;
 		//func->Output(cout);
 		//cout << endl;
@@ -368,7 +369,7 @@ FunctionInvocationUser::save_return_fact(const vector<const Fact*>& facts) const
 {
 	size_t i;
 	for (i=0; i<facts.size(); i++) {
-		if (facts[i]->get_var() == func->rv) {
+		if (func->rv->match(facts[i]->get_var())) {
 			add_return_fact_for_invocation(this, facts[i]);
 		}
 	}

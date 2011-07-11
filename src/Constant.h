@@ -73,6 +73,8 @@ public:
 	// Unused:
 	const std::string &get_value(void) const { return value; }
 	
+	string get_field(size_t fid) const;
+
 	virtual bool less_than(int num) const;
 	virtual bool not_equals(int num) const;
 	virtual bool equals(int num) const;

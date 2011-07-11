@@ -440,37 +440,39 @@ Effect::field_is_written(const Variable *v) const
 bool
 Effect::sibling_union_field_is_read(const Variable *v) const
 {   
-	while (v->field_var_of) {
-		// check other fields of the union
-		if (v->field_var_of->type->eType == eUnion) {
-			for (size_t j=0; j<v->field_var_of->field_vars.size(); j++) {
-				Variable* field_var = v->field_var_of->field_vars[j];
-				if (field_var == v) continue;
-				if (is_read(field_var) || field_is_read(field_var)) {
-					return true; 
-				}
+	const Variable* you = v->get_collective();
+	// find the union variable(s) that contains you
+	for (; you && you->type->eType != eUnion; you = you->field_var_of)
+		;
+	if (you) {
+		for (size_t i=0; i<read_vars.size(); i++) {
+			const Variable* me = read_vars[i]->get_collective(); 
+			for (; me && me->type->eType != eUnion; me = me->field_var_of)
+				;
+			if (you == me) {
+				return true;
 			}
 		}
-		v = v->field_var_of;
 	}
 	return false;
 }
 
 bool
 Effect::sibling_union_field_is_written(const Variable *v) const
-{   
-	while (v->field_var_of) {
-		// check other fields of the union
-		if (v->field_var_of->type->eType == eUnion) {
-			for (size_t j=0; j<v->field_var_of->field_vars.size(); j++) {
-				Variable* field_var = v->field_var_of->field_vars[j];
-				if (field_var == v) continue;
-				if (is_written(field_var) || field_is_written(field_var)) {
-					return true; 
-				}
+{    
+	const Variable* you = v->get_collective();
+	// find the union variable(s) that contains you
+	for (; you && you->type->eType != eUnion; you = you->field_var_of)
+		;
+	if (you) {
+		for (size_t i=0; i<write_vars.size(); i++) {
+			const Variable* me = write_vars[i]->get_collective(); 
+			for (; me && me->type->eType != eUnion; me = me->field_var_of)
+				;
+			if (you == me) {
+				return true;
 			}
 		}
-		v = v->field_var_of;
 	}
 	return false;
 }
@@ -621,7 +623,7 @@ bool
 Effect::union_field_is_read(void) const
 { 
 	for (size_t i=0; i<read_vars.size(); i++) {
-		if (read_vars[i]->is_union_field()) {
+		if (read_vars[i]->is_inside_union_field()) {
 			return true;
 		}
 	}

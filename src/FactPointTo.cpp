@@ -41,6 +41,8 @@
 #include "Function.h"
 #include "ExpressionVariable.h"
 #include "ExpressionFuncall.h"
+#include "ExpressionAssign.h"
+#include "ExpressionComma.h"
 #include "FunctionInvocation.h"
 #include "FunctionInvocationUser.h"
 #include "FactMgr.h"
@@ -167,119 +169,137 @@ FactPointTo::size() const
 	return point_to_vars.size();
 }
 
+vector<const Fact*>
+FactPointTo::rhs_to_lhs_transfer(const vector<const Fact*>& facts, const vector<const Variable*>& lvars, const Expression* rhs)
+{
+	vector<const Fact*> empty;
+	if (lvars.size()==0) return empty;
+	// assert all possible LHS are pointers
+	for (size_t i=0; i<lvars.size(); i++) {
+		assert(lvars[i]->type->eType == ePointer);
+	} 
+	if (rhs == NULL) {
+		return FactPointTo::make_facts(lvars, garbage_ptr);
+	}
+	if (rhs->get_type().eType != ePointer && rhs->get_type().eType != eUnion) { 
+		if (rhs->equals(0) && rhs->get_type().SizeInBytes() != SIZE_UNKNOWN && rhs->get_type().SizeInBytes() >= 8) {
+			return FactPointTo::make_facts(lvars,  null_ptr);
+		} else { 
+			return FactPointTo::make_facts(lvars, garbage_ptr);
+		}
+	}
+	if (rhs->term_type == eConstant) {  
+		const Constant* c = dynamic_cast<const Constant*>(rhs);  
+		if (rhs->get_type().eType == ePointer) {
+			return FactPointTo::make_facts(lvars, rhs->equals(0) ? null_ptr : garbage_ptr);
+		}
+		// for unions, all pointer fields are equally initialized if the 1st field is pointer
+		else if (rhs->get_type().eType == eUnion) {
+			if (lvars[0]->field_var_of->type->eType == eUnion && lvars[0]->get_field_id() == 0 && c->get_field(0)=="0") {
+				return FactPointTo::make_facts(lvars, null_ptr);
+			} else {
+				return FactPointTo::make_facts(lvars, garbage_ptr);
+			}
+		}
+		else {
+			// remove this when we add pointer fields to structs later
+			assert(0);
+		}
+	}
+    else if (rhs->term_type == eVariable) {
+		const ExpressionVariable* expvar = (const ExpressionVariable*)rhs;
+		int indirect = expvar->get_indirect_level();
+		if (indirect < 0) {
+			// taking address of another variable. multi-level indirection is not allowed
+			assert(indirect == -1);
+			return FactPointTo::make_facts(lvars, expvar->get_var()->get_collective()); 
+		} 
+		if (rhs->get_type().is_aggregate()) {
+			vector<const Variable*> vars = merge_pointees_of_pointer(expvar->get_var()->get_collective(), indirect, facts);
+			FactVec ret_facts;
+			for (size_t i=0; i<vars.size(); i++) {
+				vector<const Variable*> pointers;
+				vars[i]->find_pointer_fields(pointers);
+				assert(lvars.size() == pointers.size());
+				for (size_t j=0; j<lvars.size(); j++) { 
+					const FactPointTo* fp = FactPointTo::make_fact(lvars[j], merge_pointees_of_pointer(pointers[j], 1, facts));
+					merge_fact(ret_facts, fp);
+				}
+			}
+			return ret_facts;
+		}
+		else { 
+			vector<const Variable*> var_set = merge_pointees_of_pointer(expvar->get_var()->get_collective(), indirect+1, facts);
+			return FactPointTo::make_facts(lvars, var_set);
+		}
+	} 
+    else if (rhs->term_type == eFunction) {  
+        const FunctionInvocation* fi = rhs->get_invoke();
+		assert(fi);
+		// TODO: support pointer arithmetics
+        if (fi->invoke_type == eFuncCall) {  
+			const FunctionInvocationUser* fiu = dynamic_cast<const FunctionInvocationUser*>(fi);
+			if (fiu->get_type().is_aggregate()) {
+				FactVec ret_facts;
+				vector<const Variable*> pointers;
+				fiu->get_func()->rv->find_pointer_fields(pointers);
+				for (size_t i=0; i<lvars.size(); i++) {
+					const FactPointTo* rv_fact = dynamic_cast<const FactPointTo*>(get_return_fact_for_invocation(fiu, pointers[i], ePointTo));
+					const FactPointTo* fp = FactPointTo::make_fact(lvars[i], rv_fact->get_point_to_vars());
+					ret_facts.push_back(fp);
+				}
+				return ret_facts;
+			} 
+			else {
+				// find the fact regarding return variable
+				const FactPointTo* rv_fact = dynamic_cast<const FactPointTo*>(get_return_fact_for_invocation(fiu, fiu->get_func()->rv, ePointTo)); 
+				assert(rv_fact);
+				return FactPointTo::make_facts(lvars, rv_fact->get_point_to_vars());
+			}
+        }
+    } 
+	else if (rhs->term_type == eAssignment) {
+		const ExpressionAssign* ea = dynamic_cast<const ExpressionAssign*>(rhs);
+		return rhs_to_lhs_transfer(facts, lvars, ea->get_rhs());
+	}
+	else if (rhs->term_type == eCommaExpr) {
+		const ExpressionComma* ec = dynamic_cast<const ExpressionComma*>(rhs);
+		return rhs_to_lhs_transfer(facts, lvars, ec->get_rhs());
+	}
+	return empty;
+}
+
 std::vector<const Fact*>
 FactPointTo::abstract_fact_for_assign(const std::vector<const Fact*>& facts, const Lhs* lhs, const Expression* rhs)
 {   
 	std::vector<const Fact*> ret_facts;
-	// special case: the first union field is a pointer, and is initialized by a string initializer
-	// JYTODO: uncomment and fix an assertin failure it causes
-	if (lhs->get_var()->type->eType == eUnion && lhs->get_indirect_level() == 0) {
-		/*assert(!lhs->get_var()->field_vars.empty()); 
-		const Variable* f1 = lhs->get_var()->field_vars[0];
-		if (f1->type->eType == ePointer && rhs->term_type == eConstant) {
-			Lhs tmp(*f1);
-			return abstract_fact_for_assign(facts, &tmp, rhs);
-		}*/
-	}
-	// return empty set if lhs is not pointer
-	if (lhs->get_type().eType != ePointer) {
-		return ret_facts;
-	}
+	
 	// find all the pointed variables on LHS
-	std::vector<const Variable*> lvars = merge_pointees_of_pointer(lhs->get_var()->get_collective(), lhs->get_indirect_level(), facts);
-	  
-    if (rhs->term_type == eConstant) { 
-        string v = ((const Constant*)rhs)->get_value(); 
-        if (v.compare("0") == 0) {
-            return FactPointTo::make_facts(lvars, null_ptr); 
-        }
-        else {
-            // what does it mean to set a pointer to a non-zero constant?
-            // there could be multiple interpretations. Right now we just choose
-            // the simplest one: treat it as zero
-            return FactPointTo::make_facts(lvars, null_ptr); 
-        }
-    } 
-    else if (rhs->term_type == eVariable) {
-        const ExpressionVariable* expvar = (const ExpressionVariable*)rhs;
-		int indirect = expvar->get_indirect_level();
-        if (indirect < 0) {
-            // taking address of another variable. multi-level indirection is not allowed
-			assert(indirect == -1);
-			return FactPointTo::make_facts(lvars, expvar->get_var()->get_collective()); 
-        }
-		else if (indirect > 0) { 
-			vector<const Variable*> var_set = merge_pointees_of_pointer(expvar->get_var()->get_collective(), indirect+1, facts);
-			return FactPointTo::make_facts(lvars, var_set);
+	vector<const Variable*> lvars = merge_pointees_of_pointer(lhs->get_var()->get_collective(), lhs->get_indirect_level(), facts); 
+	// return empty set if lhs is not pointer
+	if (lhs->get_type().eType == ePointer) {  
+		return rhs_to_lhs_transfer(facts, lvars, rhs);
+	} 
+	for (size_t i=0; i<lvars.size(); i++) {
+		const Variable* v = lvars[i]; 
+		if (v->is_inside_union_field()) {
+			for (; v && v->type->eType != eUnion; v = v->field_var_of);
+			assert(v && v->type->eType == eUnion);
 		}
-        else {
-			const Variable* pointer = expvar->get_var()->get_collective();
-            FactPointTo dummy(pointer);
-            const Fact* exist_fact = find_related_fact(facts, &dummy);
-            // we are setting a pointer to another pointer that hasn't
-            // been initialized in this function, most likely it's a argument
-            if (exist_fact == 0) {
-                assert(0); //return pointer->is_argument() ? FactPointTo::make_facts(lvars, tbd_ptr) : FactPointTo::make_facts(lvars, garbage_ptr);
-            } 
-            // otherwise use the analysis for the existing pointer
-            else {
-                FactPointTo* f2 = (FactPointTo*)exist_fact;
-                return FactPointTo::make_facts(lvars, f2->get_point_to_vars());
-            } 
-        }
-    }
-    else if (rhs->term_type == eFunction) {
-        const ExpressionFuncall* funcall = (const ExpressionFuncall*)rhs;
-        const FunctionInvocation* fi = funcall->get_invoke();
-        switch (fi->invoke_type) {
-            case eBinaryPrim:
-            case eUnaryPrim:
-                break;              // TODO: support pointer arithmatics
-            case eFuncCall: {
-				const FunctionInvocationUser* fiu = dynamic_cast<const FunctionInvocationUser*>(fi);
-				// find the fact regarding return variable
-				const FactPointTo* rv_fact = (const FactPointTo*)(get_return_fact_for_invocation(fiu, ePointTo)); 
-				assert(rv_fact);
-				return FactPointTo::make_facts(lvars, rv_fact->get_point_to_vars());
-            }
-        }
-    } 
+		vector<const Variable*> pointers;
+		v->find_pointer_fields(pointers);
+		// transfer facts for pointer fields
+		FactVec new_facts = rhs_to_lhs_transfer(facts, pointers, rhs);
+		ret_facts.insert(ret_facts.end(), new_facts.begin(), new_facts.end());
+	}
     return ret_facts;
 }
 
-Fact* 
+std::vector<const Fact*>
 FactPointTo::abstract_fact_for_return(const std::vector<const Fact*>& facts, const ExpressionVariable* var, const Function* func)
 { 
-    if (func->return_type->eType == ePointer) {
-		int indirect_level = var->get_indirect_level();
-		// if > -2, means we "return &(&v)", which shouldn't happen in current impl.
-	    assert(indirect_level > -2);  
-		if (indirect_level == -1) {
-			return FactPointTo::make_fact(func->rv, var->get_var()->get_collective());
-		}
-		if (indirect_level == 0) {
-			FactPointTo dummy(var->get_var()->get_collective());
-			const Fact* exist_fact = find_related_fact(facts, &dummy);
-              
-			if (exist_fact == 0) { 
-				// we are returning a pointer we knew nothing, something is wrong
-				assert(0);
-			}
-			else { 
-				return FactPointTo::make_fact(func->rv, ((FactPointTo*)exist_fact)->get_point_to_vars());
-			}
-		}
-		else {
-			// for one or more level(s) of dereferences 
-			// this is a much complicated case: we are returning a pointer in the form of *p (which implies 
-			// p is a double pointer), we need to find out all variables p point to, and merge all variables
-			// these variables in turn point to 
-			vector<const Variable*> var_set = merge_pointees_of_pointer(var->get_var()->get_collective(), indirect_level+1, facts);			
-			return FactPointTo::make_fact(func->rv, var_set);
-		}
-
-    }
-    return 0;
+	Lhs lhs(*func->rv);
+	return abstract_fact_for_assign(facts, &lhs, var);
 }
 
 Fact*
@@ -401,7 +421,7 @@ bool
 FactPointTo::point_to(const Variable* v) const 
 { 
 	for (size_t i=0; i<point_to_vars.size(); i++) {
-		if (v->match(point_to_vars[i])) {
+		if (v->loose_match(point_to_vars[i]) || point_to_vars[i]->loose_match(v)) {
 			return true;
 		}
 	}
@@ -492,7 +512,7 @@ bool FactPointTo::is_pointing_to_locals(const Variable* v, const Block* b, int i
 		return v->is_visible_local(b);
 	}
 	if (!v->is_pointer()) return false;
-	if (v->isArray) {
+	if (v->isArray || v->is_array_field()) {
 		v = v->get_collective();
 	}
 	vector<const Variable*> pointees;
@@ -677,7 +697,9 @@ FactPointTo::Output(std::ostream &out) const
 bool 
 FactPointTo::is_assertable(const Statement* stm) const
 {
-	return !is_variable_in_set(point_to_vars, garbage_ptr) &&
+	string dummy;
+	return (var->get_array(dummy) == NULL) &&
+		   !is_variable_in_set(point_to_vars, garbage_ptr) &&
 		   !is_variable_in_set(point_to_vars, tbd_ptr) && 
 		   !has_invisible(stm);
 }
@@ -701,11 +723,12 @@ FactPointTo::merge_pointees_of_pointers(const std::vector<const Variable*>& ptrs
 	vector<const Variable*> pointee_vars;
 	for (i=0; i<ptrs.size(); i++) {
 		const Variable* p = ptrs[i];
+		if (FactPointTo::is_special_ptr(p)) continue;
 		FactPointTo dummy(p);
 		const FactPointTo* exist_fact = (const FactPointTo*)find_related_fact(facts, &dummy);
 		// I can not think of a reason this is null
 		// well...this actually happens when p is a parameter of function f, and we are in the middle of creating f 
-		// assert(exist_fact);
+		assert(exist_fact);
 		if (exist_fact) {
 			for (j=0; j<exist_fact->get_point_to_vars().size(); j++) {
 				const Variable* pointee = exist_fact->get_point_to_vars()[j];

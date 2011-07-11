@@ -73,8 +73,7 @@ Filter::current_kind(void) const
 		return fDefault;
 	else if (CGOptions::dfs_exhaustive())
 		return fDFS;
-
-	assert(0);
+	return MAX_FILTER_KIND_SIZE;
 }
 
 /*

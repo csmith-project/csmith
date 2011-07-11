@@ -287,6 +287,14 @@ bool Variable::has_field_var(const Variable* v) const
     return false;
 }
 
+const Variable* 
+Variable::get_top_container(void) const
+{
+	const Variable* v = this;
+	for (; v && v->field_var_of; v = v->field_var_of);
+	return v;
+}
+
 int  
 Variable::get_field_id(void) const
 { 
@@ -309,7 +317,7 @@ void Variable::create_field_vars(const Type *type)
     size_t i, j;
     assert(type->fields.size() == type->qfers_.size());
 	j = 0;
-	if (name == "g_371")
+	if (name == "g_481")
 		j = 0;
     bool is_vol_var = qfer.is_volatile();
     bool is_const_var = qfer.is_const();
@@ -358,7 +366,9 @@ Variable::CreateVariable(const std::string &name, const Type *type,
 	if (type->eType == eSimple)
 		assert(type->simple_type != eVoid);
 
-	var->init = Constant::make_random(type);
+	const Variable* top = isFieldVarOf;
+	while (top->field_var_of) top = top->field_var_of;
+	var->init = (top->type->eType == eUnion) ? 0 : Constant::make_random(type);
 
 	ERROR_GUARD_AND_DEL1(NULL, var);
 	if (type->is_aggregate()) {
@@ -445,6 +455,12 @@ Variable::is_global(void) const
 		return field_var_of->is_global();
 	}
 	return (name.find("g_") == 0);
+}
+
+bool
+Variable::is_local(void) const
+{
+	return (name.find("l_") == 0);
 }
 
 // ------------------------------------------------------------- 
@@ -1330,7 +1346,20 @@ Variable::compare_field(const Variable* v) const
 	}
 	return 0;
 }
-	 
+
+void 
+Variable::find_pointer_fields(vector<const Variable*>& ptr_fields) const
+{
+	for (size_t i=0; i<field_vars.size(); i++) {
+		if (field_vars[i]->is_pointer()) {
+			ptr_fields.push_back(field_vars[i]);
+		}
+		else if (field_vars[i]->is_aggregate()) {
+			field_vars[i]->find_pointer_fields(ptr_fields);
+		}
+	}
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 // Local Variables:

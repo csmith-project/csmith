@@ -39,6 +39,8 @@
 #include "Lhs.h"
 #include "ExpressionVariable.h"
 #include "FunctionInvocationUser.h"
+#include "ExpressionAssign.h"
+#include "ExpressionComma.h"
 #include <assert.h> 
 
 const int  FactUnion::TOP = -2;
@@ -79,7 +81,8 @@ FactUnion::rhs_to_lhs_transfer(const std::vector<const Fact*>& facts, const vect
 	// assert all possible LHS are unions
 	for (size_t i=0; i<lvars.size(); i++) {
 		assert(lvars[i]->type->eType == eUnion);
-	}
+	} 
+	assert(rhs != NULL);
 	if (rhs->term_type == eConstant) {  
 		return make_facts(lvars, 0); 
 	}
@@ -99,11 +102,19 @@ FactUnion::rhs_to_lhs_transfer(const std::vector<const Fact*>& facts, const vect
 		if (fi->invoke_type == eFuncCall) { 
 			const FunctionInvocationUser* fiu = dynamic_cast<const FunctionInvocationUser*>(fi);
 			// find the fact regarding return variable
-			const FactUnion* rv_fact = dynamic_cast<const FactUnion*>(get_return_fact_for_invocation(fiu, eUnionWrite)); 
+			const FactUnion* rv_fact = dynamic_cast<const FactUnion*>(get_return_fact_for_invocation(fiu, fiu->get_func()->rv, eUnionWrite)); 
 			assert(rv_fact);
 			return make_facts(lvars, rv_fact->get_last_written_fid());
         }
     } 
+	else if (rhs->term_type == eAssignment) {
+		const ExpressionAssign* ea = dynamic_cast<const ExpressionAssign*>(rhs);
+		return rhs_to_lhs_transfer(facts, lvars, ea->get_rhs());
+	}
+	else if (rhs->term_type == eCommaExpr) {
+		const ExpressionComma* ec = dynamic_cast<const ExpressionComma*>(rhs);
+		return rhs_to_lhs_transfer(facts, lvars, ec->get_rhs());
+	}
 	return empty;
 }
 
@@ -112,6 +123,7 @@ std::vector<const Fact*>
 FactUnion::abstract_fact_for_assign(const std::vector<const Fact*>& facts, const Lhs* lhs, const Expression* rhs)
 {   
 	std::vector<const Fact*> ret_facts; 
+	if (rhs == NULL) return ret_facts;
 	// find all the pointed variables on LHS
 	std::vector<const Variable*> lvars = FactPointTo::merge_pointees_of_pointer(lhs->get_var()->get_collective(), lhs->get_indirect_level(), facts);
 	if (lhs->get_type().eType == eUnion) {
@@ -132,19 +144,20 @@ FactUnion::abstract_fact_for_assign(const std::vector<const Fact*>& facts, const
 }
 
 /* draw facts from return statement */
-Fact* 
+std::vector<const Fact*>
 FactUnion::abstract_fact_for_return(const std::vector<const Fact*>& facts, const ExpressionVariable* rv, const Function* func)
 {
+	vector<const Fact*> ret_facts;
     if (func->return_type->eType == eUnion) {
 		int indirect = rv->get_indirect_level(); 
 	    assert(indirect >= 0);   
 		vector<const Variable*> rvars = FactPointTo::merge_pointees_of_pointer(rv->get_var()->get_collective(), indirect, facts);
 		const FactUnion* rhs_fact = dynamic_cast<const FactUnion*>(join_var_facts(facts, rvars)); 
 		if (rhs_fact) {
-			return make_fact(func->rv, rhs_fact->get_last_written_fid());
+			ret_facts.push_back(make_fact(func->rv, rhs_fact->get_last_written_fid()));
 		}
 	}
-    return 0;
+    return ret_facts;
 }
 
 Fact*
@@ -178,7 +191,9 @@ FactUnion::make_facts(const vector<const Variable*>& vars, int fid)
 bool 
 FactUnion::is_nonreadable_field(const Variable *v, const std::vector<const Fact*>& facts)
 {
-	if (v->is_union_field()) {
+	if (v->is_inside_union_field()) {
+		for (; v && !v->is_union_field(); v = v->field_var_of);
+		assert(v->is_union_field());
 		FactUnion tmp(v->field_var_of, v->get_field_id());
 		const FactUnion* fu = dynamic_cast<const FactUnion*>(find_related_fact(facts, &tmp));
 		if (fu && !tmp.imply(*fu)) {
@@ -278,7 +293,7 @@ FactUnion::imply(const Fact& f) const
 bool
 FactUnion::is_field_readable(const Variable* v, int fid, const vector<const Fact*>& facts)
 {
-	assert(v->type->eType == eUnion && fid >=0 && fid < v->type->fields.size());
+	assert(v->type->eType == eUnion && fid >=0 && fid < (int)(v->type->fields.size()));
 	FactUnion tmp(v, fid);
 	const FactUnion* fu = dynamic_cast<const FactUnion*>(find_related_fact(facts, &tmp));
 	return (fu && tmp.imply(*fu)) ;

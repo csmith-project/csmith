@@ -85,7 +85,7 @@ bool
 StatementAssignFilter::filter(int v) const
 {
 	assert(table_);
-	return table_->filter(v);
+	return false;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -132,29 +132,38 @@ AssignOpsProbability(Filter *filter = NULL)
  *
  */
 StatementAssign *
-StatementAssign::make_random(CGContext &cg_context)
+StatementAssign::make_random(CGContext &cg_context, const Type* type, const CVQualifiers* qf)
 {
-	DEPTH_GUARD_BY_TYPE_RETURN(dtStatementAssign, NULL);
-	StatementAssign::InitProbabilityTable();
-	StatementAssignFilter filter(StatementAssign::assignOpsTable_);
-	eAssignOps op = AssignOpsProbability(&filter);
-	ERROR_GUARD(NULL);
-
+	// decide assignment operator
+	eAssignOps op;
+	if (type && type->eType != eSimple) {
+		op = eSimpleAssign;
+	} else {
+		DEPTH_GUARD_BY_TYPE_RETURN(dtStatementAssign, NULL);
+		StatementAssign::InitProbabilityTable();
+		StatementAssignFilter filter(StatementAssign::assignOpsTable_);
+		op = AssignOpsProbability(&filter);
+		ERROR_GUARD(NULL);
+	}
+	// decide type
+	if (type == NULL) {
+		type = Type::SelectLType(!cg_context.get_effect_context().is_side_effect_free(), op);
+	}
+	assert(!type->is_const_struct_union());
+	
 	FactMgr* fm = get_fact_mgr(&cg_context);
 	assert(fm);
-
-	Lhs *lhs = 0;
-	Expression *e = NULL;
 	fm->backup_facts();
-  
-	const Type* t = Type::SelectLType(!cg_context.get_effect_context().is_side_effect_free(), op);
-	ERROR_GUARD(NULL);
+
+	// pre-generation initializations
+	Lhs *lhs = NULL;
+	Expression *e = NULL;
 	cg_context.expr_depth = 0;
-	
 	Effect running_eff_context(cg_context.get_effect_context());
 	Effect rhs_accum, lhs_accum;  
 	CGContext rhs_cg_context(cg_context, running_eff_context, &rhs_accum);
-	e = Expression::make_random(rhs_cg_context, t);
+	
+	e = Expression::make_random(rhs_cg_context, type, qf);
 	ERROR_GUARD_AND_DEL1(NULL, e);
 	CVQualifiers qfer = e->get_qualifiers();
 	// lhs should not has "const" qualifier
@@ -169,7 +178,7 @@ StatementAssign::make_random(CGContext &cg_context)
 	cg_context.add_effect(rhs_accum);
 	CGContext lhs_cg_context(cg_context, running_eff_context, &lhs_accum);
 	lhs_cg_context.get_effect_stm() = rhs_cg_context.get_effect_stm();
-	lhs = Lhs::make_random(lhs_cg_context, t, &qfer);
+	lhs = Lhs::make_random(lhs_cg_context, type, &qfer);
 	ERROR_GUARD_AND_DEL2(NULL, e, lhs);
 
 	// Yang: Is it a bug?
@@ -183,7 +192,7 @@ StatementAssign::make_random(CGContext &cg_context)
 	}
 
 	cg_context.add_effect(lhs_accum);
-	cg_context.get_effect_stm() = lhs_cg_context.get_effect_stm();
+	//cg_context.get_effect_stm() = cg_context.get_effect_stm();
 	
 	// book keeping
 	incr_counter(Bookkeeper::expr_depth_cnts, cg_context.expr_depth);
@@ -319,7 +328,7 @@ StatementAssign::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context)
 		return false;
 	}
 	cg_context.add_effect(lhs_accum);
-	cg_context.get_effect_stm() = lhs_cg_context.get_effect_stm();
+	//cg_context.get_effect_stm() = lhs_cg_context.get_effect_stm();
 	update_fact_for_assign(this, inputs);
 	// save effect
 	FactMgr* fm = get_fact_mgr(&cg_context);
@@ -396,7 +405,7 @@ StatementAssign::StatementAssign(const StatementAssign &sa)
  *
  */
 StatementAssign::~StatementAssign(void)
-{ 
+{
 	if (rhs != &expr) {
 		delete rhs;
 	}

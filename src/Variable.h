@@ -77,6 +77,7 @@ public:
 
 	virtual ~Variable(void);
 	virtual bool is_global(void) const; 
+	virtual bool is_local(void) const;
 	virtual bool is_visible_local(const Block* blk) const;
 	virtual size_t get_dimension(void) const { return 0;}
 	bool is_visible(const Block* blk) const { return is_global() || is_visible_local(blk);}
@@ -88,17 +89,20 @@ public:
 	bool is_volatile_after_deref(int deref_level) const;
 	bool has_field_var(const Variable* v) const; 
 	bool is_field_var(void) const { return field_var_of != 0; };
+	const Variable* get_top_container(void) const;
 	int  get_field_id(void) const;
 	bool is_union_field(void) const { return field_var_of != 0 && field_var_of->type->eType == eUnion; };
+	bool is_inside_union_field(void) const { return is_union_field() || (field_var_of && field_var_of->is_union_field()); }
 	bool is_array_field(void) const;
 	bool is_virtual(void) const;
 	bool is_aggregate(void) const { return type && type->is_aggregate(); }
 	bool match(const Variable* v) const;
 	bool loose_match(const Variable* v) const;
 	bool is_pointer(void) const { return type && type->eType == ePointer;}
-	bool is_rv(void) const { return StringUtils::end_with(name, "_rv"); }
+	bool is_rv(void) const { return name.find("_rv") != string::npos; }
 	int  compare_field(const Variable* v) const;
 	int get_seq_num(void) const;
+	void find_pointer_fields(vector<const Variable*>& ptr_fields) const;
 
 	virtual std::string get_actual_name() const;
 	std::string to_string(void) const;

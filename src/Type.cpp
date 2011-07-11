@@ -1396,7 +1396,7 @@ Type::SizeInBytes(void) const
 			unsigned int sz = 0;
 			if (is_bitfield(i)) {
 				assert(i < bitfields_length_.size());
-				sz = ceil(bitfields_length_[i] / 8.0) * 8;
+				sz = (int)(ceil(bitfields_length_[i] / 8.0) * 8);
 			} else {
 				sz = fields[i]->SizeInBytes();
 			}
@@ -1418,7 +1418,7 @@ Type::SizeInBytes(void) const
         }
         return total_size;
     }
-	case ePointer: return CGOptions::x86_64() ? 8 : 4; 
+	case ePointer: return 8; //CGOptions::x86_64() ? 8 : 4; 
 	}
 	return 0;
 }
@@ -1474,12 +1474,10 @@ Type::get_int_subfield_names(string prefix, vector<string>& names, const vector<
 		size_t i;
 		size_t j = 0;
 		for (i=0; i<fields.size(); i++) {
-			// skip 0 length bitfields
-			if (is_unamed_padding(i)) {
-				continue;
-			}
-			if (std::find(excluded_fields.begin(), excluded_fields.end(), i) != excluded_fields.end()) {
-				j++;
+			// skip 0 length bitfields and excluded fields
+			if (std::find(excluded_fields.begin(), excluded_fields.end(), i) != excluded_fields.end() ||
+				is_unamed_padding(i)) {
+				if (!is_unamed_padding(i)) j++;
 				continue;
 			}
 			ostringstream oss;
@@ -1488,6 +1486,20 @@ Type::get_int_subfield_names(string prefix, vector<string>& names, const vector<
 			fields[i]->get_int_subfield_names(oss.str(), names, empty);
 		}
 	}
+}
+
+bool 
+Type::contain_pointer_field(void) const
+{
+	if (eType == ePointer) return true;
+	if (eType == eStruct || eType == eUnion) {
+		for (size_t i=0; i<fields.size(); i++) {
+			if (fields[i]->contain_pointer_field()) {
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 // ---------------------------------------------------------------------

@@ -42,38 +42,21 @@
 /*
  *
  */
-Expression *
+ExpressionComma*
 ExpressionComma::make_random(CGContext &cg_context, const Type* type, const CVQualifiers* qfer)
 {
-	Expression *e = 0;
-	//++cg_context.stmt_depth;
-	//bool std_func = ExpressionFunctionProbability(cg_context);
-	//ERROR_GUARD(NULL);
- //   // unary/binary "functions" produce scalar types only
-	//if (type && (type->eType != eSimple || type->simple_type == eVoid))
-	//	std_func = false;
+	Expression* lhs = Expression::make_random(cg_context, NULL, NULL, false, true);
+	Expression* rhs = Expression::make_random(cg_context, type, qfer, false, false);
+	ExpressionComma* ec = new ExpressionComma(*lhs, *rhs);
+	return ec;
+}
 
-	//Effect effect_accum = cg_context.get_accum_effect();
-	//Effect effect_stm = cg_context.get_effect_stm(); 
-	//FactMgr* fm = get_fact_mgr(&cg_context);
-	//vector<const Fact*> facts_copy = fm->global_facts; 
-	//FunctionInvocation *fi = FunctionInvocation::make_random(std_func, cg_context, type, qfer);
-	//ERROR_GUARD(NULL);
-
-	//if (fi->failed) { 
-	//	// if it's a invalid invocation, (see FunctionInvocationUser::revisit) 
-	//	// restore the env, and replace invocation with a simple var
-	//	cg_context.reset_effect_accum(effect_accum);
-	//	cg_context.reset_effect_stm(effect_stm);
-	//	fm->restore_facts(facts_copy);
-	//	e = ExpressionVariable::make_random(cg_context, type, qfer);
-	//	delete fi;
-	//}
-	//else {
-	//	e = new ExpressionComma(*fi);
-	//}
-	//--cg_context.stmt_depth;
-	return e;
+ExpressionComma::ExpressionComma(const Expression& l, const Expression& r)
+	: Expression(eCommaExpr),
+	  lhs(l),
+	  rhs(r)
+{
+	// nothing else to do
 }
 
 /*
@@ -83,6 +66,12 @@ ExpressionComma::~ExpressionComma(void)
 {
 	delete &lhs;
 	delete &rhs;
+}
+
+Expression*
+ExpressionComma::clone(void) const
+{
+	return new ExpressionComma(*lhs.clone(), *rhs.clone());
 }
 
 bool 
@@ -110,8 +99,11 @@ ExpressionComma::Output(std::ostream &out) const
 	if (reducer && reducer->output_expr(this, out)) {
 		return;
 	} 
+	out << "(";
 	lhs.Output(out);
+	out << " , ";
 	rhs.Output(out);
+	out << ")";
 }
 
 void 

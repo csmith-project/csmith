@@ -101,9 +101,6 @@ VariableSelectFilter::~VariableSelectFilter()
 bool
 VariableSelectFilter::filter(int v) const
 {
-	if (VariableSelector::scopeTable_->filter(v))
-		return true;
-
 	eVariableScope scope = VariableSelector::scopeTable_->get_value(v);
 	if (scope == eParentParam) {
 		Function &parent = *cg_context_.get_current_func();
@@ -227,9 +224,9 @@ bool
 VariableSelector::is_eligible_var(const Variable* var, int deref_level, Effect::Access access, const CGContext& cg_context)
 {
 	const Variable* coll = var->get_collective();
+	FactMgr* fm = get_fact_mgr(&cg_context);
 	if (coll != var) {
 		CGContext cg_tmp(cg_context);
-		FactMgr* fm = get_fact_mgr(&cg_context);
 		if (!cg_tmp.read_indices(var, fm->global_facts)) {
 			return false;
 		}
@@ -274,7 +271,9 @@ VariableSelector::is_eligible_var(const Variable* var, int deref_level, Effect::
 	//
 	// We cannot read a variable if the current code-generation context
 	// says that we should not.
-	if ((access == Effect::READ) && cg_context.is_nonreadable(var)) {
+	if ((access == Effect::READ) && 
+		(cg_context.is_nonreadable(var) ||
+		(FactUnion::is_nonreadable_field(var, fm->global_facts)))) {
 		return false;
 	}
 	// ISSUE: generating "interesting" C programs.
@@ -1437,14 +1436,6 @@ VariableSelector::create_mutated_array_var(const ArrayVariable* av, const vector
 	AllVars.push_back(new_av);
 	av->parent->local_vars.push_back(new_av);
 	return new_av;
-}
-
-Variable *
-VariableSelector::make_dummy_variable(const string &name, const Type* t, const CVQualifiers* qfer)
-{
-	Variable *var = new Variable(name, t, 0, qfer);
-	AllVars.push_back(var);
-	return var;
 }
 
 Variable *
