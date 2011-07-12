@@ -196,7 +196,7 @@ FactUnion::is_nonreadable_field(const Variable *v, const std::vector<const Fact*
 		assert(v->is_union_field());
 		FactUnion tmp(v->field_var_of, v->get_field_id());
 		const FactUnion* fu = dynamic_cast<const FactUnion*>(find_related_fact(facts, &tmp));
-		if (fu && !tmp.imply(*fu)) {
+		if (fu==NULL || !tmp.imply(*fu)) {
 			return true;
 		}
 	}
