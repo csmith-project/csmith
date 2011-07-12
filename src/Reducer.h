@@ -103,7 +103,7 @@ public:
 
 	// for interaction with reduction config file
 	void config_active_blks(string cmd);
-	void configure_diff_active_blks(string line, int first_bid);
+	int  configure_diff_active_blks(string line, int first_bid);
 	void config_call_chain_shortcut(string cmd);
 	void config_stm_reduction(string cmd);
 	void config_expr_reduction(string cmd);

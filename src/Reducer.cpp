@@ -902,7 +902,7 @@ Reducer::get_used_vars_and_funcs_and_labels(const Statement* stm, vector<const V
 	}
 }
 
-void
+int
 Reducer::configure_diff_active_blks(string line, int first_bid)
 {
 	vector<int> ids; 
@@ -912,31 +912,33 @@ Reducer::configure_diff_active_blks(string line, int first_bid)
 	const Block* one_branch = find_block_by_id(first_bid); 
 	assert(one_branch);
 	const Statement* stm = one_branch->find_container_stm();
-	assert(stm && stm->eType == eIfElse);
-
-	for (i=0; i<ids.size(); i+=2) {
-		int id = ids[i];
-		if (1) { //id <= first_bid) {
-			int cnt = ids[i+1];
-			const Block* blk = find_block_by_id(id);
-			assert(blk);
-			map_active_blks[blk] = cnt;
+	if (stm && stm->eType == eIfElse) { 
+		for (i=0; i<ids.size(); i+=2) {
+			int id = ids[i];
+			if (1) { //id <= first_bid) {
+				int cnt = ids[i+1];
+				const Block* blk = find_block_by_id(id);
+				assert(blk);
+				map_active_blks[blk] = cnt;
+			}
 		}
+		const StatementIf* si = (const StatementIf*)stm;
+		const Block* other_branch = (one_branch == si->get_false_branch()) ? si->get_true_branch() : si->get_false_branch();
+		map_active_blks[other_branch] = map_active_blks[one_branch];
+		assert(!used_vars.empty());
+
+		// replace both branches with direct conflicting assignments
+		string vname = monitored_var->name;
+		string assign1 = vname + " = 0;";
+		string assign2 = vname + " = 1;";
+		replace_stm(one_branch, NULL, assign1);
+		replace_stm(other_branch, NULL, assign2);
+
+		// delete all statement following this if-else statement
+		delete_stms_after(si, true);
+		return 1;
 	}
-	const StatementIf* si = (const StatementIf*)stm;
-	const Block* other_branch = (one_branch == si->get_false_branch()) ? si->get_true_branch() : si->get_false_branch();
-	map_active_blks[other_branch] = map_active_blks[one_branch];
-	assert(!used_vars.empty());
-
-	// replace both branches with direct conflicting assignments
-	string vname = monitored_var->name;
-	string assign1 = vname + " = 0;";
-	string assign2 = vname + " = 1;";
-	replace_stm(one_branch, NULL, assign1);
-	replace_stm(other_branch, NULL, assign2);
-
-	// delete all statement following this if-else statement
-	delete_stms_after(si, true);
+	else return 0;
 }
 
 void
@@ -951,14 +953,15 @@ Reducer::config_active_blks(string cmd)
 	}
 	else {
 		tmp_strs.clear();
+		bool take_diff_branch = false;
 		if (cmd.find("||") != string::npos) {
 			StringUtils::split_string(cmd, tmp_strs, "|");
 			assert(tmp_strs.size() == 2); 
 			cmd = tmp_strs[0];
 			int blkid = StringUtils::str2int(tmp_strs[1]);
-			configure_diff_active_blks(cmd, blkid);
+			take_diff_branch = configure_diff_active_blks(cmd, blkid);
 		}
-		else {
+		if (!take_diff_branch) {
 			StringUtils::split_string(cmd, tmp_strs, ",()");
 			for (i=0; i<tmp_strs.size(); i+=2) {
 				const Block* blk = find_block_by_id(StringUtils::str2int(tmp_strs[i]));
