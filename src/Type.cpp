@@ -1414,6 +1414,7 @@ Type::SizeInBytes(void) const
         unsigned int total_size = 0;
         for (i=0; i<fields.size(); i++) { 
 			unsigned int sz = fields[i]->SizeInBytes();
+			if (sz == SIZE_UNKNOWN) return sz;
             total_size += sz;
         }
         return total_size;
