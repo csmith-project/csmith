@@ -55,6 +55,8 @@
 #include "Expression.h"
 #include "ExpressionVariable.h"
 #include "ExpressionFuncall.h"
+#include "ExpressionAssign.h"
+#include "ExpressionComma.h"
 #include "Lhs.h"
 #include "Constant.h"
 #include "CVQualifiers.h"
@@ -581,6 +583,18 @@ Reducer::get_used_vars_and_funcs_and_labels(const Expression* e, vector<const Va
 	case eFunction: {
 		const ExpressionFuncall* funcall = (const ExpressionFuncall*)e;
 		get_used_vars_and_funcs_and_labels(funcall->get_invoke(), vars, funcs, labels); 
+		break;
+	}
+	case eAssignment: {
+		const ExpressionAssign* ea = (const ExpressionAssign*)e;
+		get_used_vars_and_funcs_and_labels(ea->get_lhs(), vars, funcs, labels);
+		get_used_vars_and_funcs_and_labels(ea->get_rhs(), vars, funcs, labels);
+		break;
+	}
+	case eCommaExpr: {
+		const ExpressionComma* ec = (const ExpressionComma*)e;
+		get_used_vars_and_funcs_and_labels(ec->get_lhs(), vars, funcs, labels);
+		get_used_vars_and_funcs_and_labels(ec->get_rhs(), vars, funcs, labels);
 		break;
 	}
 	default: break;
