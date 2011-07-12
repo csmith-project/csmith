@@ -69,11 +69,13 @@ am_csmith_OBJECTS = csmith-AbsExtension.$(OBJEXT) \
 	csmith-Effect.$(OBJEXT) csmith-Error.$(OBJEXT) \
 	csmith-Expression.$(OBJEXT) csmith-ExpressionFuncall.$(OBJEXT) \
 	csmith-ExpressionVariable.$(OBJEXT) \
-	csmith-ExtensionMgr.$(OBJEXT) csmith-ExtensionValue.$(OBJEXT) \
-	csmith-Fact.$(OBJEXT) csmith-FactMgr.$(OBJEXT) \
-	csmith-FactPointTo.$(OBJEXT) csmith-FactUnion.$(OBJEXT) \
-	csmith-Filter.$(OBJEXT) csmith-Finalization.$(OBJEXT) \
-	csmith-Function.$(OBJEXT) csmith-FunctionInvocation.$(OBJEXT) \
+	csmith-ExpressionAssign.$(OBJEXT) \
+	csmith-ExpressionComma.$(OBJEXT) csmith-ExtensionMgr.$(OBJEXT) \
+	csmith-ExtensionValue.$(OBJEXT) csmith-Fact.$(OBJEXT) \
+	csmith-FactMgr.$(OBJEXT) csmith-FactPointTo.$(OBJEXT) \
+	csmith-FactUnion.$(OBJEXT) csmith-Filter.$(OBJEXT) \
+	csmith-Finalization.$(OBJEXT) csmith-Function.$(OBJEXT) \
+	csmith-FunctionInvocation.$(OBJEXT) \
 	csmith-FunctionInvocationBinary.$(OBJEXT) \
 	csmith-FunctionInvocationUnary.$(OBJEXT) \
 	csmith-FunctionInvocationUser.$(OBJEXT) \
@@ -283,6 +285,10 @@ csmith_SOURCES = \
 	ExpressionFuncall.h \
 	ExpressionVariable.cpp \
 	ExpressionVariable.h \
+	ExpressionAssign.cpp \
+	ExpressionAssign.h \
+	ExpressionComma.cpp \
+	ExpressionComma.h \
 	ExtensionMgr.cpp \
 	ExtensionMgr.h \
 	ExtensionValue.cpp \
@@ -502,6 +508,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-Effect.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-Error.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-Expression.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-ExpressionAssign.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-ExpressionComma.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-ExpressionFuncall.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-ExpressionVariable.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-ExtensionMgr.Po@am__quote@
@@ -944,6 +952,34 @@ csmith-ExpressionVariable.obj: ExpressionVariable.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ExpressionVariable.cpp' object='csmith-ExpressionVariable.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-ExpressionVariable.obj `if test -f 'ExpressionVariable.cpp'; then $(CYGPATH_W) 'ExpressionVariable.cpp'; else $(CYGPATH_W) '$(srcdir)/ExpressionVariable.cpp'; fi`
+
+csmith-ExpressionAssign.o: ExpressionAssign.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-ExpressionAssign.o -MD -MP -MF $(DEPDIR)/csmith-ExpressionAssign.Tpo -c -o csmith-ExpressionAssign.o `test -f 'ExpressionAssign.cpp' || echo '$(srcdir)/'`ExpressionAssign.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/csmith-ExpressionAssign.Tpo $(DEPDIR)/csmith-ExpressionAssign.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ExpressionAssign.cpp' object='csmith-ExpressionAssign.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-ExpressionAssign.o `test -f 'ExpressionAssign.cpp' || echo '$(srcdir)/'`ExpressionAssign.cpp
+
+csmith-ExpressionAssign.obj: ExpressionAssign.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-ExpressionAssign.obj -MD -MP -MF $(DEPDIR)/csmith-ExpressionAssign.Tpo -c -o csmith-ExpressionAssign.obj `if test -f 'ExpressionAssign.cpp'; then $(CYGPATH_W) 'ExpressionAssign.cpp'; else $(CYGPATH_W) '$(srcdir)/ExpressionAssign.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/csmith-ExpressionAssign.Tpo $(DEPDIR)/csmith-ExpressionAssign.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ExpressionAssign.cpp' object='csmith-ExpressionAssign.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-ExpressionAssign.obj `if test -f 'ExpressionAssign.cpp'; then $(CYGPATH_W) 'ExpressionAssign.cpp'; else $(CYGPATH_W) '$(srcdir)/ExpressionAssign.cpp'; fi`
+
+csmith-ExpressionComma.o: ExpressionComma.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-ExpressionComma.o -MD -MP -MF $(DEPDIR)/csmith-ExpressionComma.Tpo -c -o csmith-ExpressionComma.o `test -f 'ExpressionComma.cpp' || echo '$(srcdir)/'`ExpressionComma.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/csmith-ExpressionComma.Tpo $(DEPDIR)/csmith-ExpressionComma.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ExpressionComma.cpp' object='csmith-ExpressionComma.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-ExpressionComma.o `test -f 'ExpressionComma.cpp' || echo '$(srcdir)/'`ExpressionComma.cpp
+
+csmith-ExpressionComma.obj: ExpressionComma.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-ExpressionComma.obj -MD -MP -MF $(DEPDIR)/csmith-ExpressionComma.Tpo -c -o csmith-ExpressionComma.obj `if test -f 'ExpressionComma.cpp'; then $(CYGPATH_W) 'ExpressionComma.cpp'; else $(CYGPATH_W) '$(srcdir)/ExpressionComma.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/csmith-ExpressionComma.Tpo $(DEPDIR)/csmith-ExpressionComma.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ExpressionComma.cpp' object='csmith-ExpressionComma.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-ExpressionComma.obj `if test -f 'ExpressionComma.cpp'; then $(CYGPATH_W) 'ExpressionComma.cpp'; else $(CYGPATH_W) '$(srcdir)/ExpressionComma.cpp'; fi`
 
 csmith-ExtensionMgr.o: ExtensionMgr.cpp
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-ExtensionMgr.o -MD -MP -MF $(DEPDIR)/csmith-ExtensionMgr.Tpo -c -o csmith-ExtensionMgr.o `test -f 'ExtensionMgr.cpp' || echo '$(srcdir)/'`ExtensionMgr.cpp
