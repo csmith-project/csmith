@@ -164,6 +164,9 @@ DEFINE_GETTER_SETTER_BOOL(force_non_uniform_array_init)
 DEFINE_GETTER_SETTER_INT(null_pointer_dereference_prob)
 DEFINE_GETTER_SETTER_INT(dead_pointer_dereference_prob)
 DEFINE_GETTER_SETTER_BOOL(union_read_type_sensitive);
+DEFINE_GETTER_SETTER_BOOL(use_incr_decr_opers);
+DEFINE_GETTER_SETTER_INT(int_bytes);
+DEFINE_GETTER_SETTER_INT(pointer_bytes);
 
 void
 CGOptions::set_default_settings(void)
@@ -245,6 +248,11 @@ CGOptions::set_default_settings(void)
 	null_pointer_dereference_prob(0);
 	dead_pointer_dereference_prob(0);
 	union_read_type_sensitive(true);
+	use_incr_decr_opers(true);
+	// these are defaults for x86-64 machine, our most used platform. 
+	// configure them to generate random programs for other platforms.  
+	int_bytes(4);
+	pointer_bytes(8);
 }
 
 #define MAX_INTEGER_LENGTH 64

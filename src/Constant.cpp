@@ -464,6 +464,8 @@ Constant::Output(std::ostream &out) const
 	//enclose negative numbers in parenthesis to avoid syntax errors such as "--8"
 	if (!value.empty() && value[0] == '-') {
 		out << "(" << value << ")";
+	} else if (type->eType == ePointer && equals(0)){
+		out << "(void*)" << value;
 	} else {
 		out << value;
 	}

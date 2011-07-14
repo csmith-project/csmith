@@ -56,7 +56,7 @@ using namespace std;
  *
  */
 Lhs *
-Lhs::make_random(CGContext &cg_context, const Type* t, const CVQualifiers* qfer)
+Lhs::make_random(CGContext &cg_context, const Type* t, const CVQualifiers* qfer, bool no_signed_overflow)
 {
 	Function *curr_func = cg_context.get_current_func();  
 	FactMgr* fm = get_fact_mgr_for_func(curr_func);
@@ -70,7 +70,7 @@ Lhs::make_random(CGContext &cg_context, const Type* t, const CVQualifiers* qfer)
 		var = VariableSelector::select_must_use_var(Effect::WRITE, cg_context, t, qfer);
 		if (var == NULL) {
 			bool flag = rnd_flipcoin(SelectDerefPointerProb);
-			if (flag) { //rnd_flipcoin(90)) {
+			if (flag) {
 				var = VariableSelector::select_deref_pointer(Effect::WRITE, cg_context, t, qfer, dummy);
 				ERROR_GUARD(NULL);
 				if (var) {
@@ -93,6 +93,10 @@ Lhs::make_random(CGContext &cg_context, const Type* t, const CVQualifiers* qfer)
 		assert(var);  
 		bool valid = FactPointTo::opportunistic_validate(var, t, fm->global_facts) && 
 					 FactPointTo::opportunistic_validate(var, t, fm->shadow_facts);
+		// we don't want signed integer for some operations, such as ++/-- which has potential of overflowing
+		if (valid && t->eType == eSimple && no_signed_overflow && var->type->get_base_type()->signed_overflow_possible()) {
+			valid = false;
+		}
 		if (valid) {
 			assert(var); 
 			Lhs* lhs = new Lhs(*var, t);

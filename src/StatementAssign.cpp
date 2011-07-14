@@ -50,82 +50,58 @@
 #include "ProbabilityTable.h"
 #include "DepthSpec.h"
 #include "CompatibleChecker.h"
+#include "Constant.h"
+#include "VectorFilter.h"
 
 #include "random.h"
 
 using namespace std;
 
-///////////////////////////////////////////////////////////////////////////////
-
-class StatementAssignFilter : public Filter
-{
-public:
-	explicit StatementAssignFilter(ProbabilityTable<unsigned int, ProbName> *table);
-	
-	virtual ~StatementAssignFilter(void);
-
-	virtual bool filter(int v) const;
-private:
-
-	ProbabilityTable<unsigned int, ProbName> *table_;
-};
-
-StatementAssignFilter::StatementAssignFilter(ProbabilityTable<unsigned int, ProbName> *table)
-	: table_(table)
-{
-
-}
-
-StatementAssignFilter::~StatementAssignFilter()
-{
-
-}
-
-bool 
-StatementAssignFilter::filter(int v) const
-{
-	assert(table_);
-	return false;
-}
-
 //////////////////////////////////////////////////////////////////////////////
 //
 // use a table to define probabilities of different kinds of statements
 // Must initialize it before use
-ProbabilityTable<unsigned int, ProbName> *StatementAssign::assignOpsTable_ = NULL;
+ProbabilityTable<unsigned int, int> *StatementAssign::assignOpsTable_ = NULL;
 
 void
 StatementAssign::InitProbabilityTable()
 {
-	if (StatementAssign::assignOpsTable_)
-		return;
-
-	StatementAssign::assignOpsTable_ = new ProbabilityTable<unsigned int, ProbName>();
-	StatementAssign::assignOpsTable_->initialize(pAssignOpsProb);
+	assignOpsTable_ = new ProbabilityTable<unsigned int, int>();
+	if (CGOptions::use_incr_decr_opers()) {
+		assignOpsTable_->add_elem(60, (int)eSimpleAssign);
+		assignOpsTable_->add_elem(70, (int)eBitAndAssign);
+		assignOpsTable_->add_elem(79, (int)eBitXorAssign);
+		assignOpsTable_->add_elem(88, (int)eBitOrAssign);
+		assignOpsTable_->add_elem(91, (int)ePreIncr);
+		assignOpsTable_->add_elem(94, (int)ePreDecr);
+		assignOpsTable_->add_elem(97, (int)ePostIncr);
+		assignOpsTable_->add_elem(100, (int)ePostDecr);
+	} 
+	else {
+		assignOpsTable_->add_elem(70, (int)eSimpleAssign);
+		assignOpsTable_->add_elem(80, (int)eBitAndAssign);
+		assignOpsTable_->add_elem(90, (int)eBitXorAssign);
+		assignOpsTable_->add_elem(100, (int)eBitOrAssign);
+	}
 }
 
 eAssignOps
-StatementAssign::number_to_op(unsigned int value)
+StatementAssign::AssignOpsProbability(const Type* type)
 {
-	assert(StatementAssign::assignOpsTable_);
-	assert(value < 100);
-	ProbName pname = StatementAssign::assignOpsTable_->get_value(value);
-	eAssignOps op = static_cast<eAssignOps>(Probabilities::pname_to_type(pname));
-	return op;
-}
-
-static eAssignOps
-AssignOpsProbability(Filter *filter = NULL)
-{
-	int value = 0;
 	if (!CGOptions::compound_assignment()) {
-		value = eSimpleAssign;
+		return eSimpleAssign;
 	}
-	else {
-		value = rnd_upto(100, filter);
+	if (type && type->eType != eSimple) {
+		return eSimpleAssign;
 	}
-	ERROR_GUARD(MAX_ASSIGN_OP);
-	return StatementAssign::number_to_op(value);
+
+	VectorFilter filter(assignOpsTable_);
+	if (type && type->is_signed()) {
+		filter.add(ePreIncr).add(ePreDecr).add(ePostIncr).add(ePostDecr);
+	}
+	
+	int value = rnd_upto(100, &filter); 
+	return (eAssignOps)(filter.lookup(value));
 }
 
 /*
@@ -135,16 +111,8 @@ StatementAssign *
 StatementAssign::make_random(CGContext &cg_context, const Type* type, const CVQualifiers* qf)
 {
 	// decide assignment operator
-	eAssignOps op;
-	if (type && type->eType != eSimple) {
-		op = eSimpleAssign;
-	} else {
-		DEPTH_GUARD_BY_TYPE_RETURN(dtStatementAssign, NULL);
-		StatementAssign::InitProbabilityTable();
-		StatementAssignFilter filter(StatementAssign::assignOpsTable_);
-		op = AssignOpsProbability(&filter);
-		ERROR_GUARD(NULL);
-	}
+	eAssignOps op = AssignOpsProbability(type);
+
 	// decide type
 	if (type == NULL) {
 		type = Type::SelectLType(!cg_context.get_effect_context().is_side_effect_free(), op);
@@ -162,23 +130,41 @@ StatementAssign::make_random(CGContext &cg_context, const Type* type, const CVQu
 	Effect running_eff_context(cg_context.get_effect_context());
 	Effect rhs_accum, lhs_accum;  
 	CGContext rhs_cg_context(cg_context, running_eff_context, &rhs_accum);
-	
-	e = Expression::make_random(rhs_cg_context, type, qf);
-	ERROR_GUARD_AND_DEL1(NULL, e);
-	CVQualifiers qfer = e->get_qualifiers();
-	// lhs should not has "const" qualifier
-	qfer.accept_stricter = true;
+	CVQualifiers qfer;
+	if (qf) qfer = *qf;
 
-	// for compound assignment, generate LHS in the effect context of RHS
-	if (op != eSimpleAssign) {
-		running_eff_context.add_effect(rhs_accum);
-		// for now, just use non-volatile as LHS for compound assignments
-		qfer.set_volatile(false);
+	if (need_no_rhs(op)) {
+		e = Constant::make_int(1);
+		// if we are creating standalone statements like x++, any qualifers fit
+		if (qf == NULL) qfer.wildcard = true;
+	}
+	else {
+		e = Expression::make_random(rhs_cg_context, type, qf);
+		ERROR_GUARD_AND_DEL1(NULL, e);
+		if (!qf) {
+			qfer = e->get_qualifiers();
+			// lhs should not has "const" qualifier
+			qfer.accept_stricter = true;
+		}
+
+		// for compound assignment, generate LHS in the effect context of RHS
+		if (op != eSimpleAssign) {
+			running_eff_context.add_effect(rhs_accum);
+			// for now, just use non-volatile as LHS for compound assignments
+			qfer.set_volatile(false);
+		}
 	}
 	cg_context.add_effect(rhs_accum);
 	CGContext lhs_cg_context(cg_context, running_eff_context, &lhs_accum);
 	lhs_cg_context.get_effect_stm() = rhs_cg_context.get_effect_stm();
-	lhs = Lhs::make_random(lhs_cg_context, type, &qfer);
+	bool prev_flag = CGOptions::match_exact_qualifiers();
+	if (qf) {
+		CGOptions::match_exact_qualifiers(true);
+	}
+	lhs = Lhs::make_random(lhs_cg_context, type, &qfer, need_no_rhs(op));
+	if (qf) {
+		CGOptions::match_exact_qualifiers(prev_flag);
+	}
 	ERROR_GUARD_AND_DEL2(NULL, e, lhs);
 
 	// Yang: Is it a bug?
@@ -192,11 +178,9 @@ StatementAssign::make_random(CGContext &cg_context, const Type* type, const CVQu
 	}
 
 	cg_context.add_effect(lhs_accum);
-	//cg_context.get_effect_stm() = cg_context.get_effect_stm();
 	
 	// book keeping
-	incr_counter(Bookkeeper::expr_depth_cnts, cg_context.expr_depth);
-	
+	incr_counter(Bookkeeper::expr_depth_cnts, cg_context.expr_depth);	
 	ERROR_GUARD_AND_DEL2(NULL, e, lhs);
 	StatementAssign *stmt_assign = make_possible_compound_assign(cg_context, *lhs, op, *e);
 	ERROR_GUARD_AND_DEL2(NULL, e, lhs);
@@ -510,14 +494,22 @@ StatementAssign::OutputAsExpr(std::ostream &out) const
 			}
 			break;
 		}
-
-			// FIXME-- here we're not properly translating pre/post increment
+		
+		case ePreIncr:	
+			out << "++"; lhs.Output(out); 
+			break;
+		case ePreDecr:	
+			out << "--"; lhs.Output(out); 
+			break;
+		case ePostIncr:	
+			lhs.Output(out); out << "++"; 
+			break;
+		case ePostDecr:	lhs.Output(out); 
+			out << "--"; 
+			break;
+			
 		case eAddAssign:
 		case eSubAssign:
-		case ePreIncr:	
-		case ePreDecr:	
-		case ePostIncr:	
-		case ePostDecr:	
 			{
 				enum eBinaryOps bop = compound_to_binary_ops(op); 
 				assert(op_flags);

@@ -119,6 +119,8 @@ public:
 
 	bool has_int_field() const;
 
+	bool signed_overflow_possible() const;
+
 	static const Type* choose_random_struct_union_type(vector<Type *> &ok_types);
 
 	static const Type * choose_random_nonvoid_nonvolatile(void);

@@ -65,7 +65,6 @@ enum eAssignOps
 	eBitAndAssign,
 	eBitXorAssign,
 	eBitOrAssign,
-	//
 	ePreIncr,
 	ePreDecr,
 	ePostIncr,
@@ -93,7 +92,9 @@ public:
 			const Expression *er, const SafeOpFlags *flags,
 			std::string &tmp_name1, std::string &tmp_name2);
 
+	static void InitProbabilityTable();
 	static bool safe_assign(eAssignOps op);
+	static bool need_no_rhs(eAssignOps op) { return op==ePreIncr || op==ePreDecr || op==ePostIncr || op==ePostDecr;}
 
 	bool is_simple_assign(void) const { return op == eSimpleAssign;}
 
@@ -124,7 +125,7 @@ public:
 	void OutputSimple(std::ostream &out) const;
 	
 private:
-	static void InitProbabilityTable();
+	static eAssignOps AssignOpsProbability(const Type* type);
 
 	const eAssignOps op;
 	const Lhs   &lhs;
@@ -136,7 +137,7 @@ private:
 	std::string tmp_var1;
 	std::string tmp_var2;
 
-	static ProbabilityTable<unsigned int, ProbName> *assignOpsTable_;
+	static ProbabilityTable<unsigned int, int> *assignOpsTable_;
 
 	StatementAssign(const StatementAssign &sa);  // unimplemented
 

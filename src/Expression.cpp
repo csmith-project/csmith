@@ -65,9 +65,6 @@ ProbabilityTable<unsigned int, int> *Expression::exprTable_ = NULL;
 void
 Expression::InitExprProbabilityTable()
 {
-	if (Expression::exprTable_)
-		return;
-
 	Expression::exprTable_ = new ProbabilityTable<unsigned int, int>();
 	Expression::exprTable_->add_elem(40, (int)eFunction);
 	Expression::exprTable_->add_elem(50, (int)eAssignment);
@@ -80,9 +77,6 @@ ProbabilityTable<unsigned int, int> *Expression::paramTable_ = NULL;
 void
 Expression::InitParamProbabilityTable()
 {
-	if (Expression::paramTable_)
-		return;
-
 	Expression::paramTable_ = new ProbabilityTable<unsigned int, int>();
 	Expression::paramTable_->add_elem(30, (int)eFunction);
 	Expression::paramTable_->add_elem(40, (int)eConstant);
@@ -157,8 +151,6 @@ Expression *
 Expression::make_random(CGContext &cg_context, const Type* type, const CVQualifiers* qfer, bool no_func, bool no_const, enum eTermType tt)
 {
 	DEPTH_GUARD_BY_TYPE_RETURN_WITH_FLAG(dtExpression, tt, NULL);
-	Expression::InitProbabilityTables();
-
 	Expression *e = 0;  
 	if (type == NULL) {
 		do { 
@@ -228,7 +220,6 @@ Expression *
 Expression::make_random_param(CGContext &cg_context, const Type* type, const CVQualifiers* qfer, enum eTermType tt)
 {
 	DEPTH_GUARD_BY_TYPE_RETURN_WITH_FLAG(dtExpressionRandomParam, tt, NULL);
-	Expression::InitProbabilityTables();
 	Expression *e = 0;  
 	assert(type);
 	// if a term type is provided, no need to choose random term type

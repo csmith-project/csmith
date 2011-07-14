@@ -396,8 +396,6 @@ private:
 
 	void set_default_simple_types_prob();
 
-	void set_default_assign_ops_prob();
-
 	void set_default_binary_ops_prob();
 
 	void set_default_safe_ops_size_prob();

@@ -448,6 +448,12 @@ Type::has_int_field() const
 	return false;
 }
 
+bool 
+Type::signed_overflow_possible() const
+{
+	return eType == eSimple && is_signed() && ((int)SizeInBytes()) >= CGOptions::int_bytes();
+}
+
 void
 Type::get_all_ok_struct_union_types(vector<Type *> &ok_types, bool no_const, bool no_volatile, bool need_int_field, bool bStruct)
 {
@@ -1419,7 +1425,7 @@ Type::SizeInBytes(void) const
         }
         return total_size;
     }
-	case ePointer: return 8; //CGOptions::x86_64() ? 8 : 4; 
+	case ePointer: CGOptions::pointer_bytes(); 
 	}
 	return 0;
 }
@@ -1441,14 +1447,6 @@ Type::SelectLType(bool no_volatile, eAssignOps op)
 	}
 	ERROR_GUARD(NULL);
 
-	// JYTODO: choose a union type as LHS type, this mean RHS can't be constant
-	/*if (!type) {
-		vector<Type *> ok_union_types;
-		get_all_ok_struct_union_types(ok_union_types, true, no_volatile, false, false);
-		if ((ok_union_types.size() > 0) && (op == eSimpleAssign) && rnd_flipcoin(UnionAsLTypeProb)) {
-			type = Type::choose_random_struct_union_type(ok_union_types);
-		}
-	}*/
 	// choose a struct type as LHS type
 	if (!type) {
 		vector<Type *> ok_struct_types;

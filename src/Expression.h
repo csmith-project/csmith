@@ -97,6 +97,8 @@ public:
 
 	static Expression *make_random_param(CGContext &cg_context, const Type* type, const CVQualifiers* qfer, enum eTermType tt=MAX_TERM_TYPES);
 
+	static void InitProbabilityTables();
+
 	Expression(eTermType e);
 
 	Expression(const Expression &expr);
@@ -147,16 +149,12 @@ public:
 	enum eTermType term_type;
 	int expr_id;
 
-	static ProbabilityTable<unsigned int, int> *exprTable_;
-
-	static ProbabilityTable<unsigned int, int> *paramTable_;
 private:
-
 	static void InitExprProbabilityTable();
-
 	static void InitParamProbabilityTable();
 
-	static void InitProbabilityTables();
+	static ProbabilityTable<unsigned int, int> *exprTable_;
+	static ProbabilityTable<unsigned int, int> *paramTable_;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

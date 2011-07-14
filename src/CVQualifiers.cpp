@@ -154,6 +154,9 @@ CVQualifiers::match(const CVQualifiers& qfer) const
 	if (wildcard) {
 		return true;
 	}
+	if (CGOptions::match_exact_qualifiers()) {
+		return is_consts == qfer.get_consts() && is_volatiles == qfer.get_volatiles();
+	}
 	// return true if both variables are non-pointer (has only one level qualifier)
 	if (is_consts.size() == qfer.get_consts().size() && is_consts.size()==1) {
 		assert(is_consts.size() == is_volatiles.size());

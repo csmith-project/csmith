@@ -381,6 +381,15 @@ public:
 	static bool union_read_type_sensitive(void);
 	static bool union_read_type_sensitive(bool p);
 
+	static bool use_incr_decr_opers(void);
+	static bool use_incr_decr_opers(bool p);
+
+	static int int_bytes(void);
+	static int int_bytes(int p);
+
+	static int pointer_bytes(void);
+	static int pointer_bytes(int p);
+
 private:
 	static bool resolve_exhaustive_options();
 
@@ -492,6 +501,9 @@ private:
 	static int dead_pointer_dereference_prob_;
 	// flag that indicate the comformance level to C99. true means relaxed
 	static bool union_read_type_sensitive_;
+	static bool use_incr_decr_opers_;
+	static int  int_bytes_;
+	static int  pointer_bytes_;
 	static Reducer* reducer_; 
 
 private:

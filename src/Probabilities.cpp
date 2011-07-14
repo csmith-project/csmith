@@ -585,10 +585,15 @@ void
 Probabilities::initialize_group_probs()
 {
 	set_default_statement_prob();
-	set_default_assign_ops_prob();
 	set_default_binary_ops_prob();
 	set_default_simple_types_prob();
 	set_default_safe_ops_size_prob();
+
+	// setup random distribution of assignment operators (=, +=, /=...)
+	StatementAssign::InitProbabilityTable();	
+
+	// setup random distribution of expression term types (const, variable, function ...)
+	Expression::InitProbabilityTables();		
 }
 
 void
@@ -700,30 +705,6 @@ Probabilities::set_default_binary_ops_prob()
 
 	set_group_prob(true, pBinaryOpsProb, m);
 	set_prob_filter(pBinaryOpsProb);
-}
-
-void
-Probabilities::set_default_assign_ops_prob()
-{
-	std::map<ProbName, int> m;
-
-	SET_SINGLE_NAME("simple_assign_prob", SimpleAssign, 70);
-	SET_SINGLE_NAME("mul_assign_prob", MulAssign, 0);
-	SET_SINGLE_NAME("div_assign_prob", DivAssign, 0);
-	SET_SINGLE_NAME("rem_assign_prob", RemAssign, 0);
-	SET_SINGLE_NAME("add_assign_prob", AddAssign, 0);
-	SET_SINGLE_NAME("sub_assign_prob", SubAssign, 0);
-	SET_SINGLE_NAME("lshift_assign_prob", LShiftAssign, 0);
-	SET_SINGLE_NAME("rshift_assign_prob", RShiftAssign, 0);
-	SET_SINGLE_NAME("bit_and_assign_prob", BitAndAssign, 80);
-	SET_SINGLE_NAME("bit_xor_assign_prob", BitXorAssign, 90);
-	SET_SINGLE_NAME("bit_or_assign_prob", BitOrAssign, 100);
-	SET_SINGLE_NAME("pre_incr_assign_prob", PreIncr, 0);
-	SET_SINGLE_NAME("pre_decr_assign_prob", PreDecr, 0);
-	SET_SINGLE_NAME("post_incr_assign_prob", PostIncr, 0);
-	SET_SINGLE_NAME("post_decr_assign_prob", PostDecr, 0);
-
-	set_group_prob(false, pAssignOpsProb, m);
 }
 
 void
