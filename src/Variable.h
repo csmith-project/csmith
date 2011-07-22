@@ -92,7 +92,7 @@ public:
 	const Variable* get_top_container(void) const;
 	int  get_field_id(void) const;
 	bool is_union_field(void) const { return field_var_of != 0 && field_var_of->type->eType == eUnion; };
-	bool is_inside_union_field(void) const { return is_union_field() || (field_var_of && field_var_of->is_union_field()); }
+	bool is_inside_union_field(void) const { return is_union_field() || (field_var_of && field_var_of->is_inside_union_field()); }
 	bool is_array_field(void) const;
 	bool is_virtual(void) const;
 	bool is_aggregate(void) const { return type && type->is_aggregate(); }
