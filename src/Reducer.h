@@ -45,6 +45,7 @@ class Variable;
 class Expression;
 class ExpressionVariable;
 class FactMgr;
+class Type;
 class FunctionInvocation;
 class FunctionInvocationUser;
 class FunctionInvocationBinary;
@@ -97,6 +98,8 @@ public:
 	void delete_stms_after(const Statement* stm, bool include_parent_blks);
 	int reduce_stms_with_assigns(int id1, int id2, const string& assigns);
 
+	string add_artificial_globals(const Type* t, string name="");
+
 	// for outputing
 	void output_block_skeleton(const Block* blk, vector<const Block*>& work_blks, vector<const Function*>& work_funcs, std::ostream& out);
 	int  output_expr(const Expression* e, std::ostream &out);
@@ -147,6 +150,7 @@ public:
 	vector<const Function*> used_funcs;
 	vector<const Variable*> used_vars;
 	vector<string> used_labels;
+	vector<string> artificial_globals;
 	const Function* main;
 	string main_str;
 	bool configured;

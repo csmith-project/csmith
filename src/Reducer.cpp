@@ -524,7 +524,15 @@ Reducer::get_used_vars_and_funcs_and_labels(const FunctionInvocation* fi, vector
 			// replace the function call with a constant 0. In fact it's not evaluated
 			// anyway, so which constant we use doesn't matter
 			if (is_blk_deleted(call->get_func()->body)) {
-				map_reduced_invocations[fi] = new Constant(&fi->get_type(), "0");
+				if (call->get_type().is_aggregate()) {
+					// it's not a real constant, but we don't want to go through the trouble 
+					// of creating an ExpressionVariable
+					string vname = add_artificial_globals(&call->get_type());
+					map_reduced_invocations[fi] = new Constant(&call->get_type(), vname);
+				} 
+				else {
+					map_reduced_invocations[fi] = new Constant(&fi->get_type(), "0");
+				}
 				return;
 			}
 			// recursively find used vars and functions
@@ -988,6 +996,7 @@ Reducer::config_call_chain_shortcut(string cmd)
 {
 	if (cmd == "poll") {
 		dump_monitored_var = true;
+		add_artificial_globals(get_int_type(), "global_call_id");
 	}
 	else {
 		vector<string> strs;
@@ -995,6 +1004,7 @@ Reducer::config_call_chain_shortcut(string cmd)
 		assert(strs.size() == 2 || strs.size() == 3);
 		if (strs.size() == 2) {
 			dump_monitored_var = true;
+			add_artificial_globals(get_int_type(), "global_call_id");
 			monitored_func = find_function_by_name(strs[0]);
 			assert(monitored_func);
 			monitored_call_id = strs[1];
@@ -1161,6 +1171,19 @@ Reducer::config_var_init_reduction(string cmd)
 	const Variable* v = VariableSelector::find_var_by_name(strs[0]);
 	assert(v);
 	map_reduced_var_inits[v] = strs[1];
+}
+
+string
+Reducer::add_artificial_globals(const Type* t, string name)
+{
+	static int cnt = 0; 
+	ostringstream oss;
+	t->Output(oss);
+	if (name == "") {
+		name = "tmp_" + StringUtils::int2str(cnt++);
+	}
+	artificial_globals.push_back(oss.str() + " " + name);
+	return name;
 }
 
 const Variable*

@@ -935,20 +935,8 @@ ReducerOutputMgr::OutputStructUnions(ostream& out)
 void
 ReducerOutputMgr::output_artificial_globals(ostream& out)
 {
-	if (reducer->dump_monitored_var) {
-		//// hack for path shortcutting delta, move some local variables to global area for easy 
-		//// recording of the program state
-		//if (CGOptions::monitored_call_id()) {
-		//	vector<const Variable*> moved_vars;
-		//	find_moved_local_vars(moved_vars);
-		//	size_t i;
-		//	for (i=0; i<moved_vars.size(); i++) {
-		//		moved_vars[i]->OutputDef(out, 0);
-		//	}
-		//} 
-		// declare this variable as counter for subsequent function calls 
-		out << "int global_call_id = 0; ";
-		outputln(out);
+	for (size_t i=0; i<reducer->artificial_globals.size(); i++) {
+		out << reducer->artificial_globals[i] << ";" << endl;
 	}
 }
 
