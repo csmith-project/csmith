@@ -51,7 +51,8 @@ public:
 	
 	void read_var(const Variable *v);
 	void write_var(const Variable *v);
-	void add_effect(const Effect &e);
+	void write_var_set(const std::vector<const Variable *>& vars);
+	void add_effect(const Effect &e, bool include_lhs_effects = false);
 	void add_external_effect(const Effect &e, std::vector<const Block*> call_chain);
 	void add_external_effect(const Effect &e);
 	void clear(void);
@@ -78,6 +79,8 @@ public:
 
 	const std::vector<const Variable *>& get_read_vars(void) const { return read_vars;}
 	const std::vector<const Variable *>& get_write_vars(void) const { return write_vars;}
+	const std::vector<const Variable *>& get_lhs_write_vars(void) const { return lhs_write_vars;}
+	void set_lhs_write_vars(const std::vector<const Variable *>& vars)  { lhs_write_vars = vars;}
 
 	typedef enum {
 		READ, WRITE
@@ -90,6 +93,7 @@ public:
 private:	
 	std::vector<const Variable *> read_vars;
 	std::vector<const Variable *> write_vars;
+	std::vector<const Variable *> lhs_write_vars;
 
 	bool pure;
 	bool side_effect_free;

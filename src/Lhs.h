@@ -61,6 +61,8 @@ public:
 
 	int get_indirect_level(void) const;
 
+	void get_lvars(const vector<const Fact*>& facts, vector<const Variable*>& vars) const;
+
 	bool is_volatile() const;
 
 	const Variable* get_var(void) const {return &var;};

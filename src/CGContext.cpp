@@ -396,10 +396,10 @@ CGContext::read_indices(const Variable* v, const vector<const Fact*>& facts)
  * 
  */
 void
-CGContext::add_effect(const Effect &e)
+CGContext::add_effect(const Effect &e, bool include_lhs_effects)
 {
 	if (effect_accum) {
-		effect_accum->add_effect(e);
+		effect_accum->add_effect(e, include_lhs_effects);
 	}
 	effect_stm.add_effect(e);
 	sanity_check();

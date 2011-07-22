@@ -395,6 +395,10 @@ Function::make_first(void)
 	// No Parameter List
 	f->GenerateBody(CGContext::get_empty_context());
 	fm->setup_in_out_maps(true);
+		
+	// update global facts to merged facts at all possible function exits
+	fm->global_facts = fm->map_facts_out[f->body];
+	f->body->add_back_return_facts(fm, fm->global_facts);
 
 	// collect info about global dangling pointers
 	fm->find_dangling_global_ptrs(f);

@@ -63,6 +63,10 @@ Lhs::make_random(CGContext &cg_context, const Type* t, const CVQualifiers* qfer,
 	vector<const Variable*> dummy;  
 	//static int cnt = 0;				// for debug
 
+	// save effects, in case we need to backtrack
+	Effect effect_accum = cg_context.get_accum_effect();
+	Effect effect_stm = cg_context.get_effect_stm();
+
 	do {
 		DEPTH_GUARD_BY_TYPE_RETURN(dtLhs, NULL);
 		const Variable* var = 0;
@@ -99,22 +103,19 @@ Lhs::make_random(CGContext &cg_context, const Type* t, const CVQualifiers* qfer,
 		}
 		if (valid) {
 			assert(var); 
-			Lhs* lhs = new Lhs(*var, t);
-			Effect effect_accum = cg_context.get_accum_effect();
-			Effect effect_stm = cg_context.get_effect_stm(); 
-			if (lhs->visit_facts(fm->global_facts, cg_context) && lhs->visit_facts(fm->shadow_facts, cg_context)) {
+			Lhs tmp(*var, t);
+			if (tmp.visit_facts(fm->global_facts, cg_context)) {
 				// bookkeeping
-				int deref_level = lhs->get_indirect_level();
+				int deref_level = tmp.get_indirect_level();
 				if (deref_level > 0) {
 					incr_counter(Bookkeeper::write_dereference_cnts, deref_level); 
 				}
 				Bookkeeper::record_volatile_access(var, deref_level, true);
-				return lhs;
+				return new Lhs(*var, t);
 			}
 			// restore the effects
 			cg_context.reset_effect_accum(effect_accum);
 			cg_context.reset_effect_stm(effect_stm);
-			delete lhs;
 		}
 		dummy.push_back(var);
 	} while (true);
@@ -137,7 +138,7 @@ Lhs::Lhs(const Variable &v)
  * copy constructor
  */
 Lhs::Lhs(const Lhs &lhs)
-	: Expression(eVariable),
+	: Expression(eLhs),
 	  var(lhs.var),
 	  type(lhs.type)
 {
@@ -148,7 +149,7 @@ Lhs::Lhs(const Lhs &lhs)
  *
  */
 Lhs::Lhs(const Variable &v, const Type* t)
-	: Expression(eVariable),
+	: Expression(eLhs),
       var(v),
       type(t)
 { 
@@ -178,6 +179,12 @@ Lhs::get_type(void) const
 {
 	return *(type);
 }
+
+void
+Lhs::get_lvars(const vector<const Fact*>& facts, vector<const Variable*>& vars) const
+{
+	vars = FactPointTo::merge_pointees_of_pointer(get_var()->get_collective(), get_indirect_level(), facts); 
+}			
 
 /*
  *
@@ -292,6 +299,7 @@ Lhs::visit_indices(vector<const Fact*>& inputs, CGContext& cg_context) const
 bool 
 Lhs::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const
 { 
+	bool valid = false;
 	const Variable* v = get_var(); 
 	if (!visit_indices(inputs, cg_context)) {
 		return false;
@@ -303,11 +311,18 @@ Lhs::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const
 		if (ptr_modified_in_rhs(inputs, cg_context)) {
 			return false;
 		}
-		return cg_context.check_read_var(v, inputs) && cg_context.write_pointed(this, inputs);
+		valid = cg_context.check_read_var(v, inputs) && cg_context.write_pointed(this, inputs);
 	}
 	else {
-		return cg_context.check_write_var(v, inputs);
+		valid = cg_context.check_write_var(v, inputs);
 	} 
+	if (valid) {
+		if (cg_context.get_effect_accum()) {
+			Effect* eff = cg_context.get_effect_accum();
+			eff->set_lhs_write_vars(eff->get_write_vars());
+		}
+	}
+	return valid;
 }
 
 bool

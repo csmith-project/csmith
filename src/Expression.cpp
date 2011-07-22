@@ -174,7 +174,9 @@ Expression::make_random(CGContext &cg_context, const Type* type, const CVQualifi
 		if (no_const || type->eType == eStruct || type->eType == eUnion) {
 			filter.add(eConstant);
 		}
-		if (type->is_const_struct_union()) {
+		// can't assign to constant struct/unions. on the other hand, assign to a volatile 
+		// struct/union cause too much trouble for effect analysis, disable it for now
+		if (type->is_const_struct_union() || type->is_volatile_struct_union()) {
 			filter.add(eAssignment);
 		}
 		tt = ExpressionTypeProbability(cg_context, &filter); 

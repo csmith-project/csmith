@@ -52,6 +52,7 @@ class Fact;
 class Block;
 class Type;
 class Lhs;
+class Expression;
 class FactMgr;
 class Statement;
 class ExpressionVariable; 
@@ -134,7 +135,7 @@ public:
 	bool read_indices(const Variable* v, const vector<const Fact*>& facts);
 	bool read_pointed(const ExpressionVariable* v, const std::vector<const Fact*>& facts);
 	bool write_pointed(const Lhs* v, const std::vector<const Fact*>& facts);
-	void add_effect(const Effect &e);
+	void add_effect(const Effect &e, bool include_lhs_effects=false);
 	void add_external_effect(const Effect &e);
 	void add_visible_effect(const Effect &e, const Block* b);
 

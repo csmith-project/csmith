@@ -150,11 +150,19 @@ Effect::write_var(const Variable *v)
 	// side_effect_free = false;
 }
 
+void 
+Effect::write_var_set(const std::vector<const Variable *>& vars)
+{
+	for (size_t i=0; i<vars.size(); i++) {
+		write_var(vars[i]);
+	}
+}
+
 /*
  * 
  */
 void
-Effect::add_effect(const Effect &e)
+Effect::add_effect(const Effect &e, bool include_lhs_effects)
 {
 	if (this == &e) {
 		return;
@@ -181,6 +189,9 @@ Effect::add_effect(const Effect &e)
 		}
 	}
 
+	if (include_lhs_effects) {
+		add_variables_to_set(lhs_write_vars, e.get_lhs_write_vars());
+	} 
 	pure &= e.pure;
 	side_effect_free &= e.side_effect_free;
 }

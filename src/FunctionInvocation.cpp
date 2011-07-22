@@ -181,7 +181,7 @@ FunctionInvocation::make_random_binary(CGContext &cg_context, const Type* type)
 	Effect lhs_eff_accum;
 	CGContext lhs_cg_context(cg_context, cg_context.get_effect_context(), &lhs_eff_accum);
 
-	// Generate an expression with the correct type required by safe math operands
+	// Generate an expression with the correct type required by safe math operands 
 	const Type* lhs_type = flags->get_lhs_type();
 	const Type* rhs_type = flags->get_rhs_type();
 	assert(lhs_type && rhs_type);
@@ -189,7 +189,7 @@ FunctionInvocation::make_random_binary(CGContext &cg_context, const Type* type)
 	ERROR_GUARD_AND_DEL1(NULL, fi);
 	Expression *rhs = 0;
 
-	cg_context.add_effect(lhs_eff_accum);
+	cg_context.add_effect(lhs_eff_accum, true);
 	FactMgr* fm = get_fact_mgr(&cg_context);
 	vector<const Fact*> facts_copy = fm->global_facts;
 
@@ -203,7 +203,7 @@ FunctionInvocation::make_random_binary(CGContext &cg_context, const Type* type)
 		// Otherwise, the RHS must be generated under the combined effect
 		// of the original effect and the LHS effect.
 		Effect rhs_eff_context(cg_context.get_effect_context());
-		rhs_eff_context.add_effect(lhs_eff_accum);
+		rhs_eff_context.add_effect(lhs_eff_accum, true);
 		Effect rhs_eff_accum;
 
 		CGContext rhs_cg_context(cg_context, rhs_eff_context, &rhs_eff_accum);
@@ -227,7 +227,7 @@ FunctionInvocation::make_random_binary(CGContext &cg_context, const Type* type)
 				fi->set_operation(op);
 			}
 		}
-		cg_context.add_effect(rhs_eff_accum);
+		cg_context.add_effect(rhs_eff_accum, true);
 	}
 
 	ERROR_GUARD_AND_DEL2(NULL, fi, lhs);
@@ -272,7 +272,7 @@ FunctionInvocation::make_random_binary_ptr_comparison(CGContext &cg_context)
 	lhs_cg_context.flags |= NO_DANGLING_PTR;
 	Expression *lhs = Expression::make_random(lhs_cg_context, type, 0, true);
 	ERROR_GUARD_AND_DEL1(NULL, fi);
-	cg_context.add_effect(lhs_eff_accum);
+	cg_context.add_effect(lhs_eff_accum, true);
 
 	// now focus on RHS ...
 	enum eTermType tt = MAX_TERM_TYPES;
@@ -302,7 +302,7 @@ FunctionInvocation::make_random_binary_ptr_comparison(CGContext &cg_context)
 		CGContext rhs_cg_context(cg_context, rhs_eff_context, &rhs_eff_accum);
 		rhs_cg_context.flags |= NO_DANGLING_PTR;
 		rhs = Expression::make_random(rhs_cg_context, type, 0, true, false, tt);
-		cg_context.add_effect(rhs_eff_accum);
+		cg_context.add_effect(rhs_eff_accum, true);
 	}
 	ERROR_GUARD_AND_DEL2(NULL, fi, lhs);
 
@@ -479,6 +479,7 @@ FunctionInvocation::visit_facts(vector<const Fact*>& inputs, CGContext& cg_conte
 {   
 	bool unordered = false; //has_uncertain_call();  
 	bool ok = false;
+	bool is_func_call = (invoke_type == eFuncCall);
 	static int g = 0;
 	Effect running_eff_context(cg_context.get_effect_context());
 	if (!unordered) {  
@@ -498,14 +499,14 @@ FunctionInvocation::visit_facts(vector<const Fact*>& inputs, CGContext& cg_conte
 			// when we generate subsequent parameters within this invocation.
 			running_eff_context.add_effect(param_eff_accum);
 			// Update the total effect of this invocation, too.
-			cg_context.add_effect(param_eff_accum); 
+			cg_context.add_effect(param_eff_accum, !is_func_call); 
 		}
 		ok = true;
 	} 
 	else {
 		ok = visit_unordered_params(inputs, cg_context);
 	}
-	if (ok && invoke_type == eFuncCall) {
+	if (ok && is_func_call) {
 		// make a copy of env
 		vector<const Fact*> inputs_copy = inputs;
 		const FunctionInvocationUser* func_call = dynamic_cast<const FunctionInvocationUser*>(this);

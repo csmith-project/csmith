@@ -154,21 +154,16 @@ StatementAssign::make_random(CGContext &cg_context, const Type* type, const CVQu
 			qfer.set_volatile(false);
 		}
 	}
-	cg_context.add_effect(rhs_accum);
+	cg_context.add_effect(rhs_accum, true);
+	running_eff_context.write_var_set(rhs_accum.get_lhs_write_vars());
+
 	CGContext lhs_cg_context(cg_context, running_eff_context, &lhs_accum);
 	lhs_cg_context.get_effect_stm() = rhs_cg_context.get_effect_stm();
-	bool prev_flag = CGOptions::match_exact_qualifiers();
-	if (qf) {
-		CGOptions::match_exact_qualifiers(true);
-	}
+	bool prev_flag = CGOptions::match_exact_qualifiers(); // keep a copy of previous flag
+	if (qf) CGOptions::match_exact_qualifiers(true);      // force exact qualifier match when selecting vars
 	lhs = Lhs::make_random(lhs_cg_context, type, &qfer, need_no_rhs(op));
-	if (qf) {
-		CGOptions::match_exact_qualifiers(prev_flag);
-	}
+	if (qf) CGOptions::match_exact_qualifiers(prev_flag); // restore flag
 	ERROR_GUARD_AND_DEL2(NULL, e, lhs);
-
-	// Yang: Is it a bug?
-	//assert((op != eSimpleAssign) && (lhs->get_var()->is_volatile()));
 	
 	if (CompatibleChecker::compatible_check(e, lhs)) {
 		Error::set_error(COMPATIBLE_CHECK_ERROR);
@@ -177,7 +172,7 @@ StatementAssign::make_random(CGContext &cg_context, const Type* type, const CVQu
 		return NULL;
 	}
 
-	cg_context.add_effect(lhs_accum);
+	cg_context.add_effect(lhs_accum, true); 
 	
 	// book keeping
 	incr_counter(Bookkeeper::expr_depth_cnts, cg_context.expr_depth);	
@@ -305,13 +300,15 @@ StatementAssign::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context)
 	if (op != eSimpleAssign) {
 		running_eff_context.add_effect(rhs_accum);
 	}
-	cg_context.add_effect(rhs_accum);
+	cg_context.add_effect(rhs_accum, true);
+	running_eff_context.write_var_set(rhs_accum.get_lhs_write_vars());
+
 	CGContext lhs_cg_context(cg_context, running_eff_context, &lhs_accum);
 	lhs_cg_context.get_effect_stm() = rhs_cg_context.get_effect_stm(); 
 	if (!lhs.visit_facts(inputs, lhs_cg_context)) {
 		return false;
 	}
-	cg_context.add_effect(lhs_accum);
+	cg_context.add_effect(lhs_accum, true);
 	//cg_context.get_effect_stm() = lhs_cg_context.get_effect_stm();
 	update_fact_for_assign(this, inputs);
 	// save effect
