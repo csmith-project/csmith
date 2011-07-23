@@ -146,7 +146,7 @@ StatementFor::make_iteration(CGContext& cg_context, StatementAssign*& init, Expr
 	do {
 		var = VariableSelector::SelectLoopCtrlVar(cg_context, invalid_vars); 
 		ERROR_GUARD(NULL);
-		if (var->is_volatile() || 
+		if (var->is_volatile()) { 
 			invalid_vars.push_back(var);
 		} else {
 			break;
