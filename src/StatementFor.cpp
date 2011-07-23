@@ -147,10 +147,6 @@ StatementFor::make_iteration(CGContext& cg_context, StatementAssign*& init, Expr
 		var = VariableSelector::SelectLoopCtrlVar(cg_context, invalid_vars); 
 		ERROR_GUARD(NULL);
 		if (var->is_volatile() || 
-			// disallow an integer field of an union, which also has a pointer field, to be IV because
-			// increment IV would cause the pointer to be invalid, and the current points-to analysis
-			// simply assumes loop stepping has no pointer effect
-			(var->is_inside_union_field() && var->get_top_container()->type->contain_pointer_field()) ) {
 			invalid_vars.push_back(var);
 		} else {
 			break;

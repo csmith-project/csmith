@@ -439,10 +439,9 @@ Type::is_volatile_struct_union() const
 bool
 Type::has_int_field() const
 {
-	if (!is_aggregate()) return false; 
+	if (is_int()) return true; 
 	for (size_t i=0; i<fields.size(); ++i) {
 		const Type* t = fields[i];
-		if (t->is_int()) return true;
 		if (t->has_int_field()) return true;
 	}
 	return false;

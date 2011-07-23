@@ -1097,18 +1097,29 @@ Variable *
 VariableSelector::SelectLoopCtrlVar(const CGContext &cg_context, const vector<const Variable*>& invalid_vars)
 {
 	// Note that many of the functions that select `var' can return null, if
-	const Type* type = get_int_type();  
-	//eVariableScope scope = VariableSelectionProbability(eNewValue);
-	//ERROR_GUARD(NULL);
+	const Type* type = get_int_type();   
 	vector<Variable*> vars;
-	find_all_non_array_visible_vars(cg_context.get_current_block(), vars); 
+	find_all_non_array_visible_vars(cg_context.get_current_block(), vars);
+	// remove union variables that have both integer field(s) and pointer field(s)  
+	// because incrementing the integer field causes the pointer to be invalid, and the current 
+	// points-to analysis simply assumes loop stepping has no pointer effect
+	size_t len = vars.size();
+	for (size_t i=0; i<len; i++) { 
+		if (vars[i]->type && 
+			(!vars[i]->type->has_int_field() ||		// remove variables isn't (or doesn't contain) integers 
+			(vars[i]->type->eType == eUnion && 
+			vars[i]->type->contain_pointer_field()))) {
+			vars.erase(vars.begin() + i);
+			i--;
+			len--;
+		}
+	}
 	Variable* var = choose_var(vars, Effect::WRITE, cg_context, type, 0, eConvert, invalid_vars, true);
 	ERROR_GUARD(NULL);
 	if (var == NULL) {
 		var = GenerateNewGlobal(Effect::WRITE, cg_context, type, 0);
 	}
 	return var;
-	//return select(Effect::WRITE, cg_context, type, 0, invalid_vars, eConvert, scope);
 }
 
 // --------------------------------------------------------------
