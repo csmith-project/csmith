@@ -397,10 +397,10 @@ StatementAssign::~StatementAssign(void)
 }
 
 /*
- *
+ * output assign operator
  */
-static void
-OutputAssignOp(eAssignOps op, std::ostream &out)
+void
+StatementAssign::output_op(std::ostream &out) const
 {
 	switch (op) {
 	case eSimpleAssign: out << "="; break;
@@ -441,21 +441,21 @@ StatementAssign::OutputSimple(std::ostream &out) const
 	default:
 		lhs.Output(out);
 		out << " ";
-		OutputAssignOp(op, out);
+		output_op(out);
 		out << " ";
 		expr.Output(out);
 		break;
 		
 	case ePreIncr:
 	case ePreDecr:
-		OutputAssignOp(op, out);
+		output_op(out);
 		lhs.Output(out);
 		break;
 		
 	case ePostIncr:
 	case ePostDecr:
 		lhs.Output(out);
-		OutputAssignOp(op, out);
+		output_op(out);
 		break;
 	}
 }
@@ -478,14 +478,13 @@ StatementAssign::OutputAsExpr(std::ostream &out) const
 			lhs.Output(out);
 			out << " ";
 			if (CGOptions::ccomp() && (bop != MAX_BINARY_OP) && (lhs.is_volatile())) {
-				OutputAssignOp(eSimpleAssign, out);
-				out << " ";
+				out << "=" << " ";
 				lhs.Output(out);
 				out << " " << FunctionInvocationBinary::get_binop_string(bop) << " ";
 				expr.Output(out);
 			}
 			else {
-				OutputAssignOp(op, out);
+				output_op(out);
 				out << " ";
 				expr.Output(out);
 			}

@@ -117,6 +117,7 @@ public:
 	virtual bool has_uncertain_call_recursive(void) const;
 
 	virtual void Output(std::ostream &out, FactMgr* fm, int indent = 0) const;
+	void output_op(std::ostream &out) const;
 
 	// XXX --- This should go away, once assignments are properly modeled as
 	// expressions.

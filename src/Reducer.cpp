@@ -1370,6 +1370,21 @@ Reducer::output_expr(const Expression* e, std::ostream &out)
 			}
 		}
 	}
+	else if (e->term_type == eAssignment) {
+		const ExpressionAssign* ea = dynamic_cast<const ExpressionAssign*>(e);
+		ostringstream oss;
+		// if RHS can be simplified, print the simplified version
+		if (output_expr(ea->get_rhs(), oss)) {
+			out << "(";
+			ea->get_lhs()->Output(out);
+			out << " ";
+			ea->get_stm_assign()->output_op(out);
+			out << " ";
+			out << oss.str();
+			out << ")";
+			return 1;
+		}
+	}
 	return 0;
 }
 
