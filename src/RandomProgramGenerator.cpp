@@ -79,6 +79,7 @@ FUTURE:
 #endif
 
 #include <ostream>
+#include <fstream>
 #include <cstring>
 #include <cstdio>
 
@@ -1087,6 +1088,11 @@ main(int argc, char **argv)
 			arg_check(argc, i);
 			if (!parse_string_arg(argv[i], filename)) {
 				cout<< "please specify reduction directive file!" << std::endl;
+				exit(-1);
+			}
+			ifstream conf(filename.c_str());
+			if (conf.fail()) {
+				cout<< "can't read reduction directive file " << filename << "!" << std::endl;
 				exit(-1);
 			}
 			CGOptions::init_reducer(filename);
