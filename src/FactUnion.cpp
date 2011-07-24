@@ -245,6 +245,8 @@ FactUnion::join_var_facts(const vector<const Fact*>& facts, const vector<const V
 			if (fu == 0) {
 				fu = dynamic_cast<FactUnion*>(exist_fact->clone());
 			} else {
+				// hack: both facts have to be the property of the same variable to be able to merge
+				fu->set_var(exist_fact->get_var()); 
 				fu->join(*exist_fact);
 			}
 		}

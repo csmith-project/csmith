@@ -57,6 +57,7 @@ public:
 	virtual ~FactUnion(void) {}; 
 
 	virtual const Variable* get_var(void) const { return var;};
+	void set_var(const Variable* v) { var = v;}
 	const Type* get_last_written_type(void) const;
 	int   get_last_written_fid(void) const { return last_written_fid; };
 	static bool is_field_readable(const Variable* v, int fid, const vector<const Fact*>& facts);
