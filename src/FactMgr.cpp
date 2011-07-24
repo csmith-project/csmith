@@ -1050,6 +1050,13 @@ FactMgr::sanity_check_map() const
 	}
 }
 
+const vector<const Fact*>&
+FactMgr::get_program_end_facts(void)
+{
+	FactMgr* fm = get_fact_mgr_for_func(GetFirstFunction());
+	return fm->global_facts;
+}
+
 void
 FactMgr::doFinalization()
 {

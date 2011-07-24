@@ -1294,10 +1294,18 @@ Variable::output_value_dump(ostream &out, string prefix, int indent) const
 		output_print_str(out, prefix + to_string() + " = " + type->printf_directive() + "\\n", to_string(), indent);
 		outputln(out);
 	}
-	else if (type->eType == eStruct || type->eType == eUnion) {
+	else if (type->eType == eStruct) {
 		for (i=0; i<field_vars.size(); i++) {
 			// bit fields can not be taken address
 			field_vars[i]->output_value_dump(out, prefix, indent);
+		}
+	}
+	else if (type->eType == eUnion) {
+		const vector<const Fact*>& facts = FactMgr::get_program_end_facts();
+		for (i=0; i<field_vars.size(); i++) {
+			if (FactUnion::is_field_readable(this, i, facts)) {
+				field_vars[i]->output_value_dump(out, prefix, indent);
+			}
 		}
 	}
 	return 0;

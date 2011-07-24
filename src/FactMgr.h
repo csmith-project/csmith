@@ -124,6 +124,8 @@ public:
 
 	void sanity_check_map() const;
 
+	static const vector<const Fact*>& get_program_end_facts(void);
+
 	static std::vector<Fact*> meta_facts; 
 
 	std::map<const Statement*, FactVec> map_facts_in;
