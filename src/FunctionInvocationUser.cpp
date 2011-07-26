@@ -200,7 +200,7 @@ FunctionInvocationUser::build_invocation_and_function(CGContext &cg_context, con
 		// when we generate subsequent parameters within this invocation.
 		running_eff_context.add_effect(param_eff_accum);
 		// Update the total effect of this invocation, too.
-		cg_context.add_effect(param_eff_accum);  
+		cg_context.merge_param_context(param_cg_context);  
 	}  
 	  
 	FunctionInvocationUser* fiu = new FunctionInvocationUser(func, false, NULL);
@@ -255,7 +255,7 @@ FunctionInvocationUser::build_invocation(Function *target, CGContext &cg_context
 	Effect running_eff_context(cg_context.get_effect_context()); 
 	FactMgr* fm = get_fact_mgr(&cg_context);
 	// XXX DEBUGGING
-	if (func->name == "func_10" && cg_context.get_current_func()->name=="func_1") {
+	if (func->name == "func_36" && cg_context.get_current_func()->name=="func_22") {
 	 	i = 0; // Set breakpoint here.
 	}
 
@@ -271,7 +271,7 @@ FunctionInvocationUser::build_invocation(Function *target, CGContext &cg_context
 		// when we generate subsequent parameters within this invocation.
 		running_eff_context.add_effect(param_eff_accum);
 		// Update the total effect of this invocation, too.
-		cg_context.add_effect(param_eff_accum);  
+		cg_context.merge_param_context(param_cg_context);  
 	} 
 
 	// no need to validate func_1 as it has no parameters and it's called only once 

@@ -122,6 +122,7 @@ public:
 
 	virtual bool has_uncertain_call_recursive(void) const {return false;}
 
+	virtual unsigned int get_complexity(void) const = 0;
 	virtual bool less_than(int /*num*/) const { return false;}
 	virtual bool not_equals(int /*num*/) const { return false;}
 	virtual bool equals(int /*num*/) const { return false;}

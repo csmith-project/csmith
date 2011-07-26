@@ -176,6 +176,8 @@ public:
 
 	static int get_current_sid(void) { return sid; }
 
+	int get_blk_depth(void) const;
+
 	// unique id for each statement
 	int stm_id;
 	Function* func;

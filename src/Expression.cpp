@@ -98,11 +98,8 @@ Expression::InitProbabilityTables()
  *
  */
 static eTermType
-ExpressionTypeProbability(const CGContext &cg_context, const VectorFilter *filter)
+ExpressionTypeProbability(const VectorFilter *filter)
 {
-	if (cg_context.expr_depth > CGOptions::max_expr_depth())
-		return eVariable;
-
 	if (PartialExpander::direct_expand_check(eInvoke))
 		return eFunction;
 
@@ -179,7 +176,10 @@ Expression::make_random(CGContext &cg_context, const Type* type, const CVQualifi
 		if (type->is_const_struct_union() || type->is_volatile_struct_union()) {
 			filter.add(eAssignment);
 		}
-		tt = ExpressionTypeProbability(cg_context, &filter); 
+		if (cg_context.expr_depth + 2 > CGOptions::max_expr_depth()) {
+			filter.add(eFunction).add(eAssignment).add(eCommaExpr);
+		}
+		tt = ExpressionTypeProbability(&filter); 
 	}
 	    
 	ERROR_GUARD(NULL);
@@ -193,8 +193,7 @@ Expression::make_random(CGContext &cg_context, const Type* type, const CVQualifi
 	case eVariable:
 		e = ExpressionVariable::make_random(cg_context, type, qfer);
 		break;
-	case eFunction:
-		cg_context.expr_depth++;
+	case eFunction: 
 		e = ExpressionFuncall::make_random(cg_context, type, qfer);
 		break;
 	case eAssignment:
@@ -209,8 +208,13 @@ Expression::make_random(CGContext &cg_context, const Type* type, const CVQualifi
 	if (!cg_context.get_effect_context().is_side_effect_free()) {
 		assert(e->effect.is_side_effect_free());
 	}
-#endif 
+#endif
 
+	// increment expression depth. A function call increase the depth by 1
+	if (e->term_type == eConstant || e->term_type == eVariable || 
+		(e->get_invoke() && e->get_invoke()->invoke_type == eFuncCall)) {
+		cg_context.expr_depth++;
+	}
 	ERROR_GUARD(NULL);
 	return e;
 }
@@ -227,7 +231,7 @@ Expression::make_random_param(CGContext &cg_context, const Type* type, const CVQ
 	// if a term type is provided, no need to choose random term type
 	if (tt == MAX_TERM_TYPES) {
 		VectorFilter filter(Expression::paramTable_);
-		filter.add(eConstant);   // no constants as function call parameters
+		filter.add(eConstant);   // don't call functions with constant parameters because it is not interesting
 		if ((!CGOptions::return_structs() && type->eType == eStruct) ||
 			(!CGOptions::return_unions() && type->eType == eUnion)) {
 			filter.add(eFunction);
@@ -235,7 +239,10 @@ Expression::make_random_param(CGContext &cg_context, const Type* type, const CVQ
 		if (type->is_const_struct_union()) {
 			filter.add(eAssignment);
 		}
-		tt = ExpressionTypeProbability(cg_context, &filter);
+		if (cg_context.expr_depth + 2 > CGOptions::max_expr_depth()) {
+			filter.add(eFunction).add(eAssignment).add(eCommaExpr);
+		}
+		tt = ExpressionTypeProbability(&filter);
 	}
 	 
 	ERROR_GUARD(NULL);
@@ -250,7 +257,6 @@ Expression::make_random_param(CGContext &cg_context, const Type* type, const CVQ
 		e = ExpressionVariable::make_random(cg_context, type, qfer, true);
 		break; 
 	case eFunction:
-		cg_context.expr_depth++;
 		e = ExpressionFuncall::make_random(cg_context, type, qfer); 
 		break;
 	case eAssignment:
@@ -262,6 +268,10 @@ Expression::make_random_param(CGContext &cg_context, const Type* type, const CVQ
 	default: break;
 	} 
 
+	if (e->term_type == eConstant || e->term_type == eVariable || 
+		(e->get_invoke() && e->get_invoke()->invoke_type == eFuncCall)) {
+		cg_context.expr_depth++;
+	}
 	ERROR_GUARD(NULL);
 	return e;
 }

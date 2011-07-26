@@ -138,6 +138,7 @@ public:
 	void add_effect(const Effect &e, bool include_lhs_effects=false);
 	void add_external_effect(const Effect &e);
 	void add_visible_effect(const Effect &e, const Block* b);
+	void merge_param_context(const CGContext& param_cg_context, bool include_lhs_effects=false);
 
     int find_variable_scope(const Variable* var) const;
 
@@ -154,7 +155,7 @@ private:
     
 
 public: // XXX
-	int stmt_depth;
+	int blk_depth;
 	int expr_depth;
 	unsigned int flags;
 	std::vector<const Block*> call_chain;

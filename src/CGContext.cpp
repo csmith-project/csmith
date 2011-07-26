@@ -58,12 +58,11 @@ const CGContext CGContext::empty_context(0, Effect::get_empty_effect(), 0);
 
 ///////////////////////////////////////////////////////////////////////////////
 /*
- * A convenience constructor.  Set `stmt_depth' and `flags' to zero, and set
- * `no_read_vars' and `no_write_vars' each to be an empty set.
+ * A convenience constructor. Context is created when entering functions
  */
 CGContext::CGContext(Function *current_func, const Effect &eff_context, Effect *eff_accum)
 	: current_func(current_func),
-	  stmt_depth(0),
+	  blk_depth(0),
 	  expr_depth(0),
 	  flags(0),
 	  curr_blk(0),
@@ -78,7 +77,7 @@ CGContext::CGContext(Function *current_func, const Effect &eff_context, Effect *
 // adapt current context to create context of parameters
 CGContext::CGContext(const CGContext &cgc, const Effect &eff_context, Effect *eff_accum)
 	: current_func(cgc.current_func),
-	  stmt_depth(cgc.stmt_depth),
+	  blk_depth(cgc.blk_depth),
 	  expr_depth(cgc.expr_depth),
 	  flags(cgc.flags),
 	  call_chain(cgc.call_chain),
@@ -95,8 +94,8 @@ CGContext::CGContext(const CGContext &cgc, const Effect &eff_context, Effect *ef
 // adapt current context to create context of callee
 CGContext::CGContext(const CGContext &cgc, Function* f, const Effect &eff_context, Effect *eff_accum)
 	: current_func(f),
-	  stmt_depth(cgc.stmt_depth),
-	  expr_depth(cgc.expr_depth),
+	  blk_depth(0),
+	  expr_depth(0),
 	  flags(cgc.flags),
 	  call_chain(cgc.call_chain),
 	  curr_blk(cgc.curr_blk),
@@ -111,8 +110,8 @@ CGContext::CGContext(const CGContext &cgc, Function* f, const Effect &eff_contex
 // adapt current context to create context of loop body
 CGContext::CGContext(const CGContext &cgc, RWDirective* rwd, const Variable* iv, unsigned int bound)
 	: current_func(cgc.current_func),
-	  stmt_depth(cgc.stmt_depth),
-	  expr_depth(cgc.expr_depth),
+	  blk_depth(cgc.blk_depth),
+	  expr_depth(0),
 	  flags(cgc.flags | IN_LOOP),
 	  call_chain(cgc.call_chain),
 	  curr_blk(cgc.curr_blk),
@@ -403,6 +402,13 @@ CGContext::add_effect(const Effect &e, bool include_lhs_effects)
 	}
 	effect_stm.add_effect(e);
 	sanity_check();
+}
+
+void 
+CGContext::merge_param_context(const CGContext& param_cg_context, bool include_lhs_effects)
+{
+	add_effect(*param_cg_context.get_effect_accum(), include_lhs_effects);
+	expr_depth = param_cg_context.expr_depth;
 }
 
 /*

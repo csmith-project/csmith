@@ -110,7 +110,6 @@ Block::make_random(CGContext &cg_context, bool looping)
 	b->in_array_loop = !(cg_context.iv_bounds.empty());
 	//b->stm_id = bid++;
 	
-	++cg_context.stmt_depth;
 	// Push this block onto the variable scope stack.
 	curr_func->stack.push_back(b);
 	curr_func->blocks.push_back(b);
@@ -148,7 +147,7 @@ Block::make_random(CGContext &cg_context, bool looping)
 	}
 
 	// append nested loop if some must-read/write variables hasn't been accessed
-	if (b->need_nested_loop(cg_context)) {
+	if (b->need_nested_loop(cg_context) && cg_context.blk_depth < CGOptions::max_blk_depth()) {
 		b->append_nested_loop(cg_context);
 	}
 
@@ -162,8 +161,6 @@ Block::make_random(CGContext &cg_context, bool looping)
 	}
 
 	curr_func->stack.pop_back();
-	--cg_context.stmt_depth; 
-
 	if (Error::get_error() != SUCCESS) {
 		//curr_func->stack.pop_back();
 		delete b;

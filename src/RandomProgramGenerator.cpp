@@ -177,6 +177,8 @@ static void print_help()
 	cout << "  --max-pointer-depth <depth>: limit the indirect depth of pointers to <depth> (default 2)." << endl << endl;
 	cout << "  --max-array-dim <num>: limit array dimensions to <num>. (default 3)" << endl << endl;
 	cout << "  --max-array-len-per-dim <num>: limit array length per dimension to <num> (default 10)." << endl << endl;
+	cout << "  --upper-expr-complexity <num>: limit expression complexities to <num> (default 10)." << endl << endl;
+	cout << "  --max-block-depth <num>: limit depth of nested blocks to <num> (default 5)." << endl << endl;
 }
 
 static void print_advanced_help()
@@ -1069,6 +1071,26 @@ main(int argc, char **argv)
 			if (!parse_int_arg(argv[i], &prob))
 				exit(-1);
 			CGOptions::dead_pointer_dereference_prob(prob);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--upper-expr-complexity") ==0 ) {
+			unsigned long comp;
+			i++;
+			arg_check(argc, i);
+			if (!parse_int_arg(argv[i], &comp))
+				exit(-1);
+			CGOptions::max_expr_depth(comp);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--max-block-depth") ==0 ) {
+			unsigned long depth;
+			i++;
+			arg_check(argc, i);
+			if (!parse_int_arg(argv[i], &depth))
+				exit(-1);
+			CGOptions::max_blk_depth(depth);
 			continue;
 		}
 

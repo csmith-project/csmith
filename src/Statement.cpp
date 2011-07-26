@@ -158,14 +158,9 @@ bool StatementFilter::filter(int value) const
 		return true;
 	}
 
-	// Limit Function complexity (depth of nested control structures and
-	// expressions)
-	if (cg_context_.stmt_depth > CGOptions::max_stmt_depth()) {
-		if (type == eAssign || type == eReturn)
-			return false;
-		else
-			return true;
-			
+	// Limit Function complexity (depth of nested control structures)
+	if (cg_context_.blk_depth >= CGOptions::max_blk_depth()) {
+		return Statement::is_compound(type);			
 	} else if (FuncListSize() > CGOptions::max_funcs()) { // Limit # of functions..
 		if (type != eInvoke)
 			return false;
@@ -257,8 +252,13 @@ Statement::make_random(CGContext &cg_context,
 	FactVec pre_facts = fm->global_facts; 
 	Effect pre_effect = cg_context.get_accum_effect();
 	cg_context.get_effect_stm().clear();
+	cg_context.expr_depth = 0;	
+	if (is_compound(t)) {
+		cg_context.blk_depth++;
+	}
 	// XXX: interim ickiness
 	Statement *s = 0;
+
 	switch (t) {
 	default:
 		assert(!"unknown Statement type");
@@ -296,7 +296,9 @@ Statement::make_random(CGContext &cg_context,
 	}
 
 	ERROR_GUARD(NULL);
-
+	if (is_compound(t)) {
+		cg_context.blk_depth--;
+	}
 	// sometimes make_random may return 0 for various reasons. keep generating 
 	if (s == 0) {
 		return make_random(cg_context);
@@ -332,6 +334,16 @@ Statement::get_referenced_ptrs(std::vector<const Variable*>& ptrs) const
 			s->get_referenced_ptrs(ptrs);
 		}
 	}
+}
+
+int 
+Statement::get_blk_depth(void) const
+{
+	int depth = 0;
+	for (const Block* b = parent; b != NULL; b = b->parent) {
+		depth++;
+	}
+	return depth;
 }
 
 bool 

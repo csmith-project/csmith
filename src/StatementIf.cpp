@@ -57,7 +57,6 @@ StatementIf::make_random(CGContext &cg_context)
 {
 	DEPTH_GUARD_BY_TYPE_RETURN(dtStatementIf, NULL);
 	FactMgr* fm = get_fact_mgr(&cg_context); 
-	cg_context.expr_depth = 0;
 	FactVec pre_facts;
 	Effect pre_effect;
 	// func_1 hacking, save the env in case we need to re-analyze
@@ -84,8 +83,6 @@ StatementIf::make_random(CGContext &cg_context)
 		}
 	}
 	Effect eff = cg_context.get_effect_stm();
-
-	incr_counter(Bookkeeper::expr_depth_cnts, cg_context.expr_depth); 
 
 	// this will save global_facts to map_facts_in[if_true], and update
 	// facts for new variables created while generating if_true

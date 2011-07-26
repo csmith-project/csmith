@@ -64,6 +64,8 @@ public:
 
 	virtual void get_called_funcs(std::vector<const FunctionInvocationUser*>& funcs ) const;
 
+	virtual unsigned int get_complexity(void) const;
+
 	virtual bool visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const;
 
 	virtual bool has_uncertain_call_recursive(void) const; 

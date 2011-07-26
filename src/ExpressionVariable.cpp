@@ -61,10 +61,8 @@ ExpressionVariable::make_random(CGContext &cg_context, const Type* type, const C
 	// save current effects, in case we need to reset 
 	Effect eff_accum = cg_context.get_accum_effect();
 	Effect eff_stmt = cg_context.get_effect_stm();
-
-	++cg_context.stmt_depth;  
+  
 	ExpressionVariable *ev = 0;
-	
 	do {
 		const Variable* var = 0; 
 		// try to use one of must_read_vars in CGContext 
@@ -111,8 +109,6 @@ ExpressionVariable::make_random(CGContext &cg_context, const Type* type, const C
 		Bookkeeper::record_address_taken(ev->get_var());
 	}   
 	Bookkeeper::record_volatile_access(ev->get_var(), deref_level, false);
-
-	--cg_context.stmt_depth; 
 	return ev;
 }
 

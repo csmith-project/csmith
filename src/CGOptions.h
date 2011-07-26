@@ -47,13 +47,13 @@ using namespace std;
 #define CGOPTIONS_DEFAULT_FUNC1_MAX_PARAMS		(3)
 #define CGOPTIONS_DEFAULT_COVERAGE_TEST_SIZE	(500)
 #define CGOPTIONS_DEFAULT_MAX_BLOCK_SIZE	(4)
-#define CGOPTIONS_DEFAULT_MAX_STMT_DEPTH	(5)
-#define CGOPTIONS_DEFAULT_MAX_EXPR_DEPTH	(5)
+#define CGOPTIONS_DEFAULT_MAX_BLOCK_DEPTH	(5)
+#define CGOPTIONS_DEFAULT_MAX_EXPR_DEPTH	(10)
 #define CGOPTIONS_DEFAULT_MAX_STRUCT_FIELDS	(10)
 #define CGOPTIONS_DEFAULT_MAX_UNION_FIELDS	(5)
 #define CGOPTIONS_DEFAULT_MAX_NESTED_STRUCT_LEVEL	(0)
 #define CGOPTIONS_DEFAULT_MAX_INDIRECT_LEVEL (2)
-#define CGOPTIONS_DEFAULT_MAX_ARRAY_DIMENSIONS	(3)
+#define CGOPTIONS_DEFAULT_MAX_ARRAY_DIMENSIONS	(3) 
 #define CGOPTIONS_DEFAULT_MAX_ARRAY_LENGTH_PER_DIMENSION (10)
 #define CGOPTIONS_DEFAULT_MAX_ARRAY_LENGTH	(256)
 #define CGOPTIONS_DEFAULT_MAX_ARRAY_NUM_IN_LOOP	(4)
@@ -93,8 +93,8 @@ public:
 	static int max_block_size(void);
 	static int max_block_size(int p);
 
-	static int max_stmt_depth(void);
-	static int max_stmt_depth(int p);
+	static int max_blk_depth(void);
+	static int max_blk_depth(int p);
 
 	static int max_expr_depth(void);
 	static int max_expr_depth(int p);
@@ -408,7 +408,7 @@ private:
 	static std::string output_file_;
 	static int	max_params_;
 	static int	max_block_size_;
-	static int	max_stmt_depth_;
+	static int	max_blk_depth_;
 	static int	max_expr_depth_;
 	static bool	wrap_volatiles_;
 	static bool	allow_const_volatile_;

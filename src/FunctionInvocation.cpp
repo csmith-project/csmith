@@ -189,7 +189,7 @@ FunctionInvocation::make_random_binary(CGContext &cg_context, const Type* type)
 	ERROR_GUARD_AND_DEL1(NULL, fi);
 	Expression *rhs = 0;
 
-	cg_context.add_effect(lhs_eff_accum, true);
+	cg_context.merge_param_context(lhs_cg_context, true);
 	FactMgr* fm = get_fact_mgr(&cg_context);
 	vector<const Fact*> facts_copy = fm->global_facts;
 
@@ -227,7 +227,7 @@ FunctionInvocation::make_random_binary(CGContext &cg_context, const Type* type)
 				fi->set_operation(op);
 			}
 		}
-		cg_context.add_effect(rhs_eff_accum, true);
+		cg_context.merge_param_context(rhs_cg_context, true);
 	}
 
 	ERROR_GUARD_AND_DEL2(NULL, fi, lhs);
@@ -272,7 +272,7 @@ FunctionInvocation::make_random_binary_ptr_comparison(CGContext &cg_context)
 	lhs_cg_context.flags |= NO_DANGLING_PTR;
 	Expression *lhs = Expression::make_random(lhs_cg_context, type, 0, true);
 	ERROR_GUARD_AND_DEL1(NULL, fi);
-	cg_context.add_effect(lhs_eff_accum, true);
+	cg_context.merge_param_context(lhs_cg_context, true);
 
 	// now focus on RHS ...
 	enum eTermType tt = MAX_TERM_TYPES;
@@ -302,7 +302,7 @@ FunctionInvocation::make_random_binary_ptr_comparison(CGContext &cg_context)
 		CGContext rhs_cg_context(cg_context, rhs_eff_context, &rhs_eff_accum);
 		rhs_cg_context.flags |= NO_DANGLING_PTR;
 		rhs = Expression::make_random(rhs_cg_context, type, 0, true, false, tt);
-		cg_context.add_effect(rhs_eff_accum, true);
+		cg_context.merge_param_context(rhs_cg_context, true);
 	}
 	ERROR_GUARD_AND_DEL2(NULL, fi, lhs);
 
@@ -499,7 +499,7 @@ FunctionInvocation::visit_facts(vector<const Fact*>& inputs, CGContext& cg_conte
 			// when we generate subsequent parameters within this invocation.
 			running_eff_context.add_effect(param_eff_accum);
 			// Update the total effect of this invocation, too.
-			cg_context.add_effect(param_eff_accum, !is_func_call); 
+			cg_context.merge_param_context(param_cg_context, !is_func_call); 
 		}
 		ok = true;
 	} 

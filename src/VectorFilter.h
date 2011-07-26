@@ -47,7 +47,7 @@ public:
 	VectorFilter(ProbabilityTable<unsigned int, int> *table);
 	explicit VectorFilter(std::vector<unsigned int> &vs, int flag = FILTER_OUT);
 
-	VectorFilter& add(unsigned int item) { vs_.push_back(item); return *this;}
+	VectorFilter& add(unsigned int item);
 
 	int lookup(int v) const;
 

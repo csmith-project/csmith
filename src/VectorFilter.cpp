@@ -74,6 +74,15 @@ VectorFilter::filter(int v) const
 	return (flag_ == FILTER_OUT) ? re : !re;
 }
 
+VectorFilter&
+VectorFilter::add(unsigned int item)
+{ 
+	if (std::find(vs_.begin(), vs_.end(), item) == vs_.end()) {
+		vs_.push_back(item); 
+	}
+	return *this;
+}
+
 int
 VectorFilter::lookup(int v) const
 {

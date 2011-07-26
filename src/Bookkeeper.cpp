@@ -43,6 +43,7 @@
 #include "FactMgr.h"
 #include "CVQualifiers.h"
 #include "Statement.h"
+#include "Block.h"
 #include "CGOptions.h"
 
 using namespace std;
@@ -53,6 +54,7 @@ using namespace std;
 std::vector<int> Bookkeeper::struct_depth_cnts; 
 int Bookkeeper::union_var_cnt = 0;
 std::vector<int> Bookkeeper::expr_depth_cnts;
+std::vector<int> Bookkeeper::blk_depth_cnts;
 std::vector<int> Bookkeeper::dereference_level_cnts;
 int Bookkeeper::address_taken_cnt = 0;
 std::vector<int> Bookkeeper::read_dereference_cnts;
@@ -127,10 +129,49 @@ Bookkeeper::doFinalization()
 	
 }
 
+int 
+Bookkeeper::stat_blk_depths_for_stmt(const Statement* s)
+{
+	size_t i, j; 
+	int cnt = 0;
+	if (s->eType != eBlock) {
+		incr_counter(blk_depth_cnts, s->get_blk_depth() -1);
+		cnt++;
+	}
+	vector<const Block*> blks; 
+	s->get_blocks(blks); 
+	for (i=0; i<blks.size(); i++) {
+		for (j=0; j<blks[i]->stms.size(); j++) {
+			cnt += stat_blk_depths_for_stmt(blks[i]->stms[j]);
+		}
+	}
+	return cnt;
+}
+
+int 
+Bookkeeper::stat_blk_depths(void) 
+{
+	const vector<Function*>& funcs = get_all_functions();
+	int cnt = 0;
+	for (size_t i=0; i<funcs.size(); i++) {
+		cnt += stat_blk_depths_for_stmt(funcs[i]->body);
+	}
+	return cnt;
+}
+
 void
 Bookkeeper::output_stmts_statistics(std::ostream &out)
 {
-	formated_output(out, "stmts: ", Statement::get_current_sid());
+	size_t i;
+	int stmt_cnt = stat_blk_depths();
+	formated_output(out, "stmts: ", stmt_cnt);
+	formated_output(out, "max block depth: ", (blk_depth_cnts.size() - 1));
+	out << "breakdown:" << endl;
+	for (i=0; i<blk_depth_cnts.size(); i++) {
+		if (blk_depth_cnts[i]) {
+			out << "   depth: " << i << ", occurrence: " << blk_depth_cnts[i] << endl;
+		}
+	}
 }
 
 void
@@ -163,14 +204,44 @@ Bookkeeper::output_struct_union_statistics(std::ostream &out)
 	Bookkeeper::output_bitfields(out);
 }
 
+void 
+Bookkeeper::stat_expr_depths_for_stmt(const Statement* s)
+{
+	size_t i, j;
+	vector<const Expression*> exprs;
+	vector<const Block*> blks;
+	s->get_exprs(exprs); 
+	for (i=0; i<exprs.size(); i++) {
+		incr_counter(expr_depth_cnts, exprs[i]->get_complexity());
+	} 
+	s->get_blocks(blks);
+	for (i=0; i<blks.size(); i++) {
+		for (j=0; j<blks[i]->stms.size(); j++) {
+			stat_expr_depths_for_stmt(blks[i]->stms[j]);
+		}
+	}
+}
+
+void 
+Bookkeeper::stat_expr_depths(void)
+{
+	const vector<Function*>& funcs = get_all_functions();
+	for (size_t i=0; i<funcs.size(); i++) {
+		stat_expr_depths_for_stmt(funcs[i]->body);
+	}
+}
+
 void
 Bookkeeper::output_expr_statistics(std::ostream &out)
 {
 	size_t i;
+	stat_expr_depths();
 	formated_output(out, "max expression depth: ", (expr_depth_cnts.size() - 1));
 	out << "breakdown:" << endl;
 	for (i=0; i<expr_depth_cnts.size(); i++) {
-		out << "   depth: " << i << ", occurrence: " << expr_depth_cnts[i] << endl;
+		if (expr_depth_cnts[i]) {
+			out << "   depth: " << i << ", occurrence: " << expr_depth_cnts[i] << endl;
+		}
 	}
 }
 

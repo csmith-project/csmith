@@ -64,7 +64,8 @@ public:
 
 	virtual std::vector<const ExpressionVariable*> get_dereferenced_ptrs(void) const;
 	virtual void get_referenced_ptrs(std::vector<const Variable*>& ptrs) const { lhs.get_referenced_ptrs(ptrs); rhs.get_referenced_ptrs(ptrs);}
-	
+	virtual unsigned int get_complexity(void) const { return get_lhs()->get_complexity() + get_rhs()->get_complexity();}
+
 	const Expression* get_lhs(void) const { return &lhs;}
 	const Expression* get_rhs(void) const { return &rhs;}
 	void Output(std::ostream &) const;

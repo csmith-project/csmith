@@ -77,7 +77,7 @@ DEFINE_GETTER_SETTER_STRING_REF(output_file)
 DEFINE_GETTER_SETTER_INT (max_funcs)
 DEFINE_GETTER_SETTER_INT (max_params)
 DEFINE_GETTER_SETTER_INT (max_block_size)
-DEFINE_GETTER_SETTER_INT (max_stmt_depth)
+DEFINE_GETTER_SETTER_INT (max_blk_depth)
 DEFINE_GETTER_SETTER_INT (max_expr_depth)
 DEFINE_GETTER_SETTER_BOOL(wrap_volatiles)
 DEFINE_GETTER_SETTER_BOOL(allow_const_volatile)
@@ -176,7 +176,7 @@ CGOptions::set_default_settings(void)
 	max_funcs(CGOPTIONS_DEFAULT_MAX_FUNCS);
 	max_params(CGOPTIONS_DEFAULT_MAX_PARAMS);
 	max_block_size(CGOPTIONS_DEFAULT_MAX_BLOCK_SIZE);
-	max_stmt_depth(CGOPTIONS_DEFAULT_MAX_STMT_DEPTH);
+	max_blk_depth(CGOPTIONS_DEFAULT_MAX_BLOCK_DEPTH);
 	max_expr_depth(CGOPTIONS_DEFAULT_MAX_EXPR_DEPTH);
 	max_struct_fields(CGOPTIONS_DEFAULT_MAX_STRUCT_FIELDS);
 	max_union_fields(CGOPTIONS_DEFAULT_MAX_UNION_FIELDS);
@@ -409,7 +409,7 @@ CGOptions::has_conflict(void)
 		conflict_msg_ = "max-funcs must be at least 1";
 		return true;
 	}
-	if (CGOptions::max_stmt_depth() < 1) {
+	if (CGOptions::max_blk_depth() < 1) {
 		conflict_msg_ = "max-stmt-depth must be at least 1";
 		return true;
 	}

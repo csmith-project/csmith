@@ -112,9 +112,11 @@ StatementAssign::make_random(CGContext &cg_context, const Type* type, const CVQu
 {
 	// decide assignment operator
 	eAssignOps op = AssignOpsProbability(type);
+	bool stand_alone_assign = false;
 
 	// decide type
 	if (type == NULL) {
+		stand_alone_assign = true;
 		type = Type::SelectLType(!cg_context.get_effect_context().is_side_effect_free(), op);
 	}
 	assert(!type->is_const_struct_union());
@@ -126,7 +128,6 @@ StatementAssign::make_random(CGContext &cg_context, const Type* type, const CVQu
 	// pre-generation initializations
 	Lhs *lhs = NULL;
 	Expression *e = NULL;
-	cg_context.expr_depth = 0;
 	Effect running_eff_context(cg_context.get_effect_context());
 	Effect rhs_accum, lhs_accum;  
 	CGContext rhs_cg_context(cg_context, running_eff_context, &rhs_accum);
@@ -154,7 +155,7 @@ StatementAssign::make_random(CGContext &cg_context, const Type* type, const CVQu
 			qfer.set_volatile(false);
 		}
 	}
-	cg_context.add_effect(rhs_accum, true);
+	cg_context.merge_param_context(rhs_cg_context, true);
 	running_eff_context.write_var_set(rhs_accum.get_lhs_write_vars());
 
 	CGContext lhs_cg_context(cg_context, running_eff_context, &lhs_accum);
@@ -172,10 +173,7 @@ StatementAssign::make_random(CGContext &cg_context, const Type* type, const CVQu
 		return NULL;
 	}
 
-	cg_context.add_effect(lhs_accum, true); 
-	
-	// book keeping
-	incr_counter(Bookkeeper::expr_depth_cnts, cg_context.expr_depth);	
+	cg_context.merge_param_context(lhs_cg_context, true); 
 	ERROR_GUARD_AND_DEL2(NULL, e, lhs);
 	StatementAssign *stmt_assign = make_possible_compound_assign(cg_context, *lhs, op, *e);
 	ERROR_GUARD_AND_DEL2(NULL, e, lhs);
@@ -300,7 +298,7 @@ StatementAssign::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context)
 	if (op != eSimpleAssign) {
 		running_eff_context.add_effect(rhs_accum);
 	}
-	cg_context.add_effect(rhs_accum, true);
+	cg_context.merge_param_context(rhs_cg_context, true);
 	running_eff_context.write_var_set(rhs_accum.get_lhs_write_vars());
 
 	CGContext lhs_cg_context(cg_context, running_eff_context, &lhs_accum);
@@ -308,7 +306,7 @@ StatementAssign::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context)
 	if (!lhs.visit_facts(inputs, lhs_cg_context)) {
 		return false;
 	}
-	cg_context.add_effect(lhs_accum, true);
+	cg_context.merge_param_context(lhs_cg_context, true);
 	//cg_context.get_effect_stm() = lhs_cg_context.get_effect_stm();
 	update_fact_for_assign(this, inputs);
 	// save effect

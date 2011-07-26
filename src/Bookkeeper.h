@@ -37,6 +37,7 @@ using namespace std;
 
 class Variable;
 class Expression;
+class Statement;
 class Fact;
 class Type;
 
@@ -85,11 +86,19 @@ public:
 
 	static void output_var_freshness(std::ostream &out);
 
+	static void stat_expr_depths_for_stmt(const Statement* s);
+	static void stat_expr_depths(void);
+
+	static int  stat_blk_depths_for_stmt(const Statement* s); 
+	static int  stat_blk_depths(void);
+
 	static std::vector<int> struct_depth_cnts; 
 
 	static int union_var_cnt; 
 
 	static std::vector<int> expr_depth_cnts;
+
+	static std::vector<int> blk_depth_cnts;
 
 	static std::vector<int> dereference_level_cnts;
 

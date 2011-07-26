@@ -67,8 +67,7 @@ ExpressionFunctionProbability(const CGContext &/*cg_context*/)
 Expression *
 ExpressionFuncall::make_random(CGContext &cg_context, const Type* type, const CVQualifiers* qfer)
 {
-	Expression *e = 0;
-	++cg_context.stmt_depth;
+	Expression *e = 0; 
 	bool std_func = ExpressionFunctionProbability(cg_context);
 	ERROR_GUARD(NULL);
     // unary/binary "functions" produce scalar types only
@@ -94,7 +93,6 @@ ExpressionFuncall::make_random(CGContext &cg_context, const Type* type, const CV
 	else {
 		e = new ExpressionFuncall(*fi);
 	}
-	--cg_context.stmt_depth;
 	return e;
 }
 
@@ -140,6 +138,20 @@ void
 ExpressionFuncall::get_called_funcs(std::vector<const FunctionInvocationUser*>& funcs) const
 {
 	invoke.get_called_funcs(funcs);
+}
+
+unsigned int 
+ExpressionFuncall::get_complexity(void) const 
+{
+	unsigned int comp = 0;
+	const FunctionInvocation* invoke = get_invoke();
+	if (invoke->invoke_type == eFuncCall) {
+		comp++;  // function call itself counts as 1 complexity
+	}
+	for (size_t i=0; i<invoke->param_value.size(); i++) {
+		comp += invoke->param_value[i]->get_complexity();
+	}
+	return comp;
 }
 
 bool 

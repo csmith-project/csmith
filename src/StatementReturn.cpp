@@ -58,11 +58,9 @@ StatementReturn::make_random(CGContext &cg_context)
 	FactMgr* fm = get_fact_mgr(&cg_context);
 	assert(fm); 
 
-	cg_context.expr_depth = 0;
 	ExpressionVariable* ev = ExpressionVariable::make_random(cg_context, curr_func->return_type, &curr_func->rv->qfer, false, true); 
 	// XXX
 	ERROR_GUARD(NULL);
-	incr_counter(Bookkeeper::expr_depth_cnts, cg_context.expr_depth);
 
 	StatementReturn* sr = new StatementReturn(cg_context.get_current_block(), *ev);
 	return sr;
