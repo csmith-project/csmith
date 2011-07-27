@@ -656,8 +656,8 @@ Type::make_one_union_field(vector<const Type*> &fields, vector<CVQualifiers> &qf
 				type = ok_types[start_index + pure_rnd_upto(end_index - start_index + 1)];
 				assert(type->eType == eStruct);
 			}
-			// 10% chance to be char*
-			else if (pure_rnd_flipcoin(10)) {
+			// 10% chance to be char* if pointer is allowed
+			else if (CGOptions::pointers() && pure_rnd_flipcoin(10)) {
 				type = find_pointer_type(&get_simple_type(eChar), true);
 			}
 			else {
