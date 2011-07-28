@@ -1,0 +1,14 @@
+$COMPILER_HOME/gcc-320/bin/gcc-320
+$COMPILER_HOME/gcc-330/bin/gcc-330
+$COMPILER_HOME/gcc-340/bin/gcc-340
+$COMPILER_HOME/gcc-400/bin/gcc-400
+$COMPILER_HOME/gcc-410/bin/gcc-410
+$COMPILER_HOME/gcc-420/bin/gcc-420
+$COMPILER_HOME/gcc-430/bin/gcc-430
+$COMPILER_HOME/gcc-440/bin/gcc-440
+$COMPILER_HOME/gcc-450/bin/gcc-450
+#$COMPILER_HOME/llvm-gcc-25/bin/llvm-gcc-25
+$COMPILER_HOME/clang-26/bin/clang
+$COMPILER_HOME/clang-27/bin/clang
+$COMPILER_HOME/clang-28/bin/clang
+$COMPILER_HOME/clang-29/bin/clang
