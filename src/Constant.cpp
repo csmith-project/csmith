@@ -297,7 +297,7 @@ GenerateRandomConstant(const Type* type)
 		    if (CGOptions::ccomp())
 		    	v = oss.str();
 		    else
-				v = oss.str() + (type->is_signed() ? "L" : "U");
+				v = oss.str() + (type->is_signed() ? "" : "U");
 	    } else {
 		    switch (st) {
 		    case eVoid:      v = "/* void */";						break;
