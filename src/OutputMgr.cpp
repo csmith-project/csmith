@@ -389,7 +389,7 @@ OutputMgr::OutputHeader(int argc, char *argv[], unsigned long seed)
 	if (CGOptions::paranoid() && !CGOptions::concise())
 		out << "#include <assert.h>" << endl;
 	
-	if (!CGOptions::longlong()) {
+	if (!CGOptions::longlong() || CGOptions::ccomp()) {
 		out << endl;
 		out << "#define NO_LONGLONG" << std::endl;
 		out << endl;
