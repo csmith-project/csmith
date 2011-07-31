@@ -1,5 +1,9 @@
 ===================================================================
 
+07/31/2011 (total 392)
+  1 gcc crash bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=49926
+
 07/12/2011 (total 391)
   1 clang wrong code bug reported (-O0)
   http://llvm.org/bugs/show_bug.cgi?id=10342  
