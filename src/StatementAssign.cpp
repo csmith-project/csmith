@@ -160,7 +160,7 @@ StatementAssign::make_random(CGContext &cg_context, const Type* type, const CVQu
 	lhs_cg_context.get_effect_stm() = rhs_cg_context.get_effect_stm();
 	bool prev_flag = CGOptions::match_exact_qualifiers(); // keep a copy of previous flag
 	if (qf) CGOptions::match_exact_qualifiers(true);      // force exact qualifier match when selecting vars
-	lhs = Lhs::make_random(lhs_cg_context, type, &qfer, need_no_rhs(op));
+	lhs = Lhs::make_random(lhs_cg_context, type, &qfer, op != eSimpleAssign, need_no_rhs(op));
 	if (qf) CGOptions::match_exact_qualifiers(prev_flag); // restore flag
 	ERROR_GUARD_AND_DEL2(NULL, e, lhs);
 	

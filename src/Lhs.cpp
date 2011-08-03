@@ -56,7 +56,7 @@ using namespace std;
  *
  */
 Lhs *
-Lhs::make_random(CGContext &cg_context, const Type* t, const CVQualifiers* qfer, bool no_signed_overflow)
+Lhs::make_random(CGContext &cg_context, const Type* t, const CVQualifiers* qfer, bool compound_assign, bool no_signed_overflow)
 {
 	Function *curr_func = cg_context.get_current_func();  
 	FactMgr* fm = get_fact_mgr_for_func(curr_func);
@@ -94,16 +94,15 @@ Lhs::make_random(CGContext &cg_context, const Type* t, const CVQualifiers* qfer,
 			assert(!var->qfer.is_const_after_deref(deref_level));
 		}
 		ERROR_GUARD(NULL);
-		assert(var);  
-		bool valid = FactPointTo::opportunistic_validate(var, t, fm->global_facts) && 
-					 FactPointTo::opportunistic_validate(var, t, fm->shadow_facts);
+		assert(var);
+		bool valid = FactPointTo::opportunistic_validate(var, t, fm->global_facts) && !cg_context.get_effect_stm().is_written(var);
 		// we don't want signed integer for some operations, such as ++/-- which has potential of overflowing
 		if (valid && t->eType == eSimple && no_signed_overflow && var->type->get_base_type()->signed_overflow_possible()) {
 			valid = false;
 		}
 		if (valid) {
 			assert(var); 
-			Lhs tmp(*var, t);
+			Lhs tmp(*var, t, compound_assign);
 			if (tmp.visit_facts(fm->global_facts, cg_context)) {
 				// bookkeeping
 				int deref_level = tmp.get_indirect_level();
@@ -111,7 +110,7 @@ Lhs::make_random(CGContext &cg_context, const Type* t, const CVQualifiers* qfer,
 					incr_counter(Bookkeeper::write_dereference_cnts, deref_level); 
 				}
 				Bookkeeper::record_volatile_access(var, deref_level, true);
-				return new Lhs(*var, t);
+				return new Lhs(*var, t, compound_assign);
 			}
 			// restore the effects
 			cg_context.reset_effect_accum(effect_accum);
@@ -130,7 +129,8 @@ Lhs::make_random(CGContext &cg_context, const Type* t, const CVQualifiers* qfer,
 Lhs::Lhs(const Variable &v)
 	: Expression(eLhs),
       var(v),
-      type(v.type)
+      type(v.type),
+	  for_compound_assign(false)
 { 
 }
 
@@ -140,18 +140,19 @@ Lhs::Lhs(const Variable &v)
 Lhs::Lhs(const Lhs &lhs)
 	: Expression(eLhs),
 	  var(lhs.var),
-	  type(lhs.type)
+	  type(lhs.type),
+	  for_compound_assign(lhs.for_compound_assign)
 {
-
 }
 
 /*
  *
  */
-Lhs::Lhs(const Variable &v, const Type* t)
+Lhs::Lhs(const Variable &v, const Type* t, bool compound_assign)
 	: Expression(eLhs),
       var(v),
-      type(t)
+      type(t),
+	  for_compound_assign(compound_assign)
 { 
 }
 
@@ -300,7 +301,14 @@ bool
 Lhs::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const
 { 
 	bool valid = false;
-	const Variable* v = get_var(); 
+	const Variable* v = get_var();
+	// if LHS is for compound assignments, it's should be validated against a read first
+	if (for_compound_assign) {
+		ExpressionVariable ev(*v, type);
+		if (!ev.visit_facts(inputs, cg_context)) {
+			return false;
+		}
+	}
 	if (!visit_indices(inputs, cg_context)) {
 		return false;
 	}

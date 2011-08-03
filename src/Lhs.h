@@ -47,11 +47,11 @@ class Lhs : public Expression
 {
 public:
 	// Factory method. 
-	static Lhs *make_random(CGContext &cg_context, const Type* t, const CVQualifiers* qfer, bool no_signed_overflow=false);
+	static Lhs *make_random(CGContext &cg_context, const Type* t, const CVQualifiers* qfer, bool for_compound_assign, bool no_signed_overflow=false);
 
 	explicit Lhs(const Variable &v);
 
-	Lhs(const Variable &v, const Type* t);
+	Lhs(const Variable &v, const Type* t, bool compound_assign);
 
 	virtual ~Lhs(void);
 
@@ -91,6 +91,8 @@ private:
 	const Variable &var;
 
 	const Type* type;
+
+	const bool for_compound_assign;
 
 	// unimplementable
 	Lhs &operator=(const Lhs &ev);
