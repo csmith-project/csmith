@@ -74,7 +74,7 @@ public:
 	// transfer functions
 	vector<const Fact*> rhs_to_lhs_transfer(const vector<const Fact*>& facts, const vector<const Variable*>& lvars, const Expression* rhs);
 	virtual vector<const Fact*> abstract_fact_for_assign(const std::vector<const Fact*>& facts, const Lhs* lhs, const Expression* /*rhs*/);
-	virtual vector<const Fact*> abstract_fact_for_return(const std::vector<const Fact*>& facts, const ExpressionVariable* rv, const Function* func);
+	//virtual vector<const Fact*> abstract_fact_for_return(const std::vector<const Fact*>& facts, const ExpressionVariable* rv, const Function* func);
 	virtual Fact* join_var_facts(const vector<const Fact*>& facts, const vector<const Variable*>& vars) const;
 	virtual Fact* clone(void) const;
 

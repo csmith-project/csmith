@@ -142,23 +142,23 @@ FactUnion::abstract_fact_for_assign(const std::vector<const Fact*>& facts, const
 	}
     return ret_facts;
 }
-
-/* draw facts from return statement */
-std::vector<const Fact*>
-FactUnion::abstract_fact_for_return(const std::vector<const Fact*>& facts, const ExpressionVariable* rv, const Function* func)
-{
-	vector<const Fact*> ret_facts;
-    if (func->return_type->eType == eUnion) {
-		int indirect = rv->get_indirect_level(); 
-	    assert(indirect >= 0);   
-		vector<const Variable*> rvars = FactPointTo::merge_pointees_of_pointer(rv->get_var()->get_collective(), indirect, facts);
-		const FactUnion* rhs_fact = dynamic_cast<const FactUnion*>(join_var_facts(facts, rvars)); 
-		if (rhs_fact) {
-			ret_facts.push_back(make_fact(func->rv, rhs_fact->get_last_written_fid()));
-		}
-	}
-    return ret_facts;
-}
+//
+///* draw facts from return statement */
+//std::vector<const Fact*>
+//FactUnion::abstract_fact_for_return(const std::vector<const Fact*>& facts, const ExpressionVariable* rv, const Function* func)
+//{
+//	vector<const Fact*> ret_facts;
+//    if (func->return_type->eType == eUnion) {
+//		int indirect = rv->get_indirect_level(); 
+//	    assert(indirect >= 0);   
+//		vector<const Variable*> rvars = FactPointTo::merge_pointees_of_pointer(rv->get_var()->get_collective(), indirect, facts);
+//		const FactUnion* rhs_fact = dynamic_cast<const FactUnion*>(join_var_facts(facts, rvars)); 
+//		if (rhs_fact) {
+//			ret_facts.push_back(make_fact(func->rv, rhs_fact->get_last_written_fid()));
+//		}
+//	}
+//    return ret_facts;
+//}
 
 Fact*
 FactUnion::clone(void) const

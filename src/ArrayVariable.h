@@ -43,7 +43,7 @@ using namespace std;
 class ArrayVariable : public Variable 
 { 
 public:
-	static ArrayVariable* CreateArrayVariable(Block* blk, const std::string &name, const Type *type, const Expression* init, const CVQualifiers* qfer, const Variable* isFieldVarOf);
+	static ArrayVariable* CreateArrayVariable(const CGContext& cg_context, Block* blk, const std::string &name, const Type *type, const Expression* init, const CVQualifiers* qfer, const Variable* isFieldVarOf);
 	ArrayVariable(const ArrayVariable& av);
 	virtual ~ArrayVariable(void);
 
@@ -54,6 +54,7 @@ public:
 	unsigned long get_size(void) const;
 	std::vector<unsigned int> get_sizes(void) const { return sizes;}
 	const std::vector<const Expression*>& get_indices(void) const { return indices;}
+	const std::vector<const Expression*>& get_more_init_values(void) const { return init_values;}
 	bool no_loop_initializer(void) const;
 
 	ArrayVariable* itemize(void) const; 

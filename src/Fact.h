@@ -34,6 +34,7 @@
 
 #include <ostream>
 #include <vector>
+using namespace std;
 
 enum eFactCategory { 
     ePointTo=1,
@@ -91,7 +92,9 @@ public:
 
 	virtual std::vector<const Fact*> abstract_fact_for_assign(const std::vector<const Fact*>& /*facts*/, const Lhs* /*lhs*/, const Expression* /*rhs*/) = 0;
 
-	virtual std::vector<const Fact*> abstract_fact_for_return(const std::vector<const Fact*>& /*facts*/, const ExpressionVariable* /*var*/, const Function* /*func*/) = 0;
+	virtual vector<const Fact*> abstract_fact_for_return(const std::vector<const Fact*>& facts, const ExpressionVariable* expr, const Function* func);
+
+	vector<const Fact*> abstract_fact_for_var_init(const Variable* v);
 
 	static void doFinalization();
 
@@ -103,6 +106,49 @@ protected:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+typedef std::vector<const Fact*> FactVec;
+typedef FactVec* FactVecP;
+
+/******************* Fact Manipulating Functions **********************/
+/* find a fact from facts env */
+int find_fact(const FactVec& facts, const Fact* fact);  
+
+/* find a specific type of fact (same variable most likely) from facts env */
+const Fact* find_related_fact(const FactVec& facts, const Fact* new_fact);  
+const Fact* find_related_fact(const vector<Fact*>& facts, const Fact* new_fact);
+
+/* merge a fact into env */
+bool merge_fact(FactVec& facts, const Fact* new_fact);
+
+/* merge two facts env */
+bool merge_facts(FactVec& facts, const FactVec& new_facts);
+
+/* check if two facts env are identical */
+bool same_facts(const FactVec& facts1, const FactVec& facts2);
+
+/* check if one facts env is a subset of the other */
+bool subset_facts(const FactVec& facts1, const FactVec& facts2);
+
+/* renew a fact in env (append is absent) */
+bool renew_fact(FactVec& facts, const Fact* new_fact);
+
+/* renew facts in new_facts into existing facts env */
+bool renew_facts(FactVec& facts, const FactVec& new_facts);
+
+/* clone an env */
+vector<Fact*> copy_facts(const FactVec& facts_in);
+
+/* combine facts in two env, discard facts not exist in one of them */
+void combine_facts(vector<Fact*>& facts1, const FactVec& facts2);
+
+/* add a new variable fact to env */
+void add_new_var_fact(const Variable* v, FactVec& facts);
+
+/* print facts env */
+void print_facts(const FactVec& facts);
+
+/* print fact(s) in env regarding a given variable */
+void print_var_fact(const FactVec& facts, const char* vname);
 
 #endif // FACT_H
 

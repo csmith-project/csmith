@@ -295,13 +295,6 @@ FactPointTo::abstract_fact_for_assign(const std::vector<const Fact*>& facts, con
     return ret_facts;
 }
 
-std::vector<const Fact*>
-FactPointTo::abstract_fact_for_return(const std::vector<const Fact*>& facts, const ExpressionVariable* var, const Function* func)
-{ 
-	Lhs lhs(*func->rv);
-	return abstract_fact_for_assign(facts, &lhs, var);
-}
-
 Fact*
 FactPointTo::clone(void) const
 {

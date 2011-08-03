@@ -527,7 +527,7 @@ VariableSelector::GenerateNewGlobal(Effect::Access access, const CGContext &cg_c
 	GlobalList.push_back(var);
 	// for DFA 
 	FactMgr* fm = get_fact_mgr(&cg_context);
-	fm->add_new_global_var_fact(var->get_collective());
+	fm->add_new_var_fact_and_update_inout_maps(NULL, var->get_collective());
 	cg_context.get_current_func()->new_globals.push_back(var);
 
 	if (!var_qfer.is_volatile()) {
@@ -555,7 +555,7 @@ VariableSelector::GenerateNewNonArrayGlobal(Effect::Access access, const CGConte
 	GlobalList.push_back(var);
 	// for DFA 
 	FactMgr* fm = get_fact_mgr(&cg_context);
-	fm->add_new_global_var_fact(var->get_collective());
+	fm->add_new_var_fact_and_update_inout_maps(NULL, var->get_collective());
 	cg_context.get_current_func()->new_globals.push_back(var);
 
 	if (!var_qfer.is_volatile()) {
@@ -883,7 +883,7 @@ VariableSelector::GenerateNewParentLocal(Block &block,
 	Variable* var = create_and_initialize(access, cg_context, t, &var_qfer, blk, name);
 	blk->local_vars.push_back(var);
 	FactMgr* fm = get_fact_mgr(&cg_context);
-	fm->add_new_local_var_fact(blk, var->get_collective());
+	fm->add_new_var_fact_and_update_inout_maps(blk, var->get_collective());
 	var_created = true;
 	return var;
 }
@@ -1255,10 +1255,10 @@ VariableSelector::select_deref_pointer(Effect::Access access, const CGContext &c
  * create an array, and return an itemized member 
  */
 ArrayVariable* 
-VariableSelector::create_array_and_itemize(Block* blk, string name, const CGContext& /*cg_context*/, 
+VariableSelector::create_array_and_itemize(Block* blk, string name, const CGContext& cg_context, 
 		const Type* t, const Expression* init, const CVQualifiers* qfer)
 {
-	ArrayVariable* av = ArrayVariable::CreateArrayVariable(blk, name, t, init, qfer, NULL);
+	ArrayVariable* av = ArrayVariable::CreateArrayVariable(cg_context, blk, name, t, init, qfer, NULL);
 	ERROR_GUARD(NULL);
 	AllVars.push_back(av);
 	return av->itemize();
@@ -1295,16 +1295,16 @@ VariableSelector::create_random_array(const CGContext& cg_context)
 	qfer.add_qualifiers(false, false);
 
 	Expression* init = Constant::make_random(type);
-	ArrayVariable* av = ArrayVariable::CreateArrayVariable(blk, name, type, init, &qfer, NULL);
+	ArrayVariable* av = ArrayVariable::CreateArrayVariable(cg_context, blk, name, type, init, &qfer, NULL);
 	AllVars.push_back(av);
 
 	// make the points-to fact known to DFA
 	FactMgr* fm = get_fact_mgr(&cg_context);
 	if (as_global) {
-		fm->add_new_global_var_fact(av);
+		fm->add_new_var_fact_and_update_inout_maps(NULL, av);
 		cg_context.get_current_func()->new_globals.push_back(av);
 	} else {
-		fm->add_new_local_var_fact(blk, av);
+		fm->add_new_var_fact_and_update_inout_maps(blk, av);
 	}
 	return av;
 }

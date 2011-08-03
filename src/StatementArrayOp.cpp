@@ -124,7 +124,7 @@ StatementArrayOp::make_random_array_init(CGContext &cg_context)
 	assert(init->visit_facts(fm->global_facts, cg_context));
 	StatementArrayOp* sa = new StatementArrayOp(cg_context.get_current_block(), av, cvs, inits, incrs, init);
 	Lhs lhs(*av);
-	if (update_fact_for_assign(&lhs, init, fm->global_facts)) {
+	if (FactMgr::update_fact_for_assign(&lhs, init, fm->global_facts)) {
 		cg_context.get_current_func()->fact_changed = true;
 	}
 	fm->map_stm_effect[sa] = cg_context.get_effect_stm();
@@ -296,7 +296,7 @@ StatementArrayOp::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context
 		find_edges_in(edges, true, false);
 		for (i=0; i<edges.size(); i++) { 
 			const Statement* src = edges[i]->src;
-			merge_jump_facts(inputs, fm->map_facts_out[src]);
+			FactMgr::merge_jump_facts(inputs, fm->map_facts_out[src]);
 		}
 		// compute accumulated effect
 		set_accumulated_effect_after_block(eff, body, cg_context);
@@ -310,7 +310,7 @@ StatementArrayOp::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context
 		if (!lhs.visit_facts(inputs, cg_context)) {
 			return false;
 		}
-		update_fact_for_assign(&lhs, init_value, inputs);
+		FactMgr::update_fact_for_assign(&lhs, init_value, inputs);
 		fm->map_stm_effect[this] = cg_context.get_effect_stm();
 	} 
 	return true;

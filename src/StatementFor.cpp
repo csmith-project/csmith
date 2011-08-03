@@ -314,7 +314,7 @@ StatementFor::post_loop_analysis(CGContext& cg_context, vector<const Fact*>& pre
 	for (size_t i=0; i<body.break_stms.size(); i++) {
 		const StatementBreak* stm = dynamic_cast<const StatementBreak*>(body.break_stms[i]);
 		fm->create_cfg_edge(stm, this, true, false);
-		merge_jump_facts(fm->global_facts, fm->map_facts_out[stm]);
+		FactMgr::merge_jump_facts(fm->global_facts, fm->map_facts_out[stm]);
 	}
 	// compute accumulated effect
 	set_accumulated_effect_after_block(pre_effect, &body, cg_context);
@@ -424,7 +424,7 @@ StatementFor::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) co
 	find_edges_in(edges, true, false);
 	for (i=0; i<edges.size(); i++) { 
 		const Statement* src = edges[i]->src;
-		merge_jump_facts(inputs, fm->map_facts_out[src]);
+		FactMgr::merge_jump_facts(inputs, fm->map_facts_out[src]);
 	}
 	// compute accumulated effect
 	set_accumulated_effect_after_block(eff, &body, cg_context);

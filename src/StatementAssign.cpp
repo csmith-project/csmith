@@ -123,8 +123,6 @@ StatementAssign::make_random(CGContext &cg_context, const Type* type, const CVQu
 	
 	FactMgr* fm = get_fact_mgr(&cg_context);
 	assert(fm);
-	fm->backup_facts();
-
 	// pre-generation initializations
 	Lhs *lhs = NULL;
 	Expression *e = NULL;
@@ -308,7 +306,7 @@ StatementAssign::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context)
 	}
 	cg_context.merge_param_context(lhs_cg_context, true);
 	//cg_context.get_effect_stm() = lhs_cg_context.get_effect_stm();
-	update_fact_for_assign(this, inputs);
+	FactMgr::update_fact_for_assign(this, inputs);
 	// save effect
 	FactMgr* fm = get_fact_mgr(&cg_context);
 	fm->map_stm_effect[this] = cg_context.get_effect_stm();

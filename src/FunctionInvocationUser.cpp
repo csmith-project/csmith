@@ -220,7 +220,7 @@ FunctionInvocationUser::build_invocation_and_function(CGContext &cg_context, con
 	fiu->save_return_fact(ret_facts);  
 	 
 	// remove facts related to passing parameters
-	//update_facts_for_oos_vars(func->param, fm->global_facts); 
+	//FactMgr::update_facts_for_oos_vars(func->param, fm->global_facts); 
 	fm->setup_in_out_maps(true);
 	// hand-over from callee to caller: points-to facts
 	renew_facts(caller_fm->global_facts, ret_facts); 
@@ -237,7 +237,7 @@ FunctionInvocationUser::build_invocation_and_function(CGContext &cg_context, con
 	// include facts for globals just created 
 	for (i=0; i<func->new_globals.size(); i++) {
 		const Variable* var = func->new_globals[i];
-		caller_fm->add_new_global_var_fact(var);
+		caller_fm->add_new_var_fact_and_update_inout_maps(NULL, var);
 	}
 
 	func->visited_cnt = 1;
@@ -350,7 +350,7 @@ FunctionInvocationUser::revisit(std::vector<const Fact*>& inputs, CGContext& cg_
 	merge_facts(inputs, ret_facts); 
 	 
 	// remove facts related to passing parameters
-	update_facts_for_oos_vars(func->param, inputs); 
+	FactMgr::update_facts_for_oos_vars(func->param, inputs); 
 
 	fm->setup_in_out_maps(false);
 	// remember the effect context during this visit to this function

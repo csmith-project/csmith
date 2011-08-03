@@ -57,10 +57,8 @@ class CFGEdge;
 #include <vector>
 #include <map>
 #include "Effect.h"
+#include "Fact.h"
 using namespace std; 
-
-typedef std::vector<const Fact*> FactVec;
-typedef FactVec* FactVecP;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -83,18 +81,11 @@ public:
 
 	bool validate_assign(const Lhs* v, const Expression* e);
 
-	void backup_facts(void);
-
-	void restore_facts(void);
-
 	void restore_facts(vector<const Fact*>& old_facts);
 
 	void makeup_new_var_facts(vector<const Fact*>& old_facts, const vector<const Fact*>& new_facts);
-
-	/* add fact related to newly created var to all statements  this var is visible */
-	void add_new_local_var_fact(const Block* blk, const Variable* var);
  
-	void add_new_global_var_fact(const Variable* v);
+	void add_new_var_fact_and_update_inout_maps(const Block* blk, const Variable* var); 
 
 	void setup_in_out_maps(bool first_time);
 
@@ -122,12 +113,34 @@ public:
 	/* remove facts related to return variables (except rv of this function) from env */
 	void remove_rv_facts(FactVec& facts);
 
-	void sanity_check_map() const;
-
+	static void remove_loop_local_facts(const Statement* s, FactVec& facts);	
+	/* remove facts localized to a given function up to a given return statement */
+	static void remove_function_local_facts(std::vector<const Fact*>& inputs, const Statement* stm);
+	static bool merge_jump_facts(FactVec& facts, const FactVec& jump_facts);
+	/* add a new variable fact to env */
+	static void add_new_var_fact(const Variable* v, FactVec& facts);
 	static const vector<const Fact*>& get_program_end_facts(void);
+
+	/* remove facts related to certain variables from env */
+	static void update_facts_for_oos_vars(const vector<Variable*>& vars, FactVec& facts);
+	static void update_facts_for_oos_vars(const vector<const Variable*>& vars, FactVec& facts);
+
+	/* update fact(s) from assignments */
+	static bool update_fact_for_assign(const StatementAssign* sa, FactVec& inputs);
+	static bool update_fact_for_assign(const Lhs* lhs, const Expression* rhs, FactVec& inputs);
+
+	/* update facts(s) from return statement */
+	static void update_fact_for_return(const StatementReturn* sa, FactVec& inputs);
+
+	/* update fact(s) for a jump destination */
+	static void update_facts_for_dest(const FactVec& facts_in, FactVec& facts_out, const Statement* dest);
+	
+	void sanity_check_map() const;
 
 	static std::vector<Fact*> meta_facts; 
 
+	// maps to track facts and effects at historical generation points.
+	// they are used for bypassing analyzing statements if possible 
 	std::map<const Statement*, FactVec> map_facts_in;
 	std::map<const Statement*, FactVec> map_facts_out;
 	std::map<const Statement*, std::vector<Fact*> > map_facts_in_final;
@@ -135,78 +148,12 @@ public:
 	std::map<const Statement*, Effect> map_stm_effect;
 	std::map<const Statement*, Effect> map_accum_effect;
 	std::map<const Statement*, bool> map_visited;
+
 	std::vector<const CFGEdge*> cfg_edges;
-	FactVec global_facts;
-	FactVec fixed_facts;
-	//FactVec return_facts;
-	FactVec shadow_facts;
+	FactVec global_facts; 
 
 	const Function* func;
 };
-
-/******************* Fact Manipulating Functions **********************/
-
-/* find a fact from facts env */
-int find_fact(const FactVec& facts, const Fact* fact);  
-
-/* find a specific type of fact (same variable most likely) from facts env */
-const Fact* find_related_fact(const FactVec& facts, const Fact* new_fact);  
-const Fact* find_related_fact(const vector<Fact*>& facts, const Fact* new_fact);
-
-/* merge a fact into env */
-bool merge_fact(FactVec& facts, const Fact* new_fact);
-
-/* merge two facts env */
-bool merge_facts(FactVec& facts, const FactVec& new_facts);
-
-/* merge two facts env */
-bool merge_jump_facts(FactVec& facts, const FactVec& jump_facts);
-
-/* check if two facts env are identical */
-bool same_facts(const FactVec& facts1, const FactVec& facts2);
-
-/* check if one facts env is a subset of the other */
-bool subset_facts(const FactVec& facts1, const FactVec& facts2);
-
-/* renew a fact in env (append is absent) */
-bool renew_fact(FactVec& facts, const Fact* new_fact);
-
-/* renew facts in new_facts into existing facts env */
-bool renew_facts(FactVec& facts, const FactVec& new_facts);
-
-/* clone an env */
-vector<Fact*> copy_facts(const FactVec& facts_in);
-
-/* combine facts in two env, discard facts not exist in one of them */
-void combine_facts(vector<Fact*>& facts1, const FactVec& facts2);
-
-/* print facts env */
-void print_facts(const FactVec& facts);
-
-/* print fact(s) in env regarding a given variable */
-void print_var_fact(const FactVec& facts, const char* vname);
-
-/* add a new variable fact to env */
-void add_new_var_fact(const Variable* v, FactVec& facts);
-
-/* remove facts related to certain variables from env */
-void update_facts_for_oos_vars(const vector<Variable*>& vars, FactVec& facts);
-void update_facts_for_oos_vars(const vector<const Variable*>& vars, FactVec& facts);
-
-/* remove facts localized to a given function up to a given return statement */
-void remove_function_local_facts(std::vector<const Fact*>& inputs, const Statement* stm);
-
-void remove_loop_local_facts(const Statement* s, FactVec& facts);
-
-/* update fact(s) from assignments */
-bool update_fact_for_assign(const StatementAssign* sa, FactVec& inputs);
-bool update_fact_for_assign(const Lhs* lhs, const Expression* rhs, FactVec& inputs);
-
-/* update facts(s) from return statement */
-void update_fact_for_return(const StatementReturn* sa, FactVec& inputs);
-
-/* update fact(s) for a jump destination */
-void update_facts_for_dest(const FactVec& facts_in, FactVec& facts_out, const Statement* dest);
 
 ///////////////////////////////////////////////////////////////////////////////
 

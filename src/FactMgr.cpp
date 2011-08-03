@@ -64,47 +64,39 @@ using namespace std;
 std::vector<Fact*> FactMgr::meta_facts;
 
 void
-FactMgr::add_new_local_var_fact(const Block* blk, const Variable* var)
+FactMgr::add_new_var_fact_and_update_inout_maps(const Block* blk, const Variable* var)
 {
-	// if blk == 0, we add fact to all blocks of this function
-	// otherwise, only add fact to blocks equal or below blk (variable is declared in blk) 
-	if (blk==0) {
-		add_new_global_var_fact(var);
+	if (blk == NULL) {
+		assert(var->is_global());
 	}
-	else {
-		assert(blk->func == func); 
-		size_t j, k; 
-		const vector<Fact*>& meta_facts = FactMgr::meta_facts;
-		// TODO: consider facts related to struct or arrays
-		if (var->type->eType == eSimple || var->type->eType == ePointer || var->type->eType == eUnion) { 
-			FactVec facts;
-			for (j=0; j<meta_facts.size(); j++) {
-				Lhs lhs(*var);
-				facts = meta_facts[j]->abstract_fact_for_assign(facts, &lhs, var->init);
-				for (k=0; k<facts.size(); k++) {
-					const Fact* f = facts[k];
-					// sometimes the facts is already included during the creation of child
-					// functions. so need this check
-					if (find_related_fact(global_facts, f) == 0) {
-						global_facts.push_back(f);
-					} 
-					if (find_related_fact(shadow_facts, f) == 0) {
-						shadow_facts.push_back(f);
-					} 
-					map<const Statement*, FactVec>::iterator iter;
-					for(iter = map_facts_in.begin(); iter != map_facts_in.end(); ++iter) {  
-						const Statement* stm = iter->first;
-						if (stm && stm->in_block(blk)) {
-							iter->second.push_back(f);
-						}
-					}
-					for(iter = map_facts_out.begin(); iter != map_facts_out.end(); ++iter) {  
-						const Statement* stm = iter->first;
-						assert(stm);
-						add_fact_out(stm, f);
-					}
+	// var is global if blk == 0, we add fact to all blocks of this function
+	// otherwise, only add fact to blocks equal or below blk (variable is declared in blk)  
+	for (size_t i=0; i<FactMgr::meta_facts.size(); i++) { 
+		FactVec facts = FactMgr::meta_facts[i]->abstract_fact_for_var_init(var); 
+		for (size_t k=0; k<facts.size(); k++) {
+			const Fact* f = facts[k];
+			// sometimes the facts is already included during the creation of child
+			// functions. so need this check
+			if (find_related_fact(global_facts, f) == 0) {
+				global_facts.push_back(f);
+			} 
+
+			map<const Statement*, FactVec>::iterator iter;
+			for(iter = map_facts_in.begin(); iter != map_facts_in.end(); ++iter) {  
+				const Statement* stm = iter->first;
+				if (stm && (stm->in_block(blk) || blk == NULL)) {
+					iter->second.push_back(f);
 				}
 			}
+			for(iter = map_facts_out.begin(); iter != map_facts_out.end(); ++iter) {  
+				const Statement* stm = iter->first;
+				assert(stm);
+				if (blk) {
+					add_fact_out(stm, f);
+				} else {
+					iter->second.push_back(f);
+				}
+			} 
 		}
 	}
 }
@@ -116,66 +108,22 @@ FactMgr::add_param_facts(const vector<const Expression*>& param_values, FactVec&
 		const Variable* var = func->param[i];
 		const Expression* value = param_values[i]; 
 		Lhs lhs(*var); 
-		update_fact_for_assign(&lhs, value, facts);
+		FactMgr::update_fact_for_assign(&lhs, value, facts);
 	}
 }
 
 void 
-add_new_var_fact(const Variable* v, FactVec& facts)
+FactMgr::add_new_var_fact(const Variable* v, FactVec& facts)
 {
-	size_t j, k;
-	const vector<Fact*>& meta_facts = FactMgr::meta_facts;
 	assert(v);
-	// TODO: consider facts related to struct or arrays
-	if (v->type && (v->type->eType == eSimple || v->type->eType == ePointer || v->type->eType == eUnion)) { 
-		FactVec tmp_facts;
-		for (j=0; j<meta_facts.size(); j++) {
-			Lhs lhs(*v);
-			tmp_facts = meta_facts[j]->abstract_fact_for_assign(tmp_facts, &lhs, v->init);
-			for (k=0; k<tmp_facts.size(); k++) {
-				const Fact* f = tmp_facts[k];
-				// sometimes the facts is already included during the creation of child
-				// functions. so need this check
-				if (find_related_fact(facts, f) == 0) {
-					facts.push_back(f);
-				}
-			}
-		}
-	}
-}
-
-void 
-FactMgr::add_new_global_var_fact(const Variable* v)
-{
-	size_t j, k;
-	assert(v->is_global());
-	if (v->name == "g_39") 
-		j = 0;
-	const vector<Fact*>& meta_facts = FactMgr::meta_facts;
-	// TODO: consider facts related to struct or arrays
-	if (v->type->eType == eSimple || v->type->eType == ePointer || v->type->eType == eUnion) { 
-		FactVec facts;
-		for (j=0; j<meta_facts.size(); j++) {
-			Lhs lhs(*v);
-			facts = meta_facts[j]->abstract_fact_for_assign(facts, &lhs, v->init);
-			for (k=0; k<facts.size(); k++) {
-				const Fact* f = facts[k];
-				// sometimes the facts is already included during the creation of child
-				// functions. so need this check
-				if (find_related_fact(global_facts, f) == 0) {
-					global_facts.push_back(f);
-				} 
-				if (find_related_fact(shadow_facts, f) == 0) {
-					shadow_facts.push_back(f);
-				} 
-				map<const Statement*, FactVec>::iterator iter;
-				for(iter = map_facts_in.begin(); iter != map_facts_in.end(); ++iter) {  
-					iter->second.push_back(f);
-				}
-				for(iter = map_facts_out.begin(); iter != map_facts_out.end(); ++iter) { 
-					//const Statement* stm = iter->first;
-					iter->second.push_back(f);
-				}
+	for (size_t i=0; i<FactMgr::meta_facts.size(); i++) { 
+		FactVec tmp_facts = FactMgr::meta_facts[i]->abstract_fact_for_var_init(v);   
+		for (size_t k=0; k<tmp_facts.size(); k++) {
+			const Fact* f = tmp_facts[k];
+			// sometimes the facts is already included during the creation of child
+			// functions. so need this check
+			if (find_related_fact(facts, f) == 0) {
+				facts.push_back(f);
 			}
 		}
 	}
@@ -183,42 +131,15 @@ FactMgr::add_new_global_var_fact(const Variable* v)
 
 /* update facts env for out-of-scope variables */
 void 
-update_facts_for_oos_vars(const vector<Variable*>& vars, FactVec& facts)
+FactMgr::update_facts_for_oos_vars(const vector<Variable*>& vs, FactVec& facts)
 {
-	//print_facts(facts);
-	size_t i, j;
-	// remove all facts related to vars, as they become irrelevant going out of scope
-	for (i=0; i<vars.size(); i++) {
-		const Variable* var = vars[i];
-		size_t len = facts.size();
-		for (j=0; j<len; j++) {
-			//print_facts(facts);
-			// remove all facts related to this variable
-			const Fact* f = facts[j];
-			if (var->match(f->get_var())) {
-				facts.erase(facts.begin() + j);
-				len--;
-				j--;
-			}
-		}
-	}
-	// mark any remaining facts that may point to a out-of-scope variable as "point to garbage"
-	for (i=0; i<vars.size(); i++) {
-		const Variable* var = vars[i];
-		for (j=0; j<facts.size(); j++) {
-			if (facts[j]->eCat == ePointTo) {
-				FactPointTo* f = (FactPointTo*)(facts[j]);
-				FactPointTo* new_fact = f->mark_dead_var(var);
-				if (new_fact) {
-					facts[j] = new_fact;
-				}
-			}
-		}
-	}
+	vector<const Variable*> vars;
+	vars.insert(vars.end(), vs.begin(), vs.end());
+	return update_facts_for_oos_vars(vars, facts);
 }
 
 void 
-update_facts_for_oos_vars(const vector<const Variable*>& vars, FactVec& facts)
+FactMgr::update_facts_for_oos_vars(const vector<const Variable*>& vars, FactVec& facts)
 {
 	//print_facts(facts);
 	size_t i, j;
@@ -257,7 +178,7 @@ update_facts_for_oos_vars(const vector<const Variable*>& vars, FactVec& facts)
  * hint: relevant facts are those concerns variable visible at the end of this function
  */
 void 
-remove_function_local_facts(std::vector<const Fact*>& inputs, const Statement* stm)
+FactMgr::remove_function_local_facts(std::vector<const Fact*>& inputs, const Statement* stm)
 {
 	size_t i;
 	size_t len = inputs.size();
@@ -347,7 +268,7 @@ FactMgr::set_fact_out(const Statement* s, const FactVec& facts)
 	else if (s->eType == eGoto) {
 		const StatementGoto* sg = dynamic_cast<const StatementGoto*>(s);
 		FactVec facts_copy; 
-		update_facts_for_dest(facts, facts_copy, sg->dest); 
+		FactMgr::update_facts_for_dest(facts, facts_copy, sg->dest); 
 		map_facts_out[s] = facts_copy;
 	}
 	else if (s->eType == eReturn || s->parent==NULL) {
@@ -457,7 +378,7 @@ void FactMgr::remove_rv_facts(FactVec& facts)
 }
 
 bool 
-update_fact_for_assign(const Lhs* lhs, const Expression* rhs, FactVec& inputs)
+FactMgr::update_fact_for_assign(const Lhs* lhs, const Expression* rhs, FactVec& inputs)
 {
 	bool changed = false;
     for (size_t i=0; i<FactMgr::meta_facts.size(); i++) {
@@ -481,9 +402,9 @@ update_fact_for_assign(const Lhs* lhs, const Expression* rhs, FactVec& inputs)
 }
 
 bool 
-update_fact_for_assign(const StatementAssign* sa, FactVec& inputs)
+FactMgr::update_fact_for_assign(const StatementAssign* sa, FactVec& inputs)
 {
-	if (update_fact_for_assign(sa->get_lhs(), sa->get_rhs(), inputs)) { 
+	if (FactMgr::update_fact_for_assign(sa->get_lhs(), sa->get_rhs(), inputs)) { 
 		sa->func->fact_changed = true;
 		return true;
     }
@@ -491,7 +412,7 @@ update_fact_for_assign(const StatementAssign* sa, FactVec& inputs)
 }
 
 void 
-update_fact_for_return(const StatementReturn* sr, FactVec& inputs)
+FactMgr::update_fact_for_return(const StatementReturn* sr, FactVec& inputs)
 {
 	size_t i, j;
     for (i=0; i<FactMgr::meta_facts.size(); i++) {
@@ -509,7 +430,7 @@ update_fact_for_return(const StatementReturn* sr, FactVec& inputs)
 }
 
 void
-update_facts_for_dest(const FactVec& facts_in, FactVec& facts_out, const Statement* dest)
+FactMgr::update_facts_for_dest(const FactVec& facts_in, FactVec& facts_out, const Statement* dest)
 {
 	size_t i, j;
 	vector<const Variable*> oos_vars;
@@ -540,7 +461,7 @@ update_facts_for_dest(const FactVec& facts_in, FactVec& facts_out, const Stateme
 		}
 		merge_fact(facts_out, f);
 	}
-	update_facts_for_oos_vars(oos_vars, facts_out);
+	FactMgr::update_facts_for_oos_vars(oos_vars, facts_out);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -582,18 +503,6 @@ FactMgr::add_interested_facts(int interests)
 } 
 
 void 
-FactMgr::backup_facts(void) 
-{
-	shadow_facts = global_facts;
-}
-
-void 
-FactMgr::restore_facts(void)
-{
-	global_facts = shadow_facts;
-}
-
-void 
 FactMgr::restore_facts(vector<const Fact*>& old_facts)
 {
 	makeup_new_var_facts(old_facts, global_facts);
@@ -612,7 +521,7 @@ FactMgr::makeup_new_var_facts(vector<const Fact*>& old_facts, const vector<const
 			// mean they are variables created after old_facts,
 			// manually add them
 			if (find_related_fact(old_facts, f) == 0) { 
-				add_new_var_fact(v, old_facts);
+				FactMgr::add_new_var_fact(v, old_facts);
 			}
 		}
 	}
@@ -682,108 +591,8 @@ FactMgr::reset_stm_fact_maps(const Statement* stm)
 	map_facts_out[stm] = empty;
 }
 
-int 
-find_fact(const FactVec& facts, const Fact* fact)
-{
-    size_t i; 
-    for (i=0; i<facts.size(); i++) {
-        if (fact->equal(*facts[i])) {
-            return i;
-        }
-    }
-    return -1;
-}
-
-const Fact* 
-find_related_fact(const FactVec& facts, const Fact* new_fact)
-{
-    size_t i; 
-    for (i=0; i<facts.size(); i++) {
-        if (new_fact->is_related(*facts[i])) {
-            return facts[i];
-        }
-    }
-    return 0;
-}
-
-const Fact* 
-find_related_fact(const vector<Fact*>& facts, const Fact* new_fact)
-{
-    size_t i; 
-    for (i=0; i<facts.size(); i++) {
-        if (new_fact->is_related(*facts[i])) {
-            return facts[i];
-        }
-    }
-    return 0;
-}
-
-// TODO: we really need to free the memory properly while maintain the memory in compact
-// way, i.e., don't allocate a Fact object unless it's absolutely necessary
-bool 
-merge_fact(FactVec& facts, const Fact* new_fact)
-{ 
-    bool changed = false; 
-    size_t i; 
-    for (i=0; i<facts.size(); i++) {
-        const Fact* f = facts[i]; 
-        if (f->is_related(*new_fact)) {
-            if (!f->imply(*new_fact)) {
-				Fact* copy_fact = new_fact->clone();
-                copy_fact->join(*f);    
-                facts[i] = copy_fact;
-                changed = true;
-				// TODO: release the memory for f???
-            } 
-            else {
-                //delete new_fact;   // new fact is useless, unsafe to do so???
-            }
-            break;
-        }
-    }  
-    if (i == facts.size()) {// if not found 
-        facts.push_back(new_fact);
-        changed = true;
-    } 
-    return changed;
-}
-
 bool
-renew_fact(FactVec& facts, const Fact* new_fact)
-{ 
-    size_t i; 
-    for (i=0; i<facts.size(); i++) {
-        if (new_fact->is_related(*facts[i])) { 
-            if (new_fact->equal(*facts[i])) {
-                return false;
-            }
-            facts[i] = new_fact; 
-            break;
-        }
-    } 
-    // if not found, append the new fact
-    if (i==facts.size()) {
-        facts.push_back(new_fact);
-    }
-    return true;
-}
-   
-bool
-merge_facts(FactVec& facts, const FactVec& new_facts)
-{ 
-    size_t i;
-    bool changed = false;
-    for (i=0; i<new_facts.size(); i++) {
-		//new_facts[i]->Output(cout);
-        if (merge_fact(facts, new_facts[i])) {
-            changed = true;
-        }
-    } 
-    return changed;
-}
-
-bool
-merge_jump_facts(FactVec& facts, const FactVec& jump_facts)
+FactMgr::merge_jump_facts(FactVec& facts, const FactVec& jump_facts)
 { 
     size_t i;
     bool changed = false;
@@ -808,82 +617,6 @@ merge_jump_facts(FactVec& facts, const FactVec& jump_facts)
     return changed;
 }
 
-bool
-renew_facts(FactVec& facts, const FactVec& new_facts)
-{ 
-    size_t i;
-    bool changed = false;
-    for (i=0; i<new_facts.size(); i++) {
-        if (renew_fact(facts, new_facts[i])) {
-            changed = true;
-        }
-    } 
-    return changed;
-}
-
-vector<Fact*>
-copy_facts(const FactVec& facts_in)
-{ 
-    size_t i; 
-	vector<Fact*> facts_out;
-    for (i=0; i<facts_in.size(); i++) {
-		Fact* f = facts_in[i]->clone();
-        facts_out.push_back(f);
-    } 
-	return facts_out;
-}
-
-/*************************************************************
- * combine facts obtained from two visits to the same function
- *************************************************************/
-void 
-combine_facts(vector<Fact*>& facts1, const FactVec& facts2)
-{
-    size_t i, j;  
-    for (i=0; i<facts2.size(); i++) {
-		const Fact* new_fact = facts2[i];
-		for (j=0; j<facts1.size(); j++) {
-			Fact* old_fact = facts1[j];
-			if (old_fact->is_related(*new_fact)) {
-				old_fact->join_visits(*new_fact);
-				break;
-			}
-		}
-	}
-}
-
-bool 
-same_facts(const FactVec& facts1, const FactVec& facts2)
-{
-	if (facts1.size() == facts2.size()) {
-		size_t i;
-		for (i=0; i<facts1.size(); i++) {
-			if (find_fact(facts2, facts1[i]) == -1) {
-				return false;
-			}
-		}
-		return true;
-	}
-	return false;
-}
-
-bool 
-subset_facts(const FactVec& facts1, const FactVec& facts2)
-{
-	if (facts1.size() == facts2.size()) {
-		size_t i;
-		for (i=0; i<facts1.size(); i++) {
-			const Fact* f1 = facts1[i];
-			const Fact* f2 = find_related_fact(facts2, f1);
-			if (f2 == 0 || !f2->imply(*f1)) {
-				return false;
-			} 
-		}
-		return true;
-	}
-	return false;
-}
-
 /*
  * create a control flow graph edge introduced by break/continue/goto
  */
@@ -895,7 +628,7 @@ FactMgr::create_cfg_edge(const Statement* src, const Statement* dest, bool post_
 }
 
 void
-remove_loop_local_facts(const Statement* s, FactVec& facts)
+FactMgr::remove_loop_local_facts(const Statement* s, FactVec& facts)
 {
 	// filter out out-of-scope facts 
 	const Block* b = (s->eType==eBlock) ? (const Block*)s : s->parent; 
@@ -904,7 +637,7 @@ remove_loop_local_facts(const Statement* s, FactVec& facts)
 		b = b->parent;
 		local_vars.insert(local_vars.end(), b->local_vars.begin(), b->local_vars.end());
 	} 
-	update_facts_for_oos_vars(local_vars, facts);
+	FactMgr::update_facts_for_oos_vars(local_vars, facts);
 }
 
 void
@@ -995,26 +728,6 @@ FactMgr::find_dangling_global_ptrs(Function* f)
 			if (fp->is_dead()) {
 				f->dead_globals.push_back(v);
 			}
-		}
-	}
-}
-
-void
-print_facts(const FactVec& facts)
-{
-	for (size_t i=0; i<facts.size(); i++) {
-		const Fact* f = facts[i];
-		f->OutputAssertion(cout);
-	}
-}
-
-void
-print_var_fact(const FactVec& facts, const char* vname)
-{
-	for (size_t i=0; i<facts.size(); i++) {
-		const Fact* f = facts[i];
-		if (f->get_var()->name == vname) {
-			f->OutputAssertion(cout);
 		}
 	}
 }

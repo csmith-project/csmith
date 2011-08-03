@@ -88,7 +88,7 @@ StatementReturn::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context)
 	if (!var.visit_facts(inputs, cg_context)) {
 		return false;
 	}
-	update_fact_for_return(this, inputs); 
+	FactMgr::update_fact_for_return(this, inputs); 
 	FactMgr* fm = get_fact_mgr(&cg_context);
 	fm->map_stm_effect[this] = cg_context.get_effect_stm();
 	return true;

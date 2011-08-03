@@ -124,7 +124,7 @@ static const Variable* find_expr_key_var(const Expression* e)
 
 //=======================================================================================
 ArrayVariable *
-ArrayVariable::CreateArrayVariable(Block* blk, const std::string &name, const Type *type, const Expression* init, const CVQualifiers* qfer, const Variable* isFieldVarOf)
+ArrayVariable::CreateArrayVariable(const CGContext& cg_context, Block* blk, const std::string &name, const Type *type, const Expression* init, const CVQualifiers* qfer, const Variable* isFieldVarOf)
 {
 	assert(type);
 	if (type->eType == eSimple)
@@ -161,14 +161,28 @@ ArrayVariable::CreateArrayVariable(Block* blk, const std::string &name, const Ty
 	if (type->is_aggregate()) {
 		var->create_field_vars(type);
 	}
-	// create a list of alternative initial values. now only support integer arrays 
-	if (type->eType == eSimple || type->eType == eStruct) {
-		unsigned int init_num = pure_rnd_upto(total_size - 1);
-		for (size_t i=0; i<init_num; i++) {
-			Expression* e = Constant::make_random(type);
-			var->add_init_value(e);
+	// create a list of alternative initial values
+	unsigned int init_num = pure_rnd_upto(total_size / 2);
+	if (0) {   // keep the code for comparing the bug finding power with the else branch
+		if (type->eType == eSimple || type->eType == eStruct) {
+			unsigned int init_num = pure_rnd_upto(total_size - 1);
+			for (size_t i=0; i<init_num; i++) {
+				Expression* e = Constant::make_random(type);
+				var->add_init_value(e);
+			}
 		}
+	} else {
+		for (size_t i=0; i<init_num; i++) {
+			Expression* e = NULL; 
+			if (type->eType != ePointer || CGOptions::strict_const_arrays()) { 
+				e = Constant::make_random(type);
+			} else {
+				e = VariableSelector::make_init_value(Effect::READ, cg_context, type, qfer, blk);
+			}
+			var->add_init_value(e); 
+		} 
 	}
+
 	// add it to global list or local variable list
 	blk? blk->local_vars.push_back(var) : VariableSelector::GetGlobalVariables()->push_back(var);
 	return var;

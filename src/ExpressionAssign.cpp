@@ -54,7 +54,7 @@ ExpressionAssign::make_random(CGContext &cg_context, const Type* type, const CVQ
 	}
 	StatementAssign* sa = StatementAssign::make_random(cg_context, type, qfer);
 	FactMgr* fm = get_fact_mgr(&cg_context);
-	update_fact_for_assign(sa, fm->global_facts);
+	FactMgr::update_fact_for_assign(sa, fm->global_facts);
 	ExpressionAssign* ea = new ExpressionAssign(sa);
 	return ea;
 }

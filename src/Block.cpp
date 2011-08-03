@@ -580,7 +580,7 @@ Block::find_fixed_point(vector<const Fact*> inputs, vector<const Fact*>& post_fa
 		// add facts for locals
 		for (i=0; i<local_vars.size(); i++) {
 			const Variable* v = local_vars[i];
-			add_new_var_fact(v, outputs);
+			FactMgr::add_new_var_fact(v, outputs);
 		} 
 		
 		// revisit statements with new inputs
@@ -595,7 +595,7 @@ Block::find_fixed_point(vector<const Fact*> inputs, vector<const Fact*>& post_fa
 		}  
 		fm->set_fact_in(this, inputs);
 		post_facts = outputs;
-		update_facts_for_oos_vars(local_vars, outputs);
+		FactMgr::update_facts_for_oos_vars(local_vars, outputs);
 		fm->set_fact_out(this, outputs);
 		fm->map_visited[this] = true; 
 		// compute accumulated effect
@@ -730,7 +730,7 @@ Block::post_creation_analysis(CGContext& cg_context, const Effect& pre_effect)
     set_accumulated_effect(cg_context);
 	//fm->print_facts(fm->global_facts); 
 	vector<const Fact*> post_facts = fm->global_facts;
-	update_facts_for_oos_vars(local_vars, fm->global_facts); 
+	FactMgr::update_facts_for_oos_vars(local_vars, fm->global_facts); 
 	fm->remove_rv_facts(fm->global_facts);
 	fm->set_fact_out(this, fm->global_facts);
 

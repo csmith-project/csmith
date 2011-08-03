@@ -850,7 +850,7 @@ Statement::analyze_with_edges_in(vector<const Fact*>& inputs, CGContext& cg_cont
 		for (i=0; i<edges.size(); i++) { 
 			const Statement* src = edges[i]->src;
 			if (fm->map_visited[src]) { 
-				merge_jump_facts(inputs, fm->map_facts_out[src]);
+				FactMgr::merge_jump_facts(inputs, fm->map_facts_out[src]);
 				cg_context.add_effect(fm->map_accum_effect[src]);
 			}
 		}
@@ -861,7 +861,7 @@ Statement::analyze_with_edges_in(vector<const Fact*>& inputs, CGContext& cg_cont
 		for (i=0; i<edges.size(); i++) {
 			const Statement* src = edges[i]->src;
 			if (fm->map_visited[src]) {
-				merge_jump_facts(inputs, fm->map_facts_out[src]); 
+				FactMgr::merge_jump_facts(inputs, fm->map_facts_out[src]); 
 				cg_context.add_effect(fm->map_accum_effect[src]);
 			}
 		} 
@@ -920,11 +920,11 @@ Statement::post_creation_analysis(vector<const Fact*>& pre_facts, const Effect& 
 			const StatementAssign* sa = (const StatementAssign*)this;
 			// abstract fact for assignment itself. No analysis on function calls 
 			// on RHS since they are already handled during statement generation
-			update_fact_for_assign(sa, fm->global_facts);
+			FactMgr::update_fact_for_assign(sa, fm->global_facts);
 		}
 		else if (eType == eReturn) {
 			const StatementReturn* sr = (const StatementReturn*)this;
-			update_fact_for_return(sr, fm->global_facts);
+			FactMgr::update_fact_for_return(sr, fm->global_facts);
 		}
 	}
 	fm->remove_rv_facts(fm->global_facts);

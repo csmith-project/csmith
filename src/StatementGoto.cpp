@@ -152,12 +152,12 @@ StatementGoto::make_random(CGContext &cg_context)
 			bool found_new_facts = false;
 			// JYTODO: don't assume facts_in == facts_out for control statements
 			FactVec& goto_in = other_stm->is_ctrl_stmt() ? fm->map_facts_in[other_stm] : fm->map_facts_out[other_stm];
-			update_facts_for_dest(goto_in, goto_out, stm);
+			FactMgr::update_facts_for_dest(goto_in, goto_out, stm);
 			stm_in = fm->map_facts_in[stm];
 			Effect pre_effect = cg_context.get_accum_effect();
 			// merge the effect from goto src
 			cg_context.add_effect(fm->map_accum_effect[other_stm]);
-			if (merge_jump_facts(stm_in, goto_out)) {
+			if (FactMgr::merge_jump_facts(stm_in, goto_out)) {
 				stm_out = stm_in;
 				found_new_facts = true;
 				map<const Statement*, FactVec> facts_in_copy, facts_out_copy;
@@ -170,7 +170,7 @@ StatementGoto::make_random(CGContext &cg_context)
 				}
 				// in cases where "stm" contains "other_stm", the above "stm_visit_facts" will cause "map_facts_in[other_stm]" to be updated
 				if (stm->contains_stmt(other_stm)) { 
-					update_facts_for_dest(goto_in, goto_out, stm);
+					FactMgr::update_facts_for_dest(goto_in, goto_out, stm);
 				}
 			} 
 			
