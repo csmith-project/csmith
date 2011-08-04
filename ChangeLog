@@ -8,7 +8,46 @@ Changes since 2.0.0 release:
 	By default, mark variables and functions as "static" since some
 	compilers can exploit this to optimize more aggressively.
 
-	Loop code generation is significantly generalized [Xuejun: please
-	give some details].
+	Provide more controls on code generation about which variables
+	should be read or written, and which variables should not be read
+	or written.
 
+	Based on the above controls, generate generalized array-traversing 
+	loops in which the array variable must be read/written while the loop
+	control variable(s) must not be written.
+
+	Remove the modulus operations applied on array indices because all 
+	array accesses are guaranteed safe by the code generation mechanism.
+
+	Support unions in the random programs. Allow pointers to be unions
+	fields (Pointers as structure fields are yet to be supported).
+	
+	When asked, intentionally create unsafe pointer dereferences for 
+	testing static analyzers.
+	
+	Support comma operators in the random programs. A comma expression
+	is outputted as (e1 , e2) to make it more distinguishable (note the
+	extra space in front of the comma).
+	 
+	Support embedded assignments in the random programs.
+	
+	Support prefix/postfix ++/-- operators in the random programs.
+	
+	Provide more controls on code generation about the expression complexity
+	and nested block depth.
+	
+	Allow array members to be initialized to different values. 
+	
+	add command line options:
+		--force-non-uniform-arrays
+		--strict-const-arrays
+		--null-ptr-deref-prob <N>
+		--dangling-ptr-deref-prob <N>
+		--union-read-type-sensitive 
+		--no-union-read-type-sensitive
+		--upper-expr-complexity <N>
+		--max-block-depth <N>
+ 
 	Several bugs were fixed.
+	
+	Re-organize and clean up unnecessary code.
