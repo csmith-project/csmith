@@ -18,15 +18,15 @@ my $CSMITH_TIMEOUT = 180;
 my $PROVIDE_SEED = 1;
 
 my $XTRA = "";
-$XTRA .= " --force-globals-static --no-unions --force-non-uniform-arrays";
+
+$XTRA .= "--force-non-uniform-arrays ";
+#$XTRA .= "--no-unions ";
 #$XTRA .= "--no-argc";
 #$XTRA .= "--concise ";
 #$XTRA .= "--no-paranoid ";
 #$XTRA .= "--random-random ";
 #$XTRA .= "--math-notmp ";
-
-my $BF = " --bitfields ";
-#my $BF = "";
+#$XTRA .= "--bitfields ";
 
 #my $PACK = "--packed-struct";
 my $PACK = "";
@@ -135,7 +135,7 @@ sub doit ($$) {
 
     my $cmd;
     if ($CSMITH_CCOMP eq "") {
-        $cmd = "$CSMITH_HOME/src/csmith $SEED $BF $PACK $XTRA --output $cfile";
+        $cmd = "$CSMITH_HOME/src/csmith $SEED $PACK $XTRA --output $cfile";
     }
     else {
         $cmd = "$CSMITH_HOME/src/csmith $SEED $CSMITH_CCOMP --output $cfile";
