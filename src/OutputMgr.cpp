@@ -380,11 +380,6 @@ OutputMgr::OutputHeader(int argc, char *argv[], unsigned long seed)
 	else
 		out << simple_runtime_include << endl;
 
-	//if (CGOptions::compute_hash()) {
-		//out << "static uint32_t crc32_tab[256];" << endl;
-		//out << "static uint32_t crc32_context = 0xFFFFFFFFUL;" << endl;
-	//}
-	//else {
  	if (!CGOptions::compute_hash()) {
 		if (CGOptions::allow_int64())
 			out << "volatile uint64_t " << Variable::sink_var_name << " = 0;" << endl;
