@@ -82,7 +82,7 @@ case $SYSTEM in
     # files being output by the tests. 10 MB should be enough for anybody. ;)
     ULIMITCMD="$ULIMITCMD ulimit -f 10485760;"
 
-    ULIMITCMD="$ULIMITCMD ulimit -m 2000000 -v 2000000;"
+    #ULIMITCMD="$ULIMITCMD ulimit -m 2000000 -v 2000000;"
     #ULIMITCMD="$ULIMITCMD ulimit -m 2000000 -v 2000000;"
 esac
 rm -f core core.*
