@@ -34,10 +34,17 @@
 #include "custom_limits.h"
 
 #define STATIC static
+
 #define UNDEFINED(__val) (__val)
+
 #define LOG_INDEX
+
 #define LOG_EXEC
+
 #define FUNC_NAME(x) (safe_##x)
+
+// FIXME
+#define assert(x)
 
 #include "safe_math.h"
 
