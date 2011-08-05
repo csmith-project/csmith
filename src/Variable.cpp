@@ -203,6 +203,16 @@ void remove_field_vars(vector<const Variable*>& set)
 	}
 }
 
+const Variable*
+Variable::get_container_union(void) const
+{
+	if (type == NULL) return NULL;
+	const Variable* p = this;
+	for (; p && p->type->eType != eUnion; p = p->field_var_of)
+		;
+	return p;
+}
+
 /*
  * examples: array[0] "loose matches" array[1]; array[3] "loose matches" array[x].f1...
  * union.f1 "loose matches" union.f2.f3
@@ -216,10 +226,8 @@ Variable::loose_match(const Variable* v) const
 		return true;
 	}
 	// find the union variable(s) that contain me and you
-	for (me = me->field_var_of; me && me->type->eType != eUnion; me = me->field_var_of)
-		;
-	for (you = you->field_var_of; you && you->type->eType != eUnion; you = you->field_var_of)
-		;
+	me = me->get_container_union();
+	you = you->get_container_union();
 	return you && me && (you == me);
 }
 
@@ -1335,24 +1343,6 @@ Variable::match_var_name(const string& vname) const
 		}
 	}
 	return NULL;
-}
-
-/* order fields inside a struct/union variable */
-int 
-Variable::compare_field(const Variable* v) const
-{
-	if (is_field_var() && v->is_field_var()) {
-		const Variable* my_base = NULL;
-		const Variable* your_base = NULL;
-		for (my_base = this->field_var_of; my_base->field_var_of; my_base = my_base->field_var_of)
-			;
-		for (your_base = v->field_var_of; your_base->field_var_of; your_base = your_base->field_var_of)
-			;
-		if (my_base == your_base) {
-			return name.compare(v->name);
-		}
-	}
-	return 0;
 }
 
 void 

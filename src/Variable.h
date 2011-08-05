@@ -90,6 +90,7 @@ public:
 	bool has_field_var(const Variable* v) const; 
 	bool is_field_var(void) const { return field_var_of != 0; };
 	const Variable* get_top_container(void) const;
+	const Variable* get_container_union(void) const;
 	int  get_field_id(void) const;
 	bool is_union_field(void) const { return field_var_of != 0 && field_var_of->type->eType == eUnion; };
 	bool is_inside_union_field(void) const { return is_union_field() || (field_var_of && field_var_of->is_inside_union_field()); }
@@ -100,7 +101,6 @@ public:
 	bool loose_match(const Variable* v) const;
 	bool is_pointer(void) const { return type && type->eType == ePointer;}
 	bool is_rv(void) const { return name.find("_rv") != string::npos; }
-	int  compare_field(const Variable* v) const;
 	int get_seq_num(void) const;
 	void find_pointer_fields(vector<const Variable*>& ptr_fields) const;
 

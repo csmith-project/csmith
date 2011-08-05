@@ -1206,6 +1206,20 @@ Type::has_bitfields() const
 	return false;
 }
 
+// conservatively assume padding is present in all unpacked structures 
+// or whenever there is bitfields
+bool 
+Type::has_padding(void) const
+{
+	if (eType == eStruct && !packed_) return true;
+	for (size_t i=0; i<fields.size(); i++) {
+		if (is_bitfield(i) || fields[i]->has_padding()) {
+			return true;
+		}
+	}
+	return false;
+}
+
 bool
 Type::is_full_bitfields_struct() const
 {

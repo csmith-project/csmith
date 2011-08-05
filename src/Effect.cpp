@@ -451,15 +451,10 @@ Effect::field_is_written(const Variable *v) const
 bool
 Effect::sibling_union_field_is_read(const Variable *v) const
 {   
-	const Variable* you = v->get_collective();
-	// find the union variable(s) that contains you
-	for (; you && you->type->eType != eUnion; you = you->field_var_of)
-		;
+	const Variable* you = v->get_collective()->get_container_union();
 	if (you) {
 		for (size_t i=0; i<read_vars.size(); i++) {
-			const Variable* me = read_vars[i]->get_collective(); 
-			for (; me && me->type->eType != eUnion; me = me->field_var_of)
-				;
+			const Variable* me = read_vars[i]->get_collective()->get_container_union();  
 			if (you == me) {
 				return true;
 			}
@@ -471,15 +466,10 @@ Effect::sibling_union_field_is_read(const Variable *v) const
 bool
 Effect::sibling_union_field_is_written(const Variable *v) const
 {    
-	const Variable* you = v->get_collective();
-	// find the union variable(s) that contains you
-	for (; you && you->type->eType != eUnion; you = you->field_var_of)
-		;
+	const Variable* you = v->get_collective()->get_container_union();
 	if (you) {
 		for (size_t i=0; i<write_vars.size(); i++) {
-			const Variable* me = write_vars[i]->get_collective(); 
-			for (; me && me->type->eType != eUnion; me = me->field_var_of)
-				;
+			const Variable* me = write_vars[i]->get_collective()->get_container_union();  
 			if (you == me) {
 				return true;
 			}

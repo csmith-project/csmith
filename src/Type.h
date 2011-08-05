@@ -227,6 +227,7 @@ public:
 	bool is_full_bitfields_struct() const;
 	bool is_bitfield(size_t index) const ;
 	bool has_bitfields() const;
+	bool has_padding(void) const;
 	bool contain_pointer_field(void) const;
 	bool is_const_struct_union() const;
 	bool is_volatile_struct_union() const;

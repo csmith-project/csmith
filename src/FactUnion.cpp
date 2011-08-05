@@ -135,30 +135,16 @@ FactUnion::abstract_fact_for_assign(const std::vector<const Fact*>& facts, const
 		const FactUnion* fu = 0;
 		if (v->is_union_field()) { 
 			fu = make_fact(v->field_var_of, v->get_field_id());
+		} else if (v->is_inside_union_field() && v->type->has_padding()) {
+			fu = make_fact(v->get_container_union(), BOTTOM);
 		}
+
 		if (fu) {
 			ret_facts.push_back(fu);
 		}
 	}
     return ret_facts;
 }
-//
-///* draw facts from return statement */
-//std::vector<const Fact*>
-//FactUnion::abstract_fact_for_return(const std::vector<const Fact*>& facts, const ExpressionVariable* rv, const Function* func)
-//{
-//	vector<const Fact*> ret_facts;
-//    if (func->return_type->eType == eUnion) {
-//		int indirect = rv->get_indirect_level(); 
-//	    assert(indirect >= 0);   
-//		vector<const Variable*> rvars = FactPointTo::merge_pointees_of_pointer(rv->get_var()->get_collective(), indirect, facts);
-//		const FactUnion* rhs_fact = dynamic_cast<const FactUnion*>(join_var_facts(facts, rvars)); 
-//		if (rhs_fact) {
-//			ret_facts.push_back(make_fact(func->rv, rhs_fact->get_last_written_fid()));
-//		}
-//	}
-//    return ret_facts;
-//}
 
 Fact*
 FactUnion::clone(void) const
