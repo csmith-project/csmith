@@ -34,8 +34,6 @@ use File::stat;
 
 #######################################################################
 
-## TODO: run kcc and execute output
-
 my $MIN_PROGRAM_SIZE = 8000;
 my $CSMITH_HOME = $ENV{"CSMITH_HOME"};
 my $COMPILER = "gcc -w -O0";
