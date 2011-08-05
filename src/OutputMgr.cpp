@@ -62,18 +62,6 @@ static const char simple_runtime_include[] = "\
 #include \"random_inc.h\"\n\
 ";
 
-#if 0
-static const char platform_include[] = "\
-#if defined(__AVR_ARCH__)\n\
-#include \"platform_avr.h\"\n\
-#elif defined (__MSP430__)\n\
-#include \"platform_msp430.h\"\n\
-#else\n\
-#include \"platform_generic.h\"\n\
-#endif\n\
-";
-#endif
-
 static const char volatile_include[] = "\
 /* To use wrapper functions, compile this program with -DWRAP_VOLATILES=1. */\n\
 #include \"volatile_runtime.h\"\n\
@@ -379,13 +367,6 @@ OutputMgr::OutputHeader(int argc, char *argv[], unsigned long seed)
 		out << endl;
 	}
 
-#if 0
-#ifdef WIN32
-	out << "#include <stdint.h>" << endl;
-#else
-	out << "#include <stdint.h>" << endl;
-#endif
-#endif
 	if (CGOptions::paranoid() && !CGOptions::concise())
 		out << "#include <assert.h>" << endl;
 	
