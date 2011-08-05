@@ -58,9 +58,6 @@ static const char vol_end_function_name[] = "csmith_volatile_end";
 static const char runtime_include[] = "\
 #include \"csmith.h\"\n\
 ";
-static const char simple_runtime_include[] = "\
-#include \"random_inc.h\"\n\
-";
 
 static const char volatile_include[] = "\
 /* To use wrapper functions, compile this program with -DWRAP_VOLATILES=1. */\n\
@@ -375,10 +372,7 @@ OutputMgr::OutputHeader(int argc, char *argv[], unsigned long seed)
 
 	ExtensionMgr::OutputHeader(out);
 
-	if (CGOptions::compute_hash()) 
-		out << runtime_include << endl;
-	else
-		out << simple_runtime_include << endl;
+	out << runtime_include << endl;
 
  	if (!CGOptions::compute_hash()) {
 		if (CGOptions::allow_int64())
