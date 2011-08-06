@@ -48,7 +48,7 @@ my $COMPILER_TIMEOUT = 120;
 my $PROG_TIMEOUT = 8;
 
 # extra options here
-my $CSMITH_USER_OPTIONS = " --bitfields --packed-struct";
+my $CSMITH_USER_OPTIONS = "";
 my $CSMITH_EXTRA_OPTIONS = "";
 
 ################# end user-configurable stuff ################### 
@@ -90,12 +90,7 @@ sub write_bug_desc_to_file($$) {
 # properly parse the return value from system()
 sub runit ($$$) {
     my ($cmd, $timeout, $out) = @_; 
-    my $res;
-    if ($RUN_PROGRAM) {
-	$res = system "timeout $timeout $cmd > $out 2>&1";
-    } else {
-	$res = system "$cmd > $out 2>&1";
-    }
+    my $res = system "RunSafely.sh $timeout 1 /dev/null $out $cmd"; 
     my $success = 0; 
     if ($? == -1) {
         print "can't execute $cmd\n";
@@ -110,7 +105,7 @@ sub runit ($$$) {
         $success = 1;
     }
     my $exit_value  = $? >> 8;
-    if ($exit_value == 124) {
+    if ($exit_value == 137) {
         print "hangs while executing $cmd\n";
         $success = 0;
     }
@@ -137,8 +132,16 @@ sub compile_and_run($$$$) {
     my ($res, $exit_value) = runit($command, $COMPILER_TIMEOUT,  "compiler.out"); 
     # print "after run compiler: $res, $exit_value\n";
     if (($res == 0) || (!(-e $exe))) {
-        # exit code 124 means time out
-        return ($exit_value == 124 ? 2 : 1);         
+        # exit code 137 means time out
+	if ($exit_value != 137) {
+	    # dump the crash message
+	    if ($command =~ /clang/) {
+		system "grep Assertion compiler.out";
+	    } else {
+		system "grep internal compiler.out";
+	    } 
+	}
+        return ($exit_value == 137 ? 2 : 1);        
     }
 
     # run random program 
@@ -146,8 +149,8 @@ sub compile_and_run($$$$) {
         ($res, $exit_value) = runit("./$exe", $PROG_TIMEOUT, $out);
         # print "after run program: $res, $exit_value\n";
         if (($res == 0) || (!(-e $out))) {
-            # exit code 124 means time out
-            return ($exit_value == 124 ? 4 : 3);      
+            # exit code 137 means time out
+            return ($exit_value == 137 ? 4 : 3);      
         }
     }
     return 0;
@@ -165,41 +168,44 @@ sub evaluate_program ($) {
     my @tested_compilers; 
     my $interesting = 0;
     my $i = 0;     
-    foreach my $compiler (@COMPILERS) { 
-        my $out = "out$i.log";
-        my $exe = "a.out$i";
-        $i++; 
-        my $res = compile_and_run($compiler, $test_file, $exe, $out);
-
-        if ($res) {
-	    if ($res == 1 || $res == 2) { 
-		write_bug_desc_to_file($test_file, 
-		  "Compiler error! Can't compile with $compiler $COMPILE_OPTIONS $HEADER"); 
-		$interesting = 1;
-            }
-            elsif ($res == 3) { 
-		write_bug_desc_to_file($test_file, "random program crashed!"); 
-		# random program crashes, a likely wrong-code bug, but
-		# can't rule out the probablity of a Csmith bug
-		$interesting = -2;     
-                last;
-	    } else {
-		print "random program hangs!\n";  
-                # program hangs, not interesting
-		$interesting = -1;    
-                last;
-            }
-        }
-        else {
-            if ($RUN_PROGRAM) {
-                die "cannot find $out.\n" if (!(-e $out));
-                my $sum = read_value_from_file($out, "checksum = (.*)");
-                $interesting = 2 if 
-		    (scalar(@checksums) > 0 && $sum ne $checksums[0]); 
-                push @checksums, $sum;
-                push @tested_compilers, "$compiler $COMPILE_OPTIONS";
-            }             
-        }
+    my @OPT_LEVELS = ("-O0", "-O1", "-O2", "-O3", "-Os");
+    foreach my $compiler (@COMPILERS) {
+	foreach my $opt_level (@OPT_LEVELS) {
+	    my $out = "out$i.log";
+	    my $exe = "a.out$i";
+	    $i++;
+	    my $compiler_opt = "$compiler $opt_level -w ";
+	    my $res = compile_and_run($compiler_opt, $test_file, $exe, $out);
+    
+	    if ($res) {
+		if ($res == 1 || $res == 2) {  
+		    print "Compiler error! Can't compile with $compiler_opt $COMPILE_OPTIONS $HEADER"; 
+		    $interesting = 1;
+		}
+		elsif ($res == 3) { 
+		    write_bug_desc_to_file($test_file, "random program crashed!"); 
+		    # random program crashes, a likely wrong-code bug, but
+		    # can't rule out the probablity of a Csmith bug
+		    $interesting = -2;     
+		    last;
+		} else {
+		    print "random program hangs!\n";  
+		    # program hangs, not interesting
+		    $interesting = -1;    
+		    last;
+		}
+	    }
+	    else {
+		if ($RUN_PROGRAM) {
+		    die "cannot find $out.\n" if (!(-e $out));
+		    my $sum = read_value_from_file($out, "checksum = (.*)");
+		    $interesting = 2 if 
+			(scalar(@checksums) > 0 && $sum ne $checksums[0]); 
+		    push @checksums, $sum;
+		    push @tested_compilers, "$compiler $COMPILE_OPTIONS";
+		}             
+	    }
+	}
     } 
     if ($interesting >= 1) {
         if ($interesting == 2) { 
@@ -254,14 +260,14 @@ sub test_one ($) {
         $good++;
         print "GOOD PROGRAM: number $good\n";
         if ($ret == 1) {
-            print "COMPILER CRASH ERROR FOUND: number $crash_bug\n";
+            print "crash error number $crash_bug\n";
             $crash_bug++;
-            system "cp $cfile crash${crash_bug}.c";
+            # system "cp $cfile crash${crash_bug}.c";
         }
         if ($ret == 2 || $ret == -2) {
             print "LIKELY WRONG CODE ERROR FOUND: number $wrongcode_bug\n";
             $wrongcode_bug++;
-            system "cp $cfile wrong${wrongcode_bug}.c";
+            # system "cp $cfile wrong${wrongcode_bug}.c";
         } 
     } else { 
         print "BAD PROGRAM: doesn't count towards goal.\n";
