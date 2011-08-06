@@ -208,8 +208,9 @@ CGOptions::set_default_settings(void)
 	ccomp(false);
 	coverage_test(false);
 	coverage_test_size(CGOPTIONS_DEFAULT_COVERAGE_TEST_SIZE);
-	packed_struct(false);
-	bitfields(false);
+	packed_struct(true);
+	resolve_bitfields_length();
+	bitfields(true);
 	prefix_name(false);
 	sequence_name_prefix(false);
 	compatible_check(false);
