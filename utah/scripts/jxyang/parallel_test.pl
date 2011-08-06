@@ -1,21 +1,20 @@
 #!/usr/bin/perl -w
- use strict;
-use warnings;
-#use Sys::CPU;
+use strict;
+use warnings; 
 
 sub usage () {
-    die "usage: parallel_test.pl <config-file> <csmith-option>\n";
+    die "usage: parallel_test.pl <parallel_runs> <config-file> <csmith-option>\n";
 }
 
-my $CPUS = 2; #Sys::CPU::cpu_count();
-
-if (scalar (@ARGV) != 2 || !(-e $ARGV[0]) ) {
+if (scalar (@ARGV) != 3 || $ARGV[0] < 2 || !(-e $ARGV[1])) {
     usage();
 }
-print "looks like we have $CPUS cpus\n";
 
-my $CONFIG_FILE = $ARGV[0];
-my $CSMITH_OPTION = $ARGV[1];
+my $CPUS = $ARGV[0];
+print "running on $CPUS cpus\n";
+
+my $CONFIG_FILE = $ARGV[1];
+my $CSMITH_OPTION = $ARGV[2];
 my @ALT_OPTIONS = ();
 
 if ($CSMITH_OPTION =~ /--no-(.*)/) {

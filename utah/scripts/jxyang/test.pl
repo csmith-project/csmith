@@ -48,7 +48,8 @@ my $COMPILER_TIMEOUT = 120;
 my $PROG_TIMEOUT = 8;
 
 # extra options here
-my $CSMITH_USER_OPTIONS = " --bitfields --packed-struct"; 
+my $CSMITH_USER_OPTIONS = " --bitfields --packed-struct";
+my $CSMITH_EXTRA_OPTIONS = "";
 
 ################# end user-configurable stuff ################### 
 
@@ -225,7 +226,7 @@ sub test_one ($) {
     # run Csmith until generate a big enough program
     while (1) {
         unlink $cfile;
-        my $cmd = "$CSMITH_HOME/src/csmith $CSMITH_USER_OPTIONS --output $cfile";
+        my $cmd = "$CSMITH_HOME/src/csmith $CSMITH_USER_OPTIONS $CSMITH_EXTRA_OPTIONS --output $cfile";
         my ($res, $exitcode) = runit($cmd, $CSMITH_TIMEOUT,  "csmith.out"); 
         # print "after run csmith: $res, $exitcode\n";
 	
@@ -297,7 +298,7 @@ if ($nargs == 2) {
 	    $RUN_PROGRAM = 1;
 	}
     } else {
-	usage();
+        $CSMITH_EXTRA_OPTIONS = $ARGV[2];
     }
 } else {
     usage();
@@ -306,27 +307,20 @@ if ($nargs == 2) {
 my $cnt = $ARGV[0];
 usage() unless ($cnt =~ /^[0-9]+$/ && $cnt >= 0);
 
-my ($second0, $minute0, $hour0, $dayOfMonth, $month) = localtime();
-$month++;
-print "start time: $month/$dayOfMonth $hour0:$minute0\n";
+my ($second0, $minute0, $hour0, $dayOfMonth0, $month0) = localtime();
+$month0++;
+print "start time: $month0/$dayOfMonth0 $hour0:$minute0\n";
 
 # figure out what compilers to test
 my $infile = $ARGV[1];
 open INF, "<$infile" or die "Cannot read configuration file ${infile}.\n";
 while (my $line = <INF>) {
-    chomp $line;
+    $line =~ s/\r?\n?$//;            # get rid of LF/CR 
     if ($line && !($line  =~ /^\s*#/)) { 
 	my $res = system ("echo \"int main() { return 0;}\" > foo.c ; $line foo.c > /dev/null 2>&1"); 
 	unlink "foo.c",  "a.out";
 	die "cannot execute compiler $line\n" if ($res); 
 	push @COMPILERS, $line;
-    }
-    
-    # print out time once per day
-    my ($second, $minute, $hour, $dayOfMonth, $month) = localtime();
-    if ($hour == $hour0 && $minute == $minute0 && $second == $second0) {
-	$month++;
-	print "current time: $month/$dayOfMonth $hour:$minute";
     }
 }
 close INF;
@@ -338,6 +332,13 @@ while ($cnt == 0 || $i < $cnt) {
 	$i++;
     }
     print "\n";
+    # print out time once per day
+    my ($second, $minute, $hour, $dayOfMonth, $month) = localtime();
+    if ($hour == $hour0 && $minute == $minute0 && $second == $second0 && $dayOfMonth != $dayOfMonth0) {
+	$month++;
+	$dayOfMonth0 = $dayOfMonth;
+	print "current time: $month/$dayOfMonth $hour:$minute\n";
+    }
 } 
 
 print "Total csmith errors found: $csmith_bug\n";
