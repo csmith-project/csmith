@@ -304,64 +304,91 @@ my @gcc = ("ia32",
 	   "gcc",
 	   \@gcc_opts2);
 
+my $Z = "/mnt/local/randomtest";
+
+my @clang26 = ("ia32",
+	       "llvm",
+	       "$Z/clang-26/bin/clang",
+	       \@gcc_opts2);
+
+my @llvmgcc27 = ("ia32",
+		 "llvm",
+		 "llvm-gcc-27",
+		 \@gcc_opts2);
+
+my @clang27 = ("ia32",
+	       "llvm",
+	       "$Z/clang-27/bin/clang",
+	       \@gcc_opts2);
+
+my @llvmgcc28 = ("ia32",
+		 "llvm",
+		 "llvm-gcc-28",
+		 \@gcc_opts2);
+
+my @clang28 = ("ia32",
+	       "llvm",
+	       "$Z/clang-28/bin/clang",
+	       \@gcc_opts2);
+
+my @llvmgcc29 = ("ia32",
+		 "llvm",
+		 "llvm-gcc-29",
+		 \@gcc_opts2);
+
+my @clang29 = ("ia32",
+	       "llvm",
+	       "$Z/clang-29/bin/clang",
+	       \@gcc_opts2);
+
 my @gcc460 = ("ia32",
 	      "gcc",
-	      "gcc-460",
+	      "$Z/gcc-460/bin/gcc-460",
 	      \@gcc_opts2);
 
 my @gcc450 = ("ia32",
 	      "gcc",
-	      "gcc-450",
+	      "$Z/gcc-450/bin/gcc-450",
 	      \@gcc_opts2);
 
 my @gcc440 = ("ia32",
 	      "gcc",
-	      "gcc-440",
+	      "$Z/gcc-440/bin/gcc-440",
 	      \@gcc_opts2);
 
 my @gcc430 = ("ia32",
 	      "gcc",
-	      "gcc-430",
+	      "$Z/gcc-430/bin/gcc-430",
 	      \@gcc_opts2);
 
 my @gcc420 = ("ia32",
 	      "gcc",
-	      "gcc-420",
+	      "$Z/gcc-420/bin/gcc-420",
 	      \@gcc_opts2);
 
 my @gcc410 = ("ia32",
 	      "gcc",
-	      "gcc-410",
+	      "$Z/gcc-410/bin/gcc-410",
 	      \@gcc_opts2);
 
 my @gcc400 = ("ia32",
 	      "gcc",
-	      "gcc-400",
+	      "$Z/gcc-400/bin/gcc-400",
 	      \@gcc_opts2);
 
 my @gcc340 = ("ia32",
 	      "gcc",
-	      "gcc-340",
+	      "$Z/gcc-340/bin/gcc-340",
 	      \@gcc_opts2);
 
 my @gcc330 = ("ia32",
 	      "gcc",
-	      "gcc-330",
+	      "$Z/gcc-330/bin/gcc-330",
 	      \@gcc_opts2);
 
 my @gcc320 = ("ia32",
 	      "gcc",
-	      "gcc-320",
-	      \@gcc_opts2);
-
-my @gcc310 = ("ia32",
-	      "gcc",
-	      "gcc-310",
-	      \@gcc_opts2);
-
-my @gcc300 = ("ia32",
-	      "gcc",
-	      "gcc-300",
+	      "$Z/gcc-320/bin/gcc-320",
 	      \@gcc_opts2);
 
 my @clang = ("ia32",
@@ -449,41 +476,6 @@ my @llvmgcc26 = ("ia32",
 		 "llvm-gcc-26",
 		 \@gcc_opts2);
 
-my @clang26 = ("ia32",
-	       "llvm",
-	       "clang-26",
-	       \@gcc_opts2);
-
-my @llvmgcc27 = ("ia32",
-		 "llvm",
-		 "llvm-gcc-27",
-		 \@gcc_opts2);
-
-my @clang27 = ("ia32",
-	       "llvm",
-	       "clang-27",
-	       \@gcc_opts2);
-
-my @llvmgcc28 = ("ia32",
-		 "llvm",
-		 "llvm-gcc-28",
-		 \@gcc_opts2);
-
-my @clang28 = ("ia32",
-	       "llvm",
-	       "clang-28",
-	       \@gcc_opts2);
-
-my @llvmgcc29 = ("ia32",
-		 "llvm",
-		 "llvm-gcc-29",
-		 \@gcc_opts2);
-
-my @clang29 = ("ia32",
-	       "llvm",
-	       "clang-29",
-	       \@gcc_opts2);
-
 my @llvmgcc22O0only = ("ia32",
 		       "llvm",
 		       "llvm-gcc-2.2",
@@ -537,10 +529,25 @@ my @llvms = (
 
 my @compilers_to_test = (
 
+    \@gcc320,
+    \@gcc330,
+    \@gcc340,
+    \@gcc400,
+    \@gcc410,
+    \@gcc420,
+    \@gcc430,
+    \@gcc440,
+    \@gcc450,
+    \@gcc460,
+    \@clang26,
+    \@clang27,
+    \@clang28,
+    \@clang29,
+    
     #\@gcc,
 
-    \@clang,
-    \@gcccurrent,
+    #\@clang,
+    #\@gcccurrent,
     
     #\@clangpp,
     #\@gppcurrent,
@@ -551,34 +558,6 @@ my @compilers_to_test = (
     #\@gcccurrent,
     #\@dragonegg,
 
-    #\@gcc300,
-    #\@gcc310,
-    #\@gcc320,
-    #\@gcc330,
-    #\@gcc340,
-    #\@gcc400,
-    #\@gcc410,
-    #\@gcc420,
-    #\@gcc430,
-    #\@gcc440,
-    #\@gcc450,
-    #\@gcc460,
-    #\@llvmgcc19,
-    #\@llvmgcc20,
-    #\@llvmgcc21,
-    #\@llvmgcc22,
-    #\@llvmgcc23,
-    #\@llvmgcc24,
-    #\@llvmgcc25,
-    #\@llvmgcc26,
-    #\@clang26,
-    #\@llvmgcc27,
-    #\@clang27,
-    #\@llvmgcc28,
-    #\@clang28,
-    #\@llvmgcc29,
-    #\@clang29,
-    
     #\@dcc,
     #\@lance,
     #\@gcccurrent,
@@ -638,6 +617,7 @@ sub compile_and_run ($$$$$$$) {
     if ($arch eq "ia32" || $arch eq "windiss") {
 	$exe = "${root}${compiler}${opt_str}_exe";
 	($exe =~ s/\.//g);
+	($exe =~ s/\///g);
 	$xtra = "";
     } elsif ($arch eq "avr") {
 	$exe = "${root}${compiler}${opt_str}.elf";

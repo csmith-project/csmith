@@ -10,8 +10,7 @@ use File::stat;
 
 my $SAVE_BADS = 0;
 
-my $MIN_PROGRAM_SIZE = 20000;
-my $MAX_PROGRAM_SIZE = 50000;
+my $MIN_PROGRAM_SIZE = 30000;
 
 my $CSMITH_TIMEOUT = 180;
 
