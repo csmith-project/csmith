@@ -60,29 +60,36 @@
 
 int eid = 0;
 
-ProbabilityTable<unsigned int, int> *Expression::exprTable_ = NULL;
+DistributionTable Expression::exprTable_;
+DistributionTable Expression::paramTable_;
 
 void
 Expression::InitExprProbabilityTable()
-{
-	Expression::exprTable_ = new ProbabilityTable<unsigned int, int>();
-	Expression::exprTable_->add_elem(40, (int)eFunction);
-	Expression::exprTable_->add_elem(50, (int)eAssignment);
-	Expression::exprTable_->add_elem(60, (int)eCommaExpr);
-	Expression::exprTable_->add_elem(70, (int)eConstant);
-	Expression::exprTable_->add_elem(100, (int)eVariable);
+{ 
+	exprTable_.add_entry((int)eFunction, 70);  
+	exprTable_.add_entry((int)eVariable, 20);
+	exprTable_.add_entry((int)eConstant, 10);
+	if (CGOptions::use_embedded_assigns()) {
+		exprTable_.add_entry((int)eAssignment, 10);
+	}
+	if (CGOptions::use_comma_exprs()) {
+		exprTable_.add_entry((int)eCommaExpr, 10);
+	}
 }
 
-ProbabilityTable<unsigned int, int> *Expression::paramTable_ = NULL;
 void
 Expression::InitParamProbabilityTable()
 {
-	Expression::paramTable_ = new ProbabilityTable<unsigned int, int>();
-	Expression::paramTable_->add_elem(30, (int)eFunction);
-	Expression::paramTable_->add_elem(40, (int)eConstant);
-	Expression::paramTable_->add_elem(50, (int)eAssignment);
-	Expression::paramTable_->add_elem(60, (int)eCommaExpr);
-	Expression::paramTable_->add_elem(100, (int)eVariable);
+	paramTable_.add_entry((int)eFunction, 40);  
+	paramTable_.add_entry((int)eVariable, 40);
+	// constant parameters lead to non-interesting code 
+	paramTable_.add_entry((int)eConstant, 0);  
+	if (CGOptions::use_embedded_assigns()) {
+		paramTable_.add_entry((int)eAssignment, 10);
+	}
+	if (CGOptions::use_comma_exprs()) {
+		paramTable_.add_entry((int)eCommaExpr, 10);
+	}
 }
 
 void
@@ -105,7 +112,7 @@ ExpressionTypeProbability(const VectorFilter *filter)
 
 	assert(filter);
 
-	int i = rnd_upto(100, filter);
+	int i = rnd_upto(filter->get_max_prob(), filter);
 	ERROR_GUARD(MAX_TERM_TYPES);
 	return (eTermType)(filter->lookup(i));
 }
@@ -161,7 +168,7 @@ Expression::make_random(CGContext &cg_context, const Type* type, const CVQualifi
 	 
 	// if no term type is provided, choose a random term type with restrictions
 	if (tt == MAX_TERM_TYPES) {
-		VectorFilter filter(Expression::exprTable_);
+		VectorFilter filter(&Expression::exprTable_);
 		if (no_func || 
 			(!CGOptions::return_structs() && type->eType == eStruct) ||
 			(!CGOptions::return_unions() && type->eType == eUnion)) {
@@ -230,7 +237,7 @@ Expression::make_random_param(CGContext &cg_context, const Type* type, const CVQ
 	assert(type);
 	// if a term type is provided, no need to choose random term type
 	if (tt == MAX_TERM_TYPES) {
-		VectorFilter filter(Expression::paramTable_);
+		VectorFilter filter(&Expression::paramTable_);
 		filter.add(eConstant);   // don't call functions with constant parameters because it is not interesting
 		if ((!CGOptions::return_structs() && type->eType == eStruct) ||
 			(!CGOptions::return_unions() && type->eType == eUnion)) {

@@ -194,7 +194,7 @@ NonVoidNonVolatileTypeFilter::get_type()
 class ChooseRandomTypeFilter : public Filter
 {
 public:
-	ChooseRandomTypeFilter();
+	ChooseRandomTypeFilter(bool for_field_var=false);
 
 	virtual ~ChooseRandomTypeFilter();
 
@@ -202,14 +202,14 @@ public:
 
 	Type *get_type();
 
+	bool for_field_var;
 private:
 	mutable Type *typ_;
-	
 };
 
-ChooseRandomTypeFilter::ChooseRandomTypeFilter()
+ChooseRandomTypeFilter::ChooseRandomTypeFilter(bool for_field_var)
+: for_field_var(for_field_var)
 {
-
 }
 
 ChooseRandomTypeFilter::~ChooseRandomTypeFilter()
@@ -228,6 +228,10 @@ ChooseRandomTypeFilter::filter(int v) const
 		return filter->filter(typ_->simple_type);
 	}
 	else if ((typ_->eType == eStruct) && (!CGOptions::return_structs())) {
+		return true;
+	}
+
+	if (for_field_var && typ_->get_struct_depth() >= CGOptions::max_nested_struct_level()) {
 		return true;
 	}
 	return false;
@@ -547,8 +551,8 @@ MoreTypesProbability(void)
 	// Always have at least 10 types in the program.
 	if (AllTypes.size() < 10)
 		return true;
-	// 60% probability for each additional type.
-	return rnd_flipcoin(60);
+	// by default 50% probability for each additional struct or union type.
+	return rnd_flipcoin(MoreStructUnionTypeProb);
 }
 
 // ---------------------------------------------------------------------
@@ -620,7 +624,7 @@ Type::make_one_struct_field(vector<const Type*> &random_fields,
 					vector<CVQualifiers> &qualifiers,
 					vector<int> &fields_length)
 {
-	ChooseRandomTypeFilter f;
+	ChooseRandomTypeFilter f(true);
 	unsigned int i = rnd_upto(AllTypes.size(), &f);
 	ERROR_RETURN();
 	const Type* type = AllTypes[i];
@@ -1170,9 +1174,14 @@ Type::get_struct_depth() const
     int depth = 0; 
     if (eType == eStruct) {
 		depth++;
+		int max_depth = 0;
 		for (size_t i=0; i<fields.size(); i++) {
-			depth += fields[i]->get_struct_depth();
+			int field_depth = fields[i]->get_struct_depth();
+			if(field_depth > max_depth) {
+				max_depth = field_depth;
+			}
 		}
+		depth += max_depth;
 	}
 	return depth;
 }

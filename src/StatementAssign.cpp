@@ -61,28 +61,21 @@ using namespace std;
 //
 // use a table to define probabilities of different kinds of statements
 // Must initialize it before use
-ProbabilityTable<unsigned int, int> *StatementAssign::assignOpsTable_ = NULL;
+DistributionTable StatementAssign::assignOpsTable_;
 
 void
 StatementAssign::InitProbabilityTable()
-{
-	assignOpsTable_ = new ProbabilityTable<unsigned int, int>();
-	if (CGOptions::use_incr_decr_opers()) {
-		assignOpsTable_->add_elem(60, (int)eSimpleAssign);
-		assignOpsTable_->add_elem(70, (int)eBitAndAssign);
-		assignOpsTable_->add_elem(79, (int)eBitXorAssign);
-		assignOpsTable_->add_elem(88, (int)eBitOrAssign);
-		assignOpsTable_->add_elem(91, (int)ePreIncr);
-		assignOpsTable_->add_elem(94, (int)ePreDecr);
-		assignOpsTable_->add_elem(97, (int)ePostIncr);
-		assignOpsTable_->add_elem(100, (int)ePostDecr);
+{ 
+	assignOpsTable_.add_entry((int)eSimpleAssign, 70);
+	assignOpsTable_.add_entry((int)eBitAndAssign, 10);
+	assignOpsTable_.add_entry((int)eBitXorAssign, 10);
+	assignOpsTable_.add_entry((int)eBitOrAssign,  10);
+	if (CGOptions::use_incr_decr_opers()) { 
+		assignOpsTable_.add_entry((int)ePreIncr, 5);
+		assignOpsTable_.add_entry((int)ePreDecr, 5);
+		assignOpsTable_.add_entry((int)ePostIncr, 5);
+		assignOpsTable_.add_entry((int)ePostDecr, 5);
 	} 
-	else {
-		assignOpsTable_->add_elem(70, (int)eSimpleAssign);
-		assignOpsTable_->add_elem(80, (int)eBitAndAssign);
-		assignOpsTable_->add_elem(90, (int)eBitXorAssign);
-		assignOpsTable_->add_elem(100, (int)eBitOrAssign);
-	}
 }
 
 eAssignOps
@@ -95,12 +88,12 @@ StatementAssign::AssignOpsProbability(const Type* type)
 		return eSimpleAssign;
 	}
 
-	VectorFilter filter(assignOpsTable_);
+	VectorFilter filter(&assignOpsTable_);
 	if (type && type->is_signed()) {
 		filter.add(ePreIncr).add(ePreDecr).add(ePostIncr).add(ePostDecr);
 	}
 	
-	int value = rnd_upto(100, &filter); 
+	int value = rnd_upto(filter.get_max_prob(), &filter); 
 	return (eAssignOps)(filter.lookup(value));
 }
 

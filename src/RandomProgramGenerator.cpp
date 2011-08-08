@@ -168,7 +168,10 @@ static void print_help()
 	cout << "  --packed-struct | --no-packed-struct: enable | disable packed structs by adding #pragma pack(1) before struct definition (disabled by default)." << endl << endl; 
 	cout << "  --bitfields | --no-bitfields: enable | disable full-bitfields structs (disabled by default)." << endl << endl;
 	cout << "  --argc | --no-argc: genereate main function with/without argv and argc being passed (enabled by default)." << endl << endl; 
-	
+	cout << "  --incr-decr-operators | --no-incr-decr-operators: enable | disable ++/-- operators (enabled by default)." << endl << endl;
+	cout << "  --embedded-assigns | --no-embedded-assigns: enable | disable embedded assignments as sub-expressions (enabled by default)." << endl << endl;
+	cout << "  --comma-operators | --no-comma-operators: enable | disable comma operators (enabled by default)." << endl << endl;
+
 	// numbered controls	
 	cout << "  --max-block-size <size>: limit the number of non-return statements in a block to <size> (default 4)." << endl << endl; 
 	cout << "  --max-funcs <num>: limit the number of functions (besides main) to <num>  (default 10)." << endl << endl;
@@ -295,6 +298,8 @@ static void print_advanced_help()
 
 	cout << "  --union-read-type-sensitive | --no-union-read-type-sensitive: allow | disallow reading an union field when there is no risk of "
 		 << "reading padding bits (enabled by default)." << endl << endl; 
+
+	cout << "  --max-struct-nested-level: controls the max depth of nested structs (default is 3)." << endl << endl;
 }
 
 void arg_check(int argc, int i)
@@ -1094,6 +1099,16 @@ main(int argc, char **argv)
 			continue;
 		}
 
+		if (strcmp (argv[i], "--max-struct-nested-level") ==0 ) {
+			unsigned long depth;
+			i++;
+			arg_check(argc, i);
+			if (!parse_int_arg(argv[i], &depth))
+				exit(-1);
+			CGOptions::max_nested_struct_level(depth);
+			continue;
+		}
+
 		if (strcmp (argv[i], "--union-read-type-sensitive") == 0) {
 			CGOptions::union_read_type_sensitive(true);
 			continue;
@@ -1103,6 +1118,36 @@ main(int argc, char **argv)
 			CGOptions::union_read_type_sensitive(false);
 			continue;
 		}
+
+		if (strcmp (argv[i], "--incr-decr-operators") == 0) {
+			CGOptions::use_incr_decr_opers(true);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--no-incr-decr-operators") == 0) {
+			CGOptions::use_incr_decr_opers(false);
+			continue;
+		} 
+
+		if (strcmp (argv[i], "--embedded-assigns") == 0) {
+			CGOptions::use_embedded_assigns(true);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--no-embedded-assigns") == 0) {
+			CGOptions::use_embedded_assigns(false);
+			continue;
+		} 
+	
+		if (strcmp (argv[i], "--comma-operators") == 0) {
+			CGOptions::use_comma_exprs(true);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--no-comma-operators") == 0) {
+			CGOptions::use_comma_exprs(false);
+			continue;
+		}  
 
 		if (strcmp (argv[i], "--reduce") == 0) {
 			string filename;

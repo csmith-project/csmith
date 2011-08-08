@@ -44,6 +44,7 @@
 #include <ostream>
 #include "CGContext.h"
 #include "CVQualifiers.h"
+#include "ProbabilityTable.h"
 #include <vector>
 #include <string>
 using namespace std;
@@ -154,8 +155,8 @@ private:
 	static void InitExprProbabilityTable();
 	static void InitParamProbabilityTable();
 
-	static ProbabilityTable<unsigned int, int> *exprTable_;
-	static ProbabilityTable<unsigned int, int> *paramTable_;
+	static DistributionTable exprTable_;
+	static DistributionTable paramTable_;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

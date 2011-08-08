@@ -31,6 +31,7 @@
 
 #include <functional>
 #include <algorithm>
+#include "ProbabilityTable.h"
 
 using namespace std;
 
@@ -41,7 +42,7 @@ VectorFilter::VectorFilter(void)
 	//Nothing to do
 }
 
-VectorFilter::VectorFilter(ProbabilityTable<unsigned int, int> *table) 
+VectorFilter::VectorFilter(DistributionTable *table) 
 	: ptable(table), 
 	  flag_(FILTER_OUT) 
 {
@@ -66,10 +67,8 @@ VectorFilter::filter(int v) const
 {
 	if (!this->valid_filter())
 		return false;
-
-	if (ptable) {
-		v = ptable->get_value(v);
-	}
+ 
+	v = lookup(v); 
 	bool re = std::find(vs_.begin(), vs_.end(), static_cast<unsigned int>(v)) != vs_.end();
 	return (flag_ == FILTER_OUT) ? re : !re;
 }
@@ -83,10 +82,16 @@ VectorFilter::add(unsigned int item)
 	return *this;
 }
 
+int 
+VectorFilter::get_max_prob(void) const 
+{
+	return ptable ? ptable->get_max() : 100;
+}
+
 int
 VectorFilter::lookup(int v) const
 {
 	if (!this->valid_filter() || ptable == NULL)
 		return v; 
-	return v = ptable->get_value(v);
+	return v = ptable->rnd_num_to_key(v);
 }

@@ -51,7 +51,7 @@ using namespace std;
 #define CGOPTIONS_DEFAULT_MAX_EXPR_DEPTH	(10)
 #define CGOPTIONS_DEFAULT_MAX_STRUCT_FIELDS	(10)
 #define CGOPTIONS_DEFAULT_MAX_UNION_FIELDS	(5)
-#define CGOPTIONS_DEFAULT_MAX_NESTED_STRUCT_LEVEL	(0)
+#define CGOPTIONS_DEFAULT_MAX_NESTED_STRUCT_LEVEL	(3)
 #define CGOPTIONS_DEFAULT_MAX_INDIRECT_LEVEL (2)
 #define CGOPTIONS_DEFAULT_MAX_ARRAY_DIMENSIONS	(3) 
 #define CGOPTIONS_DEFAULT_MAX_ARRAY_LENGTH_PER_DIMENSION (10)
@@ -384,6 +384,12 @@ public:
 	static bool use_incr_decr_opers(void);
 	static bool use_incr_decr_opers(bool p);
 
+	static bool use_embedded_assigns(void);
+	static bool use_embedded_assigns(bool p);
+
+	static bool use_comma_exprs(void);
+	static bool use_comma_exprs(bool p);
+
 	static int int_bytes(void);
 	static int int_bytes(int p);
 
@@ -502,6 +508,8 @@ private:
 	// flag that indicate the comformance level to C99. true means relaxed
 	static bool union_read_type_sensitive_;
 	static bool use_incr_decr_opers_;
+	static bool use_embedded_assigns_;
+	static bool use_comma_exprs_;
 	static int  int_bytes_;
 	static int  pointer_bytes_;
 	static Reducer* reducer_; 

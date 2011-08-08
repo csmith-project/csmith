@@ -409,6 +409,9 @@ void
 Probabilities::set_single_name_maps()
 {
 	// for single probs
+	// for generating more struct or union types
+	set_single_name("more_struct_union_type_prob", pMoreStructUnionProb);
+
 	set_single_name("bitfields_creation_prob", pBitFieldsCreationProb);
 
 	// for single bitfield in a normal struct
@@ -512,6 +515,7 @@ void
 Probabilities::initialize_single_probs()
 {
 	std::map<ProbName, int> m;
+	m[pMoreStructUnionProb] = 50;
 	m[pBitFieldsCreationProb] = 50;
 	m[pBitFieldInNormalStructProb] = 10;
 	m[pScalarFieldInFullBitFieldsProb] = 10;
@@ -1031,5 +1035,37 @@ Probabilities::~Probabilities()
 	probabilities_.clear();
 	clear_filter(prob_filters_);
 	clear_filter(extra_filters_);
+}
+
+void DistributionTable::add_entry(int key, int prob)
+{ 
+	keys_.push_back(key); 
+	probs_.push_back(prob);  
+	max_prob_ += prob; 
+}
+
+int DistributionTable::key_to_prob(int key) const 
+{
+	for (size_t i=0; i<keys_.size(); i++) {
+		if (keys_[i] == key) {
+			return probs_[i];
+		}
+	}
+	// 0 probablility for keys not found
+	return 0;
+}
+
+int DistributionTable::rnd_num_to_key(int rnd) const
+{
+	assert(rnd < max_prob_ && rnd >= 0);
+	assert(keys_.size() == probs_.size());
+	for (size_t i=0; i<probs_.size(); i++) {
+		if (rnd < probs_[i]) {
+			return keys_[i];
+		}
+		rnd -= probs_[i];
+	}
+	assert(0);
+	return -1;
 }
 

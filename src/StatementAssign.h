@@ -138,7 +138,7 @@ private:
 	std::string tmp_var1;
 	std::string tmp_var2;
 
-	static ProbabilityTable<unsigned int, int> *assignOpsTable_;
+	static DistributionTable assignOpsTable_;
 
 	StatementAssign(const StatementAssign &sa);  // unimplemented
 

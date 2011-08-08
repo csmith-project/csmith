@@ -165,6 +165,8 @@ DEFINE_GETTER_SETTER_INT(null_pointer_dereference_prob)
 DEFINE_GETTER_SETTER_INT(dead_pointer_dereference_prob)
 DEFINE_GETTER_SETTER_BOOL(union_read_type_sensitive);
 DEFINE_GETTER_SETTER_BOOL(use_incr_decr_opers);
+DEFINE_GETTER_SETTER_BOOL(use_embedded_assigns);
+DEFINE_GETTER_SETTER_BOOL(use_comma_exprs);
 DEFINE_GETTER_SETTER_INT(int_bytes);
 DEFINE_GETTER_SETTER_INT(pointer_bytes);
 
@@ -250,8 +252,10 @@ CGOptions::set_default_settings(void)
 	dead_pointer_dereference_prob(0);
 	union_read_type_sensitive(true);
 	use_incr_decr_opers(true);
+	use_embedded_assigns(true);
+	use_comma_exprs(true);
 	// these are defaults for x86-64 machine, our most used platform. 
-	// configure them to generate random programs for other platforms.  
+	// configure them to generate *correct* random programs for other platforms.  
 	int_bytes(4);
 	pointer_bytes(8);
 }

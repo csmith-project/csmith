@@ -41,7 +41,8 @@ class ProbabilityTable;
 
 using namespace std;
 enum ProbName {
-	pBitFieldsCreationProb = 0,
+	pMoreStructUnionProb,
+	pBitFieldsCreationProb,
 	pBitFieldsSignedProb,
 	pBitFieldInNormalStructProb,
 	pScalarFieldInFullBitFieldsProb,
@@ -137,6 +138,9 @@ enum ProbName {
 };
 
 #define MAX_PROB_NAME ((ProbName)(pStatementProb+1))
+
+#define MoreStructUnionTypeProb \
+	Probabilities::get_prob(pMoreStructUnionProb)
 
 #define BitFieldsCreationProb \
 	Probabilities::get_prob(pBitFieldsCreationProb)

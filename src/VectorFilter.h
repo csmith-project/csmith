@@ -31,8 +31,9 @@
 #define VECTOR_FILTER_H
 
 #include <vector>
-#include "Filter.h"
-#include "ProbabilityTable.h"
+#include "Filter.h" 
+
+class DistributionTable;
 
 // Filter out elements from the vector, i.e., elements in the vector
 // is invalid.
@@ -44,10 +45,12 @@ class VectorFilter : public Filter
 {
 public:
 	VectorFilter(void);
-	VectorFilter(ProbabilityTable<unsigned int, int> *table);
+	VectorFilter(DistributionTable *table);
 	explicit VectorFilter(std::vector<unsigned int> &vs, int flag = FILTER_OUT);
 
 	VectorFilter& add(unsigned int item);
+
+	int get_max_prob(void) const;
 
 	int lookup(int v) const;
 
@@ -57,7 +60,7 @@ public:
 private:
 	std::vector<unsigned int> vs_;
 
-	ProbabilityTable<unsigned int, int> *ptable;
+	DistributionTable *ptable;
 
 	int flag_;
 };

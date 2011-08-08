@@ -173,4 +173,19 @@ ProbabilityTable<Key, Value>::get_value(Key k)
 	return (*i)->get_value();
 }
 
+class DistributionTable {  
+public:
+	DistributionTable() { max_prob_ = 0;} 
+	~DistributionTable() {}; 
+
+	void add_entry(int key, int prob); 
+	int get_max(void) const { return max_prob_;}
+	int key_to_prob(int key) const;
+	int rnd_num_to_key(int rnd) const;
+private:
+	int max_prob_;
+	vector<int> keys_;
+	vector<int> probs_; 
+};
+
 #endif
