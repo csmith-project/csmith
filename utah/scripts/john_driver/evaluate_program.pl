@@ -525,22 +525,31 @@ my @llvms = (
     );
 
 my @compilers_to_test = (
-
-    #\@gcc320,
-    #\@gcc330,
-    #\@gcc340,
-    #\@gcc400,
-    #\@gcc410,
-    #\@gcc420,
-    #\@gcc430,
-    #\@gcc440,
-    #\@gcc450,
-    #\@gcc460,
-    #\@clang26,
-    #\@clang27,
-    #\@clang28,
-    #\@clang29,
     
+    \@gcc320,
+    \@gcc330,
+    \@gcc340,
+    \@gcc400,
+    \@gcc410,
+    \@gcc420,
+    \@gcc430,
+    \@gcc440,
+    \@gcc450,
+    \@gcc460,
+    \@clang26,
+    \@clang27,
+    \@clang28,
+    \@clang29,
+    
+    #\@icc,
+    #\@suncc,
+    #\@open64,
+    #\@tcc,
+
+    #\@gcc_with_ccomp,
+    #\@ccomp,
+    ##\@clang_with_ccomp,
+
     #\@gcc,
 
     #\@clang,
@@ -551,7 +560,6 @@ my @compilers_to_test = (
 
     #\@gcc400,
 
-    #\@tcc,
     #\@gcccurrent,
     #\@dragonegg,
 
@@ -560,10 +568,8 @@ my @compilers_to_test = (
     #\@gcccurrent,
     #\@llvmgcc,
     #\@clang,
-    #\@icc,
 
     #\@gppcurrent,
-    #\@suncc,
     #\@avrgcc,
     #\@gcccurrent_O0only,
     #\@armcc,
@@ -571,10 +577,6 @@ my @compilers_to_test = (
     #\@llvmgcc24, 
     #\@llvmgcc_Oonly,
     #\@gcccurrent_Oonly,
-
-    \@gcc_with_ccomp,
-    #\@clang_with_ccomp,
-    \@ccomp,
 
     );
 

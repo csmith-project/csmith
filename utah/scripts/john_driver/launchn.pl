@@ -22,8 +22,6 @@ if ($argc == 0) {
     usage() if (!($CPUS =~ /^[0-9]+$/));
     if ($argc == 2) {
 	$SEEDFILE = $ARGV[1];
-    } else {
-	usage();
     }
 } else {
     usage();

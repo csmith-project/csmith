@@ -19,7 +19,8 @@ my $PROVIDE_SEED = 1;
 my $XTRA = "";
 
 #$XTRA .= "--force-non-uniform-arrays ";
-$XTRA .= "--no-unions ";
+#$XTRA .= "--no-unions ";
+#$XTRA .= "--no-unions ";
 #$XTRA .= "--no-argc";
 #$XTRA .= "--concise ";
 #$XTRA .= "--no-paranoid ";
