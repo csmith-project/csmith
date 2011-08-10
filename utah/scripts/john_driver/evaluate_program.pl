@@ -60,7 +60,7 @@ if (defined($ENV{"PIN_CMD"})) {
 
 my $VALGRIND_ON_COMPILER = 0;
 
-my $RUN_PROGRAM = 1;
+my $RUN_PROGRAM = 0;
 
 my $DO_TRIAGE = 0;
 
@@ -343,6 +343,11 @@ my @gcc460 = ("ia32",
 	      "$Z/gcc-460/bin/gcc-460",
 	      \@gcc_opts2);
 
+my @open64 = ("ia32",
+	      "opencc",
+	      "opencc",
+	      \@gcc_opts2);
+
 my @gcc450 = ("ia32",
 	      "gcc",
 	      "$Z/gcc-450/bin/gcc-450",
@@ -541,10 +546,10 @@ my @compilers_to_test = (
     \@clang28,
     \@clang29,
     
-    #\@icc,
-    #\@suncc,
-    #\@open64,
-    #\@tcc,
+    \@icc,
+    \@suncc,
+    \@tcc,
+    \@open64,
 
     #\@gcc_with_ccomp,
     #\@ccomp,

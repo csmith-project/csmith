@@ -62,7 +62,17 @@ int crc32_context;
 
 extern int printf (const char *, ...);
 
+#ifdef TCC
+int strcmp (const char *s1, const char *s2)
+{
+  for(; *s1 == *s2; ++s1, ++s2)
+    if(*s1 == 0)
+      return 0;
+  return *(unsigned char *)s1 < *(unsigned char *)s2 ? -1 : 1;
+}
+#else
 extern int strcmp (const char *, const char *);
+#endif
 
 static inline void 
 transparent_crc (uint32_t val, char* vname, int flag)
