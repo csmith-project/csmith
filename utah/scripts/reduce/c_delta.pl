@@ -83,6 +83,7 @@ use re 'eval';
 
 my $DEBUG = 0;
 my $INDENT_OPTS = "-bad -bap -bc -cs -pcs -prs -saf -sai -saw -sob -ss -bl ";
+my $SANITY = 0;
 
 ######################################################################
 
@@ -374,7 +375,9 @@ sub delta_pass ($) {
     $bad_cnt = 0;
     %funcs_seen = ();
 
-    sanity_check();
+    if ($SANITY) {
+	sanity_check();
+    }
 
     print "\n";
     print "========== starting pass <$method> ==========\n";

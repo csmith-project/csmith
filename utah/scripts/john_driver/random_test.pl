@@ -18,8 +18,8 @@ my $PROVIDE_SEED = 1;
 
 my $XTRA = "";
 
-$XTRA .= "--force-non-uniform-arrays ";
-#$XTRA .= "--no-unions ";
+#$XTRA .= "--force-non-uniform-arrays ";
+$XTRA .= "--no-unions ";
 #$XTRA .= "--no-argc";
 #$XTRA .= "--concise ";
 #$XTRA .= "--no-paranoid ";
@@ -42,10 +42,10 @@ my $PINTOOL_VOL_ADDR = "vol_addr.txt";
 my $platform = "x86_64";
 
 # remove the comment below to enable ccomp test
-#my $CSMITH_CCOMP = "$BF --quiet --no_return_dead_ptr --no-math64 --no-volatiles --ccomp --math-notmp";
+my $CSMITH_CCOMP = "--bitfields --no-math64 --no-volatiles --ccomp";
 # my $CSMITH_CCOMP = "$BF --quiet --enable-volatile-tests x86 --vol-addr-file $PINTOOL_VOL_ADDR --no-math64 --ccomp --max-array-dim 3 --max-array-len-per-dim 5 --max-struct-fields 5 --math-notmp";
 
-my $CSMITH_CCOMP = "";
+#my $CSMITH_CCOMP = "";
 
 # set up pintool for volatile testing
 my $use_pintool = 0;
@@ -137,7 +137,7 @@ sub doit ($$) {
         $cmd = "$CSMITH_HOME/src/csmith $SEED $PACK $XTRA --output $cfile";
     }
     else {
-        $cmd = "$CSMITH_HOME/src/csmith $SEED $CSMITH_CCOMP --output $cfile";
+        $cmd = "$CSMITH_HOME/src/csmith $SEED $CSMITH_CCOMP $XTRA --output $cfile";
     }
     if ($PROVIDE_SEED) {
 	print "$cmd\n";
@@ -199,7 +199,7 @@ sub doit ($$) {
 	return;
     }
 
-    if ($CSMITH_CCOMP ne "") {
+    if (0 && $CSMITH_CCOMP ne "") {
         # ccomp doesn't like asserts, regenerate random programs without asserts.
         my $noparanoid_cfile = "${fn}_small.c";
         my $cmd1 = "$CSMITH_HOME/src/csmith $CSMITH_CCOMP -s $seed  --output $noparanoid_cfile";

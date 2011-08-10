@@ -16,6 +16,7 @@ if
   ! grep 'no semicolon at end' outa.txt &&\
   ! grep 'incompatible pointer' outa.txt &&\
   ! grep 'ordered comparison of pointer with integer' outa.txt &&\
+  ! grep 'declaration does not declare anything' outa.txt &&\
   ! grep 'pointer from integer' outa.txt &&\
   ! grep 'incompatible implicit' outa.txt &&\
   ! grep 'excess elements in struct initializer' outa.txt &&\
