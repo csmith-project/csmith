@@ -8,6 +8,9 @@ use File::stat;
 
 ##################################################################
 
+my $USE_SWARM = 1;
+my $SWARM_FILE = "2.1.0x1000.configs";
+
 my $SAVE_BADS = 0;
 
 my $MIN_PROGRAM_SIZE = 30000;
@@ -43,10 +46,9 @@ my $PINTOOL_VOL_ADDR = "vol_addr.txt";
 my $platform = "x86_64";
 
 # remove the comment below to enable ccomp test
-my $CSMITH_CCOMP = "--bitfields --no-math64 --no-volatiles --ccomp";
+#my $CSMITH_CCOMP = "--bitfields --no-math64 --no-volatiles --ccomp";
 # my $CSMITH_CCOMP = "$BF --quiet --enable-volatile-tests x86 --vol-addr-file $PINTOOL_VOL_ADDR --no-math64 --ccomp --max-array-dim 3 --max-array-len-per-dim 5 --max-struct-fields 5 --math-notmp";
-
-#my $CSMITH_CCOMP = "";
+my $CSMITH_CCOMP = "";
 
 # set up pintool for volatile testing
 my $use_pintool = 0;
@@ -98,6 +100,19 @@ sub runit ($) {
     return $exit_value;
 }
 
+my @swarm;
+
+sub read_swarm_file () {
+    open INF, "<$CSMITH_HOME/utah/scripts/john_driver/$SWARM_FILE" or die;
+    while (my $line = <INF>) {
+	chomp $line;
+	push @swarm, $line;
+    }    
+    close INF;
+    my $n = scalar (@swarm);
+    print "read $n swarm configurations\n";
+}
+
 sub doit ($$) {
     (my $n, my $work) = @_;
     print "------ RANDOM PROGRAM $n ------\n";
@@ -133,12 +148,19 @@ sub doit ($$) {
 	$SEED = "-s $1 --max-block-size $2 --max-funcs $3";
     }
 
+    my $SWARM_OPTS = "";
+    if ($USE_SWARM) {
+	my $nopts = scalar (@swarm);
+	my $idx = $good % $nopts;
+	$SWARM_OPTS = $swarm[$idx];
+    }
+
     my $cmd;
     if ($CSMITH_CCOMP eq "") {
-        $cmd = "$CSMITH_HOME/src/csmith $SEED $PACK $XTRA --output $cfile";
+        $cmd = "$CSMITH_HOME/src/csmith $SEED $SWARM_OPTS $PACK $XTRA --output $cfile";
     }
     else {
-        $cmd = "$CSMITH_HOME/src/csmith $SEED $CSMITH_CCOMP $XTRA --output $cfile";
+        $cmd = "$CSMITH_HOME/src/csmith $SEED $SWARM_OPTS $CSMITH_CCOMP $XTRA --output $cfile";
     }
     if ($PROVIDE_SEED) {
 	print "$cmd\n";
@@ -245,6 +267,10 @@ if (scalar(@ARGV)==2) {
     $PROVIDE_SEED = 0;
 } else {
     $TIMED_TEST = 0;
+}
+
+if ($USE_SWARM) {
+    read_swarm_file();
 }
 
 my $i = 0;

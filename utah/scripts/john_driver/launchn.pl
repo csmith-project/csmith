@@ -38,9 +38,10 @@ close INF;
 
 system "nohup random_test_llvm_killer.pl > llvm_killer.log 2>&1 &";
 
+system "rm -rf work*";
+
 for (my $i=0; $i<$CPUS; $i++) {
     my $dir = "work$i";
-    system "rm -rf $dir";
     system "mkdir $dir";
     system "env RVDEBUG_HOME=/home/regehr/z/tmp/arm_tmp$i nice -19 nohup random_test.pl $dir $SEEDFILE > $dir/output.txt 2>&1 &";
 }
