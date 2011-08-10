@@ -209,14 +209,11 @@ my @icc_opts = (
 
 my @gcc_with_ccomp_opts = (
     "-m32 -O0 -DUSE_MATH_MACROS_NOTMP -D__COMPCERT__ $CCOMP_EXTRA_LDIR",
-    "-m32 -O1 -DUSE_MATH_MACROS_NOTMP -D__COMPCERT__ $CCOMP_EXTRA_LDIR",
     "-m32 -O2 -DUSE_MATH_MACROS_NOTMP -D__COMPCERT__ $CCOMP_EXTRA_LDIR",
-    "-m32 -Os -DUSE_MATH_MACROS_NOTMP -D__COMPCERT__ $CCOMP_EXTRA_LDIR",
-    "-m32 -O3 -DUSE_MATH_MACROS_NOTMP -D__COMPCERT__ $CCOMP_EXTRA_LDIR",
     );
 
 my @ccomp_opts = (
-  "-D__COMPCERT__ -DUSE_MATH_MACROS_NOTMP -fstruct-passing -fstruct-assign $CCOMP_BF",
+  "-D__COMPCERT__ -DUSE_MATH_MACROS_NOTMP -fpacked-structs -fbitfields -fstruct-passing -fstruct-assign $CCOMP_BF",
 );
 
 my @avrdeputy = ("avr",
@@ -529,20 +526,20 @@ my @llvms = (
 
 my @compilers_to_test = (
 
-    \@gcc320,
-    \@gcc330,
-    \@gcc340,
-    \@gcc400,
-    \@gcc410,
-    \@gcc420,
-    \@gcc430,
-    \@gcc440,
-    \@gcc450,
-    \@gcc460,
-    \@clang26,
-    \@clang27,
-    \@clang28,
-    \@clang29,
+    #\@gcc320,
+    #\@gcc330,
+    #\@gcc340,
+    #\@gcc400,
+    #\@gcc410,
+    #\@gcc420,
+    #\@gcc430,
+    #\@gcc440,
+    #\@gcc450,
+    #\@gcc460,
+    #\@clang26,
+    #\@clang27,
+    #\@clang28,
+    #\@clang29,
     
     #\@gcc,
 
@@ -575,9 +572,9 @@ my @compilers_to_test = (
     #\@llvmgcc_Oonly,
     #\@gcccurrent_Oonly,
 
-    #\@gcc_with_ccomp,
+    \@gcc_with_ccomp,
     #\@clang_with_ccomp,
-    #\@ccomp,
+    \@ccomp,
 
     );
 
@@ -636,7 +633,7 @@ sub compile_and_run ($$$$$$$) {
 
     if ($compiler eq "ccomp") {
       $xtra .= " -DINLINE=";
-      $srcfile = "${root}_small.c";
+      # $srcfile = "${root}_small.c";
     } else {
       $xtra .= " -w -DINLINE=";
     }
