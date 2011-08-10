@@ -1,5 +1,9 @@
 ===================================================================
 
+08/10/2011 (total 395)
+  1 gcc crash bug reported by Arthur O'Dwyer
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=50039
+  
 08/02/2011 (total 394)
   1 gcc crash bug reported
   http://gcc.gnu.org/bugzilla/show_bug.cgi?id=49948
