@@ -67,15 +67,15 @@ am_csmith_OBJECTS = csmith-AbsExtension.$(OBJEXT) \
 	csmith-DefaultRndNumGenerator.$(OBJEXT) \
 	csmith-DeltaMonitor.$(OBJEXT) csmith-DepthSpec.$(OBJEXT) \
 	csmith-Effect.$(OBJEXT) csmith-Error.$(OBJEXT) \
-	csmith-Expression.$(OBJEXT) csmith-ExpressionFuncall.$(OBJEXT) \
+	csmith-Expression.$(OBJEXT) csmith-ExpressionAssign.$(OBJEXT) \
+	csmith-ExpressionComma.$(OBJEXT) \
+	csmith-ExpressionFuncall.$(OBJEXT) \
 	csmith-ExpressionVariable.$(OBJEXT) \
-	csmith-ExpressionAssign.$(OBJEXT) \
-	csmith-ExpressionComma.$(OBJEXT) csmith-ExtensionMgr.$(OBJEXT) \
-	csmith-ExtensionValue.$(OBJEXT) csmith-Fact.$(OBJEXT) \
-	csmith-FactMgr.$(OBJEXT) csmith-FactPointTo.$(OBJEXT) \
-	csmith-FactUnion.$(OBJEXT) csmith-Filter.$(OBJEXT) \
-	csmith-Finalization.$(OBJEXT) csmith-Function.$(OBJEXT) \
-	csmith-FunctionInvocation.$(OBJEXT) \
+	csmith-ExtensionMgr.$(OBJEXT) csmith-ExtensionValue.$(OBJEXT) \
+	csmith-Fact.$(OBJEXT) csmith-FactMgr.$(OBJEXT) \
+	csmith-FactPointTo.$(OBJEXT) csmith-FactUnion.$(OBJEXT) \
+	csmith-Filter.$(OBJEXT) csmith-Finalization.$(OBJEXT) \
+	csmith-Function.$(OBJEXT) csmith-FunctionInvocation.$(OBJEXT) \
 	csmith-FunctionInvocationBinary.$(OBJEXT) \
 	csmith-FunctionInvocationUnary.$(OBJEXT) \
 	csmith-FunctionInvocationUser.$(OBJEXT) \
@@ -84,6 +84,7 @@ am_csmith_OBJECTS = csmith-AbsExtension.$(OBJEXT) \
 	csmith-OutputMgr.$(OBJEXT) csmith-PartialExpander.$(OBJEXT) \
 	csmith-Probabilities.$(OBJEXT) csmith-RandomNumber.$(OBJEXT) \
 	csmith-RandomProgramGenerator.$(OBJEXT) \
+	csmith-Reducer.$(OBJEXT) csmith-ReducerOutputMgr.$(OBJEXT) \
 	csmith-SafeOpFlags.$(OBJEXT) csmith-Sequence.$(OBJEXT) \
 	csmith-SequenceFactory.$(OBJEXT) \
 	csmith-SimpleDeltaRndNumGenerator.$(OBJEXT) \
@@ -99,8 +100,7 @@ am_csmith_OBJECTS = csmith-AbsExtension.$(OBJEXT) \
 	csmith-Type.$(OBJEXT) csmith-Variable.$(OBJEXT) \
 	csmith-VariableSelector.$(OBJEXT) \
 	csmith-VectorFilter.$(OBJEXT) csmith-platform.$(OBJEXT) \
-	csmith-random.$(OBJEXT) csmith-Reducer.$(OBJEXT) \
-	csmith-ReducerOutputMgr.$(OBJEXT) csmith-util.$(OBJEXT)
+	csmith-random.$(OBJEXT) csmith-util.$(OBJEXT)
 csmith_OBJECTS = $(am_csmith_OBJECTS)
 csmith_DEPENDENCIES =
 csmith_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(csmith_LDFLAGS) \
@@ -281,14 +281,14 @@ csmith_SOURCES = \
 	Error.h \
 	Expression.cpp \
 	Expression.h \
-	ExpressionFuncall.cpp \
-	ExpressionFuncall.h \
-	ExpressionVariable.cpp \
-	ExpressionVariable.h \
 	ExpressionAssign.cpp \
 	ExpressionAssign.h \
 	ExpressionComma.cpp \
 	ExpressionComma.h \
+	ExpressionFuncall.cpp \
+	ExpressionFuncall.h \
+	ExpressionVariable.cpp \
+	ExpressionVariable.h \
 	ExtensionMgr.cpp \
 	ExtensionMgr.h \
 	ExtensionValue.cpp \
@@ -333,6 +333,10 @@ csmith_SOURCES = \
 	RandomNumber.cpp \
 	RandomNumber.h \
 	RandomProgramGenerator.cpp \
+	Reducer.cpp \
+	Reducer.h \
+	ReducerOutputMgr.cpp \
+	ReducerOutputMgr.h \
 	SafeOpFlags.cpp \
 	SafeOpFlags.h \
 	Sequence.cpp \
@@ -380,10 +384,6 @@ csmith_SOURCES = \
 	platform.h \
 	random.cpp \
 	random.h \
-	Reducer.cpp \
-	Reducer.h \
-	ReducerOutputMgr.cpp \
-	ReducerOutputMgr.h \
 	util.cpp \
 	util.h
 
@@ -925,34 +925,6 @@ csmith-Expression.obj: Expression.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-Expression.obj `if test -f 'Expression.cpp'; then $(CYGPATH_W) 'Expression.cpp'; else $(CYGPATH_W) '$(srcdir)/Expression.cpp'; fi`
 
-csmith-ExpressionFuncall.o: ExpressionFuncall.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-ExpressionFuncall.o -MD -MP -MF $(DEPDIR)/csmith-ExpressionFuncall.Tpo -c -o csmith-ExpressionFuncall.o `test -f 'ExpressionFuncall.cpp' || echo '$(srcdir)/'`ExpressionFuncall.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/csmith-ExpressionFuncall.Tpo $(DEPDIR)/csmith-ExpressionFuncall.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ExpressionFuncall.cpp' object='csmith-ExpressionFuncall.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-ExpressionFuncall.o `test -f 'ExpressionFuncall.cpp' || echo '$(srcdir)/'`ExpressionFuncall.cpp
-
-csmith-ExpressionFuncall.obj: ExpressionFuncall.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-ExpressionFuncall.obj -MD -MP -MF $(DEPDIR)/csmith-ExpressionFuncall.Tpo -c -o csmith-ExpressionFuncall.obj `if test -f 'ExpressionFuncall.cpp'; then $(CYGPATH_W) 'ExpressionFuncall.cpp'; else $(CYGPATH_W) '$(srcdir)/ExpressionFuncall.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/csmith-ExpressionFuncall.Tpo $(DEPDIR)/csmith-ExpressionFuncall.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ExpressionFuncall.cpp' object='csmith-ExpressionFuncall.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-ExpressionFuncall.obj `if test -f 'ExpressionFuncall.cpp'; then $(CYGPATH_W) 'ExpressionFuncall.cpp'; else $(CYGPATH_W) '$(srcdir)/ExpressionFuncall.cpp'; fi`
-
-csmith-ExpressionVariable.o: ExpressionVariable.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-ExpressionVariable.o -MD -MP -MF $(DEPDIR)/csmith-ExpressionVariable.Tpo -c -o csmith-ExpressionVariable.o `test -f 'ExpressionVariable.cpp' || echo '$(srcdir)/'`ExpressionVariable.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/csmith-ExpressionVariable.Tpo $(DEPDIR)/csmith-ExpressionVariable.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ExpressionVariable.cpp' object='csmith-ExpressionVariable.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-ExpressionVariable.o `test -f 'ExpressionVariable.cpp' || echo '$(srcdir)/'`ExpressionVariable.cpp
-
-csmith-ExpressionVariable.obj: ExpressionVariable.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-ExpressionVariable.obj -MD -MP -MF $(DEPDIR)/csmith-ExpressionVariable.Tpo -c -o csmith-ExpressionVariable.obj `if test -f 'ExpressionVariable.cpp'; then $(CYGPATH_W) 'ExpressionVariable.cpp'; else $(CYGPATH_W) '$(srcdir)/ExpressionVariable.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/csmith-ExpressionVariable.Tpo $(DEPDIR)/csmith-ExpressionVariable.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ExpressionVariable.cpp' object='csmith-ExpressionVariable.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-ExpressionVariable.obj `if test -f 'ExpressionVariable.cpp'; then $(CYGPATH_W) 'ExpressionVariable.cpp'; else $(CYGPATH_W) '$(srcdir)/ExpressionVariable.cpp'; fi`
-
 csmith-ExpressionAssign.o: ExpressionAssign.cpp
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-ExpressionAssign.o -MD -MP -MF $(DEPDIR)/csmith-ExpressionAssign.Tpo -c -o csmith-ExpressionAssign.o `test -f 'ExpressionAssign.cpp' || echo '$(srcdir)/'`ExpressionAssign.cpp
 @am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/csmith-ExpressionAssign.Tpo $(DEPDIR)/csmith-ExpressionAssign.Po
@@ -980,6 +952,34 @@ csmith-ExpressionComma.obj: ExpressionComma.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ExpressionComma.cpp' object='csmith-ExpressionComma.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-ExpressionComma.obj `if test -f 'ExpressionComma.cpp'; then $(CYGPATH_W) 'ExpressionComma.cpp'; else $(CYGPATH_W) '$(srcdir)/ExpressionComma.cpp'; fi`
+
+csmith-ExpressionFuncall.o: ExpressionFuncall.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-ExpressionFuncall.o -MD -MP -MF $(DEPDIR)/csmith-ExpressionFuncall.Tpo -c -o csmith-ExpressionFuncall.o `test -f 'ExpressionFuncall.cpp' || echo '$(srcdir)/'`ExpressionFuncall.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/csmith-ExpressionFuncall.Tpo $(DEPDIR)/csmith-ExpressionFuncall.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ExpressionFuncall.cpp' object='csmith-ExpressionFuncall.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-ExpressionFuncall.o `test -f 'ExpressionFuncall.cpp' || echo '$(srcdir)/'`ExpressionFuncall.cpp
+
+csmith-ExpressionFuncall.obj: ExpressionFuncall.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-ExpressionFuncall.obj -MD -MP -MF $(DEPDIR)/csmith-ExpressionFuncall.Tpo -c -o csmith-ExpressionFuncall.obj `if test -f 'ExpressionFuncall.cpp'; then $(CYGPATH_W) 'ExpressionFuncall.cpp'; else $(CYGPATH_W) '$(srcdir)/ExpressionFuncall.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/csmith-ExpressionFuncall.Tpo $(DEPDIR)/csmith-ExpressionFuncall.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ExpressionFuncall.cpp' object='csmith-ExpressionFuncall.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-ExpressionFuncall.obj `if test -f 'ExpressionFuncall.cpp'; then $(CYGPATH_W) 'ExpressionFuncall.cpp'; else $(CYGPATH_W) '$(srcdir)/ExpressionFuncall.cpp'; fi`
+
+csmith-ExpressionVariable.o: ExpressionVariable.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-ExpressionVariable.o -MD -MP -MF $(DEPDIR)/csmith-ExpressionVariable.Tpo -c -o csmith-ExpressionVariable.o `test -f 'ExpressionVariable.cpp' || echo '$(srcdir)/'`ExpressionVariable.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/csmith-ExpressionVariable.Tpo $(DEPDIR)/csmith-ExpressionVariable.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ExpressionVariable.cpp' object='csmith-ExpressionVariable.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-ExpressionVariable.o `test -f 'ExpressionVariable.cpp' || echo '$(srcdir)/'`ExpressionVariable.cpp
+
+csmith-ExpressionVariable.obj: ExpressionVariable.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-ExpressionVariable.obj -MD -MP -MF $(DEPDIR)/csmith-ExpressionVariable.Tpo -c -o csmith-ExpressionVariable.obj `if test -f 'ExpressionVariable.cpp'; then $(CYGPATH_W) 'ExpressionVariable.cpp'; else $(CYGPATH_W) '$(srcdir)/ExpressionVariable.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/csmith-ExpressionVariable.Tpo $(DEPDIR)/csmith-ExpressionVariable.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ExpressionVariable.cpp' object='csmith-ExpressionVariable.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-ExpressionVariable.obj `if test -f 'ExpressionVariable.cpp'; then $(CYGPATH_W) 'ExpressionVariable.cpp'; else $(CYGPATH_W) '$(srcdir)/ExpressionVariable.cpp'; fi`
 
 csmith-ExtensionMgr.o: ExtensionMgr.cpp
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-ExtensionMgr.o -MD -MP -MF $(DEPDIR)/csmith-ExtensionMgr.Tpo -c -o csmith-ExtensionMgr.o `test -f 'ExtensionMgr.cpp' || echo '$(srcdir)/'`ExtensionMgr.cpp
@@ -1288,6 +1288,34 @@ csmith-RandomProgramGenerator.obj: RandomProgramGenerator.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='RandomProgramGenerator.cpp' object='csmith-RandomProgramGenerator.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-RandomProgramGenerator.obj `if test -f 'RandomProgramGenerator.cpp'; then $(CYGPATH_W) 'RandomProgramGenerator.cpp'; else $(CYGPATH_W) '$(srcdir)/RandomProgramGenerator.cpp'; fi`
+
+csmith-Reducer.o: Reducer.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-Reducer.o -MD -MP -MF $(DEPDIR)/csmith-Reducer.Tpo -c -o csmith-Reducer.o `test -f 'Reducer.cpp' || echo '$(srcdir)/'`Reducer.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/csmith-Reducer.Tpo $(DEPDIR)/csmith-Reducer.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Reducer.cpp' object='csmith-Reducer.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-Reducer.o `test -f 'Reducer.cpp' || echo '$(srcdir)/'`Reducer.cpp
+
+csmith-Reducer.obj: Reducer.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-Reducer.obj -MD -MP -MF $(DEPDIR)/csmith-Reducer.Tpo -c -o csmith-Reducer.obj `if test -f 'Reducer.cpp'; then $(CYGPATH_W) 'Reducer.cpp'; else $(CYGPATH_W) '$(srcdir)/Reducer.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/csmith-Reducer.Tpo $(DEPDIR)/csmith-Reducer.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Reducer.cpp' object='csmith-Reducer.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-Reducer.obj `if test -f 'Reducer.cpp'; then $(CYGPATH_W) 'Reducer.cpp'; else $(CYGPATH_W) '$(srcdir)/Reducer.cpp'; fi`
+
+csmith-ReducerOutputMgr.o: ReducerOutputMgr.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-ReducerOutputMgr.o -MD -MP -MF $(DEPDIR)/csmith-ReducerOutputMgr.Tpo -c -o csmith-ReducerOutputMgr.o `test -f 'ReducerOutputMgr.cpp' || echo '$(srcdir)/'`ReducerOutputMgr.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/csmith-ReducerOutputMgr.Tpo $(DEPDIR)/csmith-ReducerOutputMgr.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ReducerOutputMgr.cpp' object='csmith-ReducerOutputMgr.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-ReducerOutputMgr.o `test -f 'ReducerOutputMgr.cpp' || echo '$(srcdir)/'`ReducerOutputMgr.cpp
+
+csmith-ReducerOutputMgr.obj: ReducerOutputMgr.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-ReducerOutputMgr.obj -MD -MP -MF $(DEPDIR)/csmith-ReducerOutputMgr.Tpo -c -o csmith-ReducerOutputMgr.obj `if test -f 'ReducerOutputMgr.cpp'; then $(CYGPATH_W) 'ReducerOutputMgr.cpp'; else $(CYGPATH_W) '$(srcdir)/ReducerOutputMgr.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/csmith-ReducerOutputMgr.Tpo $(DEPDIR)/csmith-ReducerOutputMgr.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ReducerOutputMgr.cpp' object='csmith-ReducerOutputMgr.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-ReducerOutputMgr.obj `if test -f 'ReducerOutputMgr.cpp'; then $(CYGPATH_W) 'ReducerOutputMgr.cpp'; else $(CYGPATH_W) '$(srcdir)/ReducerOutputMgr.cpp'; fi`
 
 csmith-SafeOpFlags.o: SafeOpFlags.cpp
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-SafeOpFlags.o -MD -MP -MF $(DEPDIR)/csmith-SafeOpFlags.Tpo -c -o csmith-SafeOpFlags.o `test -f 'SafeOpFlags.cpp' || echo '$(srcdir)/'`SafeOpFlags.cpp
@@ -1610,34 +1638,6 @@ csmith-random.obj: random.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='random.cpp' object='csmith-random.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-random.obj `if test -f 'random.cpp'; then $(CYGPATH_W) 'random.cpp'; else $(CYGPATH_W) '$(srcdir)/random.cpp'; fi`
-
-csmith-Reducer.o: Reducer.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-Reducer.o -MD -MP -MF $(DEPDIR)/csmith-Reducer.Tpo -c -o csmith-Reducer.o `test -f 'Reducer.cpp' || echo '$(srcdir)/'`Reducer.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/csmith-Reducer.Tpo $(DEPDIR)/csmith-Reducer.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Reducer.cpp' object='csmith-Reducer.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-Reducer.o `test -f 'Reducer.cpp' || echo '$(srcdir)/'`Reducer.cpp
-
-csmith-Reducer.obj: Reducer.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-Reducer.obj -MD -MP -MF $(DEPDIR)/csmith-Reducer.Tpo -c -o csmith-Reducer.obj `if test -f 'Reducer.cpp'; then $(CYGPATH_W) 'Reducer.cpp'; else $(CYGPATH_W) '$(srcdir)/Reducer.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/csmith-Reducer.Tpo $(DEPDIR)/csmith-Reducer.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Reducer.cpp' object='csmith-Reducer.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-Reducer.obj `if test -f 'Reducer.cpp'; then $(CYGPATH_W) 'Reducer.cpp'; else $(CYGPATH_W) '$(srcdir)/Reducer.cpp'; fi`
-
-csmith-ReducerOutputMgr.o: ReducerOutputMgr.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-ReducerOutputMgr.o -MD -MP -MF $(DEPDIR)/csmith-ReducerOutputMgr.Tpo -c -o csmith-ReducerOutputMgr.o `test -f 'ReducerOutputMgr.cpp' || echo '$(srcdir)/'`ReducerOutputMgr.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/csmith-ReducerOutputMgr.Tpo $(DEPDIR)/csmith-ReducerOutputMgr.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ReducerOutputMgr.cpp' object='csmith-ReducerOutputMgr.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-ReducerOutputMgr.o `test -f 'ReducerOutputMgr.cpp' || echo '$(srcdir)/'`ReducerOutputMgr.cpp
-
-csmith-ReducerOutputMgr.obj: ReducerOutputMgr.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-ReducerOutputMgr.obj -MD -MP -MF $(DEPDIR)/csmith-ReducerOutputMgr.Tpo -c -o csmith-ReducerOutputMgr.obj `if test -f 'ReducerOutputMgr.cpp'; then $(CYGPATH_W) 'ReducerOutputMgr.cpp'; else $(CYGPATH_W) '$(srcdir)/ReducerOutputMgr.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/csmith-ReducerOutputMgr.Tpo $(DEPDIR)/csmith-ReducerOutputMgr.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ReducerOutputMgr.cpp' object='csmith-ReducerOutputMgr.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-ReducerOutputMgr.obj `if test -f 'ReducerOutputMgr.cpp'; then $(CYGPATH_W) 'ReducerOutputMgr.cpp'; else $(CYGPATH_W) '$(srcdir)/ReducerOutputMgr.cpp'; fi`
 
 csmith-util.o: util.cpp
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-util.o -MD -MP -MF $(DEPDIR)/csmith-util.Tpo -c -o csmith-util.o `test -f 'util.cpp' || echo '$(srcdir)/'`util.cpp

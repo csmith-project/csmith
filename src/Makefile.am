@@ -86,14 +86,14 @@ csmith_SOURCES = \
 	Error.h \
 	Expression.cpp \
 	Expression.h \
-	ExpressionFuncall.cpp \
-	ExpressionFuncall.h \
-	ExpressionVariable.cpp \
-	ExpressionVariable.h \
 	ExpressionAssign.cpp \
 	ExpressionAssign.h \
 	ExpressionComma.cpp \
 	ExpressionComma.h \
+	ExpressionFuncall.cpp \
+	ExpressionFuncall.h \
+	ExpressionVariable.cpp \
+	ExpressionVariable.h \
 	ExtensionMgr.cpp \
 	ExtensionMgr.h \
 	ExtensionValue.cpp \
@@ -138,6 +138,10 @@ csmith_SOURCES = \
 	RandomNumber.cpp \
 	RandomNumber.h \
 	RandomProgramGenerator.cpp \
+	Reducer.cpp \
+	Reducer.h \
+	ReducerOutputMgr.cpp \
+	ReducerOutputMgr.h \
 	SafeOpFlags.cpp \
 	SafeOpFlags.h \
 	Sequence.cpp \
@@ -185,10 +189,6 @@ csmith_SOURCES = \
 	platform.h \
 	random.cpp \
 	random.h \
-	Reducer.cpp \
-	Reducer.h \
-	ReducerOutputMgr.cpp \
-	ReducerOutputMgr.h \
 	util.cpp \
 	util.h
 
