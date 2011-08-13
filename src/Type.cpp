@@ -1447,7 +1447,9 @@ Type::SizeInBytes(void) const
         }
         return total_size;
     }
-	case ePointer: CGOptions::pointer_bytes(); 
+	case ePointer:
+		CGOptions::pointer_bytes();
+		break;
 	}
 	return 0;
 }
