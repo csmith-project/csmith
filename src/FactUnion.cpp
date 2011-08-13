@@ -178,7 +178,9 @@ bool
 FactUnion::is_nonreadable_field(const Variable *v, const std::vector<const Fact*>& facts)
 {
 	if (v->is_inside_union_field()) {
-		for (; v && !v->is_union_field(); v = v->field_var_of);
+		for (; v && !v->is_union_field(); v = v->field_var_of) {
+			/* Empty */
+		}
 		assert(v->is_union_field());
 		FactUnion tmp(v->field_var_of, v->get_field_id());
 		const FactUnion* fu = dynamic_cast<const FactUnion*>(find_related_fact(facts, &tmp));

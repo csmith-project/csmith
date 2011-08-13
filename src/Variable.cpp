@@ -299,7 +299,9 @@ const Variable*
 Variable::get_top_container(void) const
 {
 	const Variable* v = this;
-	for (; v && v->field_var_of; v = v->field_var_of);
+	for (; v && v->field_var_of; v = v->field_var_of) {
+		/* Empty */
+	}
 	return v;
 }
 

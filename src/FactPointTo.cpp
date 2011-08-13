@@ -283,7 +283,9 @@ FactPointTo::abstract_fact_for_assign(const std::vector<const Fact*>& facts, con
 	for (size_t i=0; i<lvars.size(); i++) {
 		const Variable* v = lvars[i]; 
 		if (v->is_inside_union_field()) {
-			for (; v && v->type->eType != eUnion; v = v->field_var_of);
+			for (; v && v->type->eType != eUnion; v = v->field_var_of) {
+				/* Empty. */
+			}
 			assert(v && v->type->eType == eUnion);
 		}
 		vector<const Variable*> pointers;
