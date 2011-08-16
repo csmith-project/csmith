@@ -1207,10 +1207,13 @@ Type::is_bitfield(size_t index) const
 bool
 Type::has_bitfields() const
 {
-	size_t i;
-	for (i = 0; i < bitfields_length_.size(); ++i) {
-		if (bitfields_length_[i] >= 0)
+	for (size_t i=0; i<fields.size(); i++) { 
+		if (bitfields_length_[i] >= 0) {
 			return true;
+		}
+		if (fields[i]->eType == eStruct && fields[i]->has_bitfields()) {
+			return true;
+		}
 	}
 	return false;
 }

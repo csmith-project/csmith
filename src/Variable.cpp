@@ -1360,6 +1360,25 @@ Variable::find_pointer_fields(vector<const Variable*>& ptr_fields) const
 	}
 }
 
+/* a struct field packed after a bit-field could has nondeterministic offset due to incompatible packings between compilers */
+bool
+Variable::is_packed_after_bitfield(void) const 
+{ 
+	const Variable* parent = this->field_var_of; 
+	if (parent == NULL) return false;
+	if (parent->type->eType == eStruct && parent->type->packed_) {
+		for (size_t i=0; i<parent->field_vars.size(); i++) {
+			if (parent->field_vars[i] == this) {
+				break;
+			}
+			if (parent->type->is_bitfield(i) || parent->field_vars[i]->type->has_bitfields()) {
+				return true;
+			} 
+		}
+	} 
+	return parent->is_packed_after_bitfield();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 // Local Variables:

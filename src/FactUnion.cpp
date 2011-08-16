@@ -135,7 +135,7 @@ FactUnion::abstract_fact_for_assign(const std::vector<const Fact*>& facts, const
 		const FactUnion* fu = 0;
 		if (v->is_union_field()) { 
 			fu = make_fact(v->field_var_of, v->get_field_id());
-		} else if (v->is_inside_union_field() && v->type->has_padding()) {
+		} else if (v->is_inside_union_field() && (v->type->has_padding() || v->is_packed_after_bitfield())) {
 			fu = make_fact(v->get_container_union(), BOTTOM);
 		}
 
