@@ -34,6 +34,7 @@
 #include <assert.h>
 #include "Fact.h"
 #include "DefaultOutputMgr.h"
+#include "Bookkeeper.h"
 #include "CompatibleChecker.h"
 #include "PartialExpander.h"
 #include "DeltaMonitor.h"
@@ -44,6 +45,8 @@
 using namespace std;
 Reducer* CGOptions::reducer_ = NULL;
 vector<int> CGOptions::safe_math_wrapper_ids_;
+int CGOptions::int_size_ = 0;
+int CGOptions::pointer_size_ = 0;
 
 /*
  *
@@ -114,7 +117,6 @@ DEFINE_GETTER_SETTER_BOOL(coverage_test)
 DEFINE_GETTER_SETTER_INT(coverage_test_size)
 DEFINE_GETTER_SETTER_BOOL(packed_struct)
 DEFINE_GETTER_SETTER_BOOL(bitfields)
-DEFINE_GETTER_SETTER_INT(bitfields_length)
 DEFINE_GETTER_SETTER_BOOL(prefix_name)
 DEFINE_GETTER_SETTER_BOOL(sequence_name_prefix)
 DEFINE_GETTER_SETTER_BOOL(compatible_check)
@@ -167,12 +169,11 @@ DEFINE_GETTER_SETTER_BOOL(union_read_type_sensitive);
 DEFINE_GETTER_SETTER_BOOL(use_incr_decr_opers);
 DEFINE_GETTER_SETTER_BOOL(use_embedded_assigns);
 DEFINE_GETTER_SETTER_BOOL(use_comma_exprs);
-DEFINE_GETTER_SETTER_INT(int_bytes);
-DEFINE_GETTER_SETTER_INT(pointer_bytes);
 
 void
 CGOptions::set_default_settings(void)
 {
+	set_platform_specific_options();
 	compute_hash(true);
 	max_funcs(CGOPTIONS_DEFAULT_MAX_SPLIT_FILES);
 	max_funcs(CGOPTIONS_DEFAULT_MAX_FUNCS);
@@ -211,7 +212,6 @@ CGOptions::set_default_settings(void)
 	coverage_test(false);
 	coverage_test_size(CGOPTIONS_DEFAULT_COVERAGE_TEST_SIZE);
 	packed_struct(true);
-	resolve_bitfields_length();
 	bitfields(true);
 	prefix_name(false);
 	sequence_name_prefix(false);
@@ -254,19 +254,66 @@ CGOptions::set_default_settings(void)
 	use_incr_decr_opers(true);
 	use_embedded_assigns(true);
 	use_comma_exprs(true);
-	// these are defaults for x86-64 machine, our most used platform. 
-	// configure them to generate *correct* random programs for other platforms.  
-	int_bytes(4);
-	pointer_bytes(8);
+} 
+	
+/*
+   looking for the platform info file in the working directory
+   and load platform specific information. If not found, use
+   info from the platform that Csmith is running, and output them
+   to the file
+*/
+void
+CGOptions::set_platform_specific_options(void) 
+{
+	const char* int_str = "integer size = ";
+	const char* ptr_str = "pointer size = ";
+	ifstream conf(PLATFORM_CONFIG_FILE);
+	if (conf.fail()) {
+		ofstream conf(PLATFORM_CONFIG_FILE);
+		conf << int_str << sizeof(int) << endl;
+		conf << ptr_str << sizeof(int*) << endl;
+		int_size(sizeof(int));
+		pointer_size(sizeof(int*));
+		conf.close();
+	}
+	else {
+		string line;
+		while(!conf.eof()) {
+			getline(conf, line);
+			if (line.substr(0, strlen(int_str)) == int_str) {
+				string s = line.substr(strlen(int_str));
+				StringUtils::chop(s);
+				int_size(StringUtils::str2int(s));
+			} 
+			if (line.substr(0, strlen(ptr_str)) == ptr_str) {
+				string s = line.substr(strlen(ptr_str));
+				StringUtils::chop(s);
+				pointer_size(StringUtils::str2int(s));
+			} 
+		}
+		if (!int_size_) {
+			cout << "please specify integer size in " << PLATFORM_CONFIG_FILE << endl;
+			exit(-1);
+		}
+		if (!pointer_size_) {
+			cout << "please specify pointer size in " << PLATFORM_CONFIG_FILE << endl;
+			exit(-1);
+		}
+		conf.close();
+	}  
 }
 
-#define MAX_INTEGER_LENGTH 64
-
-bool
-CGOptions::resolve_bitfields_length(void)
+int 
+CGOptions::int_size(void) 
 {
-	CGOptions::bitfields_length(MAX_INTEGER_LENGTH - 1);
-	return true;
+	Bookkeeper::rely_on_int_size = true;
+	return int_size_;
+} 
+
+int 
+CGOptions::pointer_size(void)
+{
+	return pointer_size_;
 }
 
 bool

@@ -86,6 +86,8 @@ int Bookkeeper::forward_jump_cnt = 0;
 int Bookkeeper::backward_jump_cnt = 0;
 int Bookkeeper::use_new_var_cnt = 0;
 int Bookkeeper::use_old_var_cnt = 0;
+bool Bookkeeper::rely_on_int_size = false;
+bool Bookkeeper::rely_on_ptr_size = false;
 
 /*
  *
@@ -190,6 +192,14 @@ Bookkeeper::output_statistics(std::ostream &out)
 	output_stmts_statistics(out);
 	out << endl;
 	output_var_freshness(out);
+	if (rely_on_int_size) {
+		out << "FYI: the random generator makes assumptions about the integer size. See ";
+		out << PLATFORM_CONFIG_FILE << " for more details." << endl;
+	}
+	if (rely_on_ptr_size) {
+		out << "FYI: the random generator makes assumptions about the pointer size. See ";
+		out << PLATFORM_CONFIG_FILE << " for more details." << endl;
+	}
 }
 
 void

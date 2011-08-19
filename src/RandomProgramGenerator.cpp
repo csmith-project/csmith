@@ -461,7 +461,6 @@ main(int argc, char **argv)
 		}
 
 		if (strcmp (argv[i], "--bitfields") == 0) {
-			CGOptions::resolve_bitfields_length();
 			CGOptions::bitfields(true);
 			continue;
 		}

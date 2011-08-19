@@ -140,6 +140,9 @@ public:
 
 	static int use_new_var_cnt;
 	static int use_old_var_cnt;
+
+	static bool rely_on_int_size;
+	static bool rely_on_ptr_size;
 };
 
 void incr_counter(std::vector<int>& counters, int index);

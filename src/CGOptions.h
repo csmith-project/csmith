@@ -63,6 +63,7 @@ using namespace std;
 #define CGOPTIONS_DEFAULT_SPLIT_FILES_DIR	("./output") 
 #define CGOPTIONS_DEFAULT_OUTPUT_FILE		("")
 #define CGOPTIONS_DEFAULT_VOL_ADDR_FILE		("vol_addr.txt")
+#define PLATFORM_CONFIG_FILE                ("platform.info")
 
 /*
  *
@@ -216,9 +217,6 @@ public:
 	static bool bitfields(void);
 	static bool bitfields(bool p);
 
-	static int bitfields_length(void);
-	static int bitfields_length(int p);
-
 	static std::string partial_expand(void);
 	static std::string partial_expand(std::string p);
 
@@ -340,7 +338,6 @@ public:
 	static const std::string& conflict_msg(void);
 
 	static bool is_random(void);
-	static bool resolve_bitfields_length();
 
 	static bool has_extension_support();
 
@@ -390,11 +387,13 @@ public:
 	static bool use_comma_exprs(void);
 	static bool use_comma_exprs(bool p);
 
-	static int int_bytes(void);
-	static int int_bytes(int p);
+	static int int_size(void);
+	static void int_size(int p) { int_size_ = p;}
 
-	static int pointer_bytes(void);
-	static int pointer_bytes(int p);
+	static int pointer_size(void);
+	static void pointer_size(int p) { pointer_size_ = p;}
+
+	static void set_platform_specific_options(void);
 
 private:
 	static bool resolve_exhaustive_options();
@@ -456,7 +455,6 @@ private:
 	static int	coverage_test_size_;
 	static bool	packed_struct_;
 	static bool	bitfields_;
-	static int	bitfields_length_;
 	static bool	prefix_name_;
 	static bool	sequence_name_prefix_;
 	static bool	compatible_check_;
@@ -510,8 +508,8 @@ private:
 	static bool use_incr_decr_opers_;
 	static bool use_embedded_assigns_;
 	static bool use_comma_exprs_;
-	static int  int_bytes_;
-	static int  pointer_bytes_;
+	static int  int_size_;
+	static int  pointer_size_;
 	static Reducer* reducer_; 
 
 private:

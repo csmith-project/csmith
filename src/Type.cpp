@@ -454,7 +454,7 @@ Type::has_int_field() const
 bool 
 Type::signed_overflow_possible() const
 {
-	return eType == eSimple && is_signed() && ((int)SizeInBytes()) >= CGOptions::int_bytes();
+	return eType == eSimple && is_signed() && ((int)SizeInBytes()) >= CGOptions::int_size();
 }
 
 void
@@ -580,7 +580,7 @@ Type::choose_random_nonvoid_simple(void)
 void
 Type::make_one_bitfield(vector<const Type*> &random_fields, vector<CVQualifiers> &qualifiers, vector<int> &fields_length)
 {
-	int max_length = CGOptions::bitfields_length();
+	int max_length = CGOptions::int_size() * 8;
 	bool sign = rnd_flipcoin(BitFieldsSignedProb);
 	ERROR_RETURN();
 
@@ -757,7 +757,7 @@ Type::init_fields_enumerator(Enumerator<string> &enumerator,
 int
 Type::get_bitfield_length(int length_flag)
 {
-	int max_length = CGOptions::bitfields_length();
+	int max_length = CGOptions::int_size() * 8;
 	assert(max_length > 0);
 	int length;
 	switch (length_flag) {
@@ -1451,7 +1451,7 @@ Type::SizeInBytes(void) const
         return total_size;
     }
 	case ePointer:
-		CGOptions::pointer_bytes();
+		CGOptions::pointer_size();
 		break;
 	}
 	return 0;
@@ -1606,7 +1606,7 @@ void OutputStructUnion(Type* type, std::ostream &out)
 					out << " : ";
 				else
 					out << " f" << j++ << " : ";
-				out << "_CSMITH_BITFIELD(" << length << ");";
+				out << length << ";";
 			}
 			else {
 				type->qfers_[i].output_qualified_type(field, out);
