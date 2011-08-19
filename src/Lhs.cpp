@@ -97,7 +97,7 @@ Lhs::make_random(CGContext &cg_context, const Type* t, const CVQualifiers* qfer,
 		assert(var);
 		bool valid = FactPointTo::opportunistic_validate(var, t, fm->global_facts) && !cg_context.get_effect_stm().is_written(var);
 		// we don't want signed integer for some operations, such as ++/-- which has potential of overflowing
-		if (valid && t->eType == eSimple && no_signed_overflow && var->type->get_base_type()->signed_overflow_possible()) {
+		if (valid && t->eType == eSimple && no_signed_overflow && var->type->get_base_type()->is_signed()) {
 			valid = false;
 		}
 		if (valid) {
