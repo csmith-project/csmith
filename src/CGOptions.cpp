@@ -32,6 +32,7 @@
 #include "CGOptions.h"
 #include <iostream>
 #include <assert.h>
+#include <string.h>
 #include "Fact.h"
 #include "DefaultOutputMgr.h"
 #include "Bookkeeper.h"
