@@ -643,21 +643,28 @@ Type::make_one_union_field(vector<const Type*> &fields, vector<CVQualifiers> &qf
 		make_one_bitfield(fields, qfers, lens);
 	} 
 	else {
-		vector<Type*> ok_types = AllTypes;
-		// find locations of struct types
-		int start_index = -1;
-		int end_index = -1;
+		size_t i;
+		vector<Type*> ok_types;
+		// filter out struct types containing bit-fields. Their layout is implementation 
+		// defined, we don't want to mess with them in unions for now
+		for (i=0; i<AllTypes.size(); i++) {
+			if (!AllTypes[i]->has_bitfields()) {
+				ok_types.push_back(AllTypes[i]);
+			}
+		}
+
+		// find of struct types 
+		vector<Type*> struct_types;
 		for (size_t i=0; i<ok_types.size(); i++) {
 			if (ok_types[i]->eType == eStruct) {
-				if (start_index == -1) start_index = i;
-				end_index = i;
+				struct_types.push_back(ok_types[i]);
 			}
 		}
 		const Type* type = NULL;
 		do {
 			// 10% chance to be struct field
-			if (start_index != -1 && pure_rnd_flipcoin(10)) { 
-				type = ok_types[start_index + pure_rnd_upto(end_index - start_index + 1)];
+			if (!struct_types.empty() && pure_rnd_flipcoin(10)) { 
+				type = struct_types[pure_rnd_upto(struct_types.size())];
 				assert(type->eType == eStruct);
 			}
 			// 10% chance to be char* if pointer is allowed
@@ -1026,6 +1033,7 @@ Type::make_random_union_type(void)
     
 	for (size_t i=0; i<field_cnt; i++) {
 		make_one_union_field(fields, qfers, lens);
+		assert(!fields.back()->has_bitfields());
 	} 
     Type* new_type = new Type(fields, false, false, qfers, lens);
     return new_type;
