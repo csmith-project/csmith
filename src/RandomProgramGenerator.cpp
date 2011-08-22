@@ -147,41 +147,43 @@ static void print_help()
 	cout << "  --output <filename> or -o <filename>: specify the output file name." << endl << endl;
 
 	// enabling/disabling options
-	cout << "  --quiet: generate programs with less comments (disabled by default)." << endl << endl; 
-	cout << "  --concise: generated programs with minimal comments (disabled by default)." << endl << endl;
-	cout << "  --paranoid | --no-paranoid: enable | disable pointer-related assertions (disabled by default)." << endl << endl; 
-	cout << "  --math64 | --no-math64: enable | disable 64-bit math ops (enabled by default)." << endl << endl;
-	cout << "  --longlong| --no-longlong: enable | disable long long (enabled by default)." << endl << endl;
-	cout << "  --pointers | --no-pointers: enable | disable pointers (enabled by default)." << endl << endl;
-	cout << "  --arrays | --no-arrays: enable | disable arrays (enabled by default)." << endl << endl;
-	cout << "  --jumps | --no-jumps: enable | disable jumps (enabled by default)." << endl << endl;
-	cout << "  --consts | --no-consts: enable | disable const qualifier (enabled by default)." << endl << endl;
-	cout << "  --volatiles | --no-volatiles: enable | disable volatiles (enabled by default)." << endl << endl;
-	cout << "  --volatile-pointers | --no-volatile-pointers: enable | disable volatile pointers (enabled by default)." << endl << endl;
-	cout << "  --checksum | --no-checksum: enable | disable checksum calculation (enabled by default)." << endl << endl;
-	cout << "  --divs | --no-divs: enable | disable divisions (enabled by default)." << endl << endl;
-	cout << "  --muls | --no-muls: enable | disable multiplications (enabled by default)." << endl << endl;
-	cout << "  --main | --nomain: enable | disable to generate main function (enabled by default)." << endl <<  endl;  
-	cout << "  --compound-assignment | --no-compound-assignment: enable | disable compound assignments (enabled by default)." << endl << endl; 
-	cout << "  --structs | --no-structs: enable | disable to generate structs (enable by default)." << endl << endl;
-	cout << "  --unions | --no-unions: enable | disable to generate unions (enable by default)." << endl << endl;
-	cout << "  --packed-struct | --no-packed-struct: enable | disable packed structs by adding #pragma pack(1) before struct definition (disabled by default)." << endl << endl; 
-	cout << "  --bitfields | --no-bitfields: enable | disable full-bitfields structs (disabled by default)." << endl << endl;
 	cout << "  --argc | --no-argc: genereate main function with/without argv and argc being passed (enabled by default)." << endl << endl; 
-	cout << "  --incr-decr-operators | --no-incr-decr-operators: enable | disable ++/-- operators (enabled by default)." << endl << endl;
-	cout << "  --embedded-assigns | --no-embedded-assigns: enable | disable embedded assignments as sub-expressions (enabled by default)." << endl << endl;
+	cout << "  --arrays | --no-arrays: enable | disable arrays (enabled by default)." << endl << endl;
+	cout << "  --bitfields | --no-bitfields: enable | disable full-bitfields structs (disabled by default)." << endl << endl;
+	cout << "  --checksum | --no-checksum: enable | disable checksum calculation (enabled by default)." << endl << endl;
 	cout << "  --comma-operators | --no-comma-operators: enable | disable comma operators (enabled by default)." << endl << endl;
+	cout << "  --compound-assignment | --no-compound-assignment: enable | disable compound assignments (enabled by default)." << endl << endl; 
+	cout << "  --concise: generated programs with minimal comments (disabled by default)." << endl << endl;
+	cout << "  --consts | --no-consts: enable | disable const qualifier (enabled by default)." << endl << endl;
+	cout << "  --divs | --no-divs: enable | disable divisions (enabled by default)." << endl << endl;
+	cout << "  --embedded-assigns | --no-embedded-assigns: enable | disable embedded assignments as sub-expressions (enabled by default)." << endl << endl;
+	cout << "  --incr-decr-operators | --no-incr-decr-operators: enable | disable ++/-- operators (enabled by default)." << endl << endl;
+	cout << "  --jumps | --no-jumps: enable | disable jumps (enabled by default)." << endl << endl;
+	cout << "  --longlong| --no-longlong: enable | disable long long (enabled by default)." << endl << endl;
+	cout << "  --main | --nomain: enable | disable to generate main function (enabled by default)." << endl <<  endl;  
+	cout << "  --math64 | --no-math64: enable | disable 64-bit math ops (enabled by default)." << endl << endl;
 
 	// numbered controls	
-	cout << "  --max-block-size <size>: limit the number of non-return statements in a block to <size> (default 4)." << endl << endl; 
-	cout << "  --max-funcs <num>: limit the number of functions (besides main) to <num>  (default 10)." << endl << endl;
-	cout << "  --max-struct-fields <num>: limit the number of struct fields to <num> (default 10). " << endl << endl;
-	cout << "  --max-union-fields <num>: limit the number of union fields to <num> (default 5). " << endl << endl;
-	cout << "  --max-pointer-depth <depth>: limit the indirect depth of pointers to <depth> (default 2)." << endl << endl;
 	cout << "  --max-array-dim <num>: limit array dimensions to <num>. (default 3)" << endl << endl;
 	cout << "  --max-array-len-per-dim <num>: limit array length per dimension to <num> (default 10)." << endl << endl;
-	cout << "  --upper-expr-complexity <num>: limit expression complexities to <num> (default 10)." << endl << endl;
 	cout << "  --max-block-depth <num>: limit depth of nested blocks to <num> (default 5)." << endl << endl;
+	cout << "  --max-block-size <size>: limit the number of non-return statements in a block to <size> (default 4)." << endl << endl; 
+	cout << "  --upper-expr-complexity <num>: limit expression complexities to <num> (default 10)." << endl << endl;
+	cout << "  --max-funcs <num>: limit the number of functions (besides main) to <num>  (default 10)." << endl << endl;
+	cout << "  --max-pointer-depth <depth>: limit the indirect depth of pointers to <depth> (default 2)." << endl << endl;
+	cout << "  --max-struct-fields <num>: limit the number of struct fields to <num> (default 10). " << endl << endl;
+	cout << "  --max-union-fields <num>: limit the number of union fields to <num> (default 5). " << endl << endl;
+
+	cout << "  --muls | --no-muls: enable | disable multiplications (enabled by default)." << endl << endl;
+	cout << "  --packed-struct | --no-packed-struct: enable | disable packed structs by adding #pragma pack(1) before struct definition (disabled by default)." << endl << endl; 
+	cout << "  --paranoid | --no-paranoid: enable | disable pointer-related assertions (disabled by default)." << endl << endl; 
+	cout << "  --pointers | --no-pointers: enable | disable pointers (enabled by default)." << endl << endl;
+	cout << "  --quiet: generate programs with less comments (disabled by default)." << endl << endl; 
+	cout << "  --structs | --no-structs: enable | disable to generate structs (enable by default)." << endl << endl;
+	cout << "  --unions | --no-unions: enable | disable to generate unions (enable by default)." << endl << endl;
+	cout << "  --volatiles | --no-volatiles: enable | disable volatiles (enabled by default)." << endl << endl;
+	cout << "  --volatile-pointers | --no-volatile-pointers: enable | disable volatile pointers (enabled by default)." << endl << endl;
+
 }
 
 static void print_advanced_help()
