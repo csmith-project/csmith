@@ -1135,6 +1135,11 @@ main(int argc, char **argv)
 			continue;
 		}
 
+        if (strcmp (argv[i], "--no-safe-math") == 0){
+            CGOptions::avoid_signed_overflow(false);
+            continue;
+        }
+
 		if (strcmp (argv[i], "--no-embedded-assigns") == 0) {
 			CGOptions::use_embedded_assigns(false);
 			continue;
