@@ -1060,7 +1060,7 @@ main(int argc, char **argv)
 			continue;
 		}
 
-		if (strcmp (argv[i], "--null-ptr-deref-prob") ==0 ) {
+		if (strcmp (argv[i], "--null-ptr-deref-prob") == 0 ) {
 			unsigned long prob;
 			i++;
 			arg_check(argc, i);
@@ -1070,7 +1070,7 @@ main(int argc, char **argv)
 			continue;
 		}
 
-		if (strcmp (argv[i], "--dangling-ptr-deref-prob") ==0 ) {
+		if (strcmp (argv[i], "--dangling-ptr-deref-prob") == 0 ) {
 			unsigned long prob;
 			i++;
 			arg_check(argc, i);
@@ -1080,7 +1080,7 @@ main(int argc, char **argv)
 			continue;
 		}
 
-		if (strcmp (argv[i], "--max-expr-complexity") ==0 ) {
+		if (strcmp (argv[i], "--max-expr-complexity") == 0 ) {
 			unsigned long comp;
 			i++;
 			arg_check(argc, i);
@@ -1090,7 +1090,7 @@ main(int argc, char **argv)
 			continue;
 		}
 
-		if (strcmp (argv[i], "--max-block-depth") ==0 ) {
+		if (strcmp (argv[i], "--max-block-depth") == 0 ) {
 			unsigned long depth;
 			i++;
 			arg_check(argc, i);
@@ -1100,7 +1100,7 @@ main(int argc, char **argv)
 			continue;
 		}
 
-		if (strcmp (argv[i], "--max-struct-nested-level") ==0 ) {
+		if (strcmp (argv[i], "--max-struct-nested-level") == 0 ) {
 			unsigned long depth;
 			i++;
 			arg_check(argc, i);
