@@ -168,7 +168,7 @@ static void print_help()
 	cout << "  --max-array-len-per-dim <num>: limit array length per dimension to <num> (default 10)." << endl << endl;
 	cout << "  --max-block-depth <num>: limit depth of nested blocks to <num> (default 5)." << endl << endl;
 	cout << "  --max-block-size <size>: limit the number of non-return statements in a block to <size> (default 4)." << endl << endl; 
-	cout << "  --upper-expr-complexity <num>: limit expression complexities to <num> (default 10)." << endl << endl;
+	cout << "  --max-expr-complexity <num>: limit expression complexities to <num> (default 10)." << endl << endl;
 	cout << "  --max-funcs <num>: limit the number of functions (besides main) to <num>  (default 10)." << endl << endl;
 	cout << "  --max-pointer-depth <depth>: limit the indirect depth of pointers to <depth> (default 2)." << endl << endl;
 	cout << "  --max-struct-fields <num>: limit the number of struct fields to <num> (default 10). " << endl << endl;
@@ -1080,7 +1080,7 @@ main(int argc, char **argv)
 			continue;
 		}
 
-		if (strcmp (argv[i], "--upper-expr-complexity") ==0 ) {
+		if (strcmp (argv[i], "--max-expr-complexity") ==0 ) {
 			unsigned long comp;
 			i++;
 			arg_check(argc, i);
