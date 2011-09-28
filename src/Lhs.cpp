@@ -297,6 +297,22 @@ Lhs::visit_indices(vector<const Fact*>& inputs, CGContext& cg_context) const
 	return true;
 }
 
+// conservatively assume two fields overlap if they are both part of the same union variable
+bool
+have_overlapping_fields(const Expression* e1, const Expression* e2, const vector<const Fact*>& facts)
+{ 
+	vector<const Variable*> vars1, vars2;
+	if (FactPointTo::find_union_pointees(facts, e1, vars1)) {
+		FactPointTo::find_union_pointees(facts, e2, vars2);
+		for (size_t i=0; i<vars2.size(); i++) {
+			if (is_variable_in_set(vars1, vars2[i])) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 bool 
 Lhs::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const
 { 
@@ -312,6 +328,13 @@ Lhs::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const
 	if (!visit_indices(inputs, cg_context)) {
 		return false;
 	}
+	// avoid a.x = a.y where x and y are partially overlapping fields
+	if (cg_context.curr_rhs && cg_context.curr_rhs->term_type == eVariable) {
+		if (have_overlapping_fields(cg_context.curr_rhs, this, inputs)) {
+			return false;
+		}
+	}
+
 	if (get_indirect_level() > 0) {
 		if (!FactPointTo::is_valid_ptr(v, inputs)) {
 			return false;

@@ -102,6 +102,7 @@ public:
 	static bool is_dangling_ptr(const Variable* p, const std::vector<const Fact*>& facts);
 	static bool is_special_ptr(const Variable* p) { return p==null_ptr || p==garbage_ptr || p==tbd_ptr;}
 	static bool is_pointing_to_locals(const Variable* v, const Block* b, int indirection, const vector<const Fact*>& facts); 
+	static int  find_union_pointees(const vector<const Fact*>& facts, const Expression* e, vector<const Variable*>& unions);
 
 	static std::string point_to_str(const Variable* v);
 

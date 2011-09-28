@@ -842,6 +842,31 @@ FactPointTo::aggregate_all_pointto_sets(void)
 	assert(all_ptrs.size() == all_aliases.size());
 }
 
+/* find union fields that are referred to by this expression */
+int 
+FactPointTo::find_union_pointees(const vector<const Fact*>& facts, const Expression* e, vector<const Variable*>& unions)
+{
+	unions.clear();
+	vector<const Variable*> vars;
+	if (e->term_type == eVariable) {
+		const ExpressionVariable* ev = dynamic_cast<const ExpressionVariable*>(e);
+		vars = merge_pointees_of_pointer(ev->get_var()->get_collective(), ev->get_indirect_level(), facts);
+	} 
+	else if (e->term_type == eLhs) {
+		const Lhs* lhs = dynamic_cast<const Lhs*>(e);
+		vars = merge_pointees_of_pointer(lhs->get_var()->get_collective(), lhs->get_indirect_level(), facts);
+	}
+		
+	for (size_t i=0; i<vars.size(); i++) {
+		const Variable* u = vars[i]->get_container_union();
+		// we only care referenced union fields, not unions
+		if (u && vars[i] != u) {
+			add_variable_to_set(unions, u);
+		}
+	}
+	return unions.size();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 // Local Variables:

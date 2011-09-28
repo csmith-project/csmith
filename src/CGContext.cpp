@@ -68,6 +68,7 @@ CGContext::CGContext(Function *current_func, const Effect &eff_context, Effect *
 	  curr_blk(0),
 	  rw_directive(NULL),
 	  iv_bounds(),
+	  curr_rhs(NULL),
 	  effect_context(eff_context),
 	  effect_accum(eff_accum)
 {
@@ -84,6 +85,7 @@ CGContext::CGContext(const CGContext &cgc, const Effect &eff_context, Effect *ef
 	  curr_blk(cgc.curr_blk),
 	  rw_directive(cgc.rw_directive),
 	  iv_bounds(cgc.iv_bounds),
+	  curr_rhs(NULL),
 	  effect_context(eff_context),
 	  effect_accum(eff_accum),
 	  effect_stm()
@@ -101,6 +103,7 @@ CGContext::CGContext(const CGContext &cgc, Function* f, const Effect &eff_contex
 	  curr_blk(cgc.curr_blk),
 	  rw_directive(cgc.rw_directive),
 	  iv_bounds(cgc.iv_bounds),
+	  curr_rhs(NULL),
 	  effect_context(eff_context),
 	  effect_accum(eff_accum)
 {
@@ -117,6 +120,7 @@ CGContext::CGContext(const CGContext &cgc, RWDirective* rwd, const Variable* iv,
 	  curr_blk(cgc.curr_blk),
 	  rw_directive(rwd), 
 	  iv_bounds(cgc.iv_bounds),
+	  curr_rhs(NULL),
 	  effect_context(cgc.effect_context),
 	  effect_accum(cgc.effect_accum)
 {

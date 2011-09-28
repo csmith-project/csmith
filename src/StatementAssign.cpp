@@ -151,6 +151,8 @@ StatementAssign::make_random(CGContext &cg_context, const Type* type, const CVQu
 
 	CGContext lhs_cg_context(cg_context, running_eff_context, &lhs_accum);
 	lhs_cg_context.get_effect_stm() = rhs_cg_context.get_effect_stm();
+	lhs_cg_context.curr_rhs = e;
+
 	bool prev_flag = CGOptions::match_exact_qualifiers(); // keep a copy of previous flag
 	if (qf) CGOptions::match_exact_qualifiers(true);      // force exact qualifier match when selecting vars
 	lhs = Lhs::make_random(lhs_cg_context, type, &qfer, op != eSimpleAssign, need_no_rhs(op));
@@ -294,6 +296,7 @@ StatementAssign::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context)
 
 	CGContext lhs_cg_context(cg_context, running_eff_context, &lhs_accum);
 	lhs_cg_context.get_effect_stm() = rhs_cg_context.get_effect_stm(); 
+	lhs_cg_context.curr_rhs = &expr;
 	if (!lhs.visit_facts(inputs, lhs_cg_context)) {
 		return false;
 	}

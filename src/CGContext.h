@@ -163,6 +163,8 @@ public: // XXX
 	RWDirective* rw_directive; 
 	// induction variables for loops, with each IV controls one nested loop
 	map<const Variable*, unsigned int> iv_bounds;
+	
+	const Expression* curr_rhs;   // only used in the context of LHS
 
 private:
 	const Effect &effect_context;
