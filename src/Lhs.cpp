@@ -328,10 +328,16 @@ Lhs::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const
 	if (!visit_indices(inputs, cg_context)) {
 		return false;
 	}
-	// avoid a.x = a.y where x and y are partially overlapping fields
-	if (cg_context.curr_rhs && cg_context.curr_rhs->term_type == eVariable) {
-		if (have_overlapping_fields(cg_context.curr_rhs, this, inputs)) {
-			return false;
+	// avoid a.x = a.y (or any RHS that evaluates to a.y) where x and y are partially overlapping fields
+	if (cg_context.curr_rhs) {
+		vector<const Expression*> subs;
+		cg_context.curr_rhs->get_eval_to_subexps(subs);
+		for (size_t i=0; i<subs.size(); i++) {
+			if (subs[i]->term_type == eVariable || subs[i]->term_type == eLhs) {
+				if (have_overlapping_fields(subs[i], this, inputs)) {
+					return false;
+				}
+			}
 		}
 	}
 

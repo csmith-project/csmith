@@ -112,6 +112,8 @@ public:
 
 	virtual CVQualifiers get_qualifiers(void) const = 0;
 
+	virtual void get_eval_to_subexps(vector<const Expression*>& subs) const = 0;
+
 	virtual void get_called_funcs(std::vector<const FunctionInvocationUser*>& /*funcs*/ ) const {};
 
 	virtual const FunctionInvocation* get_invoke(void) const {return NULL;};

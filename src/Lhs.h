@@ -59,6 +59,8 @@ public:
 
 	virtual CVQualifiers get_qualifiers(void) const;
 
+	virtual void get_eval_to_subexps(vector<const Expression*>& subs) const {subs.push_back(this);}
+
 	int get_indirect_level(void) const;
 
 	void get_lvars(const vector<const Fact*>& facts, vector<const Variable*>& vars) const;

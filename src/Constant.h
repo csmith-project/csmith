@@ -34,6 +34,7 @@
 
 #include <ostream>
 #include <string>
+#include <vector>
 
 #include "Expression.h"
 #include "Type.h"
@@ -62,6 +63,8 @@ public:
 	Expression *clone() const;
 
 	CVQualifiers get_qualifiers(void) const { return CVQualifiers(true, false);} 
+
+	virtual void get_eval_to_subexps(vector<const Expression*>& subs) const {subs.push_back(this);}
 
 	Constant(const Type *t, const std::string &v);
 	explicit Constant(const Constant &c);

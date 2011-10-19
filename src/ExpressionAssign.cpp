@@ -112,6 +112,14 @@ ExpressionAssign::is_0_or_1(void) const
 	return assign->is_simple_assign() && assign->get_expr()->is_0_or_1();
 }
 
+void 
+ExpressionAssign::get_eval_to_subexps(vector<const Expression*>& subs) const
+{
+	vector<const Expression*> exps;
+	get_lhs()->get_eval_to_subexps(exps);
+	subs.insert(subs.end(), exps.begin(), exps.end());
+}
+
 bool 
 ExpressionAssign::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const 
 {

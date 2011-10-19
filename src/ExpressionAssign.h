@@ -55,6 +55,8 @@ public:
 
 	virtual CVQualifiers get_qualifiers(void) const;  
 
+	virtual void get_eval_to_subexps(vector<const Expression*>& subs) const;
+
 	virtual const Type &get_type(void) const { return assign->get_lhs()->get_type();}
 
 	virtual void get_called_funcs(std::vector<const FunctionInvocationUser*>& funcs) const { assign->get_called_funcs(funcs);}

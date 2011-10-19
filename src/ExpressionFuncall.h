@@ -58,6 +58,8 @@ public:
 
 	virtual CVQualifiers get_qualifiers(void) const;
 
+	virtual void get_eval_to_subexps(vector<const Expression*>& subs) const {subs.push_back(this);}
+
 	virtual const FunctionInvocation* get_invoke(void) const { return &invoke; };
 
 	virtual const Type &get_type(void) const;
