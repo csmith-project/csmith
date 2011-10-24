@@ -6,7 +6,3 @@ multidelta -level=2 ./test1.sh small.c
 multidelta -level=2 ./test1.sh small.c
 multidelta -level=10 ./test1.sh small.c
 multidelta -level=10 ./test1.sh small.c
-multidelta -level=20 ./test1.sh small.c
-multidelta -level=20 ./test1.sh small.c
-
-# indent small.c
