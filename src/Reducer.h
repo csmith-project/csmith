@@ -122,11 +122,10 @@ public:
 	const Function* rewrite_calls_inside;
 	bool reduce_binaries;
 	bool output_if_ids;
-	bool print_value_with_multi_lines;
-	bool test_command_line_option;
 	const Variable* monitored_var;
 	const Function* monitored_func;
 	string monitored_call_id;
+	string crc_lines;
 
 	std::map<const Block*, int> map_active_blks;
 	vector<int> all_blks;

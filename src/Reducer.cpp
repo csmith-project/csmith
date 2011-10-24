@@ -71,8 +71,6 @@ Reducer::Reducer(string fname)
   rewrite_calls_inside(NULL),
   reduce_binaries(false),
   output_if_ids(false),
-  print_value_with_multi_lines(false),
-  test_command_line_option(false),
   monitored_var(NULL),
   monitored_func(NULL),
   monitored_call_id(""),
@@ -128,6 +126,22 @@ Reducer::configure(void)
 			monitored_var = key;
 			used_vars.push_back(key->get_named_var());
 		}
+		// find the line that crashed a compiler
+		else if (line.find("crc lines") == 0) {
+			getline(conf, line);
+			StringUtils::chop(line);
+			// find the global variables in CRC statements, and mark them as used
+			vector<string> strs;
+			StringUtils::split_string(line, strs, "(),[.");
+			for (size_t i=0; i<strs.size(); i++) {
+				if (strs[i].find("g_") == 0) {
+					const Variable* v = VariableSelector::find_var_by_name(strs[i]);
+					assert(v);
+					add_variable_to_set(used_vars, v);
+				}
+			} 
+			crc_lines = line;
+		}
 		else if (line.find("keep variable") == 0) {
 			getline(conf, line);
 			StringUtils::chop(line);
@@ -152,13 +166,6 @@ Reducer::configure(void)
 		else if (line.find("active blocks") == 0) {
 			getline(conf, line);
 			config_active_blks(line);
-		}
-		else if (line.find("print checksum with multi-lines") == 0) {
-			print_value_with_multi_lines = true;
-		}
-		else if (line.find("test command line option") == 0) {
-			test_command_line_option = true;
-			main_str = "func_1()";
 		}
 		else if (line.find("call chain shortcut") == 0) {
 			getline(conf, line);
@@ -403,12 +410,12 @@ Reducer::delete_stms_after(const Statement* stm, bool include_parent_blks)
 
 		if (begin_delete) {
 			if (find_required_labels(s, labels)==0 && s != return_stm) {
-				// don't delete statements that contains add-back blocks (those has 0 count in mao_active_blks)
+				// don't delete statements that contains add-back blocks (those has 0 count in map_active_blks)
 				vector<const Block*> blks;
 				s->get_blocks(blks);
 				bool must_dump = false;
 				for (j=0; j<blks.size(); j++) {
-					if (map_active_blks[blks[j]] == 0) {
+					if (!is_blk_deleted(blks[j]) && map_active_blks[blks[j]] == 0) {
 						must_dump = true;
 						break;
 					}
@@ -461,27 +468,33 @@ Reducer::find_local_vars_to_lift(vector<const Variable*>& vars)
 void
 Reducer::expand_used_vars(void)
 { 
-	size_t i;
+	size_t i, j;
 	for (i=0; i<used_vars.size(); i++) {
 		const Variable* v = used_vars[i]; 
-		const Expression* init = v->init; 
-		if (init && init->term_type == eVariable) {
-			const ExpressionVariable* ev = (const ExpressionVariable*)(init);
-			if (ev->get_indirect_level() < 0) {
-				string dummy;
-				const Variable* addr_var = ev->get_var()->get_array(dummy);
-				// if not an array ...
-				if (addr_var == 0) {
-					addr_var = ev->get_var();
-				}
-				addr_var = addr_var->get_named_var();
-				if (!is_var_used(addr_var)) { 
-					bool found = false;
-					// if find no appropriate variable in used list, use the original variable
-					if (!found) {
-						used_vars.push_back(addr_var);
+		vector<const Expression*> init_values;
+		if (v->isArray) {
+			const ArrayVariable* av = dynamic_cast<const ArrayVariable*>(v);
+			init_values = av->get_init_values();
+		}
+		init_values.push_back(v->init);
+
+		for (j=0; j<init_values.size(); j++) {
+			const Expression* init = init_values[j];
+			if (init && init->term_type == eVariable) {
+				const ExpressionVariable* ev = (const ExpressionVariable*)(init);
+				if (ev->get_indirect_level() < 0) {
+					string dummy;
+					const Variable* addr_var = ev->get_var()->get_array(dummy);
+					// if not an array ...
+					if (addr_var == 0) {
+						addr_var = ev->get_var();
 					}
-				} 
+					// if addr_var is a field, get the container var
+					addr_var = addr_var->get_named_var();
+					if (!is_var_used(addr_var)) {  
+						used_vars.push_back(addr_var);
+					} 
+				}
 			}
 		}
 	}
