@@ -92,6 +92,14 @@ ExpressionComma::get_dereferenced_ptrs(void) const
 	return ptrs1;
 }
 	
+void 
+ExpressionComma::get_eval_to_subexps(vector<const Expression*>& subs) const
+{
+	vector<const Expression*> exps;
+	get_rhs()->get_eval_to_subexps(exps);
+	subs.insert(subs.end(), exps.begin(), exps.end());
+}
+
 void
 ExpressionComma::Output(std::ostream &out) const
 {
