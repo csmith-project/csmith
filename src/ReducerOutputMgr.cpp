@@ -245,20 +245,25 @@ ReducerOutputMgr::output_main_func(std::ostream& out)
 { 	
 	size_t i;
 	const Function* f = reducer->main;
-	if (!reducer->test_command_line_option && f->param.size() == 0 && (reducer->main_str == "" || reducer->main_str.find("func_")==0)) { 
+	if (f->param.size() == 0 && (reducer->main_str == "" || reducer->main_str.find("func_")==0)) { 
 		out << "int  main(void)" << endl;
-		output_block(f->body, out, 0);
+		if (reducer->is_blk_deleted(f->body)) {
+			out << "{" << endl;
+			if (!reducer->crc_lines.empty()) {
+				output_tab(out, 1);
+				out << reducer->crc_lines << endl;
+			}
+			output_tab(out, 1);
+			out << "return 0;" << endl;
+			out << "}" << endl;
+		} 
+		else {
+			output_block(f->body, out, 0);
+		}
 	}
 	else {
 		output_func(f, out);
-		// make an artificial main function
-		if (reducer->test_command_line_option) {
-			out << endl << "int  main(int argc, char* argv[]) {" << endl;
-			output_tab(out, 1);
-			out << "if (argc == 2 && strcmp(argv[1], \"1\") == 0) { int i = 1;}" << endl;
-		} else {
-			out << endl << "int  main(void) {" << endl;
-		}
+		out << endl << "int  main(void) {" << endl;
 		output_tab(out, 1);
 		// break up function call and parameters, and skip parameters that are reduced
 		vector<string> strs;
@@ -620,11 +625,16 @@ ReducerOutputMgr::output_reduced_stm(const Statement* stm, std::ostream &out, in
 					ostringstream oss; 
 					const Variable* key = reducer->monitored_var;
 					oss << "checksum " << key->get_actual_name() << " = ";
-					key->output_runtime_value(out, oss.str(), "\\n", indent, reducer->print_value_with_multi_lines);
+					key->output_runtime_value(out, oss.str(), "\\n", indent, 0);
 					outputln(out);
 				}
 			}
 			if (stm->func == GetFirstFunction()) {
+				// output crc lines if they are required
+				if (!reducer->crc_lines.empty()) {
+					output_tab(out, indent);
+					out << reducer->crc_lines;
+				}
 				output_tab(out, indent);
 				out << "return 0;" << endl;
 				return;
