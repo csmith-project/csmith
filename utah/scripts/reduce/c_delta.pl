@@ -27,6 +27,8 @@
 
 # TODO:
 
+# add a global termination constraint-- reduce size across all passes
+
 # turn a union type into a struct
 # remove argument from function, including all calls
 # transform a function to return void
@@ -83,7 +85,7 @@ use re 'eval';
 
 my $DEBUG = 0;
 my $INDENT_OPTS = "-bad -bap -bc -cs -pcs -prs -saf -sai -saw -sob -ss -bl ";
-my $SANITY = 0;
+my $SANITY = 1;
 
 ######################################################################
 
@@ -96,11 +98,10 @@ my $arith = "\\+|\\-|\\%|\\/|\\*";
 my $comp = "\\<\\=|\\>\\=|\\<|\\>|\\=\\=|\\!\\=|\\=";
 my $logic = "\\&\\&|\\|\\|";
 my $bit = "\\||\\&|\\^|\\<\\<|\\>\\>";
-my $binop = "($arith)|($comp)|($logic)|($bit)";
+my $binop = "($arith)|($comp)|($logic)|($bit)|(\\-\\>)";
 my $border = "[\\*\\{\\(\\[\\:\\,\\}\\)\\]\\;\\,]";
 my $borderorspc = "(($border)|(\\s))";
-my $rettype = "int|void|short|long|char|signed|unsigned|const|static|(union\\s+U[0-9]+)|(struct\\s+S[0-9+])";
-my $functype = "(($rettype)\\s*|\\*\\s*)+";
+my $functype = "(($varnum)?\\s*|\\*\\s*)*";
 my $fname = "(?<fname>$varnum)";
 my $funcstart_free = "$functype\\s+(?<fname>$varnum)\\s*$RE{balanced}{-parens=>'()'}";
 my $funcstart = "$functype\\s+XXX\\s*$RE{balanced}{-parens=>'()'}";
@@ -116,9 +117,12 @@ my @regexes_to_replace = (
     ["=\\s*$RE{balanced}{-parens=>'{}'}", ""],
     ["\\:\\s*[0-9]+\\s*;", ";"],
     ["\\;", ""],
+    ["\#(.*)\n", ""],
     ["\\^\\=", "="],
     ["\\|\\=", "="],
     ["\\&\\=", "="],
+    ["\"(.*)\"", ""],
+    ["\'(.*)\'", ""],
     ["\\+\\=", "="],
     ["\\-\\=", "="],
     ["\\*\\=", "="],
@@ -130,6 +134,9 @@ my @regexes_to_replace = (
     ["\\-", ""],
     ["\\!", ""],
     ["\\~", ""],
+    ["struct.*?;", ""],
+    ["union.*?;", ""],
+    ["enum.*?;", ""],
     ['"(.*?)"', ""],
     ['"(.*?)",', ""],
     );
@@ -143,12 +150,13 @@ my @delimited_regexes_to_replace = (
     ["long", "int"],
     ["signed", "int"],
     ["unsigned", "int"],
-    ["int argc, char \\*argv\\[\\]", "void"],
+    ["int(\\s+)argc(\\s*),(\\s*)(.*)(\\s*)\\*argv\\[\\]", "void"],
+    ["int(\\s+)argc(\\s*),(\\s*)(.*)(\\s*)\\*(\\s*)\\*argv", "void"],
     ["int.*?;", ""],
     ["for", ""],
+    ["\"(.*)\"", ""],
+    ["\'(.*)\'", ""],
     ["if\\s+\\(.*?\\)", ""],
-    ["struct.*?;", ""],
-    ["union.*?;", ""],
     ["($functype)\\s*($varnum)\\s*$RE{balanced}{-parens=>'()'}\\s*$RE{balanced}{-parens=>'{}'}", ""],
     ["$call,", "0"],
     ["$call,", ""],
@@ -470,6 +478,7 @@ sub delta_pass ($) {
 		$prog = $first.$rest;
 		$worked |= delta_test ($method, 0);
 	    }
+	    return 0;
 	} elsif ($method eq "indent") {	    
 	    write_file();
 	    system "indent $INDENT_OPTS $cfile";
@@ -689,14 +698,23 @@ sub bymethod {
 read_file ();    
 $orig_prog_len = length ($prog);
 
+my $file_size = -s $cfile;
+my $spinning = 0;
+
 while (1) {
-    my $success = 0;
     save_copy ("delta_backup_${pass_num}.c");
+    my $success = 0;
     foreach my $method (sort bymethod keys %methods) {
 	$success |= delta_pass ($method);
     }
     $pass_num++;
     last if (!$success);
+    my $s = -s $cfile;
+    if ($s >= $file_size) {
+	$spinning++;
+    }
+    last if ($spinning > 3);
+    $file_size = $s;
 }
 
 print "===================== done ====================\n";
