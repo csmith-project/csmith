@@ -60,7 +60,7 @@ if (defined($ENV{"PIN_CMD"})) {
 
 my $VALGRIND_ON_COMPILER = 0;
 
-my $RUN_PROGRAM = 0;
+my $RUN_PROGRAM = 1;
 
 my $DO_TRIAGE = 0;
 
@@ -301,7 +301,7 @@ my @gcc = ("ia32",
 	   "gcc",
 	   \@gcc_opts2);
 
-my $Z = "/mnt/local/randomtest";
+my $Z = "/home/regehr/z/compilers";
 
 my @clang26 = ("ia32",
 	       "llvm",
@@ -548,8 +548,9 @@ my @compilers_to_test = (
     
     \@icc,
     \@suncc,
-    \@tcc,
     \@open64,
+
+    # \@tcc,
 
     #\@gcc_with_ccomp,
     #\@ccomp,
