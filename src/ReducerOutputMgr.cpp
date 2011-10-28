@@ -221,6 +221,7 @@ int
 ReducerOutputMgr::output_func_header(const Function* f, std::ostream& out)
 {
 	// output function header
+	out << "static ";
 	f->rv->qfer.output_qualified_type(f->return_type, out);
 	out << " " << f->name << "(";
 	size_t i;
@@ -236,8 +237,28 @@ ReducerOutputMgr::output_func_header(const Function* f, std::ostream& out)
 			first = false;
 		}
 	}
-	out << ")" << endl;
+	out << ")";
 	return 0;
+}
+
+void 
+ReducerOutputMgr::output_crc_lines(std::ostream& out)
+{ 
+	// declare loop variables if they are used in crc lines
+	for (char c = 'i'; c <= 'z'; c++) {
+		string pattern = string("; ") + c + "++)";
+		if (reducer->crc_lines.find(pattern) != string::npos) { 
+			output_tab(out, 1); 
+			out << "int " << c << " = 0;" << endl;
+		}
+	}
+	if (reducer->crc_lines.find("print_hash_value") != string::npos) {
+		output_tab(out, 1); 
+		out << "int print_hash_value = 0;"  << endl;
+	} 
+	// print the real CRC lines
+	output_tab(out, 1);
+	out << reducer->crc_lines << endl;
 }
 
 int 
@@ -250,8 +271,7 @@ ReducerOutputMgr::output_main_func(std::ostream& out)
 		if (reducer->is_blk_deleted(f->body)) {
 			out << "{" << endl;
 			if (!reducer->crc_lines.empty()) {
-				output_tab(out, 1);
-				out << reducer->crc_lines << endl;
+				output_crc_lines(out);
 			}
 			output_tab(out, 1);
 			out << "return 0;" << endl;
@@ -299,6 +319,7 @@ int
 ReducerOutputMgr::output_func(const Function* f, std::ostream& out)
 { 	
 	output_func_header(f, out);
+	out << endl;
 	output_block(f->body, out, 0);
 	return 0;
 }
@@ -331,13 +352,6 @@ ReducerOutputMgr::output_block_entry_msg(const Block* blk, std::ostream &out, in
 		if (s && s->eType == eFor) {
 			output_tab(out, --indent);
 			out << "}" << endl;
-		}
-	}
-	if (reducer->dump_all_block_info || reducer->dump_block_entry) {
-		// remember all the blocks for rollback
-		vector<int>& all_blks = reducer->all_blks;
-		if (std::find(all_blks.begin(), all_blks.end(), blk->stm_id) == all_blks.end()) {
-			all_blks.push_back(blk->stm_id);
 		}
 	}
 }
@@ -632,8 +646,7 @@ ReducerOutputMgr::output_reduced_stm(const Statement* stm, std::ostream &out, in
 			if (stm->func == GetFirstFunction()) {
 				// output crc lines if they are required
 				if (!reducer->crc_lines.empty()) {
-					output_tab(out, indent);
-					out << reducer->crc_lines;
+					output_crc_lines(out);
 				}
 				output_tab(out, indent);
 				out << "return 0;" << endl;
@@ -956,8 +969,9 @@ ReducerOutputMgr::output_tail(ostream& out)
 	size_t i;
 	if (reducer->dump_block_entry || reducer->dump_all_block_info) {
 		out << "// all blocks: ";
-		for (i=0; i<reducer->all_blks.size(); i++) {
-			out << StringUtils::int2str(reducer->all_blks[i]) << ", ";
+		// print from backward so the leaf blocks will be printed last
+		for (i=reducer->all_blks.size(); i>0; i--) {
+			out << StringUtils::int2str(reducer->all_blks[i-1]) << ", ";
 		}
 		out << endl;
 	}
@@ -987,7 +1001,11 @@ ReducerOutputMgr::Output()
 	output_artificial_globals(out);
 	size_t i;
 	for (i=0; i<reducer->used_funcs.size(); i++) {
-		const Function* f = reducer->used_funcs[i];
+		output_func_header(reducer->used_funcs[i], out);
+		out << ";" << endl;
+	} 
+	for (int j=reducer->used_funcs.size(); j>0; j--) {
+		const Function* f = reducer->used_funcs[j-1]; 
 		outputln(out);
 		output_func(f, out);
 		outputln(out);

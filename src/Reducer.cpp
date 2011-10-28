@@ -915,10 +915,13 @@ Reducer::get_used_vars_and_funcs_and_labels(const Statement* stm, vector<const V
 	for (i=0; i<blks.size(); i++) {
 		if (is_blk_deleted(blks[i])) {
 			continue;
-		}
+		} 
 		for (j=0; j<blks[i]->stms.size(); j++) {
 			const Statement* s = blks[i]->stms[j];
 			get_used_vars_and_funcs_and_labels(s, vars, funcs, labels);
+		}
+		if (std::find(all_blks.begin(), all_blks.end(), blks[i]->stm_id) == all_blks.end()) {
+			all_blks.push_back(blks[i]->stm_id);
 		}
 	}
 }

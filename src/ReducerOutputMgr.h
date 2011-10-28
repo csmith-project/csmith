@@ -66,6 +66,7 @@ public:
 	void output_memory_addrs(const Statement* stm, std::ostream& out, int indent);
 	void output_global_values(string header, std::ostream& out, int indent);
 	void output_tail(ostream& out);
+	void output_crc_lines(std::ostream& out);
 
 	void output_vars(const vector<Variable*> &vars, std::ostream &out, int indent);
 	void output_var(const Variable* v, std::ostream &out, int indent);
