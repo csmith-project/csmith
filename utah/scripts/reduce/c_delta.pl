@@ -101,7 +101,7 @@ my $bit = "\\||\\&|\\^|\\<\\<|\\>\\>";
 my $binop = "($arith)|($comp)|($logic)|($bit)|(\\-\\>)";
 my $border = "[\\*\\{\\(\\[\\:\\,\\}\\)\\]\\;\\,]";
 my $borderorspc = "(($border)|(\\s))";
-my $functype = "(($varnum)?\\s*|\\*\\s*)*";
+my $functype = "(($varnum)\\s*(\\*\\s*)?)*";
 my $fname = "(?<fname>$varnum)";
 my $funcstart_free = "$functype\\s+(?<fname>$varnum)\\s*$RE{balanced}{-parens=>'()'}";
 my $funcstart = "$functype\\s+XXX\\s*$RE{balanced}{-parens=>'()'}";
@@ -157,7 +157,7 @@ my @delimited_regexes_to_replace = (
     ["\"(.*)\"", ""],
     ["\'(.*)\'", ""],
     ["if\\s+\\(.*?\\)", ""],
-    ["($functype)\\s*($varnum)\\s*$RE{balanced}{-parens=>'()'}\\s*$RE{balanced}{-parens=>'{}'}", ""],
+    # ["($functype)\\s*($varnum)\\s*$RE{balanced}{-parens=>'()'}\\s*$RE{balanced}{-parens=>'{}'}", ""],
     ["$call,", "0"],
     ["$call,", ""],
     ["$call", "0"],
@@ -373,6 +373,14 @@ sub find_func () {
     return ($funcname, $proto_start, $proto_end, $func_start, $func_end);
 }
 
+sub uniq_func ($) {
+    (my $s) = @_;
+    for (my $i=0; $i<1000; $i++) {
+	my $str = "func_$i";
+	return $str unless ($s =~ $str);
+    }
+}
+
 my %funcs_seen;
 
 sub delta_pass ($) {
@@ -479,6 +487,16 @@ sub delta_pass ($) {
 		$worked |= delta_test ($method, 0);
 	    }
 	    return 0;
+	} elsif ($method eq "shorten_funcs") {
+	    my $first = substr($prog, 0, $pos);
+	    my $rest = substr($prog, $pos);
+	    if ($rest =~ /^(safe_$varnum)/) {
+		my $orig = $1;
+		my $repl = uniq_func ($prog);
+		print "renaming $orig as $repl\n";
+		$prog =~ s/$orig/$repl/g;
+		$worked |= delta_test ($method, 0);
+	    }
 	} elsif ($method eq "indent") {	    
 	    write_file();
 	    system "indent $INDENT_OPTS $cfile";
@@ -627,13 +645,14 @@ my %all_methods = (
     "all_blanks" => 0,
     "blanks" => 1,
     "crc" => 1,
-    "move_func" => 2,
-    "del_args" => 2,
+    # "move_func" => 2,
+    # "del_args" => 2,
     "brackets" => 2,
     "ternary" => 2,
     "parens" => 3,
     "replace_regex" => 4,
     "shorten_ints" => 5,
+    "shorten_funcs" => 6,
     "indent" => 15,
 
     );
