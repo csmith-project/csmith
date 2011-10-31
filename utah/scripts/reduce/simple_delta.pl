@@ -19,10 +19,10 @@ use File::stat;
 my $CSMITH_HOME = $ENV{"CSMITH_HOME"};
 die "please set CSMITH_HOME env first!" if (!defined($CSMITH_HOME));
 
-my $VOLATILE = $ENV{"VOLATILE_HOME"};
-die "please set VOLATILE_HOME env first!" if (!defined($VOLATILE));
+#my $VOLATILE = $ENV{"VOLATILE_HOME"};
+#die "please set VOLATILE_HOME env first!" if (!defined($VOLATILE));
 
-$ENV{"PATH"} = "$ENV{VOLATILE_HOME}:$ENV{PATH}";
+#$ENV{"PATH"} = "$ENV{VOLATILE_HOME}:$ENV{PATH}";
 
 my $COMPILER_TIMEOUT = 600;
 my $PROG_TIMEOUT = 2;
