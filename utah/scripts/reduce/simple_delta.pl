@@ -27,16 +27,24 @@ die "please set CSMITH_HOME env first!" if (!defined($CSMITH_HOME));
 my $COMPILER_TIMEOUT = 600;
 my $PROG_TIMEOUT = 2;
 
-if (@ARGV != 4 && @ARGV != 3) {
-    die "usage: simple_delta.pl <seed> <compiler1> <compiler2> <csmith-options>\n\n";
+# in second
+my $TEST_TIMEOUT = 20 * 60;
+
+if (@ARGV != 4 && @ARGV != 3 && @ARGV != 5) {
+    die "usage: simple_delta.pl <seed> <compiler1> <compiler2> <csmith-options> <crash string>\n\n";
 }
 
 my $seed = $ARGV[0];
 my $COMPILER1 = $ARGV[1];
 my $COMPILER2 = $ARGV[2];
 my $OPTS = "--concise ";
-if (@ARGV == 4) {
+if (@ARGV >= 4) {
     $OPTS =  "$OPTS$ARGV[3]";
+}
+
+my $crash_string = "";
+if (@ARGV == 5) {
+  $crash_string = $ARGV[4];
 }
 
 my $cfile = "small.c"; 
@@ -157,7 +165,7 @@ my $ARGS="-g -Wmissing-prototypes -Werror=missing-prototypes -Wreturn-type -Werr
 my $EXTRA='-Wuninitialized -Werror=uninitialized';
 # flag1 == 1: we check if two outputs have the same lines. 
 # flag2 == 1: we check the line which is "checksum = xxxx". 
-sub run_test ($$$) {
+sub run_wrong_code_test ($$$) {
     my ($test_file, $flag1, $match) = @_;
     system "rm -f gcc.txt";
     system "gcc $ARGS $EXTRA -O0 $test_file -o a.out > gcc.txt 2>&1";
@@ -207,6 +215,50 @@ sub run_test ($$$) {
     return $res;
 }
 
+sub run_crash_test($$) {
+    my ($test_file, $match) = @_;
+    system "rm -f gcc.txt";
+    system "gcc $ARGS $EXTRA -O0 $test_file -o a.out > gcc.txt 2>&1";
+    my @tmp = ();
+    if (read_file("gcc.txt", @tmp, "no return statement") || 
+	read_file("gcc.txt", @tmp, "control reaches") ||
+	# read_file("gcc.txt", @tmp, "initia") ||
+	read_file("gcc.txt", @tmp, "proto")) {
+	system("cp $test_file gcc_fail.c");
+	print "$indent compiler error! Can't compile $test_file with gcc\n";
+	return 0;
+    }
+    
+    $test_count++;
+    my $res;
+    $res = compile($COMPILER1, $test_file, "$EXE1$test_count", "$COMPILER_OUT1$test_count");
+    if ($res) {
+        if (read_file("$COMPILER_OUT1$test_count", @tmp, $match)) {
+	    print "$indent crash string $match found for $test_file with $COMPILER1\n";
+            return 1;
+        }
+        else {
+	    print "$indent no crash string $match found for $test_file with $COMPILER1\n";
+	    return 0;
+        }
+    }
+    else {
+	print "$indent no crash error found for $test_file with $COMPILER1\n";
+	return 0;
+    }
+}
+
+sub run_test($$$) {
+    my ($test_file, $flag1, $match) = @_;
+
+    if ($crash_string eq "") {
+        return run_wrong_code_test($test_file, $flag1, $match);
+    }
+    else {
+        return run_crash_test($test_file, $crash_string);
+    }
+}
+
 sub get_score ($) {
     (my $fn) = @_;
     return stat($fn)->size;    
@@ -226,6 +278,8 @@ sub get_score ($) {
 ############################ MAIN ############################
 
 print "seed = $seed\n";
+
+$OPTS =~ s/-s\s+[0-9]+//g;
 
 system "${CSMITH_HOME}/src/csmith -s $seed $OPTS --delta-monitor simple --delta-output $deltafile > $cfile";
 
@@ -247,6 +301,8 @@ system "cp $cfile aaa.c";
 my $orig_sz = get_score($cfile);
 
 my $n = 0;
+my $prev_time = time();
+my $total_time = 0;
 
 print "initial score = $orig_sz\n";
 while (1) {
@@ -288,6 +344,13 @@ while (1) {
 	system "cp ${backup_deltafile} $deltafile";
     } else {
 	$sz = $new_sz;
+    }
+    my $curr_time = time();
+    $total_time += ($curr_time - $prev_time);
+    $prev_time = $curr_time;
+    print "elapsed time: $total_time\n";
+    if ($total_time > $TEST_TIMEOUT) {
+        last;
     }
 }
 system "cp $cfile simple$seed.c";
