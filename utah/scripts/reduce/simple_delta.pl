@@ -89,6 +89,21 @@ sub read_file($\@$) {
     return $cnt;
 	      }
 
+sub read_file_with_substring($\@$) {
+    my ($input, $out, $substring) = @_;
+    my $cnt = 0;
+    open INF1, "<$input" or die;
+    while (my $line = <INF1>) {
+        chomp $line;
+        if (index($line, $substring) != -1) {
+            push @$out, $line;
+            $cnt++;
+        }
+    }
+    close INF1;
+    return $cnt;
+}
+
 sub compile($$$$) {
     my ($compiler, $src_file, $exe, $out) = @_;
     my $res = 0;
@@ -233,7 +248,7 @@ sub run_crash_test($$) {
     my $res;
     $res = compile($COMPILER1, $test_file, "$EXE1$test_count", "$COMPILER_OUT1$test_count");
     if ($res) {
-        if (read_file("$COMPILER_OUT1$test_count", @tmp, $match)) {
+        if (read_file_with_substring("$COMPILER_OUT1$test_count", @tmp, $match)) {
 	    print "$indent crash string $match found for $test_file with $COMPILER1\n";
             return 1;
         }
