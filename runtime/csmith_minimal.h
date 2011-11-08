@@ -28,6 +28,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+extern int printf (const char *, ...);
+
 // FIXME-- need more versions, and a way to figure out which is needed
 #include "custom_stdint_x86.h"
 
@@ -59,8 +61,6 @@ static inline void crc32_gentab (void)
 #define _CSMITH_BITFIELD(x) ((x>32)?(x%32):x)
 
 int crc32_context;
-
-extern int printf (const char *, ...);
 
 #ifdef TCC
 int strcmp (const char *s1, const char *s2)
