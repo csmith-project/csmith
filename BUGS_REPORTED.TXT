@@ -1,8 +1,8 @@
 ===================================================================
 
 11/07/2011 (total 396)
-  1 clang crash bug reported
-  http://llvm.org/bugs/show_bug.cgi?id=11327
+  1 gcc wrong code bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=51023
 
 08/10/2011 (total 395)
   1 gcc crash bug reported by Arthur O'Dwyer
