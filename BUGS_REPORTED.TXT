@@ -1,5 +1,9 @@
 ===================================================================
 
+11/08/2011 (total 397)
+  http://llvm.org/bugs/show_bug.cgi?id=11335
+  1 llvm crash bug reported
+
 11/07/2011 (total 396)
   1 gcc wrong code bug reported
   http://gcc.gnu.org/bugzilla/show_bug.cgi?id=51023
