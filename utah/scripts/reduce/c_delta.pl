@@ -27,23 +27,7 @@
 
 # TODO:
 
-# add a global termination constraint-- reduce size across all passes
-
 # turn a union type into a struct
-# remove argument from function, including all calls
-# transform a function to return void
-# inline a function call
-#   only for small functions, and only when delta has already
-#   gotten pretty far
-# remove function call from its enclosing expression
-#   look for preceding semicolon or open curly brace
-# move arguments and locals to global scope
-# remove level of pointer indirection
-# remove array dimension
-# do copy propagation
-#   especially try to replace calls and arguments with available exprs
-# replace for-loops with expressions guessed from initializers
-#   guess that it executes 0 and 1 times
 
 # get speedup by adding fast bailouts from test scripts
 #   super-fast: just runs one compiler at -O0 look for syntactical correctness
@@ -71,9 +55,6 @@
 # need to measure some runs and estimate the values of constants
 
 # watch for unexpected abnormal compiler outputs
-
-# long term: rewrite this tool to operate on ASTs
-#   need a tool that can pretty-print almost exactly the original code
 
 ######################################################################
 
