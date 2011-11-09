@@ -1,5 +1,9 @@
 ===================================================================
 
+11/09/2011 (total 404)
+  1 gcc crash bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=51070
+
 11/09/2011 (total 403)
   1 gcc crash bug reported
   http://gcc.gnu.org/bugzilla/show_bug.cgi?id=51069
