@@ -1,9 +1,5 @@
 ===================================================================
 
-11/11/2011 (total 407)
-  1 clang crash bug reported
-  http://llvm.org/bugs/show_bug.cgi?id=11360
-
 11/10/2011 (total 406)
   1 clang crash bug reported
   http://llvm.org/bugs/show_bug.cgi?id=11357
