@@ -82,13 +82,7 @@ my $bit = "\\||\\&|\\^|\\<\\<|\\>\\>";
 my $binop = "($arith)|($comp)|($logic)|($bit)|(\\-\\>)";
 my $border = "[\\*\\{\\(\\[\\:\\,\\}\\)\\]\\;\\,]";
 my $borderorspc = "(($border)|(\\s))";
-my $functype = "(($varnum)\\s*(\\*\\s*)?)*";
 my $fname = "(?<fname>$varnum)";
-my $funcstart_free = "$functype\\s+(?<fname>$varnum)\\s*$RE{balanced}{-parens=>'()'}";
-my $funcstart = "$functype\\s+XXX\\s*$RE{balanced}{-parens=>'()'}";
-my $proto = "$funcstart;";
-my $func = "$funcstart\\s*$RE{balanced}{-parens=>'{}'}";
-my $func_free = "$funcstart_free\\s*$RE{balanced}{-parens=>'{}'}";
 my $call = "$varnum\\s*$RE{balanced}{-parens=>'()'}";
 
 # these match without additional qualification
@@ -115,11 +109,16 @@ my @regexes_to_replace = (
     ["\\-", ""],
     ["\\!", ""],
     ["\\~", ""],
-    ["struct.*?;", ""],
-    ["union.*?;", ""],
-    ["enum.*?;", ""],
+    ["struct(.*?);", ""],
+    ["union(.*?);", ""],
+    ["enum(.*?);", ""],
+    ["struct(.*);", ""],
+    ["union(.*);", ""],
+    ["enum(.*);", ""],
     ['"(.*?)"', ""],
     ['"(.*?)",', ""],
+    ['"(.*)"', ""],
+    ['"(.*)",', ""],
     );
 
 # these match when preceded and followed by $borderorspc
@@ -137,8 +136,9 @@ my @delimited_regexes_to_replace = (
     ["for", ""],
     ["\"(.*)\"", ""],
     ["\'(.*)\'", ""],
+    ["\"(.*?)\"", ""],
+    ["\'(.*?)\'", ""],
     ["if\\s+\\(.*?\\)", ""],
-    # ["($functype)\\s*($varnum)\\s*$RE{balanced}{-parens=>'()'}\\s*$RE{balanced}{-parens=>'{}'}", ""],
     ["$call,", "0"],
     ["$call,", ""],
     ["$call", "0"],
@@ -318,42 +318,6 @@ sub sanity_check () {
     print "successful\n";
 }
 
-sub find_func () {
-    my $first = substr($prog, 0, $pos);
-    my $rest = substr($prog, $pos);
-    my $proto2 = $proto;
-    die if (!($proto2 =~ s/XXX/$fname/));
-    my $proto_start;
-    my $proto_end;
-    my $func_start;
-    my $func_end;
-    my $funcname;
-    if ($rest =~ /^($proto2)/) {
-	my $realproto = $1;
-	$proto_start = length($first) + $-[0];
-	$proto_end = length($first) + $+[0];
-	$funcname = $+{fname};
-	print "found prototype for '$funcname'\n";
-	my $func2 = $func;
-	die if (!($func2 =~ s/XXX/$funcname/));
-	if ($rest =~ /($func2)/) {
-	    my $body = $1;
-	    $func_start = length ($first) + $-[0];
-	    $func_end = length ($first) + $+[0];
-	    print "got body as well\n";
-	}
-    } else {
-	if ($rest =~ /^($func_free)/) {
-	    my $body = $1;
-	    $funcname = $+{fname};
-	    $func_start = length ($first) + $-[0];
-	    $func_end = length ($first) + $+[0];
-	    print "got only body for $funcname\n";
-	}
-    }
-    return ($funcname, $proto_start, $proto_end, $func_start, $func_end);
-}
-
 sub uniq_func ($) {
     (my $s) = @_;
     for (my $i=0; $i<1000; $i++) {
@@ -392,7 +356,7 @@ sub delta_pass ($) {
 		my $first = substr($prog, 0, $pos);
 		my $rest = substr($prog, $pos);
 		my $rrest = $rest;
-		if ($rest =~ s/(^$str)/$repl/) {
+		if ($rest =~ s/(^$str)/$repl/s) {
 		    my $before = $1;
 		    my $zz1 = $rest;
 		    my $zz2 = $rrest;
@@ -429,7 +393,7 @@ sub delta_pass ($) {
 		next if ($repl =~ /1\s*,/ && $rest =~ /^($borderorspc)1,$borderorspc/);
 
 		my $rrest = $rest;
-		if ($rest =~ s/^(?<delim1>$borderorspc)(?<str>$str)(?<delim2>$borderorspc)/$+{delim1}$repl$+{delim2}/) {
+		if ($rest =~ s/^(?<delim1>$borderorspc)(?<str>$str)(?<delim2>$borderorspc)/$+{delim1}$repl$+{delim2}/s) {
 		    my $before = $+{str};
 		    my $zz1 = $rest;
 		    my $zz2 = $rrest;
@@ -496,34 +460,10 @@ sub delta_pass ($) {
 		$prog = $first.$rest;
 		$worked |= delta_test ($method, 0);
 	    }
-	} elsif ($method eq "move_func") {
-	    (my $func_name, my $proto_start, my $proto_end, my $func_start, my $func_end) = find_func();
-	    if (defined($proto_start) && defined($func_start)) {
-		my $proto = substr ($prog, $proto_start, $proto_end - $proto_start);
-		my $bod = substr ($prog, $func_start, $func_end - $func_start, "");
-		substr ($prog, $proto_start, $proto_end - $proto_start) = $bod;
-		print "replacing < $proto > with < $bod >\n";	       
-	        $worked |= delta_test ($method, 0);
-		$pos += $proto_end - $proto_start;
-	    }
-	} elsif ($method eq "del_args") {
-	    (my $func_name, my $proto_start, my $proto_end, my $func_start, my $func_end) = find_func();
-	    if (defined ($func_name) && !defined ($funcs_seen{$func_name})) {
-		$funcs_seen{$func_name} = 1;
-		if (defined($proto_start)) {
-		    my $proto = substr ($prog, $proto_start, $proto_end - $proto_start);
-		    die if (!($proto =~ /($RE{balanced}{-parens=>'()'})/));
-		    my $proto_args = $1;
-		    substr ($proto_args, 0, 1) = "";
-		    substr ($proto_args, 0, -1) = "";
-		    my @proto_list = split /,/, $proto_args;
-		    $pos += $proto_end - $proto_start;
-		}
-	    }
 	} elsif ($method eq "ternary") {
 	    my $first = substr($prog, 0, $pos);
 	    my $rest = substr($prog, $pos);
-	    if ($rest =~ s/^(?<del1>$borderorspc)(?<a>$varnumexp)\s*\?\s*(?<b>$varnumexp)\s*:\s*(?<c>$varnumexp)(?<del2>$borderorspc)/$+{del1}$+{b}$+{del2}/) {
+	    if ($rest =~ s/^(?<del1>$borderorspc)(?<a>$varnumexp)\s*\?\s*(?<b>$varnumexp)\s*:\s*(?<c>$varnumexp)(?<del2>$borderorspc)/$+{del1}$+{b}$+{del2}/s) {
 		$prog = $first.$rest;
 		my $n1 = "$+{del1}$+{a} ? $+{b} : $+{c}$+{del2}";
 		my $n2 = "$+{del1}$+{b}$+{del2}";
@@ -532,7 +472,7 @@ sub delta_pass ($) {
 	    }	    
 	    $first = substr($prog, 0, $pos);
 	    $rest = substr($prog, $pos);
-	    if ($rest =~ s/^(?<del1>$borderorspc)(?<a>$varnumexp)\s*\?\s*(?<b>$varnumexp)\s*:\s*(?<c>$varnumexp)(?<del2>$borderorspc)/$+{del1}$+{c}$+{del2}/) {
+	    if ($rest =~ s/^(?<del1>$borderorspc)(?<a>$varnumexp)\s*\?\s*(?<b>$varnumexp)\s*:\s*(?<c>$varnumexp)(?<del2>$borderorspc)/$+{del1}$+{c}$+{del2}/s) {
 		$prog = $first.$rest;
 		my $n1 = "$+{del1}$+{a} ? $+{b} : $+{c}$+{del2}";
 		my $n2 = "$+{del1}$+{c}$+{del2}";
@@ -542,7 +482,7 @@ sub delta_pass ($) {
 	} elsif ($method eq "shorten_ints") {
 	    my $first = substr($prog, 0, $pos);
 	    my $rest = substr($prog, $pos);
-	    if ($rest =~ s/^(?<pref>$borderorspc(\\-|\\+)?(0|(0[xX]))?)(?<del>[0-9a-fA-F])(?<numpart>[0-9a-fA-F]+)(?<suf>[ULul]*$borderorspc)/$+{pref}$+{numpart}$+{suf}/) {
+	    if ($rest =~ s/^(?<pref>$borderorspc(\\-|\\+)?(0|(0[xX]))?)(?<del>[0-9a-fA-F])(?<numpart>[0-9a-fA-F]+)(?<suf>[ULul]*$borderorspc)/$+{pref}$+{numpart}$+{suf}/s) {
 		$prog = $first.$rest;
 		my $n1 = "$+{pref}$+{del}$+{numpart}$+{suf}";
 		my $n2 = "$+{pref}$+{numpart}$+{suf}";
@@ -552,7 +492,7 @@ sub delta_pass ($) {
 	    $first = substr($prog, 0, $pos);
 	    $rest = substr($prog, $pos);
 	    my $orig_rest = $rest;
-	    if ($rest =~ s/^(?<pref1>$borderorspc)(?<pref2>(\\-|\\+)?(0|(0[xX]))?)(?<numpart>[0-9a-fA-F]+)(?<suf>[ULul]*$borderorspc)/$+{pref1}$+{numpart}$+{suf}/ && ($rest ne $orig_rest)) {
+	    if ($rest =~ s/^(?<pref1>$borderorspc)(?<pref2>(\\-|\\+)?(0|(0[xX]))?)(?<numpart>[0-9a-fA-F]+)(?<suf>[ULul]*$borderorspc)/$+{pref1}$+{numpart}$+{suf}/s && ($rest ne $orig_rest)) {
 		$prog = $first.$rest;
 		my $n1 = "$+{pref1}$+{pref2}$+{numpart}$+{suf}";
 		my $n2 = "$+{pref1}$+{numpart}$+{suf}";
@@ -562,7 +502,7 @@ sub delta_pass ($) {
 	    $first = substr($prog, 0, $pos);
 	    $rest = substr($prog, $pos);
 	    $orig_rest = $rest;
-	    if ($rest =~ s/^(?<pref>$borderorspc(\\-|\\+)?(0|(0[xX]))?)(?<numpart>[0-9a-fA-F]+)(?<suf1>[ULul]*)(?<suf2>$borderorspc)/$+{pref}$+{numpart}$+{suf2}/ && ($rest ne $orig_rest)) {
+	    if ($rest =~ s/^(?<pref>$borderorspc(\\-|\\+)?(0|(0[xX]))?)(?<numpart>[0-9a-fA-F]+)(?<suf1>[ULul]*)(?<suf2>$borderorspc)/$+{pref}$+{numpart}$+{suf2}/s && ($rest ne $orig_rest)) {
 		$prog = $first.$rest;
 		my $n1 = "$+{pref}$+{numpart}$+{suf1}$+{suf2}";
 		my $n2 = "$+{pref}$+{numpart}$+{suf2}";
@@ -626,8 +566,6 @@ my %all_methods = (
     "all_blanks" => 0,
     "blanks" => 1,
     "crc" => 1,
-    # "move_func" => 2,
-    # "del_args" => 2,
     "brackets" => 2,
     "ternary" => 2,
     "parens" => 3,
