@@ -4,6 +4,37 @@ This file is not expected to be interseting/useful for people other
 than Csmith's developers.  It's not particularly up to date either.
 
 -------------------------------------------------------------------------------
+Mail sent by John on 11/11/2011
+
+- make a "2.1" release.  Xuejun, Eric, Yang -- is there anything on
+  your TODO lists before we make this release?  Xuejun, don't you have
+  an unfixed bug or two from Pascal?
+
+- support "swarm testing" (see our ICSE submission on my papers
+  page). This is already done in my (old) drivers, but a few things
+  need to be redone.  If someone wants to do this for the new Csmith
+  drivers, that would be good.
+
+- print platform information at the top of each generated random test
+
+- add command line flags to disable generation of: loops,
+  conditionals, shifts, arithmetic (outside of loops and checksum)
+
+- add a flag that switches between initializing all / none / random
+  global variables
+
+- support generating these features: (limited) type casts, ternary
+  conditional operator, floating point math, switch statments -- all
+  of these are easy!  Don't make me start hacking this stuff in,
+  folks.
+
+A few other features we want:
+
+- the "register" qualifier (trivial!)
+
+- memset, memcpy, bzero, etc.
+
+-------------------------------------------------------------------------------
 
 + Come up with a better naming convention for "platform" files for csmith
   itself, versus "platform" files that make up the runtime of generated
@@ -14,33 +45,6 @@ than Csmith's developers.  It's not particularly up to date either.
   the conditionally compiled functions are invoked by csmith itself, not by
   the generated programs.  (See how confusing it is to call everything
   "platform*"?)
-
--------------------------------------------------------------------------------
-Yang's working list:
-
-  - generating several groups of outputs within certain exhaustive depth, e.g,
-    all pointer operations, binary operations, etc;
-
-  - better delta implemetation. Ideas:
-    * remove the usage of variable without affecting the function summary;
-    * replace function calls with "equivalent" variables, then remove unused
-      functions;
-
-  - exhaustively generate code based on some shapes, e.g,
-    csmith reads a configuration which looks like:
-    if (express) {
-      assignment;
-      assignment;
-    }
-
-    then it will only generate code with respect to the shape configuration. 
-
-  - make csmith to take symbolic inputs and try to run it over splat:
-    http://www.cs.ucla.edu/~rxu/splat.html
-      
-Xuejun's TODO:
-
-- Purposely generating unsafe code
 
 -------------------------------------------------------------------------------
 csmith output should compile as C++
@@ -74,55 +78,13 @@ coverage.  this amounts to:
   - overall amount of branch coverage 
 
 -------------------------------------------------------------------------------
-arrays:
-
-- have a type system similar to Deputy where for every pointer,
-csmith knows a lower bound on the number of items that are pointed
-to
-
-- optionally, emit deputy annotations
-
-- array assignment operators:
-  - create sub-array
-  - assign same size
-  - assign longer to shorter
-
-- feature we want: optionally generate unsafe code that sometimes
-  accesses null pointers and out-of-bounds memory cells; we'll use
-  this to find bugs in safe language implementations
-
--------------------------------------------------------------------------------
-extension: make special bounded integers that always live within some range;
-use these in switches and in array indices
-
-  - emit special for-loops that increment/decrement these
-
-  - assign into them using expressions like this:
-
-    bounded_int = unbounded_int % bound;
-
-    bounded_int = (unbounded_unsigned_int>bound)?0:unbounded_unsigned_int;
-
--------------------------------------------------------------------------------
 CSMITH C FEATURES TO GENERATE
-
-assignments in expressions
-
-++, --
-
-same variable on LHS and RHS of assignments
-
-+=, -=, /=, *=, %=, <<=, >>= require wrappers-- write these
 
 memset, memcpy, and other heavily optimized intrinsics
 
 ->
 
-?:
-
 register
-
-comma operator
 
 switches
 
@@ -152,9 +114,9 @@ Can generate "restrict" qualifiers
   http://www.cs.pitt.edu/~mock/papers/clei2004.pdf
 
 -------------------------------------------------------------------------------
-Repair the effect sanity-checking in CGContext.  Basically, check that the
-thing you are doing doesn't interfere with the context.  Note that this is too
-broad:
+Repair the effect sanity-checking in CGContext.  Basically, check that
+the thing you are doing doesn't interfere with the context.  Note that
+this is too broad:
 
 void
 CGContext::sanity_check(void)
@@ -164,12 +126,13 @@ CGContext::sanity_check(void)
 	}
 }
 
-Checking for side-effects only is no good in general.  We can usually have
-side-effects in both the context and accum, as long as they do not overlap.
+Checking for side-effects only is no good in general.  We can usually
+have side-effects in both the context and accum, as long as they do
+not overlap.
 
 -------------------------------------------------------------------------------
-Fix what "side_effect_free" means.  It should either mean side-effect free, or
-it should be renamed to "volatile-free" or similar.  See:
+Fix what "side_effect_free" means.  It should either mean side-effect
+free, or it should be renamed to "volatile-free" or similar.  See:
 
 void
 Effect::write_var(const Variable *v)
