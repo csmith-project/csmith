@@ -87,7 +87,7 @@ public:
 
 	~SafeOpFlags();
 
-	static std::vector<std::string> wrapper_names;;
+	static std::vector<std::string> wrapper_names;
 private:
 	bool op1_;
 	bool op2_;
