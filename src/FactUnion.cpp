@@ -70,8 +70,8 @@ FactUnion::get_last_written_type(void) const
 {
 	assert(var->type && var->type->eType == eUnion);
 	if (is_top() || is_bottom()) return NULL;
-	assert (last_written_fid >= 0 && last_written_fid < (int)(var->type->fields.size()));
-	return var->type->fields[last_written_fid];
+	assert (last_written_fid >= 0 && last_written_fid < (int)(var->field_vars.size()));
+	return var->field_vars[last_written_fid]->type;
 }
 
 std::vector<const Fact*>
@@ -133,8 +133,14 @@ FactUnion::abstract_fact_for_assign(const std::vector<const Fact*>& facts, const
 	for (size_t i=0; i<lvars.size(); i++) {
 		const Variable* v = lvars[i];
 		const FactUnion* fu = 0;
-		if (v->is_union_field()) { 
-			fu = make_fact(v->field_var_of, v->get_field_id());
+		if (v->is_union_field()) {  
+			if (lvars.size() > 1) {
+				// if writing to an union field is uncertain (due to dereference of a pointer which may points to an 
+				// union field or something else), We mark the union as unreadable
+				fu = make_fact(v->field_var_of, BOTTOM);
+			} else {
+				fu = make_fact(v->field_var_of, v->get_field_id());
+			}
 		} else if (v->is_inside_union_field() && (v->type->has_padding() || v->is_packed_after_bitfield())) {
 			fu = make_fact(v->get_container_union(), BOTTOM);
 		}
