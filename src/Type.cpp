@@ -766,7 +766,7 @@ Type::get_bitfield_length(int length_flag)
 {
 	int max_length = CGOptions::int_size() * 8;
 	assert(max_length > 0);
-	int length;
+	int length = 0;
 	switch (length_flag) {
 	case ZERO_BITFIELD:
 		length = 0;

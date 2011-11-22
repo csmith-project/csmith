@@ -957,8 +957,8 @@ bool
 Probabilities::parse_line(std::string &error_msg, string &line)
 {
 	char c = StringUtils::first_nonspace_char(line);
-	bool rv;
-	bool is_equal;
+	bool rv = false;
+	bool is_equal = false;
 	if (c == '\0') {
 		assert("parse empty line, cannot happen!\n" && 0);
 	}

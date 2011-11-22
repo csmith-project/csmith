@@ -66,7 +66,7 @@ AbsRndNumGenerator::~AbsRndNumGenerator()
 AbsRndNumGenerator*
 AbsRndNumGenerator::make_rndnum_generator(RNDNUM_GENERATOR impl, const unsigned long seed)
 {
-	AbsRndNumGenerator *rImpl;
+	AbsRndNumGenerator *rImpl = 0;
 
 	AbsRndNumGenerator::seedrand(seed);
 	switch (impl) {
