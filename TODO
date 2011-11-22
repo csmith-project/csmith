@@ -4,11 +4,6 @@ This file is not expected to be interseting/useful for people other
 than Csmith's developers.  It's not particularly up to date either.
 
 -------------------------------------------------------------------------------
-Mail sent by John on 11/11/2011
-
-- make a "2.1" release.  Xuejun, Eric, Yang -- is there anything on
-  your TODO lists before we make this release?  Xuejun, don't you have
-  an unfixed bug or two from Pascal?
 
 - support "swarm testing" (see our ICSE submission on my papers
   page). This is already done in my (old) drivers, but a few things
@@ -23,16 +18,33 @@ Mail sent by John on 11/11/2011
 - add a flag that switches between initializing all / none / random
   global variables
 
-- support generating these features: (limited) type casts, ternary
-  conditional operator, floating point math, switch statments -- all
-  of these are easy!  Don't make me start hacking this stuff in,
-  folks.
+- generate (limited) type casts
 
-A few other features we want:
+- generate ternary conditional operator
 
-- the "register" qualifier (trivial!)
+- generate floating point math
 
-- memset, memcpy, bzero, etc.
+- generate switch statments with random fallthroughs
+
+- generate the "register" qualifier (trivial!)
+
+- generate memset, memcpy, bzero, etc.
+
+- generate simple uses of malloc/free
+
+- generate C++11 memory model operations
+  - first, just atomics
+
+- make output compile as C++
+
+- Carlos Scheiddeger says:
+
+"Most graphics cards support some form of OpenGL acceleration, and
+these days this means supporting GLSL, which is a simple C
+derivative. The reason this is at all interesting is that with WebGL,
+(a subset of) GLSL is part of the attack surface for web
+browsers. Break graphics drivers sufficiently bad and you can kernel
+panic a computer from an HTML page."
 
 -------------------------------------------------------------------------------
 
@@ -47,25 +59,6 @@ A few other features we want:
   "platform*"?)
 
 -------------------------------------------------------------------------------
-csmith output should compile as C++
-
--------------------------------------------------------------------------------
-all program features should be controllable (either on/off, or using
-a parameter) from the command line
-
-basically, if we invoke csmith with all features turned off, it should
-emit an empty func_1() 100% of the time
-
--------------------------------------------------------------------------------
-add a command line option 
-
-  -func_1_parameters=x,y,z
-
-that makes func_1() take integer parameters with types x, y, z
-
-the main in csmith should make random values to pass to func_1
-
--------------------------------------------------------------------------------
 add a command line option where random programs report on their branch
 coverage.  this amounts to:
 
@@ -76,17 +69,6 @@ coverage.  this amounts to:
 - print coverage information at the end
   - for each branch: was it taken? not-taken?
   - overall amount of branch coverage 
-
--------------------------------------------------------------------------------
-CSMITH C FEATURES TO GENERATE
-
-memset, memcpy, and other heavily optimized intrinsics
-
-->
-
-register
-
-switches
 
 -------------------------------------------------------------------------------
 GENERATING TYPE CASTS
