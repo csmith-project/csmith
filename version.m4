@@ -29,7 +29,7 @@
 
 ###############################################################################
 
-m4_define([CSMITH_VERSION],   [2.1.0])
+m4_define([CSMITH_VERSION],   [2.2.0])
 m4_define([CSMITH_BUGREPORT], [csmith-bugs@flux.utah.edu])
 m4_define([CSMITH_URL],       [http://embed.cs.utah.edu/csmith/])
 
