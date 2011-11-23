@@ -44,7 +44,7 @@
 
 #include "platform.h"
 
-#if (TARGET_CPU_powerpc == 1)
+#if (TARGET_CPU_powerpc == 1 || TARGET_CPU_powerpc64 == 1)
 /*For PPC, got from:
 http://lists.ozlabs.org/pipermail/linuxppc-dev/1999-October/003889.html
 */
