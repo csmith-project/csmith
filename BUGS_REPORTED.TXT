@@ -4,17 +4,13 @@
   1 gcc crash bug reported
   http://gcc.gnu.org/bugzilla/show_bug.cgi?id=51247
 
-11/20/2011 (total 410)
+11/20/2011 (total 409)
   1 gcc crash bug reported
   http://gcc.gnu.org/bugzilla/show_bug.cgi?id=51246
 
-11/20/2011 (total 409)
+11/20/2011 (total 408)
   1 gcc crash bug reported
   http://gcc.gnu.org/bugzilla/show_bug.cgi?id=51245
-
-11/16/2011 (total 408)
-  1 gcc wrong code bug reported
-  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=51176
 
 11/11/2011 (total 407)
   1 clang crash bug reported
