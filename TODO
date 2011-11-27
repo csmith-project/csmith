@@ -5,10 +5,14 @@ than Csmith's developers.  It's not particularly up to date either.
 
 -------------------------------------------------------------------------------
 
+- incrementally add C++ features
+
 - support "swarm testing" (see our ICSE submission on my papers
   page). This is already done in my (old) drivers, but a few things
   need to be redone.  If someone wants to do this for the new Csmith
   drivers, that would be good.
+
+- make swarm use all options that make sense
 
 - print platform information at the top of each generated random test
 
@@ -22,6 +26,8 @@ than Csmith's developers.  It's not particularly up to date either.
 
 - generate ternary conditional operator
 
+- add a flag to avoid copy-by-value of structs
+
 - generate floating point math
 
 - generate switch statments with random fallthroughs
@@ -31,6 +37,7 @@ than Csmith's developers.  It's not particularly up to date either.
 - generate memset, memcpy, bzero, etc.
 
 - generate simple uses of malloc/free
+  - should span parts of structs, arrays, scalars, etc.
 
 - generate C++11 memory model operations
   - first, just atomics
@@ -45,6 +52,8 @@ derivative. The reason this is at all interesting is that with WebGL,
 (a subset of) GLSL is part of the attack surface for web
 browsers. Break graphics drivers sufficiently bad and you can kernel
 panic a computer from an HTML page."
+
+- also, we should generate OpenCL / CUDA code
 
 -------------------------------------------------------------------------------
 
