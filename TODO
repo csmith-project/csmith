@@ -5,7 +5,11 @@ than Csmith's developers.  It's not particularly up to date either.
 
 -------------------------------------------------------------------------------
 
-- incrementally add C++ features
+- incrementally add C++ features; which ones have high value but are
+  easy to generate?
+  - exceptions
+  - limited use of objects
+  - atomics
 
 - support "swarm testing" (see our ICSE submission on my papers
   page). This is already done in my (old) drivers, but a few things

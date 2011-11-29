@@ -29,6 +29,7 @@
 
 # turn a union type into a struct
 # add more things like while (x) { y } -> if (x) { y }
+# format string reduction
 
 # get speedup by adding fast bailouts from test scripts
 #   super-fast: just runs one compiler at -O0 look for syntactical correctness
