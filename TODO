@@ -5,6 +5,10 @@ than Csmith's developers.  It's not particularly up to date either.
 
 -------------------------------------------------------------------------------
 
+- optionally generate GCC attributes: stdcall, may_alias, ...
+
+- generate openmp pragmas 
+
 - incrementally add C++ features; which ones have high value but are
   easy to generate?
   - exceptions
