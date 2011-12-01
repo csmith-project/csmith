@@ -88,6 +88,14 @@ my @gcc_opts2 = (
     "-O3",
     );
 
+my @gcc_opts9 = (
+    "-O0 -fwrapv",
+    "-O1 -fwrapv",
+    "-O2 -fwrapv",
+    "-Os -fwrapv",
+    "-O3 -fwrapv",
+    );
+
 my $DRAGONEGG = "-fplugin=/home/regehr/z/compiler-source/dragonegg/dragonegg.so";
 
 my @dragonegg_opts = (
@@ -531,24 +539,27 @@ my @llvms = (
 
 my @compilers_to_test = (
     
-    \@gcc320,
-    \@gcc330,
-    \@gcc340,
-    \@gcc400,
-    \@gcc410,
-    \@gcc420,
-    \@gcc430,
-    \@gcc440,
-    \@gcc450,
-    \@gcc460,
-    \@clang26,
-    \@clang27,
-    \@clang28,
-    \@clang29,
+    \@clang,
+    #\@gcccurrent,
     
-    \@icc,
-    \@suncc,
-    \@open64,
+    #\@gcc320,
+    #\@gcc330,
+    #\@gcc340,
+    #\@gcc400,
+    #\@gcc410,
+    #\@gcc420,
+    #\@gcc430,
+    #\@gcc440,
+    #\@gcc450,
+    #\@gcc460,
+    #\@clang26,
+    #\@clang27,
+    #\@clang28,
+    #\@clang29,
+    
+    #\@icc,
+    #\@suncc,
+    #\@open64,
 
     # \@tcc,
 
@@ -558,9 +569,6 @@ my @compilers_to_test = (
 
     #\@gcc,
 
-    #\@clang,
-    #\@gcccurrent,
-    
     #\@clangpp,
     #\@gppcurrent,
 

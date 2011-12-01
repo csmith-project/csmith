@@ -19,8 +19,10 @@ my $CSMITH_TIMEOUT = 180;
 
 my $PROVIDE_SEED = 1;
 
+
 my $XTRA = "";
 
+#$XTRA .= "--no-safe-math";
 #$XTRA .= "--force-non-uniform-arrays ";
 #$XTRA .= "--no-unions ";
 #$XTRA .= "--no-unions ";
