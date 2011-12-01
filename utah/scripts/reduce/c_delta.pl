@@ -585,10 +585,11 @@ my %all_methods = (
 
 sub usage() {
     print "usage: c_delta.pl test_script.sh file.c [method [method ...]]\n";
-    print "available methods are --all or:\n";
+    print "available methods are:\n";
     foreach my $method (keys %all_methods) {
 	print "  --$method\n";
     }
+    print "Default strategy is trying all methods.\n";
     die;
 }
 
@@ -607,27 +608,33 @@ if (!(-e $cfile)) {
 }
 
 my %methods = ();
-usage if (!defined(@ARGV));
 foreach my $arg (@ARGV) {
-    if ($arg eq "--all") {
-	foreach my $method (keys %all_methods) {
+    my $found = 0;
+    foreach my $method (keys %all_methods) {
+	if ($arg eq "--$method") {
 	    $methods{$method} = 1;
-	}
-    } else {
-	my $found = 0;
-	foreach my $method (keys %all_methods) {
-	    if ($arg eq "--$method") {
-		$methods{$method} = 1;
-		$found = 1;
-		last;
-	    }
-	}
-	if (!$found) {
-	    print "unknown method '$arg'\n";
-	    usage();
+	    $found = 1;
+	    last;
 	}
     }
+    if (!$found) {
+	print "unknown method '$arg'\n";
+	usage();
+    }
 }
+
+if (scalar (keys %methods) == 0) {
+    # default to all methods
+    foreach my $method (keys %all_methods) {
+	$methods{$method} = 1;
+    }
+}
+
+#print "methods: ";
+#foreach (sort keys %methods) {
+#    print "$_ ";
+#}
+#print "\n";
 
 system "cp $cfile $cfile.orig";
 system "cp $cfile $cfile.bak";
