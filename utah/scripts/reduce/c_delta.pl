@@ -27,6 +27,8 @@
 
 # TODO:
 
+# add a quiet mode
+# work from back to front?
 # turn a union type into a struct
 # add more things like while (x) { y } -> if (x) { y }
 # format string reduction
@@ -91,8 +93,10 @@ my $call = "$varnum\\s*$RE{balanced}{-parens=>'()'}";
 
 # these match without additional qualification
 my @regexes_to_replace = (
+    ["$RE{balanced}{-parens=>'<>'}", ""],
     ["$RE{balanced}{-parens=>'()'}", ""],
     ["$RE{balanced}{-parens=>'{}'}", ""],
+    ["namespace(.*?)$RE{balanced}{-parens=>'{}'}", ""],
     ["=\\s*$RE{balanced}{-parens=>'{}'}", ""],
     ["\\:\\s*[0-9]+\\s*;", ";"],
     ["\\;", ""],
@@ -111,6 +115,8 @@ my @regexes_to_replace = (
     ["\\>\\>\\=", "="],
     ["\\+", ""],
     ["\\-", ""],
+    [":", ""],
+    ["::", ""],
     ["\\!", ""],
     ["\\~", ""],
     ["while", "if"],
@@ -155,6 +161,10 @@ my @subexprs = (
     "($fullvar)(\\s*)($binop)",
     "($binop)(\\s*)($fullvar)",
     "($fullvar)",
+    ":(\\s*)($fullvar)",
+    "::(\\s*)($fullvar)",
+    "($fullvar)(\\s*):",
+    "($fullvar)(\\s*)::",
     "($fullvar)(\\s*\\?\\s*)($fullvar)(\\s*\\:\\s*)($fullvar)",
     );
 
@@ -514,6 +524,26 @@ sub delta_pass ($) {
 		print "replacing $n1 with $n2\n";
 		$worked |= delta_test ($method, 0);
 	    }      
+	} elsif ($method eq "angles") {
+	    if (substr($prog, $pos, 1) eq "<") {
+		my $p2 = find_match ($pos+1,"<",">");
+		if ($p2 != -1) {
+		    die if (substr($prog, $pos, 1) ne "<");
+		    die if (substr($prog, $p2, 1) ne ">");
+
+		    my $del = substr ($prog, $pos, $p2-$pos+1, "");
+		    print "deleting '$del' at $pos--$p2 : ";
+		    my $res = delta_test ($method, 0);
+		    $worked |= $res;
+
+		    if (!$res) {
+			substr ($prog, $p2, 1) = "";
+			substr ($prog, $pos, 1) = "";
+			print "deleting at $pos--$p2 : ";
+			$worked |= delta_test ($method, 0);
+		    }
+		}
+	    }
 	} elsif ($method eq "parens") {
 	    if (substr($prog, $pos, 1) eq "(") {
 		my $p2 = find_match ($pos+1,"(",")");
@@ -571,6 +601,7 @@ my %all_methods = (
     "all_blanks" => 0,
     "blanks" => 1,
     "crc" => 1,
+    "angles" => 2,
     "brackets" => 2,
     "ternary" => 2,
     "parens" => 3,
