@@ -2,22 +2,20 @@
 
 ######################################################################
 #
-# This Delta debugger specifically targets C code. Its design point --
-# in two different senses -- is to be complementary to a line-based
-# Delta like this one:
+# This Delta debugger specifically targets C/C++ code. Its design
+# point -- in two different senses -- is to be complementary to 
+# the line-based delta tool:
 #
 #   http://delta.tigris.org/
 #
 # The first sense is that c_delta aims for maximum reduction and
 # specifically targets transformations not available to a
-# language-independent Delta debugger. For example, c_delta makes
-# coordinated changes across the whole program: remove an array
-# dimension, remove a function argument, reorder function calls.
+# language-independent Delta debugger.
 #
 # Second, c_delta is stupid in the sense that it generates a lot of
 # invalid code and also most of its changes do not reduce program size
 # by a large amount. Thus, it is best used as a second pass with a
-# faster Delta like the Berkeley one trimming the obviously irrelevant
+# faster delta like the Berkeley one trimming the obviously irrelevant
 # code. Actually, generating syntactically invalid code is not a
 # performance problem at all: these are discarded very quickly be a
 # typical "interestingness" script. The vast majority of a Delta's
@@ -27,7 +25,9 @@
 
 # TODO:
 
-# add a quiet mode
+# use the "reduce" interface from the blog post
+# add a quiet mode -- only report progress
+# simplify the termination condition -- stop after 2 passes with no size decrease
 # work from back to front?
 # turn a union type into a struct
 # add more things like while (x) { y } -> if (x) { y }
@@ -189,6 +189,12 @@ for (my $n=0; $n<scalar(@regexes_to_replace); $n++) {
 for (my $n=0; $n<scalar(@delimited_regexes_to_replace); $n++) {
     $delimited_regex_worked{$n} = 0;
     $delimited_regex_failed{$n} = 0;
+}
+
+######################################################################
+
+sub reduce ($$$) {
+    (my $fn, my $command, my $number) = @_;
 }
 
 ######################################################################
