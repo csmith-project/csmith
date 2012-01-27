@@ -461,7 +461,25 @@ sub delta_pass ($) {
 		my $repl = uniq_func ($prog);
 		print "renaming $orig as $repl\n";
 		$prog =~ s/$orig/$repl/g;
-		$worked |= delta_test ($method, 0);
+		$worked |= delta_test ($method, 1);
+	    }
+	} elsif (
+	    $method eq "clang-remove-nested" ||
+	    $method eq "aggregate-to-scalar" ||
+	    $method eq "param-to-local" ||
+	    $method eq "return-void" ||
+	    $method eq "param-to-global" ||
+	    $method eq "local-to-global" 
+	    ) {
+	    write_file();
+	    my $x = $pos+1;
+	    my $res = runit ("clang_delta --transformation=$method --counter=$x  $cfile > foo");
+	    if ($res==0) {
+		system "mv foo $cfile";
+		read_file();
+		$worked |= delta_test ($method, 1);
+	    } else {
+		return 0;
 	    }
 	} elsif ($method eq "indent") {	    
 	    write_file();
@@ -617,6 +635,15 @@ my %all_methods = (
     "indent" => 15,
 
     );
+
+if (1) {
+    $all_methods{"clang-remove-nested"} = 10;
+    $all_methods{"aggregate-to-scalar"} = 10;
+    $all_methods{"local-to-global"} = 10;
+    $all_methods{"param-to-global"} = 10;
+    $all_methods{"param-to-local"} = 10;
+    $all_methods{"return-void"} = 10;
+}
  
 ############################### main #################################
 
