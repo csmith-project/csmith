@@ -464,7 +464,8 @@ sub delta_pass ($) {
 		$worked |= delta_test ($method, 1);
 	    }
 	} elsif (
-	    $method eq "clang-remove-nested" ||
+	    $method eq "remove-nested-function" ||
+	    $method eq "binop-simplification" ||
 	    $method eq "aggregate-to-scalar" ||
 	    $method eq "param-to-local" ||
 	    $method eq "return-void" ||
@@ -637,7 +638,8 @@ my %all_methods = (
     );
 
 if (1) {
-    $all_methods{"clang-remove-nested"} = 10;
+    $all_methods{"remove-nested-function"} = 10;
+    $all_methods{"binop-simplification"} = 10;
     $all_methods{"aggregate-to-scalar"} = 10;
     $all_methods{"local-to-global"} = 10;
     $all_methods{"param-to-global"} = 10;
