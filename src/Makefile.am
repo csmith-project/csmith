@@ -197,7 +197,7 @@ EXTRA_DIST = \
 	csmith.vcproj \
 	csmith.vcxproj
 
-GIT_HASH := $(shell (cd "$(top_srcdir)" && git show -s --format=%h . 2>/dev/null) || echo exported)
+GIT_HASH := $(shell "$(top_srcdir)/git-hash.sh" "$(top_srcdir)" || echo error)
 GIT_FLAG = -DGIT_VERSION=\"$(GIT_HASH)\"
 
 ## ENE: The idea of stuffing the target CPU name (a string) into a CPP symbol
