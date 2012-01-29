@@ -25,7 +25,9 @@
 
 # TODO:
 
-# use the "reduce" interface from the blog post
+# avoid the interface where read/write calls are required
+
+# use the "reduce" interface from the blog post?
 # add a quiet mode -- only report progress
 # simplify the termination condition -- stop after 2 passes with no size decrease
 # work from back to front?
@@ -286,6 +288,15 @@ my %method_worked = ();
 my %method_failed = ();
 my $old_size = 1000000000;
  
+sub sanity_check () {
+    print "sanity check... ";
+    my $res = run_test ();
+    if (!$res) {
+	die "test (and sanity check) fails";
+    }
+    print "successful\n";
+}
+
 sub delta_test ($$) {
     (my $method, my $ok_to_enlarge) = @_;
     my $len = length ($prog);
@@ -298,6 +309,7 @@ sub delta_test ($$) {
 	print "(hit) ";
 	print "failure\n";
 	read_file ();    
+	write_file ();
 	$bad_cnt++;
 	$method_failed{$method}++;
 	return 0;
@@ -330,15 +342,6 @@ sub delta_test ($$) {
     }
 }
 
-sub sanity_check () {
-    print "sanity check... ";
-    my $res = run_test ();
-    if (!$res) {
-	die "test (and sanity check) fails";
-    }
-    print "successful\n";
-}
-
 sub uniq_func ($) {
     (my $s) = @_;
     for (my $i=0; $i<1000; $i++) {
@@ -357,14 +360,15 @@ sub delta_pass ($) {
     $bad_cnt = 0;
     %funcs_seen = ();
 
+    print "\n";
+    print "========== starting pass <$method> ==========\n";
+
     if ($SANITY) {
 	sanity_check();
     }
 
-    print "\n";
-    print "========== starting pass <$method> ==========\n";
-
     while (1) {
+
 	return ($good_cnt > 0) if ($pos >= length ($prog));
 	my $worked = 0;
 
@@ -474,7 +478,7 @@ sub delta_pass ($) {
 	    ) {
 	    write_file();
 	    my $x = $pos+1;
-	    my $res = runit ("clang_delta --transformation=$method --counter=$x  $cfile > foo");
+	    my $res = runit ("clang_delta --transformation=$method --counter=$x $cfile > foo");
 	    if ($res==0) {
 		system "mv foo $cfile";
 		read_file();
@@ -638,12 +642,12 @@ my %all_methods = (
     );
 
 if (1) {
-    $all_methods{"remove-nested-function"} = 10;
-    $all_methods{"binop-simplification"} = 10;
     $all_methods{"aggregate-to-scalar"} = 10;
+    $all_methods{"binop-simplification"} = 10;
     $all_methods{"local-to-global"} = 10;
     $all_methods{"param-to-global"} = 10;
     $all_methods{"param-to-local"} = 10;
+    $all_methods{"remove-nested-function"} = 10;
     $all_methods{"return-void"} = 10;
 }
  
