@@ -1,5 +1,13 @@
 ===================================================================
 
+01/29/2011 (total 412)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=11882
+
+01/29/2011 (total 411)
+  1 clang crash bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=11881
+  
 11/20/2011 (total 410)
   1 gcc crash bug reported
   http://gcc.gnu.org/bugzilla/show_bug.cgi?id=51247
