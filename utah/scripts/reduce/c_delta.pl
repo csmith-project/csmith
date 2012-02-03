@@ -25,12 +25,15 @@
 
 # TODO:
 
+# add an option limiting the number of passes
+
 # avoid the interface where read/write calls are required
 
 # use the "reduce" interface from the blog post?
 # add a quiet mode -- only report progress
 # simplify the termination condition -- stop after 2 passes with no size decrease
 # work from back to front?
+#   also can back off a few instances upon success of a transformation
 # turn a union type into a struct
 # add more things like while (x) { y } -> if (x) { y }
 # format string reduction
@@ -474,6 +477,9 @@ sub delta_pass ($) {
 	    $method eq "param-to-local" ||
 	    $method eq "return-void" ||
 	    $method eq "param-to-global" ||
+	    $method eq "rename-var" ||
+	    $method eq "rename-fun" ||
+	    $method eq "rename-param" ||
 	    $method eq "local-to-global" 
 	    ) {
 	    write_file();
@@ -649,6 +655,9 @@ if (1) {
     $all_methods{"param-to-local"} = 10;
     $all_methods{"remove-nested-function"} = 10;
     $all_methods{"return-void"} = 10;
+    $all_methods{"rename-fun"} = 10;
+    $all_methods{"rename-var"} = 10;
+    $all_methods{"rename-param"} = 10;
 }
  
 ############################### main #################################
