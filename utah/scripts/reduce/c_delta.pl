@@ -72,6 +72,7 @@
 use strict;
 use Regexp::Common;
 use re 'eval';
+use File::Which;
 
 ######################################################################
 
@@ -647,7 +648,8 @@ my %all_methods = (
 
     );
 
-if (1) {
+my $clang_delta = File::Which::which ("clang_delta");
+if (defined($clang_delta)) {
     $all_methods{"aggregate-to-scalar"} = 10;
     $all_methods{"binop-simplification"} = 10;
     $all_methods{"local-to-global"} = 10;
