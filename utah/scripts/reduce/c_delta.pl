@@ -26,19 +26,12 @@
 # TODO:
 
 # add an option limiting the number of passes
-
-# avoid the interface where read/write calls are required
-
-# use the "reduce" interface from the blog post?
 # add a quiet mode -- only report progress
 # simplify the termination condition -- stop after 2 passes with no size decrease
-# work from back to front?
-#   also can back off a few instances upon success of a transformation
+# see if it's faster to work from back to front
 # turn a union type into a struct
 # add more things like while (x) { y } -> if (x) { y }
 # format string reduction
-# move same-type declarations into a compound declaration
-# shorten variable and function names
 
 # get speedup by adding fast bailouts from test scripts
 #   super-fast: just runs one compiler at -O0 look for syntactical correctness
@@ -237,19 +230,28 @@ my $cfile;
 my $test;
 my $trial_num = 0;   
 
-sub read_file () {
+sub read_file_helper () {
     open INF, "<$cfile" or die;
-    $prog = "";
+    my $xxprog = "";
     while (my $line = <INF>) {
-	$prog .= $line;
+	$xxprog .= $line;
     }
-    if (substr($prog, 0, 1) ne " ") {
-	$prog = " $prog";
+    if (substr($xxprog, 0, 1) ne " ") {
+	$xxprog = " $xxprog";
     }
-    if (substr ($prog, -1, 1) ne " ") {
-	$prog = "$prog ";
+    if (substr ($xxprog, -1, 1) ne " ") {
+	$xxprog = "$xxprog ";
     }
     close INF;
+    return $xxprog;
+}
+
+sub read_file () {
+    $prog = read_file_helper();
+}
+
+sub check_mem_and_disk_are_synced () {
+    die unless ($prog eq read_file_helper());
 }
 
 sub save_copy ($) {
@@ -301,8 +303,29 @@ sub sanity_check () {
     print "successful\n";
 }
 
+sub delta_step_fail($) {
+    (my $method) = @_;
+    print "failure\n";
+    system "cp $cfile.bak $cfile";
+    read_file();
+    $bad_cnt++;
+    $method_failed{$method}++;
+}
+    
+my $changed_on_disk = 0;
+
 sub delta_test ($$) {
     (my $method, my $ok_to_enlarge) = @_;
+
+    if ($changed_on_disk) {
+	read_file();
+	$changed_on_disk = 0;
+    } else {
+	write_file();
+    }
+
+    check_mem_and_disk_are_synced();
+
     my $len = length ($prog);
     print "[$pass_num $method ($pos / $len) s:$good_cnt f:$bad_cnt] ";
 
@@ -311,15 +334,10 @@ sub delta_test ($$) {
     if (defined($result)) {
 	$cache_hits++;
 	print "(hit) ";
-	print "failure\n";
-	read_file ();    
-	write_file ();
-	$bad_cnt++;
-	$method_failed{$method}++;
+	delta_step_fail($method);
 	return 0;
     }
     
-    write_file ();
     $result = run_test ();
     $cache{$prog} = $result;
     
@@ -337,11 +355,7 @@ sub delta_test ($$) {
 	$old_size = $size;
 	return 1;
     } else {
-	print "failure\n";
-	system "cp $cfile.bak $cfile";
-	read_file ();    
-	$bad_cnt++;
-	$method_failed{$method}++;
+	delta_step_fail($method);
 	return 0;
     }
 }
@@ -373,6 +387,8 @@ sub delta_pass ($) {
 
     while (1) {
 
+	check_mem_and_disk_are_synced();
+
 	return ($good_cnt > 0) if ($pos >= length ($prog));
 	my $worked = 0;
 
@@ -395,8 +411,6 @@ sub delta_pass ($) {
 			print "regex $n replacing '$before' with '$repl' : ";
 			$prog = $first.$rest;
 			if (delta_test ($method, 0)) {
-			    #print "\n\n$zz1\n\n";
-			    #print "\n\n$zz2\n\n";
 			    $worked = 1;
 			    $regex_worked{$n}++;
 			} else {
@@ -471,32 +485,20 @@ sub delta_pass ($) {
 		$prog =~ s/$orig/$repl/g;
 		$worked |= delta_test ($method, 1);
 	    }
-	} elsif (
-	    $method eq "remove-nested-function" ||
-	    $method eq "binop-simplification" ||
-	    $method eq "aggregate-to-scalar" ||
-	    $method eq "param-to-local" ||
-	    $method eq "return-void" ||
-	    $method eq "param-to-global" ||
-	    $method eq "rename-var" ||
-	    $method eq "rename-fun" ||
-	    $method eq "rename-param" ||
-	    $method eq "local-to-global" 
-	    ) {
-	    write_file();
+	} elsif ($method =~ /^clang\-(.*)$/) {
+	    my $how = $1;
 	    my $x = $pos+1;
-	    my $res = runit ("clang_delta --transformation=$method --counter=$x $cfile > foo");
+	    my $res = runit ("clang_delta --transformation=$how --counter=$x $cfile > foo");
 	    if ($res==0) {
 		system "mv foo $cfile";
-		read_file();
-		$worked |= delta_test ($method, 1);
+		$changed_on_disk = 1;
+		$worked |= delta_test ($how, 1);
 	    } else {
 		return 0;
 	    }
 	} elsif ($method eq "indent") {	    
-	    write_file();
 	    system "indent $INDENT_OPTS $cfile";
-	    read_file();
+	    $changed_on_disk = 1;
 	    $worked |= delta_test ($method, 1);
 	    return 0;
 	} elsif ($method eq "crc") {
@@ -649,19 +651,22 @@ my %all_methods = (
     );
 
 my $clang_delta = File::Which::which ("clang_delta");
-if (defined($clang_delta)) {
-    $all_methods{"aggregate-to-scalar"} = 10;
-    $all_methods{"binop-simplification"} = 10;
-    $all_methods{"local-to-global"} = 10;
-    $all_methods{"param-to-global"} = 10;
-    $all_methods{"param-to-local"} = 10;
-    $all_methods{"remove-nested-function"} = 10;
-    $all_methods{"return-void"} = 10;
-    $all_methods{"rename-fun"} = 10;
-    $all_methods{"rename-var"} = 10;
-    $all_methods{"rename-param"} = 10;
+if (1 && defined($clang_delta)) {
+    $all_methods{"clang-aggregate-to-scalar"} = 10;
+    $all_methods{"clang-binop-simplification"} = 10;
+    $all_methods{"clang-combine-global-var"} = 10;
+    $all_methods{"clang-combine-local-var"} = 10;
+    $all_methods{"clang-local-to-global"} = 10;
+    $all_methods{"clang-param-to-global"} = 10;
+    $all_methods{"clang-param-to-local"} = 10;
+    $all_methods{"clang-remove-nested-function"} = 10;
+    $all_methods{"clang-rename-fun"} = 10;
+    $all_methods{"clang-rename-param"} = 10;    
+    $all_methods{"clang-rename-var"} = 10;
+    $all_methods{"clang-replace-callexpr"} = 10;    
+    $all_methods{"clang-return-void"} = 10;
 }
- 
+
 ############################### main #################################
 
 sub usage() {
