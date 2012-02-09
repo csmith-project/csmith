@@ -392,7 +392,7 @@ sub delta_pass ($) {
 	return ($good_cnt > 0) if ($pos >= length ($prog));
 	my $worked = 0;
 
-	if ($method eq "replace_regex") {
+	if ($method eq "replace-regex") {
 	    my $n=-1;
 	    foreach my $l (@regexes_to_replace) {	       
 		$n++;
@@ -454,7 +454,7 @@ sub delta_pass ($) {
 		    }
 		}
 	    }
-	} elsif ($method eq "all_blanks") {
+	} elsif ($method eq "all-blanks") {
 	    if ($prog =~ s/\s{2,}/ /g) {
 		$worked |= delta_test ($method, 0);
 	    }
@@ -475,7 +475,7 @@ sub delta_pass ($) {
 		$worked |= delta_test ($method, 0);
 	    }
 	    return 0;
-	} elsif ($method eq "shorten_funcs") {
+	} elsif ($method eq "shorten-funcs") {
 	    my $first = substr($prog, 0, $pos);
 	    my $rest = substr($prog, $pos);
 	    if ($rest =~ /^(safe_$varnum)/) {
@@ -532,7 +532,7 @@ sub delta_pass ($) {
 		print "replacing $n1 with $n2\n";
 		$worked |= delta_test ($method, 0);
 	    }	    
-	} elsif ($method eq "shorten_ints") {
+	} elsif ($method eq "shorten-ints") {
 	    my $first = substr($prog, 0, $pos);
 	    my $rest = substr($prog, $pos);
 	    if ($rest =~ s/^(?<pref>$borderorspc(\\-|\\+)?(0|(0[xX]))?)(?<del>[0-9a-fA-F])(?<numpart>[0-9a-fA-F]+)(?<suf>[ULul]*$borderorspc)/$+{pref}$+{numpart}$+{suf}/s) {
@@ -636,16 +636,16 @@ sub delta_pass ($) {
 
 my %all_methods = (
 
-    "all_blanks" => 0,
+    "all-blanks" => 0,
     "blanks" => 1,
     "crc" => 1,
     "angles" => 2,
     "brackets" => 2,
     "ternary" => 2,
     "parens" => 3,
-    "replace_regex" => 4,
-    "shorten_ints" => 5,
-    "shorten_funcs" => 6,
+    "replace-regex" => 4,
+    "shorten-ints" => 5,
+    "shorten-funcs" => 6,
     "indent" => 15,
 
     );
