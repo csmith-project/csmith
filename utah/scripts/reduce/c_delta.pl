@@ -25,6 +25,7 @@
 
 # TODO:
 
+# implement line-based delta
 # add an option limiting the number of passes
 # add a quiet mode -- only report progress
 # simplify the termination condition -- stop after 2 passes with no size decrease
