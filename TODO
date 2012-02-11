@@ -5,9 +5,19 @@ than Csmith's developers.  It's not particularly up to date either.
 
 -------------------------------------------------------------------------------
 
+- optionally (turned on by default) fail to take the address of union
+  fields
+
 - optionally generate GCC attributes: stdcall, may_alias, ...
 
 - generate openmp pragmas 
+
+- optionally put all globals into a (packed) struct
+
+- optionally put all globals into a char array
+
+- generate code that manipulates strings
+  - concatenate, copy, take length, compare
 
 - incrementally add C++ features; which ones have high value but are
   easy to generate?
@@ -40,9 +50,9 @@ than Csmith's developers.  It's not particularly up to date either.
 
 - generate switch statments with random fallthroughs
 
-- generate the "register" qualifier (trivial!)
+- generate "register" and "inline" -- trivial!
 
-- generate memset, memcpy, bzero, etc.
+- generate memset, memcpy, bzero, sizeof, etc.
 
 - generate simple uses of malloc/free
   - should span parts of structs, arrays, scalars, etc.
