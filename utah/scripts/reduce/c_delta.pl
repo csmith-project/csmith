@@ -30,9 +30,6 @@
 # add a quiet mode -- only report progress
 # simplify the termination condition -- stop after 2 passes with no size decrease
 # see if it's faster to work from back to front
-# turn a union type into a struct
-# add more things like while (x) { y } -> if (x) { y }
-# format string reduction
 
 # get speedup by adding fast bailouts from test scripts
 #   super-fast: just runs one compiler at -O0 look for syntactical correctness
