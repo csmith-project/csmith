@@ -358,23 +358,12 @@ sub delta_test ($$) {
     }
 }
 
-sub uniq_func ($) {
-    (my $s) = @_;
-    for (my $i=0; $i<1000; $i++) {
-	my $str = "func_$i";
-	return $str unless ($s =~ $str);
-    }
-}
-
-my %funcs_seen;
-
 sub delta_pass ($) {
     (my $method) = @_;
     
     $pos = 0;
     $good_cnt = 0;
     $bad_cnt = 0;
-    %funcs_seen = ();
 
     print "\n";
     print "========== starting pass <$method> ==========\n";
@@ -458,16 +447,6 @@ sub delta_pass ($) {
 	    if ($rest =~ s/^(\s{2,})/ /) {
 		$prog = $first.$rest;
 		$worked |= delta_test ($method, 0);
-	    }
-	} elsif ($method eq "shorten-funcs") {
-	    my $first = substr($prog, 0, $pos);
-	    my $rest = substr($prog, $pos);
-	    if ($rest =~ /^(safe_$varnum)/) {
-		my $orig = $1;
-		my $repl = uniq_func ($prog);
-		print "renaming $orig as $repl\n";
-		$prog =~ s/$orig/$repl/g;
-		$worked |= delta_test ($method, 1);
 	    }
 	} elsif ($method =~ /^clang\-(.*)$/) {
 	    my $how = $1;
@@ -628,7 +607,6 @@ my %all_methods = (
     "parens" => 3,
     "replace-regex" => 4,
     "shorten-ints" => 5,
-    "shorten-funcs" => 6,
     "indent" => 15,
 
     );
