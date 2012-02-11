@@ -455,19 +455,6 @@ sub delta_pass ($) {
 		    }
 		}
 	    }
-	} elsif ($method eq "all-blanks") {
-	    if ($prog =~ s/\s{2,}/ /g) {
-		$worked |= delta_test ($method, 0);
-	    }
-	    if ($prog =~ s/:(\S)/:\n$1/g) {
-		$worked |= delta_test ($method, 1);
-	    }
-	    my $r1 = ($prog =~ s/,/ , /g);
-	    my $r2 = ($prog =~ s/\s{2,}/ /g);
-	    if ($r1 || $r2) {
-		$worked |= delta_test ($method, 1);
-	    }
-	    return 0;
 	} elsif ($method eq "blanks") {
 	    my $first = substr($prog, 0, $pos);
 	    my $rest = substr($prog, $pos);
@@ -475,7 +462,6 @@ sub delta_pass ($) {
 		$prog = $first.$rest;
 		$worked |= delta_test ($method, 0);
 	    }
-	    return 0;
 	} elsif ($method eq "shorten-funcs") {
 	    my $first = substr($prog, 0, $pos);
 	    my $rest = substr($prog, $pos);
@@ -637,7 +623,6 @@ sub delta_pass ($) {
 
 my %all_methods = (
 
-    "all-blanks" => 0,
     "blanks" => 1,
     "crc" => 1,
     "angles" => 2,
