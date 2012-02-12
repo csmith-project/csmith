@@ -58,6 +58,8 @@ my $DEBUG = 0;
 # if set, ensure the delta test succeeds before starting each pass
 my $SANITY = 1;
 
+my $QUIET = 1;
+
 ######################################################################
 
 my $prog;
@@ -155,19 +157,19 @@ my $delta_pos;
 my %method_worked = ();
 my %method_failed = ();
 my $old_size = 1000000000;
- 
+
 sub sanity_check () {
-    print "sanity check... ";
+    print "sanity check... " unless $QUIET;
     my $res = run_test ();
     if (!$res) {
 	die "test (and sanity check) fails";
     }
-    print "successful\n";
+    print "successful\n" unless $QUIET;
 }
 
 sub delta_step_fail($) {
     (my $method) = @_;
-    print "failure\n";
+    print "failure\n" unless $QUIET;
     system "cp $cfile.bak $cfile";
     read_file();
     $bad_cnt++;
@@ -190,13 +192,13 @@ sub delta_test ($) {
     ensure_mem_and_disk_are_synced();
 
     my $len = length ($prog);
-    print "[$pass_num $delta_method ($delta_pos / $len) s:$good_cnt f:$bad_cnt] ";
+    print "[$pass_num $delta_method ($delta_pos / $len) s:$good_cnt f:$bad_cnt] " unless $QUIET;
 
     my $result = $cache{$prog};
 
     if (defined($result)) {
 	$cache_hits++;
-	print "(hit) ";
+	print "(hit) " unless $QUIET;
 	delta_step_fail($delta_method);
 	return 0;
     }
@@ -205,7 +207,7 @@ sub delta_test ($) {
     $cache{$prog} = $result;
     
     if ($result) {
-	print "success ";
+	print "success " unless $QUIET;
 	print_pct();
 	system "cp $cfile $cfile.bak";
 	$good_cnt++;
@@ -359,7 +361,7 @@ sub replace_regex (){
 	    ($zz1 =~ s/\s//g);
 	    ($zz2 =~ s/\s//g);
 	    if ($zz1 ne $zz2) {
-		print "regex $n replacing '$before' with '$repl' : ";
+		print "regex $n replacing '$before' with '$repl' : " unless $QUIET;
 		$prog = $first.$rest;
 		if (delta_test (0)) {
 		    $delta_worked = 1;
@@ -394,7 +396,7 @@ sub replace_regex (){
 	    ($zz1 =~ s/\s//g);
 	    ($zz2 =~ s/\s//g);
 	    if ($zz1 ne $zz2) {
-		print "regex $n delimited replacing '$before' with '$repl' : ";
+		print "regex $n delimited replacing '$before' with '$repl' : " unless $QUIET;
 		$prog = $first.$rest;
 		if (delta_test (0)) {
 		    $delta_worked = 1;
@@ -445,7 +447,7 @@ sub crc () {
 	my @stuff = split /,/, $+{list};
 	my $var = $stuff[0];
 	my $repl = "printf (\"%d\\n\", (int)$var)";
-	print "crc call: < $+{all} > => < $repl > ";
+	print "crc call: < $+{all} > => < $repl > " unless $QUIET;
 	substr ($rest, 0, length ($+{all})) = $repl;
 	$prog = $first.$rest;
 	$delta_worked |= delta_test (0);
@@ -459,7 +461,7 @@ sub ternary () {
 	$prog = $first.$rest;
 	my $n1 = "$+{del1}$+{a} ? $+{b} : $+{c}$+{del2}";
 	my $n2 = "$+{del1}$+{b}$+{del2}";
-	print "replacing $n1 with $n2\n";
+	print "replacing $n1 with $n2\n" unless $QUIET;
 	$delta_worked |= delta_test (0);
     }	    
     $first = substr($prog, 0, $delta_pos);
@@ -468,7 +470,7 @@ sub ternary () {
 	$prog = $first.$rest;
 	my $n1 = "$+{del1}$+{a} ? $+{b} : $+{c}$+{del2}";
 	my $n2 = "$+{del1}$+{c}$+{del2}";
-	print "replacing $n1 with $n2\n";
+	print "replacing $n1 with $n2\n" unless $QUIET;
 	$delta_worked |= delta_test (0);
     }
 }
@@ -480,7 +482,7 @@ sub shorten_ints () {
 	$prog = $first.$rest;
 	my $n1 = "$+{pref}$+{del}$+{numpart}$+{suf}";
 	my $n2 = "$+{pref}$+{numpart}$+{suf}";
-	print "replacing $n1 with $n2\n";
+	print "replacing $n1 with $n2\n" unless $QUIET;
 	$delta_worked |= delta_test (0);
     }      
     $first = substr($prog, 0, $delta_pos);
@@ -490,7 +492,7 @@ sub shorten_ints () {
 	$prog = $first.$rest;
 	my $n1 = "$+{pref1}$+{pref2}$+{numpart}$+{suf}";
 	my $n2 = "$+{pref1}$+{numpart}$+{suf}";
-	print "replacing $n1 with $n2\n";
+	print "replacing $n1 with $n2\n" unless $QUIET;
 	$delta_worked |= delta_test (0);
     }     
     $first = substr($prog, 0, $delta_pos);
@@ -500,7 +502,7 @@ sub shorten_ints () {
 	$prog = $first.$rest;
 	my $n1 = "$+{pref}$+{numpart}$+{suf1}$+{suf2}";
 		my $n2 = "$+{pref}$+{numpart}$+{suf2}";
-	print "replacing $n1 with $n2\n";
+	print "replacing $n1 with $n2\n" unless $QUIET;
 	$delta_worked |= delta_test (0);
     } 
 }
@@ -513,14 +515,14 @@ sub angles () {
 	    die if (substr($prog, $p2, 1) ne ">");
 	    
 	    my $del = substr ($prog, $delta_pos, $p2-$delta_pos+1, "");
-	    print "deleting '$del' at $delta_pos--$p2 : ";
+	    print "deleting '$del' at $delta_pos--$p2 : " unless $QUIET;
 	    my $res = delta_test (0);
 	    $delta_worked |= $res;
 	    
 	    if (!$res) {
 		substr ($prog, $p2, 1) = "";
 		substr ($prog, $delta_pos, 1) = "";
-		print "deleting at $delta_pos--$p2 : ";
+		print "deleting at $delta_pos--$p2 : " unless $QUIET;
 		$delta_worked |= delta_test (0);
 	    }
 	}
@@ -535,14 +537,14 @@ sub parens () {
 	    die if (substr($prog, $p2, 1) ne ")");
 	    
 	    my $del = substr ($prog, $delta_pos, $p2-$delta_pos+1, "");
-	    print "deleting '$del' at $delta_pos--$p2 : ";
+	    print "deleting '$del' at $delta_pos--$p2 : " unless $QUIET;
 	    my $res = delta_test (0);
 	    $delta_worked |= $res;
 	    
 	    if (!$res) {
 		substr ($prog, $p2, 1) = "";
 		substr ($prog, $delta_pos, 1) = "";
-		print "deleting at $delta_pos--$p2 : ";
+		print "deleting at $delta_pos--$p2 : " unless $QUIET;
 		$delta_worked |= delta_test (0);
 	    }
 	}
@@ -557,14 +559,14 @@ sub brackets () {
 	    die if (substr($prog, $p2, 1) ne "}");
 	    
 	    my $del = substr ($prog, $delta_pos, $p2-$delta_pos+1, "");
-	    print "deleting '$del' at $delta_pos--$p2 : ";
+	    print "deleting '$del' at $delta_pos--$p2 : " unless $QUIET;
 	    my $res = delta_test (0);
 	    $delta_worked |= $res;
 	    
 	    if (!$res) {
 		substr ($prog, $p2, 1) = "";
 		substr ($prog, $delta_pos, 1) = "";
-		print "deleting at $delta_pos--$p2 : ";
+		print "deleting at $delta_pos--$p2 : " unless $QUIET;
 		$delta_worked |= delta_test (0);
 	    }
 	}
@@ -580,7 +582,7 @@ sub delta_pass ($) {
     $good_cnt = 0;
     $bad_cnt = 0;
 
-    print "\n";
+    print "\n" unless $QUIET;
     print "========== starting pass <$delta_method> ==========\n";
 
     if ($SANITY) {
