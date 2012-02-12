@@ -58,7 +58,7 @@ my $DEBUG = 0;
 # if set, ensure the delta test succeeds before starting each pass
 my $SANITY = 1;
 
-my $QUIET = 1;
+my $QUIET = 0;
 
 ######################################################################
 
@@ -412,7 +412,7 @@ sub replace_regex (){
 sub blanks () {
     my $first = substr($prog, 0, $delta_pos);
     my $rest = substr($prog, $delta_pos);
-    if ($rest =~ s/^(\s{2,})/ /) {
+    if ($rest =~ s/^(\s\t){2,}/ /) {
 	$prog = $first.$rest;
 	$delta_worked |= delta_test (0);
     }
