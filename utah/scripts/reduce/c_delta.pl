@@ -596,8 +596,8 @@ sub delta_pass ($) {
 	$exit_delta_pass = 0;
 
 	if ($delta_method =~ /^clang-(.*)$/) {
-	    $delta_method = $1;
-	    clang_delta ($delta_method);
+	    my $clang_delta_method = $1;
+	    clang_delta ($clang_delta_method);
 	} else {
 	    &$delta_method();
 	} 
