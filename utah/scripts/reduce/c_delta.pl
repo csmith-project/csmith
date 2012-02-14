@@ -12,39 +12,18 @@
 # TODO:
 
 # decouple delta_pos from file position
-
-# finish line-based delts
+# test quiet mode
+# finish line-based delta pass
+# add an API for creating temporary files
 # add an option limiting the number of passes
-# add a quiet mode -- only report progress
 # simplify the termination condition -- stop after 2 passes with no size decrease
 # see if it's faster to work from back to front
 # watch for unexpected abnormal compiler outputs
 # optimize the order of passes
-
-# get speedup by adding fast bailouts from test scripts
-#   super-fast: just runs one compiler at -O0 look for syntactical correctness
-#   medium fast: looks for checksum differences, runs valgrind, etc.
-#   full: runs chucky's tool
-#   can also batch up transformations (like delete parens) that
-#     usually succeed without running any test
-
-# parameters
-#   Cp = cost of a passed test
-#   Cf = cost of a failed test, say half the cost of a passed test
-#   S  = fraction of transformations that succeed
-#   N  = number of attempted transformations
-#   assumption: test are independent
-#   assumption: c_delta has negligible running time
-
-# if test is run every time
-#  Cp*S*N + Cf*(1-S)*N
-
-# if K transformations are run before running any test
-# SS = S^K, NN = N/K
-# Cp*SS*NN + Cf(1-SS)*NN
-
-# test this and then work out the math when cheaper tests exist
-# need to measure some runs and estimate the values of constants
+# exploit early-exit from delta test to speed this up
+#   keep per-pass statistic on the probability of requiring the slow test
+#   invert this to decide how many fast tests to run in a row
+#   need to keep checkpoits
 
 ######################################################################
 
@@ -170,7 +149,7 @@ sub sanity_check () {
     print "successful\n" unless $QUIET;
 }
 
-sub delta_step_fail($) {
+sub delta_step_fail ($) {
     (my $method) = @_;
     print "failure\n" unless $QUIET;
     system "cp $cfile.bak $cfile";
@@ -409,7 +388,7 @@ sub replace_regex (){
 	my $first = substr($prog, 0, $delta_pos);
 	my $rest = substr($prog, $delta_pos);
 	
-	# avoid infinite replacement loops!
+	# special cases to avoid infinite replacement loops
 	next if ($repl eq "0" && $rest =~ /^($borderorspc)0$borderorspc/);
 	next if ($repl =~ /0\s*,/ && $rest =~ /^($borderorspc)0\s*,$borderorspc/);
 	next if ($repl eq "1" && $rest =~ /^($borderorspc)0$borderorspc/);
