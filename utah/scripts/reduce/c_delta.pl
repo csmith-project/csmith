@@ -223,6 +223,7 @@ sub lines () {
     while (my $line = <INF>) {
 	if ($n != $line_id) {
 	    print OUTF $line;
+	} else {
 	    $done = 1;
 	}
 	$n++;
@@ -602,11 +603,12 @@ sub delta_pass ($) {
 	sanity_check();
     }
 
+    $exit_delta_pass = 0;
+    
     while (1) {
 	ensure_mem_and_disk_are_synced();
 	return ($good_cnt > 0) if ($delta_pos >= length ($prog));
 	$delta_worked = 0;
-	$exit_delta_pass = 0;
 
 	if ($delta_method =~ /^clang-(.*)$/) {
 	    my $clang_delta_method = $1;
