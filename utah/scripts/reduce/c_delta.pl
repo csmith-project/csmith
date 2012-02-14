@@ -654,11 +654,13 @@ if (1 && defined($clang_delta)) {
     $all_methods{"clang-param-to-global"} = 10;
     $all_methods{"clang-param-to-local"} = 10;
     $all_methods{"clang-remove-nested-function"} = 10;
+    $all_methods{"clang-remove-unused-function"} = 10;
     $all_methods{"clang-rename-fun"} = 10;
     $all_methods{"clang-rename-param"} = 10;    
     $all_methods{"clang-rename-var"} = 10;
     $all_methods{"clang-replace-callexpr"} = 10;    
     $all_methods{"clang-return-void"} = 10;
+    $all_methods{"clang-simple-inliner"} = 10;
 }
 
 sub usage() {
