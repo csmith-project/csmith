@@ -230,7 +230,7 @@ sub lines () {
     close INF;
     close OUTF;
     if ($done) {
-	system "mv tmpfile $file" or die;
+	system "mv tmpfile $cfile";
 	$changed_on_disk = 1;
 	$delta_worked |= delta_test (1);
     } else {
