@@ -11,12 +11,15 @@
 
 # TODO:
 
-# implement line-based delta
+# decouple delta_pos from file position
+
+# finish line-based delts
 # add an option limiting the number of passes
 # add a quiet mode -- only report progress
 # simplify the termination condition -- stop after 2 passes with no size decrease
 # see if it's faster to work from back to front
 # watch for unexpected abnormal compiler outputs
+# optimize the order of passes
 
 # get speedup by adding fast bailouts from test scripts
 #   super-fast: just runs one compiler at -O0 look for syntactical correctness
@@ -229,6 +232,32 @@ sub delta_test ($) {
 
 my $exit_delta_pass;
 my $delta_worked;
+
+# TODO: support chunking, support topformflat
+
+sub lines () {
+    my $line_id = $delta_pos;
+    open INF, "<$cfile" or die;
+    open OUTF, ">tmpfile" or die;
+    my $n=0;
+    my $done=0;
+    while (my $line = <INF>) {
+	if ($n != $line_id) {
+	    print OUTF $line;
+	    $done = 1;
+	}
+	$n++;
+    }
+    close INF;
+    close OUTF;
+    if ($done) {
+	system "mv tmpfile $file" or die;
+	$changed_on_disk = 1;
+	$delta_worked |= delta_test (1);
+    } else {
+	$exit_delta_pass = 1;
+    }
+}
 
 my $varnum = "(\\-?|\\+?)[0-9a-zA-Z\_]+";
 my $varnumexp = "($varnum)|($RE{balanced}{-parens=>'()'})";
@@ -575,8 +604,13 @@ sub brackets () {
 
 ############################## end delta passes #############################
 
-sub delta_pass ($) {
+sub call_method ($) {
     no strict "refs";
+    ($delta_method) = @_;    
+    &$delta_method();
+}
+
+sub delta_pass ($) {
     ($delta_method) = @_;    
     $delta_pos = 0;
     $good_cnt = 0;
@@ -599,7 +633,7 @@ sub delta_pass ($) {
 	    my $clang_delta_method = $1;
 	    clang_delta ($clang_delta_method);
 	} else {
-	    &$delta_method();
+	    call_method($delta_method);
 	} 
 
 	return 0 if ($exit_delta_pass);
@@ -616,7 +650,7 @@ sub delta_pass ($) {
 
 my %all_methods = (
 
-    "blanks" => 1,
+    "lines" => 0,
     "crc" => 1,
     "angles" => 2,
     "brackets" => 2,
@@ -624,6 +658,7 @@ my %all_methods = (
     "parens" => 3,
     "replace_regex" => 4,
     "shorten_ints" => 5,
+    "blanks" => 14,
     "indent" => 15,
 
     );
