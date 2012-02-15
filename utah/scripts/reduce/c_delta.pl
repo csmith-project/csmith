@@ -617,7 +617,7 @@ sub delta_pass ($) {
 	    call_method($delta_method);
 	} 
 
-	return 0 if ($exit_delta_pass);
+	return ($good_cnt > 0) if ($exit_delta_pass);
 
 	if (!$delta_worked) {
 	    $delta_pos++;
