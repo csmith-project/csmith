@@ -11,6 +11,7 @@
 
 # TODO:
 
+# add an option to keep stats about fast vs. slow tests
 # decouple delta_pos from file position
 # test quiet mode
 # finish line-based delta pass
@@ -94,6 +95,14 @@ sub read_file_helper () {
 
 sub read_file () {
     $prog = read_file_helper();
+}
+
+sub count_lines () {
+    open INF, "<$cfile" or die;
+    my $n=0;
+    $n++ while (<INF>);
+    close INF;
+    return $n;
 }
 
 sub ensure_mem_and_disk_are_synced () {
@@ -214,23 +223,29 @@ my $delta_worked;
 
 # TODO: support chunking, support topformflat
 
-sub lines () {
-    my $line_id = $delta_pos;
+sub lines ($) {
+    (my $chunk_size) = @_;
+
+    my $chunk_start = $delta_pos * $chunk_size;
+
     open INF, "<$cfile" or die;
     open OUTF, ">tmpfile" or die;
+
     my $n=0;
-    my $done=0;
+    my $did_something=0;
+
     while (my $line = <INF>) {
-	if ($n != $line_id) {
+	if ($n < $chunk_start ||
+	    $n >= ($chunk_start + $chunk_size)) {
 	    print OUTF $line;
 	} else {
-	    $done = 1;
+	    $did_something = 1;
 	}
 	$n++;
     }
     close INF;
     close OUTF;
-    if ($done) {
+    if ($did_something) {
 	system "mv tmpfile $cfile";
 	$changed_on_disk = 1;
 	$delta_worked |= delta_test (1);
@@ -590,6 +605,11 @@ sub call_method ($) {
     &$delta_method();
 }
 
+sub round ($) {
+    (my $n) = @_;
+    return int ($n+0.5);
+}
+
 sub delta_pass ($) {
     ($delta_method) = @_;    
     $delta_pos = 0;
@@ -598,6 +618,13 @@ sub delta_pass ($) {
 
     print "\n" unless $QUIET;
     print "========== starting pass <$delta_method> ==========\n";
+
+    my $chunk_size;
+    if ($delta_method eq "lines") {
+	$chunk_size = round (count_lines() / 2.0);
+    }
+
+  again:
 
     if ($SANITY) {
 	sanity_check();
@@ -613,11 +640,22 @@ sub delta_pass ($) {
 	if ($delta_method =~ /^clang-(.*)$/) {
 	    my $clang_delta_method = $1;
 	    clang_delta ($clang_delta_method);
+	} elsif ($delta_method eq "lines") {
+	    lines ($chunk_size);
 	} else {
 	    call_method($delta_method);
 	} 
 
-	return ($good_cnt > 0) if ($exit_delta_pass);
+	if ($exit_delta_pass) {
+	    
+	    if ($delta_method eq "lines") {
+		$chunk_size = round ($chunk_size / 2.0);
+		printf "new chunk size = $chunk_size\n";
+		goto again if ($chunk_size >= 1);
+	    }
+
+	    return ($good_cnt > 0);
+	}
 
 	if (!$delta_worked) {
 	    $delta_pos++;
