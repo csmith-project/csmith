@@ -621,7 +621,7 @@ sub delta_pass ($) {
     if ($delta_method =~ /^lines([0-9]*)$/) {
 	my $topform = $1;
 	if (defined($1)) {
-	    system "topformflat < $cfile > tmpfile";
+	    system "topformflat $1 < $cfile > tmpfile";
 	    system "mv tmpfile $cfile";
 	    $changed_on_disk = 1;
 	    if (!delta_test(1)) {
