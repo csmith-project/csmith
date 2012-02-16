@@ -221,8 +221,6 @@ sub delta_test ($) {
 my $exit_delta_pass;
 my $delta_worked;
 
-# TODO: support chunking, support topformflat
-
 sub lines ($) {
     (my $chunk_size) = @_;
 
@@ -620,7 +618,16 @@ sub delta_pass ($) {
     print "========== starting pass <$delta_method> ==========\n";
 
     my $chunk_size;
-    if ($delta_method eq "lines") {
+    if ($delta_method =~ /^lines([0-9]*)$/) {
+	my $topform = $1;
+	if (defined($1)) {
+	    system "topformflat < $cfile > tmpfile";
+	    system "mv tmpfile $cfile";
+	    $changed_on_disk = 1;
+	    if (!delta_test(1)) {
+		return 0;
+	    }
+	}
 	$chunk_size = round (count_lines() / 2.0);
     }
 
@@ -640,7 +647,7 @@ sub delta_pass ($) {
 	if ($delta_method =~ /^clang-(.*)$/) {
 	    my $clang_delta_method = $1;
 	    clang_delta ($clang_delta_method);
-	} elsif ($delta_method eq "lines") {
+	} elsif ($delta_method =~ /^lines/) {
 	    lines ($chunk_size);
 	} else {
 	    call_method($delta_method);
@@ -648,10 +655,10 @@ sub delta_pass ($) {
 
 	if ($exit_delta_pass) {
 	    
-	    if ($delta_method eq "lines") {
+	    if ($delta_method =~ /^lines/ && $chunk_size > 1) {
 		$chunk_size = round ($chunk_size / 2.0);
 		printf "new chunk size = $chunk_size\n";
-		goto again if ($chunk_size >= 1);
+		goto again;
 	    }
 
 	    return ($good_cnt > 0);
@@ -669,7 +676,6 @@ sub delta_pass ($) {
 
 my %all_methods = (
 
-    "lines" => 0,
     "crc" => 1,
     "angles" => 2,
     "brackets" => 2,
@@ -683,7 +689,7 @@ my %all_methods = (
     );
 
 my $clang_delta = File::Which::which ("clang_delta");
-if (1 && defined($clang_delta)) {
+if (defined($clang_delta)) {
     $all_methods{"clang-aggregate-to-scalar"} = 10;
     $all_methods{"clang-binop-simplification"} = 10;
     $all_methods{"clang-combine-global-var"} = 10;
@@ -692,13 +698,26 @@ if (1 && defined($clang_delta)) {
     $all_methods{"clang-param-to-global"} = 10;
     $all_methods{"clang-param-to-local"} = 10;
     $all_methods{"clang-remove-nested-function"} = 10;
-    $all_methods{"clang-remove-unused-function"} = 10;
+    $all_methods{"clang-remove-unused-function"} = -10;
     $all_methods{"clang-rename-fun"} = 10;
     $all_methods{"clang-rename-param"} = 10;    
     $all_methods{"clang-rename-var"} = 10;
     $all_methods{"clang-replace-callexpr"} = 10;    
     $all_methods{"clang-return-void"} = 10;
     $all_methods{"clang-simple-inliner"} = 10;
+} else {
+    printf ("clang_delta not found in path, disabling its passes\n");
+}
+
+my $topformflat = File::Which::which ("topformflat");
+if (defined($topformflat)) {
+    $all_methods{"lines0"} = -5;
+    $all_methods{"lines1"} = -4;
+    $all_methods{"lines2"} = -3;
+    $all_methods{"lines10"} = -2;
+} else {
+    $all_methods{"lines"} = -5;
+    printf ("topformflat not found in path, disabling its passes\n");
 }
 
 sub usage() {
