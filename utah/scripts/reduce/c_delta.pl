@@ -11,6 +11,7 @@
 
 # TODO:
 
+# look for more bugs like Yang found -- eliminate this entirely
 # turn hex constants into decimal
 # in code like: int a, b; we need a regex that gets rid of ", b"
 # keep a cache per size category and only drop those that are
