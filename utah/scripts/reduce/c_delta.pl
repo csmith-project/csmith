@@ -11,9 +11,14 @@
 
 # TODO:
 
+# turn hex constants into decimal
+# in code like: int a, b; we need a regex that gets rid of ", b"
+# keep a cache per size category and only drop those that are
+#   clearly not going to be used again
+# only run some passes (like combine vars) very late
 # add an option to keep stats about fast vs. slow tests
 # decouple delta_pos from file position
-# test quiet mode
+# expose quiet on command line
 # finish line-based delta pass
 # add an API for creating temporary files
 # add an option limiting the number of passes
@@ -24,7 +29,7 @@
 # exploit early-exit from delta test to speed this up
 #   keep per-pass statistic on the probability of requiring the slow test
 #   invert this to decide how many fast tests to run in a row
-#   need to keep checkpoits
+#   need to keep checkpoints
 
 ######################################################################
 
@@ -41,7 +46,7 @@ my $DEBUG = 0;
 # if set, ensure the delta test succeeds before starting each pass
 my $SANITY = 1;
 
-my $QUIET = 0;
+my $QUIET = 1;
 
 ######################################################################
 
@@ -224,7 +229,7 @@ my $delta_worked;
 sub lines ($) {
     (my $chunk_size) = @_;
 
-    my $chunk_start = $delta_pos * $chunk_size;
+    my $chunk_start = (1+$delta_pos) * $chunk_size;
 
     open INF, "<$cfile" or die;
     open OUTF, ">tmpfile" or die;
@@ -657,7 +662,7 @@ sub delta_pass ($) {
 	    
 	    if ($delta_method =~ /^lines/ && $chunk_size > 1) {
 		$chunk_size = round ($chunk_size / 2.0);
-		printf "new chunk size = $chunk_size\n";
+		printf "new chunk size = $chunk_size\n" unless $QUIET;
 		goto again;
 	    }
 
