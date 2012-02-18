@@ -20,7 +20,9 @@
 # add an option to keep stats about fast vs. slow tests
 # decouple delta_pos from file position
 # expose quiet on command line
-# finish line-based delta pass
+# run some passes, such as remove_unused_funcs, multiple times
+# refine the line-based pass -- should be just as powerful and fast
+#   as berkeley delta
 # add an API for creating temporary files
 # add an option limiting the number of passes
 # simplify the termination condition -- stop after 2 passes with no size decrease
