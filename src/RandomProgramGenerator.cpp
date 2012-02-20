@@ -241,6 +241,7 @@ static void print_advanced_help()
 	cout << "  --arg-structs | --no-arg-structs: enable | disable structs being used as args (enabled by default)." << endl << endl; 
 	cout << "  --return-unions | --no-return-unions: enable | disable return unions from a function (enabled by default)." << endl << endl; 
 	cout << "  --arg-unions | --no-arg-unions: enable | disable unions being used as args (enabled by default)." << endl << endl; 
+	cout << "  --take-union-field-addr | --take-no-union-field-addr: allow | disallow addresses of union fields to be taken (allowed by default)." << endl << endl; 
 
 	// delta related options
 	cout << "  --delta-monitor [simple]: specify the type of delta monitor. Only [simple] type is supported now." << endl << endl;
@@ -1153,6 +1154,16 @@ main(int argc, char **argv)
 
 		if (strcmp (argv[i], "--no-comma-operators") == 0) {
 			CGOptions::use_comma_exprs(false);
+			continue;
+		}  
+
+		if (strcmp (argv[i], "--take-no-union-field-addr") == 0) {
+			CGOptions::take_union_field_addr(false);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--take-union-field-addr") == 0) {
+			CGOptions::take_union_field_addr(true);
 			continue;
 		}  
 

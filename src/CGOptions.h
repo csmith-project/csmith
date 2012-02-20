@@ -387,6 +387,9 @@ public:
 	static bool use_comma_exprs(void);
 	static bool use_comma_exprs(bool p);
 
+	static bool take_union_field_addr(void);
+	static bool take_union_field_addr(bool p);
+
 	static int int_size(void);
 	static void int_size(int p) { int_size_ = p;}
 
@@ -510,6 +513,7 @@ private:
 	static bool use_comma_exprs_;
 	static int  int_size_;
 	static int  pointer_size_;
+	static bool take_union_field_addr_;
 	static Reducer* reducer_; 
 
 private:

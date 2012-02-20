@@ -170,6 +170,7 @@ DEFINE_GETTER_SETTER_BOOL(union_read_type_sensitive);
 DEFINE_GETTER_SETTER_BOOL(use_incr_decr_opers);
 DEFINE_GETTER_SETTER_BOOL(use_embedded_assigns);
 DEFINE_GETTER_SETTER_BOOL(use_comma_exprs);
+DEFINE_GETTER_SETTER_BOOL(take_union_field_addr);
 
 void
 CGOptions::set_default_settings(void)
@@ -255,6 +256,7 @@ CGOptions::set_default_settings(void)
 	use_incr_decr_opers(true);
 	use_embedded_assigns(true);
 	use_comma_exprs(true);
+	take_union_field_addr(true);
 } 
 	
 /*

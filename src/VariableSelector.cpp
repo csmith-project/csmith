@@ -470,8 +470,11 @@ VariableSelector::choose_var(vector<Variable *> vars,
 		vector<Variable *> addressable_vars;
 		for (size_t j=0; j<ok_vars.size(); j++) {
 			Variable* vv = ok_vars[j];
-			// don't take the address of a volatile, for now
 			if (type->get_indirect_level() > vv->type->get_indirect_level()) {
+				// don't take the address of an union field if flag "take_no_union_field_addr" is on
+				if (!CGOptions::take_union_field_addr() && vv->is_inside_union_field()) {
+					continue;
+				} 
 				addressable_vars.push_back(vv);
 			}
 		}
