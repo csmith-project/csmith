@@ -191,7 +191,8 @@ sub delta_test ($) {
     ensure_mem_and_disk_are_synced();
 
     my $len = length ($prog);
-    print "[$pass_num $delta_method ($delta_pos / $len) s:$good_cnt f:$bad_cnt] " unless $QUIET;
+    print "[$pass_num $delta_method ($delta_pos / $len) s:$good_cnt f:$bad_cnt] " 
+	unless $QUIET;
 
     my $result = $cache{$prog};
 
@@ -632,9 +633,7 @@ sub delta_pass ($) {
 	    system "topformflat $1 < $cfile > tmpfile";
 	    system "mv tmpfile $cfile";
 	    $changed_on_disk = 1;
-	    if (!delta_test(1)) {
-		# return 0;
-	    }
+	    delta_test(1);
 	}
 	$chunk_size = round (count_lines() / 2.0);
     }
@@ -649,7 +648,7 @@ sub delta_pass ($) {
     
     while (1) {
 	ensure_mem_and_disk_are_synced();
-	return ($good_cnt > 0) if ($delta_pos >= length ($prog));
+	return if ($delta_pos >= length ($prog));
 	$delta_worked = 0;
 
 	if ($delta_method =~ /^clang-(.*)$/) {
@@ -668,8 +667,7 @@ sub delta_pass ($) {
 		printf "new chunk size = $chunk_size\n" unless $QUIET;
 		goto again;
 	    }
-
-	    return ($good_cnt > 0);
+	    return;
 	}
 
 	if (!$delta_worked) {
@@ -794,17 +792,12 @@ my $spinning = 0;
 
 while (1) {
     save_copy ("delta_backup_${pass_num}.c");
-    my $success = 0;
     foreach my $method (sort bymethod keys %methods) {
-	$success |= delta_pass ($method);
+	delta_pass ($method);
     }
     $pass_num++;
-    last if (!$success);
     my $s = -s $cfile;
-    if ($s >= $file_size) {
-	$spinning++;
-    }
-    last if ($spinning > 3);
+    last if ($s == $file_size);
     $file_size = $s;
 }
 
