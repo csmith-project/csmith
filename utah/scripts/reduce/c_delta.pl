@@ -178,9 +178,7 @@ sub delta_step_fail ($) {
 my $changed_on_disk = 0;
 my $delta_method;
 
-sub delta_test ($) {
-    (my $ok_to_enlarge) = @_;
-
+sub delta_test () {
     if ($changed_on_disk) {
 	read_file();
 	$changed_on_disk = 0;
@@ -213,7 +211,6 @@ sub delta_test ($) {
 	$good_cnt++;
 	$method_worked{$delta_method}++;
 	my $size = length ($prog);
-	die if (($size > $old_size) && !$ok_to_enlarge);
 	if ($size < $old_size) {
 	    %cache = ();
 	}
@@ -255,7 +252,7 @@ sub lines ($) {
     if ($did_something) {
 	system "mv tmpfile $cfile";
 	$changed_on_disk = 1;
-	$delta_worked |= delta_test (1);
+	$delta_worked |= delta_test ();
     } else {
 	$exit_delta_pass = 1;
     }
@@ -394,7 +391,7 @@ sub replace_regex (){
 	    if ($zz1 ne $zz2) {
 		print "regex $n replacing '$before' with '$repl' : " unless $QUIET;
 		$prog = $first.$rest;
-		if (delta_test (0)) {
+		if (delta_test ()) {
 		    $delta_worked = 1;
 		    $regex_worked{$n}++;
 		} else {
@@ -429,7 +426,7 @@ sub replace_regex (){
 	    if ($zz1 ne $zz2) {
 		print "regex $n delimited replacing '$before' with '$repl' : " unless $QUIET;
 		$prog = $first.$rest;
-		if (delta_test (0)) {
+		if (delta_test ()) {
 		    $delta_worked = 1;
 		    $delimited_regex_worked{$n}++;
 		} else {
@@ -445,7 +442,7 @@ sub blanks () {
     my $rest = substr($prog, $delta_pos);
     if ($rest =~ s/^(\s\t){2,}/ /) {
 	$prog = $first.$rest;
-	$delta_worked |= delta_test (0);
+	$delta_worked |= delta_test ();
     }
 }
 
@@ -456,7 +453,7 @@ sub clang_delta ($) {
     if ($res==0) {
 	system "mv foo $cfile";
 	$changed_on_disk = 1;
-	$delta_worked |= delta_test (1);
+	$delta_worked |= delta_test ();
     } else {
 	$exit_delta_pass = 1;
     }
@@ -467,7 +464,7 @@ my $INDENT_OPTS = "-bad -bap -bc -cs -pcs -prs -saf -sai -saw -sob -ss -bl ";
 sub indent () {
     system "indent $INDENT_OPTS $cfile";
     $changed_on_disk = 1;
-    $delta_worked |= delta_test (1);
+    $delta_worked |= delta_test ();
     $exit_delta_pass = 1;
 }
 
@@ -481,7 +478,7 @@ sub crc () {
 	print "crc call: < $+{all} > => < $repl > " unless $QUIET;
 	substr ($rest, 0, length ($+{all})) = $repl;
 	$prog = $first.$rest;
-	$delta_worked |= delta_test (0);
+	$delta_worked |= delta_test ();
     }
 }
 
@@ -493,7 +490,7 @@ sub ternary () {
 	my $n1 = "$+{del1}$+{a} ? $+{b} : $+{c}$+{del2}";
 	my $n2 = "$+{del1}$+{b}$+{del2}";
 	print "replacing $n1 with $n2\n" unless $QUIET;
-	$delta_worked |= delta_test (0);
+	$delta_worked |= delta_test ();
     }	    
     $first = substr($prog, 0, $delta_pos);
     $rest = substr($prog, $delta_pos);
@@ -502,7 +499,7 @@ sub ternary () {
 	my $n1 = "$+{del1}$+{a} ? $+{b} : $+{c}$+{del2}";
 	my $n2 = "$+{del1}$+{c}$+{del2}";
 	print "replacing $n1 with $n2\n" unless $QUIET;
-	$delta_worked |= delta_test (0);
+	$delta_worked |= delta_test ();
     }
 }
 
@@ -514,7 +511,7 @@ sub shorten_ints () {
 	my $n1 = "$+{pref}$+{del}$+{numpart}$+{suf}";
 	my $n2 = "$+{pref}$+{numpart}$+{suf}";
 	print "replacing $n1 with $n2\n" unless $QUIET;
-	$delta_worked |= delta_test (0);
+	$delta_worked |= delta_test ();
     }      
     $first = substr($prog, 0, $delta_pos);
     $rest = substr($prog, $delta_pos);
@@ -524,7 +521,7 @@ sub shorten_ints () {
 	my $n1 = "$+{pref1}$+{pref2}$+{numpart}$+{suf}";
 	my $n2 = "$+{pref1}$+{numpart}$+{suf}";
 	print "replacing $n1 with $n2\n" unless $QUIET;
-	$delta_worked |= delta_test (0);
+	$delta_worked |= delta_test ();
     }     
     $first = substr($prog, 0, $delta_pos);
     $rest = substr($prog, $delta_pos);
@@ -534,7 +531,7 @@ sub shorten_ints () {
 	my $n1 = "$+{pref}$+{numpart}$+{suf1}$+{suf2}";
 		my $n2 = "$+{pref}$+{numpart}$+{suf2}";
 	print "replacing $n1 with $n2\n" unless $QUIET;
-	$delta_worked |= delta_test (0);
+	$delta_worked |= delta_test ();
     } 
 }
 
@@ -547,14 +544,14 @@ sub angles () {
 	    
 	    my $del = substr ($prog, $delta_pos, $p2-$delta_pos+1, "");
 	    print "deleting '$del' at $delta_pos--$p2 : " unless $QUIET;
-	    my $res = delta_test (0);
+	    my $res = delta_test ();
 	    $delta_worked |= $res;
 	    
 	    if (!$res) {
 		substr ($prog, $p2, 1) = "";
 		substr ($prog, $delta_pos, 1) = "";
 		print "deleting at $delta_pos--$p2 : " unless $QUIET;
-		$delta_worked |= delta_test (0);
+		$delta_worked |= delta_test ();
 	    }
 	}
     }
@@ -569,14 +566,14 @@ sub parens () {
 	    
 	    my $del = substr ($prog, $delta_pos, $p2-$delta_pos+1, "");
 	    print "deleting '$del' at $delta_pos--$p2 : " unless $QUIET;
-	    my $res = delta_test (0);
+	    my $res = delta_test ();
 	    $delta_worked |= $res;
 	    
 	    if (!$res) {
 		substr ($prog, $p2, 1) = "";
 		substr ($prog, $delta_pos, 1) = "";
 		print "deleting at $delta_pos--$p2 : " unless $QUIET;
-		$delta_worked |= delta_test (0);
+		$delta_worked |= delta_test ();
 	    }
 	}
     }
@@ -591,14 +588,14 @@ sub brackets () {
 	    
 	    my $del = substr ($prog, $delta_pos, $p2-$delta_pos+1, "");
 	    print "deleting '$del' at $delta_pos--$p2 : " unless $QUIET;
-	    my $res = delta_test (0);
+	    my $res = delta_test ();
 	    $delta_worked |= $res;
 	    
 	    if (!$res) {
 		substr ($prog, $p2, 1) = "";
 		substr ($prog, $delta_pos, 1) = "";
 		print "deleting at $delta_pos--$p2 : " unless $QUIET;
-		$delta_worked |= delta_test (0);
+		$delta_worked |= delta_test ();
 	    }
 	}
     }
@@ -633,7 +630,7 @@ sub delta_pass ($) {
 	    system "topformflat $1 < $cfile > tmpfile";
 	    system "mv tmpfile $cfile";
 	    $changed_on_disk = 1;
-	    delta_test(1);
+	    delta_test();
 	}
 	$chunk_size = round (count_lines() / 2.0);
     }
