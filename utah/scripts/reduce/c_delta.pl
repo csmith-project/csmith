@@ -633,7 +633,7 @@ sub delta_pass ($) {
 	    system "mv tmpfile $cfile";
 	    $changed_on_disk = 1;
 	    if (!delta_test(1)) {
-		return 0;
+		# return 0;
 	    }
 	}
 	$chunk_size = round (count_lines() / 2.0);
