@@ -231,7 +231,7 @@ my $delta_worked;
 sub lines ($) {
     (my $chunk_size) = @_;
 
-    my $chunk_start = (1+$delta_pos) * $chunk_size;
+    my $chunk_start = $delta_pos * $chunk_size;
 
     open INF, "<$cfile" or die;
     open OUTF, ">tmpfile" or die;
@@ -633,7 +633,7 @@ sub delta_pass ($) {
 	    $changed_on_disk = 1;
 	    delta_test();
 	}
-	$chunk_size = round (count_lines() / 2.0);
+	$chunk_size = count_lines();
     }
 
   again:
