@@ -11,11 +11,9 @@
 
 # TODO:
 
-# look for more bugs like Yang found -- eliminate this entirely
+# delete some of the regexes that never work
 # turn hex constants into decimal
 # in code like: int a, b; we need a regex that gets rid of ", b"
-# keep a cache per size category and only drop those that are
-#   clearly not going to be used again
 # only run some passes (like combine vars) very late
 # add an option to keep stats about fast vs. slow tests
 # decouple delta_pos from file position
@@ -49,7 +47,7 @@ my $DEBUG = 0;
 # if set, ensure the delta test succeeds before starting each pass
 my $SANITY = 1;
 
-my $QUIET = 1;
+my $QUIET = 0;
 
 ######################################################################
 
@@ -186,23 +184,22 @@ sub delta_test () {
 	write_file();
     }
 
+    # sanity check that could be deleted
     ensure_mem_and_disk_are_synced();
 
     my $len = length ($prog);
     print "[$pass_num $delta_method ($delta_pos / $len) s:$good_cnt f:$bad_cnt] " 
 	unless $QUIET;
 
-    my $result = $cache{$prog};
+    my $result = $cache{$len}{$prog};
 
     if (defined($result)) {
 	$cache_hits++;
 	print "(hit) " unless $QUIET;
-	delta_step_fail($delta_method);
-	return 0;
+    } else {    
+	$result = run_test ();
+	$cache{$len}{$prog} = $result;
     }
-    
-    $result = run_test ();
-    $cache{$prog} = $result;
     
     if ($result) {
 	print "success " unless $QUIET;
@@ -212,7 +209,11 @@ sub delta_test () {
 	$method_worked{$delta_method}++;
 	my $size = length ($prog);
 	if ($size < $old_size) {
-	    %cache = ();
+	    foreach my $k (keys %cache) {
+		if ($k > ($size + 5000)) {
+		    $cache{$k} = ();
+		}
+	    }
 	}
 	$old_size = $size;
 	return 1;
