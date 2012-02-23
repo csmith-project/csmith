@@ -243,7 +243,8 @@ sub lines ($) {
 	    print OUTF $line;
 	} else {
 	    chomp $line;
-	    print "omitting: '$line'\n";
+	    # TMI
+	    # print "omitting: '$line'\n";
 	    $did_something = 1;
 	}
 	$n++;
@@ -358,6 +359,8 @@ foreach my $x (@subexprs) {
     push @delimited_regexes_to_replace, ["$x\\s*,", "0,"];
     push @delimited_regexes_to_replace, ["$x\\s*,", "1,"];
     push @delimited_regexes_to_replace, ["$x\\s*,", ""];
+    push @delimited_regexes_to_replace, [",\\s*$x", ",0"];
+    push @delimited_regexes_to_replace, [",\\s*$x", ",1"];
     push @delimited_regexes_to_replace, [",\\s*$x", ""];
 }
 
@@ -383,7 +386,7 @@ sub replace_regex (){
 	my $first = substr($prog, 0, $delta_pos);
 	my $rest = substr($prog, $delta_pos);
 	my $rrest = $rest;
-	if ($rest =~ s/(^$str)/$repl/s) {
+	if ($rest =~ s/(^$str)/$repl/sm) {
 	    my $before = $1;
 	    my $zz1 = $rest;
 	    my $zz2 = $rrest;
@@ -410,15 +413,20 @@ sub replace_regex (){
 	my $rest = substr($prog, $delta_pos);
 	
 	# special cases to avoid infinite replacement loops
-	next if ($repl eq "0" && $rest =~ /^($borderorspc)0$borderorspc/);
-	next if ($repl =~ /0\s*,/ && $rest =~ /^($borderorspc)0\s*,$borderorspc/);
-	next if ($repl eq "1" && $rest =~ /^($borderorspc)0$borderorspc/);
-	next if ($repl =~ /1\s*,/ && $rest =~ /^($borderorspc)0\s*,$borderorspc/);
-	next if ($repl eq "1" && $rest =~ /^($borderorspc)1$borderorspc/);
-	next if ($repl =~ /1\s*,/ && $rest =~ /^($borderorspc)1,$borderorspc/);
+	next if ($repl eq "0" && $rest =~ /^($borderorspc)0$borderorspc/sm);
+	next if ($repl eq "1" && $rest =~ /^($borderorspc)0$borderorspc/sm);
+	next if ($repl eq "1" && $rest =~ /^($borderorspc)1$borderorspc/sm);
+	next if ($repl =~ /0\s*,/ && $rest =~ /^($borderorspc)0\s*,$borderorspc/sm);
+	next if ($repl =~ /1\s*,/ && $rest =~ /^($borderorspc)0\s*,$borderorspc/sm);
+	next if ($repl =~ /1\s*,/ && $rest =~ /^($borderorspc)1\s*,$borderorspc/sm);
+	next if ($repl =~ /,\s*0/ && $rest =~ /^($borderorspc),\s*0$borderorspc/sm);
+	next if ($repl =~ /,\s*1/ && $rest =~ /^($borderorspc),\s*0$borderorspc/sm);
+	next if ($repl =~ /,\s*1/ && $rest =~ /^($borderorspc),\s*1$borderorspc/sm);
 	
 	my $rrest = $rest;
-	if ($rest =~ s/^(?<delim1>$borderorspc)(?<str>$str)(?<delim2>$borderorspc)/$+{delim1}$repl$+{delim2}/s) {
+	if (
+	    $rest =~ s/^(?<delim1>$borderorspc)(?<str>$str)(?<delim2>$borderorspc)/$+{delim1}$repl$+{delim2}/sm
+	    ) {
 	    my $before = $+{str};
 	    my $zz1 = $rest;
 	    my $zz2 = $rrest;
@@ -486,7 +494,7 @@ sub crc () {
 sub ternary () {
     my $first = substr($prog, 0, $delta_pos);
     my $rest = substr($prog, $delta_pos);
-    if ($rest =~ s/^(?<del1>$borderorspc)(?<a>$varnumexp)\s*\?\s*(?<b>$varnumexp)\s*:\s*(?<c>$varnumexp)(?<del2>$borderorspc)/$+{del1}$+{b}$+{del2}/s) {
+    if ($rest =~ s/^(?<del1>$borderorspc)(?<a>$varnumexp)\s*\?\s*(?<b>$varnumexp)\s*:\s*(?<c>$varnumexp)(?<del2>$borderorspc)/$+{del1}$+{b}$+{del2}/sm) {
 	$prog = $first.$rest;
 	my $n1 = "$+{del1}$+{a} ? $+{b} : $+{c}$+{del2}";
 	my $n2 = "$+{del1}$+{b}$+{del2}";
@@ -495,7 +503,7 @@ sub ternary () {
     }	    
     $first = substr($prog, 0, $delta_pos);
     $rest = substr($prog, $delta_pos);
-    if ($rest =~ s/^(?<del1>$borderorspc)(?<a>$varnumexp)\s*\?\s*(?<b>$varnumexp)\s*:\s*(?<c>$varnumexp)(?<del2>$borderorspc)/$+{del1}$+{c}$+{del2}/s) {
+    if ($rest =~ s/^(?<del1>$borderorspc)(?<a>$varnumexp)\s*\?\s*(?<b>$varnumexp)\s*:\s*(?<c>$varnumexp)(?<del2>$borderorspc)/$+{del1}$+{c}$+{del2}/sm) {
 	$prog = $first.$rest;
 	my $n1 = "$+{del1}$+{a} ? $+{b} : $+{c}$+{del2}";
 	my $n2 = "$+{del1}$+{c}$+{del2}";
@@ -507,7 +515,7 @@ sub ternary () {
 sub shorten_ints () {
     my $first = substr($prog, 0, $delta_pos);
     my $rest = substr($prog, $delta_pos);
-    if ($rest =~ s/^(?<pref>$borderorspc(\\-|\\+)?(0|(0[xX]))?)(?<del>[0-9a-fA-F])(?<numpart>[0-9a-fA-F]+)(?<suf>[ULul]*$borderorspc)/$+{pref}$+{numpart}$+{suf}/s) {
+    if ($rest =~ s/^(?<pref>$borderorspc(\\-|\\+)?(0|(0[xX]))?)(?<del>[0-9a-fA-F])(?<numpart>[0-9a-fA-F]+)(?<suf>[ULul]*$borderorspc)/$+{pref}$+{numpart}$+{suf}/sm) {
 	$prog = $first.$rest;
 	my $n1 = "$+{pref}$+{del}$+{numpart}$+{suf}";
 	my $n2 = "$+{pref}$+{numpart}$+{suf}";
@@ -517,7 +525,7 @@ sub shorten_ints () {
     $first = substr($prog, 0, $delta_pos);
     $rest = substr($prog, $delta_pos);
     my $orig_rest = $rest;
-    if ($rest =~ s/^(?<pref1>$borderorspc)(?<pref2>(\\-|\\+)?(0|(0[xX]))?)(?<numpart>[0-9a-fA-F]+)(?<suf>[ULul]*$borderorspc)/$+{pref1}$+{numpart}$+{suf}/s && ($rest ne $orig_rest)) {
+    if ($rest =~ s/^(?<pref1>$borderorspc)(?<pref2>(\\-|\\+)?(0|(0[xX]))?)(?<numpart>[0-9a-fA-F]+)(?<suf>[ULul]*$borderorspc)/$+{pref1}$+{numpart}$+{suf}/sm && ($rest ne $orig_rest)) {
 	$prog = $first.$rest;
 	my $n1 = "$+{pref1}$+{pref2}$+{numpart}$+{suf}";
 	my $n2 = "$+{pref1}$+{numpart}$+{suf}";
@@ -527,7 +535,7 @@ sub shorten_ints () {
     $first = substr($prog, 0, $delta_pos);
     $rest = substr($prog, $delta_pos);
     $orig_rest = $rest;
-    if ($rest =~ s/^(?<pref>$borderorspc(\\-|\\+)?(0|(0[xX]))?)(?<numpart>[0-9a-fA-F]+)(?<suf1>[ULul]*)(?<suf2>$borderorspc)/$+{pref}$+{numpart}$+{suf2}/s && ($rest ne $orig_rest)) {
+    if ($rest =~ s/^(?<pref>$borderorspc(\\-|\\+)?(0|(0[xX]))?)(?<numpart>[0-9a-fA-F]+)(?<suf1>[ULul]*)(?<suf2>$borderorspc)/$+{pref}$+{numpart}$+{suf2}/sm && ($rest ne $orig_rest)) {
 	$prog = $first.$rest;
 	my $n1 = "$+{pref}$+{numpart}$+{suf1}$+{suf2}";
 		my $n2 = "$+{pref}$+{numpart}$+{suf2}";
