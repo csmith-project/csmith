@@ -14,6 +14,7 @@
 # make pass 0 use a hand-tuned phase ordering, after that it doesn't matter
 #   use cleanup passes often
 #   don't call variable combiner
+# disable sanity check and enable quiet mode for timing runs
 # make this script follow the interface from the paper
 #   fully decouple delta_pos from file position
 # add a pass to turn hex constants into decimal
