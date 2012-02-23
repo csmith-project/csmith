@@ -11,6 +11,7 @@
 
 # TODO:
 
+# run "astyle -xd at the very end"
 # make pass 0 use a hand-tuned phase ordering, after that it doesn't matter
 #   use cleanup passes often
 #   don't call variable combiner
@@ -487,7 +488,7 @@ sub clang_delta ($) {
     }
 }
 
-my $INDENT_OPTS = "-bad -bap -bc -cs -pcs -prs -saf -sai -saw -sob -ss -bl ";
+my $INDENT_OPTS = "-nbad -nbap -nbbb -cs -pcs -prs -saf -sai -saw -sob -ss ";
 
 sub indent () {
     system "indent $INDENT_OPTS $cfile";
@@ -713,10 +714,10 @@ my %all_methods = (
     "brackets" => 2,
     "ternary" => 2,
     "parens" => 3,
+    "indent" => 3,
     "replace_regex" => 4,
     "shorten_ints" => 5,
     "blanks" => 14,
-    "indent" => 15,
 
     );
 
