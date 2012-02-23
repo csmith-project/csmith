@@ -415,17 +415,6 @@ sub replace_regex (){
 	    my $first = substr($prog, 0, $delta_pos);
 	    my $rest = substr($prog, $delta_pos);
 
-	    # special cases to avoid infinite replacement loops
-	    next if ($repl eq "0" && $rest =~ /^($borderorspc)0$borderorspc/sm);
-	    next if ($repl eq "1" && $rest =~ /^($borderorspc)0$borderorspc/sm);
-	    next if ($repl eq "1" && $rest =~ /^($borderorspc)1$borderorspc/sm);
-	    next if ($repl =~ /0\s*,/ && $rest =~ /^($borderorspc)0\s*,$borderorspc/sm);
-	    next if ($repl =~ /1\s*,/ && $rest =~ /^($borderorspc)0\s*,$borderorspc/sm);
-	    next if ($repl =~ /1\s*,/ && $rest =~ /^($borderorspc)1\s*,$borderorspc/sm);
-	    next if ($repl =~ /,\s*0/ && $rest =~ /^($borderorspc),\s*0$borderorspc/sm);
-	    next if ($repl =~ /,\s*1/ && $rest =~ /^($borderorspc),\s*0$borderorspc/sm);
-	    next if ($repl =~ /,\s*1/ && $rest =~ /^($borderorspc),\s*1$borderorspc/sm);
-	    
 	    my $rrest = $rest;
 	    my $front;
 	    my $back;
@@ -439,6 +428,18 @@ sub replace_regex (){
 	    } else {
 		$back = "(?<delim2>$borderorspc)";
 	    }
+
+	    # special cases to avoid infinite replacement loops
+	    next if ($repl eq "0" && $rest =~ /^($front)0$back/sm);
+	    next if ($repl eq "1" && $rest =~ /^($front)0$back/sm);
+	    next if ($repl eq "1" && $rest =~ /^($front)1$back/sm);
+	    next if ($repl =~ /0\s*,/ && $rest =~ /^($front)0\s*,$back/sm);
+	    next if ($repl =~ /1\s*,/ && $rest =~ /^($front)0\s*,$back/sm);
+	    next if ($repl =~ /1\s*,/ && $rest =~ /^($front)1\s*,$back/sm);
+	    next if ($repl =~ /,\s*0/ && $rest =~ /^($front),\s*0$back/sm);
+	    next if ($repl =~ /,\s*1/ && $rest =~ /^($front),\s*0$back/sm);
+	    next if ($repl =~ /,\s*1/ && $rest =~ /^($front),\s*1$back/sm);
+	    
 	    if (
 		$rest =~ s/^$front(?<str>$str)$back/$+{delim1}$repl$+{delim2}/sm
 		) {
@@ -722,7 +723,7 @@ my %all_methods = (
 my $clang_delta = File::Which::which ("clang_delta");
 if (defined($clang_delta)) {
     $all_methods{"clang-aggregate-to-scalar"} = 10;
-    $all_methods{"clang-binop-simplification"} = 10;
+    # $all_methods{"clang-binop-simplification"} = 10;
     $all_methods{"clang-combine-global-var"} = 10;
     $all_methods{"clang-combine-local-var"} = 10;
     $all_methods{"clang-local-to-global"} = 10;
