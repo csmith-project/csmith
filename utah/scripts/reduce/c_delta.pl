@@ -418,12 +418,12 @@ sub replace_regex (){
 	    my $front;
 	    my $back;
 	    if (substr($rest,0,1) eq ",") {
-		$front = "(?<delim1>($borderorspc)*)";
+		$front = "(?<delim1>($borderorspc)?)";
 	    } else {
 		$front = "(?<delim1>$borderorspc)";
 	    }
 	    if (substr($rest,-1,1) eq ",") {
-		$back = "(?<delim2>($borderorspc)*)";
+		$back = "(?<delim2>($borderorspc)?)";
 	    } else {
 		$back = "(?<delim2>$borderorspc)";
 	    }
