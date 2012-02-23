@@ -242,6 +242,8 @@ sub lines ($) {
 	    $n >= ($chunk_start + $chunk_size)) {
 	    print OUTF $line;
 	} else {
+	    chomp $line;
+	    print "omitting: '$line'\n";
 	    $did_something = 1;
 	}
 	$n++;
@@ -661,6 +663,7 @@ sub delta_pass ($) {
 	    if ($delta_method =~ /^lines/ && $chunk_size > 1) {
 		$chunk_size = round ($chunk_size / 2.0);
 		printf "new chunk size = $chunk_size\n" unless $QUIET;
+		$delta_pos = 0;
 		goto again;
 	    }
 	    return;
@@ -793,7 +796,8 @@ while (1) {
     }
     $pass_num++;
     my $s = -s $cfile;
-    last if ($s == $file_size);
+    print "Termination check: size was $file_size; now $s\n";
+    last if ($s >= $file_size);
     $file_size = $s;
 }
 
