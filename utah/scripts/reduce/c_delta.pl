@@ -11,19 +11,17 @@
 
 # TODO:
 
+# make this script follow the interface from the paper
+#   fully decouple delta_pos from file position
 # delete some of the regexes that never work
-# turn hex constants into decimal
+# add a pass to turn hex constants into decimal
 # in code like: int a, b; we need a regex that gets rid of ", b"
 # only run some passes (like combine vars) very late
 # add an option to keep stats about fast vs. slow tests
-# decouple delta_pos from file position
 # expose quiet on command line
-# run some passes, such as remove_unused_funcs, multiple times
-# refine the line-based pass -- should be just as powerful and fast
-#   as berkeley delta
+# run some passes, such as remove_unused_funcs, more often
 # add an API for creating temporary files
 # add an option limiting the number of passes
-# simplify the termination condition -- stop after 2 passes with no size decrease
 # see if it's faster to work from back to front
 # watch for unexpected abnormal compiler outputs
 # optimize the order of passes
@@ -145,8 +143,6 @@ sub run_test () {
     return ($res == 0);
 }
 
-my %cache = ();
-my $cache_hits = 0;
 my $good_cnt;
 my $bad_cnt;
 my $pass_num = 0;
@@ -175,6 +171,8 @@ sub delta_step_fail ($) {
     
 my $changed_on_disk = 0;
 my $delta_method;
+my %cache = ();
+my $cache_hits = 0;
 
 sub delta_test () {
     if ($changed_on_disk) {
