@@ -11,20 +11,18 @@
 
 # TODO:
 
+# make pass 0 use a hand-tuned phase ordering, after that it doesn't matter
+#   use cleanup passes often
+#   don't call variable combiner
 # make this script follow the interface from the paper
 #   fully decouple delta_pos from file position
-# delete some of the regexes that never work
 # add a pass to turn hex constants into decimal
-# in code like: int a, b; we need a regex that gets rid of ", b"
-# only run some passes (like combine vars) very late
 # add an option to keep stats about fast vs. slow tests
 # expose quiet on command line
-# run some passes, such as remove_unused_funcs, more often
 # add an API for creating temporary files
 # add an option limiting the number of passes
 # see if it's faster to work from back to front
 # watch for unexpected abnormal compiler outputs
-# optimize the order of passes
 # exploit early-exit from delta test to speed this up
 #   keep per-pass statistic on the probability of requiring the slow test
 #   invert this to decide how many fast tests to run in a row
