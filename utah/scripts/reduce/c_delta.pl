@@ -378,68 +378,86 @@ for (my $n=0; $n<scalar(@delimited_regexes_to_replace); $n++) {
 }
 
 sub replace_regex (){ 
-    my $n=-1;
-    foreach my $l (@regexes_to_replace) {	       
-	$n++;
-	my $str = @{$l}[0];
-	my $repl = @{$l}[1];
-	my $first = substr($prog, 0, $delta_pos);
-	my $rest = substr($prog, $delta_pos);
-	my $rrest = $rest;
-	if ($rest =~ s/(^$str)/$repl/sm) {
-	    my $before = $1;
-	    my $zz1 = $rest;
-	    my $zz2 = $rrest;
-	    ($zz1 =~ s/\s//g);
-	    ($zz2 =~ s/\s//g);
-	    if ($zz1 ne $zz2) {
-		print "regex $n replacing '$before' with '$repl' : " unless $QUIET;
-		$prog = $first.$rest;
-		if (delta_test ()) {
-		    $delta_worked = 1;
-		    $regex_worked{$n}++;
-		} else {
-		    $regex_failed{$n}++;
+    if (1) {
+	my $n=-1;
+	foreach my $l (@regexes_to_replace) {	       
+	    $n++;
+	    my $str = @{$l}[0];
+	    my $repl = @{$l}[1];
+	    my $first = substr($prog, 0, $delta_pos);
+	    my $rest = substr($prog, $delta_pos);
+	    my $rrest = $rest;
+	    if ($rest =~ s/(^$str)/$repl/sm) {
+		my $before = $1;
+		my $zz1 = $rest;
+		my $zz2 = $rrest;
+		($zz1 =~ s/\s//g);
+		($zz2 =~ s/\s//g);
+		if ($zz1 ne $zz2) {
+		    print "regex $n replacing '$before' with '$repl' : " unless $QUIET;
+		    $prog = $first.$rest;
+		    if (delta_test ()) {
+			$delta_worked = 1;
+			$regex_worked{$n}++;
+		    } else {
+			$regex_failed{$n}++;
+		    }
 		}
 	    }
 	}
     }
-    $n=-1;
-    foreach my $l (@delimited_regexes_to_replace) {
-	$n++;
-	my $str = @{$l}[0];
-	my $repl = @{$l}[1];
-	my $first = substr($prog, 0, $delta_pos);
-	my $rest = substr($prog, $delta_pos);
-	
-	# special cases to avoid infinite replacement loops
-	next if ($repl eq "0" && $rest =~ /^($borderorspc)0$borderorspc/sm);
-	next if ($repl eq "1" && $rest =~ /^($borderorspc)0$borderorspc/sm);
-	next if ($repl eq "1" && $rest =~ /^($borderorspc)1$borderorspc/sm);
-	next if ($repl =~ /0\s*,/ && $rest =~ /^($borderorspc)0\s*,$borderorspc/sm);
-	next if ($repl =~ /1\s*,/ && $rest =~ /^($borderorspc)0\s*,$borderorspc/sm);
-	next if ($repl =~ /1\s*,/ && $rest =~ /^($borderorspc)1\s*,$borderorspc/sm);
-	next if ($repl =~ /,\s*0/ && $rest =~ /^($borderorspc),\s*0$borderorspc/sm);
-	next if ($repl =~ /,\s*1/ && $rest =~ /^($borderorspc),\s*0$borderorspc/sm);
-	next if ($repl =~ /,\s*1/ && $rest =~ /^($borderorspc),\s*1$borderorspc/sm);
-	
-	my $rrest = $rest;
-	if (
-	    $rest =~ s/^(?<delim1>$borderorspc)(?<str>$str)(?<delim2>$borderorspc)/$+{delim1}$repl$+{delim2}/sm
-	    ) {
-	    my $before = $+{str};
-	    my $zz1 = $rest;
-	    my $zz2 = $rrest;
-	    ($zz1 =~ s/\s//g);
-	    ($zz2 =~ s/\s//g);
-	    if ($zz1 ne $zz2) {
-		print "regex $n delimited replacing '$before' with '$repl' : " unless $QUIET;
-		$prog = $first.$rest;
-		if (delta_test ()) {
-		    $delta_worked = 1;
-		    $delimited_regex_worked{$n}++;
+    if (1) {
+	my $n=-1;
+	foreach my $l (@delimited_regexes_to_replace) {
+	    $n++;
+	    my $str = @{$l}[0];
+	    my $repl = @{$l}[1];
+	    my $first = substr($prog, 0, $delta_pos);
+	    my $rest = substr($prog, $delta_pos);
+
+	    # special cases to avoid infinite replacement loops
+	    next if ($repl eq "0" && $rest =~ /^($borderorspc)0$borderorspc/sm);
+	    next if ($repl eq "1" && $rest =~ /^($borderorspc)0$borderorspc/sm);
+	    next if ($repl eq "1" && $rest =~ /^($borderorspc)1$borderorspc/sm);
+	    next if ($repl =~ /0\s*,/ && $rest =~ /^($borderorspc)0\s*,$borderorspc/sm);
+	    next if ($repl =~ /1\s*,/ && $rest =~ /^($borderorspc)0\s*,$borderorspc/sm);
+	    next if ($repl =~ /1\s*,/ && $rest =~ /^($borderorspc)1\s*,$borderorspc/sm);
+	    next if ($repl =~ /,\s*0/ && $rest =~ /^($borderorspc),\s*0$borderorspc/sm);
+	    next if ($repl =~ /,\s*1/ && $rest =~ /^($borderorspc),\s*0$borderorspc/sm);
+	    next if ($repl =~ /,\s*1/ && $rest =~ /^($borderorspc),\s*1$borderorspc/sm);
+	    
+	    my $rrest = $rest;
+	    my $front;
+	    my $back;
+	    if (substr($rest,0,1) eq ",") {
+		$front = "(?<delim1>($borderorspc)*)";
+	    } else {
+		$front = "(?<delim1>$borderorspc)";
+	    }
+	    if (substr($rest,-1,1) eq ",") {
+		$back = "(?<delim2>($borderorspc)*)";
+	    } else {
+		$back = "(?<delim2>$borderorspc)";
+	    }
+	    if (
+		$rest =~ s/^$front(?<str>$str)$back/$+{delim1}$repl$+{delim2}/sm
+		) {
+		my $before = $+{str};
+		my $zz1 = $rest;
+		my $zz2 = $rrest;
+		($zz1 =~ s/\s//g);
+		($zz2 =~ s/\s//g);
+		if ($zz1 ne $zz2) {
+		    print "regex $n delimited replacing '$before' with '$repl' : " unless $QUIET;
+		    $prog = $first.$rest;
+		    if (delta_test ()) {
+			$delta_worked = 1;
+			$delimited_regex_worked{$n}++;
+		    } else {
+			$delimited_regex_failed{$n}++;
+		    }
 		} else {
-		    $delimited_regex_failed{$n}++;
+		    # die;
 		}
 	    }
 	}
