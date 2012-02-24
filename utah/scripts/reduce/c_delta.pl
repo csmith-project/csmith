@@ -11,6 +11,8 @@
 
 # TODO:
 
+# add sanity check for clang_delta: if it returns success, the
+#   file needs to have changed, and it still needs to compile
 # run "astyle -xd at the very end"
 # make pass 0 use a hand-tuned phase ordering, after that it doesn't matter
 #   use cleanup passes often
