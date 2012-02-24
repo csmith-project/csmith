@@ -743,6 +743,7 @@ if (defined($clang_delta)) {
     $all_methods{"clang-reduce-pointer-level"} = 10;
     $all_methods{"clang-lift-assignment-expr"} = 10;
     $all_methods{"clang-copy-propagation"} = 10;
+    $all_methods{"clang-remove-unused-var"} = 10;
 } else {
     printf ("clang_delta not found in path, disabling its passes\n");
 }
