@@ -482,9 +482,18 @@ sub blanks () {
 sub clang_delta ($) {
     (my $how) = @_;
     my $x = $delta_pos+1;
-    my $res = runit ("clang_delta --transformation=$how --counter=$x $cfile > foo");
+    my $cmd = "clang_delta --transformation=$how --counter=$x $cfile > foo";
+    my $res = runit ($cmd);
     if ($res==0) {
+	my $res2 = runit ("diff $cfile foo");
+	if ($res2 == 0) {
+	    die "oops, command '$cmd' produced identical output";
+	}
 	system "mv foo $cfile";
+	$res2 = ("clang -O0 -c $cfile");
+	if ($res != 0) {
+	    die "oops couldn't compile $cfile now";
+	}
 	$changed_on_disk = 1;
 	$delta_worked |= delta_test ();
     } else {
