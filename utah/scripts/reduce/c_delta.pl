@@ -11,6 +11,8 @@
 
 # TODO:
 
+# put regex passses in a perl module
+# make passes explicitly load and store the file
 # add sanity check for clang_delta: if it returns success, the
 #   file needs to have changed, and it still needs to compile
 # run "astyle -xd at the very end"
