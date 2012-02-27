@@ -728,8 +728,6 @@ my $clang_delta = File::Which::which ("clang_delta");
 if (defined($clang_delta)) {
     $all_methods{"clang-aggregate-to-scalar"} = 10;
     # $all_methods{"clang-binop-simplification"} = 10;
-    $all_methods{"clang-combine-global-var"} = 10;
-    $all_methods{"clang-combine-local-var"} = 10;
     $all_methods{"clang-local-to-global"} = 10;
     $all_methods{"clang-param-to-global"} = 10;
     $all_methods{"clang-param-to-local"} = 10;
@@ -845,6 +843,12 @@ while (1) {
     print "Termination check: size was $file_size; now $s\n";
     last if ($s >= $file_size);
     $file_size = $s;
+}
+
+if (1) {
+    delta_pass ("clang-combine-global-var");
+    delta_pass ("clang-combine-local-var");
+    delta_pass ("indent");
 }
 
 print "===================== done ====================\n";
