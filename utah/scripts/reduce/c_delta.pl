@@ -9,8 +9,11 @@
 #
 ####################################################################
 
+# sudo apt-get install libfile-which-perl libregexp-common-perl indent astyle delta
+
 # TODO:
 
+# by default, exit if one of the tools we want isn't available
 # put regex passses in a perl module
 # make passes explicitly load and store the file
 # add sanity check for clang_delta: if it returns success, the
@@ -117,17 +120,7 @@ sub ensure_mem_and_disk_are_synced () {
     die unless ($prog eq read_file_helper());
 }
 
-sub save_copy ($) {
-    (my $fn) = @_;
-    open OUTF, ">$fn" or die;
-    print OUTF $prog;
-    close OUTF;
-}
-
 sub write_file () {
-    if (defined($DEBUG) && $DEBUG) {
-	save_copy ("delta_tmp_${trial_num}.c");
-    }
     $trial_num++;
     open OUTF, ">$cfile" or die;
     print OUTF $prog;
@@ -288,7 +281,7 @@ my @regexes_to_replace = (
     ["=\\s*$RE{balanced}{-parens=>'{}'}", ""],
     ["\\:\\s*[0-9]+\\s*;", ";"],
     ["\\;", ""],
-    ["\#(.*)\n", ""],
+    ["\#(.*?)\n", ""],
     ["\\^\\=", "="],
     ["\\|\\=", "="],
     ["\\&\\=", "="],
@@ -309,16 +302,13 @@ my @regexes_to_replace = (
     ["\\!", ""],
     ["\\~", ""],
     ["while", "if"],
-    ["struct(.*?);", ""],
-    ["union(.*?);", ""],
-    ["enum(.*?);", ""],
-    ["struct(.*);", ""],
-    ["union(.*);", ""],
-    ["enum(.*);", ""],
     ['"(.*?)"', ""],
     ['"(.*?)",', ""],
-    ['"(.*)"', ""],
-    ['"(.*)",', ""],
+    ["struct\\s*$RE{balanced}{-parens=>'{}'}", ""],
+    ["union\\s*$RE{balanced}{-parens=>'{}'}", ""],
+    ["enum\\s*$RE{balanced}{-parens=>'{}'}", ""],
+    #['"(.*)"', ""],
+    #['"(.*)",', ""],
     );
 
 # these match when preceded and followed by $borderorspc
@@ -392,7 +382,7 @@ sub replace_regex (){
 	    my $first = substr($prog, 0, $delta_pos);
 	    my $rest = substr($prog, $delta_pos);
 	    my $rrest = $rest;
-	    if ($rest =~ s/(^$str)/$repl/sm) {
+	    if ($rest =~ s/^($str)/$repl/sm) {
 		my $before = $1;
 		my $zz1 = $rest;
 		my $zz2 = $rrest;
@@ -763,12 +753,12 @@ if (defined($clang_delta)) {
 
 my $topformflat = File::Which::which ("topformflat");
 if (defined($topformflat)) {
-    $all_methods{"lines0"} = -5;
-    $all_methods{"lines1"} = -4;
-    $all_methods{"lines2"} = -3;
-    $all_methods{"lines10"} = -2;
+    $all_methods{"lines0"} = 15;
+    $all_methods{"lines1"} = 14;
+    $all_methods{"lines2"} = 13;
+    $all_methods{"lines10"} = 12;
 } else {
-    $all_methods{"lines"} = -5;
+    $all_methods{"lines"} = 15;
     printf ("topformflat not found in path, disabling its passes\n");
 }
 
@@ -834,8 +824,19 @@ $orig_prog_len = length ($prog);
 my $file_size = -s $cfile;
 my $spinning = 0;
 
+if (1) {
+    delta_pass ("lines0");
+    delta_pass ("lines1");
+    delta_pass ("lines2");
+    delta_pass ("lines10");
+    delta_pass ("clang-remove-unused-function");
+    delta_pass ("clang-remove-unused-var");
+    delta_pass ("clang-callexpr-to-value");
+    delta_pass ("clang-simplify-callexpr");
+    delta_pass ("clang-remove-unused-function");
+}
+
 while (1) {
-    save_copy ("delta_backup_${pass_num}.c");
     foreach my $method (sort bymethod keys %methods) {
 	delta_pass ($method);
     }
