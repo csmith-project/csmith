@@ -18,7 +18,6 @@
 # make passes explicitly load and store the file
 # add sanity check for clang_delta: if it returns success, the
 #   file needs to have changed, and it still needs to compile
-# run "astyle -xd at the very end"
 # make pass 0 use a hand-tuned phase ordering, after that it doesn't matter
 #   use cleanup passes often
 #   don't call variable combiner
@@ -307,8 +306,7 @@ my @regexes_to_replace = (
     ["struct\\s*$RE{balanced}{-parens=>'{}'}", ""],
     ["union\\s*$RE{balanced}{-parens=>'{}'}", ""],
     ["enum\\s*$RE{balanced}{-parens=>'{}'}", ""],
-    #['"(.*)"', ""],
-    #['"(.*)",', ""],
+    ["if\\s*$RE{balanced}{-parens=>'()'}", ""],
     );
 
 # these match when preceded and followed by $borderorspc
@@ -328,7 +326,6 @@ my @delimited_regexes_to_replace = (
     ["\'(.*)\'", ""],
     ["\"(.*?)\"", ""],
     ["\'(.*?)\'", ""],
-    ["if\\s+\\(.*?\\)", ""],
     ["$call,", "0"],
     ["$call,", ""],
     ["$call", "0"],
@@ -495,6 +492,14 @@ my $INDENT_OPTS = "-nbad -nbap -nbbb -cs -pcs -prs -saf -sai -saw -sob -ss ";
 
 sub indent () {
     system "indent $INDENT_OPTS $cfile";
+    $changed_on_disk = 1;
+    $delta_worked |= delta_test ();
+    $exit_delta_pass = 1;
+}
+
+sub final_indent () {
+    system "indent -nbad -nbap -nbbb $cfile";
+    system "astyle -A2 -xd -s2 $cfile";
     $changed_on_disk = 1;
     $delta_worked |= delta_test ();
     $exit_delta_pass = 1;
@@ -848,7 +853,7 @@ while (1) {
 if (1) {
     delta_pass ("clang-combine-global-var");
     delta_pass ("clang-combine-local-var");
-    delta_pass ("indent");
+    delta_pass ("final_indent");
 }
 
 print "===================== done ====================\n";
@@ -886,6 +891,8 @@ for (my $n=0; $n<scalar(@delimited_regexes_to_replace); $n++) {
 }
 
 print "\n";
-print "there were $cache_hits cache hits\n";
+
+print "reduced test case:\n\n";
+system "cat $cfile";
 
 ######################################################################
