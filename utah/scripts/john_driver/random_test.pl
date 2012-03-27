@@ -9,7 +9,37 @@ use File::stat;
 ##################################################################
 
 my $USE_SWARM = 1;
-my $SWARM_FILE = "2.1.0x1000.configs";
+
+my @ALL_SWARM_OPTS = (
+    "argc",
+    "arrays",
+    "bitfields",
+    "checksum",
+    "comma-operators",
+    "compound-assignment",
+    "consts",
+    "divs",
+    "embedded-assigns",
+    "incr-decr-operators",
+    "jumps",
+    "longlong",
+    "math64",
+    "muls",
+    "packed-struct",
+    "paranoid",
+    "pointers",
+    "structs",
+    "unions",
+    "volatiles",
+    "volatile-pointers",
+    "return-structs",
+    "arg-structs",
+    "return-unions",
+    "arg-unions",
+    "dangling-global-pointers",
+    "return-dead-pointer",
+    "union-read-type-sensitive",
+    );
 
 my $SAVE_BADS = 0;
 
@@ -102,19 +132,6 @@ sub runit ($) {
     return $exit_value;
 }
 
-my @swarm;
-
-sub read_swarm_file () {
-    open INF, "<$CSMITH_HOME/utah/scripts/john_driver/$SWARM_FILE" or die;
-    while (my $line = <INF>) {
-	chomp $line;
-	push @swarm, $line;
-    }    
-    close INF;
-    my $n = scalar (@swarm);
-    print "read $n swarm configurations\n";
-}
-
 sub doit ($$) {
     (my $n, my $work) = @_;
     print "------ RANDOM PROGRAM $n ------\n";
@@ -152,9 +169,13 @@ sub doit ($$) {
 
     my $SWARM_OPTS = "";
     if ($USE_SWARM) {
-	my $nopts = scalar (@swarm);
-	my $idx = $good % $nopts;
-	$SWARM_OPTS = $swarm[$idx];
+	foreach my $opt (@ALL_SWARM_OPTS) {
+	    if (rand() < 0.5) {
+		$SWARM_OPTS .= " --$opt ";
+	    } else {
+		$SWARM_OPTS .= " --no-$opt ";
+	    }
+	}
     }
 
     my $cmd;
@@ -269,10 +290,6 @@ if (scalar(@ARGV)==2) {
     $PROVIDE_SEED = 0;
 } else {
     $TIMED_TEST = 0;
-}
-
-if ($USE_SWARM) {
-    read_swarm_file();
 }
 
 my $i = 0;

@@ -60,7 +60,7 @@ if (defined($ENV{"PIN_CMD"})) {
 
 my $VALGRIND_ON_COMPILER = 0;
 
-my $RUN_PROGRAM = 1;
+my $RUN_PROGRAM = 0;
 
 my $DO_TRIAGE = 0;
 
@@ -539,23 +539,23 @@ my @llvms = (
 
 my @compilers_to_test = (
     
-    \@clang,
+    #\@clang,
     #\@gcccurrent,
     
-    #\@gcc320,
-    #\@gcc330,
-    #\@gcc340,
-    #\@gcc400,
-    #\@gcc410,
-    #\@gcc420,
-    #\@gcc430,
-    #\@gcc440,
-    #\@gcc450,
-    #\@gcc460,
-    #\@clang26,
-    #\@clang27,
-    #\@clang28,
-    #\@clang29,
+    \@gcc320,
+    \@gcc330,
+    \@gcc340,
+    \@gcc400,
+    \@gcc410,
+    \@gcc420,
+    \@gcc430,
+    \@gcc440,
+    \@gcc450,
+    \@gcc460,
+    \@clang26,
+    \@clang27,
+    \@clang28,
+    \@clang29,
     
     #\@icc,
     #\@suncc,

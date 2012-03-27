@@ -175,7 +175,7 @@ static void print_help()
 	cout << "  --max-union-fields <num>: limit the number of union fields to <num> (default 5). " << endl << endl;
 
 	cout << "  --muls | --no-muls: enable | disable multiplications (enabled by default)." << endl << endl;
-	cout << "  --no-safe-math: Do not emit safe math wrapper functions." << endl << endl;
+	cout << "  --safe-math | --no-safe-math: Emit safe math wrapper functions (enabled by default)." << endl << endl;
 	cout << "  --packed-struct | --no-packed-struct: enable | disable packed structs by adding #pragma pack(1) before struct definition (disabled by default)." << endl << endl; 
 	cout << "  --paranoid | --no-paranoid: enable | disable pointer-related assertions (disabled by default)." << endl << endl; 
 	cout << "  --pointers | --no-pointers: enable | disable pointers (enabled by default)." << endl << endl;
@@ -1139,6 +1139,11 @@ main(int argc, char **argv)
 
         if (strcmp (argv[i], "--no-safe-math") == 0){
             CGOptions::avoid_signed_overflow(false);
+            continue;
+        }
+
+        if (strcmp (argv[i], "--safe-math") == 0){
+            CGOptions::avoid_signed_overflow(true);
             continue;
         }
 
