@@ -294,7 +294,7 @@ static void print_advanced_help()
 				
 	cout << "  --mark-mutable-const: mark constants that can be mutated with parentheses (disabled by default)." << endl << endl; 
 
-	cout << "  --force-non-uniform-arrays: force integer arrays to be initialized with multiple values (disabled by default)." << endl << endl; 
+	cout << "  --force-non-uniform-arrays | --no-force-non-uniform-arrays: force integer arrays to be initialized with multiple values (enabled by default)." << endl << endl; 
  
 	cout << "  --null-ptr-deref-prob <N>: allow null pointers to be dereferenced with probability N% (0 by default)." << endl << endl;
 
@@ -1059,6 +1059,11 @@ main(int argc, char **argv)
 
 		if (strcmp (argv[i], "--force-non-uniform-arrays") == 0) {
 			CGOptions::force_non_uniform_array_init(true);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--no-force-non-uniform-arrays") == 0) {
+			CGOptions::force_non_uniform_array_init(false);
 			continue;
 		}
 

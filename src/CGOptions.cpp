@@ -248,7 +248,7 @@ CGOptions::set_default_settings(void)
 	identify_wrappers(false);
 	mark_mutable_const(false);
 	force_globals_static(true);
-	force_non_uniform_array_init(false);
+	force_non_uniform_array_init(true);
 	max_array_num_in_loop(CGOPTIONS_DEFAULT_MAX_ARRAY_NUM_IN_LOOP);
 	null_pointer_dereference_prob(0);
 	dead_pointer_dereference_prob(0);
