@@ -6,6 +6,8 @@ use strict;
 use warnings;
 use Sys::CPU;
 
+my $NICE = "";
+
 sub usage () {
     die "usage: launchn.pl [number] [seedfile]\n";
 }
@@ -43,6 +45,6 @@ system "rm -rf work*";
 for (my $i=0; $i<$CPUS; $i++) {
     my $dir = "work$i";
     system "mkdir $dir";
-    system "env RVDEBUG_HOME=/home/regehr/z/tmp/arm_tmp$i nice -19 nohup random_test.pl $dir $SEEDFILE > $dir/output.txt 2>&1 &";
+    system "$NICE nohup random_test.pl $dir $SEEDFILE > $dir/output.txt 2>&1 &";
 }
 

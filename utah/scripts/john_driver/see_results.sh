@@ -1,2 +1,3 @@
 grep FAIL work*/output.txt | grep -v 'COMPILER FAILURE'
-grep GOOD work*/output.txt | wc
+echo -n 'tests: '
+grep GOOD work*/output.txt | wc -l

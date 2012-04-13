@@ -60,7 +60,7 @@ if (defined($ENV{"PIN_CMD"})) {
 
 my $VALGRIND_ON_COMPILER = 0;
 
-my $RUN_PROGRAM = 0;
+my $RUN_PROGRAM = 1;
 
 my $DO_TRIAGE = 0;
 
@@ -82,9 +82,9 @@ my $LOCKFN = "/var/tmp/version_search_lockfile";
 
 my @gcc_opts2 = (
     "-O0", 
-    "-O1", 
-    "-O2", 
-    "-Os", 
+    #"-O1", 
+    #"-O2", 
+    #"-Os", 
     "-O3",
     );
 
@@ -108,10 +108,10 @@ my @dragonegg_opts = (
 
 my @gcc_opts3 = (
     "-O0", 
-    "-O1 -fomit-frame-pointer -fwhole-program", 
-    "-O2", 
-    "-Os", 
-    "-Ofast -funroll-loops -fomit-frame-pointer -fwhole-program",
+    #"-O1 -fomit-frame-pointer -fwhole-program", 
+    #"-O2", 
+    #"-Os", 
+    "-O3 -march=corei7 -mtune=corei7",
     );
 
 my @gcc_opts4 = (
@@ -404,7 +404,7 @@ my @gcc320 = ("ia32",
 my @clang = ("ia32",
 	     "clang",
 	     "clang",
-	     \@gcc_opts2);
+	     \@gcc_opts3);
 
 my @clangpp = ("ia32",
 	     "clang",
@@ -539,23 +539,23 @@ my @llvms = (
 
 my @compilers_to_test = (
     
-    #\@clang,
-    #\@gcccurrent,
+    \@clang,
+    \@gcccurrent,
     
-    \@gcc320,
-    \@gcc330,
-    \@gcc340,
-    \@gcc400,
-    \@gcc410,
-    \@gcc420,
-    \@gcc430,
-    \@gcc440,
-    \@gcc450,
-    \@gcc460,
-    \@clang26,
-    \@clang27,
-    \@clang28,
-    \@clang29,
+    #\@gcc320,
+    #\@gcc330,
+    #\@gcc340,
+    #\@gcc400,
+    #\@gcc410,
+    #\@gcc420,
+    #\@gcc430,
+    #\@gcc440,
+    #\@gcc450,
+    #\@gcc460,
+    #\@clang26,
+    #\@clang27,
+    #\@clang28,
+    #\@clang29,
     
     #\@icc,
     #\@suncc,
