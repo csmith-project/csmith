@@ -89,7 +89,7 @@ sub abort_if_fail ($) {
 }
 
 sub usage() {
-    die "usage: build_compiler.pl llvm|gcc rev|LATEST";	
+    die "usage: build_compiler llvm|gcc rev|LATEST";	
 }
 
 sub build_gcc() {

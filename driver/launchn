@@ -9,7 +9,7 @@ use Sys::CPU;
 my $NICE = "";
 
 sub usage () {
-    die "usage: launchn.pl [number] [seedfile]\n";
+    die "usage: launchn [number] [seedfile]\n";
 }
 
 my $SEEDFILE = "";
@@ -32,7 +32,7 @@ if ($argc == 0) {
 open INF, "ps axu |" or die;
 while (<INF>) {
     if (/random\_test/) {
-	print "oops-- kill existing random_test.pl processes first!\n";
+	print "oops-- kill existing random_test processes first!\n";
 	exit;
     }
 }
@@ -43,6 +43,6 @@ system "rm -rf work*";
 for (my $i=0; $i<$CPUS; $i++) {
     my $dir = "work$i";
     system "mkdir $dir";
-    system "$NICE nohup random_test.pl $dir $SEEDFILE > $dir/output.txt 2>&1 &";
+    system "$NICE nohup random_test $dir $SEEDFILE > $dir/output.txt 2>&1 &";
 }
 

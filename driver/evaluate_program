@@ -593,7 +593,7 @@ sub compile_and_run ($$$$$) {
     my $out = "${exe}.out";
     my $compilerout = "${exe}_compiler.out";
 
-    my $command = "RunSafely.sh $COMPILER_TIMEOUT 1 /dev/null $compilerout $compiler $opt $xtra $xxtra $notmp -I${CSMITH_HOME}/runtime $srcfile -o $exe $custom_options $notmp ";
+    my $command = "RunSafely $COMPILER_TIMEOUT 1 /dev/null $compilerout $compiler $opt $xtra $xxtra $notmp -I${CSMITH_HOME}/runtime $srcfile -o $exe $custom_options $notmp ";
 
     print "$command\n";
     
@@ -615,7 +615,7 @@ sub compile_and_run ($$$$$) {
 	return (0,"",0);
     }
 
-    ($res, $dur) = runit ("run_program.pl $exe $srcfile $compiler > $out");
+    ($res, $dur) = runit ("run_program $exe $srcfile $compiler > $out");
 
     if ($res != 0) {
 	print "couldn't compute access summary\n";
@@ -715,16 +715,16 @@ sub triage ($$$$$$$) {
 	if ($VERSION_SEARCH) {
 	    if ($base_compiler ne "armcc" &&
 		$arch ne "avr") {
-		$res = runit ("version_search.pl $base_compiler");
+		$res = runit ("version_search $base_compiler");
 	    }
 	}
-	runit ("reduce_miscompile.sh > reduce_log.txt 2>&1");
+	runit ("reduce_miscompile > reduce_log.txt 2>&1");
 	print ("reduced size: ");
 	runit ("wc -c small.c");
 	if ($VERSION_SEARCH) {
 	    if ($base_compiler ne "armcc" &&
 		$arch ne "avr") {
-		$res = runit ("version_search.pl $base_compiler");
+		$res = runit ("version_search $base_compiler");
 	    }
 	}
 	unlockit();			

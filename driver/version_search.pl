@@ -67,7 +67,7 @@ sub check_results ($) {
 	return $r;
     }
 
-    my $res1 = runit "build_compiler.pl $COMP $version >build_log_${version} 2>&1";
+    my $res1 = runit "build_compiler $COMP $version >build_log_${version} 2>&1";
     if ($res1 != 0) {
 	my $x;
 	print "not buildable\n";
@@ -95,7 +95,7 @@ sub check_results ($) {
 ################################ main ################################
 
 if (scalar(@ARGV) != 1) {
-    print "usage: version_search.pl COMPILER\n";
+    print "usage: version_search COMPILER\n";
     print "supported compilers:\n";
     foreach my $compiler (sort keys %compilers) {
 	print "  $compiler\n";
