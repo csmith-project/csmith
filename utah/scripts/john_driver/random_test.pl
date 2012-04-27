@@ -73,47 +73,10 @@ my $QUIET = "--quiet";
 my $notmp = "-DUSE_MATH_MACROS_NOTMP";
 #my $notmp = "";
 
-my $PINTOOL_VOL_ADDR = "vol_addr.txt";
-
 # my $platform = "x86";
 my $platform = "x86_64";
 
-# remove the comment below to enable ccomp test
-#my $CSMITH_CCOMP = "--bitfields --no-math64 --no-volatiles --ccomp";
-# my $CSMITH_CCOMP = "$BF --quiet --enable-volatile-tests x86 --vol-addr-file $PINTOOL_VOL_ADDR --no-math64 --ccomp --max-array-dim 3 --max-array-len-per-dim 5 --max-struct-fields 5 --math-notmp";
 my $CSMITH_CCOMP = "";
-
-# set up pintool for volatile testing
-my $use_pintool = 0;
-# my $use_pintool = 1;
-
-#my $PIN_MODE = "-output_mode verbose"; # We are not supporting it right now
-my $PIN_MODE = "";
-
-if ($use_pintool) {
-    # Before you could use pintool to test volatile accesses, change the pintool location when necessary!
-    my $PIN_HOME = $ENV{"PIN_HOME"};
-    die "oops: PIN_HOME environment variable needs to be set"
-        if (!defined($PIN_HOME));
-
-    $XTRA .= " --enable-volatile-tests $platform --vol-addr-file $PINTOOL_VOL_ADDR ";
-    my $pin_cmd;
-
-    # make sure we are going to use the correct version of pinatrace.so,
-    # i.e., obj-ia32/pinatrace.so for x86 and obj-intel64/pinatrace.so for x86_64. 
-    # For testing compcert, we use the ia32 version
-    if (($platform eq "x86") || (not ($CSMITH_CCOMP eq ""))) {
-        $pin_cmd = "$PIN_HOME/ia32/bin/pinbin -t $PIN_HOME/source/tools/ManualExamples/obj-ia32/pinatrace.so -vol_input $PINTOOL_VOL_ADDR $PIN_MODE --";
-    }
-    elsif ($platform eq "x86_64") {
-        $pin_cmd = "$PIN_HOME/intel64/bin/pinbin -t $PIN_HOME/source/tools/ManualExamples/obj-intel64/pinatrace.so -vol_input $PINTOOL_VOL_ADDR $PIN_MODE --";
-    }
-    else {
-        die "Invalid platform[$platform] for pintool!";
-    }
-
-    $ENV{"PIN_CMD"} = $pin_cmd;
-}
 
 ##################################################################
 
@@ -215,9 +178,6 @@ sub doit ($$) {
 
     open INF, "<$cfile" or die;
     while (my $line = <INF>) {
-	if ($line =~ /volatile/) {
-	    $vcount++;
-	}
 	if ($line =~ /Seed:\s+([0-9]+)$/) {
 	    $seed = $1;
 	}
@@ -239,13 +199,6 @@ sub doit ($$) {
 	return;
     }
     $checksums{$digest} = 1;
-
-    if ($vcount < 1) {
-	print "NOT ENOUGH VOLATILES\n";
-	chdir "../..";
-	system "rm -rf $dir";
-	return;
-    }
 
     if (0 && $CSMITH_CCOMP ne "") {
         # ccomp doesn't like asserts, regenerate random programs without asserts.

@@ -45,16 +45,6 @@ my $COMPILER_TIMEOUT = 600;
 
 my $COMPILER_TIMEOUT_RES = 137;
 
-my $NO_VOLCHECK = 0;
-my $USE_VOLCHECK = 1;
-my $USE_PINTOOL = 2;
-
-my $CHECK_VOLATILE = $NO_VOLCHECK;
-
-if (defined($ENV{"PIN_CMD"})) {
-    $CHECK_VOLATILE = $USE_PINTOOL;
-}
-
 my $VALGRIND_ON_COMPILER = 0;
 
 my $RUN_PROGRAM = 1;
@@ -70,8 +60,6 @@ my $BAIL_ON_ZERO_WRITES = 0;
 my $CSMITH_HOME=$ENV{"CSMITH_HOME"};
 die "oops: CSMITH_HOME environment variable needs to be set"
     if (!defined($CSMITH_HOME));
-
-my $VOLATILE_HOME=$CSMITH_HOME."/utah/scripts/john_driver";
 
 my $LOCKFN = "/var/tmp/version_search_lockfile";
 
@@ -608,10 +596,9 @@ sub runit ($) {
 }
 
 # build and run the app, with timeouts for both the compiler and the program
-sub compile_and_run ($$$$$$) {
+sub compile_and_run ($$$$$) {
     (my $root, my $arch, my $compiler, 
-     my $opt, my $volref, my $custom_options) = @_;
-    my %vols = %{$volref};
+     my $opt, my $custom_options) = @_;
 
     print "[$arch] $compiler $opt : ";
 
@@ -661,8 +648,6 @@ sub compile_and_run ($$$$$$) {
     my $out = "${exe}.out";
     my $compilerout = "${exe}_compiler.out";
 
-    # ccomp doesn't allow -I option appearing after $srcfile
-    #my $command = "RunSafely.sh $COMPILER_TIMEOUT 1 /dev/null $compilerout $valgrind $compiler $opt $xtra $srcfile -o $exe $custom_options $notmp -I${CSMITH_HOME}/runtime";
     my $command = "RunSafely.sh $COMPILER_TIMEOUT 1 /dev/null $compilerout $valgrind $compiler $opt $xtra $xxtra $notmp -I${CSMITH_HOME}/runtime $srcfile -o $exe $custom_options $notmp ";
 
     print "$command\n";
@@ -699,18 +684,14 @@ sub compile_and_run ($$$$$$) {
 	return (0,"",0);
     }
 
-    ($res, $dur) = runit ("run_program.pl $exe $srcfile $arch $CHECK_VOLATILE $compiler > $out");
-
-    if (-f "vol_addr.txt") {
-        system("mv vol_addr.txt ${exe}_vol_addr.txt");
-    }
+    ($res, $dur) = runit ("run_program.pl $exe $srcfile $compiler > $out");
 
     if ($res != 0) {
 	print "couldn't compute access summary\n";
 	return (-1,"",-1);
     }
     
-    system "grep 'cpu time' ${exe}.raw-out.time";
+    # system "grep 'cpu time' ${exe}.raw-out.time";
 
     my $result = "";
     my $code_size = 0;
@@ -728,30 +709,7 @@ sub compile_and_run ($$$$$$) {
     die if (!defined($code_size));
 
     return (0,$result,$code_size);
-		     }
-
-# return a hash whose keys are the names of volatile variables
-sub find_volatiles ($) {
-    (my $cfile) = @_;
-
-    open INF, "<$cfile.c" or die;
-    my %vols;
-    my $vcount = 0;
-    while (my $line = <INF>) {
-	chomp $line;
-	if ($line =~ /\/\/ VOLATILE GLOBAL (.+)$/) {
-	    my $v = $1;
-	    $vols{$v} = 1;
-	    $vcount++;
-	    print "volatile $v\n";
-	}
-    }
-    close INF;
-
-    print "$vcount volatile variables\n";
-
-    return ($vcount, \%vols);
-		    }
+}
 
 sub instantiate_test_scripts ($$$$) {
     (my $infn, my $opt1, my $opt, my $base_compiler) = @_;
@@ -842,8 +800,8 @@ sub triage ($$$$$$$) {
     }
 	    }
 
-sub test_compiler ($$$$) {
-    (my $root, my $compiler_ref, my $volsref, my $custom_options) = @_;
+sub test_compiler ($$$) {
+    (my $root, my $compiler_ref, my $custom_options) = @_;
 
     (my $arch, my $base_compiler, my $compiler, my $optref) = @{$compiler_ref};
     my @OPTS = @{$optref};
@@ -875,7 +833,7 @@ sub test_compiler ($$$$) {
     foreach my $opt (@OPTS) {
 	(my $res, my $res_str, my $code_size) = 
 	    compile_and_run ($root, $arch, $compiler, 
-			     $opt, $volsref, $custom_options);
+			     $opt, $custom_options);
         $num_reads{$opt} = 0;
         $num_writes{$opt} = 0;
 	if ($res == 0) {
@@ -905,12 +863,6 @@ sub test_compiler ($$$$) {
 		    $tot_writes += $3;
 		}
 
-		if ($first &&
-		    $BAIL_ON_ZERO_WRITES &&
-		    $tot_writes == 0) {
-		    print "BAILING due to zero volatile writes\n";
-		    return (1, 0, $undef, $undef, 1);
-		}
 		$first = 0;
 
 	    }
@@ -949,25 +901,10 @@ sub test_compiler ($$$$) {
 		    system "touch ../../${NOTEFILE_PREFIX}checksum_$compiler.txt";
 		    $interesting = 1;
 		    triage($compiler, 
-			   "$VOLATILE_HOME/test-${arch}-${base_compiler}-wrong-code-template.sh", 
+			   "test-${arch}-${base_compiler}-wrong-code-template.sh", 
 			   $opt1, $opt, $root, $base_compiler, $arch);
 		    $consistent = 0;
 		    last;
-		}
-		if ($CHECK_VOLATILE) {
-		    if ($result ne $results{$opt}) {
-			my $write_problem = "";
-			if ($num_writes{$opt} != $writes) {
-			    $write_problem = " WRITES";
-			}
-			print "INTERNAL VOLATILE FAILURE${write_problem} $compiler $opt\n";
-			$interesting = 1;
-			triage($compiler, 
-			       "$VOLATILE_HOME/test-${arch}-${base_compiler}-volatile-template.sh", 
-			       $opt1, $opt, $root, $base_compiler, $arch);
-			$consistent = 0;
-			last;
-		    }
 		}
 	    } else {
 		$writes = $num_writes{$opt};
@@ -988,14 +925,7 @@ sub test_program ($$) {
     (my $root, my $custom_options) = @_;
 
     my $vcount;
-    my $volsref;
     my %mt;
-
-    if ($CHECK_VOLATILE == $USE_VOLCHECK) {
-	($vcount, $volsref) = find_volatiles ($root);
-    } else {
-	$volsref = \%mt;
-    }
 
     my $result;
     my $csum;
@@ -1004,8 +934,7 @@ sub test_program ($$) {
 
     foreach my $compiler_ref (@compilers_to_test) {
 	(my $abort_test, my $consistent, my $tmp_result, my $tmp_csum, my $tmp_interesting) = 
-	    test_compiler ($root, $compiler_ref, $volsref, 
-			   $custom_options);
+	    test_compiler ($root, $compiler_ref, $custom_options);
 	return -1 if ($abort_test != 0);
 	
 	if ($tmp_interesting) {
@@ -1019,12 +948,6 @@ sub test_program ($$) {
 	if ($consistent) {
 	    if (defined ($result) &&
 		defined ($csum)) {
-		if ($CHECK_VOLATILE) {
-		    if ($result ne $tmp_result) {
-			print "EXTERNAL VOLATILE FAILURE\n";
-			$interesting = 1;
-		    }
-		}
 		if (($csum ne $tmp_csum) &&
 		    ($csum ne "TIMEOUT") &&
 		    ($tmp_csum ne "TIMEOUT")) {
@@ -1046,11 +969,6 @@ sub test_program ($$) {
 }
 
 ####################################################################
-
-# on darwin timeout res is 152 instead of 137
-if ($OSNAME =~ /darwin/) {
-    $COMPILER_TIMEOUT_RES = 152;
-}
 
 die "expecting filename" if scalar(@ARGV < 1);
 
