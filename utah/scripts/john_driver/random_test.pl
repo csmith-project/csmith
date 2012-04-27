@@ -170,8 +170,9 @@ sub doit ($$) {
 
     my $SWARM_OPTS = "";
     if ($USE_SWARM) {
+	my $p = rand();
 	foreach my $opt (@ALL_SWARM_OPTS) {
-	    if (rand() < 0.5) {
+	    if (rand() < $p) {
 		$SWARM_OPTS .= " --$opt ";
 	    } else {
 		$SWARM_OPTS .= " --no-$opt ";

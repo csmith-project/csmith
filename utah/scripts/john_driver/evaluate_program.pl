@@ -107,11 +107,13 @@ my @dragonegg_opts = (
     );
 
 my @gcc_opts3 = (
+    #"-O0 -m32", 
     "-O0", 
     #"-O1 -fomit-frame-pointer -fwhole-program", 
     #"-O2", 
     #"-Os", 
-    "-O3 -march=corei7 -mtune=corei7",
+    #"-O3 -m32",
+    "-O3 -fno-strict-aliasing",
     );
 
 my @gcc_opts4 = (
