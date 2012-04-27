@@ -1,11 +1,17 @@
 make a centralized file for config information
 
+make automatic reduction work again
+
+make compiler version search work again
+  do this after reduction
+
 make log format saner
 
 pluggable scripts for 
-  running compilers
-  evaluating programs
-  uniquifying crash strings
+  compiling a program
+  evaluating a program
+    including volatile testing, running simulators, etc
+  uniquifying compiler crash strings
 
 when a new bug is found
   if known to be duplicate, drop it
