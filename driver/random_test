@@ -8,8 +8,6 @@ use File::stat;
 
 ##################################################################
 
-my $USE_SWARM = 1;
-
 my @ALL_SWARM_OPTS = (
     "argc",
     "arrays",
@@ -76,15 +74,11 @@ my $notmp = "-DUSE_MATH_MACROS_NOTMP";
 # my $platform = "x86";
 my $platform = "x86_64";
 
-my $CSMITH_CCOMP = "";
-
 ##################################################################
 
 my $CSMITH_HOME = $ENV{"CSMITH_HOME"};
 
 my $good = 0;
-
-my %checksums;
 
 my $TIMED_TEST;
 
@@ -132,24 +126,17 @@ sub doit ($$) {
     }
 
     my $SWARM_OPTS = "";
-    if ($USE_SWARM) {
-	my $p = rand();
-	foreach my $opt (@ALL_SWARM_OPTS) {
-	    if (rand() < $p) {
-		$SWARM_OPTS .= " --$opt ";
-	    } else {
-		$SWARM_OPTS .= " --no-$opt ";
-	    }
+    my $p = rand();
+    foreach my $opt (@ALL_SWARM_OPTS) {
+	if (rand() < $p) {
+	    $SWARM_OPTS .= " --$opt ";
+	} else {
+	    $SWARM_OPTS .= " --no-$opt ";
 	}
     }
 
-    my $cmd;
-    if ($CSMITH_CCOMP eq "") {
-        $cmd = "$CSMITH_HOME/src/csmith $SEED $SWARM_OPTS $PACK $XTRA --output $cfile";
-    }
-    else {
-        $cmd = "$CSMITH_HOME/src/csmith $SEED $SWARM_OPTS $CSMITH_CCOMP $XTRA --output $cfile";
-    }
+    my $cmd = "$CSMITH_HOME/src/csmith $SEED $SWARM_OPTS $PACK $XTRA --output $cfile";
+
     if ($PROVIDE_SEED) {
 	print "$cmd\n";
     }
@@ -190,29 +177,10 @@ sub doit ($$) {
 	print "regenerate with: '$cmd -s $seed'\n";
     }
 
-    ($prog =~ s/\/\*(.*?)\*\///g);
-    my $digest = md5($prog);
-    if ($checksums{$digest}) {
-	print "BAD PROGRAM: DUPLICATE\n";
-	chdir "../..";
-	system "rm -rf $dir";
-	return;
-    }
-    $checksums{$digest} = 1;
-
-    if (0 && $CSMITH_CCOMP ne "") {
-        # ccomp doesn't like asserts, regenerate random programs without asserts.
-        my $noparanoid_cfile = "${fn}_small.c";
-        my $cmd1 = "$CSMITH_HOME/src/csmith $CSMITH_CCOMP -s $seed  --output $noparanoid_cfile";
-        my $res1 = runit ("RunSafely $CSMITH_TIMEOUT 1 /dev/zero randprog_output.txt $cmd1");
-    }
-
     my $ret = system "evaluate_program $fn";
     my $rc = ($ret>>8) & 0xff;
 
     chdir "../..";
-
-    #print "evaluate program returned $rc\n";
 
     if ($rc == 0 || $rc == 1) {
 	print "GOOD PROGRAM: number $good\n";
@@ -221,10 +189,7 @@ sub doit ($$) {
 	print "BAD PROGRAM: doesn't count towards goal.\n";
     }
 
-    # if ($rc != 1 && !$SAVE_BADS) {
-    if (1) {
-	system "rm -rf $dir";
-    }
+    system "rm -rf $dir";
 }
 
 if (scalar(@ARGV) != 1 &&

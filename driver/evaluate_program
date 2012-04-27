@@ -10,19 +10,11 @@ use LockFile::Simple;
 
 # TODO: we hold the lock for too long, put it into compile_llvm?
 
-# abstract over compilation and evaluation strategies
-
 # properly propagate run_program failures upwards
-
-# piece together byte-level information from run_program
 
 # distinguish between programs that compile and those that run inside the timeout
 
 ####################################################################
-
-my $SKIP = 0;
-
-my $NOTEFILE_PREFIX="logged_";
 
 my $xxtra = "-DCSMITH_MINIMAL";
 
@@ -38,8 +30,6 @@ my $RUN_PROGRAM = 1;
 my $DO_TRIAGE = 0;
 
 my $VERSION_SEARCH = 0;
-
-my $BAIL_ON_ZERO_WRITES = 0;
 
 ####################################################################
 
@@ -65,13 +55,11 @@ my @gcc_opts3 = (
     "-O3 -fno-strict-aliasing",
     );
 
-my @clang = ("ia32",
-	     "clang",
+my @clang = ("clang",
 	     "clang",
 	     \@gcc_opts3);
 
-my @gcccurrent = ("ia32",
-		  "gcc",
+my @gcccurrent = ("gcc",
 		  "current-gcc",
 		  \@gcc_opts3);
 
@@ -95,11 +83,11 @@ sub runit ($) {
 }
 
 # build and run the app, with timeouts for both the compiler and the program
-sub compile_and_run ($$$$$) {
-    (my $root, my $arch, my $compiler, 
+sub compile_and_run ($$$$) {
+    (my $root, my $compiler, 
      my $opt, my $custom_options) = @_;
 
-    print "[$arch] $compiler $opt : ";
+    print "$compiler $opt : ";
 
     my $opt_str = $opt;
     ($opt_str =~ s/\ //g);
@@ -110,20 +98,12 @@ sub compile_and_run ($$$$$) {
 	$opt_str = substr ($opt_str, 0, 40);
     }
     
-    my $exe;
-    my $xtra;
-    if ($arch eq "ia32" || $arch eq "windiss") {
-	$exe = "${root}${compiler}${opt_str}_exe";
-	($exe =~ s/\.//g);
-	($exe =~ s/\///g);
-	$xtra = "";
-    } else {
-	die;
-    }
+    my $exe = "${root}${compiler}${opt_str}_exe";
+    ($exe =~ s/\.//g);
+    ($exe =~ s/\///g);
+    my $xtra = "";
 
     my $srcfile = "$root.c";
-
-    $xtra .= " -w -DINLINE=";
 
     my $out = "${exe}.out";
     my $compilerout = "${exe}_compiler.out";
@@ -157,8 +137,6 @@ sub compile_and_run ($$$$$) {
 	return (-1,"",-1);
     }
     
-    # system "grep 'cpu time' ${exe}.raw-out.time";
-
     my $result = "";
     my $code_size = 0;
 
@@ -188,8 +166,6 @@ sub instantiate_test_scripts ($$$$) {
 	    (s/XX_COMPILER/llvm-gcc/g);
 	} elsif ($base_compiler eq "gcc") {
 	    (s/XX_COMPILER/gcc/g);
-	} elsif ($base_compiler eq "armcc") {
-	    # nothing
 	} else {
 	    die;
 	}
@@ -232,16 +208,11 @@ sub unlockit() {
     $lockmgr->unlock($LOCKFN);
 }
 
-sub triage ($$$$$$$) {
+sub triage ($$$$$$) {
     (my $compiler, my $templ, 
      my $opt1, my $opt, 
      my $root, my $base_compiler,
-     my $version_searchp, my $arch) = @_;
-    return if (!$DO_TRIAGE);
-    return if (
-	$base_compiler ne "gcc" &&
-	$base_compiler ne "llvm" &&
-	$base_compiler ne "armcc");
+     my $version_searchp) = @_;
     if (lockit()) {
 	my $res;
 	print "diffing $opt1 and $opt\n";			    
@@ -263,21 +234,13 @@ sub triage ($$$$$$$) {
 sub test_compiler ($$$) {
     (my $root, my $compiler_ref, my $custom_options) = @_;
 
-    (my $arch, my $base_compiler, my $compiler, my $optref) = @{$compiler_ref};
+    (my $base_compiler, my $compiler, my $optref) = @{$compiler_ref};
     my @OPTS = @{$optref};
 
     my $undef;
 
     print "--------------------\n";
 
-    if ($SKIP) {
-	if ((-f "../../${NOTEFILE_PREFIX}checksum_$compiler.txt") &&
-	    (-f "../../${NOTEFILE_PREFIX}checksum_$compiler.txt")) {
-	    print "skipping $compiler\n";
-	    return (0, 0, 0, "f", 1);
-	}
-    }
-    
     my %results;
     my %csums;
     my $min_code_size = 100000000;
@@ -292,7 +255,7 @@ sub test_compiler ($$$) {
 
     foreach my $opt (@OPTS) {
 	(my $res, my $res_str, my $code_size) = 
-	    compile_and_run ($root, $arch, $compiler, 
+	    compile_and_run ($root, $compiler, 
 			     $opt, $custom_options);
         $num_reads{$opt} = 0;
         $num_writes{$opt} = 0;
@@ -341,7 +304,6 @@ sub test_compiler ($$$) {
 
     if ($compiler_fail > 0) {
 	print "COMPILER FAILED $compiler\n";
-	system "touch ../../${NOTEFILE_PREFIX}crash_$compiler.txt";
 	$interesting = 1;
     }
 
@@ -358,11 +320,12 @@ sub test_compiler ($$$) {
 		if (($csum ne $csums{$opt}) &&
 		    ($csum ne "TIMEOUT" && $csums{$opt} ne "TIMEOUT")) {
 		    print "INTERNAL CHECKSUM FAILURE $compiler $opt\n";
-		    system "touch ../../${NOTEFILE_PREFIX}checksum_$compiler.txt";
 		    $interesting = 1;
-		    triage($compiler, 
-			   "test-${arch}-${base_compiler}-wrong-code-template.sh", 
-			   $opt1, $opt, $root, $base_compiler, $arch);
+		    if ($DO_TRIAGE) {
+			triage($compiler, 
+			       "test-${base_compiler}-wrong-code-template.sh", 
+			       $opt1, $opt, $root, $base_compiler);
+		    }
 		    $consistent = 0;
 		    last;
 		}
@@ -401,7 +364,7 @@ sub test_program ($$) {
 	    $interesting = 1;
 	}
 	
-	(my $arch, my $base_compiler, my $compiler, my $optref) = @{$compiler_ref};
+	(my $base_compiler, my $compiler, my $optref) = @{$compiler_ref};
 	print "COMPLETED TEST $compiler\n";
 	
 	# ignore internally inconsistent results
