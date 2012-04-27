@@ -1,0 +1,28 @@
+make a centralized file for config information
+
+make log format saner
+
+pluggable scripts for 
+  running compilers
+  evaluating programs
+  uniquifying crash strings
+
+when a new bug is found
+  if known to be duplicate, drop it
+  otherwise, reduce and version search
+
+daily or so
+  update and rebuild the compiler under test
+  check all known test cases including fixed ones
+  prioritize the broken ones and report them
+  high priority
+    seems new, for wrong-code bugs
+    has a different string, for crash bugs
+  report on progress to web, email, RSS feed
+  if compiler can't be built, report this and sleep for a day
+
+relevance estimation: does fault localization place the bug in 
+  a part of the code that gets executed by our test suite?
+
+make a VM image for the cloud, or a local machine
+

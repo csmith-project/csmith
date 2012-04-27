@@ -9,7 +9,7 @@ use Sys::CPU;
 my $NICE = "";
 
 sub usage () {
-    die "usage: launchn [number] [seedfile]\n";
+    die "usage: runcsmith [number] [seedfile]\n";
 }
 
 my $SEEDFILE = "";
