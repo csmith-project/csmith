@@ -63,7 +63,7 @@ my $compiler = $ARGV[2];
 
 my $out = "${exe}.raw-out";
 
-my $res = runit ("RunSafely.sh $TIMEOUT 1 /dev/null $out ./$exe");
+my $res = runit ("RunSafely $TIMEOUT 1 /dev/null $out ./$exe");
 
 if ($res == $COMPILER_TIMEOUT_RES) {
     print STDERR "BAILING -- timeout\n";

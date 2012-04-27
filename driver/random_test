@@ -153,7 +153,7 @@ sub doit ($$) {
     if ($PROVIDE_SEED) {
 	print "$cmd\n";
     }
-    my $res = runit ("RunSafely.sh $CSMITH_TIMEOUT 1 /dev/zero csmith_output.txt $cmd");
+    my $res = runit ("RunSafely $CSMITH_TIMEOUT 1 /dev/zero csmith_output.txt $cmd");
 
     if ($res != 0 || !(-e "$cfile")) {
 	print "CSMITH FAILED\n";
@@ -204,10 +204,10 @@ sub doit ($$) {
         # ccomp doesn't like asserts, regenerate random programs without asserts.
         my $noparanoid_cfile = "${fn}_small.c";
         my $cmd1 = "$CSMITH_HOME/src/csmith $CSMITH_CCOMP -s $seed  --output $noparanoid_cfile";
-        my $res1 = runit ("RunSafely.sh $CSMITH_TIMEOUT 1 /dev/zero randprog_output.txt $cmd1");
+        my $res1 = runit ("RunSafely $CSMITH_TIMEOUT 1 /dev/zero randprog_output.txt $cmd1");
     }
 
-    my $ret = system "evaluate_program.pl $fn";
+    my $ret = system "evaluate_program $fn";
     my $rc = ($ret>>8) & 0xff;
 
     chdir "../..";
@@ -229,7 +229,7 @@ sub doit ($$) {
 
 if (scalar(@ARGV) != 1 &&
     scalar(@ARGV) != 2) {
-    die "usage: random_test.pl work_dir [seedfile]";
+    die "usage: random_test work_dir [seedfile]";
 }
 
 my $work = $ARGV[0];
