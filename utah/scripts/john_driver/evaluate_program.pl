@@ -8,10 +8,6 @@ use LockFile::Simple;
 
 # TODO: check for program crash (vs. timeout)
 
-# TODO: factor out version search code; automatically check
-# if it valgrinds clean; when we do a version search, save
-# the temp dir
-
 # TODO: we hold the lock for too long, put it into compile_llvm?
 
 # abstract over compilation and evaluation strategies
@@ -33,19 +29,9 @@ my $xxtra = "-DCSMITH_MINIMAL";
 #my $notmp = "-DUSE_MATH_MACROS_NOTMP";
 my $notmp = "";
 
-#my $CCOMP_BF = "-fbitfields";
-my $CCOMP_BF = "-fbitfields";
-
-# I don't know the reason, but on our mini mac, current-gcc complains about "can't find -lgcc"
-# So remove the comment below if we do tests on maya
-#my $CCOMP_EXTRA_LDIR = "-L/Users/Shared/compilers/lib/gcc/x86_64-apple-darwin10.2.0/4.5.0";
-my $CCOMP_EXTRA_LDIR = "";
-
 my $COMPILER_TIMEOUT = 600;
 
 my $COMPILER_TIMEOUT_RES = 137;
-
-my $VALGRIND_ON_COMPILER = 0;
 
 my $RUN_PROGRAM = 1;
 
@@ -201,15 +187,6 @@ my @icc_opts = (
     "-O2",
     "-fast -ipo",
     );
-
-my @gcc_with_ccomp_opts = (
-    "-m32 -O0 -DUSE_MATH_MACROS_NOTMP -D__COMPCERT__ $CCOMP_EXTRA_LDIR",
-    "-m32 -O2 -DUSE_MATH_MACROS_NOTMP -D__COMPCERT__ $CCOMP_EXTRA_LDIR",
-    );
-
-my @ccomp_opts = (
-  "-D__COMPCERT__ -DUSE_MATH_MACROS_NOTMP -fpacked-structs -fbitfields -fstruct-passing -fstruct-assign $CCOMP_BF",
-);
 
 my @avrdeputy = ("avr",
 		 "deputy",
@@ -498,24 +475,6 @@ my @icc_O0only = ("ia32",
 		  "icc",
 		  \@O0only);
 
-my @gcc_with_ccomp = (
-    "ia32",
-    "gcc",
-    "current-gcc",
-    \@gcc_with_ccomp_opts);
-
-my @clang_with_ccomp = (
-    "ia32",
-    "gcc",
-    "clang",
-    \@gcc_with_ccomp_opts);
-
-my @ccomp = (
-     "ia32",
-     "ccomp",
-     "ccomp",
-      \@ccomp_opts);
-
 my @llvms = (
     \@llvmgcc20, 
     \@llvmgcc21, 
@@ -549,10 +508,6 @@ my @compilers_to_test = (
     #\@open64,
 
     # \@tcc,
-
-    #\@gcc_with_ccomp,
-    #\@ccomp,
-    ##\@clang_with_ccomp,
 
     #\@gcc,
 
@@ -633,22 +588,12 @@ sub compile_and_run ($$$$$) {
 
     my $srcfile = "$root.c";
 
-    if ($compiler eq "ccomp") {
-      $xtra .= " -DINLINE=";
-      # $srcfile = "${root}_small.c";
-    } else {
-      $xtra .= " -w -DINLINE=";
-    }
-
-    my $valgrind = "";
-    if ($VALGRIND_ON_COMPILER) {
-	$valgrind = "/home/regehr/valgrind-inst/bin/valgrind --trace-children=yes";
-    }
+    $xtra .= " -w -DINLINE=";
 
     my $out = "${exe}.out";
     my $compilerout = "${exe}_compiler.out";
 
-    my $command = "RunSafely.sh $COMPILER_TIMEOUT 1 /dev/null $compilerout $valgrind $compiler $opt $xtra $xxtra $notmp -I${CSMITH_HOME}/runtime $srcfile -o $exe $custom_options $notmp ";
+    my $command = "RunSafely.sh $COMPILER_TIMEOUT 1 /dev/null $compilerout $compiler $opt $xtra $xxtra $notmp -I${CSMITH_HOME}/runtime $srcfile -o $exe $custom_options $notmp ";
 
     print "$command\n";
     
@@ -666,20 +611,6 @@ sub compile_and_run ($$$$$) {
 	return (-2,"",-1);
     }
     
-    if ($VALGRIND_ON_COMPILER) {
-	open INF, "<$compilerout" or die;
-	while (my $line = <INF>) { 
-	    if ($line =~ /ERROR SUMMARY: ([0-9]+) /) {
-		my $errcount = $1;
-		print "$line";
-		if ($errcount > 0) {
-		    print "SAFETY FAILURE: $line";
-		}
-	    }
-	}
-	close INF;
-    }
-
     if (!$RUN_PROGRAM) {
 	return (0,"",0);
     }
