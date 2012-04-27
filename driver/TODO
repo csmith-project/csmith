@@ -1,15 +1,31 @@
-need a way to make sure existing processes, reductions, compiler
-  builds etc. are either stopped fully, or else won't get in the way
-  of whatever we do next
+users need to provide scripts to
+  compile a program
+    arguments: 0..N-1; anything else prints a file containing N
+      ordered from least to strongest optimzing
+    input: c program
+    output: 
+      executable or
+      crash output
+  run a program
+    input: an executable
+    output: text file including
+      checksum
+      volatile info, format TBD
+      timing info
+      exit status
+        success
+        timeout
+        non-zero exit code
+  create a crash string from compiler output
+
+make canned reduction scripts use these user-provided scripts
+
+probably need a way to make sure existing processes, reductions,
+  compiler builds etc. are either stopped fully, or else won't get in
+  the way of whatever we do next
 
 some of these interfaces want to be implemented by perl modules
   instead of executing separate scripts
-
-pluggable scripts for 
-  compiling a program
-  evaluating a program
-    including volatile testing, running simulators, etc
-  uniquifying compiler crash strings
 
 make a centralized file for config information
 
