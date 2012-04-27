@@ -45,9 +45,6 @@ my $COMPILER_TIMEOUT = 600;
 
 my $COMPILER_TIMEOUT_RES = 137;
 
-# see if it helps to wrap volatile accesses in function calls?
-my $TRY_WRAP = 0;
-
 my $NO_VOLCHECK = 0;
 my $USE_VOLCHECK = 1;
 my $USE_PINTOOL = 2;
@@ -611,9 +608,9 @@ sub runit ($) {
 }
 
 # build and run the app, with timeouts for both the compiler and the program
-sub compile_and_run ($$$$$$$) {
+sub compile_and_run ($$$$$$) {
     (my $root, my $arch, my $compiler, 
-     my $opt, my $volref, my $wrap_volatiles, my $custom_options) = @_;
+     my $opt, my $volref, my $custom_options) = @_;
     my %vols = %{$volref};
 
     print "[$arch] $compiler $opt : ";
@@ -656,13 +653,6 @@ sub compile_and_run ($$$$$$$) {
       $xtra .= " -w -DINLINE=";
     }
 
-    my $wrapstr;
-    if ($wrap_volatiles) {
-	$wrapstr = "-DWRAP_VOLATILES=1";
-    } else {
-	$wrapstr = "-DWRAP_VOLATILES=0";
-    }
-
     my $valgrind = "";
     if ($VALGRIND_ON_COMPILER) {
 	$valgrind = "/home/regehr/valgrind-inst/bin/valgrind --trace-children=yes";
@@ -672,8 +662,8 @@ sub compile_and_run ($$$$$$$) {
     my $compilerout = "${exe}_compiler.out";
 
     # ccomp doesn't allow -I option appearing after $srcfile
-    #my $command = "RunSafely.sh $COMPILER_TIMEOUT 1 /dev/null $compilerout $valgrind $compiler $opt $xtra $srcfile -o $exe $custom_options $wrapstr $notmp -I${CSMITH_HOME}/runtime";
-    my $command = "RunSafely.sh $COMPILER_TIMEOUT 1 /dev/null $compilerout $valgrind $compiler $opt $xtra $xxtra $notmp -I${CSMITH_HOME}/runtime $srcfile -o $exe $custom_options $wrapstr $notmp ";
+    #my $command = "RunSafely.sh $COMPILER_TIMEOUT 1 /dev/null $compilerout $valgrind $compiler $opt $xtra $srcfile -o $exe $custom_options $notmp -I${CSMITH_HOME}/runtime";
+    my $command = "RunSafely.sh $COMPILER_TIMEOUT 1 /dev/null $compilerout $valgrind $compiler $opt $xtra $xxtra $notmp -I${CSMITH_HOME}/runtime $srcfile -o $exe $custom_options $notmp ";
 
     print "$command\n";
     
@@ -852,9 +842,8 @@ sub triage ($$$$$$$) {
     }
 	    }
 
-sub test_compiler ($$$$$) {
-    (my $root, my $compiler_ref, my $volsref, my $wrap, 
-     my $custom_options) = @_;
+sub test_compiler ($$$$) {
+    (my $root, my $compiler_ref, my $volsref, my $custom_options) = @_;
 
     (my $arch, my $base_compiler, my $compiler, my $optref) = @{$compiler_ref};
     my @OPTS = @{$optref};
@@ -886,7 +875,7 @@ sub test_compiler ($$$$$) {
     foreach my $opt (@OPTS) {
 	(my $res, my $res_str, my $code_size) = 
 	    compile_and_run ($root, $arch, $compiler, 
-			     $opt, $volsref, $wrap, $custom_options);
+			     $opt, $volsref, $custom_options);
         $num_reads{$opt} = 0;
         $num_writes{$opt} = 0;
 	if ($res == 0) {
@@ -939,7 +928,7 @@ sub test_compiler ($$$$$) {
     my $interesting = 0;
 
     if ($compiler_fail > 0) {
-	print "COMPILER FAILED $compiler WRAP=$wrap\n";
+	print "COMPILER FAILED $compiler\n";
 	system "touch ../../${NOTEFILE_PREFIX}crash_$compiler.txt";
 	$interesting = 1;
     }
@@ -949,14 +938,14 @@ sub test_compiler ($$$$$) {
 	my $consistent = 1;
 	my $opt1;
 	
-	print "CODE SIZE $compiler WRAP=$wrap ${min_code_size}\n";
+	print "CODE SIZE $compiler ${min_code_size}\n";
 
 	foreach my $opt (keys %results) {
 
 	    if (defined($result)) {
 		if (($csum ne $csums{$opt}) &&
 		    ($csum ne "TIMEOUT" && $csums{$opt} ne "TIMEOUT")) {
-		    print "INTERNAL CHECKSUM FAILURE $compiler $opt WRAP=$wrap\n";
+		    print "INTERNAL CHECKSUM FAILURE $compiler $opt\n";
 		    system "touch ../../${NOTEFILE_PREFIX}checksum_$compiler.txt";
 		    $interesting = 1;
 		    triage($compiler, 
@@ -971,7 +960,7 @@ sub test_compiler ($$$$$) {
 			if ($num_writes{$opt} != $writes) {
 			    $write_problem = " WRITES";
 			}
-			print "INTERNAL VOLATILE FAILURE${write_problem} $compiler $opt WRAP=$wrap\n";
+			print "INTERNAL VOLATILE FAILURE${write_problem} $compiler $opt\n";
 			$interesting = 1;
 			triage($compiler, 
 			       "$VOLATILE_HOME/test-${arch}-${base_compiler}-volatile-template.sh", 
@@ -1008,52 +997,43 @@ sub test_program ($$) {
 	$volsref = \%mt;
     }
 
-    my @wraps;
-    if ($TRY_WRAP) {
-	@wraps = (0,1);
-    } else {
-	@wraps = (0);
-    }
-
     my $result;
     my $csum;
 
     my $interesting = 0;
 
     foreach my $compiler_ref (@compilers_to_test) {
-	foreach my $wrap (@wraps) {
-	    (my $abort_test, my $consistent, my $tmp_result, my $tmp_csum, my $tmp_interesting) = 
-		test_compiler ($root, $compiler_ref, $volsref, $wrap, 
-			       $custom_options);
-	    return -1 if ($abort_test != 0);
-
-	    if ($tmp_interesting) {
-		$interesting = 1;
-	    }
-
-	    (my $arch, my $base_compiler, my $compiler, my $optref) = @{$compiler_ref};
-	    print "COMPLETED TEST $compiler WRAP=$wrap\n";
-
-	    # ignore internally inconsistent results
-	    if ($consistent) {
-		if (defined ($result) &&
-		    defined ($csum)) {
-		    if ($CHECK_VOLATILE) {
-			if ($result ne $tmp_result) {
-			    print "EXTERNAL VOLATILE FAILURE\n";
-			    $interesting = 1;
-			}
-		    }
-		    if (($csum ne $tmp_csum) &&
-			($csum ne "TIMEOUT") &&
-			($tmp_csum ne "TIMEOUT")) {
-			print "EXTERNAL CHECKSUM FAILURE\n";
+	(my $abort_test, my $consistent, my $tmp_result, my $tmp_csum, my $tmp_interesting) = 
+	    test_compiler ($root, $compiler_ref, $volsref, 
+			   $custom_options);
+	return -1 if ($abort_test != 0);
+	
+	if ($tmp_interesting) {
+	    $interesting = 1;
+	}
+	
+	(my $arch, my $base_compiler, my $compiler, my $optref) = @{$compiler_ref};
+	print "COMPLETED TEST $compiler\n";
+	
+	# ignore internally inconsistent results
+	if ($consistent) {
+	    if (defined ($result) &&
+		defined ($csum)) {
+		if ($CHECK_VOLATILE) {
+		    if ($result ne $tmp_result) {
+			print "EXTERNAL VOLATILE FAILURE\n";
 			$interesting = 1;
 		    }
-		} else {
-		    $result = $tmp_result;
-		    $csum = $tmp_csum;
 		}
+		if (($csum ne $tmp_csum) &&
+		    ($csum ne "TIMEOUT") &&
+		    ($tmp_csum ne "TIMEOUT")) {
+		    print "EXTERNAL CHECKSUM FAILURE\n";
+		    $interesting = 1;
+		}
+	    } else {
+		$result = $tmp_result;
+		$csum = $tmp_csum;
 	    }
 	}
     }
