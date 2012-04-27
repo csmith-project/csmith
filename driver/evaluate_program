@@ -51,489 +51,33 @@ my $LOCKFN = "/var/tmp/version_search_lockfile";
 
 ####################################################################
 
-my @gcc_opts2 = (
-    "-O0", 
-    #"-O1", 
-    #"-O2", 
-    #"-Os", 
-    "-O3",
-    );
-
-my @gcc_opts9 = (
-    "-O0 -fwrapv",
-    "-O1 -fwrapv",
-    "-O2 -fwrapv",
-    "-Os -fwrapv",
-    "-O3 -fwrapv",
-    );
-
-my $DRAGONEGG = "-fplugin=/home/regehr/z/compiler-source/dragonegg/dragonegg.so";
-
-my @dragonegg_opts = (
-    "-O0 $DRAGONEGG", 
-    "-O1 $DRAGONEGG", 
-    "-O2 $DRAGONEGG", 
-    "-Os $DRAGONEGG", 
-    "-O3 $DRAGONEGG", 
-    );
-
-my @gcc_opts3 = (
-    #"-O0 -m32", 
-    "-O0", 
-    #"-O1 -fomit-frame-pointer -fwhole-program", 
-    #"-O2", 
-    #"-Os", 
-    #"-O3 -m32",
-    "-O3 -fno-strict-aliasing",
-    );
-
-my @gcc_opts4 = (
-    "-O0", 
-    "-Os", 
-    "-Os -fno-asynchronous-unwind-tables -fno-common -fno-delete-null-pointer-checks -fno-dwarf2-cfi-asm -fno-omit-frame-pointer -fno-optimize-sibling-calls -fno-strict-aliasing -fno-strict-overflow -fstack-protector -fstack-protector-all -ftest-coverage -g -m32 -march=i486 -mno-3dnow -mno-mmx -mno-sse -mno-sse2 -mpreferred-stack-boundary=2 -msoft-float",
-    );
-
-my @gcc_opts5 = (
-    "-O0", 
-    "-O1", 
-    "-O2 -march=core2 -mtune=core2 -fno-stack-protector -fomit-frame-pointer", 
-    "-Os", 
-    "-Os -fconserve-stack -fno-asynchronous-unwind-tables -fno-common -fno-delete-null-pointer-checks -fno-dwarf2-cfi-asm -fno-omit-frame-pointer -fno-optimize-sibling-calls -fno-strict-aliasing -fno-strict-overflow -fprofile-arcs -fstack-protector -ftest-coverage -funit-at-a-time -g -m64 -maccumulate-outgoing-args -mno-3dnow -mno-mmx -mno-red-zone -mno-sse -mno-sse2 -mtune=generic -pg", 
-    "-O3 -fwhole-program -combine",
-    );
-
-my @clang_opts = (
-    "-O0 ", 
-    "-O1 ", 
-    "-O2  -march=core2 -mtune=core2 -fomit-frame-pointer -fno-stack-protector ", 
-    "-Os ", 
-    "-O3 ", 
-    );
-
-my @clangwrapv_opts = (
-    "-O0 -fwrapv", 
-    "-O1 -fwrapv", 
-    "-O2 -fwrapv -march=core2 -mtune=core2 -fomit-frame-pointer -fno-stack-protector", 
-    "-Os -fwrapv", 
-    "-O3 -fwrapv",
-    );
-
-my @gcc_686_opts = (
-    "-O0 -march=i686", 
-    "-O1 -march=i686", 
-    "-O2 -march=i686", 
-    "-Os -march=i686", 
-    "-O3 -march=i686", 
-    );
-
-my @llvm_opts_sse3 = (
-    "-O0 -msse3", 
-    "-O1 -msse3", 
-    "-O2 -msse3", 
-    "-Os -msse3", 
-    "-O3 -msse3",
-    );
-
-my @armcc_opts = (
-    "-O0", 
-    "-O1", 
-    "-O2 -Ospace", 
-    "-O2 -Otime", 
-    "-O3 -Ospace",
-    "-O3 -Otime",
-    );
-
-my @dcc_opts = (
-    "-tARMES:windiss -DSTANDALONE",
-    "-tARMES:windiss -DSTANDALONE -O",
-    "-tARMES:windiss -DSTANDALONE -XO",
-    );
-
-my @gcc_opts_noO0 = ("-O1", 
-		     "-Os", 
-		     "-O2", 
-		     "-O3");
-
 my @gcc_opts = ("-O0", 
 		"-O1", 
 		"-Os", 
 		"-O2", 
 		"-O3");
 
-my @Oonly = ("-O");
-
-my @Osonly = ("-Os");
-
-my @none = ("-DTCC");
-
-my @O0sonly = ("-O0", "-Os");
-
-my @O0only = ("-O0");
-
-my @suncc_opts = (
-    "", 
-    "-xO1",
-    "-xO2",
-    "-xO3",
-    "-xO4",
-    "-xO5",
-    "-fast",
+my @gcc_opts3 = (
+    "-O0", 
+    #"-O1", 
+    #"-O2", 
+    #"-Os", 
+    "-O3 -fno-strict-aliasing",
     );
-
-my @icc_opts = (
-    "-O0",
-    "-O1",
-    "-Os",
-    "-O2",
-    "-fast -ipo",
-    );
-
-my @avrdeputy = ("avr",
-		 "deputy",
-		 "my-deputy-avr.pl",
-		 \@Osonly);
-
-my @clang_Oonly = ("ia32",
-		   "clang",
-		   "clang",
-		   \@Oonly);
-
-my @lance = ("ia32",
-	     "clang",
-	     "run-lance",
-	     \@Osonly);
-
-my @tendra = ("ia32",
-	      "tendracc",
-	      "tendracc",
-	      \@gcc_opts2);
-
-my @llvmgcc = ("ia32",
-	       "llvm",
-	       "llvm-gcc",
-	       \@gcc_opts2);
-
-my @cparser = ("ia32",
-	       "cparser",
-	       "cparser-driver",
-	       \@Osonly);
-
-my @tcc = ("ia32",
-	   "tcc",
-	   "tcc",
-	   \@none);
-
-my @dcc = ("windiss",
-	   "dcc",
-	   "dcc",
-	   \@dcc_opts);
-
-my @armcc = ("arm",
-	     "armcc",
-	     "armcc",
-	     \@armcc_opts);
-
-my @avrgcc = ("avr",
-	      "gcc",
-	      "avr-gcc",
-	      \@gcc_opts2);
-
-my @avrgcc34 = ("avr",
-		"gcc",
-		"avr-gcc-3.4",
-		\@gcc_opts2);
-
-my @mspgcc = ("msp",
-	      "gcc",
-	      "msp430-gcc",
-	      \@gcc_opts2);
-
-my @avrgcc42_O0sonly = ("avr",
-			"gcc",
-			"avr-gcc-4.2",
-			\@O0sonly);
-
-my @avrgcc42 = ("avr",
-		"gcc",
-		"avr-gcc-4.2",
-		\@gcc_opts2);
-
-my @deputy = ("ia32",
-	      "deputy",
-	      "/home/regehr/tmp/deputy/bin/deputy",
-	      \@Osonly);
-
-my @nesc = ("ia32",
-	    "nesc",
-	    "nescc",
-	    \@Osonly);
-
-my @gcc = ("ia32",
-	   "gcc",
-	   "gcc",
-	   \@gcc_opts2);
-
-my $Z = "/home/regehr/z/compilers";
-
-my @clang26 = ("ia32",
-	       "llvm",
-	       "$Z/clang-26/bin/clang",
-	       \@gcc_opts2);
-
-my @llvmgcc27 = ("ia32",
-		 "llvm",
-		 "llvm-gcc-27",
-		 \@gcc_opts2);
-
-my @clang27 = ("ia32",
-	       "llvm",
-	       "$Z/clang-27/bin/clang",
-	       \@gcc_opts2);
-
-my @llvmgcc28 = ("ia32",
-		 "llvm",
-		 "llvm-gcc-28",
-		 \@gcc_opts2);
-
-my @clang28 = ("ia32",
-	       "llvm",
-	       "$Z/clang-28/bin/clang",
-	       \@gcc_opts2);
-
-my @llvmgcc29 = ("ia32",
-		 "llvm",
-		 "llvm-gcc-29",
-		 \@gcc_opts2);
-
-my @clang29 = ("ia32",
-	       "llvm",
-	       "$Z/clang-29/bin/clang",
-	       \@gcc_opts2);
-
-my @gcc460 = ("ia32",
-	      "gcc",
-	      "$Z/gcc-460/bin/gcc-460",
-	      \@gcc_opts2);
-
-my @open64 = ("ia32",
-	      "opencc",
-	      "opencc",
-	      \@gcc_opts2);
-
-my @gcc450 = ("ia32",
-	      "gcc",
-	      "$Z/gcc-450/bin/gcc-450",
-	      \@gcc_opts2);
-
-my @gcc440 = ("ia32",
-	      "gcc",
-	      "$Z/gcc-440/bin/gcc-440",
-	      \@gcc_opts2);
-
-my @gcc430 = ("ia32",
-	      "gcc",
-	      "$Z/gcc-430/bin/gcc-430",
-	      \@gcc_opts2);
-
-my @gcc420 = ("ia32",
-	      "gcc",
-	      "$Z/gcc-420/bin/gcc-420",
-	      \@gcc_opts2);
-
-my @gcc410 = ("ia32",
-	      "gcc",
-	      "$Z/gcc-410/bin/gcc-410",
-	      \@gcc_opts2);
-
-my @gcc400 = ("ia32",
-	      "gcc",
-	      "$Z/gcc-400/bin/gcc-400",
-	      \@gcc_opts2);
-
-my @gcc340 = ("ia32",
-	      "gcc",
-	      "$Z/gcc-340/bin/gcc-340",
-	      \@gcc_opts2);
-
-my @gcc330 = ("ia32",
-	      "gcc",
-	      "$Z/gcc-330/bin/gcc-330",
-	      \@gcc_opts2);
-
-my @gcc320 = ("ia32",
-	      "gcc",
-	      "$Z/gcc-320/bin/gcc-320",
-	      \@gcc_opts2);
 
 my @clang = ("ia32",
 	     "clang",
 	     "clang",
 	     \@gcc_opts3);
 
-my @clangpp = ("ia32",
-	     "clang",
-	     "clang++",
-	     \@gcc_opts2);
-
 my @gcccurrent = ("ia32",
 		  "gcc",
 		  "current-gcc",
 		  \@gcc_opts3);
 
-my @gppcurrent = ("ia32",
-		  "gcc",
-		  "current-g++",
-		  \@gcc_opts3);
-
-my @dragonegg = ("ia32",
-		  "gcc",
-		  "gcc-4.5",
-		  \@dragonegg_opts);
-
-my @gcccurrent2 = ("ia32",
-		   "gcc",
-		   "current-gcc",
-		   \@gcc_opts4);
-
-my @gcccurrent_Oonly = ("ia32",
-			"gcc",
-			"current-gcc",
-			\@Oonly);
-
-my @gcccurrent_O0only = ("ia32",
-			 "gcc",
-			 "current-gcc",
-			 \@O0only);
-
-my @suncc = ("ia32",
-	     "suncc",
-	     "suncc",
-	     \@suncc_opts);
-
-my @llvmgcc19 = ("ia32",
-		 "llvm",
-		 "llvm-gcc-19",
-		 \@gcc_opts2);
-
-my @llvmgcc20 = ("ia32",
-		 "llvm",
-		 "llvm-gcc-20",
-		 \@gcc_opts2);
-
-my @llvmgcc21 = ("ia32",
-		 "llvm",
-		 "llvm-gcc-21",
-		 \@gcc_opts2);
-
-my @llvmgcc22 = ("ia32",
-		 "llvm",
-		 "llvm-gcc-22",
-		 \@gcc_opts2);
-
-my @llvmgcc23 = ("ia32",
-		 "llvm",
-		 "llvm-gcc-23",
-		 \@gcc_opts2);
-
-my @llvmgcc24 = ("ia32",
-		 "llvm",
-		 "llvm-gcc-24",
-		 \@gcc_opts2);
-
-my @llvmgcc25 = ("ia32",
-		 "llvm",
-		 "llvm-gcc-25",
-		 \@gcc_opts2);
-
-my @llvmgcc26 = ("ia32",
-		 "llvm",
-		 "llvm-gcc-26",
-		 \@gcc_opts2);
-
-my @llvmgcc22O0only = ("ia32",
-		       "llvm",
-		       "llvm-gcc-2.2",
-		       \@O0only);
-
-my @llvmgcccurrent = ("ia32",
-		      "llvm",
-		      "llvm-gcc-current",
-		      \@gcc_opts2);
-
-my @llvmgcc_Oonly = ("ia32",
-		     "llvm",
-		     "llvm-gcc",
-		     \@Oonly);
-
-my @icc = ("ia32",
-	   "icc",
-	   "icc",
-	   \@icc_opts);
-
-my @icc_O0only = ("ia32",
-		  "icc",
-		  "icc",
-		  \@O0only);
-
-my @llvms = (
-    \@llvmgcc20, 
-    \@llvmgcc21, 
-    \@llvmgcc22, 
-    \@llvmgcc23, 
-    \@llvmgcc24, 
-    );
-
 my @compilers_to_test = (
-    
     \@clang,
     \@gcccurrent,
-    
-    #\@gcc320,
-    #\@gcc330,
-    #\@gcc340,
-    #\@gcc400,
-    #\@gcc410,
-    #\@gcc420,
-    #\@gcc430,
-    #\@gcc440,
-    #\@gcc450,
-    #\@gcc460,
-    #\@clang26,
-    #\@clang27,
-    #\@clang28,
-    #\@clang29,
-    
-    #\@icc,
-    #\@suncc,
-    #\@open64,
-
-    # \@tcc,
-
-    #\@gcc,
-
-    #\@clangpp,
-    #\@gppcurrent,
-
-    #\@gcc400,
-
-    #\@gcccurrent,
-    #\@dragonegg,
-
-    #\@dcc,
-    #\@lance,
-    #\@gcccurrent,
-    #\@llvmgcc,
-    #\@clang,
-
-    #\@gppcurrent,
-    #\@avrgcc,
-    #\@gcccurrent_O0only,
-    #\@armcc,
-    #\@cparser,
-    #\@llvmgcc24, 
-    #\@llvmgcc_Oonly,
-    #\@gcccurrent_Oonly,
-
     );
 
 ####################################################################
@@ -573,15 +117,6 @@ sub compile_and_run ($$$$$) {
 	($exe =~ s/\.//g);
 	($exe =~ s/\///g);
 	$xtra = "";
-    } elsif ($arch eq "avr") {
-	$exe = "${root}${compiler}${opt_str}.elf";
-	$xtra = "-mmcu=atmega128 -fwhole-program";
-    } elsif ($arch eq "msp" ) {
-	$exe = "${root}${compiler}${opt_str}.elf";
-	$xtra = "-mmcu=msp430x1611";
-    } elsif ($arch eq "arm" ) {
-	$exe = "${root}${compiler}${opt_str}.axf";
-	$xtra = "--cpu=ARM926EJ-S -L--datacompressor=off -W";
     } else {
 	die;
     }
@@ -713,19 +248,13 @@ sub triage ($$$$$$$) {
 	runit "cp $root.c small.c" or die;
 	instantiate_test_scripts ($templ, $opt1, $opt, $base_compiler);		
 	if ($VERSION_SEARCH) {
-	    if ($base_compiler ne "armcc" &&
-		$arch ne "avr") {
-		$res = runit ("version_search $base_compiler");
-	    }
+	    $res = runit ("version_search $base_compiler");
 	}
 	runit ("reduce_miscompile > reduce_log.txt 2>&1");
 	print ("reduced size: ");
 	runit ("wc -c small.c");
 	if ($VERSION_SEARCH) {
-	    if ($base_compiler ne "armcc" &&
-		$arch ne "avr") {
-		$res = runit ("version_search $base_compiler");
-	    }
+	    $res = runit ("version_search $base_compiler");
 	}
 	unlockit();			
     }
