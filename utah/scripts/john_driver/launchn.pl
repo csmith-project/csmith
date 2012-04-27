@@ -38,8 +38,6 @@ while (<INF>) {
 }
 close INF;
 
-system "nohup random_test_llvm_killer.pl > llvm_killer.log 2>&1 &";
-
 system "rm -rf work*";
 
 for (my $i=0; $i<$CPUS; $i++) {
