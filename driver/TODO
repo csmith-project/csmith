@@ -1,3 +1,5 @@
+------------------------------------------------------------------
+
 users need to provide scripts to
   compile a program
     arguments: 0..N-1; anything else prints a file containing N
@@ -6,6 +8,7 @@ users need to provide scripts to
     output: 
       executable or
       crash output
+    one script per compiler?
   run a program
     input: an executable
     output: text file including
@@ -17,6 +20,7 @@ users need to provide scripts to
         timeout
         non-zero exit code
   create a crash string from compiler output
+  build a specified version of the compiler
 
 make canned reduction scripts use these user-provided scripts
 
@@ -57,3 +61,4 @@ relevance estimation: does fault localization place the bug in
 
 make a VM image for the cloud, or a local machine
 
+------------------------------------------------------------------

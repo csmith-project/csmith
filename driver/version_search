@@ -7,6 +7,9 @@ use Env::Path;
 
 # TODO: bail if last release and latest snapshot aren't already compiled
 
+# TODO: use whatever existing versions are in the range first, then 
+# later build new compilers when necessary
+
 ######################################################################
 
 my $gcc_latest_release = 139673;
@@ -44,7 +47,7 @@ my $MAX_RETRY = 4;
 sub runit ($) {
     my $cmd = shift;
     my $res = (system "$cmd");
-    if ($res != 0) {
+    if ($res == -1) {
 	# print "system '$cmd': $?";
 	return -1;
     }
