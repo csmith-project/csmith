@@ -1,5 +1,9 @@
 ===================================================================
 
+04/29/2012 (total 445)
+  1 gcc crash bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=53163
+
 04/29/2012 (total 444)
   1 gcc wrong code bug reported
   http://gcc.gnu.org/bugzilla/show_bug.cgi?id=53160
