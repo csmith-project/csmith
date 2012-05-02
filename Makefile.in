@@ -239,6 +239,9 @@ SUBDIRS = \
 	scripts \
 	src
 
+EXTRA_DIST = \
+	git-hash.sh
+
 all: all-recursive
 
 .SUFFIXES:
