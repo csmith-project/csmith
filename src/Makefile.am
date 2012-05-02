@@ -1,6 +1,6 @@
-## -*- mode: Makefile.am -*-
+## -*- mode: Makefile-Automake -*-
 ##
-## Copyright (c) 2008-2011 The University of Utah
+## Copyright (c) 2008-2012 The University of Utah
 ## All rights reserved.
 ##
 ## This file is part of `csmith', a random generator of C programs.
