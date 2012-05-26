@@ -6,6 +6,7 @@ users need to provide scripts to
       ordered from least to strongest optimzing
     input: c program
     output: 
+      preprocessed file for reduction
       executable or
       crash output
     one script per compiler?
