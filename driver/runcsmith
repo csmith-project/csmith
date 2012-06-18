@@ -17,6 +17,14 @@ my $SEEDFILE = "";
 my $CPUS;
 my $argc = scalar (@ARGV);
 
+my $CSMITH_HOME = $ENV{"CSMITH_HOME"};
+if (!defined($CSMITH_HOME)) {
+    die "OOPS: please export CSMITH_HOME before running this script";
+}
+if (!(-d $CSMITH_HOME)) {
+    die "OOPS: CSMITH_HOME directory '${CSMITH_HOME}' does not seem to exist";
+}
+
 if ($argc == 0) {
     $CPUS = Sys::CPU::cpu_count();    
     print "looks like we have $CPUS cpus\n";
