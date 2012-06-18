@@ -5,11 +5,14 @@ use Sys::CPU;
 
 #################################################################
 
-# TODO: don't make a copy of the source tree, just set build_dir
-# to be somewhere else
+# TODO: don't make a copy of the source tree, just set build_dir to be
+# somewhere else
 
-# TODO: add a "force" option that first removes this compiler from
-# the unbuildable list, if it's in there
+# TODO: add a "force" option that first removes this compiler from the
+# unbuildable list, if it's in there
+
+# TODO: don't make links but rather expect that this will be added to
+# the PATH
 
 # specification:
 #   return success if the requested version is already in the path
@@ -20,7 +23,7 @@ use Sys::CPU;
 
 my $TOPDIR = $ENV{"HOME"}."/z";
 
-my $NICE = "nice -10";
+my $NICE = "nice -5";
 
 my $LINK_TO = "$TOPDIR/bin";
 my $BUILD_HOME = "$TOPDIR/compiler-build";
@@ -62,12 +65,10 @@ my @dirs_to_delete = ();
 # properly parse the return value from system()
 sub runit ($) {
     my $cmd = shift;
-
-    if ((system "$NICE $cmd") != 0) {
+    if ((system "$NICE $cmd") == -1) {
 	print "build_compiler FAILING: system '$cmd': $?";
 	return -1;
     }
-    
     my $exit_value  = $? >> 8;
     return $exit_value;
 }
@@ -128,8 +129,8 @@ sub build_gcc() {
 
 sub build_llvm() {
     my $LLVM_DIR="$BUILD_HOME/llvm-r$REV";
-    my $LLVMGCC_DIR="$BUILD_HOME/llvm-gcc-r$REV-src";
-    my $LLVM_INSTALL_DIR="$INSTALL_HOME/llvm-gcc-r$REV-install";
+    my $LLVMGCC_DIR="$BUILD_HOME/llvm-r$REV-src";
+    my $LLVM_INSTALL_DIR="$INSTALL_HOME/llvm-r$REV-install";
 
     push @dirs_to_delete, $LLVM_DIR;
     push @dirs_to_delete, $LLVMGCC_DIR;
@@ -146,25 +147,9 @@ sub build_llvm() {
     
     chdir $LLVM_DIR or die;
     abort_if_fail ("$CC ./configure $LLVM_CHECKS --prefix=$LLVM_INSTALL_DIR");
-    abort_if_fail ("make VERBOSE=0 -j${CPUS}");
+    abort_if_fail ("make -j${CPUS}");
     abort_if_fail ("make install");
     
-    #abort_if_fail ("rm -rf $LLVMGCC_DIR");
-    #chdir $BUILD_HOME or die;
-    
-    #abort_if_fail ("cp -r $BUILD_HOME/llvm-gcc $LLVMGCC_DIR");
-    #chdir $LLVMGCC_DIR or die;
-    #abort_if_fail ("svn update -r $REV");
-    
-    #chdir $LLVMGCC_DIR or die;
-    #abort_if_fail ("mkdir build");
-    #chdir "build" or die;
-    #abort_if_fail ("$CC ../configure $LLVM_CHECKS --prefix=$LLVM_INSTALL_DIR --program-prefix=$PROGRAM_PREFIX --enable-languages=c,c++ --enable-llvm=$LLVM_DIR");
-    #abort_if_fail ("make VERBOSE=1 -j${CPUS}");
-    #abort_if_fail ("make install");
-    #abort_if_fail ("ln -sf $LLVM_INSTALL_DIR/bin/${PROGRAM_PREFIX}gcc $LINK_TO/${C_EXE}");
-    #abort_if_fail ("ln -sf $LLVM_INSTALL_DIR/bin/${PROGRAM_PREFIX}g++ $LINK_TO/${CPP_EXE}");
-
     abort_if_fail ("ln -sf $LLVM_INSTALL_DIR/bin/bugpoint $LINK_TO");
     abort_if_fail ("ln -sf $LLVM_INSTALL_DIR/bin/clang $LINK_TO");
     abort_if_fail ("ln -sf $LLVM_INSTALL_DIR/bin/clang++ $LINK_TO");
@@ -235,8 +220,8 @@ if ($OREV eq "LATEST") {
 if ($COMPILER eq "llvm") {
     $FAIL_FILE = $FAIL_FILE_LLVM;
     $PROGRAM_PREFIX = "llvm-r${REV}-";
-    $BARE_C_EXE = "llvm-gcc";
-    $BARE_CPP_EXE = "llvm-g++";
+    $BARE_C_EXE = "clang";
+    $BARE_CPP_EXE = "clang++";
 } elsif ($COMPILER eq "gcc") {
     $FAIL_FILE = $FAIL_FILE_GCC;
     $PROGRAM_PREFIX = "r${REV}-";
@@ -289,7 +274,7 @@ if ($COMPILER eq "llvm") {
     die;
 }
 
-print "build $COMPILER SUCCESS -- installed $C_EXE and $CPP_EXE\n";
+print "build $COMPILER SUCCESS -- compiled and installed $C_EXE and $CPP_EXE\n";
 exit 0;
 
 #################################################################
