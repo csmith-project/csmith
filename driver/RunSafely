@@ -101,7 +101,7 @@ rm -f core core.*
 PWD=`pwd`
 COMMAND="$PROGRAM $*"
 if [ "$SYSTEM" = "Darwin" ]; then
-  COMMAND="${DIR}TimedExec.sh $ULIMIT $PWD $COMMAND"
+  COMMAND="${DIR}TimedExec $ULIMIT $PWD $COMMAND"
 fi
 
 if [ "x$RHOST" = x ] ; then
