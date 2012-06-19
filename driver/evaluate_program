@@ -138,21 +138,14 @@ sub compile_and_run ($$$$) {
     }
     
     my $result = "";
-    my $code_size = 0;
 
     open INF, "<$out" or die;
     while (my $line = <INF>) {
-	if ($line =~ /CODE SIZE ([0-9]+)$/) {
-	    $code_size = $1;
-	} else {
-	    $result .= $line;
-	}
+	$result .= $line;
     }
     close INF;
 
-    die if (!defined($code_size));
-
-    return (0,$result,$code_size);
+    return (0,$result);
 }
 
 sub instantiate_test_scripts ($$$$) {
@@ -243,7 +236,6 @@ sub test_compiler ($$$) {
 
     my %results;
     my %csums;
-    my $min_code_size = 100000000;
     my $success = 0;
     my $compiler_fail = 0;
 
@@ -254,7 +246,7 @@ sub test_compiler ($$$) {
     my $first = 1;
 
     foreach my $opt (@OPTS) {
-	(my $res, my $res_str, my $code_size) = 
+	(my $res, my $res_str) = 
 	    compile_and_run ($root, $compiler, 
 			     $opt, $custom_options);
         $num_reads{$opt} = 0;
@@ -262,9 +254,6 @@ sub test_compiler ($$$) {
 	if ($res == 0) {
 	    $success++;
 	    if ($RUN_PROGRAM) {
-		if ($code_size < $min_code_size) {
-		    $min_code_size = $code_size;
-		}
 		my $checksum_regex = "checksum = (TIMEOUT|[0-9a-fA-F]+)\\s*";
 		die if ((!($res_str =~ s/$checksum_regex//)) &&
 		        (!($res_str =~ "TIMEOUT")));
@@ -312,8 +301,6 @@ sub test_compiler ($$$) {
 	my $consistent = 1;
 	my $opt1;
 	
-	print "CODE SIZE $compiler ${min_code_size}\n";
-
 	foreach my $opt (keys %results) {
 
 	    if (defined($result)) {

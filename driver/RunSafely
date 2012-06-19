@@ -36,7 +36,7 @@
 #     <args...> are the arguments to pass to the program.
 #
 if [ $# -lt 4 ]; then
-  echo "./RunSafely.sh <timeout> <exitok> <infile> <outfile> <program> <args...>"
+  echo "./RunSafely <timeout> <exitok> <infile> <outfile> <program> <args...>"
   exit 1
 fi
 

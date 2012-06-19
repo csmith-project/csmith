@@ -1,14 +1,14 @@
 #!/bin/sh
 #
-# Program:  TimedExec.sh
+# Program:  TimedExec
 #
 # Synopsis: This script is a watchdog wrapper. It runs the specified program
 # but times out if it does not complete in the allocated time frame.
-# Syntax: ./TimedExec.sh <timeout> <dir> <program> <args...>
+# Syntax: ./TimedExec <timeout> <dir> <program> <args...>
 #
 
 if [ $# -lt 3 ]; then
-    echo "./TimedExec.sh <timeout> <dir> <program> <args...>"
+    echo "./TimedExec <timeout> <dir> <program> <args...>"
     exit 1
 fi
 
