@@ -58,6 +58,11 @@ If you look through a probability output, we will see that the probability value
 
 [statement_prob,statement_return_prob=25,statement_for_prob=50,statement_if_else_prob=100]
 
+Note that it's a good idea to set statement_return_prob to a
+*non-zero* value. If you set statement_return_prob to 0, then csmith
+will hang forever because it couldn't generate a return-statement for a
+function such as "int foo(void) ...". 
+
  - The idea is that often we have code like unsigned i = rnd_upto(5),
    where i gets its value from the range of [0, 4] with equal change.
 
