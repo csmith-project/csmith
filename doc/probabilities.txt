@@ -39,8 +39,24 @@ Configuration file format:
    * we have (70-55)% chance to get statement_for.
    * ...
 
- Note that all probability symbols(e.g., statement_prog) are fixed in the program.
+Note that all probability symbols(e.g., statement_prog) are fixed in the program.
  And all values must between [0, 100], where 0 means we won't use it.
+
+It's worth to point out that the sum of all probabilities in group probabilities does not equal to 100. Instead, Group probabilities actually refer to probability distribution. This design choice was based on some Csmith internal logic which deals with random probabilities. For example, statement_assign_prob = 99 doesn't mean that we have 99% chance to generate assign statements.
+
+Let's look at a simplified example. Assume we want to generate three kinds of statements, let's say return-statement, for-statement, and if-else-statement. We also assume we have 25% chance to generate return-statement, 25% chance for for-statement and 50% chance for if-else-statement.
+
+When Csmith determines which kind of statement to be generated, it takes the following steps:
+
+(1) get a random value p which ranges from 0 to 99;
+
+(2) if 0 <= p < 25, then csmith generates return-statement;
+      if 25 <= p < 50, then csmith generatets for-statement;
+     if 50 <= p < 100, then csmith generates if-else-statement;
+
+If you look through a probability output, we will see that the probability values are actually direct mapping to the conditions above. To be more specific, for this simple example, we have group probabilities like this:
+
+[statement_prob,statement_return_prob=25,statement_for_prob=50,statement_if_else_prob=100]
 
  - The idea is that often we have code like unsigned i = rnd_upto(5),
    where i gets its value from the range of [0, 4] with equal change.
@@ -52,3 +68,4 @@ Configuration file format:
    where the first symbol is the group name, and value "1" means csmith
    will generate the corresponding value which represents binary_add_op,
    "0" means binary_add_op will be filtered out.
+
