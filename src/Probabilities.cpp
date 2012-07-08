@@ -132,7 +132,9 @@ SingleProbElem::set_prob(ProbName pname, int val)
 {
 	assert(pname == pname_);
 	VAL_ASSERT(val);
-	// if val is -1, then we use the default val
+	if (pname == pVoidProb) {
+		assert(!val && "Invalid probability - the probability value of void_prob must be 0!");
+	}
 	if (val >= 0)
 		val_ = val;
 }
@@ -879,12 +881,20 @@ Probabilities::setup_group_probabilities(bool is_equal, const vector<string> &el
 	assert(elem);
 	// Used for sanity check - make sure no two probabilities are the same
 	set<int> vals;
+	bool all_zero = true;
+	bool valid_max_value = false;
 	for (size_t i = 1; i < elems.size(); i++) {
 		int val = parse_single_elem(is_equal, elem, elems[i]);
+		valid_max_value = true;
 		if (is_equal) {
 			assert(val == 0 || val == 1);
+			if (val == 1)
+				all_zero = false;
 		}
 		else {
+			all_zero = false;
+			if (val == 100)
+				valid_max_value = true;
 			assert(val >= 0 && val <= 100);
 			if ((val > 0) && (vals.find(val) != vals.end()))
 				assert("duplicated values in a group probability" && 0);
@@ -893,6 +903,8 @@ Probabilities::setup_group_probabilities(bool is_equal, const vector<string> &el
 		}
 	}
 	// assert(vals.size() == (elems.size() - 1));
+	assert(!all_zero && "Invalid probabilities: all probabilities are zero!");
+	assert(valid_max_value && "Invalid group probabilities: one probability value must be 100!");
 	return true;
 }
 
