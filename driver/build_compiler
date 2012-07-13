@@ -11,9 +11,6 @@ use Sys::CPU;
 # TODO: add a "force" option that first removes this compiler from the
 # unbuildable list, if it's in there
 
-# TODO: don't make links but rather expect that this will be added to
-# the PATH
-
 # specification:
 #   return success if the requested version is already in the path
 #   return success if we can build the requested version
@@ -31,11 +28,6 @@ my $INSTALL_HOME = "$TOPDIR/compiler-install";
 my $FAIL_FILE_LLVM = "${SOURCE_HOME}/unbuildable_llvm.txt";
 my $FAIL_FILE_GCC = "${SOURCE_HOME}/unbuildable_gcc.txt";
 
-#my $CC = "CC=llvm-gcc CXX=llvm-g++";
-#my $CC = "CC=current-gcc CXX=current-g++";
-#my $CC = "CC=gcc-4.3 CXX=g++-4.3";
-my $CC = "";
-
 #my $EXPENSIVE = "--enable-expensive-checks";
 my $EXPENSIVE = "";
 
@@ -46,8 +38,6 @@ my $LLVM_CHECKS = "--enable-checking=release --enable-optimized";
 
 my $CPUS = Sys::CPU::cpu_count();
 print "looks like we have $CPUS cpus\n";
-
-#$CPUS = 1;
 
 my $C_EXE;
 my $CPP_EXE;
