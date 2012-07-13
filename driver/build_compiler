@@ -41,9 +41,6 @@ print "looks like we have $CPUS cpus\n";
 
 my $C_EXE;
 my $CPP_EXE;
-my $BARE_C_EXE;
-my $BARE_CPP_EXE;
-my $PROGRAM_PREFIX;
 my $REV;
 my $OREV;
 my $INSTALL_DIR;
@@ -99,7 +96,7 @@ sub build_gcc() {
     abort_if_fail ("mkdir build");
     chdir "build" or die;
 
-    abort_if_fail ("../configure --with-libelf=/usr/local --enable-lto --prefix=$GCC_INSTALL_DIR  --program-prefix=$PROGRAM_PREFIX --enable-languages=c,c++ ");
+    abort_if_fail ("../configure --with-libelf=/usr/local --enable-lto --prefix=$GCC_INSTALL_DIR  --enable-languages=c,c++ ");
     abort_if_fail ("make -j${CPUS}");
     abort_if_fail ("make install");
     
@@ -127,7 +124,7 @@ sub build_llvm() {
     abort_if_fail ("svn update -r $REV");
     
     chdir $LLVM_DIR or die;
-    abort_if_fail ("$CC ./configure $LLVM_CHECKS --prefix=$LLVM_INSTALL_DIR");
+    abort_if_fail ("./configure $LLVM_CHECKS --prefix=$LLVM_INSTALL_DIR");
     abort_if_fail ("make -j${CPUS}");
     abort_if_fail ("make install");
     
@@ -139,12 +136,12 @@ sub build_llvm() {
 
 ########################### main ################################
 
-usage() if (scalar(@ARGV) != 2);
+$COMPILER = shift @ARGV;
+$OREV = shift @ARGV;
+my $last = shift @ARGV;
+usage() unless (defined($COMPILER) && defined($OREV) && !defined($last));
 
-$COMPILER = $ARGV[0];
-$OREV = $ARGV[1];
-
-usage() if (!(($OREV =~ /^\d+$/) || ($OREV eq "LATEST")));
+usage() unless ($OREV =~ /^\d+$/) || ($OREV eq "LATEST");
 
 if ($OREV eq "LATEST") {
     my $r;
@@ -174,20 +171,15 @@ if ($OREV eq "LATEST") {
 
 if ($COMPILER eq "llvm") {
     $FAIL_FILE = $FAIL_FILE_LLVM;
-    $PROGRAM_PREFIX = "llvm-r${REV}-";
-    $BARE_C_EXE = "clang";
-    $BARE_CPP_EXE = "clang++";
+    $C_EXE = "clang";
+    $CPP_EXE = "clang++";
 } elsif ($COMPILER eq "gcc") {
     $FAIL_FILE = $FAIL_FILE_GCC;
-    $PROGRAM_PREFIX = "r${REV}-";
-    $BARE_C_EXE = "current-gcc";
-    $BARE_CPP_EXE = "current-g++";
+    $C_EXE = "gcc";
+    $CPP_EXE = "g++";
 } else {
     usage();
 }
-
-$C_EXE = "${PROGRAM_PREFIX}gcc";
-$CPP_EXE = "${PROGRAM_PREFIX}g++";
 
 open INF, "<$FAIL_FILE" or die "oops-- fail file $FAIL_FILE does not exist";
 while (my $line = <INF>) {
