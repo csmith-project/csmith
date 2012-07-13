@@ -8,15 +8,13 @@ use LockFile::Simple;
 
 # TODO: check for program crash (vs. timeout)
 
-# TODO: we hold the lock for too long, put it into compile_llvm?
-
 # properly propagate run_program failures upwards
 
 # distinguish between programs that compile and those that run inside the timeout
 
 ####################################################################
 
-my $xxtra = "-DCSMITH_MINIMAL";
+my $xxtra = "-w -DCSMITH_MINIMAL";
 
 #my $notmp = "-DUSE_MATH_MACROS_NOTMP";
 my $notmp = "";
@@ -34,8 +32,7 @@ my $VERSION_SEARCH = 0;
 ####################################################################
 
 my $CSMITH_HOME=$ENV{"CSMITH_HOME"};
-die "oops: CSMITH_HOME environment variable needs to be set"
-    if (!defined($CSMITH_HOME));
+die "oops: CSMITH_HOME environment variable needs to be set" unless defined($CSMITH_HOME);
 
 my $LOCKFN = "/var/tmp/version_search_lockfile";
 
@@ -101,14 +98,13 @@ sub compile_and_run ($$$$) {
     my $exe = "${root}${compiler}${opt_str}_exe";
     ($exe =~ s/\.//g);
     ($exe =~ s/\///g);
-    my $xtra = "";
 
     my $srcfile = "$root.c";
 
     my $out = "${exe}.out";
     my $compilerout = "${exe}_compiler.out";
 
-    my $command = "RunSafely $COMPILER_TIMEOUT 1 /dev/null $compilerout $compiler $opt $xtra $xxtra $notmp -I${CSMITH_HOME}/runtime $srcfile -o $exe $custom_options $notmp ";
+    my $command = "RunSafely $COMPILER_TIMEOUT 1 /dev/null $compilerout $compiler $opt $xxtra $notmp -I${CSMITH_HOME}/runtime $srcfile -o $exe $custom_options $notmp ";
 
     print "$command\n";
     
