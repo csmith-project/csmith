@@ -25,7 +25,6 @@ my $TOPDIR = $ENV{"HOME"}."/z";
 
 my $NICE = "nice -5";
 
-my $LINK_TO = "$TOPDIR/bin";
 my $BUILD_HOME = "$TOPDIR/compiler-build";
 my $SOURCE_HOME = "$TOPDIR/compiler-source";
 my $INSTALL_HOME = "$TOPDIR/compiler-install";
@@ -114,14 +113,6 @@ sub build_gcc() {
     abort_if_fail ("make -j${CPUS}");
     abort_if_fail ("make install");
     
-    abort_if_fail ("ln -sf $GCC_INSTALL_DIR/bin/${PROGRAM_PREFIX}gcc $LINK_TO/${C_EXE}");
-    abort_if_fail ("ln -sf $GCC_INSTALL_DIR/bin/${PROGRAM_PREFIX}g++ $LINK_TO/${CPP_EXE}");
-
-    if ($OREV eq "LATEST") {
-	abort_if_fail ("ln -sf $GCC_INSTALL_DIR/bin/${PROGRAM_PREFIX}gcc $LINK_TO/${BARE_C_EXE}");
-	abort_if_fail ("ln -sf $GCC_INSTALL_DIR/bin/${PROGRAM_PREFIX}g++ $LINK_TO/${BARE_CPP_EXE}");
-    }
-    
     print "cleaning up...";
 
     system ("$NICE rm -rf $GCC_DIR");
@@ -149,32 +140,6 @@ sub build_llvm() {
     abort_if_fail ("$CC ./configure $LLVM_CHECKS --prefix=$LLVM_INSTALL_DIR");
     abort_if_fail ("make -j${CPUS}");
     abort_if_fail ("make install");
-    
-    abort_if_fail ("ln -sf $LLVM_INSTALL_DIR/bin/bugpoint $LINK_TO");
-    abort_if_fail ("ln -sf $LLVM_INSTALL_DIR/bin/clang $LINK_TO");
-    abort_if_fail ("ln -sf $LLVM_INSTALL_DIR/bin/clang++ $LINK_TO");
-    abort_if_fail ("ln -sf $LLVM_INSTALL_DIR/bin/llc $LINK_TO");
-    abort_if_fail ("ln -sf $LLVM_INSTALL_DIR/bin/lli  $LINK_TO");
-    abort_if_fail ("ln -sf $LLVM_INSTALL_DIR/bin/llvm-ar $LINK_TO");
-    abort_if_fail ("ln -sf $LLVM_INSTALL_DIR/bin/llvm-as $LINK_TO");
-    abort_if_fail ("ln -sf $LLVM_INSTALL_DIR/bin/llvm-bcanalyzer $LINK_TO");
-    abort_if_fail ("ln -sf $LLVM_INSTALL_DIR/bin/llvmc $LINK_TO");
-    abort_if_fail ("ln -sf $LLVM_INSTALL_DIR/bin/llvm-config $LINK_TO");
-    abort_if_fail ("ln -sf $LLVM_INSTALL_DIR/bin/llvm-dis $LINK_TO");
-    abort_if_fail ("ln -sf $LLVM_INSTALL_DIR/bin/llvm-extract $LINK_TO");
-    abort_if_fail ("ln -sf $LLVM_INSTALL_DIR/bin/llvm-ld $LINK_TO");
-    abort_if_fail ("ln -sf $LLVM_INSTALL_DIR/bin/llvm-link $LINK_TO");
-    abort_if_fail ("ln -sf $LLVM_INSTALL_DIR/bin/llvm-nm $LINK_TO");
-    abort_if_fail ("ln -sf $LLVM_INSTALL_DIR/bin/llvm-prof $LINK_TO");
-    abort_if_fail ("ln -sf $LLVM_INSTALL_DIR/bin/llvm-ranlib $LINK_TO");
-    abort_if_fail ("ln -sf $LLVM_INSTALL_DIR/bin/llvm-stub $LINK_TO");
-    abort_if_fail ("ln -sf $LLVM_INSTALL_DIR/bin/opt $LINK_TO");
-    abort_if_fail ("ln -sf $LLVM_INSTALL_DIR/bin/tblgen $LINK_TO");
-
-    if ($OREV eq "LATEST") {
-	abort_if_fail ("ln -sf $LLVM_INSTALL_DIR/bin/${PROGRAM_PREFIX}gcc $LINK_TO/${BARE_C_EXE}");
-	abort_if_fail ("ln -sf $LLVM_INSTALL_DIR/bin/${PROGRAM_PREFIX}g++ $LINK_TO/${BARE_CPP_EXE}");
-    }
     
     print "cleaning up...";
 
