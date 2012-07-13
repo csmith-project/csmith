@@ -12,11 +12,6 @@ use Sys::CPU;
 #
 #################################################################
 
-# TODO: don't make a copy of the source tree, just set build_dir to be
-# somewhere else
-
-#################################################################
-
 my $TOPDIR = $ENV{"HOME"}."/z";
 
 my $NICE = "nice -5";
@@ -107,11 +102,9 @@ sub build_gcc() {
 
 sub build_llvm() {
     my $LLVM_DIR="$BUILD_HOME/llvm-r$REV";
-    my $LLVMGCC_DIR="$BUILD_HOME/llvm-r$REV-src";
     my $LLVM_INSTALL_DIR="$INSTALL_HOME/llvm-r$REV-install";
 
     push @dirs_to_delete, $LLVM_DIR;
-    push @dirs_to_delete, $LLVMGCC_DIR;
     push @dirs_to_delete, $LLVM_INSTALL_DIR;
     
     abort_if_fail ("rm -rf $LLVM_DIR");
@@ -131,7 +124,6 @@ sub build_llvm() {
     print "cleaning up...";
 
     system ("$NICE rm -rf $LLVM_DIR");
-    system ("$NICE rm -rf $LLVMGCC_DIR");
 }
 
 ########################### main ################################
