@@ -4,17 +4,16 @@ use strict;
 use Sys::CPU;
 
 #################################################################
-
-# TODO: don't make a copy of the source tree, just set build_dir to be
-# somewhere else
-
-# TODO: add a "force" option that first removes this compiler from the
-# unbuildable list, if it's in there
-
+#
 # specification:
 #   return success if the requested version is already in the path
 #   return success if we can build the requested version
 #   return fail otherwise
+#
+#################################################################
+
+# TODO: don't make a copy of the source tree, just set build_dir to be
+# somewhere else
 
 #################################################################
 
@@ -47,6 +46,7 @@ my $INSTALL_DIR;
 my $COMPILER;
 my $FAIL_FILE;
 my @dirs_to_delete = ();
+my $FORCE = 0;
 
 # properly parse the return value from system()
 sub runit ($) {
@@ -136,6 +136,11 @@ sub build_llvm() {
 
 ########################### main ################################
 
+if ($ARGV[0] eq "-f") {
+    shift @ARGV;
+    $FORCE = 1;
+}
+
 $COMPILER = shift @ARGV;
 $OREV = shift @ARGV;
 my $last = shift @ARGV;
@@ -181,15 +186,17 @@ if ($COMPILER eq "llvm") {
     usage();
 }
 
-open INF, "<$FAIL_FILE" or die "oops-- fail file $FAIL_FILE does not exist";
-while (my $line = <INF>) {
-    chomp $line;
-    if ($line eq $C_EXE) {
-	print "build_compiler FAILING: this version previously determined to be unbuildable\n";
-	exit (-1);
+if (!$FORCE) {
+    open INF, "<$FAIL_FILE" or die "oops-- fail file $FAIL_FILE does not exist";
+    while (my $line = <INF>) {
+	chomp $line;
+	if ($line eq $C_EXE) {
+	    print "build_compiler FAILING: this version previously determined to be unbuildable\n";
+	    exit (-1);
+	}
     }
+    close INF;
 }
-close INF;
 
 my $worked = 0;
 if (open(CMD,"| $C_EXE -O -x c - -S -o /dev/null")) {
