@@ -1,8 +1,5 @@
 #!/usr/bin/perl -w
 
-use strict;
-use Sys::CPU;
-
 #################################################################
 #
 # specification:
@@ -12,15 +9,15 @@ use Sys::CPU;
 #
 #################################################################
 
+use strict;
+use Sys::CPU;
+
+#################################################################
+
+# shouldn't be a network disk
 my $TOPDIR = $ENV{"HOME"}."/z";
 
 my $NICE = "nice -5";
-
-my $BUILD_HOME = "$TOPDIR/compiler-build";
-my $SOURCE_HOME = "$TOPDIR/compiler-source";
-my $INSTALL_HOME = "$TOPDIR/compiler-install";
-my $FAIL_FILE_LLVM = "${SOURCE_HOME}/unbuildable_llvm.txt";
-my $FAIL_FILE_GCC = "${SOURCE_HOME}/unbuildable_gcc.txt";
 
 #my $EXPENSIVE = "--enable-expensive-checks";
 my $EXPENSIVE = "";
@@ -28,16 +25,32 @@ my $EXPENSIVE = "";
 #my $LLVM_CHECKS = "$EXPENSIVE --enable-debug-runtime --disable-optimized";
 my $LLVM_CHECKS = "--enable-checking=release --enable-optimized";
 
+my $CLEANUP = 1;
+
 #################################################################
+
+my $SOURCE_HOME = "$TOPDIR/compiler-source";
+my $BUILD_HOME = "$TOPDIR/compiler-build";
+my $INSTALL_HOME = "$TOPDIR/compiler-install";
+
+die unless (-d $SOURCE_HOME);
+die unless (-d $BUILD_HOME);
+die unless (-d $INSTALL_HOME);
+
+my $FAIL_FILE_LLVM = "${SOURCE_HOME}/unbuildable_llvm.txt";
+my $FAIL_FILE_GCC = "${SOURCE_HOME}/unbuildable_gcc.txt";
 
 my $CPUS = Sys::CPU::cpu_count();
 print "looks like we have $CPUS cpus\n";
+
+my $SRC_DIR;
+my $BUILD_DIR;
+my $INSTALL_DIR;
 
 my $C_EXE;
 my $CPP_EXE;
 my $REV;
 my $OREV;
-my $INSTALL_DIR;
 my $COMPILER;
 my $FAIL_FILE;
 my @dirs_to_delete = ();
@@ -75,72 +88,50 @@ sub usage() {
 }
 
 sub build_gcc() {
-    my $GCC_DIR="$BUILD_HOME/gcc-r$REV";
-    my $GCC_INSTALL_DIR="$INSTALL_HOME/gcc-r$REV-install";
-    
-    push @dirs_to_delete, $GCC_DIR;
-    push @dirs_to_delete, $GCC_INSTALL_DIR;
+    push @dirs_to_delete, $BUILD_DIR;
+    push @dirs_to_delete, $INSTALL_DIR;
 
-    abort_if_fail ("rm -rf $GCC_DIR");
-    chdir $BUILD_HOME or die;
-    
-    abort_if_fail ("cp -r $SOURCE_HOME/gcc $GCC_DIR");
-    chdir $GCC_DIR or die;
+    chdir $SRC_DIR or die;
     abort_if_fail ("svn update -r $REV");
     
-    abort_if_fail ("mkdir build");
-    chdir "build" or die;
+    abort_if_fail ("rm -rf $BUILD_DIR");
+    mkdir $BUILD_DIR or die;
+    chdir $BUILD_DIR or die;
 
-    abort_if_fail ("../configure --with-libelf=/usr/local --enable-lto --prefix=$GCC_INSTALL_DIR  --enable-languages=c,c++ ");
+    abort_if_fail ("${SRC_DIR}/configure --with-libelf=/usr/local --enable-lto --prefix=$INSTALL_DIR  --enable-languages=c,c++ ");
     abort_if_fail ("make -j${CPUS}");
     abort_if_fail ("make install");
     
-    print "cleaning up...";
-
-    system ("$NICE rm -rf $GCC_DIR");
+    if ($CLEANUP) {
+	print "cleaning up...";
+	system ("$NICE rm -rf $BUILD_DIR");
+    }
 }
 
 sub build_llvm() {
-    my $LLVM_DIR="$BUILD_HOME/llvm-r$REV";
-    my $LLVM_INSTALL_DIR="$INSTALL_HOME/llvm-r$REV-install";
+    push @dirs_to_delete, $BUILD_DIR;
+    push @dirs_to_delete, $INSTALL_DIR;
+    
+    chdir $SRC_DIR or die;
+    abort_if_fail ("svn update -r $REV");
+    chdir "$SRC_DIR/tools/clang" or die;
+    abort_if_fail ("svn update -r $REV");
 
-    push @dirs_to_delete, $LLVM_DIR;
-    push @dirs_to_delete, $LLVM_INSTALL_DIR;
-    
-    abort_if_fail ("rm -rf $LLVM_DIR");
-    chdir $BUILD_HOME or die "couldn't chdir to $BUILD_HOME";
-    
-    abort_if_fail ("cp -r $SOURCE_HOME/llvm $LLVM_DIR");
-    chdir $LLVM_DIR or die;
-    abort_if_fail ("svn update -r $REV");
-    chdir "$LLVM_DIR/tools/clang" or die;
-    abort_if_fail ("svn update -r $REV");
-    
-    chdir $LLVM_DIR or die;
-    abort_if_fail ("./configure $LLVM_CHECKS --prefix=$LLVM_INSTALL_DIR");
+    abort_if_fail ("rm -rf $BUILD_DIR");
+    mkdir $BUILD_DIR or die;
+    chdir $BUILD_DIR or die;
+
+    abort_if_fail ("${SRC_DIR}/configure $LLVM_CHECKS --prefix=$INSTALL_DIR");
     abort_if_fail ("make -j${CPUS}");
     abort_if_fail ("make install");
     
-    print "cleaning up...";
-
-    system ("$NICE rm -rf $LLVM_DIR");
+    if ($CLEANUP) {
+	print "cleaning up...";
+	system ("$NICE rm -rf $BUILD_DIR");
+    }
 }
 
-########################### main ################################
-
-if ($ARGV[0] eq "-f") {
-    shift @ARGV;
-    $FORCE = 1;
-}
-
-$COMPILER = shift @ARGV;
-$OREV = shift @ARGV;
-my $last = shift @ARGV;
-usage() unless (defined($COMPILER) && defined($OREV) && !defined($last));
-
-usage() unless ($OREV =~ /^\d+$/) || ($OREV eq "LATEST");
-
-if ($OREV eq "LATEST") {
+sub find_rev() {
     my $r;
     chdir $SOURCE_HOME or die;
     runit ("rm -rf trunk");
@@ -162,15 +153,39 @@ if ($OREV eq "LATEST") {
     $REV = $r;
     runit ("rm -rf $TRUNKDIR");
     print "latest rev of $COMPILER id $REV\n";
+}
+
+########################### main ################################
+
+if ($ARGV[0] eq "-f") {
+    shift @ARGV;
+    $FORCE = 1;
+}
+
+$COMPILER = shift @ARGV;
+$OREV = shift @ARGV;
+my $last = shift @ARGV;
+usage() unless (defined($COMPILER) && defined($OREV) && !defined($last));
+
+usage() unless ($OREV =~ /^\d+$/) || ($OREV eq "LATEST");
+
+if ($OREV eq "LATEST") {
+    find_rev();
 } else {
     $REV = $OREV;
 }
 
 if ($COMPILER eq "llvm") {
+    $SRC_DIR = "$SOURCE_HOME/llvm";
+    $BUILD_DIR="$BUILD_HOME/llvm-r$REV";
+    $INSTALL_DIR="$INSTALL_HOME/llvm-r$REV-install";
     $FAIL_FILE = $FAIL_FILE_LLVM;
     $C_EXE = "clang";
     $CPP_EXE = "clang++";
 } elsif ($COMPILER eq "gcc") {
+    $SRC_DIR = "$SOURCE_HOME/gcc";
+    $BUILD_DIR = "$BUILD_HOME/gcc-r$REV";
+    $INSTALL_DIR = "$INSTALL_HOME/gcc-r$REV-install";
     $FAIL_FILE = $FAIL_FILE_GCC;
     $C_EXE = "gcc";
     $CPP_EXE = "g++";
@@ -191,7 +206,7 @@ if (!$FORCE) {
 }
 
 my $worked = 0;
-if (open(CMD,"| $C_EXE -O -x c - -S -o /dev/null")) {
+if (open(CMD,"| ${INSTALL_DIR}/bin/${C_EXE} -O -x c - -S -o /dev/null")) {
     print CMD<<"END";
 \#include <stdio.h>
 int main (void)
