@@ -73,7 +73,7 @@ sub abort_if_fail ($) {
     if ($res != 0) {
 	print "build $COMPILER FAILING and recording this version as unbuildable\n";
 	open OUTF, ">>$FAIL_FILE" or die "cannot open fail file $FAIL_FILE for appending";
-	print OUTF "${C_EXE}\n";
+	print OUTF "${REV}\n";
 	close OUTF;
 	# NOTE-- this leaves trash sitting around
 	#foreach my $d (@dirs_to_delete) {
@@ -197,7 +197,7 @@ if (!$FORCE) {
     open INF, "<$FAIL_FILE" or die "oops-- fail file $FAIL_FILE does not exist";
     while (my $line = <INF>) {
 	chomp $line;
-	if ($line eq $C_EXE) {
+	if ($line eq $REV) {
 	    print "build_compiler FAILING: this version previously determined to be unbuildable\n";
 	    exit (-1);
 	}
@@ -236,6 +236,7 @@ if ($COMPILER eq "llvm") {
 }
 
 print "build $COMPILER SUCCESS -- compiled and installed $C_EXE and $CPP_EXE\n";
+
 exit 0;
 
 #################################################################
