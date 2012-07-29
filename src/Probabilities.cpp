@@ -885,8 +885,8 @@ Probabilities::setup_group_probabilities(bool is_equal, const vector<string> &el
 	bool valid_max_value = false;
 	for (size_t i = 1; i < elems.size(); i++) {
 		int val = parse_single_elem(is_equal, elem, elems[i]);
-		valid_max_value = true;
 		if (is_equal) {
+			valid_max_value = true;
 			assert(val == 0 || val == 1);
 			if (val == 1)
 				all_zero = false;
