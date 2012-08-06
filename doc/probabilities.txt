@@ -63,6 +63,8 @@ Note that it's a good idea to set statement_return_prob to a
 will hang forever because it couldn't generate a return-statement for a
 function such as "int foo(void) ...". 
 
+One more thing is that for group probabilities, one probability value must be 100.
+
  - The idea is that often we have code like unsigned i = rnd_upto(5),
    where i gets its value from the range of [0, 4] with equal change.
 
