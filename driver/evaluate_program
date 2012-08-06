@@ -59,13 +59,18 @@ my @clang = ("clang",
 	     "clang",
 	     \@gcc_opts3);
 
+my @gcc410 = ("gcc410",
+	     "/home/regehr/z/compilers/gcc-410/bin/gcc-410",
+	     \@gcc_opts3);
+
 my @gcccurrent = ("gcc",
 		  "current-gcc",
 		  \@gcc_opts3);
 
 my @compilers_to_test = (
-    \@clang,
-    \@gcccurrent,
+    #\@clang,
+    #\@gcccurrent,
+    \@gcc410,
     );
 
 ####################################################################
