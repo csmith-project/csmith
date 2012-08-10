@@ -10,7 +10,8 @@ use LockFile::Simple;
 
 # properly propagate run_program failures upwards
 
-# distinguish between programs that compile and those that run inside the timeout
+# distinguish between programs that compile and those that run inside
+# the timeout
 
 ####################################################################
 
@@ -32,7 +33,8 @@ my $VERSION_SEARCH = 0;
 ####################################################################
 
 my $CSMITH_HOME=$ENV{"CSMITH_HOME"};
-die "oops: CSMITH_HOME environment variable needs to be set" unless defined($CSMITH_HOME);
+die "oops: CSMITH_HOME environment variable needs to be set" 
+    unless defined($CSMITH_HOME);
 
 my $LOCKFN = "/var/tmp/version_search_lockfile";
 
