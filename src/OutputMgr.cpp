@@ -372,6 +372,9 @@ OutputMgr::OutputHeader(int argc, char *argv[], unsigned long seed)
 
 	ExtensionMgr::OutputHeader(out);
 
+	if (CGOptions::enable_vol_tests()) {
+		out << "#include <stdio.h>\n";
+	}
 	out << runtime_include << endl;
 
  	if (!CGOptions::compute_hash()) {
