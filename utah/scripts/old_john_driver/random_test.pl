@@ -106,7 +106,7 @@ if ($use_pintool) {
         $pin_cmd = "$PIN_HOME/ia32/bin/pinbin -t $PIN_HOME/source/tools/ManualExamples/obj-ia32/pinatrace.so -vol_input $PINTOOL_VOL_ADDR $PIN_MODE --";
     }
     elsif ($platform eq "x86_64") {
-        $pin_cmd = "$PIN_HOME/pin -injection child -t $PIN_HOME/source/tools/ManualExamples/obj-intel64/pinatrace.so -vol_input $PINTOOL_VOL_ADDR $PIN_MODE --";
+        $pin_cmd = "$PIN_HOME/pin.sh -injection child -t $PIN_HOME/source/tools/ManualExamples/obj-intel64/pinatrace.so -vol_input $PINTOOL_VOL_ADDR $PIN_MODE --";
     }
     else {
         die "Invalid platform[$platform] for pintool!";
