@@ -1176,10 +1176,14 @@ Variable::is_seen_name(vector<std::string> &seen_names, const std::string &name)
 bool 
 Variable::is_valid_volatile(void) const
 {
-	if (!is_union_field())
-		assert(init);
+	if (is_inside_union_field()) {
+		const Variable *uv = get_container_union();
+		assert(uv && "NULL union var!");
+		return uv->is_valid_volatile();
+	}	
 
-	if (!is_const() || (init && init->not_equals(0)) || (type->eType != ePointer))
+	assert(init && "NULL init expression!");
+	if (!is_const() || init->not_equals(0) || (type->eType != ePointer))
 		return true;
 
 	return false;
