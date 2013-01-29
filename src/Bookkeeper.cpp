@@ -329,6 +329,12 @@ Bookkeeper::record_address_taken(const Variable *var)
 	assert(var->type);
 	const Type *type = var->type;
 
+	// explicitly removing const-ness is a little bit ugly,
+	// but changing record_address_taken interface involves
+	// a lot of code change...
+	Variable *addrTakenVar = const_cast<Variable*>(var);
+        addrTakenVar->isAddrTaken =  true;
+
 	Bookkeeper::address_taken_cnt++;
 	if (type->has_bitfields())
 		Bookkeeper::vars_with_bitfields_address_taken_cnt++;
