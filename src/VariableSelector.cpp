@@ -1489,6 +1489,21 @@ VariableSelector::doFinalization(void)
 	GlobalNonvolatilesList.clear();
 }
 
+void
+VariableSelector::GenerateAccessOnceVariables()
+{
+	vector<Variable *>::iterator i;
+
+	for (i = AllVars.begin(); i != AllVars.end(); ++i) {
+		Variable *var = (*i);
+		if (var->isAddrTaken)
+			continue;
+		if (rnd_flipcoin(AccessOnceVariableProb)){
+			var->isAccessOnce = true;
+		}
+	}
+}
+
 // --------------------------------------------------------------
 void
 OutputGlobalVariables(std::ostream &out)

@@ -653,6 +653,9 @@ GenerateFunctions(void)
 	}
 	FactPointTo::aggregate_all_pointto_sets();
 
+	if (CGOptions::access_once()) {
+		VariableSelector::GenerateAccessOnceVariables();
+	}
 	ExtensionMgr::GenerateValues();
 }
 
