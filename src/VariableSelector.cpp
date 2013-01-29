@@ -1510,14 +1510,22 @@ OutputGlobalVariables(std::ostream &out)
 {
 	output_comment_line(out, "--- GLOBAL VARIABLES ---");
 	vector<Variable *>& vars = *(VariableSelector::GetGlobalVariables());
+	bool access_once = CGOptions::access_once();
+
+	CGOptions::access_once(false);
 	OutputVariableList(vars, out);
+	CGOptions::access_once(access_once);
 }
 
 void
 OutputGlobalVariablesDecls(std::ostream &out, std::string prefix)
 {
 	output_comment_line(out, "--- GLOBAL VARIABLES ---");
+
+	bool access_once = CGOptions::access_once();
+	CGOptions::access_once(false);
 	OutputVariableDeclList(*VariableSelector::GetGlobalVariables(), out, prefix);
+	CGOptions::access_once(access_once);
 }
 
 void

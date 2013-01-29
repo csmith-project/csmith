@@ -806,7 +806,7 @@ Variable::Output(std::ostream &out) const
 		type->Output(out);
 		out << ")";
 	} 
-	else if (isAccessOnce) {
+	else if (CGOptions::access_once() && isAccessOnce) {
 		assert(CGOptions::access_once() && "access_once is disabled!");
 		assert(!isAddrTaken && "var cannot be address-taken!");
 		out << "ACCESS_ONCE(" << get_actual_name() << ")";
