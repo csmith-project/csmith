@@ -150,9 +150,10 @@ public:
 	const bool isStatic;
 	const bool isRegister; 
 	const bool isBitfield_; // expanded from a full-bitfield struct var
+	bool isAddrTaken;
 	const Variable* field_var_of; //expanded from a struct/union
 	const bool isArray;
-    const CVQualifiers qfer;
+	const CVQualifiers qfer;
 	static std::vector<const Variable*> ctrl_vars;
 
 	static const char sink_var_name[];
