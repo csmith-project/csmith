@@ -866,6 +866,7 @@ main(int argc, char **argv)
 
 		if (strcmp (argv[i], "--enable-access-once") == 0) {
 			CGOptions::access_once(true);
+			continue;
 		}
 
 		if (strcmp (argv[i], "--consts") == 0) {
