@@ -105,11 +105,11 @@ StatementAssign::make_random(CGContext &cg_context, const Type* type, const CVQu
 {
 	// decide assignment operator
 	eAssignOps op = AssignOpsProbability(type);
-	bool stand_alone_assign = false;
+	// bool stand_alone_assign = false;
 
 	// decide type
 	if (type == NULL) {
-		stand_alone_assign = true;
+		// stand_alone_assign = true;
 		type = Type::SelectLType(!cg_context.get_effect_context().is_side_effect_free(), op);
 	}
 	assert(!type->is_const_struct_union());
