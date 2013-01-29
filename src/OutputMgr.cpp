@@ -64,6 +64,12 @@ static const char volatile_include[] = "\
 #include \"volatile_runtime.h\"\n\
 ";
 
+static const char access_once_macro[] = "\
+#ifndef ACCESS_ONCE\n\
+#define ACCESS_ONCE(v) (*(volatile typeof(v) *)&(v))\n\
+#endif\n\
+";
+
 using namespace std;
 
 vector<string> OutputMgr::monitored_funcs_;
@@ -398,6 +404,10 @@ OutputMgr::OutputHeader(int argc, char *argv[], unsigned long seed)
 	// out << platform_include << endl;
 	if (CGOptions::wrap_volatiles()) {
 		out << volatile_include << endl;
+	}
+
+	if (CGOptions::access_once()) {
+		out << access_once_macro << endl;
 	}
 
 	if (CGOptions::step_hash_by_stmt()) {
