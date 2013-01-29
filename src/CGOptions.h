@@ -283,6 +283,9 @@ public:
 	static std::string vol_addr_file(void);
 	static std::string vol_addr_file(std::string p);
 
+	static bool access_once(bool p);
+	static bool access_once(void);
+
 	static bool consts(void);
 	static bool consts(bool p);
 
@@ -483,6 +486,7 @@ private:
 	static bool	enable_vol_tests_;
 	static std::string	vol_addr_file_;
 	static std::string	vol_tests_mach_;
+	static bool	access_once_;
 	static bool	consts_;
 	static bool dangling_global_ptrs_;
 	static bool divs_;
