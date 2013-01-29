@@ -151,6 +151,7 @@ public:
 	const bool isRegister; 
 	const bool isBitfield_; // expanded from a full-bitfield struct var
 	bool isAddrTaken;
+	bool isAccessOnce;
 	const Variable* field_var_of; //expanded from a struct/union
 	const bool isArray;
 	const CVQualifiers qfer;

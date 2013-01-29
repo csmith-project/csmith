@@ -412,7 +412,8 @@ Variable::Variable(const std::string &name, const Type *type,
 	: name(name), type(type),
 	  init(0),
 	  isAuto(isAuto), isStatic(isStatic), isRegister(isRegister),
-	  isBitfield_(isBitfield), field_var_of(isFieldVarOf), isArray(false),
+	  isBitfield_(isBitfield), isAddrTaken(false), isAccessOnce(false), 
+	  field_var_of(isFieldVarOf), isArray(false),
 	  qfer(isConsts, isVolatiles)
 {
 	// nothing else to do
@@ -424,7 +425,9 @@ Variable::Variable(const std::string &name, const Type *type,
 Variable::Variable(const std::string &name, const Type *type, const Expression* init, const CVQualifiers* qfer)
 	: name(name), type(type),
 	  init(init),
-	  isAuto(false), isStatic(false), isRegister(false), isBitfield_(false), field_var_of(0), isArray(false),
+	  isAuto(false), isStatic(false), isRegister(false), isBitfield_(false), 
+	  isAddrTaken(false), isAccessOnce(false),
+	  field_var_of(0), isArray(false),
 	  qfer(*qfer)
 {
 	// nothing else to do
@@ -434,6 +437,7 @@ Variable::Variable(const std::string &name, const Type *type, const Expression* 
 	: name(name), type(type),
 	  init(init),
 	  isAuto(false), isStatic(false), isRegister(false), isBitfield_(false),
+	  isAddrTaken(false), isAccessOnce(false),
 	  field_var_of(isFieldVarOf),
 	  isArray(isArray),
 	  qfer(*qfer)
@@ -801,7 +805,13 @@ Variable::Output(std::ostream &out) const
 		out << "VOL_RVAL(" << get_actual_name() << ", ";
 		type->Output(out);
 		out << ")";
-	} else {
+	} 
+	else if (isAccessOnce) {
+		assert(CGOptions::access_once() && "access_once is disabled!");
+		assert(!isAddrTaken && "var cannot be address-taken!");
+		out << "ACCESS_ONCE(" << get_actual_name() << ")";
+	}
+	else {
 		out << get_actual_name();
 	}
 }
