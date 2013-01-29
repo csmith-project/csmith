@@ -470,6 +470,9 @@ Probabilities::set_single_name_maps()
 	// for creating new array var 
 	set_single_name("new_array_var_prob", pNewArrayVariableProb);
 
+	// for wrapping all accesses to a var by ACCESS_ONCE macro
+	set_single_name("access_once_var_prob", pAccessOnceVariableProb);
+
         //////////////////////////////////////////////////////////////////
 	// group for statement
 	set_single_name("statement_prob", pStatementProb);
@@ -571,6 +574,8 @@ Probabilities::initialize_single_probs()
 		m[pPointerAsLTypeProb] = 0;
 		m[pSelectDerefPointerProb] = 0;
 	}
+
+	m[pAccessOnceVariableProb] = 20;
 
 	std::map<ProbName, int>::iterator i;
 	for (i = m.begin(); i != m.end(); ++i) {

@@ -61,6 +61,7 @@ enum ProbName {
 	pStructAsLTypeProb,
 	pUnionAsLTypeProb,
 	pNewArrayVariableProb,
+	pAccessOnceVariableProb,
 
 	// group for statement
 	pStatementProb,
@@ -198,6 +199,9 @@ enum ProbName {
 
 #define NewArrayVariableProb \
 	Probabilities::get_prob(pNewArrayVariableProb)
+
+#define AccessOnceVariableProb \
+	Probabilities::get_prob(pAccessOnceVariableProb)
 
 //////////////////////////////////////////////////
 #define BINARY_OPS_PROB_FILTER \
