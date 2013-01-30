@@ -1146,6 +1146,12 @@ Variable::output_volatile_fprintf(ostream &out, int indent, const string &name,
 {
 	std::string sz_symbol;
 	std::string mach = CGOptions::vol_tests_mach();
+	std::string pointer_str;
+
+	if (is_pointer())
+		pointer_str = "pointer";
+	else
+		pointer_str = "non-pointer";
 
 	if (!mach.compare("x86")) {
 		sz_symbol = "d";
@@ -1157,7 +1163,7 @@ Variable::output_volatile_fprintf(ostream &out, int indent, const string &name,
 		assert("invalid mach!" && 0);
 	}
 
-	std::string str = "fprintf(" + fp_string + ", \"" + name + "; %p; %" + sz_symbol + "\\n\", ";
+	std::string str = "fprintf(" + fp_string + ", \"" + name + "; %p; %" + sz_symbol + "; " + pointer_str + "\\n\", ";
 	str += name;
 	str += ", ";
 
