@@ -851,6 +851,12 @@ VariableSelector::make_init_value(Effect::Access access, const CGContext &cg_con
 		}
 		Bookkeeper::record_address_taken(var);
 	}
+	else {
+        	int deref_level = var->type->get_indirect_level() - t->get_indirect_level();
+        	if (deref_level < 0)
+                	Bookkeeper::record_address_taken(var);
+	}
+
 	assert(var);
 	return new ExpressionVariable(*var, t);
 }
