@@ -130,8 +130,8 @@ Effect::read_var(const Variable *v)
 	if (!is_read(v)) {
 		read_vars.push_back(v);
 	}
-	pure &= (v->is_const() && !v->is_volatile());
-	side_effect_free &= !v->is_volatile();
+	pure &= (v->is_const() && !v->is_volatile() && !v->is_access_once());
+	side_effect_free &= (!v->is_volatile() && !v->is_access_once());
 }
 
 /*
@@ -146,7 +146,7 @@ Effect::write_var(const Variable *v)
 	// pure = pure;
 	// TODO: not quite correct below ---
 	// --- but I think we want "side_effect_free" to mean "volatile_free".
-	side_effect_free &= !v->is_volatile();
+	side_effect_free &= (!v->is_volatile() && !v->is_access_once());
 	// side_effect_free = false;
 }
 

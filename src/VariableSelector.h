@@ -92,7 +92,6 @@ public:
 	~VariableSelector(void);  
 	///////////////////////////////////////////////////////////////////////  
 
-	static void GenerateAccessOnceVariables();
 	static void GenerateParameterVariable(Function &curFunc);
 	static Variable* GenerateParameterVariable(const Type *type, const CVQualifiers *qfer);
 	static std::vector<Variable *>* GetGlobalVariables(void) {return &GlobalList;}

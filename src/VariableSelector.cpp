@@ -534,6 +534,9 @@ VariableSelector::GenerateNewGlobal(Effect::Access access, const CGContext &cg_c
 	cg_context.get_current_func()->new_globals.push_back(var);
 
 	if (!var_qfer.is_volatile()) {
+		if (CGOptions::access_once() && rnd_flipcoin(AccessOnceVariableProb)) {
+			var->isAccessOnce = true;
+		}
 		GlobalNonvolatilesList.push_back(var);
 	}
 	var_created = true;
@@ -1493,21 +1496,6 @@ VariableSelector::doFinalization(void)
 	AllVars.clear();
 	GlobalList.clear();
 	GlobalNonvolatilesList.clear();
-}
-
-void
-VariableSelector::GenerateAccessOnceVariables()
-{
-	vector<Variable *>::iterator i;
-
-	for (i = AllVars.begin(); i != AllVars.end(); ++i) {
-		Variable *var = (*i);
-		if (var->isAddrTaken)
-			continue;
-		if (rnd_flipcoin(AccessOnceVariableProb)){
-			var->isAccessOnce = true;
-		}
-	}
 }
 
 // --------------------------------------------------------------
