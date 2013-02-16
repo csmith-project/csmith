@@ -261,6 +261,7 @@ static void print_advanced_help()
 	cout << "  --enable-volatile-tests=[x86|x86_64] : generate code to cooperate with the Pin tool to enable volatile tests." << endl << endl;
 	cout << "  --vol-addr-file=[file]: specify the file to dump volatile addresses (default vol_addr.txt)." << endl << endl;
 	cout << "  --enable-access-once: enable testing access once macro." << endl << endl;
+	cout << "  --strict-volatile-rule: make sure only one volatile access between any pair of sequence points. " << endl << endl;
 
 	// other options
 	cout << "  --math-notmp: make csmith generate code for safe_math_macros_notmp." << endl << endl;
@@ -866,6 +867,11 @@ main(int argc, char **argv)
 
 		if (strcmp (argv[i], "--enable-access-once") == 0) {
 			CGOptions::access_once(true);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--strict-volatile-rule") == 0) {
+			CGOptions::strict_volatile_rule(true);
 			continue;
 		}
 

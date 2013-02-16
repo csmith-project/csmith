@@ -105,10 +105,25 @@ StatementArrayOp::make_random_array_init(CGContext &cg_context)
 	size_t i;
 	cg_context.get_effect_stm().clear(); 
 	FactMgr* fm = get_fact_mgr(&cg_context);
+	int vol_count = 0;
+	if (av->is_volatile())
+		vol_count++;
+
 	for (i=0; i<av->get_dimension(); i++) {
 		inits.push_back(0);
 		incrs.push_back(1); 
-		Variable *cv = VariableSelector::SelectLoopCtrlVar(cg_context, invalid_vars); 
+		Variable *cv = NULL;
+		do {
+			cv = VariableSelector::SelectLoopCtrlVar(cg_context, invalid_vars); 
+			if (cv->is_volatile())
+				vol_count++;
+			if (CGOptions::strict_volatile_rule() && (vol_count > 1) && cv->is_volatile()) {
+				continue;
+			}
+			else {
+				break;	
+			}
+		} while (true);
 		invalid_vars.push_back(cv);
 		cvs.push_back(cv);
 		assert(cg_context.read_indices(cv, fm->global_facts));

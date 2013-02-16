@@ -31,6 +31,7 @@
 
 #include "Effect.h"
 #include "Variable.h"
+#include "ExpressionVariable.h"
 #include "Block.h"
 #include "Type.h"
 #include "util.h"
@@ -132,6 +133,24 @@ Effect::read_var(const Variable *v)
 	}
 	pure &= (v->is_const() && !v->is_volatile() && !v->is_access_once());
 	side_effect_free &= (!v->is_volatile() && !v->is_access_once());
+}
+
+void
+Effect::read_deref_volatile(const ExpressionVariable *ev)
+{
+	if (!CGOptions::strict_volatile_rule())
+		return;
+	int indirect = ev->get_indirect_level();
+	if (indirect <= 0)
+		return;
+
+	const Variable *v = ev->get_var();
+	while (indirect > 0) {
+		if (v->is_volatile_after_deref(indirect)) {
+			side_effect_free = false;	
+		}
+		indirect--;
+	}
 }
 
 /*

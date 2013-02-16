@@ -1332,19 +1332,24 @@ VariableSelector::select_array(const CGContext &cg_context)
 	vector<ArrayVariable*> array_vars;
 	size_t i, len;
 	for (i=0; i<vars.size(); i++) {
-		if (vars[i]->isArray) {
-			ArrayVariable* av = dynamic_cast<ArrayVariable*>(vars[i]);
-			assert(av);
-			if (av->collective == 0) {
-				if (!cg_context.get_effect_context().is_read_partially(av) && 
-					!cg_context.get_effect_context().is_written_partially(av) &&
-					(cg_context.get_effect_context().is_side_effect_free() || !av->is_volatile()) &&
-					!av->is_const() &&
-					!cg_context.is_nonwritable(av) &&
-					!av->type->is_const_struct_union()) {
-					array_vars.push_back(av);
-				}
-			}
+		if (!vars[i]->isArray)
+			continue;
+
+		ArrayVariable* av = dynamic_cast<ArrayVariable*>(vars[i]);
+		assert(av);
+		if (av->collective != 0)
+			continue;
+
+		if (!cg_context.get_effect_context().is_read_partially(av) && 
+			!cg_context.get_effect_context().is_written_partially(av) &&
+			(cg_context.get_effect_context().is_side_effect_free() || !av->is_volatile()) &&
+			!av->is_const() &&
+			!cg_context.is_nonwritable(av) &&
+			!av->type->is_const_struct_union()) {
+			
+			if (CGOptions::strict_volatile_rule() && av->is_volatile())
+				continue;
+			array_vars.push_back(av);
 		}
 	}
 	len = array_vars.size();

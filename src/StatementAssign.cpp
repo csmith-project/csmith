@@ -130,6 +130,30 @@ StatementAssign::make_random(CGContext &cg_context, const Type* type, const CVQu
 		// if we are creating standalone statements like x++, any qualifers fit
 		if (qf == NULL) qfer.wildcard = true;
 	}
+	else if (CGOptions::strict_volatile_rule()) {
+		if (type->is_volatile_struct_union())
+			return NULL;
+
+		e = Expression::make_random(rhs_cg_context, type, qf);
+		ERROR_GUARD_AND_DEL1(NULL, e);
+		if (!qf) {
+			qfer = e->get_qualifiers();
+			// lhs should not has "const" qualifier
+			qfer.accept_stricter = true;
+		}
+
+		// for compound assignment, generate LHS in the effect context of RHS
+		if (op != eSimpleAssign) {
+			running_eff_context.add_effect(rhs_accum);
+			// for now, just use non-volatile as LHS for compound assignments
+			qfer.set_volatile(false);
+		}
+		running_eff_context.add_effect(rhs_accum);
+		// if the rhs is volatile, almost came from dereferencing a pointer,
+		// then make sure lhs is not a vol
+		if (qfer.get_volatiles().size() && qfer.is_volatile())
+			qfer.set_volatile(false);
+	}
 	else {
 		e = Expression::make_random(rhs_cg_context, type, qf);
 		ERROR_GUARD_AND_DEL1(NULL, e);

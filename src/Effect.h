@@ -37,6 +37,7 @@
 
 class Variable;
 class Block;
+class ExpressionVariable;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -50,6 +51,7 @@ public:
 	Effect &operator=(const Effect &e);
 	
 	void read_var(const Variable *v);
+	void read_deref_volatile(const ExpressionVariable *ev);
 	void write_var(const Variable *v);
 	void write_var_set(const std::vector<const Variable *>& vars);
 	void add_effect(const Effect &e, bool include_lhs_effects = false);

@@ -44,6 +44,7 @@
 #include "CGContext.h"
 #include "Effect.h"
 #include "Expression.h"
+#include "ExpressionVariable.h"
 #include "ExpressionFuncall.h"
 #include "Function.h"
 #include "FunctionInvocationBinary.h"
@@ -192,6 +193,12 @@ FunctionInvocation::make_random_binary(CGContext &cg_context, const Type* type)
 	cg_context.merge_param_context(lhs_cg_context, true);
 	FactMgr* fm = get_fact_mgr(&cg_context);
 	vector<const Fact*> facts_copy = fm->global_facts;
+
+#if 0
+	if (lhs->term_type == eVariable) {
+		lhs_eff_accum.read_deref_volatile((ExpressionVariable*)lhs);
+	}
+#endif
 
 	// If we are guaranteed that the LHS will be evaluated before the RHS,
 	// or if the LHS is pure (not merely side-effect-free),

@@ -286,6 +286,9 @@ public:
 	static bool access_once(bool p);
 	static bool access_once(void);
 
+	static bool strict_volatile_rule(bool p);
+	static bool strict_volatile_rule(void);
+
 	static bool consts(void);
 	static bool consts(bool p);
 
@@ -487,6 +490,7 @@ private:
 	static std::string	vol_addr_file_;
 	static std::string	vol_tests_mach_;
 	static bool	access_once_;
+	static bool	strict_volatile_rule_;
 	static bool	consts_;
 	static bool dangling_global_ptrs_;
 	static bool divs_;

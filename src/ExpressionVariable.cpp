@@ -90,6 +90,8 @@ ExpressionVariable::make_random(CGContext &cg_context, const Type* type, const C
 			if (tmp.visit_facts(fm->global_facts, cg_context)) { 
 				ev = tmp.get_indirect_level() == 0 ? new ExpressionVariable(*var) : new ExpressionVariable(*var, type); 
 				cg_context.curr_blk = cg_context.get_current_block();
+				Effect *tmp_eff = cg_context.get_effect_accum();
+				tmp_eff->read_deref_volatile(ev);
 				break;
 			}  
 			else {
