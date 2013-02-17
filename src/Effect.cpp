@@ -136,6 +136,20 @@ Effect::read_var(const Variable *v)
 }
 
 void
+Effect::read_deref_volatile(const Variable *v, int deref_level)
+{
+	assert(v && "NULL Variable!");
+	if (!CGOptions::strict_volatile_rule())
+		return;
+	while (deref_level > 0) {
+		if (v->is_volatile_after_deref(deref_level)) {
+			side_effect_free = false;	
+		}
+		deref_level--;
+	}
+}
+
+void
 Effect::read_deref_volatile(const ExpressionVariable *ev)
 {
 	if (!CGOptions::strict_volatile_rule())

@@ -111,6 +111,8 @@ Lhs::make_random(CGContext &cg_context, const Type* t, const CVQualifiers* qfer,
 					incr_counter(Bookkeeper::write_dereference_cnts, deref_level); 
 				}
 				Bookkeeper::record_volatile_access(var, deref_level, true);
+				Effect *tmp_eff = cg_context.get_effect_accum();
+				tmp_eff->read_deref_volatile(var, deref_level);
 				return new Lhs(*var, t, compound_assign);
 			}
 			// restore the effects
