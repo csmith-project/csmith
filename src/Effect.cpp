@@ -136,7 +136,7 @@ Effect::read_var(const Variable *v)
 }
 
 void
-Effect::read_deref_volatile(const Variable *v, int deref_level)
+Effect::access_deref_volatile(const Variable *v, int deref_level)
 {
 	assert(v && "NULL Variable!");
 	if (!CGOptions::strict_volatile_rule())
@@ -144,32 +144,12 @@ Effect::read_deref_volatile(const Variable *v, int deref_level)
 	while (deref_level > 0) {
 		if (v->is_volatile_after_deref(deref_level)) {
 			side_effect_free = false;	
+			return;
 		}
 		deref_level--;
 	}
 }
 
-void
-Effect::read_deref_volatile(const ExpressionVariable *ev)
-{
-	if (!CGOptions::strict_volatile_rule())
-		return;
-	int indirect = ev->get_indirect_level();
-	if (indirect <= 0)
-		return;
-
-	const Variable *v = ev->get_var();
-	while (indirect > 0) {
-		if (v->is_volatile_after_deref(indirect)) {
-			side_effect_free = false;	
-		}
-		indirect--;
-	}
-}
-
-/*
- *
- */
 void
 Effect::write_var(const Variable *v)
 {

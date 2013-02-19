@@ -128,6 +128,7 @@ public:
 	bool is_nonreadable(const Variable *v) const;
 	bool is_nonwritable(const Variable *v) const;
 
+	bool check_deref_volatile(const Variable *v, int deref_level);
 	void read_var(const Variable *v);
 	void write_var(const Variable *v);
 	bool check_read_var(const Variable *v, const std::vector<const Fact*>& facts);

@@ -831,6 +831,8 @@ VariableSelector::make_init_value(Effect::Access access, const CGContext &cg_con
 		DEPTH_GUARD_BY_TYPE_RETURN(dtInitPointerValue, NULL);
 		// current context has no impact on variable initialization, which happens at declare time?
 		bool no_volatile = false; //!cg_context.get_effect_context().is_side_effect_free();
+		if (CGOptions::strict_volatile_rule())
+			no_volatile = !cg_context.get_effect_context().is_side_effect_free();
 		CVQualifiers qfer_deref = qfer.random_loose_qualifiers(no_volatile, access, cg_context);
 		qfer_deref.remove_qualifiers(1);
 		qfer_deref.accept_stricter = false; 

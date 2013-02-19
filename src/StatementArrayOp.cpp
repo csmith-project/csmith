@@ -118,6 +118,7 @@ StatementArrayOp::make_random_array_init(CGContext &cg_context)
 			if (cv->is_volatile())
 				vol_count++;
 			if (CGOptions::strict_volatile_rule() && (vol_count > 1) && cv->is_volatile()) {
+				invalid_vars.push_back(cv);
 				continue;
 			}
 			else {

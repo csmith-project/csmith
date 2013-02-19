@@ -90,8 +90,6 @@ ExpressionVariable::make_random(CGContext &cg_context, const Type* type, const C
 			if (tmp.visit_facts(fm->global_facts, cg_context)) { 
 				ev = tmp.get_indirect_level() == 0 ? new ExpressionVariable(*var) : new ExpressionVariable(*var, type); 
 				cg_context.curr_blk = cg_context.get_current_block();
-				Effect *tmp_eff = cg_context.get_effect_accum();
-				tmp_eff->read_deref_volatile(ev);
 				break;
 			}  
 			else {
@@ -246,7 +244,9 @@ ExpressionVariable::visit_facts(vector<const Fact*>& inputs, CGContext& cg_conte
 			return false;
 		}
 		// Yang: do we need to consider the deref_level?
-		return cg_context.check_read_var(v, inputs) && cg_context.read_pointed(this, inputs);
+		bool valid = cg_context.check_read_var(v, inputs) && cg_context.read_pointed(this, inputs) && 
+			cg_context.check_deref_volatile(v, deref_level);
+		return valid;
 	}
 	// we filter out bitfield
 	if (deref_level < 0) {

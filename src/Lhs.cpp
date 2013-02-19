@@ -111,8 +111,6 @@ Lhs::make_random(CGContext &cg_context, const Type* t, const CVQualifiers* qfer,
 					incr_counter(Bookkeeper::write_dereference_cnts, deref_level); 
 				}
 				Bookkeeper::record_volatile_access(var, deref_level, true);
-				Effect *tmp_eff = cg_context.get_effect_accum();
-				tmp_eff->read_deref_volatile(var, deref_level);
 				return new Lhs(*var, t, compound_assign);
 			}
 			// restore the effects
@@ -344,14 +342,16 @@ Lhs::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const
 		}
 	}
 
-	if (get_indirect_level() > 0) {
+	int deref_level = get_indirect_level();
+	if (deref_level > 0) {
 		if (!FactPointTo::is_valid_ptr(v, inputs)) {
 			return false;
 		}
 		if (ptr_modified_in_rhs(inputs, cg_context)) {
 			return false;
 		}
-		valid = cg_context.check_read_var(v, inputs) && cg_context.write_pointed(this, inputs);
+		valid = cg_context.check_read_var(v, inputs) && cg_context.write_pointed(this, inputs) && 
+			cg_context.check_deref_volatile(v, deref_level);
 	}
 	else {
 		valid = cg_context.check_write_var(v, inputs);

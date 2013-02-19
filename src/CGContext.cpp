@@ -181,6 +181,27 @@ CGContext::is_nonwritable(const Variable *v) const
 	return false;
 }
 
+bool CGContext::check_deref_volatile(const Variable *v, int deref_level)
+{
+        assert(v && "NULL Variable!");
+        if (!CGOptions::strict_volatile_rule())
+                return true;
+	int level = deref_level;
+
+	if (!effect_context.is_side_effect_free()) {
+		while (level > 0) {
+			if (v->is_volatile_after_deref(level))
+				return false;
+			level--;
+		}
+	} 
+	if (effect_accum)
+		effect_accum->access_deref_volatile(v, deref_level);
+
+	effect_stm.access_deref_volatile(v, deref_level);
+	return true;
+}
+
 /*
  *
  */
