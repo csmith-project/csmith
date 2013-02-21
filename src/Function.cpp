@@ -250,10 +250,10 @@ Function::choose_func(vector<Function *> funcs,
 	vector<Function *>::iterator i; 
 
 	for (i = funcs.begin(); i != funcs.end(); ++i) {
-        // skip any function which has incompatible return type
-        // if type = 0, we don't care
-        if (type && !type->is_convertable((*i)->return_type))
-            continue;
+		// skip any function which has incompatible return type
+		// if type = 0, we don't care
+		if (type && !type->is_convertable((*i)->return_type))
+			continue;
 		if (qfer && (*i)->rv && !qfer->match((*i)->rv->qfer))
 			continue;
 		// We cannot call a function that has an as-yet unknown effect.
@@ -262,8 +262,16 @@ Function::choose_func(vector<Function *> funcs,
 			continue;
 		}
 		// We cannot call a function with a side-effect that is in conflict with the current context 
-		if (cg_context.in_conflict((*i)->get_feffect())) {
-			continue;
+		if (CGOptions::strict_volatile_rule()) {
+			if (!((*i)->get_feffect().is_side_effect_free())
+			    && !cg_context.get_effect_context().is_side_effect_free()) {
+				continue;
+			}
+		}
+		else {
+			if (cg_context.in_conflict((*i)->get_feffect())) {
+				continue;
+			}
 		}
 		//// TODO: is this too strong for what we want?
 		//if (!((*i)->get_feffect().is_side_effect_free())
