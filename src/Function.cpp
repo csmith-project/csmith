@@ -262,14 +262,12 @@ Function::choose_func(vector<Function *> funcs,
 			continue;
 		}
 		// We cannot call a function with a side-effect that is in conflict with the current context 
+		if (cg_context.in_conflict((*i)->get_feffect())) {
+			continue;
+		}
 		if (CGOptions::strict_volatile_rule()) {
 			if (!((*i)->get_feffect().is_side_effect_free())
 			    && !cg_context.get_effect_context().is_side_effect_free()) {
-				continue;
-			}
-		}
-		else {
-			if (cg_context.in_conflict((*i)->get_feffect())) {
 				continue;
 			}
 		}

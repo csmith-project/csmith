@@ -312,6 +312,8 @@ StatementAssign::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context)
 	}
 
 	// for compound assignment, LHS needs to be evaluated in the effect context of RHS
+	// Yang: do we also need to consider strict_volatile_rule here?
+	// if ((op != eSimpleAssign) || (CGOptions::strict_volatile_rule())) {
 	if (op != eSimpleAssign) {
 		running_eff_context.add_effect(rhs_accum);
 	}
