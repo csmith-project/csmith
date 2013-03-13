@@ -214,14 +214,6 @@ DefaultOutputMgr::Output()
 		OutputMgr::OutputStepHashFuncDef(out);
 	}
 		
-	if (CGOptions::enable_vol_tests()) {
-		OutputMgr::OutputVolFiniFuncDef(out);
-		DefaultOutputMgr::outputln(out);
-		OutputMgr::OutputVolInitFuncDef(out);
-		DefaultOutputMgr::outputln(out);
-		OutputMgr::OutputVolEndFuncDef(out);
-	}
-
 	if (!CGOptions::nomain())
 		OutputMain(out);
 	OutputTail(out);

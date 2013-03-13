@@ -49,12 +49,6 @@ const char *OutputMgr::hash_func_name = "csmith_compute_hash";
 
 const char *OutputMgr::step_hash_func_name = "step_hash";
 
-static const char vol_init_function_name[] = "csmith_volatile_init";
-
-static const char vol_fini_function_name[] = "csmith_volatile_fini";
-
-static const char vol_end_function_name[] = "csmith_volatile_end";
-
 static const char runtime_include[] = "\
 #include \"csmith.h\"\n\
 ";
@@ -103,12 +97,6 @@ OutputMgr::~OutputMgr()
 }
 
 void
-OutputMgr::OutputVolInitInvocation(std::ostream &out)
-{
-	out << "    " << vol_init_function_name << "();" << endl;
-}
-
-void
 OutputMgr::OutputMain(std::ostream &out)
 {
 	CGContext cg_context(GetFirstFunction() /* BOGUS -- not in first func. */,
@@ -126,13 +114,7 @@ OutputMgr::OutputMain(std::ostream &out)
 	OutputArrayInitializers(*VariableSelector::GetGlobalVariables(), out, 1);
 
 	if (CGOptions::blind_check_global()) {
-		if (CGOptions::enable_vol_tests()) {
-			OutputVolInitInvocation(out);
-		}
 		ExtensionMgr::OutputFirstFunInvocation(out, invoke);
-		if (CGOptions::enable_vol_tests()) {
-			OutputVolEndInvocation(out);
-		}
 		std::vector<Variable *>& vars = *VariableSelector::GetGlobalVariables();
 		for (size_t i=0; i<vars.size(); i++) {
 			vars[i]->output_value_dump(out, "checksum ", 1);
@@ -145,10 +127,6 @@ OutputMgr::OutputMain(std::ostream &out)
 			out << "    if (argc == 2 && strcmp(argv[1], \"1\") == 0) print_hash_value = 1;" << endl;
 		}
 
-		if (CGOptions::enable_vol_tests()) {
-			OutputVolInitInvocation(out);
-		}
-
 		out << "    platform_main_begin();" << endl;
 		if (CGOptions::compute_hash()) {
 			out << "    crc32_gentab();" << endl;
@@ -156,9 +134,6 @@ OutputMgr::OutputMain(std::ostream &out)
 
 		ExtensionMgr::OutputFirstFunInvocation(out, invoke);
 
-		if (CGOptions::enable_vol_tests()) {
-			OutputVolEndInvocation(out);
-		}
 	#if 0
 		out << "    ";
 		invoke->Output(out);
@@ -257,72 +232,6 @@ OutputMgr::OutputHashFuncDef(std::ostream &out)
 }
 
 void
-OutputMgr::OutputVolInitFuncDecl(std::ostream &out)
-{
-	out << "__attribute__ ((noinline)) void " << vol_init_function_name << "(void);";
-	out << std::endl << std::endl;
-}
-
-void
-OutputMgr::OutputVolFiniFuncDecl(std::ostream &out)
-{
-	out << "__attribute__ ((noinline)) void " << vol_fini_function_name << "(FILE *fp);";
-	out << std::endl << std::endl;
-}
-
-void
-OutputMgr::OutputVolEndFuncDecl(std::ostream &out)
-{
-	out << "__attribute__ ((noinline)) void " << vol_end_function_name << "(void);";
-	out << std::endl << std::endl;
-}
-
-void
-OutputMgr::OutputVolFiniInvocation(std::ostream &out, std::string &fp_string)
-{
-	out << "    " << vol_fini_function_name << "(" << fp_string << ");" << endl;
-}
-
-void
-OutputMgr::OutputVolEndInvocation(std::ostream &out)
-{
-	out << "    " << vol_end_function_name << "();" << endl;
-}
-
-void
-OutputMgr::OutputVolInitFuncDef(std::ostream &out)
-{
-	string fp_string = "fp";
-	out << "__attribute__ ((noinline)) void " << vol_init_function_name << "(void)" << std::endl;
-	out << "{" << std::endl;
-	output_tab_(out, 1);
-	out << "FILE *" << fp_string << " = fopen(\"" << CGOptions::vol_addr_file() << "\", \"w\");" << std::endl;
-        OutputVolatileAddress(*VariableSelector::GetGlobalVariables(), out, 1, fp_string);
-	output_tab_(out, 1);
-	out << "fflush(" << fp_string << ");" << std::endl;
-	OutputVolFiniInvocation(out, fp_string);
-	out << "}" << std::endl;
-}
-
-void
-OutputMgr::OutputVolFiniFuncDef(std::ostream &out)
-{
-	out << "__attribute__ ((noinline)) void " << vol_fini_function_name << "(FILE *fp)" << std::endl;
-	out << "{" << std::endl;
-	output_tab_(out, 1);
-	out << "fclose(fp);" << std::endl;
-	out << "}" << std::endl;
-}
-
-void
-OutputMgr::OutputVolEndFuncDef(std::ostream &out)
-{
-	out << "__attribute__ ((noinline)) void " << vol_end_function_name << "(void)" << std::endl;
-	out << "{" << std::endl;
-	out << "}" << std::endl;
-}
-
-void
 OutputMgr::OutputTail(std::ostream &out)
 {
 	if (!CGOptions::concise()) {
@@ -378,9 +287,6 @@ OutputMgr::OutputHeader(int argc, char *argv[], unsigned long seed)
 
 	ExtensionMgr::OutputHeader(out);
 
-	if (CGOptions::enable_vol_tests()) {
-		out << "#include <stdio.h>\n";
-	}
 	out << runtime_include << endl;
 
  	if (!CGOptions::compute_hash()) {
@@ -413,10 +319,6 @@ OutputMgr::OutputHeader(int argc, char *argv[], unsigned long seed)
 	if (CGOptions::step_hash_by_stmt()) {
 		OutputMgr::OutputHashFuncDecl(out);
 		OutputMgr::OutputStepHashFuncDecl(out);
-	}
-
-	if (CGOptions::enable_vol_tests()) {
-		OutputMgr::OutputVolInitFuncDecl(out);
 	}
 }
 

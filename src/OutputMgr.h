@@ -57,24 +57,6 @@ public:
 
 	static void OutputStepHashFuncDef(std::ostream &out);
 
-	static void OutputVolInitFuncDecl(std::ostream &out);
-
-	static void OutputVolInitFuncDef(std::ostream &out);
-
-	static void OutputVolInitInvocation(std::ostream &out);
-
-	static void OutputVolFiniFuncDecl(std::ostream &out);
-
-	static void OutputVolFiniFuncDef(std::ostream &out);
-
-	static void OutputVolFiniInvocation(std::ostream &out, std::string &fp_string);
-
-	static void OutputVolEndFuncDecl(std::ostream &out);
-
-	static void OutputVolEndFuncDef(std::ostream &out);
-
-	static void OutputVolEndInvocation(std::ostream &out);
-
 	static void really_outputln(std::ostream &out);
 
 	static void set_curr_func(const std::string &fname);
