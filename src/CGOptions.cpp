@@ -140,7 +140,6 @@ DEFINE_GETTER_SETTER_BOOL(return_unions)
 DEFINE_GETTER_SETTER_BOOL(arg_unions)
 DEFINE_GETTER_SETTER_BOOL(volatiles)
 DEFINE_GETTER_SETTER_BOOL(volatile_pointers)
-DEFINE_GETTER_SETTER_BOOL(enable_vol_tests)
 DEFINE_GETTER_SETTER_BOOL(access_once)
 DEFINE_GETTER_SETTER_BOOL(strict_volatile_rule)
 DEFINE_GETTER_SETTER_BOOL(consts)
@@ -554,19 +553,6 @@ std::string
 CGOptions::vol_tests_mach(void)
 {
 	return CGOptions::vol_tests_mach_;
-}
-
-bool
-CGOptions::set_vol_tests(const string &s)
-{
-	if (!s.compare("x86") || !s.compare("x86_64")) {
-		CGOptions::enable_vol_tests(true);
-		CGOptions::vol_tests_mach_ = s;
-		return true;
-	}
-	else {
-		return false;
-	}
 }
 
 void 

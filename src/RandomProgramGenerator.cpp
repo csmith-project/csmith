@@ -258,7 +258,6 @@ static void print_advanced_help()
 	cout << "  --random-random: enable random probabilities." << endl << endl;
 
 	// volatile checking options
-	cout << "  --enable-volatile-tests=[x86|x86_64] : generate code to cooperate with the Pin tool to enable volatile tests." << endl << endl;
 	cout << "  --enable-access-once: enable testing access once macro." << endl << endl;
 	cout << "  --strict-volatile-rule: make sure only one volatile access between any pair of sequence points. " << endl << endl;
 
@@ -835,20 +834,6 @@ main(int argc, char **argv)
 
 		if (strcmp (argv[i], "--no-volatile-pointers") == 0) {
 			CGOptions::volatile_pointers(false);
-			continue;
-		}
-
-		if (strcmp (argv[i], "--enable-volatile-tests") == 0) {
-			string s;
-			i++;
-			arg_check(argc, i);
-			if (!parse_string_arg(argv[i], s)) {
-				exit(-1);
-			}
-			if (!CGOptions::set_vol_tests(s)) {
-				cout << "please specify mach[x86|x86_64]" << std::endl;
-				exit(-1);
-			}
 			continue;
 		}
 
