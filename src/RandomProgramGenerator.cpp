@@ -259,7 +259,6 @@ static void print_advanced_help()
 
 	// volatile checking options
 	cout << "  --enable-volatile-tests=[x86|x86_64] : generate code to cooperate with the Pin tool to enable volatile tests." << endl << endl;
-	cout << "  --vol-addr-file=[file]: specify the file to dump volatile addresses (default vol_addr.txt)." << endl << endl;
 	cout << "  --enable-access-once: enable testing access once macro." << endl << endl;
 	cout << "  --strict-volatile-rule: make sure only one volatile access between any pair of sequence points. " << endl << endl;
 
@@ -850,18 +849,6 @@ main(int argc, char **argv)
 				cout << "please specify mach[x86|x86_64]" << std::endl;
 				exit(-1);
 			}
-			continue;
-		}
-
-		if (strcmp (argv[i], "--vol-addr-file") == 0) {
-			string f;
-			i++;
-			arg_check(argc, i);
-			if (!parse_string_arg(argv[i], f)) {
-				cout << "please specify <dir>" << std::endl;
-				exit(-1);
-			}
-			CGOptions::vol_addr_file(f);
 			continue;
 		}
 

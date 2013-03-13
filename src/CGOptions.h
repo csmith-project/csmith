@@ -62,7 +62,6 @@ using namespace std;
 #define CGOPTIONS_DEFAULT_MAX_SPLIT_FILES	(0)
 #define CGOPTIONS_DEFAULT_SPLIT_FILES_DIR	("./output") 
 #define CGOPTIONS_DEFAULT_OUTPUT_FILE		("")
-#define CGOPTIONS_DEFAULT_VOL_ADDR_FILE		("vol_addr.txt")
 #define PLATFORM_CONFIG_FILE                ("platform.info")
 
 /*
@@ -280,9 +279,6 @@ public:
 	static std::string vol_tests_mach(void);
 	static bool set_vol_tests(const std::string &s);
 
-	static std::string vol_addr_file(void);
-	static std::string vol_addr_file(std::string p);
-
 	static bool access_once(bool p);
 	static bool access_once(void);
 
@@ -487,7 +483,6 @@ private:
 	static bool	volatiles_;
 	static bool	volatile_pointers_;
 	static bool	enable_vol_tests_;
-	static std::string	vol_addr_file_;
 	static std::string	vol_tests_mach_;
 	static bool	access_once_;
 	static bool	strict_volatile_rule_;

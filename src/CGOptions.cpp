@@ -141,7 +141,6 @@ DEFINE_GETTER_SETTER_BOOL(arg_unions)
 DEFINE_GETTER_SETTER_BOOL(volatiles)
 DEFINE_GETTER_SETTER_BOOL(volatile_pointers)
 DEFINE_GETTER_SETTER_BOOL(enable_vol_tests)
-DEFINE_GETTER_SETTER_STRING_REF(vol_addr_file)
 DEFINE_GETTER_SETTER_BOOL(access_once)
 DEFINE_GETTER_SETTER_BOOL(strict_volatile_rule)
 DEFINE_GETTER_SETTER_BOOL(consts)
@@ -234,7 +233,6 @@ CGOptions::set_default_settings(void)
 	arg_unions(true);
 	volatiles(true);
 	volatile_pointers(true);
-	vol_addr_file(CGOPTIONS_DEFAULT_VOL_ADDR_FILE);
 	consts(true);
 	dangling_global_ptrs(true);
 	divs(true);
