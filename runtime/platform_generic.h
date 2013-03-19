@@ -1,7 +1,6 @@
 /* -*- mode: C -*-
  *
- *
- * Copyright (c) 2007, 2008 The University of Utah
+ * Copyright (c) 2007, 2008, 2011, 2013 The University of Utah
  * All rights reserved.
  *
  * This file is part of `csmith', a random generator of C programs.
@@ -54,7 +53,7 @@ platform_main_end(uint32_t crc, int flag)
 #endif
 
 #ifndef NOT_PRINT_CHECKSUM
-        printf ("checksum = %X\n", crc);
+	printf ("checksum = %X\n", crc);
 #endif
 
 #if defined (LOG_WRAPPERS)

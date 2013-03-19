@@ -1,6 +1,6 @@
 /* -*- mode: C -*-
  *
- * Copyright (c) 2007-2011 The University of Utah
+ * Copyright (c) 2007-2011, 2013 The University of Utah
  * All rights reserved.
  *
  * This file is part of `csmith', a random generator of C programs.
@@ -84,5 +84,7 @@ transparent_crc (uint32_t val, char* vname, int flag)
 static inline void
 platform_main_end (int x, int flag)
 {
+#ifndef NOT_PRINT_CHECKSUM
   if (!flag) printf ("checksum = %x\n", x);
+#endif
 }
