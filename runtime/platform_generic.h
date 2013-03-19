@@ -40,6 +40,10 @@ extern int printf (const char *, ...);
 #include <stdio.h>
 #endif
 
+#ifdef STORE_CHECKSUM_VALUE
+static uint32_t global_checksum;
+#endif
+
 static void
 platform_main_begin(void)
 {
@@ -52,7 +56,12 @@ platform_main_end(uint32_t crc, int flag)
 #if defined (__FRAMAC)
     Frama_C_dump_assert_each();
 #endif
+#if defined (STORE_CHECKSUM_VALUE)
+        /* store the checksum rather than printing it out */
+        global_checksum = crc;
+#else
 	printf ("checksum = %X\n", crc);
+#endif
 #if defined (LOG_WRAPPERS)
 	{
 		int i, first;
