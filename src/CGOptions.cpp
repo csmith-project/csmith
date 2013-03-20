@@ -171,6 +171,7 @@ DEFINE_GETTER_SETTER_BOOL(use_incr_decr_opers);
 DEFINE_GETTER_SETTER_BOOL(use_embedded_assigns);
 DEFINE_GETTER_SETTER_BOOL(use_comma_exprs);
 DEFINE_GETTER_SETTER_BOOL(take_union_field_addr);
+DEFINE_GETTER_SETTER_BOOL(vol_struct_union_fields);
 
 void
 CGOptions::set_default_settings(void)
@@ -256,7 +257,8 @@ CGOptions::set_default_settings(void)
 	use_embedded_assigns(true);
 	use_comma_exprs(true);
 	take_union_field_addr(true);
-} 
+	vol_struct_union_fields(true);
+}
 	
 /*
    looking for the platform info file in the working directory

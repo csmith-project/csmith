@@ -242,6 +242,7 @@ static void print_advanced_help()
 	cout << "  --return-unions | --no-return-unions: enable | disable return unions from a function (enabled by default)." << endl << endl; 
 	cout << "  --arg-unions | --no-arg-unions: enable | disable unions being used as args (enabled by default)." << endl << endl; 
 	cout << "  --take-union-field-addr | --take-no-union-field-addr: allow | disallow addresses of union fields to be taken (allowed by default)." << endl << endl; 
+	cout << "  --vol-struct-union-fields | --no-vol-struct-union-fields: enable | disable volatile struct/union fields (enabled by default)" << endl << endl;
 
 	// delta related options
 	cout << "  --delta-monitor [simple]: specify the type of delta monitor. Only [simple] type is supported now." << endl << endl;
@@ -1158,6 +1159,16 @@ main(int argc, char **argv)
 
 		if (strcmp (argv[i], "--take-union-field-addr") == 0) {
 			CGOptions::take_union_field_addr(true);
+			continue;
+		}  
+
+		if (strcmp (argv[i], "--vol-struct-union-fields") == 0) {
+			CGOptions::vol_struct_union_fields(true);
+			continue;
+		}  
+
+		if (strcmp (argv[i], "--no-vol-struct-union-fields") == 0) {
+			CGOptions::vol_struct_union_fields(false);
 			continue;
 		}  
 

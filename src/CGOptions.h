@@ -389,6 +389,9 @@ public:
 	static bool take_union_field_addr(void);
 	static bool take_union_field_addr(bool p);
 
+	static bool vol_struct_union_fields(void);
+	static bool vol_struct_union_fields(bool p);
+
 	static int int_size(void);
 	static void int_size(int p) { int_size_ = p;}
 
@@ -513,6 +516,7 @@ private:
 	static int  int_size_;
 	static int  pointer_size_;
 	static bool take_union_field_addr_;
+	static bool vol_struct_union_fields_;
 	static Reducer* reducer_; 
 
 private:
