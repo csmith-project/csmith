@@ -548,7 +548,7 @@ Probabilities::initialize_single_probs()
 	else
 		m[pLooserConstProb] = 0;
 
-	if (CGOptions::volatiles())
+	if (CGOptions::volatiles() && CGOptions::vol_struct_union_fields())
 		m[pFieldVolatileProb] = 30;
 	else
 		m[pFieldVolatileProb] = 0;
