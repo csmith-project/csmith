@@ -715,6 +715,15 @@ VariableSelector::get_all_array_vars(vector<const Variable*> &array_vars)
 	}
 }
 
+void
+VariableSelector::get_all_local_vars(const Block *b, vector<const Variable*> &vars)
+{
+	while (b) {
+		vars.insert(vars.end(), b->local_vars.begin(), b->local_vars.end());
+		b = b->parent;
+	}
+}
+
 /* find all visible variables at block b */
 vector<Variable*>
 VariableSelector::find_all_visible_vars(const Block* b)
@@ -822,6 +831,8 @@ VariableSelector::make_init_value(Effect::Access access, const CGContext &cg_con
 		var = choose_var(vars, access, cg_context, type, &qfer, eExact, dummy, true, true);
 	}
 	else {
+		if (!CGOptions::addr_taken_of_locals())
+			get_all_local_vars(b, dummy);
 		var = choose_var(vars, access, cg_context, type, &qfer, eExact, dummy, true);
 	}
 	ERROR_GUARD(NULL);
@@ -840,7 +851,7 @@ VariableSelector::make_init_value(Effect::Access access, const CGContext &cg_con
 		const Type* tt = use_local ? Type::random_type_from_type(type, true, true) : Type::random_type_from_type(type, false, true);
 		ERROR_GUARD(NULL);
 		// create a local if it's not a volatile, and it's a pointer, and block is specified
-		if (use_local) {  
+		if (CGOptions::addr_taken_of_locals() && use_local) {  
 			var = GenerateNewParentLocal(*b, Effect::READ, cg_context, tt, &qfer_deref);
 			ERROR_GUARD(NULL);
 			Bookkeeper::record_volatile_access(var, var->type->get_indirect_level() - tt->get_indirect_level(), false);

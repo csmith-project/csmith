@@ -142,6 +142,7 @@ DEFINE_GETTER_SETTER_BOOL(volatiles)
 DEFINE_GETTER_SETTER_BOOL(volatile_pointers)
 DEFINE_GETTER_SETTER_BOOL(access_once)
 DEFINE_GETTER_SETTER_BOOL(strict_volatile_rule)
+DEFINE_GETTER_SETTER_BOOL(addr_taken_of_locals)
 DEFINE_GETTER_SETTER_BOOL(consts)
 DEFINE_GETTER_SETTER_BOOL(dangling_global_ptrs)
 DEFINE_GETTER_SETTER_BOOL(divs)
@@ -258,6 +259,7 @@ CGOptions::set_default_settings(void)
 	use_comma_exprs(true);
 	take_union_field_addr(true);
 	vol_struct_union_fields(true);
+	addr_taken_of_locals(true);
 }
 	
 /*

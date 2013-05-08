@@ -282,6 +282,9 @@ public:
 	static bool strict_volatile_rule(bool p);
 	static bool strict_volatile_rule(void);
 
+	static bool addr_taken_of_locals(bool p);
+	static bool addr_taken_of_locals(void);
+
 	static bool consts(void);
 	static bool consts(bool p);
 
@@ -485,6 +488,7 @@ private:
 	static std::string	vol_tests_mach_;
 	static bool	access_once_;
 	static bool	strict_volatile_rule_;
+	static bool	addr_taken_of_locals_;
 	static bool	consts_;
 	static bool dangling_global_ptrs_;
 	static bool divs_;

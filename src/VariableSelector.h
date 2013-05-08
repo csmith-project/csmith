@@ -102,6 +102,7 @@ public:
 	static void InitScopeTable();
 
 	static vector<Variable*> find_all_visible_vars(const Block* b); 
+	static void get_all_local_vars(const Block* b, vector<const Variable *> &vars); 
 	static const Variable* find_var_by_name(string name);
 
 private:  

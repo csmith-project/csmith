@@ -78,6 +78,12 @@ ExpressionVariable::make_random(CGContext &cg_context, const Type* type, const C
 		if (as_param && var->is_argument() && var->type->is_dereferenced_from(type)) {
 			continue;
 		}
+		if (!CGOptions::addr_taken_of_locals()
+			&& var->type->is_dereferenced_from(type)
+			&& (var->is_argument() || var->is_local())) {
+			continue;
+		}
+
 		// forbid a escaping pointer to take the address of an argument or a local variable
 		int indirection = var->type->get_indirect_level() - type->get_indirect_level();
 		if (as_return && CGOptions::no_return_dead_ptr() &&

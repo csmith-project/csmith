@@ -262,6 +262,9 @@ static void print_advanced_help()
 	cout << "  --enable-access-once: enable testing access once macro." << endl << endl;
 	cout << "  --strict-volatile-rule: make sure only one volatile access between any pair of sequence points. " << endl << endl;
 
+	cout << "  --addr-taken-of-locals: enable addr-taken of local vars. [default]" << endl << endl;
+	cout << "  --no-addr-taken-of-locals: disable addr-taken of local vars. " << endl << endl;
+
 	// other options
 	cout << "  --math-notmp: make csmith generate code for safe_math_macros_notmp." << endl << endl;
 	 
@@ -845,6 +848,16 @@ main(int argc, char **argv)
 
 		if (strcmp (argv[i], "--strict-volatile-rule") == 0) {
 			CGOptions::strict_volatile_rule(true);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--addr-taken-of-locals") == 0) {
+			CGOptions::addr_taken_of_locals(true);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--no-addr-taken-of-locals") == 0) {
+			CGOptions::addr_taken_of_locals(false);
 			continue;
 		}
 
