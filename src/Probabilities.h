@@ -94,6 +94,13 @@ enum ProbName {
 	pPostIncrProb,
 	pPostDecrProb,
 
+	// for unary ops
+	pUnaryOpsProb,
+	pPlusProb,
+	pMinusProb,
+	pNotProb,
+	pBitNotProb,
+
 	// for binary ops
 	pBinaryOpsProb,
 	pAddProb,
@@ -204,6 +211,9 @@ enum ProbName {
 	Probabilities::get_prob(pAccessOnceVariableProb)
 
 //////////////////////////////////////////////////
+#define UNARY_OPS_PROB_FILTER \
+	Probabilities::get_prob_filter(pUnaryOpsProb)
+
 #define BINARY_OPS_PROB_FILTER \
 	Probabilities::get_prob_filter(pBinaryOpsProb)
 
@@ -405,6 +415,8 @@ private:
 	void set_default_simple_types_prob();
 
 	void set_default_binary_ops_prob();
+
+	void set_default_unary_ops_prob();
 
 	void set_default_safe_ops_size_prob();
 

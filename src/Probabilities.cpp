@@ -480,6 +480,9 @@ Probabilities::set_single_name_maps()
 	// group for assignment ops
 	set_single_name("assign_ops_prob", pAssignOpsProb);
 
+	// group for unary ops which equal probability
+	set_single_name("assign_unary_ops_prob", pUnaryOpsProb);
+
 	// group for binary ops which equal probability
 	set_single_name("assign_binary_ops_prob", pBinaryOpsProb);
 
@@ -596,6 +599,7 @@ void
 Probabilities::initialize_group_probs()
 {
 	set_default_statement_prob();
+	set_default_unary_ops_prob();
 	set_default_binary_ops_prob();
 	set_default_simple_types_prob();
 	set_default_safe_ops_size_prob();
@@ -674,6 +678,20 @@ Probabilities::set_default_simple_types_prob()
 
 	set_group_prob(true, pSimpleTypesProb, m);
 	set_prob_filter(pSimpleTypesProb);
+}
+
+void Probabilities::set_default_unary_ops_prob()
+{
+	std::map<ProbName, int> m;
+
+	// each op has equivalent probability
+	SET_SINGLE_NAME("unary_plus_prob", Plus, 1);
+	SET_SINGLE_NAME("unary_minus_prob", Minus, 1);
+	SET_SINGLE_NAME("unary_not_prob", Not, 1);
+	SET_SINGLE_NAME("unary_bit_not_prob", BitNot, 1);
+
+	set_group_prob(true, pUnaryOpsProb, m);
+	set_prob_filter(pUnaryOpsProb);
 }
 
 void

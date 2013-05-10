@@ -140,7 +140,7 @@ FunctionInvocation::make_random_unary(CGContext &cg_context, const Type* type)
 {
 	DEPTH_GUARD_BY_TYPE_RETURN(dtFunctionInvocationRandomUnary, NULL);
 	assert(type);
-	eUnaryOps op = (eUnaryOps)(rnd_upto(MAX_UNARY_OP));
+	eUnaryOps op = (eUnaryOps)(rnd_upto(MAX_UNARY_OP, UNARY_OPS_PROB_FILTER));
 	ERROR_GUARD(NULL);
 	SafeOpFlags *flags = NULL;
 	if (op == eMinus) {
