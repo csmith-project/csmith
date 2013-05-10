@@ -66,7 +66,7 @@ public:
 	virtual bool is_global(void) const; 
 	virtual bool is_visible_local(const Block* blk) const;
 	
-	string make_print_index_str(void) const;
+	string make_print_index_str(const vector<const Variable*> &cvs) const;
 	virtual void Output(std::ostream &) const; 
 	virtual void OutputDef(std::ostream &out, int indent) const;
 	virtual void OutputDecl(std::ostream &) const; 

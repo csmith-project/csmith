@@ -225,8 +225,10 @@ OutputMgr::OutputHashFuncDef(std::ostream &out)
 	out << "{" << std::endl;
 
 	size_t dimen = Variable::GetMaxArrayDimension(*VariableSelector::GetGlobalVariables());
-	if (dimen)
-		OutputArrayCtrlVars(out, dimen, 1);
+	if (dimen) {
+		vector <const Variable*> &ctrl_vars = Variable::get_new_ctrl_vars();
+		OutputArrayCtrlVars(ctrl_vars, out, dimen, 1);
+	}
 	HashGlobalVariables(out);
 	out << "}" << std::endl;
 }
@@ -346,7 +348,8 @@ OutputMgr::OutputPtrResets(ostream &out, const vector<const Variable*>& ptrs)
 		if (v->isArray) {
 			const ArrayVariable* av = (const ArrayVariable*)v;
 			Constant zero(get_int_type(), "0");
-			av->output_init(out, &zero, Variable::ctrl_vars, 1);
+			vector<const Variable *> &ctrl_vars = Variable::get_last_ctrl_vars();
+			av->output_init(out, &zero, ctrl_vars, 1);
 		}
 		else {
 			output_tab(out, 1);

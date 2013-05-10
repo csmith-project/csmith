@@ -149,11 +149,11 @@ ReducerOutputMgr::output_vars(const vector<Variable*> &vars, std::ostream &out, 
 	}
 	// output array initializers
 	if (dimen > 0) {
-		Variable::setup_ctrl_vars();
-		OutputArrayCtrlVars(out, dimen, indent);
+		vector <const Variable*> &ctrl_vars = Variable::get_new_ctrl_vars();
+		OutputArrayCtrlVars(ctrl_vars, out, dimen, indent);
 		for (i=0; i<avs.size(); i++) { 
 			const ArrayVariable* av = avs[i]; 
-			av->output_init(out, av->init, Variable::ctrl_vars, indent);
+			av->output_init(out, av->init, ctrl_vars, indent);
 		}
 	}
 }

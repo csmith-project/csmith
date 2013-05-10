@@ -696,16 +696,17 @@ void
 ArrayVariable::output_addr_checks(std::ostream &out, const Variable* var, string field_name, int indent) const
 {
 	size_t i;
+	vector<const Variable *> &ctrl_vars = Variable::get_new_ctrl_vars();
 	// declare control variables
-	OutputArrayCtrlVars(out, get_dimension(), indent);
+	OutputArrayCtrlVars(ctrl_vars, out, get_dimension(), indent);
 	for (i=0; i<get_dimension(); i++) {
 		output_tab(out, indent);
 		out << "for (";
-		out << Variable::ctrl_vars[i]->get_actual_name(); 
+		out << ctrl_vars[i]->get_actual_name(); 
 		out << " = 0; ";
-		out << Variable::ctrl_vars[i]->get_actual_name();
+		out << ctrl_vars[i]->get_actual_name();
 		out << " < " << sizes[i] << "; "; 
-		out << Variable::ctrl_vars[i]->get_actual_name();
+		out << ctrl_vars[i]->get_actual_name();
 		out << "++)"; 
 		outputln(out); 
 		output_open_encloser("{", out, indent);
@@ -714,7 +715,7 @@ ArrayVariable::output_addr_checks(std::ostream &out, const Variable* var, string
 	out << "if (";
 	var->Output(out);
 	out << " == &";
-	output_with_indices(out, Variable::ctrl_vars);
+	output_with_indices(out, ctrl_vars);
 	out << field_name;
 	out << ")" << endl;
 	output_open_encloser("{", out, indent);
@@ -729,7 +730,7 @@ ArrayVariable::output_addr_checks(std::ostream &out, const Variable* var, string
 	out << ";\\n\"";
 	for (i=0; i<get_dimension(); i++) {
 		out << ", ";
-		out << Variable::ctrl_vars[i]->get_actual_name();
+		out << ctrl_vars[i]->get_actual_name();
 	}
 	out << ");" << endl;
 	output_tab(out, indent);
@@ -742,9 +743,8 @@ ArrayVariable::output_addr_checks(std::ostream &out, const Variable* var, string
 }
 
 string
-ArrayVariable::make_print_index_str(void) const
+ArrayVariable::make_print_index_str(const vector<const Variable *> &cvs) const
 {
-	const vector<const Variable*>& cvs = Variable::ctrl_vars;
 	size_t i;
 	string str = "printf(\"index = ";
 	for (i=0; i<get_dimension(); i++) {
@@ -786,7 +786,9 @@ ArrayVariable::hash(std::ostream& out) const
 
 	size_t i, j;
 	int indent = 1;
-	const vector<const Variable*>& cvs = Variable::ctrl_vars;
+	//ISSUE: ugly hack to make sure we use the latest ctrl_vars, which is generated
+	// from the call of OutputArrayInitializers in OutputMgr.cpp
+	const vector<const Variable*>& cvs = Variable::get_last_ctrl_vars();
 	for (i=0; i<get_dimension(); i++) {
 		output_tab(out, indent);
 		out << "for (";
@@ -810,7 +812,7 @@ ArrayVariable::hash(std::ostream& out) const
 		}
 		// print the index value
 		output_tab(out, indent);
-		out << "if (print_hash_value) " << make_print_index_str() << endl;
+		out << "if (print_hash_value) " << make_print_index_str(cvs) << endl;
 	}
 	else {
 		if (type->eType == eSimple) {

@@ -73,7 +73,6 @@ public:
 			 bool isAuto, bool isStatic, bool isRegister, bool isBitfield, const Variable* isFieldVarOf);
 
 	static void doFinalization(void);
-	static void setup_ctrl_vars(void);
 
 	virtual ~Variable(void);
 	virtual bool is_global(void) const; 
@@ -156,7 +155,8 @@ public:
 	const Variable* field_var_of; //expanded from a struct/union
 	const bool isArray;
 	const CVQualifiers qfer;
-	static std::vector<const Variable*> ctrl_vars;
+	static std::vector<const Variable*> &get_new_ctrl_vars();
+	static std::vector<const Variable*> &get_last_ctrl_vars();
 
 	static const char sink_var_name[];
 
@@ -167,13 +167,17 @@ private:
 			 const vector<bool>& isConsts, const vector<bool>& isVolatiles,
 			 bool isAuto, bool isStatic, bool isRegister, bool isBitfield, const Variable* isFieldVarOf);
 
+	static std::vector<const Variable*>& new_ctrl_vars(void);
+	static std::vector< std::vector<const Variable*>* > ctrl_vars_vectors;
+	static unsigned long ctrl_vars_count;
+
 	void create_field_vars(const Type* type);
 };
  
 void OutputVariableList(const std::vector<Variable*> &var, std::ostream &out, int indent = 0);
 void OutputVariableDeclList(const std::vector<Variable*> &var, std::ostream &out, std::string prefix = "", int indent = 0);
 void OutputArrayInitializers(const vector<Variable*>& vars, std::ostream &out, int indent);
-void OutputArrayCtrlVars(std::ostream &out, size_t dimen, int indent);
+void OutputArrayCtrlVars(const vector<const Variable*>& ctrl_vars, std::ostream &out, size_t dimen, int indent);
 void OutputVolatileAddress(const vector<Variable*> &vars, std::ostream &out, int indent, const string &fp_string);
 void MapVariableList(const vector<Variable*> &var, std::ostream &out, int (*func)(Variable *var, std::ostream *pOut));
 int HashVariable(Variable *var, std::ostream *pOut);

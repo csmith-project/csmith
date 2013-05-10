@@ -42,6 +42,7 @@
 #include "Variable.h"
 
 #include <cassert>
+#include <sstream>
 
 #include "Common.h"
 #include "Block.h"
@@ -66,8 +67,11 @@
 #include "StringUtils.h"
 
 
-using namespace std; 
-std::vector<const Variable*> Variable::ctrl_vars;
+using namespace std;
+// Yang: I changed the definition of ctrl_vars, and ReducerMgr might be affected
+std::vector< std::vector<const Variable*>* > Variable::ctrl_vars_vectors;
+unsigned long Variable::ctrl_vars_count;
+
 const char Variable::sink_var_name[] = "csmith_sink_";
 
 //////////////////////////////////////////////////////////////////////////////
@@ -878,30 +882,57 @@ Variable::OutputLowerBound(std::ostream &out) const
 }
 
 // --------------------------------------------------------------
-void
-Variable::setup_ctrl_vars(void) 
+std::vector<const Variable*>&
+Variable::new_ctrl_vars()
 {
-	char name[2] = "i";
-	int i;
-	if (ctrl_vars.empty()) {
-		CVQualifiers dummy;
-		dummy.add_qualifiers(false, false);
-		for (i=0; i<CGOptions::max_array_dimensions(); i++) { 
-			Variable *v = new Variable(name, 0, 0, &dummy);
-			ctrl_vars.push_back(v);
-			name[0] = name[0] + 1;
-		}
+	unsigned long ctrl_var_suffix = Variable::ctrl_vars_count;
+	CVQualifiers dummy;
+	dummy.add_qualifiers(false, false);
+	char name = 'i';
+	vector<const Variable *> *ctrl_vars = new vector<const Variable *>();
+	assert(ctrl_vars);
+
+	for (int i=0; i<CGOptions::max_array_dimensions(); i++) { 
+		stringstream name_stream;
+		name_stream << name;
+		if (CGOptions::fresh_array_ctrl_var_names())
+			name_stream << ctrl_var_suffix;
+		Variable *v = new Variable(name_stream.str(), 0, 0, &dummy);
+		assert(v);
+		ctrl_vars->push_back(v);
+		name++;
 	}
+	Variable::ctrl_vars_count++;
+	ctrl_vars_vectors.push_back(ctrl_vars);
+	return *ctrl_vars;
+}
+
+std::vector<const Variable*>&
+Variable::get_new_ctrl_vars()
+{
+	return Variable::new_ctrl_vars();
+}
+
+std::vector<const Variable*>&
+Variable::get_last_ctrl_vars()
+{
+	return *Variable::ctrl_vars_vectors.back();
 }
 
 // ------------------------------------------------------------
 void
 Variable::doFinalization(void)
 {
-	for (size_t i=0; i<ctrl_vars.size(); i++) {
-		delete ctrl_vars[i];
+	for (vector< vector<const Variable *>* >::iterator vi = ctrl_vars_vectors.begin(),
+	     ve = ctrl_vars_vectors.end(); vi != ve; ++vi) {
+		vector<const Variable *> *v = (*vi);
+		for (vector<const Variable *>::iterator i = v->begin(),
+		     e = v->end(); i != e; ++i) {
+			delete (*i);
+		}
+		delete v;
 	}
-	ctrl_vars.clear();
+	ctrl_vars_vectors.clear();
 }
 
 // --------------------------------------------------------------
@@ -914,13 +945,13 @@ MapVariableList(const vector<Variable*> &var, std::ostream &out,
 
 // --------------------------------------------------------------
 void
-OutputArrayCtrlVars(std::ostream &out, size_t dimen, int indent)
+OutputArrayCtrlVars(const vector <const Variable*> &ctrl_vars, std::ostream &out, size_t dimen, int indent)
 {
-	assert(dimen <= Variable::ctrl_vars.size());
+	assert(dimen <= ctrl_vars.size());
 	output_tab(out, indent);
 	out << "int ";
 	for (size_t i=0; i<dimen; i++) {
-		out << Variable::ctrl_vars[i]->get_actual_name();
+		out << ctrl_vars[i]->get_actual_name();
 		out << ((i==dimen-1) ? "" : ", ");
 	}
 	out << ";";
@@ -932,8 +963,6 @@ Variable::GetMaxArrayDimension(const vector<Variable*>& vars)
 {
 	// find the largest dimension of arrays, if there is any
 	size_t dimen = 0; 
-	// setup control vars if necessary 
-	Variable::setup_ctrl_vars();
 
 	for (size_t i=0; i<vars.size(); i++) {
 		if (vars[i]->isArray) {
@@ -953,12 +982,13 @@ OutputArrayInitializers(const vector<Variable*>& vars, std::ostream &out, int in
 	size_t i, dimen;  
 	dimen = Variable::GetMaxArrayDimension(vars);
 	if (dimen) {
-		OutputArrayCtrlVars(out, dimen, indent);
+		vector <const Variable*> &ctrl_vars = Variable::get_new_ctrl_vars();
+		OutputArrayCtrlVars(ctrl_vars, out, dimen, indent);
 		for (i=0; i<vars.size(); i++) {
 			if (vars[i]->isArray) {
 				ArrayVariable* av = (ArrayVariable*)(vars[i]);
 				if (!av->no_loop_initializer()) {
-					av->output_init(out, av->init, Variable::ctrl_vars, indent);
+					av->output_init(out, av->init, ctrl_vars, indent);
 				}
 			}
 		}
@@ -1052,7 +1082,7 @@ HashVariable(Variable *var, std::ostream *pOut)
 	std::ostream &out = *pOut;
 	var->hash(out);
     return 0;
-}	
+}
 
 std::string 
 Variable::to_string(void) const
