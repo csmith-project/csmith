@@ -171,6 +171,7 @@ DEFINE_GETTER_SETTER_INT(null_pointer_dereference_prob)
 DEFINE_GETTER_SETTER_INT(dead_pointer_dereference_prob)
 DEFINE_GETTER_SETTER_BOOL(union_read_type_sensitive);
 DEFINE_GETTER_SETTER_BOOL(use_incr_decr_opers);
+DEFINE_GETTER_SETTER_BOOL(unary_plus_operator);
 DEFINE_GETTER_SETTER_BOOL(use_embedded_assigns);
 DEFINE_GETTER_SETTER_BOOL(use_comma_exprs);
 DEFINE_GETTER_SETTER_BOOL(take_union_field_addr);
@@ -258,6 +259,7 @@ CGOptions::set_default_settings(void)
 	dead_pointer_dereference_prob(0);
 	union_read_type_sensitive(true);
 	use_incr_decr_opers(true);
+	unary_plus_operator(true);
 	use_embedded_assigns(true);
 	use_comma_exprs(true);
 	take_union_field_addr(true);

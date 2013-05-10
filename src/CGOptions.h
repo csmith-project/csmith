@@ -389,6 +389,9 @@ public:
 	static bool use_incr_decr_opers(void);
 	static bool use_incr_decr_opers(bool p);
 
+	static bool unary_plus_operator(void);
+	static bool unary_plus_operator(bool p);
+
 	static bool use_embedded_assigns(void);
 	static bool use_embedded_assigns(bool p);
 
@@ -523,6 +526,7 @@ private:
 	// flag that indicate the comformance level to C99. true means relaxed
 	static bool union_read_type_sensitive_;
 	static bool use_incr_decr_opers_;
+	static bool unary_plus_operator_;
 	static bool use_embedded_assigns_;
 	static bool use_comma_exprs_;
 	static int  int_size_;

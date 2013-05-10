@@ -685,7 +685,13 @@ void Probabilities::set_default_unary_ops_prob()
 	std::map<ProbName, int> m;
 
 	// each op has equivalent probability
-	SET_SINGLE_NAME("unary_plus_prob", Plus, 1);
+	if (CGOptions::unary_plus_operator()) {
+		SET_SINGLE_NAME("unary_plus_prob", Plus, 1);
+	}
+	else {
+		SET_SINGLE_NAME("unary_plus_prob", Plus, 0);
+	}
+
 	SET_SINGLE_NAME("unary_minus_prob", Minus, 1);
 	SET_SINGLE_NAME("unary_not_prob", Not, 1);
 	SET_SINGLE_NAME("unary_bit_not_prob", BitNot, 1);

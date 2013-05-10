@@ -158,6 +158,7 @@ static void print_help()
 	cout << "  --divs | --no-divs: enable | disable divisions (enabled by default)." << endl << endl;
 	cout << "  --embedded-assigns | --no-embedded-assigns: enable | disable embedded assignments as sub-expressions (enabled by default)." << endl << endl;
 	cout << "  --incr-decr-operators | --no-incr-decr-operators: enable | disable ++/-- operators (enabled by default)." << endl << endl;
+	cout << "  --unary-plus-operator | --no-unary-plus-operator: enable | disable + operator (enabled by default)." << endl << endl;
 	cout << "  --jumps | --no-jumps: enable | disable jumps (enabled by default)." << endl << endl;
 	cout << "  --longlong| --no-longlong: enable | disable long long (enabled by default)." << endl << endl;
 	cout << "  --main | --nomain: enable | disable to generate main function (enabled by default)." << endl <<  endl;  
@@ -1150,6 +1151,16 @@ main(int argc, char **argv)
 
 		if (strcmp (argv[i], "--no-incr-decr-operators") == 0) {
 			CGOptions::use_incr_decr_opers(false);
+			continue;
+		} 
+
+		if (strcmp (argv[i], "--unary-plus-operator") == 0) {
+			CGOptions::unary_plus_operator(true);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--no-unary-plus-operator") == 0) {
+			CGOptions::unary_plus_operator(false);
 			continue;
 		} 
 
