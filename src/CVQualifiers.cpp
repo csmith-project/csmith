@@ -193,6 +193,18 @@ CVQualifiers::make_scalar_volatiles(std::vector<bool> &volatiles)
 	}
 }
 
+/*
+ * make sure no const-pointers if const_pointers is false
+ */
+void
+CVQualifiers::make_scalar_consts(std::vector<bool> &consts)
+{
+	if (!CGOptions::const_pointers()) {
+		for (size_t i=1; i<consts.size(); i++)
+			consts[i] = false;
+	}
+}
+
 /* 
  * generate a random CV qualifier vector that is looser or stricter than this one
  */
@@ -221,6 +233,7 @@ CVQualifiers::random_qualifiers(bool no_volatile, Effect::Access access, const C
 	ERROR_GUARD(CVQualifiers(consts, volatiles));
 	make_scalar_volatiles(volatiles);
 	consts = !accept_stricter ? random_looser_consts() : random_stricter_consts();
+	make_scalar_consts(consts);
 	ERROR_GUARD(CVQualifiers(consts, volatiles));
 	if (access == Effect::WRITE) {
 		consts[consts.size() - 1] = false;
@@ -256,6 +269,7 @@ CVQualifiers::random_loose_qualifiers(bool no_volatile, Effect::Access access, c
 	make_scalar_volatiles(volatiles);
 
 	consts = random_looser_consts();
+	make_scalar_consts(consts);
 	ERROR_GUARD(CVQualifiers(consts, volatiles));
 	if (access == Effect::WRITE) {
 		consts[consts.size() - 1] = false;
@@ -335,6 +349,7 @@ CVQualifiers::random_qualifiers(const Type* t, Effect::Access access, const CGCo
 		}
 	}
 	make_scalar_volatiles(is_volatiles);
+	make_scalar_consts(is_consts);
 	return CVQualifiers(is_consts, is_volatiles);
 }
 
@@ -465,6 +480,7 @@ CVQualifiers::add_qualifiers(bool is_const, bool is_volatile)
 }
 
 
+// actually add qualifiers to pointers
 CVQualifiers 
 CVQualifiers::random_add_qualifiers(bool no_volatile) const
 {
@@ -481,7 +497,11 @@ CVQualifiers::random_add_qualifiers(bool no_volatile) const
 		DEPTH_GUARD_BY_DEPTH_RETURN(2, qfer);
 	}
 
-	bool is_const = rnd_flipcoin(RegularConstProb);
+	bool is_const;
+	if (!CGOptions::const_pointers())
+		is_const = false;
+	else
+		is_const = rnd_flipcoin(RegularConstProb);
 	ERROR_GUARD(qfer);
 	//bool is_volatile = no_volatile ? false : rnd_upto(RegularVolatileProb);  
 	bool is_volatile;

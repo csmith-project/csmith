@@ -69,6 +69,7 @@ public:
 	CVQualifiers random_qualifiers(bool no_volatile, Effect::Access access, const CGContext &cg_context) const;
 	CVQualifiers random_loose_qualifiers(bool no_volatile, Effect::Access access, const CGContext &cg_context) const;
 	static void make_scalar_volatiles(std::vector<bool> &volatiles);
+	static void make_scalar_consts(std::vector<bool> &consts);
 	static CVQualifiers random_qualifiers(const Type* t, Effect::Access access, 
 		const CGContext &cg_context, bool no_volatile);
 	static CVQualifiers random_qualifiers(const Type* t, Effect::Access access, 

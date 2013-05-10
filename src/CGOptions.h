@@ -273,6 +273,9 @@ public:
 	static bool volatile_pointers(void);
 	static bool volatile_pointers(bool p);
 
+	static bool const_pointers(void);
+	static bool const_pointers(bool p);
+
 	static std::string vol_tests_mach(void);
 	static bool set_vol_tests(const std::string &s);
 
@@ -488,6 +491,7 @@ private:
 	static bool	arg_unions_;
 	static bool	volatiles_;
 	static bool	volatile_pointers_;
+	static bool	const_pointers_;
 	static std::string	vol_tests_mach_;
 	static bool	access_once_;
 	static bool	strict_volatile_rule_;

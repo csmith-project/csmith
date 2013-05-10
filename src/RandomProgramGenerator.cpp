@@ -184,6 +184,7 @@ static void print_help()
 	cout << "  --unions | --no-unions: enable | disable to generate unions (enable by default)." << endl << endl;
 	cout << "  --volatiles | --no-volatiles: enable | disable volatiles (enabled by default)." << endl << endl;
 	cout << "  --volatile-pointers | --no-volatile-pointers: enable | disable volatile pointers (enabled by default)." << endl << endl;
+	cout << "  --const-pointers | --no-const-pointers: enable | disable const pointers (enabled by default)." << endl << endl;
 
 }
 
@@ -840,6 +841,16 @@ main(int argc, char **argv)
 
 		if (strcmp (argv[i], "--no-volatile-pointers") == 0) {
 			CGOptions::volatile_pointers(false);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--const-pointers") == 0) {
+			CGOptions::const_pointers(true);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--no-const-pointers") == 0) {
+			CGOptions::const_pointers(false);
 			continue;
 		}
 
