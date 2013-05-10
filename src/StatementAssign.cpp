@@ -70,12 +70,15 @@ StatementAssign::InitProbabilityTable()
 	assignOpsTable_.add_entry((int)eBitAndAssign, 10);
 	assignOpsTable_.add_entry((int)eBitXorAssign, 10);
 	assignOpsTable_.add_entry((int)eBitOrAssign,  10);
-	if (CGOptions::use_incr_decr_opers()) { 
+	if (CGOptions::pre_incr_operator())
 		assignOpsTable_.add_entry((int)ePreIncr, 5);
+	if (CGOptions::pre_decr_operator())
 		assignOpsTable_.add_entry((int)ePreDecr, 5);
+	if (CGOptions::post_incr_operator())
 		assignOpsTable_.add_entry((int)ePostIncr, 5);
+	if (CGOptions::post_decr_operator()) { 
 		assignOpsTable_.add_entry((int)ePostDecr, 5);
-	} 
+	}
 }
 
 eAssignOps

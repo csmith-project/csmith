@@ -157,7 +157,10 @@ static void print_help()
 	cout << "  --consts | --no-consts: enable | disable const qualifier (enabled by default)." << endl << endl;
 	cout << "  --divs | --no-divs: enable | disable divisions (enabled by default)." << endl << endl;
 	cout << "  --embedded-assigns | --no-embedded-assigns: enable | disable embedded assignments as sub-expressions (enabled by default)." << endl << endl;
-	cout << "  --incr-decr-operators | --no-incr-decr-operators: enable | disable ++/-- operators (enabled by default)." << endl << endl;
+	cout << "  --pre-incr-operator | --no-pre-incr-operator: enable | disable pre ++ operator (enabled by default)." << endl << endl;
+	cout << "  --pre-decr-operator | --no-pre-decr-operator: enable | disable pre -- operator (enabled by default)." << endl << endl;
+	cout << "  --post-incr-operator | --no-post-incr-operator: enable | disable post ++ operator (enabled by default)." << endl << endl;
+	cout << "  --post-decr-operator | --no-post-decr-operator: enable | disable post -- operator (enabled by default)." << endl << endl;
 	cout << "  --unary-plus-operator | --no-unary-plus-operator: enable | disable + operator (enabled by default)." << endl << endl;
 	cout << "  --jumps | --no-jumps: enable | disable jumps (enabled by default)." << endl << endl;
 	cout << "  --longlong| --no-longlong: enable | disable long long (enabled by default)." << endl << endl;
@@ -1144,13 +1147,43 @@ main(int argc, char **argv)
 			continue;
 		}
 
-		if (strcmp (argv[i], "--incr-decr-operators") == 0) {
-			CGOptions::use_incr_decr_opers(true);
+		if (strcmp (argv[i], "--pre-incr-operator") == 0) {
+			CGOptions::pre_incr_operator(true);
 			continue;
 		}
 
-		if (strcmp (argv[i], "--no-incr-decr-operators") == 0) {
-			CGOptions::use_incr_decr_opers(false);
+		if (strcmp (argv[i], "--no-pre-incr-operator") == 0) {
+			CGOptions::pre_incr_operator(false);
+			continue;
+		} 
+
+		if (strcmp (argv[i], "--pre-decr-operator") == 0) {
+			CGOptions::pre_decr_operator(true);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--no-pre-decr-operator") == 0) {
+			CGOptions::pre_decr_operator(false);
+			continue;
+		} 
+
+		if (strcmp (argv[i], "--post-incr-operator") == 0) {
+			CGOptions::post_incr_operator(true);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--no-post-incr-operator") == 0) {
+			CGOptions::post_incr_operator(false);
+			continue;
+		} 
+
+		if (strcmp (argv[i], "--post-decr-operator") == 0) {
+			CGOptions::post_decr_operator(true);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--no-post-decr-operator") == 0) {
+			CGOptions::post_decr_operator(false);
 			continue;
 		} 
 
