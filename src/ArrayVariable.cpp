@@ -673,7 +673,12 @@ ArrayVariable::output_init(std::ostream &out, const Expression* init, const vect
 		out << cvs[i]->get_actual_name();
 		out << " < " << sizes[i] << "; "; 
 		out << cvs[i]->get_actual_name();
-		out << "++)"; 
+		if (CGOptions::post_incr_operator()) {
+			out << "++)"; 
+		}
+		else {
+			out << " = " << cvs[i]->get_actual_name() << " + 1)"; 
+		}
 		outputln(out); 
 	}  
 	output_tab(out, indent+1);
@@ -707,7 +712,12 @@ ArrayVariable::output_addr_checks(std::ostream &out, const Variable* var, string
 		out << ctrl_vars[i]->get_actual_name();
 		out << " < " << sizes[i] << "; "; 
 		out << ctrl_vars[i]->get_actual_name();
-		out << "++)"; 
+		if (CGOptions::post_incr_operator()) {
+			out << "++)"; 
+		}
+		else {
+			out << " = " << ctrl_vars[i]->get_actual_name() << " + 1)"; 
+		}
 		outputln(out); 
 		output_open_encloser("{", out, indent);
 	}  
@@ -797,7 +807,12 @@ ArrayVariable::hash(std::ostream& out) const
 		out << cvs[i]->get_actual_name();
 		out << " < " << sizes[i] << "; "; 
 		out << cvs[i]->get_actual_name();
-		out << "++)"; 
+		if (CGOptions::post_incr_operator()) {
+			out << "++)"; 
+		}
+		else {
+			out << " = " << cvs[i]->get_actual_name() << " + 1)"; 
+		}
 		outputln(out); 
 		output_open_encloser("{", out, indent);
 	}  

@@ -95,6 +95,13 @@ make_random_loop_control(int &init, int &limit, int &incr,
 		} else {
 			incr_op = pure_rnd_flipcoin(50) ? ePreDecr : ePostDecr;
 		}
+		if (((incr_op == ePreIncr) && !CGOptions::pre_incr_operator())
+			|| ((incr_op == ePostIncr) && !CGOptions::post_incr_operator())
+			|| ((incr_op == ePreDecr) && !CGOptions::pre_decr_operator())
+			|| ((incr_op == ePostDecr) && !CGOptions::post_decr_operator())) {
+			
+			incr_op = (limit >= init) ? eAddAssign : eSubAssign; 
+		}
 		incr = 1;
 	}
 	ERROR_RETURN();
