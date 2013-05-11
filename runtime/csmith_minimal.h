@@ -28,7 +28,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifdef NO_PRINTF
+int putchar (int);
+#else
 extern int printf (const char *, ...);
+#endif
 
 // FIXME-- need more versions, and a way to figure out which is needed
 #include "custom_stdint_x86.h"
@@ -77,14 +81,60 @@ extern int strcmp (const char *, const char *);
 static inline void 
 transparent_crc (uint32_t val, char* vname, int flag)
 {
+#ifndef NO_PRINTF
   if (flag) printf ("%s %d\n", vname, val);
+#endif
   crc32_context += val;
 }
+
+#ifdef NO_PRINTF
+void my_puts (char *p)
+{
+  int i = 0;
+  while (p[i]) {
+    putchar (p[i]);
+    i++;
+  }
+}
+
+void put_hex (int x)
+{
+  switch (x) {
+  case 0: putchar ('0'); break;
+  case 1: putchar ('1'); break;
+  case 2: putchar ('2'); break;
+  case 3: putchar ('3'); break;
+  case 4: putchar ('4'); break;
+  case 5: putchar ('5'); break;
+  case 6: putchar ('6'); break;
+  case 7: putchar ('7'); break;
+  case 8: putchar ('8'); break;
+  case 9: putchar ('9'); break;
+  case 10: putchar ('a'); break;
+  case 11: putchar ('b'); break;
+  case 12: putchar ('c'); break;
+  case 13: putchar ('d'); break;
+  case 14: putchar ('e'); break;
+  case 15: putchar ('f'); break;
+  }
+}
+#endif
 
 static inline void
 platform_main_end (int x, int flag)
 {
 #ifndef NOT_PRINT_CHECKSUM
-  if (!flag) printf ("checksum = %x\n", x);
+  if (!flag) {
+#ifdef NO_PRINTF
+    int i;
+    my_puts ("checksum = ");
+    for (i=0; i<8; i++) {
+      put_hex (x & 0xf);
+      x >>= 4;
+    }
+#else
+    printf ("checksum = %x\n", x);
+#endif
+  }
 #endif
 }

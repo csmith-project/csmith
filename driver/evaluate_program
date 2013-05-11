@@ -15,7 +15,7 @@ use LockFile::Simple;
 
 ####################################################################
 
-my $xxtra = "-w -DCSMITH_MINIMAL";
+my $xxtra = "-w -DCSMITH_MINIMAL -DNO_PRINTF";
 
 #my $notmp = "-DUSE_MATH_MACROS_NOTMP";
 my $notmp = "";
