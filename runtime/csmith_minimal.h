@@ -132,6 +132,7 @@ platform_main_end (int x, int flag)
       put_hex (x & 0xf);
       x >>= 4;
     }
+    putchar ('\n');
 #else
     printf ("checksum = %x\n", x);
 #endif
