@@ -9,6 +9,7 @@ use English;
 my $TIMEOUT = 5;
 
 my $COMPILER_TIMEOUT_RES = 137;
+
 # ugh
 if ($OSNAME =~ /darwin/) {
     $COMPILER_TIMEOUT_RES = 152;

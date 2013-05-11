@@ -98,7 +98,7 @@ sub build_gcc() {
     mkdir $BUILD_DIR or die;
     chdir $BUILD_DIR or die;
 
-    abort_if_fail ("${SRC_DIR}/configure --with-libelf=/usr/local --enable-lto --prefix=$INSTALL_DIR  --enable-languages=c,c++ ");
+    abort_if_fail ("${SRC_DIR}/configure --prefix=$INSTALL_DIR --enable-languages=c,c++ --disable-multilib");
     abort_if_fail ("make -j${CPUS}");
     abort_if_fail ("make install");
     
@@ -116,8 +116,8 @@ sub build_llvm() {
     abort_if_fail ("svn update -r $REV");
     chdir "$SRC_DIR/tools/clang" or die;
     abort_if_fail ("svn update -r $REV");
-    chdir "$SRC_DIR/projects/compiler-rt" or die;
-    abort_if_fail ("svn update -r $REV");
+    # chdir "$SRC_DIR/projects/compiler-rt" or die;
+    # abort_if_fail ("svn update -r $REV");
 
     abort_if_fail ("rm -rf $BUILD_DIR");
     mkdir $BUILD_DIR or die;
