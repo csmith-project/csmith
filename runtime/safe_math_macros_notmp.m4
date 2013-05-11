@@ -151,7 +151,7 @@ safe_signed_math(int16_t,INT16_MIN,INT16_MAX)
 safe_signed_math(int32_t,INT32_MIN,INT32_MAX)
 safe_signed_math(int64_t,INT64_MIN,INT64_MAX)
 
-define(`promote',`ifelse($1,uint64_t,unsigned long long int,unsigned int)')
+define(`promote',`ifelse($1,uint64_t,unsigned long long,unsigned int)')
 
 define(`safe_unsigned_math',`
 

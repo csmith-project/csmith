@@ -35,8 +35,8 @@ dnl But note that some of the functions on that page are wrong!
 #ifndef SAFE_MATH_H
 #define SAFE_MATH_H
 
-define(`promote1',`ifelse($1,int64_t,long long int,int)')
-define(`promote2',`ifelse($1,uint64_t,unsigned long long int,unsigned int)')
+define(`promote1',`ifelse($1,int64_t,long long,int)')
+define(`promote2',`ifelse($1,uint64_t,unsigned long long,unsigned int)')
 define(`maxshift',`ifelse($1,int64_t,64,32)')
 
 define(`safe_signed_math',`
