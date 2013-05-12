@@ -338,6 +338,9 @@ public:
 	static bool no_return_dead_ptr(void);
 	static bool no_return_dead_ptr(bool p);
 
+	static bool hash_value_printf(void);
+	static bool hash_value_printf(bool p);
+
 	/////////////////////////////////////////////////////////
 	static void set_default_settings(void);
 
@@ -517,6 +520,7 @@ private:
 	static bool random_random_;
 	static bool const_as_condition_;
 	static bool no_return_dead_ptr_;
+	static bool hash_value_printf_;
 	static std::string	dump_default_probabilities_;
 	static std::string	dump_random_probabilities_;
 	static std::string	probability_configuration_;

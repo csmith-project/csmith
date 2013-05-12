@@ -315,6 +315,7 @@ static void print_advanced_help()
 		 << "reading padding bits (enabled by default)." << endl << endl; 
 
 	cout << "  --max-struct-nested-level: controls the max depth of nested structs (default is 3)." << endl << endl;
+	cout << "  --no-hash-value-printf: do not emit printf on the index of an array" << endl << endl;
 }
 
 void arg_check(int argc, int i)
@@ -1246,6 +1247,11 @@ main(int argc, char **argv)
 			CGOptions::vol_struct_union_fields(false);
 			continue;
 		}  
+
+		if (strcmp (argv[i], "--no-hash-value-printf") == 0) {
+			CGOptions::hash_value_printf(false);
+			continue;
+		}
 
 		if (strcmp (argv[i], "--reduce") == 0) {
 			string filename;

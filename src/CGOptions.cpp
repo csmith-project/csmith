@@ -162,6 +162,7 @@ DEFINE_GETTER_SETTER_BOOL(const_as_condition)
 DEFINE_GETTER_SETTER_BOOL(match_exact_qualifiers)
 DEFINE_GETTER_SETTER_BOOL(blind_check_global)
 DEFINE_GETTER_SETTER_BOOL(no_return_dead_ptr)
+DEFINE_GETTER_SETTER_BOOL(hash_value_printf)
 DEFINE_GETTER_SETTER_INT (max_array_num_in_loop)
 DEFINE_GETTER_SETTER_BOOL(identify_wrappers)
 DEFINE_GETTER_SETTER_BOOL(mark_mutable_const)
@@ -253,6 +254,7 @@ CGOptions::set_default_settings(void)
 	match_exact_qualifiers(false);
 	blind_check_global(false);
 	no_return_dead_ptr(true);
+	hash_value_printf(true);
 	identify_wrappers(false);
 	mark_mutable_const(false);
 	force_globals_static(true);

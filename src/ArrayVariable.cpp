@@ -826,8 +826,10 @@ ArrayVariable::hash(std::ostream& out) const
 			out << "transparent_crc(" << vname << field_names[j] << ", \"" << vname << field_names[j] << "\", print_hash_value);" << endl;
 		}
 		// print the index value
-		output_tab(out, indent);
-		out << "if (print_hash_value) " << make_print_index_str(cvs) << endl;
+		if (CGOptions::hash_value_printf()) {
+			output_tab(out, indent);
+			out << "if (print_hash_value) " << make_print_index_str(cvs) << endl;
+		}
 	}
 	else {
 		if (type->eType == eSimple) {
