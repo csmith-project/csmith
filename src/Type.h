@@ -219,6 +219,9 @@ public:
 	bool is_signed(void) const;
 	const Type* to_unsigned(void) const;
 	bool is_pointer_to_char(void) const { return ptr_type && ptr_type->eType == eSimple && (ptr_type->simple_type==eChar || ptr_type->simple_type==eUChar);}
+	bool is_signed_char() const {
+		return ((eType == eSimple) && (simple_type == eChar));
+	}
 	bool is_promotable(const Type* t) const;
 	bool is_convertable(const Type* t) const;
 	bool is_derivable(const Type* t) const;

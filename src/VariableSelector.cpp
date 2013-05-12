@@ -1390,6 +1390,8 @@ VariableSelector::itemize_array(CGContext& cg_context, const ArrayVariable* av)
 		for(iter = cg_context.iv_bounds.begin(); iter != cg_context.iv_bounds.end(); ++iter) {  
 			if (iter->second != INVALID_BOUND && iter->second < dimen_len) {
 				const Variable* iv = iter->first;
+				if (!CGOptions::signed_char_index() && iv->type->is_signed_char())
+					continue;
 				// unfortunately different std::map implementations give us diff. order, we 
 				// have to sort them to generate consistant outputs across diff. platforms
 				bool insert_middle = false;
@@ -1400,9 +1402,11 @@ VariableSelector::itemize_array(CGContext& cg_context, const ArrayVariable* av)
 						break;
 					}
 				}
-				if (!insert_middle) ok_ivs.push_back(iv);
+				if (insert_middle)
+					continue;
+				ok_ivs.push_back(iv);
 			}
-		}  
+		}
 		
 		const Variable* v = choose_ok_var(ok_ivs);
 		// this could happen if the context contained 2 or more array to be used, but the longer one(s) has
@@ -1468,6 +1472,7 @@ VariableSelector::select_must_use_var(Effect::Access access, CGContext &cg_conte
 ArrayVariable*
 VariableSelector::create_mutated_array_var(const ArrayVariable* av, const vector<const Expression*>& new_indices)
 {
+	assert(0 && "invalid call to create_mutated_array_var!");
 	size_t i;
 	ArrayVariable* new_av = new ArrayVariable(*av);
 	for (i=0; i<new_indices.size(); i++) {

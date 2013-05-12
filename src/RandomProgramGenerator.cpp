@@ -316,6 +316,7 @@ static void print_advanced_help()
 
 	cout << "  --max-struct-nested-level: controls the max depth of nested structs (default is 3)." << endl << endl;
 	cout << "  --no-hash-value-printf: do not emit printf on the index of an array" << endl << endl;
+	cout << "  --no-signed-char-index: do not allow a var of type char to be used as array index" << endl << endl;
 }
 
 void arg_check(int argc, int i)
@@ -1250,6 +1251,11 @@ main(int argc, char **argv)
 
 		if (strcmp (argv[i], "--no-hash-value-printf") == 0) {
 			CGOptions::hash_value_printf(false);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--no-signed-char-index") == 0) {
+			CGOptions::signed_char_index(false);
 			continue;
 		}
 

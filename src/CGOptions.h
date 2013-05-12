@@ -341,6 +341,9 @@ public:
 	static bool hash_value_printf(void);
 	static bool hash_value_printf(bool p);
 
+	static bool signed_char_index(void);
+	static bool signed_char_index(bool p);
+
 	/////////////////////////////////////////////////////////
 	static void set_default_settings(void);
 
@@ -521,6 +524,7 @@ private:
 	static bool const_as_condition_;
 	static bool no_return_dead_ptr_;
 	static bool hash_value_printf_;
+	static bool signed_char_index_;
 	static std::string	dump_default_probabilities_;
 	static std::string	dump_random_probabilities_;
 	static std::string	probability_configuration_;

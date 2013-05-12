@@ -341,6 +341,7 @@ ArrayVariable::itemize(const std::vector<const Expression*>& indices, Block* blk
 ArrayVariable* 
 ArrayVariable::rnd_mutate(void)
 {
+	assert(0 && "invalid call to rnd_mutate");
 	bool use_existing = rnd_flipcoin(20);
 	ERROR_GUARD(NULL);
 	size_t i;

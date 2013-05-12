@@ -117,7 +117,8 @@ StatementArrayOp::make_random_array_init(CGContext &cg_context)
 			cv = VariableSelector::SelectLoopCtrlVar(cg_context, invalid_vars); 
 			if (cv->is_volatile())
 				vol_count++;
-			if (CGOptions::strict_volatile_rule() && (vol_count > 1) && cv->is_volatile()) {
+			if ((CGOptions::strict_volatile_rule() && (vol_count > 1) && cv->is_volatile())
+				|| (!CGOptions::signed_char_index() && cv->type->is_signed_char())) {
 				invalid_vars.push_back(cv);
 				continue;
 			}
