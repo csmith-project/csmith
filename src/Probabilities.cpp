@@ -627,7 +627,13 @@ Probabilities::set_default_safe_ops_size_prob()
 
 	// each op has equivalent probability
 	
-	SET_SINGLE_NAME1("safe_ops_size_int8", Int8, 1);
+	if (CGOptions::int8() && CGOptions::uint8()) {
+		SET_SINGLE_NAME1("safe_ops_size_int8", Int8, 1);
+	}
+	else {
+		SET_SINGLE_NAME1("safe_ops_size_int8", Int8, 0);
+	}
+		
 	SET_SINGLE_NAME1("safe_ops_size_int16", Int16, 1);
 	SET_SINGLE_NAME1("safe_ops_size_int32", Int32, 1);
 	if (CGOptions::allow_int64()) {
@@ -650,7 +656,13 @@ Probabilities::set_default_simple_types_prob()
 	// We only use void for function's parameter, so
 	// disallow choosing void type from other places
 	SET_SINGLE_NAME("void_prob", Void, 0);
-	SET_SINGLE_NAME("char_prob", Char, 1);
+	if (CGOptions::int8()) {
+		SET_SINGLE_NAME("char_prob", Char, 1);
+	}
+	else {
+		SET_SINGLE_NAME("char_prob", Char, 0);
+	}
+
 	SET_SINGLE_NAME("int_prob", Int, 1);
 	SET_SINGLE_NAME("short_prob", Short, 1);
 
@@ -663,7 +675,13 @@ Probabilities::set_default_simple_types_prob()
 		SET_SINGLE_NAME("ulong_prob", ULong, 1);
 	}
 
-	SET_SINGLE_NAME("uchar_prob", UChar, 1);
+	if (CGOptions::uint8()) {
+		SET_SINGLE_NAME("uchar_prob", UChar, 1);
+	}
+	else {
+		SET_SINGLE_NAME("uchar_prob", UChar, 0);
+	}
+		
 	SET_SINGLE_NAME("uint_prob", UInt, 1);
 	SET_SINGLE_NAME("ushort_prob", UShort, 1);
 

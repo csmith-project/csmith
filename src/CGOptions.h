@@ -243,6 +243,12 @@ public:
 	static bool longlong(void);
 	static bool longlong(bool p);
 
+	static bool int8(void);
+	static bool int8(bool p);
+
+	static bool uint8(void);
+	static bool uint8(bool p);
+
 	static bool pointers(void);
 	static bool pointers(bool p);
 
@@ -499,6 +505,8 @@ private:
 	static bool	math64_;
 	static bool	math_notmp_;
 	static bool	longlong_;
+	static bool	int8_;
+	static bool	uint8_;
 	static bool	pointers_;
 	static bool	arrays_;
 	static bool	strict_const_arrays_;

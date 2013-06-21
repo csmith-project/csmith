@@ -164,6 +164,8 @@ static void print_help()
 	cout << "  --unary-plus-operator | --no-unary-plus-operator: enable | disable + operator (enabled by default)." << endl << endl;
 	cout << "  --jumps | --no-jumps: enable | disable jumps (enabled by default)." << endl << endl;
 	cout << "  --longlong| --no-longlong: enable | disable long long (enabled by default)." << endl << endl;
+	cout << "  --int8 | --no-int: enable | disable int8_t (enabled by default)." << endl << endl;
+	cout << "  --uint8 | --no-uint8: enable | disable uint8_t (enabled by default)." << endl << endl;
 	cout << "  --main | --nomain: enable | disable to generate main function (enabled by default)." << endl <<  endl;  
 	cout << "  --math64 | --no-math64: enable | disable 64-bit math ops (enabled by default)." << endl << endl;
 
@@ -732,6 +734,26 @@ main(int argc, char **argv)
 
 		if (strcmp (argv[i], "--no-longlong") == 0) {
 			CGOptions::longlong(false);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--int8") == 0) {
+			CGOptions::int8(true);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--no-int8") == 0) {
+			CGOptions::int8(false);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--uint8") == 0) {
+			CGOptions::uint8(true);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--no-uint8") == 0) {
+			CGOptions::uint8(false);
 			continue;
 		}
 

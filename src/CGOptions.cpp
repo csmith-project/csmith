@@ -130,6 +130,8 @@ DEFINE_GETTER_SETTER_BOOL(no_delta_reduction)
 DEFINE_GETTER_SETTER_BOOL(math64)
 DEFINE_GETTER_SETTER_BOOL(math_notmp)
 DEFINE_GETTER_SETTER_BOOL(longlong)
+DEFINE_GETTER_SETTER_BOOL(int8)
+DEFINE_GETTER_SETTER_BOOL(uint8)
 DEFINE_GETTER_SETTER_BOOL(pointers)
 DEFINE_GETTER_SETTER_BOOL(arrays)
 DEFINE_GETTER_SETTER_BOOL(strict_const_arrays)
@@ -232,6 +234,8 @@ CGOptions::set_default_settings(void)
 	math64(true);
 	math_notmp(false);
 	longlong(true);
+	int8(true);
+	uint8(true);
 	pointers(true);
 	arrays(true);
 	strict_const_arrays(false);
