@@ -54,7 +54,7 @@ my $OREV;
 my $COMPILER;
 my $FAIL_FILE;
 my @dirs_to_delete = ();
-my $FORCE = 0;
+my $FORCE = 1;
 
 # properly parse the return value from system()
 sub runit ($) {
@@ -116,8 +116,10 @@ sub build_llvm() {
     abort_if_fail ("svn update -r $REV");
     chdir "$SRC_DIR/tools/clang" or die;
     abort_if_fail ("svn update -r $REV");
-    # chdir "$SRC_DIR/projects/compiler-rt" or die;
-    # abort_if_fail ("svn update -r $REV");
+    chdir "$SRC_DIR/projects/compiler-rt" or die;
+    abort_if_fail ("svn update -r $REV");
+    chdir "$SRC_DIR/tools/clang/tools" or die;
+    abort_if_fail ("svn update -r $REV");
 
     abort_if_fail ("rm -rf $BUILD_DIR");
     mkdir $BUILD_DIR or die;
