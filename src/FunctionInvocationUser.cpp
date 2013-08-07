@@ -195,6 +195,8 @@ FunctionInvocationUser::build_invocation_and_function(CGContext &cg_context, con
 		Variable* v = func->param[i];
 		// to avoid too much function invocations as parameters
 		Expression *p = Expression::make_random_param(param_cg_context, v->type, &v->qfer); 
+		// typecast, if needed.
+		p->check_and_set_cast(v->type);
 		param_values.push_back(p);
 		// Update the "running effect context": the context that we must use
 		// when we generate subsequent parameters within this invocation.
@@ -266,6 +268,8 @@ FunctionInvocationUser::build_invocation(Function *target, CGContext &cg_context
 		// to avoid too much function invocations as parameters
 		Expression *p = Expression::make_random_param(param_cg_context, v->type, &v->qfer);   
 		ERROR_GUARD(false);
+		// typecast, if needed.
+		p->check_and_set_cast(v->type);
 		param_value.push_back(p);
 		// Update the "running effect context": the context that we must use
 		// when we generate subsequent parameters within this invocation.

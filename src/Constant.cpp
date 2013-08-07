@@ -461,11 +461,16 @@ Constant::get_type(void) const
 void
 Constant::Output(std::ostream &out) const
 {
+	output_cast(out);
 	//enclose negative numbers in parenthesis to avoid syntax errors such as "--8"
 	if (!value.empty() && value[0] == '-') {
 		out << "(" << value << ")";
 	} else if (type->eType == ePointer && equals(0)){
+		if (CGOptions::lang_cpp()) {
+			out << "NULL";
+		} else {
 		out << "(void*)" << value;
+		}
 	} else {
 		out << value;
 	}

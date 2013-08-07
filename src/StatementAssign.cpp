@@ -185,7 +185,10 @@ StatementAssign::make_random(CGContext &cg_context, const Type* type, const CVQu
 	lhs = Lhs::make_random(lhs_cg_context, type, &qfer, op != eSimpleAssign, need_no_rhs(op));
 	if (qf) CGOptions::match_exact_qualifiers(prev_flag); // restore flag
 	ERROR_GUARD_AND_DEL2(NULL, e, lhs);
-	
+
+	// typecast, if needed.
+	e->check_and_set_cast(type);
+
 	if (CompatibleChecker::compatible_check(e, lhs)) {
 		Error::set_error(COMPATIBLE_CHECK_ERROR);
 		delete e;

@@ -226,6 +226,24 @@ Expression::make_random(CGContext &cg_context, const Type* type, const CVQualifi
 	return e;
 }
 
+void
+Expression::check_and_set_cast(const Type* type)
+{
+	if(CGOptions::lang_cpp() && get_type().needs_cast(type)) {
+		cast_type = type;
+	}
+}
+
+void
+Expression::output_cast(std::ostream& out) const
+{
+	if(CGOptions::lang_cpp() && (cast_type != NULL)) {
+		out << "(";
+		cast_type->Output(out);
+		out << ") ";
+	}
+}
+
 /*
  *
  */
@@ -287,14 +305,16 @@ Expression::make_random_param(CGContext &cg_context, const Type* type, const CVQ
  *
  */
 Expression::Expression(eTermType e) :
-    term_type(e),
-	expr_id(eid++)
+	term_type(e),
+	expr_id(eid++),
+	cast_type(NULL)
 {
 	// Nothing to do.
 }
 
-Expression::Expression(const Expression &expr)
-	: term_type(expr.term_type)
+Expression::Expression(const Expression &expr) :
+	term_type(expr.term_type),
+	cast_type(NULL)
 {
 	
 }

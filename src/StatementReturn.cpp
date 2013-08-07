@@ -59,6 +59,8 @@ StatementReturn::make_random(CGContext &cg_context)
 	assert(fm); 
 
 	ExpressionVariable* ev = ExpressionVariable::make_random(cg_context, curr_func->return_type, &curr_func->rv->qfer, false, true); 
+	// typecast, if needed.
+	ev->check_and_set_cast(curr_func->return_type);
 	// XXX
 	ERROR_GUARD(NULL);
 

@@ -150,8 +150,13 @@ public:
 
 	virtual bool compatible(const Variable *) const { return false;}
 
+	void check_and_set_cast(const Type* t);
+	void output_cast(std::ostream& out) const;
+
 	enum eTermType term_type;
 	int expr_id;
+
+	const Type* cast_type;
 
 private:
 	static void InitExprProbabilityTable();

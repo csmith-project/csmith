@@ -433,6 +433,9 @@ public:
 
 	static void set_platform_specific_options(void);
 
+	static bool lang_cpp(void);
+	static bool lang_cpp(bool p);
+
 private:
 	static bool resolve_exhaustive_options();
 
@@ -563,6 +566,8 @@ private:
 	static bool vol_struct_union_fields_;
 	static Reducer* reducer_; 
 
+	// flag to indicate language
+	static bool lang_cpp_;
 private:
 	CGOptions(void);
 	CGOptions(CGOptions &cgo);

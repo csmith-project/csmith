@@ -226,6 +226,8 @@ public:
 	bool is_convertable(const Type* t) const;
 	bool is_derivable(const Type* t) const;
 	bool is_dereferenced_from(const Type* t) const;
+	bool is_equivalent(const Type* t) const;
+	bool needs_cast(const Type* t) const;
 	bool is_unamed_padding(size_t index) const;
 	bool is_full_bitfields_struct() const;
 	bool is_bitfield(size_t index) const ;

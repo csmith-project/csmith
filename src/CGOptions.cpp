@@ -183,6 +183,7 @@ DEFINE_GETTER_SETTER_BOOL(use_embedded_assigns);
 DEFINE_GETTER_SETTER_BOOL(use_comma_exprs);
 DEFINE_GETTER_SETTER_BOOL(take_union_field_addr);
 DEFINE_GETTER_SETTER_BOOL(vol_struct_union_fields);
+DEFINE_GETTER_SETTER_BOOL(lang_cpp);
 
 void
 CGOptions::set_default_settings(void)
@@ -279,6 +280,7 @@ CGOptions::set_default_settings(void)
 	take_union_field_addr(true);
 	vol_struct_union_fields(true);
 	addr_taken_of_locals(true);
+	lang_cpp(false);
 }
 	
 /*

@@ -42,11 +42,25 @@
 /*
  *
  */
+
+// Needs cast only if it is NULL
+void
+cast_if_needed(Expression* exp)
+{
+	const Type& exp_type = exp->get_type();
+	if((exp->term_type == eConstant) && (exp_type.eType == ePointer) && exp->equals(0)) {
+		exp->cast_type = &exp_type;
+	}
+}
+
 ExpressionComma*
 ExpressionComma::make_random(CGContext &cg_context, const Type* type, const CVQualifiers* qfer)
 {
 	Expression* lhs = Expression::make_random(cg_context, NULL, NULL, false, true);
 	Expression* rhs = Expression::make_random(cg_context, type, qfer, false, false);
+	// typecast, if needed.
+	if(CGOptions::lang_cpp())
+		cast_if_needed(rhs);
 	ExpressionComma* ec = new ExpressionComma(*lhs, *rhs);
 	return ec;
 }
@@ -103,6 +117,7 @@ ExpressionComma::get_eval_to_subexps(vector<const Expression*>& subs) const
 void
 ExpressionComma::Output(std::ostream &out) const
 {
+	output_cast(out);
 	Reducer* reducer = CGOptions::get_reducer();
 	if (reducer && reducer->output_expr(this, out)) {
 		return;

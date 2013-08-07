@@ -313,6 +313,9 @@ FunctionInvocation::make_random_binary_ptr_comparison(CGContext &cg_context)
 	}
 	ERROR_GUARD_AND_DEL2(NULL, fi, lhs);
 
+	// typecast, if needed.
+	rhs->check_and_set_cast(&lhs->get_type());
+
 	// TODO: fix `rhs' for eLShift and eRShift and ...
 	// Currently, the "fix" is handled in `FunctionInvocationBinary::Output'.
 	fi->param_value.push_back(lhs);

@@ -192,6 +192,9 @@ static void print_help()
 	cout << "  --volatile-pointers | --no-volatile-pointers: enable | disable volatile pointers (enabled by default)." << endl << endl;
 	cout << "  --const-pointers | --no-const-pointers: enable | disable const pointers (enabled by default)." << endl << endl;
 
+        // language options
+	cout << "  --lang-cpp : generate C++ code (C by default)." << endl << endl;
+
 }
 
 static void print_advanced_help()
@@ -1278,6 +1281,11 @@ main(int argc, char **argv)
 
 		if (strcmp (argv[i], "--no-signed-char-index") == 0) {
 			CGOptions::signed_char_index(false);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--lang-cpp") == 0) {
+			CGOptions::lang_cpp(true);
 			continue;
 		}
 

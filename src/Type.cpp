@@ -1359,6 +1359,26 @@ Type::is_convertable(const Type* t) const
     return false;
 }
 
+// eLong & eInt, eULong & eUInt are equivalent
+bool
+Type::is_equivalent(const Type* t) const
+{
+	if(this == t)
+		return true;
+
+	if(eType == eSimple) {
+		return (is_signed() == t->is_signed()) && (SizeInBytes() == t->SizeInBytes());
+	}
+
+	return false;
+}
+
+bool
+Type::needs_cast(const Type* t) const
+{
+	return (eType == ePointer) && !get_base_type()->is_equivalent(t->get_base_type());
+}
+
 bool 
 Type::match(const Type* t, enum eMatchType mt) const
 {

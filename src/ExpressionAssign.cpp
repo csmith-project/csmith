@@ -129,6 +129,7 @@ ExpressionAssign::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context
 void
 ExpressionAssign::Output(std::ostream &out) const
 {
+	output_cast(out);
 	Reducer* reducer = CGOptions::get_reducer();
 	if (reducer && reducer->output_expr(this, out)) {
 		return;

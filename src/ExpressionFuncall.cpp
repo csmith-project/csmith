@@ -241,6 +241,7 @@ bool ExpressionFuncall::compatible(const Expression * /*exp*/) const
 void
 ExpressionFuncall::Output(std::ostream &out) const
 {
+	output_cast(out);
 	Reducer* reducer = CGOptions::get_reducer();
 	if (reducer && reducer->output_expr(this, out)) {
 		return;
