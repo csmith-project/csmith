@@ -118,7 +118,7 @@ sub build_llvm() {
     abort_if_fail ("svn update -r $REV");
     chdir "$SRC_DIR/projects/compiler-rt" or die;
     abort_if_fail ("svn update -r $REV");
-    chdir "$SRC_DIR/tools/clang/tools" or die;
+    chdir "$SRC_DIR/tools/clang/tools/extra" or die;
     abort_if_fail ("svn update -r $REV");
 
     abort_if_fail ("rm -rf $BUILD_DIR");
