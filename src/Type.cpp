@@ -592,7 +592,7 @@ Type::make_one_bitfield(vector<const Type*> &random_fields, vector<CVQualifiers>
 	int length = rnd_upto(max_length); 
 	ERROR_RETURN();
 
-	bool no_zero_len = fields_length.empty() || (fields_length.back() == 0);
+	bool no_zero_len = fields_length.empty() || (fields_length.back() == 0) || CGOptions::ccomp();
 	// force length to be non-zero is required
 	if (length == 0 && no_zero_len) {
 		if (max_length <= 2) length = 1;
@@ -992,7 +992,6 @@ Type::has_aggregate_field(const vector<const Type *> &fields)
 {
   for (vector<const Type *>::const_iterator iter = fields.begin(),
        iter_end = fields.end(); iter != iter_end; ++iter) {
-    eTypeDesc field_type = (*iter)->eType;
     if ((*iter)->is_aggregate())
         return true;
   }
