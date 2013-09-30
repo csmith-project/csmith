@@ -223,6 +223,9 @@ public:
 	int get_struct_depth(void) const;
 	void get_int_subfield_names(string prefix, vector<string>& names, const vector<int>& excluded_fields) const;
 	bool is_signed(void) const;
+	bool is_long_long(void) const {
+		return ((eType == eSimple) && (simple_type == eLongLong || simple_type == eULongLong));
+	}
 	const Type* to_unsigned(void) const;
 	bool is_pointer_to_char(void) const { return ptr_type && ptr_type->eType == eSimple && (ptr_type->simple_type==eChar || ptr_type->simple_type==eUChar);}
 	bool is_signed_char() const {

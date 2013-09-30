@@ -1005,8 +1005,7 @@ Type::has_longlong_field(const vector<const Type *> &fields)
 {
   for (vector<const Type *>::const_iterator iter = fields.begin(),
        iter_end = fields.end(); iter != iter_end; ++iter) {
-    if (((*iter)->eType == eSimple) && (((*iter)->simple_type == eLongLong) || 
-					((*iter)->simple_type == eULongLong)))
+    if ((*iter)->is_long_long())
         return true;
   }
   return false;
