@@ -281,7 +281,7 @@ OutputMgr::OutputHeader(int argc, char *argv[], unsigned long seed)
 		out << endl;
 	}
 
-	if (!CGOptions::longlong() || CGOptions::ccomp()) {
+	if (!CGOptions::longlong()) {
 		out << endl;
 		out << "#define NO_LONGLONG" << std::endl;
 		out << endl;

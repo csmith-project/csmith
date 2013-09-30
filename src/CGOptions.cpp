@@ -462,8 +462,6 @@ CGOptions::has_extension_support()
 bool
 CGOptions::allow_int64()
 {
-	if (CGOptions::ccomp()) 
-		return false; 
 	return ((!CGOptions::has_extension_support()) &&
 			CGOptions::math64() && 
 			CGOptions::longlong());

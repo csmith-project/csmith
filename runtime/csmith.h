@@ -72,7 +72,7 @@ crc32_byte (uint8_t b) {
 		crc32_tab[(crc32_context ^ b) & 0xFF];
 }
 
-#if defined(__SPLAT__) || defined (__COMPCERT__) || defined(NO_LONGLONG)
+#if defined(__SPLAT__) || defined(NO_LONGLONG)
 static void 
 crc32_8bytes (uint32_t val)
 {
