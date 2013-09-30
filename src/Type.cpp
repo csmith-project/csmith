@@ -194,7 +194,7 @@ NonVoidNonVolatileTypeFilter::get_type()
 class ChooseRandomTypeFilter : public Filter
 {
 public:
-	ChooseRandomTypeFilter(bool for_field_var=false);
+	ChooseRandomTypeFilter(bool for_field_var, bool for_packed_struct);
 
 	virtual ~ChooseRandomTypeFilter();
 
@@ -202,13 +202,18 @@ public:
 
 	Type *get_type();
 
-	bool for_field_var;
+	bool for_field_var_;
+
+	bool for_packed_struct_;
+
 private:
 	mutable Type *typ_;
 };
 
-ChooseRandomTypeFilter::ChooseRandomTypeFilter(bool for_field_var)
-: for_field_var(for_field_var)
+ChooseRandomTypeFilter::ChooseRandomTypeFilter(bool for_field_var,
+						bool for_packed_struct)
+  : for_field_var_(for_field_var),
+    for_packed_struct_(for_packed_struct)
 {
 }
 
@@ -224,6 +229,9 @@ ChooseRandomTypeFilter::filter(int v) const
 	typ_ = AllTypes[v];
 	assert(typ_);
 	if (typ_->eType == eSimple) {
+		if (CGOptions::ccomp() && for_packed_struct_ && 
+		    ((typ_->simple_type == eULongLong) || (typ_->simple_type == eLongLong)))
+			return true;
 		Filter *filter = SIMPLE_TYPES_PROB_FILTER;
 		return filter->filter(typ_->simple_type);
 	}
@@ -231,7 +239,7 @@ ChooseRandomTypeFilter::filter(int v) const
 		return true;
 	}
 
-	if (for_field_var && typ_->get_struct_depth() >= CGOptions::max_nested_struct_level()) {
+	if (for_field_var_ && typ_->get_struct_depth() >= CGOptions::max_nested_struct_level()) {
 		return true;
 	}
 	return false;
@@ -608,12 +616,13 @@ Type::make_one_bitfield(vector<const Type*> &random_fields, vector<CVQualifiers>
 void
 Type::make_full_bitfields_struct_fields(size_t field_cnt, vector<const Type*> &random_fields, 
 					vector<CVQualifiers> &qualifiers,
-					vector<int> &fields_length)
+					vector<int> &fields_length,
+					bool packed)
 {
 	for (size_t i=0; i<field_cnt; i++) {
 		bool is_non_bitfield = rnd_flipcoin(ScalarFieldInFullBitFieldsProb);
 		if (is_non_bitfield) {
-			make_one_struct_field(random_fields, qualifiers, fields_length);
+			make_one_struct_field(random_fields, qualifiers, fields_length, packed);
 		}
 		else {
 			make_one_bitfield(random_fields, qualifiers, fields_length, false);
@@ -624,9 +633,10 @@ Type::make_full_bitfields_struct_fields(size_t field_cnt, vector<const Type*> &r
 void
 Type::make_one_struct_field(vector<const Type*> &random_fields, 
 					vector<CVQualifiers> &qualifiers,
-					vector<int> &fields_length)
+					vector<int> &fields_length,
+					bool packed)
 {
-	ChooseRandomTypeFilter f(true);
+	ChooseRandomTypeFilter f(true, packed);
 	unsigned int i = rnd_upto(AllTypes.size(), &f);
 	ERROR_RETURN();
 	const Type* type = AllTypes[i];
@@ -696,7 +706,8 @@ Type::make_one_union_field(vector<const Type*> &fields, vector<CVQualifiers> &qf
 void
 Type::make_normal_struct_fields(size_t field_cnt, vector<const Type*> &random_fields, 
 					vector<CVQualifiers> &qualifiers,
-					vector<int> &fields_length)
+					vector<int> &fields_length,
+					bool packed)
 {
 	for (size_t i=0; i<field_cnt; i++)
 	{
@@ -705,7 +716,7 @@ Type::make_normal_struct_fields(size_t field_cnt, vector<const Type*> &random_fi
 			make_one_bitfield(random_fields, qualifiers, fields_length, false);
 		}
 		else {
-			make_one_struct_field(random_fields, qualifiers, fields_length);
+			make_one_struct_field(random_fields, qualifiers, fields_length, packed);
 		}
 	}
 } 
@@ -1026,9 +1037,9 @@ Type::make_random_struct_type(void)
     }
     //if (CGOptions::bitfields())
     if (is_bitfields)
-        make_full_bitfields_struct_fields(field_cnt, random_fields, qualifiers, fields_length);
+        make_full_bitfields_struct_fields(field_cnt, random_fields, qualifiers, fields_length, packed);
     else
-        make_normal_struct_fields(field_cnt, random_fields, qualifiers, fields_length);
+        make_normal_struct_fields(field_cnt, random_fields, qualifiers, fields_length, packed);
 
     ERROR_GUARD(NULL);
 
@@ -1130,7 +1141,7 @@ GenerateAllTypes(void)
 const Type *
 Type::choose_random()
 {
-	ChooseRandomTypeFilter f;
+	ChooseRandomTypeFilter f(/*for_union*/false, /*for_packed_struct*/false);
 	rnd_upto(AllTypes.size(), &f);
 	ERROR_GUARD(NULL);
 	Type *rv_type = f.get_type();
