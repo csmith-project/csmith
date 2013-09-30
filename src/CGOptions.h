@@ -240,6 +240,9 @@ public:
 	static bool math64(void);
 	static bool math64(bool p);
 
+	static bool inline_function(void);
+	static bool inline_function(bool p);
+
 	static bool longlong(void);
 	static bool longlong(bool p);
 
@@ -389,6 +392,9 @@ public:
 	static bool force_non_uniform_array_init(void);
 	static bool force_non_uniform_array_init(bool p);
 
+	static int inline_function_prob(void);
+	static int inline_function_prob(int p);
+
 	static int null_pointer_dereference_prob(void);
 	static int null_pointer_dereference_prob(int p);
 
@@ -506,6 +512,7 @@ private:
 	static std::string	delta_input_;
 	static bool	no_delta_reduction_;
 	static bool	math64_;
+	static bool	inline_function_;
 	static bool	math_notmp_;
 	static bool	longlong_;
 	static bool	int8_;
@@ -549,6 +556,7 @@ private:
 	static bool mark_mutable_const_;
 	static bool force_globals_static_;
 	static bool force_non_uniform_array_init_;
+	static int inline_function_prob_;
 	static int null_pointer_dereference_prob_;
 	static int dead_pointer_dereference_prob_;
 	// flag that indicate the comformance level to C99. true means relaxed

@@ -168,6 +168,8 @@ static void print_help()
 	cout << "  --uint8 | --no-uint8: enable | disable uint8_t (enabled by default)." << endl << endl;
 	cout << "  --main | --nomain: enable | disable to generate main function (enabled by default)." << endl <<  endl;  
 	cout << "  --math64 | --no-math64: enable | disable 64-bit math ops (enabled by default)." << endl << endl;
+	cout << "  --inline-function | --no-inline-function: enable | disable inline attributes on generated functions." << endl << endl;
+	cout << "  --inline-function-prob <num>: set the probability of each function being marked as inline (default is 50)." << endl << endl;
 
 	// numbered controls	
 	cout << "  --max-array-dim <num>: limit array dimensions to <num>. (default 3)" << endl << endl;
@@ -730,6 +732,16 @@ main(int argc, char **argv)
 			continue;
 		}
 
+		if (strcmp (argv[i], "--inline-function") == 0) {
+			CGOptions::inline_function(true);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--no-inline-function") == 0) {
+			CGOptions::inline_function(false);
+			continue;
+		}
+
 		if (strcmp (argv[i], "--longlong") == 0) {
 			CGOptions::longlong(true);
 			continue;
@@ -1111,6 +1123,16 @@ main(int argc, char **argv)
 
 		if (strcmp (argv[i], "--no-force-non-uniform-arrays") == 0) {
 			CGOptions::force_non_uniform_array_init(false);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--inline-function-prob") == 0 ) {
+			unsigned long prob;
+			i++;
+			arg_check(argc, i);
+			if (!parse_int_arg(argv[i], &prob))
+				exit(-1);
+			CGOptions::inline_function_prob(prob);
 			continue;
 		}
 

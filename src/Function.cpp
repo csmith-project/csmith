@@ -336,6 +336,7 @@ Function::Function(const string &name, const Type *return_type)
 	  body(0),
 	  fact_changed(false),
 	  union_field_read(false),
+	  is_inlined(false),
 	  visited_cnt(0),
 	  build_state(UNBUILT)
 {
@@ -346,7 +347,7 @@ Function *
 Function::make_random_signature(const CGContext& cg_context, const Type* type, const CVQualifiers* qfer)
 {
 	if (type == 0)
-        type = RandomReturnType();
+		type = RandomReturnType();
 
 	DEPTH_GUARD_BY_TYPE_RETURN(dtFunction, NULL);
 	ERROR_GUARD(NULL);
@@ -360,6 +361,8 @@ Function::make_random_signature(const CGContext& cg_context, const Type* type, c
 	f->rv = Variable::CreateVariable(rvname, type, NULL, &ret_qfer);
 	GenerateParameterList(*f); 
 	FMList.push_back(new FactMgr(f));
+	if (CGOptions::inline_function() && rnd_flipcoin(InlineFunctionProb))
+		f->is_inlined = true;
 	return f;
 }
 
@@ -458,6 +461,8 @@ Function::OutputHeader(std::ostream &out)
 		assert(return_type->eType != eStruct);
 	if (!CGOptions::return_unions() && return_type)
 		assert(return_type->eType != eUnion);
+	if (is_inlined)
+		out << "inline ";
 	// force functions to be static if necessary
 	if (CGOptions::force_globals_static()) {
 		out << "static ";

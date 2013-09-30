@@ -473,6 +473,9 @@ Probabilities::set_single_name_maps()
 	// for wrapping all accesses to a var by ACCESS_ONCE macro
 	set_single_name("access_once_var_prob", pAccessOnceVariableProb);
 
+	// for marking each function as inline
+	set_single_name("inline_function_prob", pInlineFunctionProb);
+
         //////////////////////////////////////////////////////////////////
 	// group for statement
 	set_single_name("statement_prob", pStatementProb);
@@ -579,6 +582,7 @@ Probabilities::initialize_single_probs()
 	}
 
 	m[pAccessOnceVariableProb] = 20;
+	m[pInlineFunctionProb] = CGOptions::inline_function_prob();
 
 	std::map<ProbName, int>::iterator i;
 	for (i = m.begin(); i != m.end(); ++i) {
