@@ -107,8 +107,8 @@ public:
 
 	static const Type *choose_random_nonvoid();
 
-    // choose a random integer type
-    static const Type *choose_random_simple(void);
+	// choose a random integer type
+	static const Type *choose_random_simple(void);
 
 	// choose a random pointer type
 	static const Type* choose_random_pointer_type(void);
@@ -187,11 +187,11 @@ public:
 					vector<CVQualifiers> &qualifiers,
 					vector<int> &fields_length);
 
-    // make a random pointer type
-    static Type* make_random_pointer_type(void);
+	// make a random pointer type
+	static Type* make_random_pointer_type(void);
 
-    // generate all simple types except void and long long(if it is not allowed)
-    static void GenerateSimpleTypes(void);
+	// generate all simple types except void and long long(if it is not allowed)
+	static void GenerateSimpleTypes(void);
 
 	void get_type_sizeof_string(std::string &s) const;
 
@@ -200,6 +200,8 @@ public:
 
 	// select a type for LHS
 	static const Type *SelectLType(bool no_volatile, eAssignOps op);
+
+	static bool has_aggregate_field(const vector<const Type *> &fields);
 
 	explicit Type(eSimpleType simple_type);
 	Type(vector<const Type*>& fields, bool isStruct, bool packed, 

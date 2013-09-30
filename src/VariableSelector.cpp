@@ -1392,6 +1392,8 @@ VariableSelector::itemize_array(CGContext& cg_context, const ArrayVariable* av)
 				const Variable* iv = iter->first;
 				if (!CGOptions::signed_char_index() && iv->type->is_signed_char())
 					continue;
+				if (CGOptions::ccomp() && iv->is_packed_aggregate_field_var())
+					continue;
 				// unfortunately different std::map implementations give us diff. order, we 
 				// have to sort them to generate consistant outputs across diff. platforms
 				bool insert_middle = false;

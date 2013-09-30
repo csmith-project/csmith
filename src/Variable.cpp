@@ -299,6 +299,17 @@ bool Variable::has_field_var(const Variable* v) const
     return false;
 }
 
+// return true if the var is inside a packed aggregate,
+bool
+Variable::is_packed_aggregate_field_var() const 
+{
+	if (!field_var_of)
+		return false;
+	if (field_var_of->type->packed_)
+		return true;
+	return field_var_of->is_packed_aggregate_field_var();
+}
+
 const Variable* 
 Variable::get_top_container(void) const
 {
@@ -491,13 +502,13 @@ Variable::is_visible_local(const Block* blk) const
 	if (is_field_var()) {
 		return field_var_of->is_visible_local(blk);
 	}
-    size_t i;
+	size_t i;
 	const Function* func = blk->func;
-    for (i=0; i<func->param.size(); i++) {
-        if (func->param[i]->match(this)) {
-            return true;
-        }
-    } 
+	for (i=0; i<func->param.size(); i++) {
+		if (func->param[i]->match(this)) {
+			return true;
+ 		}
+	} 
 	const Block* b = blk;
 	while (b) {
 		if (find_variable_in_set(b->local_vars, this) != -1) {

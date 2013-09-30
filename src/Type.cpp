@@ -987,6 +987,18 @@ Type::make_all_struct_union_types(void)
 	}
 }
 
+bool
+Type::has_aggregate_field(const vector<const Type *> &fields)
+{
+  for (vector<const Type *>::const_iterator iter = fields.begin(),
+       iter_end = fields.end(); iter != iter_end; ++iter) {
+    eTypeDesc field_type = (*iter)->eType;
+    if ((*iter)->is_aggregate())
+        return true;
+  }
+  return false;
+}
+
 Type*
 Type::make_random_struct_type(void)
 { 
@@ -1012,8 +1024,10 @@ Type::make_random_struct_type(void)
     // for now, no union type
     bool packed = false;
     if (CGOptions::packed_struct()) {
-        packed = rnd_flipcoin(50);
-        ERROR_GUARD(NULL);
+        if (!CGOptions::ccomp() || !has_aggregate_field(random_fields)) {
+            packed = rnd_flipcoin(50);
+            ERROR_GUARD(NULL);
+        }
     }
 
     Type* new_type = new Type(random_fields, true, packed, qualifiers, fields_length);
@@ -1604,8 +1618,10 @@ void OutputStructUnion(Type* type, std::ostream &out)
         } 
         // output myself
         if (type->packed_) {
-            out << "#pragma pack(push)";
-            really_outputln(out);
+            if (!CGOptions::ccomp()) {
+                out << "#pragma pack(push)";
+                really_outputln(out);
+            }
             out << "#pragma pack(1)";
             really_outputln(out);
         }
@@ -1645,8 +1661,13 @@ void OutputStructUnion(Type* type, std::ostream &out)
         out << "};";
 		really_outputln(out);
         if (type->packed_) {
+		if (CGOptions::ccomp()) {
+			out << "#pragma pack()";
+		}
+		else {
 			out << "#pragma pack(pop)";
-			really_outputln(out);
+		}
+		really_outputln(out);
         }
         type->printed = true;
 		really_outputln(out);
