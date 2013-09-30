@@ -578,7 +578,8 @@ Type::choose_random_nonvoid_simple(void)
 }
 
 void
-Type::make_one_bitfield(vector<const Type*> &random_fields, vector<CVQualifiers> &qualifiers, vector<int> &fields_length)
+Type::make_one_bitfield(vector<const Type*> &random_fields, vector<CVQualifiers> &qualifiers, 
+			vector<int> &fields_length, bool for_union)
 {
 	int max_length = CGOptions::int_size() * 8;
 	bool sign = rnd_flipcoin(BitFieldsSignedProb);
@@ -592,7 +593,8 @@ Type::make_one_bitfield(vector<const Type*> &random_fields, vector<CVQualifiers>
 	int length = rnd_upto(max_length); 
 	ERROR_RETURN();
 
-	bool no_zero_len = fields_length.empty() || (fields_length.back() == 0) || CGOptions::ccomp();
+	bool no_zero_len = 
+		fields_length.empty() || (fields_length.back() == 0) || (for_union && CGOptions::ccomp());
 	// force length to be non-zero is required
 	if (length == 0 && no_zero_len) {
 		if (max_length <= 2) length = 1;
@@ -614,7 +616,7 @@ Type::make_full_bitfields_struct_fields(size_t field_cnt, vector<const Type*> &r
 			make_one_struct_field(random_fields, qualifiers, fields_length);
 		}
 		else {
-			make_one_bitfield(random_fields, qualifiers, fields_length);
+			make_one_bitfield(random_fields, qualifiers, fields_length, false);
 		}
 	}
 }
@@ -640,7 +642,7 @@ Type::make_one_union_field(vector<const Type*> &fields, vector<CVQualifiers> &qf
 {
 	bool is_bitfield = CGOptions::bitfields() && rnd_flipcoin(BitFieldInNormalStructProb);
 	if (is_bitfield) {
-		make_one_bitfield(fields, qfers, lens);
+		make_one_bitfield(fields, qfers, lens, true);
 	} 
 	else {
 		size_t i;
@@ -700,7 +702,7 @@ Type::make_normal_struct_fields(size_t field_cnt, vector<const Type*> &random_fi
 	{
 		bool is_bitfield = CGOptions::bitfields() && rnd_flipcoin(BitFieldInNormalStructProb);
 		if (is_bitfield) {
-			make_one_bitfield(random_fields, qualifiers, fields_length);
+			make_one_bitfield(random_fields, qualifiers, fields_length, false);
 		}
 		else {
 			make_one_struct_field(random_fields, qualifiers, fields_length);

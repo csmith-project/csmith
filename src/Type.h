@@ -173,7 +173,8 @@ public:
 
 	static void make_one_bitfield(vector<const Type*> &random_fields,
 				vector<CVQualifiers> &qualifiers,
-				vector<int> &fields_length);
+				vector<int> &fields_length,
+				bool for_union);
 
 	static void make_one_struct_field(vector<const Type*> &random_fields, 
 					vector<CVQualifiers> &qualifiers, vector<int> &fields_length);
