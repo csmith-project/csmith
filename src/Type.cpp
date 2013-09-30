@@ -1015,13 +1015,7 @@ Type::make_random_struct_type(void)
     vector<int> fields_length;
     bool is_bitfields = CGOptions::bitfields() && rnd_flipcoin(BitFieldsCreationProb);
     ERROR_GUARD(NULL);
-    //if (CGOptions::bitfields())
-    if (is_bitfields)
-        make_full_bitfields_struct_fields(field_cnt, random_fields, qualifiers, fields_length);
-    else
-        make_normal_struct_fields(field_cnt, random_fields, qualifiers, fields_length);
 
-    ERROR_GUARD(NULL);
     // for now, no union type
     bool packed = false;
     if (CGOptions::packed_struct()) {
@@ -1030,6 +1024,13 @@ Type::make_random_struct_type(void)
             ERROR_GUARD(NULL);
         }
     }
+    //if (CGOptions::bitfields())
+    if (is_bitfields)
+        make_full_bitfields_struct_fields(field_cnt, random_fields, qualifiers, fields_length);
+    else
+        make_normal_struct_fields(field_cnt, random_fields, qualifiers, fields_length);
+
+    ERROR_GUARD(NULL);
 
     Type* new_type = new Type(random_fields, true, packed, qualifiers, fields_length);
     return new_type;
