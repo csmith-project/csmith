@@ -177,16 +177,21 @@ public:
 				bool for_union);
 
 	static void make_one_struct_field(vector<const Type*> &random_fields, 
-					vector<CVQualifiers> &qualifiers, vector<int> &fields_length);
+					vector<CVQualifiers> &qualifiers, 
+					vector<int> &fields_length,
+					bool packed);
+
 	static void make_one_union_field(vector<const Type*> &fields, vector<CVQualifiers> &qfers, vector<int> &lens);
 
 	static void make_full_bitfields_struct_fields(size_t field_cnt, vector<const Type*> &random_fields, 
 					vector<CVQualifiers> &qualifiers,
-					vector<int> &fields_length);
+					vector<int> &fields_length,
+					bool packed);
 
 	static void make_normal_struct_fields(size_t field_cnt, vector<const Type*> &random_fields, 
 					vector<CVQualifiers> &qualifiers,
-					vector<int> &fields_length);
+					vector<int> &fields_length,
+					bool packed);
 
 	// make a random pointer type
 	static Type* make_random_pointer_type(void);
