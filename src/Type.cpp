@@ -587,7 +587,7 @@ Type::choose_random_nonvoid_simple(void)
 
 void
 Type::make_one_bitfield(vector<const Type*> &random_fields, vector<CVQualifiers> &qualifiers, 
-			vector<int> &fields_length, bool for_union)
+			vector<int> &fields_length)
 {
 	int max_length = CGOptions::int_size() * 8;
 	bool sign = rnd_flipcoin(BitFieldsSignedProb);
@@ -601,8 +601,7 @@ Type::make_one_bitfield(vector<const Type*> &random_fields, vector<CVQualifiers>
 	int length = rnd_upto(max_length); 
 	ERROR_RETURN();
 
-	bool no_zero_len = 
-		fields_length.empty() || (fields_length.back() == 0) || (for_union && CGOptions::ccomp());
+	bool no_zero_len = fields_length.empty() || (fields_length.back() == 0);
 	// force length to be non-zero is required
 	if (length == 0 && no_zero_len) {
 		if (max_length <= 2) length = 1;
@@ -625,7 +624,7 @@ Type::make_full_bitfields_struct_fields(size_t field_cnt, vector<const Type*> &r
 			make_one_struct_field(random_fields, qualifiers, fields_length, packed);
 		}
 		else {
-			make_one_bitfield(random_fields, qualifiers, fields_length, false);
+			make_one_bitfield(random_fields, qualifiers, fields_length);
 		}
 	}
 }
@@ -650,9 +649,9 @@ Type::make_one_struct_field(vector<const Type*> &random_fields,
 void
 Type::make_one_union_field(vector<const Type*> &fields, vector<CVQualifiers> &qfers, vector<int> &lens)
 {
-	bool is_bitfield = CGOptions::bitfields() && rnd_flipcoin(BitFieldInNormalStructProb);
+	bool is_bitfield = CGOptions::bitfields() && !CGOptions::ccomp() && rnd_flipcoin(BitFieldInNormalStructProb);
 	if (is_bitfield) {
-		make_one_bitfield(fields, qfers, lens, true);
+		make_one_bitfield(fields, qfers, lens);
 	} 
 	else {
 		size_t i;
@@ -713,7 +712,7 @@ Type::make_normal_struct_fields(size_t field_cnt, vector<const Type*> &random_fi
 	{
 		bool is_bitfield = CGOptions::bitfields() && rnd_flipcoin(BitFieldInNormalStructProb);
 		if (is_bitfield) {
-			make_one_bitfield(random_fields, qualifiers, fields_length, false);
+			make_one_bitfield(random_fields, qualifiers, fields_length);
 		}
 		else {
 			make_one_struct_field(random_fields, qualifiers, fields_length, packed);
@@ -1141,7 +1140,7 @@ GenerateAllTypes(void)
 const Type *
 Type::choose_random()
 {
-	ChooseRandomTypeFilter f(/*for_union*/false, /*for_packed_struct*/false);
+	ChooseRandomTypeFilter f(/*for_field_var*/false, /*for_packed_struct*/false);
 	rnd_upto(AllTypes.size(), &f);
 	ERROR_GUARD(NULL);
 	Type *rv_type = f.get_type();
