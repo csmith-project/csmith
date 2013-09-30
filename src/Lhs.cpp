@@ -101,6 +101,9 @@ Lhs::make_random(CGContext &cg_context, const Type* t, const CVQualifiers* qfer,
 		if (valid && t->eType == eSimple && no_signed_overflow && (var->type->get_base_type()->is_signed() || var->isBitfield_)) {
 			valid = false;
 		}
+		if (valid && CGOptions::ccomp() && var->isBitfield_ && t->is_long_long()) {
+			valid = false;
+		}
 		if (valid) {
 			assert(var); 
 			Lhs tmp(*var, t, compound_assign);

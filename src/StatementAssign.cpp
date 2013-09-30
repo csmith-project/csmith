@@ -188,6 +188,9 @@ StatementAssign::make_random(CGContext &cg_context, const Type* type, const CVQu
 
 	// typecast, if needed.
 	e->check_and_set_cast(type);
+	if (CGOptions::ccomp() && lhs->get_var()->isBitfield_) {
+		e->cast_type = type;
+	}
 
 	if (CompatibleChecker::compatible_check(e, lhs)) {
 		Error::set_error(COMPATIBLE_CHECK_ERROR);

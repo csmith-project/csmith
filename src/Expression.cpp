@@ -237,7 +237,7 @@ Expression::check_and_set_cast(const Type* type)
 void
 Expression::output_cast(std::ostream& out) const
 {
-	if(CGOptions::lang_cpp() && (cast_type != NULL)) {
+	if((CGOptions::ccomp() || CGOptions::lang_cpp()) && (cast_type != NULL)) {
 		out << "(";
 		cast_type->Output(out);
 		out << ") ";
