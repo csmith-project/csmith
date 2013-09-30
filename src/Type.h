@@ -177,20 +177,17 @@ public:
 
 	static void make_one_struct_field(vector<const Type*> &random_fields, 
 					vector<CVQualifiers> &qualifiers, 
-					vector<int> &fields_length,
-					bool packed);
+					vector<int> &fields_length);
 
 	static void make_one_union_field(vector<const Type*> &fields, vector<CVQualifiers> &qfers, vector<int> &lens);
 
 	static void make_full_bitfields_struct_fields(size_t field_cnt, vector<const Type*> &random_fields, 
 					vector<CVQualifiers> &qualifiers,
-					vector<int> &fields_length,
-					bool packed);
+					vector<int> &fields_length);
 
 	static void make_normal_struct_fields(size_t field_cnt, vector<const Type*> &random_fields, 
 					vector<CVQualifiers> &qualifiers,
-					vector<int> &fields_length,
-					bool packed);
+					vector<int> &fields_length);
 
 	// make a random pointer type
 	static Type* make_random_pointer_type(void);
@@ -207,6 +204,8 @@ public:
 	static const Type *SelectLType(bool no_volatile, eAssignOps op);
 
 	static bool has_aggregate_field(const vector<const Type *> &fields);
+
+	static bool has_longlong_field(const vector<const Type *> &fields);
 
 	explicit Type(eSimpleType simple_type);
 	Type(vector<const Type*>& fields, bool isStruct, bool packed, 

@@ -194,7 +194,7 @@ NonVoidNonVolatileTypeFilter::get_type()
 class ChooseRandomTypeFilter : public Filter
 {
 public:
-	ChooseRandomTypeFilter(bool for_field_var, bool for_packed_struct);
+	ChooseRandomTypeFilter(bool for_field_var);
 
 	virtual ~ChooseRandomTypeFilter();
 
@@ -204,16 +204,12 @@ public:
 
 	bool for_field_var_;
 
-	bool for_packed_struct_;
-
 private:
 	mutable Type *typ_;
 };
 
-ChooseRandomTypeFilter::ChooseRandomTypeFilter(bool for_field_var,
-						bool for_packed_struct)
-  : for_field_var_(for_field_var),
-    for_packed_struct_(for_packed_struct)
+ChooseRandomTypeFilter::ChooseRandomTypeFilter(bool for_field_var)
+  : for_field_var_(for_field_var)
 {
 }
 
@@ -229,9 +225,6 @@ ChooseRandomTypeFilter::filter(int v) const
 	typ_ = AllTypes[v];
 	assert(typ_);
 	if (typ_->eType == eSimple) {
-		if (CGOptions::ccomp() && for_packed_struct_ && 
-		    ((typ_->simple_type == eULongLong) || (typ_->simple_type == eLongLong)))
-			return true;
 		Filter *filter = SIMPLE_TYPES_PROB_FILTER;
 		return filter->filter(typ_->simple_type);
 	}
@@ -615,13 +608,12 @@ Type::make_one_bitfield(vector<const Type*> &random_fields, vector<CVQualifiers>
 void
 Type::make_full_bitfields_struct_fields(size_t field_cnt, vector<const Type*> &random_fields, 
 					vector<CVQualifiers> &qualifiers,
-					vector<int> &fields_length,
-					bool packed)
+					vector<int> &fields_length)
 {
 	for (size_t i=0; i<field_cnt; i++) {
 		bool is_non_bitfield = rnd_flipcoin(ScalarFieldInFullBitFieldsProb);
 		if (is_non_bitfield) {
-			make_one_struct_field(random_fields, qualifiers, fields_length, packed);
+			make_one_struct_field(random_fields, qualifiers, fields_length);
 		}
 		else {
 			make_one_bitfield(random_fields, qualifiers, fields_length);
@@ -632,10 +624,9 @@ Type::make_full_bitfields_struct_fields(size_t field_cnt, vector<const Type*> &r
 void
 Type::make_one_struct_field(vector<const Type*> &random_fields, 
 					vector<CVQualifiers> &qualifiers,
-					vector<int> &fields_length,
-					bool packed)
+					vector<int> &fields_length)
 {
-	ChooseRandomTypeFilter f(true, packed);
+	ChooseRandomTypeFilter f(/*for_field_var*/true);
 	unsigned int i = rnd_upto(AllTypes.size(), &f);
 	ERROR_RETURN();
 	const Type* type = AllTypes[i];
@@ -705,8 +696,7 @@ Type::make_one_union_field(vector<const Type*> &fields, vector<CVQualifiers> &qf
 void
 Type::make_normal_struct_fields(size_t field_cnt, vector<const Type*> &random_fields, 
 					vector<CVQualifiers> &qualifiers,
-					vector<int> &fields_length,
-					bool packed)
+					vector<int> &fields_length)
 {
 	for (size_t i=0; i<field_cnt; i++)
 	{
@@ -715,7 +705,7 @@ Type::make_normal_struct_fields(size_t field_cnt, vector<const Type*> &random_fi
 			make_one_bitfield(random_fields, qualifiers, fields_length);
 		}
 		else {
-			make_one_struct_field(random_fields, qualifiers, fields_length, packed);
+			make_one_struct_field(random_fields, qualifiers, fields_length);
 		}
 	}
 } 
@@ -1010,6 +1000,18 @@ Type::has_aggregate_field(const vector<const Type *> &fields)
   return false;
 }
 
+bool
+Type::has_longlong_field(const vector<const Type *> &fields)
+{
+  for (vector<const Type *>::const_iterator iter = fields.begin(),
+       iter_end = fields.end(); iter != iter_end; ++iter) {
+    if (((*iter)->eType == eSimple) && (((*iter)->simple_type == eLongLong) || 
+					((*iter)->simple_type == eULongLong)))
+        return true;
+  }
+  return false;
+}
+
 Type*
 Type::make_random_struct_type(void)
 { 
@@ -1026,21 +1028,25 @@ Type::make_random_struct_type(void)
     bool is_bitfields = CGOptions::bitfields() && rnd_flipcoin(BitFieldsCreationProb);
     ERROR_GUARD(NULL);
 
+    //if (CGOptions::bitfields())
+    if (is_bitfields)
+        make_full_bitfields_struct_fields(field_cnt, random_fields, qualifiers, fields_length);
+    else
+        make_normal_struct_fields(field_cnt, random_fields, qualifiers, fields_length);
+
+    ERROR_GUARD(NULL);
+
     // for now, no union type
     bool packed = false;
     if (CGOptions::packed_struct()) {
-        if (!CGOptions::ccomp() || !has_aggregate_field(random_fields)) {
+	if (CGOptions::ccomp() && (has_aggregate_field(random_fields) || has_longlong_field(random_fields))) {
+		// Nothing to do
+	}
+	else {
             packed = rnd_flipcoin(50);
             ERROR_GUARD(NULL);
         }
     }
-    //if (CGOptions::bitfields())
-    if (is_bitfields)
-        make_full_bitfields_struct_fields(field_cnt, random_fields, qualifiers, fields_length, packed);
-    else
-        make_normal_struct_fields(field_cnt, random_fields, qualifiers, fields_length, packed);
-
-    ERROR_GUARD(NULL);
 
     Type* new_type = new Type(random_fields, true, packed, qualifiers, fields_length);
     return new_type;
@@ -1140,7 +1146,7 @@ GenerateAllTypes(void)
 const Type *
 Type::choose_random()
 {
-	ChooseRandomTypeFilter f(/*for_field_var*/false, /*for_packed_struct*/false);
+	ChooseRandomTypeFilter f(/*for_field_var*/false);
 	rnd_upto(AllTypes.size(), &f);
 	ERROR_GUARD(NULL);
 	Type *rv_type = f.get_type();
