@@ -403,6 +403,8 @@ Function::make_first(void)
 
 	// No Parameter List
 	f->GenerateBody(CGContext::get_empty_context());
+	if (CGOptions::inline_function() && rnd_flipcoin(InlineFunctionProb))
+		f->is_inlined = true;
 	fm->setup_in_out_maps(true);
 		
 	// update global facts to merged facts at all possible function exits
