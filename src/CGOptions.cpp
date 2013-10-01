@@ -486,9 +486,9 @@ CGOptions::has_conflict(void)
 	if (CGOptions::has_delta_conflict())
 		return true;
 
-	if ((CGOptions::inline_function_prob() <= 0) ||
-	    (CGOptions::inline_function_prob() >= 100)) {
-		conflict_msg_ = "inline-function-prob value must between [1,99]";
+	if ((CGOptions::inline_function_prob() < 0) ||
+	    (CGOptions::inline_function_prob() > 100)) {
+		conflict_msg_ = "inline-function-prob value must between [0,100]";
 		return true;
 	}
 
