@@ -1,4 +1,8 @@
 ===================================================================
+10/03/2013 (total 467)
+  1 clang wrong code bug reported
+  http://llvm.org/bugs/show_bug.cgi?id=17473
+
 09/10/2013 (total 466)
   1 gcc wrong code bug reported
   http://gcc.gnu.org/bugzilla/show_bug.cgi?id=58385
