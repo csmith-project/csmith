@@ -15,12 +15,12 @@ use LockFile::Simple;
 
 ####################################################################
 
-my $xxtra = "-w -DCSMITH_MINIMAL -DNO_PRINTF";
+my $xxtra = "-DCSMITH_MINIMAL";
 
 #my $notmp = "-DUSE_MATH_MACROS_NOTMP";
 my $notmp = "";
 
-my $COMPILER_TIMEOUT = 600;
+my $COMPILER_TIMEOUT = 180;
 
 my $COMPILER_TIMEOUT_RES = 137;
 
@@ -46,6 +46,12 @@ my @gcc_opts = ("-O0",
 		"-O2", 
 		"-O3");
 
+my @o0only = ("-m32 -O0",
+	      "-m32 -O3" );
+
+my @occomp = ("-fall");
+# my @occomp = (" -fbitfields -fstruct-return ");
+
 my @gcc_opts3 = (
     "-O0", 
     "-O1", 
@@ -56,19 +62,43 @@ my @gcc_opts3 = (
 
 my @clang = ("clang",
 	     "clang",
-	     \@gcc_opts3);
+	     \@o0only);
+
+my @ccomp = ("ccomp",
+	     "ccomp",
+	     \@occomp);
 
 my @gcc410 = ("gcc410",
 	     "/home/regehr/z/compilers/gcc-410/bin/gcc-410",
 	     \@gcc_opts3);
 
+my @gcc46 = ("gcc",
+	     "gcc-4.6",
+	     \@gcc_opts3);
+
+my @gcc47 = ("gcc",
+	     "gcc-4.7",
+	     \@gcc_opts3);
+
+my @gcc45 = ("gcc",
+	      "gcc-4.5",
+	      \@gcc_opts3);
+
+my @gcc44 = ("gcc",
+	      "gcc-4.4",
+	      \@gcc_opts3);
+
 my @gcccurrent = ("gcc",
 		  "gcc",
-		  \@gcc_opts3);
+		  \@o0only);
 
 my @compilers_to_test = (
     \@clang,
     \@gcccurrent,
+    \@ccomp,
+    #\@gcc44,
+    #\@gcc45,
+    #\@gcc46,
     #\@gcc410,
     );
 
