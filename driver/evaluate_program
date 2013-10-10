@@ -24,7 +24,7 @@ my $COMPILER_TIMEOUT = 180;
 
 my $COMPILER_TIMEOUT_RES = 137;
 
-my $RUN_PROGRAM = 1;
+my $RUN_PROGRAM = 0;
 
 my $DO_REDUCE = 0;
 
@@ -66,8 +66,24 @@ my @ccomp = ("ccomp",
 	     "ccomp",
 	     \@occomp);
 
+my @gcc400 = ("gcc400",
+	     "/mnt/local/randomtest/gcc-4.0.0-install/bin/gcc",
+	     \@gcc_opts3);
+
 my @gcc410 = ("gcc410",
-	     "/home/regehr/z/compilers/gcc-410/bin/gcc-410",
+	     "/mnt/local/randomtest/gcc-4.1.0-install/bin/gcc",
+	     \@gcc_opts3);
+
+my @gcc420 = ("gcc420",
+	     "/mnt/local/randomtest/gcc-4.2.0-install/bin/gcc",
+	     \@gcc_opts3);
+
+my @gcc430 = ("gcc430",
+	     "/mnt/local/randomtest/gcc-4.3.0-install/bin/gcc",
+	     \@gcc_opts3);
+
+my @gcc440 = ("gcc440",
+	     "/mnt/local/randomtest/gcc-4.4.0-install/bin/gcc",
 	     \@gcc_opts3);
 
 my @gcc46 = ("gcc",
@@ -91,9 +107,14 @@ my @gcccurrent = ("gcc",
 		  \@o0only);
 
 my @compilers_to_test = (
-    \@clang,
-    \@gcccurrent,
-    \@ccomp,
+    \@gcc400,
+    \@gcc410,
+    \@gcc420,
+    \@gcc430,
+    \@gcc440,
+    #\@clang,
+    #\@gcccurrent,
+    #\@ccomp,
     #\@gcc44,
     #\@gcc45,
     #\@gcc46,
@@ -232,19 +253,19 @@ sub unlockit() {
 sub reduce_miscompile ($$$$$$) {
     (my $compiler, my $templ, 
      my $opt1, my $opt, 
-     my $root, my $base_compiler,
-    if (lockit()) {
-	my $res;
-	print "diffing $opt1 and $opt\n";			    
-	runit "cp $root.c small.c" or die;
-	instantiate_test_scripts ($templ, $opt1, $opt, $base_compiler);		
-	runit ("reduce_miscompile > reduce_log.txt 2>&1");
-	print ("reduced size: ");
-	runit ("wc -c small.c");
-	unlockit();			
+     my $root, my $base_compiler) = @_;
+     if (lockit()) {
+	 my $res;
+	 print "diffing $opt1 and $opt\n";			    
+	 runit "cp $root.c small.c" or die;
+	 instantiate_test_scripts ($templ, $opt1, $opt, $base_compiler);		
+	 runit ("reduce_miscompile > reduce_log.txt 2>&1");
+	 print ("reduced size: ");
+	 runit ("wc -c small.c");
+	 unlockit();			
+     }
     }
-}
-
+    
 sub test_compiler ($$$) {
     (my $root, my $compiler_ref, my $custom_options) = @_;
 
@@ -316,9 +337,9 @@ sub test_compiler ($$$) {
 	print "COMPILER FAILED $compiler\n";
 	$interesting = 1;
 	if ($DO_REDUCE) {
-	    reduce_crash ($compiler, 
-			  "test-${base_compiler}-wrong-code-template.sh", 
-			  $opt1, $opt, $root, $base_compiler);
+	    #reduce_crash ($compiler, 
+	#		  "test-${base_compiler}-wrong-code-template.sh", 
+	#		  $opt1, $opt, $root, $base_compiler);
 	}
     }
 
