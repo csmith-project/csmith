@@ -26,9 +26,7 @@ my $COMPILER_TIMEOUT_RES = 137;
 
 my $RUN_PROGRAM = 1;
 
-my $DO_TRIAGE = 0;
-
-my $VERSION_SEARCH = 0;
+my $DO_REDUCE = 0;
 
 ####################################################################
 
@@ -224,9 +222,6 @@ sub lockit() {
 	-stale => 1,
 	);
     my $res = $lockmgr->lock($LOCKFN);
-    if (!$res) {
-	print "couldn't get lockfile to build compiler -- not doing triage on this bug\n";
-    }
     return $res;
 }
 
@@ -234,28 +229,21 @@ sub unlockit() {
     $lockmgr->unlock($LOCKFN);
 }
 
-sub triage ($$$$$$) {
+sub reduce_miscompile ($$$$$$) {
     (my $compiler, my $templ, 
      my $opt1, my $opt, 
      my $root, my $base_compiler,
-     my $version_searchp) = @_;
     if (lockit()) {
 	my $res;
 	print "diffing $opt1 and $opt\n";			    
 	runit "cp $root.c small.c" or die;
 	instantiate_test_scripts ($templ, $opt1, $opt, $base_compiler);		
-	if ($VERSION_SEARCH) {
-	    $res = runit ("version_search $base_compiler");
-	}
 	runit ("reduce_miscompile > reduce_log.txt 2>&1");
 	print ("reduced size: ");
 	runit ("wc -c small.c");
-	if ($VERSION_SEARCH) {
-	    $res = runit ("version_search $base_compiler");
-	}
 	unlockit();			
     }
-	    }
+}
 
 sub test_compiler ($$$) {
     (my $root, my $compiler_ref, my $custom_options) = @_;
@@ -327,6 +315,11 @@ sub test_compiler ($$$) {
     if ($compiler_fail > 0) {
 	print "COMPILER FAILED $compiler\n";
 	$interesting = 1;
+	if ($DO_REDUCE) {
+	    reduce_crash ($compiler, 
+			  "test-${base_compiler}-wrong-code-template.sh", 
+			  $opt1, $opt, $root, $base_compiler);
+	}
     }
 
     if ($success > 0) {
@@ -341,10 +334,10 @@ sub test_compiler ($$$) {
 		    ($csum ne "TIMEOUT" && $csums{$opt} ne "TIMEOUT")) {
 		    print "INTERNAL CHECKSUM FAILURE $compiler $opt\n";
 		    $interesting = 1;
-		    if ($DO_TRIAGE) {
-			triage($compiler, 
-			       "test-${base_compiler}-wrong-code-template.sh", 
-			       $opt1, $opt, $root, $base_compiler);
+		    if ($DO_REDUCE) {
+			reduce_miscompile ($compiler, 
+					   "test-${base_compiler}-wrong-code-template.sh", 
+					   $opt1, $opt, $root, $base_compiler);
 		    }
 		    $consistent = 0;
 		    last;
@@ -362,7 +355,7 @@ sub test_compiler ($$$) {
     } else {
 	return (0, 0, $result, $csum, $interesting);
     }
-		   }
+}
 
 sub test_program ($$) {
     (my $root, my $custom_options) = @_;
