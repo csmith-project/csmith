@@ -98,7 +98,7 @@ sub build_gcc() {
     mkdir $BUILD_DIR or die;
     chdir $BUILD_DIR or die;
 
-    abort_if_fail ("${SRC_DIR}/configure --prefix=$INSTALL_DIR --enable-languages=c,c++ --disable-multilib");
+    abort_if_fail ("${SRC_DIR}/configure --prefix=$INSTALL_DIR --enable-languages=c,c++ --enable-multilib");
     abort_if_fail ("make -j${CPUS}");
     abort_if_fail ("make install");
     
