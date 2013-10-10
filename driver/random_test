@@ -9,7 +9,7 @@ use File::stat;
 ##################################################################
 
 my @ALL_SWARM_OPTS = (
-    "argc",
+    #"argc",
     "arrays",
     "bitfields",
     #"checksum",
@@ -18,7 +18,7 @@ my @ALL_SWARM_OPTS = (
     "consts",
     "divs",
     "embedded-assigns",
-    "incr-decr-operators",
+    #"incr-decr-operators",
     "jumps",
     "longlong",
     "force-non-uniform-arrays",
@@ -28,11 +28,12 @@ my @ALL_SWARM_OPTS = (
     "paranoid",
     "pointers",
     "structs",
-    "unions",
+    #"unions",
     "volatiles",
     "volatile-pointers",
-    #"return-structs",
-    #"arg-structs",
+    "inline-function",
+    "return-structs",
+    "arg-structs",
     #"return-unions",
     #"arg-unions",
     #"dangling-global-pointers",
@@ -52,9 +53,8 @@ my $XTRA = "";
 
 #$XTRA .= "--no-safe-math";
 #$XTRA .= "--force-non-uniform-arrays ";
-#$XTRA .= "--no-unions ";
-#$XTRA .= "--no-unions ";
-#$XTRA .= "--no-argc";
+$XTRA .= "--no-unions ";
+$XTRA .= "--no-argc --ccomp";
 #$XTRA .= "--concise ";
 #$XTRA .= "--no-paranoid ";
 #$XTRA .= "--random-random ";
