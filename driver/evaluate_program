@@ -107,11 +107,13 @@ my @gcccurrent = ("gcc",
 		  \@o0only);
 
 my @compilers_to_test = (
+
     \@gcc400,
-    \@gcc410,
-    \@gcc420,
-    \@gcc430,
-    \@gcc440,
+    #\@gcc410,
+    #\@gcc420,
+    #\@gcc430,
+    #\@gcc440,
+
     #\@clang,
     #\@gcccurrent,
     #\@ccomp,
