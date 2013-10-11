@@ -324,17 +324,21 @@ sub reduce_crash ($$$$$) {
     runit "gcc -E -I${CSMITH_HOME}/runtime -DCSMITH_MINIMAL ${root}.c > $tempdir/small.c";
     open INF, "<${CSMITH_HOME}/driver/test1_gcc_crash.sh" or die;
     open OUTF, ">$tempdir/test1.sh" or die;
+    my $origdir = getcwd;
+    my $updir = "${origdir}/../bonus_crashes";
+    my $str = "${origdir}/../crash_strings.txt";
     while (my $line = <INF>) {
 	$line =~ s/XX_COMMAND/$compiler/;
 	$line =~ s/XX_STRING/'$err'/;
+	$line =~ s/XX_CRASHFILE/$str/;
+	$line =~ s/XX_DIR/$updir/;
 	print OUTF $line;
     }
     close INF;
     close OUTF;
     runit "chmod a+rx $tempdir/test1.sh";
-    my $origdir = getcwd;
     chdir $tempdir or die;
-    runit "creduce -n 1 ./test1.sh small.c";
+    runit "creduce --skip-initial-passes --fuzz -n 1 ./test1.sh small.c";
     chdir $origdir or die;
 }
 

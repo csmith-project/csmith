@@ -203,6 +203,7 @@ if (!(-d $work)) {
 }
 
 system "touch $work/crash_strings.txt";
+system "mkdir $work/bonus_crashes";
 
 if (scalar(@ARGV)==2) {
     my $seedfile = $ARGV[1];
