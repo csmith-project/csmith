@@ -338,7 +338,7 @@ sub reduce_crash ($$$$$) {
     close OUTF;
     runit "chmod a+rx $tempdir/test1.sh";
     chdir $tempdir or die;
-    runit "creduce --skip-initial-passes --fuzz -n 1 ./test1.sh small.c";
+    runit "creduce -n 1 --fuzz ./test1.sh small.c";
     chdir $origdir or die;
 }
 

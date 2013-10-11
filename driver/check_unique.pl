@@ -26,6 +26,7 @@ my $found = 0;
 my $cnt;
 open INF, "<$strings" or die;
 while (my $line = <INF>) {
+    chomp $line;
     die unless ($line =~ /^([0-9]+) <<< (.*) >>>$/);
     if ($2 eq $err) {
 	$found = 1;
@@ -34,11 +35,14 @@ while (my $line = <INF>) {
 close INF;
 
 if (!$found) {
-    open OUTF, ">>../crash_strings.txt" or die;
-    print OUTF "1 <<< $err >>>\n";
+    open OUTF, ">>$strings" or die;
+    print OUTF "333 <<< $err >>>\n";
     close OUTF;
-    my $tmpfn = File::Temp::tempnam ($dir, "crashXXXXXX");
-    system "cp small.c ${tmpfn}.c";
+    my $tmpfn = File::Temp::tempnam ($dir, "crashXXXXXX").".c";
+    system "cp small.c ${tmpfn}";
+    open OUTF, ">>${tmpfn}" or die;
+    print OUTF "// $err\n";
+    close OUTF;
 }
 
 exit 0
