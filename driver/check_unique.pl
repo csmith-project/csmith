@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/usr/bin/perl -w
+
+use strict;
 
 res=$(grep -c 'compiler error' out.txt)
 if [ $res -gt 0 ]

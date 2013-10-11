@@ -5,6 +5,8 @@ use warnings;
 use Benchmark;
 use English;
 use LockFile::Simple;
+use File::Temp qw/ tempfile tempdir /;
+use File::Copy;
 
 # TODO: check for program crash (vs. timeout)
 
@@ -26,7 +28,7 @@ my $COMPILER_TIMEOUT_RES = 137;
 
 my $RUN_PROGRAM = 0;
 
-my $DO_REDUCE = 0;
+my $DO_REDUCE = 1;
 
 ####################################################################
 
@@ -169,26 +171,27 @@ sub compile_and_run ($$$$) {
     (my $res, my $dur) = runit ($command);
 
     if (($res != 0) || (!(-e $exe))) {
+	my $crashout = "";
 	if ($res == $COMPILER_TIMEOUT_RES) {
 	    print STDERR "COMPILER FAILURE: TIMEOUT\n";
 	} else {
 	    print STDERR "COMPILER FAILURE with return code $res; output is:\n";
 	    open INF, "<$compilerout" or die;
-	    while (my $line = <INF>) { print "  $line"; }
+	    while (my $line = <INF>) { print "  $line"; $crashout .= $line }
 	    close INF;
 	}
-	return (-2,"",-1);
+	return (-2,$crashout,-1);
     }
     
     if (!$RUN_PROGRAM) {
-	return (0,"",0);
+	return (0,"");
     }
 
     ($res, $dur) = runit ("run_program $exe $srcfile $compiler > $out");
 
     if ($res != 0) {
 	print "couldn't compute access summary\n";
-	return (-1,"",-1);
+	return (-1,"");
     }
     
     my $result = "";
@@ -266,8 +269,31 @@ sub reduce_miscompile ($$$$$$) {
 	 runit ("wc -c small.c");
 	 unlockit();			
      }
+}
+
+sub reduce_crash ($$$$$) {
+    (my $compiler, my $fail_opt, my $root, my $base_compiler, my $fail_out) = @_;
+    my $err;
+    if ($fail_out =~ /internal compiler error: (.*)$/m) {
+	$err = $1;
+    } else {
+	print "not reducing-- no ICE message\n";
+	return;
     }
-    
+    my $tempdir = tempdir ( "reduce_XXXXXX", DIR => "../", CLEANUP => 0 );
+    print "ok: reducing crash bug for $compiler at $fail_opt in $tempdir with '$err'\n";
+    File::Copy::cp ("$root.c", $tempdir);
+    runit "gcc -E -I${CSMITH_HOME}/runtime -DCSMITH_MINIMAL ${root}.c > $tempdir/small.c";
+    open INF, "<${CSMITH_HOME}/driver/test1_gcc_crash.sh" or die;
+    open OUTF, ">$tempdir/test1.sh" or die;
+    while (my $line = <INF>) {
+	print OUTF $line;
+    }
+    close INF;
+    close OUTF;
+    runit "chmod a+rx $tempdir/test1.sh";
+}
+
 sub test_compiler ($$$) {
     (my $root, my $compiler_ref, my $custom_options) = @_;
 
@@ -288,6 +314,8 @@ sub test_compiler ($$$) {
     my %num_reads;
     my %num_writes;
     my $first = 1;
+    my $fail_opt;
+    my $fail_out;
 
     foreach my $opt (@OPTS) {
 	(my $res, my $res_str) = 
@@ -324,6 +352,10 @@ sub test_compiler ($$$) {
 	    }
 	} elsif ($res == -2) {
 	    $compiler_fail++;
+	    if (!defined($fail_opt) || rand() < 0.5) {
+		$fail_opt = $opt;
+		$fail_out = $res_str;
+	    }
 	} else {
 	    die if ($res != -1);
 	    return (1, 0, $undef, $undef);
@@ -339,9 +371,7 @@ sub test_compiler ($$$) {
 	print "COMPILER FAILED $compiler\n";
 	$interesting = 1;
 	if ($DO_REDUCE) {
-	    #reduce_crash ($compiler, 
-	#		  "test-${base_compiler}-wrong-code-template.sh", 
-	#		  $opt1, $opt, $root, $base_compiler);
+	    reduce_crash ($compiler, $fail_opt, $root, $base_compiler, $fail_out);
 	}
     }
 
@@ -358,6 +388,7 @@ sub test_compiler ($$$) {
 		    print "INTERNAL CHECKSUM FAILURE $compiler $opt\n";
 		    $interesting = 1;
 		    if ($DO_REDUCE) {
+			die;
 			reduce_miscompile ($compiler, 
 					   "test-${base_compiler}-wrong-code-template.sh", 
 					   $opt1, $opt, $root, $base_compiler);
