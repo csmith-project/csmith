@@ -111,10 +111,10 @@ my @gcccurrent = ("gcc",
 
 my @compilers_to_test = (
 
-    \@gcc400,
+    #\@gcc400,
     #\@gcc410,
     #\@gcc420,
-    #\@gcc430,
+    \@gcc430,
     #\@gcc440,
 
     #\@clang,
@@ -332,13 +332,19 @@ sub reduce_crash ($$$$$) {
 	$line =~ s/XX_STRING/'$err'/;
 	$line =~ s/XX_CRASHFILE/$str/;
 	$line =~ s/XX_DIR/$updir/;
+	$line =~ s/XX_COMPILER/${base_compiler}/;
+	$line =~ s/XX_OPT/${fail_opt}/;
 	print OUTF $line;
     }
     close INF;
     close OUTF;
     runit "chmod a+rx $tempdir/test1.sh";
     chdir $tempdir or die;
-    runit "creduce -n 1 --fuzz ./test1.sh small.c";
+    print "timestamp for creduce start: ";
+    system "date";
+    runit "creduce -n 1 --fuzz --sllooww --sanitize ./test1.sh small.c";
+    print "timestamp for creduce stop: ";
+    system "date";
     chdir $origdir or die;
 }
 
