@@ -7,6 +7,7 @@ use English;
 use LockFile::Simple;
 use File::Temp qw/ tempfile tempdir /;
 use File::Copy;
+use Cwd;
 
 # TODO: check for program crash (vs. timeout)
 
@@ -271,8 +272,36 @@ sub reduce_miscompile ($$$$$$) {
      }
 }
 
+sub bug_count ($) {
+    (my $err) = @_;
+    my $lines = "";
+    my $found = 0;
+    my $cnt;
+    open INF,"../crash_strings.txt" or die;
+    while (my $line = <INF>) {
+	die unless ($line =~ /^([0-9]+) <<< (.*) >>>$/);
+	if ($2 eq $err) {
+	    $found = 1;
+	    $cnt = 1 + $1;
+	    $lines .= "$cnt <<< $err >>>\n";
+	} else {
+	    $lines .= $line;
+	}
+    }
+    close INF;
+    if (!$found) {
+	$cnt = 1;
+	$lines .= "$cnt <<< $err >>>\n";    
+    }
+    open OUTF, ">../crash_strings.txt" or die;
+    print OUTF $lines;
+    close OUTF;
+    return $cnt;
+}
+
 sub reduce_crash ($$$$$) {
     (my $compiler, my $fail_opt, my $root, my $base_compiler, my $fail_out) = @_;
+
     my $err;
     if ($fail_out =~ /internal compiler error: (.*)$/m) {
 	$err = $1;
@@ -280,6 +309,15 @@ sub reduce_crash ($$$$$) {
 	print "not reducing-- no ICE message\n";
 	return;
     }
+
+    my $cnt = bug_count ($err);
+    print "this bug has been seen $cnt time(s)\n";
+    my $prob = 1.0 / $cnt;
+    if (rand() > $prob) {
+	print "we'll skip reducing this time\n";
+	return;
+    }
+
     my $tempdir = tempdir ( "reduce_XXXXXX", DIR => "../", CLEANUP => 0 );
     print "ok: reducing crash bug for $compiler at $fail_opt in $tempdir with '$err'\n";
     File::Copy::cp ("$root.c", $tempdir);
@@ -287,11 +325,17 @@ sub reduce_crash ($$$$$) {
     open INF, "<${CSMITH_HOME}/driver/test1_gcc_crash.sh" or die;
     open OUTF, ">$tempdir/test1.sh" or die;
     while (my $line = <INF>) {
+	$line =~ s/XX_COMMAND/$compiler/;
+	$line =~ s/XX_STRING/'$err'/;
 	print OUTF $line;
     }
     close INF;
     close OUTF;
     runit "chmod a+rx $tempdir/test1.sh";
+    my $origdir = getcwd;
+    chdir $tempdir or die;
+    runit "creduce -n 1 ./test1.sh small.c";
+    chdir $origdir or die;
 }
 
 sub test_compiler ($$$) {

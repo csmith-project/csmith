@@ -202,6 +202,8 @@ if (!(-d $work)) {
     die "error: create work dir '$work' first";
 }
 
+system "touch $work/crash_strings.txt";
+
 if (scalar(@ARGV)==2) {
     my $seedfile = $ARGV[1];
     open SEEDFILE, "<$seedfile" or die "error: cannot open seed file $seedfile";
