@@ -36,7 +36,7 @@ close INF;
 
 if (!$found) {
     open OUTF, ">>$strings" or die;
-    print OUTF "333 <<< $err >>>\n";
+    print OUTF "10000000 <<< $err >>>\n";
     close OUTF;
     my $tmpfn = File::Temp::tempnam ($dir, "crashXXXXXX").".c";
     system "cp small.c ${tmpfn}";
