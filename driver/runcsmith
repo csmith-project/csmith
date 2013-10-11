@@ -7,7 +7,7 @@ use warnings;
 use Sys::CPU;
 
 my $NICE = "";
-my $ULIMIT = "ulimit -m 2000000; ulimit -v 2000000;";
+my $ULIMIT = "ulimit -m 20000000; ulimit -v 20000000;";
 
 sub usage () {
     die "usage: runcsmith [number] [seedfile]\n";
