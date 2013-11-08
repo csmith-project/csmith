@@ -311,14 +311,16 @@ sub reduce_crash ($$$$$) {
     my $err;
     if ($fail_out =~ /internal compiler error: (.*)$/m) {
 	$err = $1;
+    } elsif ($fail_out =~ /Assertion(.*)failed./m) {
+	$err = $1;
     } else {
-	print "not reducing-- no ICE message\n";
+	print "FAILURE to reduce: no ICE message\n";
 	return;
     }
 
     my $cnt = bug_count ($err);
     print "this bug has been seen $cnt time(s)\n";
-    my $prob = 1.0 / $cnt;
+    my $prob = 5.0 / $cnt;
     if (rand() > $prob) {
 	print "we'll skip reducing this time\n";
 	return;
