@@ -194,6 +194,9 @@ static void print_help()
 	cout << "  --volatile-pointers | --no-volatile-pointers: enable | disable volatile pointers (enabled by default)." << endl << endl;
 	cout << "  --const-pointers | --no-const-pointers: enable | disable const pointers (enabled by default)." << endl << endl;
 
+	cout << "  --builtins | --no-builtins: enable | disable to generate builtin functions (disabled by default)." << endl << endl;
+	cout << "  --builtin-function-prob <num>: set the probability of choosing a builtin function (default is 20)." << endl << endl;
+
         // language options
 	cout << "  --lang-cpp : generate C++ code (C by default)." << endl << endl;
 
@@ -972,6 +975,16 @@ main(int argc, char **argv)
 			continue;
 		} 
 
+		if (strcmp (argv[i], "--builtins") == 0) {
+			CGOptions::builtins(true);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--no-builtins") == 0) {
+			CGOptions::builtins(false);
+			continue;
+		}
+
 		if (strcmp (argv[i], "--random-random") == 0) {
 			CGOptions::random_random(true);
 			continue;
@@ -1133,6 +1146,16 @@ main(int argc, char **argv)
 			if (!parse_int_arg(argv[i], &prob))
 				exit(-1);
 			CGOptions::inline_function_prob(prob);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--builtin-function-prob") == 0 ) {
+			unsigned long prob;
+			i++;
+			arg_check(argc, i);
+			if (!parse_int_arg(argv[i], &prob))
+				exit(-1);
+			CGOptions::builtin_function_prob(prob);
 			continue;
 		}
 
