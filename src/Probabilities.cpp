@@ -476,6 +476,9 @@ Probabilities::set_single_name_maps()
 	// for marking each function as inline
 	set_single_name("inline_function_prob", pInlineFunctionProb);
 
+	// for choosing a builtin function
+	set_single_name("builtin_function_prob", pBuiltinFunctionProb);
+
         //////////////////////////////////////////////////////////////////
 	// group for statement
 	set_single_name("statement_prob", pStatementProb);
@@ -583,6 +586,7 @@ Probabilities::initialize_single_probs()
 
 	m[pAccessOnceVariableProb] = 20;
 	m[pInlineFunctionProb] = CGOptions::inline_function_prob();
+	m[pBuiltinFunctionProb] = CGOptions::builtin_function_prob();
 
 	std::map<ProbName, int>::iterator i;
 	for (i = m.begin(); i != m.end(); ++i) {
