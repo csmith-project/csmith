@@ -54,7 +54,8 @@ my $XTRA = "";
 #$XTRA .= "--no-safe-math";
 #$XTRA .= "--force-non-uniform-arrays ";
 $XTRA .= "--no-unions ";
-$XTRA .= "--no-argc --ccomp";
+$XTRA .= "--no-argc ";
+#$XTRA .= "--ccomp ";
 #$XTRA .= "--concise ";
 #$XTRA .= "--no-paranoid ";
 #$XTRA .= "--random-random ";
@@ -92,7 +93,7 @@ sub runit ($) {
 sub doit ($$) {
     (my $n, my $work) = @_;
     print "------ RANDOM PROGRAM $n ------\n";
-    if ($TIMED_TEST || ($n%100)==0) {
+    if ($TIMED_TEST || ($n%10)==0) {
 	print "timestamp: ";
 	system "date";
     }

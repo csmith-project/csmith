@@ -23,13 +23,13 @@ my $xxtra = "-DCSMITH_MINIMAL";
 #my $notmp = "-DUSE_MATH_MACROS_NOTMP";
 my $notmp = "";
 
-my $COMPILER_TIMEOUT = 180;
+my $COMPILER_TIMEOUT = 300;
 
 my $COMPILER_TIMEOUT_RES = 137;
 
-my $RUN_PROGRAM = 0;
+my $RUN_PROGRAM = 1;
 
-my $DO_REDUCE = 1;
+my $DO_REDUCE = 0;
 
 ####################################################################
 
@@ -41,14 +41,19 @@ my $LOCKFN = "/var/tmp/version_search_lockfile";
 
 ####################################################################
 
-my @gcc_opts = ("-O0", 
-		"-O1", 
-		"-Os", 
-		"-O2", 
-		"-O3");
+my @gcc_opts = (
+    "-O0", 
+    "-O1", 
+    "-Os", 
+    "-O2", 
+    "-Ofast");
 
-my @o0only = ("-m32 -O0",
-	      "-m32 -O3" );
+my @o0only = (
+    "-O0", 
+    "-O1", 
+    "-Os", 
+    "-O2", 
+    "-Ofast");
 
 my @occomp = ("-fall");
 # my @occomp = (" -fbitfields -fstruct-return ");
@@ -114,12 +119,13 @@ my @compilers_to_test = (
     #\@gcc400,
     #\@gcc410,
     #\@gcc420,
-    \@gcc430,
+    #\@gcc430,
     #\@gcc440,
 
-    #\@clang,
-    #\@gcccurrent,
+    \@clang,
+    \@gcccurrent,
     #\@ccomp,
+
     #\@gcc44,
     #\@gcc45,
     #\@gcc46,

@@ -11,11 +11,11 @@ my $comp = $ARGV[2];
 die unless defined ($comp);
 
 my @opts = (
-    "-O0",
-    "-O1",
-    "-O2",
+    #"-O0",
+    #"-O1",
+    #"-O2",
     "-O3",
-    "-Os",
+    #"-Os",
     );
 
 foreach my $opt (@opts) {

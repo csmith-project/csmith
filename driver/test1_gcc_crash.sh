@@ -1,5 +1,7 @@
 #!/bin/bash
 
+ulimit -t 120
+
 ${CSMITH_HOME}/driver/check_unique.pl XX_CRASHFILE XX_DIR "XX_COMMAND"
 
 gcc -w -c -O0 small.c &&\
