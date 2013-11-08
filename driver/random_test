@@ -23,6 +23,7 @@ my @ALL_SWARM_OPTS = (
     "longlong",
     "force-non-uniform-arrays",
     "math64",
+    "builtins",
     "muls",
     "packed-struct",
     "paranoid",
