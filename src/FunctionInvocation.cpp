@@ -94,7 +94,7 @@ FunctionInvocation::make_random(bool is_std_func,
 				cg_context.get_current_func()->fact_changed |= fiu->func->fact_changed;
 			}
 		} 
-		else if (FuncListSize() < CGOptions::max_funcs()) {
+		else if (!Function::reach_max_functions_cnt()) {
 			fi = FunctionInvocationUser::build_invocation_and_function(cg_context, type, qfer); 
 		} else {
 			// we can not find/create a function because we reach the limit, so give up

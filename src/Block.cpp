@@ -69,6 +69,8 @@ Block* find_block_by_id(int blk_id)
 	size_t i, j; 
 	for (i=0; i<funcs.size(); i++) {
 		Function* f = funcs[i];
+		if (f->is_builtin)
+			continue;
 		for (j=0; j<f->blocks.size(); j++) {
 			if (f->blocks[j]->stm_id == blk_id) {
 				return f->blocks[j]; 
@@ -89,6 +91,25 @@ BlockProbability(Block &block)
 	VectorFilter filter(v, NOT_FILTER_OUT);
 	filter.disable(fDefault);
 	return rnd_upto(block.block_size(), &filter);
+}
+
+Block *
+Block::make_dummy_block(CGContext &cg_context)
+{
+	Function *curr_func = cg_context.get_current_func();
+	assert(curr_func);
+
+	Block *b = new Block(cg_context.get_current_block(), 0);
+	b->func = curr_func;
+	b->in_array_loop = !(cg_context.iv_bounds.empty());
+	curr_func->blocks.push_back(b);
+	curr_func->stack.push_back(b);
+	FactMgr* fm = get_fact_mgr_for_func(curr_func);
+	fm->set_fact_in(b, fm->global_facts);
+	Effect pre_effect = cg_context.get_accum_effect();
+	b->post_creation_analysis(cg_context, pre_effect);
+	curr_func->stack.pop_back();
+	return b;
 }
 
 /*
@@ -727,7 +748,7 @@ Block::post_creation_analysis(CGContext& cg_context, const Effect& pre_effect)
 	FactMgr* fm = get_fact_mgr(&cg_context);
 	fm->map_visited[this] = true;
 	// compute accumulated effect
-    set_accumulated_effect(cg_context);
+	set_accumulated_effect(cg_context);
 	//fm->print_facts(fm->global_facts); 
 	vector<const Fact*> post_facts = fm->global_facts;
 	FactMgr::update_facts_for_oos_vars(local_vars, fm->global_facts); 

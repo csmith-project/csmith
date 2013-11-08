@@ -71,6 +71,7 @@ static vector<Function*> FuncList;		// List of all functions in the program
 static vector<FactMgr*>  FMList;        // list of fact managers for each function
 static long cur_func_idx;				// Index into FuncList that we are currently working on
 static bool param_first=true;			// Flag to track output of commas 
+static int builtin_functions_cnt;
 
 /*
  * find FactMgr for a function
@@ -190,6 +191,12 @@ Function::is_var_oos(const Variable* var, const Statement* stm) const
 	return false;
 }
 
+bool 
+Function::reach_max_functions_cnt()
+{
+	return ((FuncList.size() - builtin_functions_cnt) >= CGOptions::max_funcs());
+}
+
 const vector<Function*>& 
 get_all_functions(void)
 {
@@ -212,7 +219,8 @@ FuncListSize(void)
 Function *
 GetFirstFunction(void)
 {
-	return FuncList[0];
+	assert((builtin_functions_cnt >= 0) && "Invalid builtin_functions_cnt!");
+	return FuncList[builtin_functions_cnt];
 }
 
 /*
@@ -236,6 +244,21 @@ RandomReturnType(void)
 	return t;
 }
 
+Function *
+Function::get_one_function(const vector<Function *> &ok_funcs)
+{
+	vector<Function *>::size_type ok_size = ok_funcs.size();
+	
+	if (ok_size == 0) {
+		return 0;
+	}
+	if (ok_size == 1) {
+		return ok_funcs[0];
+	}
+	int index = rnd_upto(ok_size);
+	return ok_funcs[index];
+}
+
 /*
  * Choose a function from `funcs' to invoke.
  * Return null if no suitable function can be found.
@@ -247,6 +270,7 @@ Function::choose_func(vector<Function *> funcs,
 			const CVQualifiers* qfer)
 {
 	vector<Function *> ok_funcs;
+	vector<Function *> ok_builtin_funcs;
 	vector<Function *>::iterator i; 
 
 	for (i = funcs.begin(); i != funcs.end(); ++i) {
@@ -281,20 +305,20 @@ Function::choose_func(vector<Function *> funcs,
 		//	continue;
 		//}
 		// Otherwise, this is an acceptable choice.
-		ok_funcs.push_back(*i);
+		if ((*i)->is_builtin)
+			ok_builtin_funcs.push_back(*i);
+		else
+			ok_funcs.push_back(*i);
 	}
 	
-	vector<Function *>::size_type ok_size = ok_funcs.size();
-	
-	if (ok_size == 0) {
-		return 0;
+	Function *f = NULL;
+	if (CGOptions::builtins() && rnd_flipcoin(BuiltinFunctionProb)) {
+		f = Function::get_one_function(ok_builtin_funcs);
 	}
-	if (ok_size == 1) {
-		return ok_funcs[0];
+	if (f == NULL) {
+		f = Function::get_one_function(ok_funcs);
 	}
-	int index = rnd_upto(ok_size);
-	ERROR_GUARD(NULL);
-	return ok_funcs[index];
+	return f;
 }
 
 /*
@@ -304,6 +328,27 @@ static unsigned int
 ParamListProbability()
 {
 	return rnd_upto(CGOptions::max_params());
+}
+
+static void
+GenerateParameterListFromString(Function &currFunc, const string &params_string)
+{
+	vector<string> vs;
+	StringUtils::split_string(params_string, vs, ",");
+	int params_cnt = vs.size();
+	assert((params_cnt > 0) && "Invalid params_string!");
+	if ((params_cnt == 1) && (vs[0] == "Void")) {
+		return;	
+	}
+	for (int i = 0; i < params_cnt; i++) {
+		assert((vs[i] != "Void") && "Invalid parameter type!");
+		CVQualifiers qfer;
+		qfer.add_qualifiers(false, false);
+		const Type *ty = Type::get_type_from_string(vs[0]);
+		Variable *v = VariableSelector::GenerateParameterVariable(ty, &qfer);
+		assert(v);
+		currFunc.param.push_back(v);
+	}
 }
 
 /*
@@ -337,6 +382,21 @@ Function::Function(const string &name, const Type *return_type)
 	  fact_changed(false),
 	  union_field_read(false),
 	  is_inlined(false),
+	  is_builtin(false),
+	  visited_cnt(0),
+	  build_state(UNBUILT)
+{
+	FuncList.push_back(this);			// Add to global list of functions.
+}
+
+Function::Function(const string &name, const Type *return_type, bool builtin)
+	: name(name),
+	  return_type(return_type),
+	  body(0),
+	  fact_changed(false),
+	  union_field_read(false),
+	  is_inlined(false),
+	  is_builtin(builtin),
 	  visited_cnt(0),
 	  build_state(UNBUILT)
 {
@@ -481,6 +541,8 @@ Function::OutputHeader(std::ostream &out)
 void
 Function::OutputForwardDecl(std::ostream &out)
 {
+	if (is_builtin)
+		return;
 	OutputHeader(out);
 	out << ";";
 	outputln(out);
@@ -492,6 +554,8 @@ Function::OutputForwardDecl(std::ostream &out)
 void
 Function::Output(std::ostream &out)
 {
+	if (is_builtin)
+		return;
 	OutputMgr::set_curr_func(name);
 	output_comment_line(out, "------------------------------------------");
 	if (!CGOptions::concise()) {
@@ -572,7 +636,10 @@ Function::GenerateBody(const CGContext &prev_context)
 		}
 	}
 	// Fill in the Function body. 
-	body = Block::make_random(cg_context); 
+	if (is_builtin)
+		body = Block::make_dummy_block(cg_context);
+	else
+		body = Block::make_random(cg_context); 
 	ERROR_RETURN();
 	body->set_depth_protect(true);
 
@@ -628,6 +695,54 @@ Function::generate_body_with_known_params(const CGContext &prev_context, Effect&
 }
 
 void
+Function::initialize_builtin_functions()
+{
+	// format: return_type; builtin_func_name; (param1_type, param2_type, ...)
+	// supported type: Void, Char, UChar, Short, UShort, Int, 
+	// 		   UInt, Long, ULong, Longlong, ULonglong
+	string builtin_function_strings[] = {
+		"Int; __builtin_popcount; (Int)",
+		"UInt; __builtin_ia32_crc32qi; (UInt, UChar)"
+	};
+
+	builtin_functions_cnt = 
+		sizeof(builtin_function_strings) / sizeof(builtin_function_strings[0]);
+	for (int i = 0; i < builtin_functions_cnt; i++) {
+		make_builtin_function(builtin_function_strings[i]);
+	}
+}
+
+void
+Function::make_builtin_function(const string &function_string)
+{
+	vector<string> v;
+	StringUtils::split_string(function_string, v, ";");
+	assert((v.size() == 3) && "Invalid builtin function format!");
+
+	const Type *ty = Type::get_type_from_string(v[0]);
+	Function *f = new Function(v[1], ty, /*is_builtin*/true);
+
+	// dummy variable representing return variable, we don't care about the type, so use 0
+	string rvname = f->name + "_" + "rv"; 
+	CVQualifiers ret_qfer = CVQualifiers::random_qualifiers(ty); 
+	f->rv = Variable::CreateVariable(rvname, ty, NULL, &ret_qfer);
+
+	// create a fact manager for this function, with empty global facts 
+	FactMgr* fm = new FactMgr(f);
+	FMList.push_back(fm);
+
+	GenerateParameterListFromString(*f, StringUtils::get_substring(v[2], '(', ')'));
+	f->GenerateBody(CGContext::get_empty_context());
+
+	// update global facts to merged facts at all possible function exits
+	fm->global_facts = fm->map_facts_out[f->body];
+	f->body->add_back_return_facts(fm, fm->global_facts);
+
+	// collect info about global dangling pointers
+	fm->find_dangling_global_ptrs(f);
+}
+
+void
 Function::compute_summary(void) 
 {
 	FactMgr* fm = get_fact_mgr_for_func(this); 
@@ -650,6 +765,8 @@ void
 GenerateFunctions(void)
 { 
 	FactMgr::add_interested_facts(CGOptions::interested_facts());
+	if (CGOptions::builtins())
+		Function::initialize_builtin_functions();
 	// -----------------
 	// Create a basic first function, then generate a random graph from there.
 	/* Function *first = */ Function::make_first();
@@ -675,7 +792,7 @@ static int
 OutputForwardDecl(Function *func, std::ostream *pOut)
 {
 	func->OutputForwardDecl(*pOut);
-    return 0;
+	return 0;
 }
 
 /*
@@ -685,7 +802,7 @@ static int
 OutputFunction(Function *func, std::ostream *pOut)
 {
 	func->Output(*pOut);
-    return 0;
+	return 0;
 }
 
 /*

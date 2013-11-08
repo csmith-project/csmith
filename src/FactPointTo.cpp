@@ -833,6 +833,8 @@ FactPointTo::aggregate_all_pointto_sets(void)
 	size_t i;
 	const vector<Function*>& funcs = get_all_functions();  
 	for (i=0; i<funcs.size(); i++) { 
+		if (funcs[i]->is_builtin)
+			continue;
 		FactMgr* fm = get_fact_mgr_for_func(funcs[i]);
 		map<const Statement*, vector<Fact*> >::iterator iter; 
 		for(iter = fm->map_facts_out_final.begin(); iter != fm->map_facts_out_final.end(); ++iter) { 
