@@ -328,7 +328,7 @@ sub reduce_crash ($$$$$) {
     print "ok: reducing crash bug for $compiler at $fail_opt in $tempdir with '$err'\n";
     File::Copy::cp ("$root.c", $tempdir);
     runit "gcc -E -I${CSMITH_HOME}/runtime -DCSMITH_MINIMAL ${root}.c > $tempdir/small.c";
-    open INF, "<${CSMITH_HOME}/driver/test1_gcc_crash.sh" or die;
+    open INF, "<${CSMITH_HOME}/driver/test1_crash.sh" or die;
     open OUTF, ">$tempdir/test1.sh" or die;
     my $origdir = getcwd;
     my $updir = "${origdir}/../bonus_crashes";
