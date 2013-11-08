@@ -29,7 +29,7 @@ my $COMPILER_TIMEOUT_RES = 137;
 
 my $RUN_PROGRAM = 1;
 
-my $DO_REDUCE = 0;
+my $DO_REDUCE = 1;
 
 ####################################################################
 
@@ -449,7 +449,7 @@ sub test_compiler ($$$) {
 		    ($csum ne "TIMEOUT" && $csums{$opt} ne "TIMEOUT")) {
 		    print "INTERNAL CHECKSUM FAILURE $compiler $opt\n";
 		    $interesting = 1;
-		    if ($DO_REDUCE) {
+		    if ($DO_REDUCE && 0) {
 			die;
 			reduce_miscompile ($compiler, 
 					   "test-${base_compiler}-wrong-code-template.sh", 
