@@ -12,6 +12,10 @@ die unless defined ($opt);
 my $comp = $ARGV[3];
 die unless defined ($comp);
 
+# TODO: 
+# randomize optimization flag instead of using the one given to us?
+# don't treat processors individually; that will require some locking
+
 my $cmd = "$comp $opt -c -w small.c > crash.txt 2>&1";
 # print "$cmd\n";
 system $cmd;
@@ -20,12 +24,16 @@ my $err;
 open INF, "<crash.txt" or die;
 while (my $line = <INF>) {
     chomp $line;
+    # for now, we only support uniqueness checking for a few specific kinds of error
     if ($line =~ /internal compiler error: (.*)$/) {
 	$err = $1;
+    } elsif ($line =~ =~ /Assertion(.*)failed./m) {
+	$err = $1;
+    } else {
+	exit 0;
     }
 }
 close INF;
-exit 0 unless defined ($err);
 
 my $lines = "";
 my $found = 0;
