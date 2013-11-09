@@ -63,6 +63,8 @@ class Block : public Statement
 public:
 	// Factory method.
 	static Block *make_random(CGContext &cg_context, bool looping = false);
+
+	static Block *make_dummy_block(CGContext &cg_context);
 	 
 	Block(Block* b, int block_size);
 	virtual ~Block(void);

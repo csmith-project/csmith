@@ -192,6 +192,8 @@ public:
 	// make a random pointer type
 	static Type* make_random_pointer_type(void);
 
+	static const Type *get_type_from_string(const string &type_string);
+
 	// generate all simple types except void and long long(if it is not allowed)
 	static void GenerateSimpleTypes(void);
 

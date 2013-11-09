@@ -75,7 +75,10 @@ public:
 
 	static Function* choose_func(vector<Function *> funcs, const CGContext& cg_context, const Type* type, const CVQualifiers* qfer);
 
+	static Function *get_one_function(const vector<Function *> &ok_funcs);
+
 	static void doFinalization();
+	static bool reach_max_functions_cnt();
 
 	void generate_body_with_known_params(const CGContext &prev_context, Effect& effect_accum);
 	void compute_summary(void);
@@ -116,6 +119,7 @@ public:
 	bool fact_changed;
 	bool union_field_read;
 	bool is_inlined;
+	bool is_builtin;
 	int  visited_cnt;
 	Effect accum_eff_context;
 
@@ -123,10 +127,14 @@ private:
 	static int deleteFunction(Function* func);
 
 	Function(const std::string &name, const Type *return_type);
+	Function(const std::string &name, const Type *return_type, bool is_builtin);
 	void OutputHeader(std::ostream &);
 	void OutputFormalParamList(std::ostream &);
 	void GenerateBody(const CGContext& prev_context);
 	void make_return_const();
+
+	static void initialize_builtin_functions();
+	static void make_builtin_function(const string &function_string);
 
 private:
 	enum { UNBUILT, BUILDING, BUILT } build_state;

@@ -366,6 +366,47 @@ Type::get_simple_type(eSimpleType st)
 	return *Type::simple_types[st];
 }
 
+const Type *
+Type::get_type_from_string(const string &type_string)
+{
+	if (type_string == "Void") {
+		return Type::void_type;
+	}
+	else if (type_string == "Char") {
+		return &Type::get_simple_type(eChar);
+	}
+	else if (type_string == "UChar") {
+		return &Type::get_simple_type(eUChar);
+	}
+	else if (type_string == "Short") {
+		return &Type::get_simple_type(eShort);
+	}
+	else if (type_string == "UShort") {
+		return &Type::get_simple_type(eUShort);
+	}
+	else if (type_string == "Int") {
+		return &Type::get_simple_type(eInt);
+	}
+	else if (type_string == "UInt") {
+		return &Type::get_simple_type(eUInt);
+	}
+	else if (type_string == "Long") {
+		return &Type::get_simple_type(eLong);
+	}
+	else if (type_string == "ULong") {
+		return &Type::get_simple_type(eULong);
+	}
+	else if (type_string == "Longlong") {
+		return &Type::get_simple_type(eLongLong);
+	}
+	else if (type_string == "ULonglong") {
+		return &Type::get_simple_type(eULongLong);
+	}
+
+	assert(0 && "Unsupported type string!");
+	return NULL;
+}
+
 // ---------------------------------------------------------------------
 /* return the most commonly used type - integer
  *************************************************************/

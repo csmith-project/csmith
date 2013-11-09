@@ -303,6 +303,9 @@ public:
 	static bool consts(void);
 	static bool consts(bool p);
 
+	static bool builtins(void);
+	static bool builtins(bool p);
+
 	static bool dangling_global_ptrs(void);
 	static bool dangling_global_ptrs(bool p);
 
@@ -394,6 +397,9 @@ public:
 
 	static int inline_function_prob(void);
 	static int inline_function_prob(int p);
+
+	static int builtin_function_prob(void);
+	static int builtin_function_prob(int p);
 
 	static int null_pointer_dereference_prob(void);
 	static int null_pointer_dereference_prob(int p);
@@ -534,6 +540,7 @@ private:
 	static bool	addr_taken_of_locals_;
 	static bool	fresh_array_ctrl_var_names_;
 	static bool	consts_;
+	static bool	builtins_;
 	static bool dangling_global_ptrs_;
 	static bool divs_;
 	static bool muls_;
@@ -557,6 +564,7 @@ private:
 	static bool force_globals_static_;
 	static bool force_non_uniform_array_init_;
 	static int inline_function_prob_;
+	static int builtin_function_prob_;
 	static int null_pointer_dereference_prob_;
 	static int dead_pointer_dereference_prob_;
 	// flag that indicate the comformance level to C99. true means relaxed

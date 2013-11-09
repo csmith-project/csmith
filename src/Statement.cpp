@@ -161,12 +161,14 @@ bool StatementFilter::filter(int value) const
 	// Limit Function complexity (depth of nested control structures)
 	if (cg_context_.blk_depth >= CGOptions::max_blk_depth()) {
 		return Statement::is_compound(type);			
-	} else if (FuncListSize() > CGOptions::max_funcs()) { // Limit # of functions..
+	} 
+	else if (Function::reach_max_functions_cnt()) { // Limit # of functions..
 		if (type != eInvoke)
 			return false;
 		else
 			return true;
-	} else {
+	} 
+	else {
 		return false;
 	}
 

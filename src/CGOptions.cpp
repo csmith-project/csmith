@@ -149,6 +149,7 @@ DEFINE_GETTER_SETTER_BOOL(strict_volatile_rule)
 DEFINE_GETTER_SETTER_BOOL(addr_taken_of_locals)
 DEFINE_GETTER_SETTER_BOOL(fresh_array_ctrl_var_names)
 DEFINE_GETTER_SETTER_BOOL(consts)
+DEFINE_GETTER_SETTER_BOOL(builtins)
 DEFINE_GETTER_SETTER_BOOL(dangling_global_ptrs)
 DEFINE_GETTER_SETTER_BOOL(divs)
 DEFINE_GETTER_SETTER_BOOL(muls)
@@ -173,6 +174,7 @@ DEFINE_GETTER_SETTER_BOOL(mark_mutable_const)
 DEFINE_GETTER_SETTER_BOOL(force_globals_static)
 DEFINE_GETTER_SETTER_BOOL(force_non_uniform_array_init)
 DEFINE_GETTER_SETTER_INT(inline_function_prob)
+DEFINE_GETTER_SETTER_INT(builtin_function_prob)
 DEFINE_GETTER_SETTER_INT(null_pointer_dereference_prob)
 DEFINE_GETTER_SETTER_INT(dead_pointer_dereference_prob)
 DEFINE_GETTER_SETTER_BOOL(union_read_type_sensitive);
@@ -271,6 +273,7 @@ CGOptions::set_default_settings(void)
 	force_non_uniform_array_init(true);
 	max_array_num_in_loop(CGOPTIONS_DEFAULT_MAX_ARRAY_NUM_IN_LOOP);
 	inline_function_prob(50);
+	builtin_function_prob(20);
 	null_pointer_dereference_prob(0);
 	dead_pointer_dereference_prob(0);
 	union_read_type_sensitive(true);
@@ -491,6 +494,13 @@ CGOptions::has_conflict(void)
 		conflict_msg_ = "inline-function-prob value must between [0,100]";
 		return true;
 	}
+
+	if ((CGOptions::builtin_function_prob() < 0) ||
+	    (CGOptions::builtin_function_prob() > 100)) {
+		conflict_msg_ = "builtin-function-prob value must between [0,100]";
+		return true;
+	}
+
 
 	if (CGOptions::max_funcs() < 1) {
 		conflict_msg_ = "max-funcs must be at least 1";
