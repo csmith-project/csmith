@@ -350,7 +350,7 @@ sub reduce_crash ($$$$$) {
     chdir $tempdir or die;
     print "timestamp for creduce start: ";
     system "date";
-    runit "creduce -n 1 --fuzz --sllooww --sanitize ./test1.sh small.c";
+    runit "creduce -n 1 --fuzz --sllooww ./test1.sh small.c";
     print "timestamp for creduce stop: ";
     system "date";
     chdir $origdir or die;
