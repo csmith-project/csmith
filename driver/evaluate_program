@@ -318,6 +318,8 @@ sub reduce_crash ($$$$$) {
 	return;
     }
 
+    $err =~ s/[.*+?|\(\)\'\"\`\[\]\{\}\\]/\\$&/g;
+
     my $cnt = bug_count ($err);
     print "this bug has been seen $cnt time(s)\n";
     my $prob = 5.0 / $cnt;

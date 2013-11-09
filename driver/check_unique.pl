@@ -13,7 +13,7 @@ my $comp = $ARGV[3];
 die unless defined ($comp);
 
 my $cmd = "$comp $opt -c -w small.c > crash.txt 2>&1";
-print "$cmd\n";
+# print "$cmd\n";
 system $cmd;
 
 my $err;
@@ -25,7 +25,7 @@ while (my $line = <INF>) {
     }
 }
 close INF;
-next unless defined ($err);
+exit 0 unless defined ($err);
 
 my $lines = "";
 my $found = 0;
