@@ -49,11 +49,11 @@ my @gcc_opts = (
     "-Ofast");
 
 my @o0only = (
-    "-O0", 
-    "-O1", 
-    "-Os", 
-    "-O2", 
-    "-Ofast");
+    "-O0 -m32", 
+    "-O1 -m32", 
+    "-Os -m32", 
+    "-O2 -m32", 
+    "-Ofast -m32");
 
 my @occomp = ("-fall");
 # my @occomp = (" -fbitfields -fstruct-return ");
@@ -212,6 +212,51 @@ sub compile_and_run ($$$$) {
     return (0,$result);
 }
 
+my $lockmgr;
+
+sub lockit() {
+    $lockmgr = LockFile::Simple->make (
+	-autoclean => 1,
+	-max => 10, 
+	-nfs => 1,
+	-hold => 15000,			    
+	-stale => 1,
+	);
+    my $res = $lockmgr->lock($LOCKFN);
+    return $res;
+}
+
+sub unlockit() {
+    $lockmgr->unlock($LOCKFN);
+}
+
+sub bug_count ($) {
+    (my $err) = @_;
+    my $lines = "";
+    my $found = 0;
+    my $cnt;
+    open INF,"../crash_strings.txt" or die;
+    while (my $line = <INF>) {
+	die unless ($line =~ /^([0-9]+) <<< (.*) >>>$/);
+	if ($2 eq $err) {
+	    $found = 1;
+	    $cnt = 1 + $1;
+	    $lines .= "$cnt <<< $err >>>\n";
+	} else {
+	    $lines .= $line;
+	}
+    }
+    close INF;
+    if (!$found) {
+	$cnt = 1;
+	$lines .= "$cnt <<< $err >>>\n";    
+    }
+    open OUTF, ">../crash_strings.txt" or die;
+    print OUTF $lines;
+    close OUTF;
+    return $cnt;
+}
+
 sub instantiate_test_scripts ($$$$) {
     (my $infn, my $opt1, my $opt, my $base_compiler) = @_;
     open INF, "<$infn" or die;
@@ -244,95 +289,42 @@ sub instantiate_test_scripts ($$$$) {
     runit ("chmod a+x ./test2.sh") || die;
 }
 
-my $lockmgr;
-
-sub lockit() {
-    $lockmgr = LockFile::Simple->make (
-	-autoclean => 1,
-	-max => 10, 
-	-nfs => 1,
-	-hold => 15000,			    
-	-stale => 1,
-	);
-    my $res = $lockmgr->lock($LOCKFN);
-    return $res;
-}
-
-sub unlockit() {
-    $lockmgr->unlock($LOCKFN);
-}
-
-sub reduce_miscompile ($$$$$$) {
-    (my $compiler, my $templ, 
-     my $opt1, my $opt, 
-     my $root, my $base_compiler) = @_;
-     if (lockit()) {
-	 my $res;
-	 print "diffing $opt1 and $opt\n";			    
-	 runit "cp $root.c small.c" or die;
-	 instantiate_test_scripts ($templ, $opt1, $opt, $base_compiler);		
-	 runit ("reduce_miscompile > reduce_log.txt 2>&1");
-	 print ("reduced size: ");
-	 runit ("wc -c small.c");
-	 unlockit();			
-     }
-}
-
-sub bug_count ($) {
-    (my $err) = @_;
-    my $lines = "";
-    my $found = 0;
-    my $cnt;
-    open INF,"../crash_strings.txt" or die;
-    while (my $line = <INF>) {
-	die unless ($line =~ /^([0-9]+) <<< (.*) >>>$/);
-	if ($2 eq $err) {
-	    $found = 1;
-	    $cnt = 1 + $1;
-	    $lines .= "$cnt <<< $err >>>\n";
-	} else {
-	    $lines .= $line;
-	}
-    }
-    close INF;
-    if (!$found) {
-	$cnt = 1;
-	$lines .= "$cnt <<< $err >>>\n";    
-    }
-    open OUTF, ">../crash_strings.txt" or die;
-    print OUTF $lines;
-    close OUTF;
-    return $cnt;
-}
-
-sub reduce_crash ($$$$$) {
-    (my $compiler, my $fail_opt, my $root, my $base_compiler, my $fail_out) = @_;
+sub reduce_program ($$$$$) {
+    (my $crash, my $compiler, my $fail_opt, my $good_opt, my $root, my $base_compiler, my $fail_out) = @_;
 
     my $err;
-    if ($fail_out =~ /internal compiler error: (.*)$/m) {
-	$err = $1;
-    } elsif ($fail_out =~ /Assertion(.*)failed./m) {
-	$err = $1;
+    if ($crash) {
+	if ($fail_out =~ /internal compiler error: (.*)$/m) {
+	    $err = $1;
+	} elsif ($fail_out =~ /Assertion(.*)failed./m) {
+	    $err = $1;
+	} else {
+	    print "FAILURE to reduce: no ICE message\n";
+	    return;
+	}
+	# escape the string so we can use it in a shell command
+	$err =~ s/[.*+?|\(\)\'\"\`\[\]\{\}\\]/\\$&/g;
+	
+	my $cnt = bug_count ($err);
+	print "this bug has been seen $cnt time(s)\n";
+	my $prob = 5.0 / $cnt;
+	if (rand() > $prob) {
+	    print "we'll skip reducing this time\n";
+	    return;
+	}
     } else {
-	print "FAILURE to reduce: no ICE message\n";
-	return;
+	$err = "OOPS";
     }
 
-    $err =~ s/[.*+?|\(\)\'\"\`\[\]\{\}\\]/\\$&/g;
-
-    my $cnt = bug_count ($err);
-    print "this bug has been seen $cnt time(s)\n";
-    my $prob = 5.0 / $cnt;
-    if (rand() > $prob) {
-	print "we'll skip reducing this time\n";
-	return;
-    }
-
-    my $tempdir = tempdir ( "reduce_XXXXXX", DIR => "../", CLEANUP => 0 );
-    print "ok: reducing crash bug for $compiler at $fail_opt in $tempdir with '$err'\n";
+    my $tempdir = tempdir ("reduce_XXXXXX", DIR => "../", CLEANUP => 0 );
+    print "ok: reducing ".($crash ? "crash" : "wrong code")." bug for $compiler at $fail_opt in $tempdir with '$err'\n";
     File::Copy::cp ("$root.c", $tempdir);
     runit "gcc -E -I${CSMITH_HOME}/runtime -DCSMITH_MINIMAL ${root}.c > $tempdir/small.c";
-    open INF, "<${CSMITH_HOME}/driver/test1_crash.sh" or die;
+    if ($crash) {
+	open INF, "<${CSMITH_HOME}/driver/test1_crash.sh" or die;
+    } else {
+	open INF, "<${CSMITH_HOME}/driver/test1_wrong_code.sh" or die;
+    }
     open OUTF, ">$tempdir/test1.sh" or die;
     my $origdir = getcwd;
     my $updir = "${origdir}/../bonus_crashes";
@@ -435,7 +427,7 @@ sub test_compiler ($$$) {
 	print "COMPILER FAILED $compiler\n";
 	$interesting = 1;
 	if ($DO_REDUCE) {
-	    reduce_crash ($compiler, $fail_opt, $root, $base_compiler, $fail_out);
+	    reduce_program (1, $compiler, $fail_opt, "", $root, $base_compiler, $fail_out);
 	}
     }
 
@@ -449,13 +441,10 @@ sub test_compiler ($$$) {
 	    if (defined($result)) {
 		if (($csum ne $csums{$opt}) &&
 		    ($csum ne "TIMEOUT" && $csums{$opt} ne "TIMEOUT")) {
-		    print "INTERNAL CHECKSUM FAILURE $compiler $opt\n";
+		    print "INTERNAL CHECKSUM FAILURE $compiler\n";
 		    $interesting = 1;
-		    if ($DO_REDUCE && 0) {
-			die;
-			reduce_miscompile ($compiler, 
-					   "test-${base_compiler}-wrong-code-template.sh", 
-					   $opt1, $opt, $root, $base_compiler);
+		    if ($DO_REDUCE) {
+			reduce_program (0, $compiler, $fail_opt, $opt, $root, $base_compiler, "");
 		    }
 		    $consistent = 0;
 		    last;
