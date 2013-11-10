@@ -49,11 +49,8 @@ my @gcc_opts = (
     "-Ofast");
 
 my @o0only = (
-    "-O0 -m32", 
-    "-O1 -m32", 
-    "-Os -m32", 
-    "-O2 -m32", 
-    "-Ofast -m32");
+    "-O0", 
+    );
 
 my @occomp = ("-fall");
 # my @occomp = (" -fbitfields -fstruct-return ");
@@ -68,7 +65,7 @@ my @gcc_opts3 = (
 
 my @clang = ("clang",
 	     "clang",
-	     \@o0only);
+	     \@gcc_opts);
 
 my @ccomp = ("ccomp",
 	     "ccomp",
@@ -112,19 +109,19 @@ my @gcc44 = ("gcc",
 
 my @gcccurrent = ("gcc",
 		  "gcc",
-		  \@o0only);
+		  \@gcc_opts);
 
 my @compilers_to_test = (
+
+    \@clang,
+    \@gcccurrent,
+    #\@ccomp,
 
     #\@gcc400,
     #\@gcc410,
     #\@gcc420,
     #\@gcc430,
     #\@gcc440,
-
-    \@clang,
-    \@gcccurrent,
-    #\@ccomp,
 
     #\@gcc44,
     #\@gcc45,
@@ -289,7 +286,7 @@ sub instantiate_test_scripts ($$$$) {
     runit ("chmod a+x ./test2.sh") || die;
 }
 
-sub reduce_program ($$$$$) {
+sub reduce_program ($$$$$$$) {
     (my $crash, my $compiler, my $fail_opt, my $good_opt, my $root, my $base_compiler, my $fail_out) = @_;
 
     my $err;
@@ -336,6 +333,7 @@ sub reduce_program ($$$$$) {
 	$line =~ s/XX_DIR/$updir/;
 	$line =~ s/XX_COMPILER/${base_compiler}/;
 	$line =~ s/XX_OPT/${fail_opt}/;
+	$line =~ s/XX_OPT2/${good_opt}/;
 	print OUTF $line;
     }
     close INF;

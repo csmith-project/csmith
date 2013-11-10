@@ -10,8 +10,11 @@
 
 rm -f out*.txt
 
-ulimit -t 3
-ulimit -v 2000000
+ulimit -t 120
+ulimit -v 8000000
+ulimit -m 8000000
+
+${CSMITH_HOME}/driver/check_unique.pl XX_CRASHFILE XX_DIR XX_OPT "XX_COMMAND"
 
 if 
   clang -pedantic -Wall -O0 -c small.c  >out.txt 2>&1 &&\
@@ -45,13 +48,12 @@ if
   ! grep 'incompatible implicit' outa.txt &&\
   ! grep 'excess elements in struct initializer' outa.txt &&\
   ! grep 'comparison between pointer and integer' outa.txt &&\
-  XXOPT1 small.c -o small1 > cc_out1.txt 2>&1 &&\
+  XX_COMMAND XX_OPT small.c -o small1 > cc_out1.txt 2>&1 &&\
   ./small1 >out1.txt 2>&1 &&\
-  XXOPT2 small.c -o small2 > cc_out2.txt 2>&1 &&\
+  XX_COMMAND XX_OPT2 small.c -o small2 > cc_out2.txt 2>&1 &&\
   ./small2 >out2.txt 2>&1 &&\
   ! diff out1.txt out2.txt &&\
   cp small.c small-framac.c &&\
-  perl -pi.bak -e 's/int main \(int argc, char\* argv\[\]\)/int argc; char **argv; int main (void)/' small-framac.c &&\
   RunSafely.sh 125 1 /dev/null out_framac.txt frama-c -cpp-command \"gcc -C -Dvolatile= -E -I.\" -val-signed-overflow-alarms -val -stop-at-first-alarm -no-val-show-progress -machdep x86_64 -obviously-terminates -precise-unions small-framac.c &&\
   ! egrep -i '(user error|assert)' out_framac.txt >/dev/null 2>&1
 then
