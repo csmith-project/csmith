@@ -454,6 +454,8 @@ public:
 	static void disable_builtin_kinds(const string &kinds);
 
 private:
+	static void set_default_builtin_kinds();
+
 	static bool resolve_exhaustive_options();
 
 	static bool has_delta_conflict();
