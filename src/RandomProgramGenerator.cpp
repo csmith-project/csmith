@@ -1159,6 +1159,30 @@ main(int argc, char **argv)
 			continue;
 		}
 
+		if (strcmp (argv[i], "--enable-builtin-kinds") == 0) {
+			string kinds;
+			i++;
+			arg_check(argc, i);
+			if (!parse_string_arg(argv[i], kinds)) {
+				cout<< "please specify enabled builtin kinds in the form of k1,k2..." << std::endl;
+				exit(-1);
+			}
+			CGOptions::enable_builtin_kinds(kinds);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--disable-builtin-kinds") == 0) {
+			string kinds;
+			i++;
+			arg_check(argc, i);
+			if (!parse_string_arg(argv[i], kinds)) {
+				cout<< "please specify disabled builtin kinds in the form of k1,k2..." << std::endl;
+				exit(-1);
+			}
+			CGOptions::disable_builtin_kinds(kinds);
+			continue;
+		}
+
 		if (strcmp (argv[i], "--null-ptr-deref-prob") == 0 ) {
 			unsigned long prob;
 			i++;

@@ -33,6 +33,7 @@
 #include <iostream>
 #include <assert.h>
 #include <string.h>
+#include <map>
 #include "Fact.h"
 #include "DefaultOutputMgr.h"
 #include "Bookkeeper.h"
@@ -46,6 +47,7 @@
 using namespace std;
 Reducer* CGOptions::reducer_ = NULL;
 vector<int> CGOptions::safe_math_wrapper_ids_;
+map<string, bool> CGOptions::enabled_builtin_kinds_;
 int CGOptions::int_size_ = 0;
 int CGOptions::pointer_size_ = 0;
 
@@ -288,6 +290,8 @@ CGOptions::set_default_settings(void)
 	vol_struct_union_fields(true);
 	addr_taken_of_locals(true);
 	lang_cpp(false);
+
+	enabled_builtin_kinds_["generic"] = true;
 }
 	
 /*
@@ -610,6 +614,35 @@ CGOptions::safe_math_wrapper(int id)
 	// if no safe math wrapper ids specified, assume all needs wrapper
 	if (safe_math_wrapper_ids_.empty()) return true;
 	return std::find(safe_math_wrapper_ids_.begin(), safe_math_wrapper_ids_.end(), id) != safe_math_wrapper_ids_.end();
+}
+
+void
+CGOptions::disable_builtin_kinds(const string &kinds)
+{
+	vector<string> vs;
+	StringUtils::split_string(kinds, vs, ",");
+	for (vector<string>::const_iterator i = vs.begin(), e = vs.end(); i != e; ++i) {
+		enabled_builtin_kinds_[*i] = false;
+	}
+}
+
+void
+CGOptions::enable_builtin_kinds(const string &kinds)
+{
+	vector<string> vs;
+	StringUtils::split_string(kinds, vs, ",");
+	for (vector<string>::const_iterator i = vs.begin(), e = vs.end(); i != e; ++i) {
+		enabled_builtin_kinds_[*i] = true;
+	}
+}
+
+bool
+CGOptions::enabled_builtin_kind(const string &kind)
+{
+	map<string, bool>::iterator i = enabled_builtin_kinds_.find(kind);
+	if (i == enabled_builtin_kinds_.end())
+		return false;
+	return i->second;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
