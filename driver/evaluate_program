@@ -311,7 +311,7 @@ sub reduce_program ($$$$$$$) {
     chdir $tempdir or die;
     print "timestamp for creduce start: ";
     system "date";
-    runit "creduce -n 1 --fuzz --sllooww ./test1.sh small.c";
+    runit "creduce -n 1 --slow ./test1.sh small.c";
     print "timestamp for creduce stop: ";
     system "date";
     my $ofn = ($crash?"CRASH":"WRONG_CODE")."_REDUCTION_FINISHED";
