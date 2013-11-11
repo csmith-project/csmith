@@ -345,6 +345,10 @@ sub reduce_program ($$$$$$$) {
     runit "creduce -n 1 --fuzz --sllooww ./test1.sh small.c";
     print "timestamp for creduce stop: ";
     system "date";
+    my $ofn = ($crash?"CRASH":"WRONG_CODE")."_REDUCTION_FINISHED";
+    open OF, ">$ofn" or die;
+    print OF "${base_compiler}\n";
+    close OF;
     chdir $origdir or die;
 }
 
