@@ -275,7 +275,7 @@ CGOptions::set_default_settings(void)
 	force_non_uniform_array_init(true);
 	max_array_num_in_loop(CGOPTIONS_DEFAULT_MAX_ARRAY_NUM_IN_LOOP);
 	inline_function_prob(50);
-	builtin_function_prob(20);
+	builtin_function_prob(50);
 	null_pointer_dereference_prob(0);
 	dead_pointer_dereference_prob(0);
 	union_read_type_sensitive(true);
