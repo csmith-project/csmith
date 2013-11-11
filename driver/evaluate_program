@@ -113,9 +113,9 @@ my @gcccurrent = ("gcc",
 
 my @compilers_to_test = (
 
-    \@gcc440,
-    #\@clang,
-    #\@gcccurrent,
+    #\@gcc440,
+    \@clang,
+    \@gcccurrent,
     #\@ccomp,
 
     #\@gcc400,
