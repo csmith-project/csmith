@@ -195,6 +195,7 @@ static void print_help()
 	cout << "  --const-pointers | --no-const-pointers: enable | disable const pointers (enabled by default)." << endl << endl;
 
 	cout << "  --builtins | --no-builtins: enable | disable to generate builtin functions (disabled by default)." << endl << endl;
+	cout << "  --enable-builtin-kinds k1,k2 | --disable-builtin-kinds k1,k2: enable | disable certain kinds of builtin functions." << endl << endl;
 	cout << "  --builtin-function-prob <num>: set the probability of choosing a builtin function (default is 20)." << endl << endl;
 
         // language options
