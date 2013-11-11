@@ -450,10 +450,12 @@ public:
 	static bool lang_cpp(bool p);
 
 	static void enable_builtin_kinds(const string &kinds);
-	static bool enabled_builtin_kind(const string &kind);
 	static void disable_builtin_kinds(const string &kinds);
+	static bool enabled_builtin(const string &ks);
 
 private:
+	static bool enabled_builtin_kind(const string &kind);
+
 	static void set_default_builtin_kinds();
 
 	static bool resolve_exhaustive_options();

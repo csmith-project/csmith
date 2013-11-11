@@ -643,13 +643,24 @@ CGOptions::enable_builtin_kinds(const string &kinds)
 	}
 }
 
-bool
-CGOptions::enabled_builtin_kind(const string &kind)
+bool CGOptions::enabled_builtin_kind(const string &kind)
 {
 	map<string, bool>::iterator i = enabled_builtin_kinds_.find(kind);
 	if (i == enabled_builtin_kinds_.end())
 		return false;
 	return i->second;
+}
+
+bool
+CGOptions::enabled_builtin(const string &ks)
+{
+	vector<string> vs;
+	StringUtils::split_string(ks, vs, "|");
+	for (vector<string>::iterator iter_begin = vs.begin(), iter_end = vs.end(); iter_begin != iter_end; ++iter_begin) {
+		if (enabled_builtin_kind(*iter_begin))
+			return true;
+	}
+	return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

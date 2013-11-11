@@ -721,7 +721,7 @@ Function::initialize_builtin_functions()
 		"ULonglong; __builtin_bswap64; (ULonglong); x86",
 		"Int; __builtin_ctzs; (UShort); clang",
 		"Int; __builtin_clzs; (UShort); clang",
-		"UShort; __builtin_bswap16; (UShort); ppc"
+		"UShort; __builtin_bswap16; (UShort); ppc | clang"
 	};
 
 	int cnt = sizeof(builtin_function_strings) / sizeof(builtin_function_strings[0]);
@@ -736,11 +736,11 @@ Function::make_builtin_function(const string &function_string)
 	vector<string> v;
 	StringUtils::split_string(function_string, v, ";");
 	if (v.size() == 4) {
-		if (!CGOptions::enabled_builtin_kind(v[3]))
+		if (!CGOptions::enabled_builtin(v[3]))
 			return;
 	}
 	else if (v.size() == 3) {
-		if (!CGOptions::enabled_builtin_kind("generic"))
+		if (!CGOptions::enabled_builtin("generic"))
 			return;
 	}
 	else {
