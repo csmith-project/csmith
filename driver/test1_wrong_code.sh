@@ -50,11 +50,11 @@ if
   ! grep 'comparison between pointer and integer' outa.txt &&\
   XX_COMMAND XX_OPT small.c -o small1 > cc_out1.txt 2>&1 &&\
   ./small1 >out1.txt 2>&1 &&\
-  XX_COMMAND XX_OPT2 small.c -o small2 > cc_out2.txt 2>&1 &&\
+  XX_COMMAND XX_GOOD small.c -o small2 > cc_out2.txt 2>&1 &&\
   ./small2 >out2.txt 2>&1 &&\
   ! diff out1.txt out2.txt &&\
-  cp small.c small-framac.c &&\
-  RunSafely.sh 125 1 /dev/null out_framac.txt frama-c -cpp-command \"gcc -C -Dvolatile= -E -I.\" -val-signed-overflow-alarms -val -stop-at-first-alarm -no-val-show-progress -machdep x86_64 -obviously-terminates -precise-unions small-framac.c &&\
+  # these options assume Frama-C Fluorine
+  RunSafely 125 1 /dev/null out_framac.txt frama-c -cpp-command \"gcc -C -Dvolatile= -E -I.\" -val -no-val-show-progress -machdep x86_64 -obviously-terminates small.c &&\
   ! egrep -i '(user error|assert)' out_framac.txt >/dev/null 2>&1
 then
   exit 0

@@ -84,11 +84,11 @@ my @gcc420 = ("gcc420",
 	     \@gcc_opts3);
 
 my @gcc430 = ("gcc430",
-	     "/mnt/local/randomtest/gcc-4.3.0-install/bin/gcc",
+	     "/home/regehr/z/compilers/gcc-430/bin/gcc-430",
 	     \@gcc_opts3);
 
-my @gcc440 = ("gcc440",
-	     "/mnt/local/randomtest/gcc-4.4.0-install/bin/gcc",
+my @gcc440 = ("gcc-4.4",
+	     "gcc-4.4",
 	     \@gcc_opts3);
 
 my @gcc46 = ("gcc",
@@ -113,8 +113,9 @@ my @gcccurrent = ("gcc",
 
 my @compilers_to_test = (
 
-    \@clang,
-    \@gcccurrent,
+    \@gcc440,
+    #\@clang,
+    #\@gcccurrent,
     #\@ccomp,
 
     #\@gcc400,
@@ -254,38 +255,6 @@ sub bug_count ($) {
     return $cnt;
 }
 
-sub instantiate_test_scripts ($$$$) {
-    (my $infn, my $opt1, my $opt, my $base_compiler) = @_;
-    open INF, "<$infn" or die;
-    open OUTF, ">./test1.sh" or die;
-    while (<INF>) {
-	(s/XX_WORKING_OPT/$opt1/g);
-	(s/XX_BROKEN_OPT/$opt/g);
-	if ($base_compiler eq "llvm") {
-	    (s/XX_COMPILER/llvm-gcc/g);
-	} elsif ($base_compiler eq "gcc") {
-	    (s/XX_COMPILER/gcc/g);
-	} else {
-	    die;
-	}
-	print OUTF;
-    }
-    close INF;
-    close OUTF;
-    open INF, "<$infn" or die;
-    open OUTF, ">./test2.sh" or die;
-    while (<INF>) {
-	(s/XX_WORKING_OPT/$opt1/g);
-	(s/XX_BROKEN_OPT/$opt/g);
-	(s/XX_COMPILER/\$1/g);
-	print OUTF;
-    }
-    close INF;
-    close OUTF;
-    runit ("chmod a+x ./test1.sh") || die;
-    runit ("chmod a+x ./test2.sh") || die;
-}
-
 sub reduce_program ($$$$$$$) {
     (my $crash, my $compiler, my $fail_opt, my $good_opt, my $root, my $base_compiler, my $fail_out) = @_;
 
@@ -333,7 +302,7 @@ sub reduce_program ($$$$$$$) {
 	$line =~ s/XX_DIR/$updir/;
 	$line =~ s/XX_COMPILER/${base_compiler}/;
 	$line =~ s/XX_OPT/${fail_opt}/;
-	$line =~ s/XX_OPT2/${good_opt}/;
+	$line =~ s/XX_GOOD/${good_opt}/;
 	print OUTF $line;
     }
     close INF;
@@ -446,7 +415,7 @@ sub test_compiler ($$$) {
 		    print "INTERNAL CHECKSUM FAILURE $compiler\n";
 		    $interesting = 1;
 		    if ($DO_REDUCE) {
-			reduce_program (0, $compiler, $fail_opt, $opt, $root, $base_compiler, "");
+			reduce_program (0, $compiler, $opt, $opt1, $root, $base_compiler, "");
 		    }
 		    $consistent = 0;
 		    last;
