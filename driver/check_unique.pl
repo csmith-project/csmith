@@ -57,7 +57,9 @@ open INF, "<$strings" or die;
 while (my $line = <INF>) {
     chomp $line;
     die unless ($line =~ /^([0-9]+) <<< (.*) >>>$/);
-    if ($2 eq $err) {
+    my $s = $2;
+    die unless ($s ne "");
+    if ($s eq $err) {
 	$found = 1;
     }
 }

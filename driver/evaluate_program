@@ -268,6 +268,10 @@ sub reduce_program ($$$$$$$) {
 	    print "FAILURE to reduce: no ICE message\n";
 	    return;
 	}
+	if ($err =~ /killed/i) {
+	    print "FAILURE to reduce compiler that was killed\n";
+	    return;
+	}
 	# escape the string so we can use it in a shell command
 	$err =~ s/[.*+?|\(\)\'\"\`\[\]\{\}\\]/\\$&/g;
 	
