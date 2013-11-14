@@ -1,4 +1,12 @@
 ===================================================================
+11/14/2013 (total 474)
+  1 gcc crash bug reported 
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=59139
+
+11/14/2013 (total 473)
+  1 gcc wrong code bug reported 
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=59138
+
 11/08/2013 (total 472)
   1 clang crash bug reported
   http://llvm.org/bugs/show_bug.cgi?id=17852
