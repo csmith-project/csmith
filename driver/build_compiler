@@ -23,7 +23,7 @@ my $NICE = "nice -5";
 my $EXPENSIVE = "";
 
 #my $LLVM_CHECKS = "$EXPENSIVE --enable-debug-runtime --disable-optimized";
-my $LLVM_CHECKS = "--enable-checking=release --enable-optimized";
+my $LLVM_CHECKS = "--enable-checking=release --enable-optimized --disable-bindings";
 
 my $CLEANUP = 1;
 
