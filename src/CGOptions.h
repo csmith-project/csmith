@@ -32,6 +32,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 #include "Reducer.h"
 using namespace std;
 
@@ -448,7 +449,15 @@ public:
 	static bool lang_cpp(void);
 	static bool lang_cpp(bool p);
 
+	static void enable_builtin_kinds(const string &kinds);
+	static void disable_builtin_kinds(const string &kinds);
+	static bool enabled_builtin(const string &ks);
+
 private:
+	static bool enabled_builtin_kind(const string &kind);
+
+	static void set_default_builtin_kinds();
+
 	static bool resolve_exhaustive_options();
 
 	static bool has_delta_conflict();
@@ -541,6 +550,7 @@ private:
 	static bool	fresh_array_ctrl_var_names_;
 	static bool	consts_;
 	static bool	builtins_;
+	static map<string, bool> enabled_builtin_kinds_;
 	static bool dangling_global_ptrs_;
 	static bool divs_;
 	static bool muls_;

@@ -113,9 +113,9 @@ my @gcccurrent = ("gcc",
 
 my @compilers_to_test = (
 
-    \@gcc440,
-    #\@clang,
-    #\@gcccurrent,
+    #\@gcc440,
+    \@clang,
+    \@gcccurrent,
     #\@ccomp,
 
     #\@gcc400,
@@ -268,6 +268,10 @@ sub reduce_program ($$$$$$$) {
 	    print "FAILURE to reduce: no ICE message\n";
 	    return;
 	}
+	if ($err =~ /killed/i) {
+	    print "FAILURE to reduce compiler that was killed\n";
+	    return;
+	}
 	# escape the string so we can use it in a shell command
 	$err =~ s/[.*+?|\(\)\'\"\`\[\]\{\}\\]/\\$&/g;
 	
@@ -311,7 +315,7 @@ sub reduce_program ($$$$$$$) {
     chdir $tempdir or die;
     print "timestamp for creduce start: ";
     system "date";
-    runit "creduce -n 1 --fuzz --sllooww ./test1.sh small.c";
+    runit "creduce -n 1 --slow ./test1.sh small.c";
     print "timestamp for creduce stop: ";
     system "date";
     my $ofn = ($crash?"CRASH":"WRONG_CODE")."_REDUCTION_FINISHED";

@@ -13,21 +13,32 @@ my $comp = $ARGV[3];
 die unless defined ($comp);
 
 # TODO: 
-# randomize optimization flag instead of using the one given to us?
 # don't treat processors individually; that will require some locking
+
+# FIXME, this is specific to gcc/clang
+my @all_opts = (
+    "-O0", 
+    "-O1", 
+    "-Os", 
+    "-O2", 
+    "-Ofast");
+$opt = $all_opts[rand @all_opts];
 
 my $cmd = "$comp $opt -c -w small.c > crash.txt 2>&1";
 # print "$cmd\n";
 system $cmd;
+
+# FIXME
+system "cat crash.txt >> /mnt/local/randomtest/all_crash.txt";
 
 my $err;
 open INF, "<crash.txt" or die;
 while (my $line = <INF>) {
     chomp $line;
     # for now, we only support uniqueness checking for a few specific kinds of error
-    if ($line =~ /internal compiler error: (.*)$/) {
+    if ($line =~ /internal compiler error: (.*)$/m) {
 	$err = $1;
-    } elsif ($line =~ =~ /Assertion(.*)failed./m) {
+    } elsif ($line =~ /Assertion(.*)failed./m) {
 	$err = $1;
     } else {
 	exit 0;
@@ -46,7 +57,9 @@ open INF, "<$strings" or die;
 while (my $line = <INF>) {
     chomp $line;
     die unless ($line =~ /^([0-9]+) <<< (.*) >>>$/);
-    if ($2 eq $err) {
+    my $s = $2;
+    die unless ($s ne "");
+    if ($s eq $err) {
 	$found = 1;
     }
 }

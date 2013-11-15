@@ -266,7 +266,7 @@ Function::get_one_function(const vector<Function *> &ok_funcs)
 Function *
 Function::choose_func(vector<Function *> funcs,
 			const CGContext& cg_context,
-            const Type* type, 
+			const Type* type, 
 			const CVQualifiers* qfer)
 {
 	vector<Function *> ok_funcs;
@@ -701,13 +701,31 @@ Function::initialize_builtin_functions()
 	// supported type: Void, Char, UChar, Short, UShort, Int, 
 	// 		   UInt, Long, ULong, Longlong, ULonglong
 	string builtin_function_strings[] = {
-		"Int; __builtin_popcount; (Int)",
-		"UInt; __builtin_ia32_crc32qi; (UInt, UChar)"
+		"UInt; __builtin_ia32_crc32qi; (UInt, UChar); x86",
+		"Int; __builtin_clz; (UInt); x86",
+		"Int; __builtin_clzl; (ULong); x86",
+		"Int; __builtin_clzll; (ULonglong); x86",
+		"Int; __builtin_ctz; (UInt); x86",
+		"Int; __builtin_ctzl; (ULong); x86",
+                "Int; __builtin_ctzll; (ULonglong); x86",
+		"Int; __builtin_ffs; (Int); x86",
+		"Int; __builtin_ffsl; (Long); x86",
+		"Int; __builtin_ffsll; (Longlong); x86",
+		"Int; __builtin_parity; (UInt); x86",
+		"Int; __builtin_parityl; (ULong); x86",
+		"Int; __builtin_parityll; (ULonglong); x86",
+		"Int; __builtin_popcount; (UInt); x86",
+		"Int; __builtin_popcountl; (ULong); x86",
+		"Int; __builtin_popcountll; (ULonglong); x86",
+		"UInt; __builtin_bswap32; (UInt); x86",
+		"ULonglong; __builtin_bswap64; (ULonglong); x86",
+		"Int; __builtin_ctzs; (UShort); clang",
+		"Int; __builtin_clzs; (UShort); clang",
+		"UShort; __builtin_bswap16; (UShort); ppc | clang"
 	};
 
-	builtin_functions_cnt = 
-		sizeof(builtin_function_strings) / sizeof(builtin_function_strings[0]);
-	for (int i = 0; i < builtin_functions_cnt; i++) {
+	int cnt = sizeof(builtin_function_strings) / sizeof(builtin_function_strings[0]);
+	for (int i = 0; i < cnt; i++) {
 		make_builtin_function(builtin_function_strings[i]);
 	}
 }
@@ -717,7 +735,17 @@ Function::make_builtin_function(const string &function_string)
 {
 	vector<string> v;
 	StringUtils::split_string(function_string, v, ";");
-	assert((v.size() == 3) && "Invalid builtin function format!");
+	if (v.size() == 4) {
+		if (!CGOptions::enabled_builtin(v[3]))
+			return;
+	}
+	else if (v.size() == 3) {
+		if (!CGOptions::enabled_builtin("generic"))
+			return;
+	}
+	else {
+		assert(0 && "Invalid builtin function format!");
+	}
 
 	const Type *ty = Type::get_type_from_string(v[0]);
 	Function *f = new Function(v[1], ty, /*is_builtin*/true);
@@ -740,6 +768,7 @@ Function::make_builtin_function(const string &function_string)
 
 	// collect info about global dangling pointers
 	fm->find_dangling_global_ptrs(f);
+	++builtin_functions_cnt;
 }
 
 void

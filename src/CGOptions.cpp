@@ -33,6 +33,7 @@
 #include <iostream>
 #include <assert.h>
 #include <string.h>
+#include <map>
 #include "Fact.h"
 #include "DefaultOutputMgr.h"
 #include "Bookkeeper.h"
@@ -46,6 +47,7 @@
 using namespace std;
 Reducer* CGOptions::reducer_ = NULL;
 vector<int> CGOptions::safe_math_wrapper_ids_;
+map<string, bool> CGOptions::enabled_builtin_kinds_;
 int CGOptions::int_size_ = 0;
 int CGOptions::pointer_size_ = 0;
 
@@ -190,6 +192,13 @@ DEFINE_GETTER_SETTER_BOOL(vol_struct_union_fields);
 DEFINE_GETTER_SETTER_BOOL(lang_cpp);
 
 void
+CGOptions::set_default_builtin_kinds()
+{
+	enabled_builtin_kinds_["generic"] = true;
+	enabled_builtin_kinds_["x86"] = true;
+}
+
+void
 CGOptions::set_default_settings(void)
 {
 	set_platform_specific_options();
@@ -273,7 +282,7 @@ CGOptions::set_default_settings(void)
 	force_non_uniform_array_init(true);
 	max_array_num_in_loop(CGOPTIONS_DEFAULT_MAX_ARRAY_NUM_IN_LOOP);
 	inline_function_prob(50);
-	builtin_function_prob(20);
+	builtin_function_prob(50);
 	null_pointer_dereference_prob(0);
 	dead_pointer_dereference_prob(0);
 	union_read_type_sensitive(true);
@@ -288,6 +297,8 @@ CGOptions::set_default_settings(void)
 	vol_struct_union_fields(true);
 	addr_taken_of_locals(true);
 	lang_cpp(false);
+
+	set_default_builtin_kinds();
 }
 	
 /*
@@ -610,6 +621,46 @@ CGOptions::safe_math_wrapper(int id)
 	// if no safe math wrapper ids specified, assume all needs wrapper
 	if (safe_math_wrapper_ids_.empty()) return true;
 	return std::find(safe_math_wrapper_ids_.begin(), safe_math_wrapper_ids_.end(), id) != safe_math_wrapper_ids_.end();
+}
+
+void
+CGOptions::disable_builtin_kinds(const string &kinds)
+{
+	vector<string> vs;
+	StringUtils::split_string(kinds, vs, ",");
+	for (vector<string>::const_iterator i = vs.begin(), e = vs.end(); i != e; ++i) {
+		enabled_builtin_kinds_[*i] = false;
+	}
+}
+
+void
+CGOptions::enable_builtin_kinds(const string &kinds)
+{
+	vector<string> vs;
+	StringUtils::split_string(kinds, vs, ",");
+	for (vector<string>::const_iterator i = vs.begin(), e = vs.end(); i != e; ++i) {
+		enabled_builtin_kinds_[*i] = true;
+	}
+}
+
+bool CGOptions::enabled_builtin_kind(const string &kind)
+{
+	map<string, bool>::iterator i = enabled_builtin_kinds_.find(kind);
+	if (i == enabled_builtin_kinds_.end())
+		return false;
+	return i->second;
+}
+
+bool
+CGOptions::enabled_builtin(const string &ks)
+{
+	vector<string> vs;
+	StringUtils::split_string(ks, vs, "|");
+	for (vector<string>::iterator iter_begin = vs.begin(), iter_end = vs.end(); iter_begin != iter_end; ++iter_begin) {
+		if (enabled_builtin_kind(*iter_begin))
+			return true;
+	}
+	return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
