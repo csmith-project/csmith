@@ -273,7 +273,8 @@ sub reduce_program ($$$$$$$) {
 	    return;
 	}
 	# escape the string so we can use it in a shell command
-	$err =~ s/[.*+?|\(\)\'\"\`\[\]\{\}\\]/\\$&/g;
+	$err =~ s/[.*+?|\"\`\[\]\{\}\\]/\\$&/g;
+	$err =~ s/'/'\\''/g;
 	
 	my $cnt = bug_count ($err);
 	print "this bug has been seen $cnt time(s)\n";
