@@ -1,4 +1,8 @@
 ===================================================================
+11/17/2013 (total 475)
+  1 gcc crash bug reported
+  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=59164
+
 11/14/2013 (total 474)
   1 gcc crash bug reported 
   http://gcc.gnu.org/bugzilla/show_bug.cgi?id=59139
