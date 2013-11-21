@@ -54,7 +54,7 @@ if
   ./small2 >out_small2.txt 2>&1 &&\
   ! diff out_small1.txt out_small2.txt &&\
   # these options assume Frama-C Fluorine and a 64-bit machine
-  frama-c -cpp-command \"gcc -C -Dvolatile= -E -I.\" -val -no-val-show-progress -machdep x86_64 -obviously-terminates small.c > out_framac.txt 2>&1 &&\
+  frama-c -cpp-command 'gcc -C -Dvolatile= -E -I.' -val -no-val-show-progress -machdep x86_64 -obviously-terminates small.c > out_framac.txt 2>&1 &&\
   ! egrep -i '(user error|assert)' out_framac.txt >/dev/null 2>&1
 then
   exit 0
