@@ -10,6 +10,9 @@
 
 rm -f out*.txt
 
+# this should mirror the timeout in run_program 
+PROG_TIMEOUT=5
+
 ulimit -t 600
 ulimit -v 8000000
 ulimit -m 8000000
@@ -49,9 +52,9 @@ if
   ! grep 'excess elements in struct initializer' out_gcc.txt &&\
   ! grep 'comparison between pointer and integer' out_gcc.txt &&\
   XX_COMMAND XX_OPT small.c -o small1 > /dev/null 2>&1 &&\
-  ./small1 >out_small1.txt 2>&1 &&\
+  RunSafely ${PROG_TIMEOUT} 1 /dev/null out_small1.txt ./small1 &&\
   XX_COMMAND XX_GOOD small.c -o small2 > /dev/null 2>&1 &&\
-  ./small2 >out_small2.txt 2>&1 &&\
+  RunSafely ${PROG_TIMEOUT} 1 /dev/null out_small2.txt ./small2 &&\
   ! diff out_small1.txt out_small2.txt &&\
   # these options assume Frama-C Fluorine and a 64-bit machine
   frama-c -cpp-command 'gcc -C -Dvolatile= -E -I.' -val -no-val-show-progress -machdep x86_64 -obviously-terminates small.c > out_framac.txt 2>&1 &&\
