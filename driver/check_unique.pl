@@ -47,7 +47,8 @@ while (my $line = <INF>) {
 close INF;
 
 # escape the string so we can use it in a shell command
-$err =~ s/[.*+?|\(\)\'\"\`\[\]\{\}\\]/\\$&/g;
+$err =~ s/[.*+?|\"\`\[\]\{\}\\]/\\$&/g;
+$err =~ s/'/'\\''/g;
 
 my $lines = "";
 my $found = 0;
