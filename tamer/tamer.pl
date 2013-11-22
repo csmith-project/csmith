@@ -32,9 +32,13 @@ my $nwork = 0;
 
 print "found $nwork work dirs and ".(scalar @dirs)." reduce dirs for $compiler wrong-code bugs.\n";
 
+# calculate distances using different metrics
+
 foreach my $dir1 (@dirs) {
     foreach my $dir2 (@dirs) {
 	next if ($dir1 eq $dir2);
 	print "$dir1 $dir2\n";
     }
 }
+
+# create ranked lists in a nice web format
