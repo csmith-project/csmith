@@ -4,6 +4,8 @@ use strict;
 use Text::LevenshteinXS qw(distance);
 
 # TODO:
+#   segregate test cases by compiler option
+#   update interestingness tests for new compiler?
 #   prefer smaller test cases?
 #   handle all compilers, not just one
 #   support more distance functions

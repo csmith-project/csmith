@@ -8,6 +8,14 @@
 
 ###############################################################################
 
+# command: XX_COMMAND
+# string: XX_STRING
+# crashfile: XX_CRASHFILE
+# dir: XX_DIR
+# compiler: XX_COMPILER
+# bad opt: XX_OPT
+# good_opt: XX_GOOD
+
 rm -f out*.txt
 
 # this should mirror the timeout in run_program 
@@ -51,7 +59,7 @@ if
   ! grep 'incompatible implicit' out_gcc.txt &&\
   ! grep 'excess elements in struct initializer' out_gcc.txt &&\
   ! grep 'comparison between pointer and integer' out_gcc.txt &&\
-  XX_COMMAND XX_OPT small.c -o small1 > /dev/null 2>&1 &&\
+  XX_COMMAND XX_OPT small.c -o small1 > /dev/null 2>&1 &&\ # DOWNGRADE 
   RunSafely ${PROG_TIMEOUT} 1 /dev/null out_small1.txt ./small1 &&\
   XX_COMMAND XX_GOOD small.c -o small2 > /dev/null 2>&1 &&\
   RunSafely ${PROG_TIMEOUT} 1 /dev/null out_small2.txt ./small2 &&\
