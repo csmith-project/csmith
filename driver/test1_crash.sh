@@ -1,6 +1,16 @@
 #!/bin/bash
 
+# command: XX_COMMAND
+# string: XX_STRING
+# crashfile: XX_CRASHFILE
+# dir: XX_DIR
+# compiler: XX_COMPILER
+# bad opt: XX_OPT
+# good_opt: XX_GOOD
+
 ulimit -t 120
+ulimit -v 8000000
+ulimit -m 8000000
 
 ${CSMITH_HOME}/driver/check_unique.pl XX_CRASHFILE XX_DIR XX_OPT "XX_COMMAND"
 
