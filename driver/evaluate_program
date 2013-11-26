@@ -23,13 +23,13 @@ my $xxtra = "-DCSMITH_MINIMAL";
 #my $notmp = "-DUSE_MATH_MACROS_NOTMP";
 my $notmp = "";
 
-my $COMPILER_TIMEOUT = 300;
+my $COMPILER_TIMEOUT = 30;
 
 my $COMPILER_TIMEOUT_RES = 137;
 
-my $RUN_PROGRAM = 1;
+my $RUN_PROGRAM = 0;
 
-my $DO_REDUCE = 1;
+my $DO_REDUCE = 0;
 
 ####################################################################
 
@@ -42,11 +42,11 @@ my $LOCKFN = "/var/tmp/version_search_lockfile";
 ####################################################################
 
 my @gcc_opts = (
-    # "-O0", 
-    "-O1", 
-    "-Os", 
-    "-O2", 
-    "-Ofast");
+    "-c -w -O0", 
+    "-c -w -O1", 
+    "-c -w -Os", 
+    "-c -w -O2", 
+    "-c -w -O3");
 
 my @o0only = (
     "-O0", 
@@ -54,14 +54,6 @@ my @o0only = (
 
 my @occomp = ("-fall");
 # my @occomp = (" -fbitfields -fstruct-return ");
-
-my @gcc_opts3 = (
-    "-O0", 
-    "-O1", 
-    "-O2", 
-    "-Os", 
-    "-O3",
-    );
 
 my @gcccurrent = ("gcc",
 		  "/mnt/local/randomtest/compiler-install/gcc-r205227-install/bin/gcc",
@@ -75,59 +67,126 @@ my @ccomp = ("ccomp",
 	     "ccomp",
 	     \@occomp);
 
+my @gcc320 = ("gcc320",
+	     "/mnt/local/randomtest/compilers/gcc-320/bin/gcc-320",
+	     \@gcc_opts);
+
+my @gcc330 = ("gcc330",
+	     "/mnt/local/randomtest/compilers/gcc-330/bin/gcc-330",
+	     \@gcc_opts);
+
+my @gcc340 = ("gcc340",
+	     "/mnt/local/randomtest/compilers/gcc-340/bin/gcc-340",
+	     \@gcc_opts);
+
 my @gcc400 = ("gcc400",
-	     "/mnt/local/randomtest/gcc-4.0.0-install/bin/gcc",
-	     \@gcc_opts3);
+	     "/mnt/local/randomtest/compilers/gcc-400/bin/gcc-400",
+	     \@gcc_opts);
 
 my @gcc410 = ("gcc410",
-	     "/mnt/local/randomtest/gcc-4.1.0-install/bin/gcc",
-	     \@gcc_opts3);
+	     "/mnt/local/randomtest/compilers/gcc-410/bin/gcc-410",
+	     \@gcc_opts);
 
 my @gcc420 = ("gcc420",
-	     "/mnt/local/randomtest/gcc-4.2.0-install/bin/gcc",
-	     \@gcc_opts3);
+	     "/mnt/local/randomtest/compilers/gcc-420/bin/gcc-420",
+	     \@gcc_opts);
 
 my @gcc430 = ("gcc430",
-	     "/home/regehr/z/compilers/gcc-430/bin/gcc-430",
-	     \@gcc_opts3);
+	     "/mnt/local/randomtest/compilers/gcc-430/bin/gcc-430",
+	     \@gcc_opts);
 
-my @gcc440 = ("gcc-4.4",
-	     "gcc-4.4",
-	     \@gcc_opts3);
+my @gcc440 = ("gcc440",
+	     "/mnt/local/randomtest/compilers/gcc-440/bin/gcc-440",
+	     \@gcc_opts);
 
-my @gcc46 = ("gcc",
-	     "gcc-4.6",
-	     \@gcc_opts3);
+my @gcc450 = ("gcc450",
+	     "/mnt/local/randomtest/compilers/gcc-450/bin/gcc-450",
+	     \@gcc_opts);
 
-my @gcc47 = ("gcc",
-	     "gcc-4.7",
-	     \@gcc_opts3);
+my @gcc460 = ("gcc460",
+	     "/mnt/local/randomtest/compilers/gcc-460/bin/gcc-460",
+	     \@gcc_opts);
 
-my @gcc45 = ("gcc",
-	      "gcc-4.5",
-	      \@gcc_opts3);
+my @gcc470 = ("gcc470",
+	     "/mnt/local/randomtest/compilers/gcc-470/bin/gcc",
+	     \@gcc_opts);
 
-my @gcc44 = ("gcc",
-	      "gcc-4.4",
-	      \@gcc_opts3);
+my @gcc480 = ("gcc480",
+	     "/mnt/local/randomtest/compilers/gcc-480/bin/gcc",
+	     \@gcc_opts);
+
+my @opencc40 = ("open64-40",
+	      "/users/regehr/z/compilers/open64-4.0/bin/opencc",
+	      \@gcc_opts);
+
+my @opencc50 = ("open64-50",
+	      "/users/regehr/z/compilers/open64-5.0/bin/opencc",
+	      \@gcc_opts);
+
+my @clang26 = ("clang26",
+	       "/mnt/local/randomtest/compilers/clang-2.6/bin/clang",
+	       \@gcc_opts);
+
+my @clang27 = ("clang27",
+	       "/mnt/local/randomtest/compilers/clang-2.7/bin/clang",
+	       \@gcc_opts);
+
+my @clang28 = ("clang28",
+	       "/mnt/local/randomtest/compilers/clang-2.8/bin/clang",
+	       \@gcc_opts);
+
+my @clang29 = ("clang29",
+	       "/mnt/local/randomtest/compilers/clang-2.9/bin/clang",
+	       \@gcc_opts);
+
+my @clang30 = ("clang30",
+	       "/mnt/local/randomtest/compilers/clang-3.0/bin/clang",
+	       \@gcc_opts);
+
+my @clang31 = ("clang31",
+	       "/mnt/local/randomtest/compilers/clang-3.1/bin/clang",
+	       \@gcc_opts);
+
+my @clang32 = ("clang32",
+	       "/mnt/local/randomtest/compilers/clang-3.2/bin/clang",
+	       \@gcc_opts);
+
+my @clang33 = ("clang33",
+	       "/mnt/local/randomtest/compilers/clang+llvm-3.3-amd64-Ubuntu-12.04.2/bin/clang",
+	       \@gcc_opts);
 
 my @compilers_to_test = (
 
-    #\@gcc440,
-    \@clang,
-    \@gcccurrent,
+    #\@clang,
+    #\@gcccurrent,
     #\@ccomp,
 
-    #\@gcc400,
-    #\@gcc410,
-    #\@gcc420,
-    #\@gcc430,
-    #\@gcc440,
+    \@gcc320,
+    \@gcc330,
+    \@gcc340,
 
-    #\@gcc44,
-    #\@gcc45,
-    #\@gcc46,
-    #\@gcc410,
+    \@gcc400,
+    \@gcc410,
+    \@gcc420,
+    \@gcc430,
+    \@gcc440,
+    \@gcc450,
+    \@gcc460,
+    \@gcc470,
+    \@gcc480,
+
+    \@opencc40,
+    \@opencc50,
+
+    \@clang26,
+    \@clang27,
+    \@clang28,
+    \@clang29,
+    \@clang30,
+    \@clang31,
+    \@clang32,
+    \@clang33,
+
     );
 
 ####################################################################
@@ -334,8 +393,6 @@ sub test_compiler ($$$) {
 
     my $undef;
 
-    print "--------------------\n";
-
     my %results;
     my %csums;
     my $success = 0;
@@ -350,6 +407,8 @@ sub test_compiler ($$$) {
     my $fail_out;
 
     foreach my $opt (@OPTS) {
+	
+	print "-------------------- start testing $base_compiler\n";	
 	(my $res, my $res_str) = 
 	    compile_and_run ($root, $compiler, 
 			     $opt, $custom_options);
@@ -392,6 +451,7 @@ sub test_compiler ($$$) {
 	    die if ($res != -1);
 	    return (1, 0, $undef, $undef);
 	}
+	print "-------------------- stop\n";	
     }
 
     my $result;
@@ -452,15 +512,18 @@ sub test_program ($$) {
     my $interesting = 0;
 
     foreach my $compiler_ref (@compilers_to_test) {
+
+	(my $base_compiler, my $compiler, my $optref) = @{$compiler_ref};
+
 	(my $abort_test, my $consistent, my $tmp_result, my $tmp_csum, my $tmp_interesting) = 
 	    test_compiler ($root, $compiler_ref, $custom_options);
+
 	return -1 if ($abort_test != 0);
 	
 	if ($tmp_interesting) {
 	    $interesting = 1;
 	}
 	
-	(my $base_compiler, my $compiler, my $optref) = @{$compiler_ref};
 	print "COMPLETED TEST $compiler\n";
 	
 	# ignore internally inconsistent results

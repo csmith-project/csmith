@@ -3,22 +3,24 @@
 use strict;
 use Digest::MD5 qw(md5 md5_hex md5_base64);
 use File::stat;
+use Cwd;
 
 # when errors are detected, fork off reduction scripts
 
 ##################################################################
 
+my $CCG = 1;
+
 my @ALL_SWARM_OPTS = (
     #"argc",
     "arrays",
     "bitfields",
-    #"checksum",
+    "checksum",
     "comma-operators",
     "compound-assignment",
     "consts",
     "divs",
     "embedded-assigns",
-    #"incr-decr-operators",
     "jumps",
     "longlong",
     "force-non-uniform-arrays",
@@ -29,22 +31,24 @@ my @ALL_SWARM_OPTS = (
     "paranoid",
     "pointers",
     "structs",
-    #"unions",
+    "unions",
     "volatiles",
     "volatile-pointers",
     "inline-function",
     "return-structs",
     "arg-structs",
-    #"return-unions",
-    #"arg-unions",
-    #"dangling-global-pointers",
-    #"return-dead-pointer",
-    #"union-read-type-sensitive",
+    "return-unions",
+    "arg-unions",
+    "dangling-global-pointers",
+    "return-dead-pointer",
+    "union-read-type-sensitive",
+    "safe-math",
     );
 
 my $SAVE_BADS = 0;
 
 my $MIN_PROGRAM_SIZE = 30000;
+my $MAX_PROGRAM_SIZE = 5*1024*1024;
 
 my $CSMITH_TIMEOUT = 180;
 
@@ -52,18 +56,6 @@ my $PROVIDE_SEED = 1;
 
 my $XTRA = "";
 
-#$XTRA .= "--no-safe-math";
-#$XTRA .= "--force-non-uniform-arrays ";
-$XTRA .= "--no-unions ";
-$XTRA .= "--no-argc ";
-#$XTRA .= "--ccomp ";
-#$XTRA .= "--concise ";
-#$XTRA .= "--no-paranoid ";
-#$XTRA .= "--random-random ";
-#$XTRA .= "--math-notmp ";
-#$XTRA .= "--bitfields ";
-
-#my $PACK = "--packed-struct";
 my $PACK = "";
 
 my $QUIET = "--quiet";
@@ -101,8 +93,11 @@ sub doit ($$) {
     my $nstr = sprintf "%06d", $n;
     my $dir = "${work}/$nstr";
 
-    system "mkdir $dir";
-    chdir $dir;
+    if (!(mkdir $dir)) {
+	my $cwd = getcwd;
+	die "can't make dir from $cwd";
+    }
+    chdir $dir or die;
 
     my $fn = "rand$nstr";
     my $cfile = "${fn}.c";
@@ -110,7 +105,11 @@ sub doit ($$) {
     my $SEED = "";
     if ($PROVIDE_SEED) {
 	my $n = int (rand (2147483647));
-	$SEED = "-s $n";
+	if ($CCG) {
+	    $SEED = "--seed $n";
+	} else {
+	    $SEED = "-s $n";
+	}
 	print "seed = $n\n";
     }
     if ($TIMED_TEST) {
@@ -136,7 +135,12 @@ sub doit ($$) {
 	}
     }
 
-    my $cmd = "$CSMITH_HOME/src/csmith $SEED $SWARM_OPTS $PACK $XTRA --output $cfile";
+    my $cmd;
+    if ($CCG) {
+	$cmd = "ccg $SEED --swarm --output $cfile";
+    } else {
+	$cmd = "$CSMITH_HOME/src/csmith $SEED $SWARM_OPTS $PACK $XTRA --output $cfile";
+    }
 
     if ($PROVIDE_SEED) {
 	print "$cmd\n";
@@ -159,6 +163,12 @@ sub doit ($$) {
 	system "rm -rf $dir";
 	return;
     }
+    if (($filesize > $MAX_PROGRAM_SIZE) && !$TIMED_TEST) {
+	print "FILE TOO LARGE\n";
+	chdir "../..";
+	system "rm -rf $dir";
+	return;
+    }
 
     my $seed;
     my $prog = "";
@@ -173,7 +183,7 @@ sub doit ($$) {
 	$prog .= "$line ";
     }
     close INF;
-    die if (!defined($seed));
+    # FIXME: die unless defined($seed);
     if (!$PROVIDE_SEED) {
 	print "regenerate with: '$cmd -s $seed'\n";
     }
@@ -205,7 +215,7 @@ if (!(-d $work)) {
 }
 
 system "touch $work/crash_strings.txt";
-system "mkdir $work/bonus_crashes";
+mkdir "$work/bonus_crashes" or die;
 
 if (scalar(@ARGV)==2) {
     my $seedfile = $ARGV[1];

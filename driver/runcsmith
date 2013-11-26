@@ -7,7 +7,7 @@ use warnings;
 use Sys::CPU;
 
 my $NICE = "";
-my $ULIMIT = "ulimit -m 20000000; ulimit -v 20000000;";
+my $ULIMIT = "ulimit -m 80000000; ulimit -v 80000000;";
 
 sub usage () {
     die "usage: runcsmith [number] [seedfile]\n";
@@ -49,9 +49,10 @@ close INF;
 
 system "rm -rf work*";
 
+system "nohup random_test_tmp_cleaner &";
+
 for (my $i=0; $i<$CPUS; $i++) {
     my $dir = "work$i";
-    system "mkdir $dir";
+    mkdir $dir or die;
     system "$ULIMIT $NICE nohup random_test $dir $SEEDFILE > $dir/output.txt 2>&1 &";
 }
-
