@@ -20,14 +20,13 @@ while (1) {
 
     print "now = $now\n";
 
-    open INF, "ps ax -o comm=,pid=,pgrp=,bsdstart= |" or die;
+    open INF, "ps x -o comm=,pid=,bsdstart= |" or die;
     while (my $line = <INF>) {
 	chomp $line;
 	next if (!($line =~ /^cc1/));
 	die if (!($line =~ /\s+([0-9]+)\s+(.*)\s+(.*)$/));	
 	my $pid = $1;
-	my $pgrp = $2;
-	my $stime = $3;
+	my $stime = $2;
 	my $age = 999;
 	if ($stime =~ /([0-9]+):([0-9]+)/) {
 	    my $h = $1;
