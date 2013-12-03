@@ -10,6 +10,7 @@ use Cwd;
 ##################################################################
 
 my $CCG = 1;
+my $number;
 
 my @ALL_SWARM_OPTS = (
     #"argc",
@@ -86,10 +87,9 @@ sub runit ($) {
 sub doit ($$) {
     (my $n, my $work) = @_;
     print "------ RANDOM PROGRAM $n ------\n";
-    if ($TIMED_TEST || ($n%10)==0) {
-	print "timestamp: ";
-	system "date";
-    }
+    print "timestamp: ";
+    system "date";
+
     my $nstr = sprintf "%06d", $n;
     my $dir = "${work}/$nstr";
 
@@ -137,7 +137,13 @@ sub doit ($$) {
 
     my $cmd;
     if ($CCG) {
-	$cmd = "ccg $SEED --swarm --output $cfile";
+
+	my $swarm="";
+	if ($number >= 16) {
+	    $swarm = "--swarm";
+	}
+
+	$cmd = "ccg $SEED $swarm --output $cfile";
     } else {
 	$cmd = "$CSMITH_HOME/src/csmith $SEED $SWARM_OPTS $PACK $XTRA --output $cfile";
     }
@@ -148,7 +154,7 @@ sub doit ($$) {
     my $res = runit ("RunSafely $CSMITH_TIMEOUT 1 /dev/zero csmith_output.txt $cmd");
 
     if ($res != 0 || !(-e "$cfile")) {
-	print "CSMITH FAILED\n";
+	print "GENERATOR FAILED\n";
 	system "cat csmith_output.txt";
 	chdir "../..";
 	system "rm -rf $dir";
@@ -187,6 +193,9 @@ sub doit ($$) {
     if (!$PROVIDE_SEED) {
 	print "regenerate with: '$cmd -s $seed'\n";
     }
+    if ($CCG) {
+	system "grep Options $cfile";
+    }
 
     my $ret = system "evaluate_program $fn";
     my $rc = ($ret>>8) & 0xff;
@@ -213,6 +222,9 @@ my $work = $ARGV[0];
 if (!(-d $work)) {
     die "error: create work dir '$work' first";
 }
+
+die unless ($work =~ /work([0-9]+)$/);
+$number = $1;
 
 system "touch $work/crash_strings.txt";
 mkdir "$work/bonus_crashes" or die;

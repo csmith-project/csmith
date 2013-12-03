@@ -5,4 +5,5 @@ use strict;
 while (1) {
     sleep (600);
     system "rm -rf /tmp/rand*";
+    system "rm -rf ~/.open64-bugs";
 }
