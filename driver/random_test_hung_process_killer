@@ -23,8 +23,12 @@ while (1) {
     open INF, "ps x -o comm=,pid=,bsdstart= |" or die;
     while (my $line = <INF>) {
 	chomp $line;
-	next if (!($line =~ /^cc1/));
-	die if (!($line =~ /\s+([0-9]+)\s+(.*)\s+(.*)$/));	
+	next unless (
+	    $line =~ /^cc1/ ||
+	    $line =~ /opencc/ ||
+	    $line =~ /clang/
+	    );
+	next unless ($line =~ /\s+([0-9]+)\s+(.*)$/);
 	my $pid = $1;
 	my $stime = $2;
 	my $age = 999;
@@ -37,9 +41,8 @@ while (1) {
 	print "$line age=$age\n";
 	print "pid=$pid start time=$stime age=$age\n";
 	if ($age >= 3 || $age < 0) {
-	    my $cmd = "kill -9 $pid";
-	    print "executing: $cmd\n";
-	    system "$cmd";
+	    print "killing $pid\n";
+	    # kill -9, $pid;
 	}
     }
     close INF;

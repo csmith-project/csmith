@@ -50,6 +50,7 @@ close INF;
 system "rm -rf work*";
 
 system "nohup random_test_tmp_cleaner &";
+system "nohup random_test_hung_process_killer > hung_process_killer.log 2>&1 &";
 
 for (my $i=0; $i<$CPUS; $i++) {
     my $dir = "work$i";
