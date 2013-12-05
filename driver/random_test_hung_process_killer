@@ -3,10 +3,10 @@
 use strict;
 
 while (1) {
+    sleep (60);
 
     my $now;
-
-    open INF, "date |" or die;
+    open INF, "date |" or next;
     my $d = <INF>;
     chomp $d;
     close INF;
@@ -15,12 +15,12 @@ while (1) {
 	my $m = $2;
 	$now = ($h*60)+$m;
     } else {
-	die;
+	next;
     }
 
     print "now = $now\n";
 
-    open INF, "ps x -o comm=,pid=,bsdstart= |" or die;
+    open INF, "ps x -o comm=,pid=,bsdstart= |" or next;
     while (my $line = <INF>) {
 	chomp $line;
 	next unless (
@@ -38,15 +38,12 @@ while (1) {
 	    my $t = ($h*60)+$m;
 	    $age = $now - $t;
 	}
+	next unless ($age >= 3 || $age < 0);
 	print "$line age=$age\n";
 	print "pid=$pid start time=$stime age=$age\n";
-	if ($age >= 3 || $age < 0) {
-	    print "killing $pid\n";
-	    # kill -9, $pid;
-	}
+	my $cmd = "kill -9 $pid";
+	print "executing: $cmd\n";
+	system $cmd;
     }
     close INF;
-
-    sleep (30);
-
 }
