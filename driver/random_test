@@ -4,12 +4,13 @@ use strict;
 use Digest::MD5 qw(md5 md5_hex md5_base64);
 use File::stat;
 use Cwd;
+use Sys::CPU;
 
 # when errors are detected, fork off reduction scripts
 
 ##################################################################
 
-my $CCG = 1;
+my $CCG = 0;
 my $number;
 
 my @ALL_SWARM_OPTS = (
@@ -139,7 +140,8 @@ sub doit ($$) {
     if ($CCG) {
 
 	my $swarm="";
-	if ($number >= 16) {
+	my $CPUS = Sys::CPU::cpu_count();    
+	if ($number >= ($CPUS/2)) {
 	    $swarm = "--swarm";
 	}
 
