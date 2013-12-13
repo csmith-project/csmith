@@ -194,7 +194,7 @@ Function::is_var_oos(const Variable* var, const Statement* stm) const
 bool 
 Function::reach_max_functions_cnt()
 {
-	return ((FuncList.size() - builtin_functions_cnt) >= CGOptions::max_funcs());
+	return ((static_cast<int>(FuncList.size()) - builtin_functions_cnt) >= CGOptions::max_funcs());
 }
 
 const vector<Function*>& 
