@@ -1188,6 +1188,8 @@ VariableSelector::select(Effect::Access access,
 		if (CGOptions::expand_struct())
 			Error::set_error(ERROR);
 		break;
+	case MAX_VAR_SCOPE:
+		assert (0);
 	} 
 	ERROR_GUARD(NULL);
 	if (var && !cg_context.get_effect_context().is_side_effect_free()) {

@@ -52,9 +52,9 @@ enum eVariableScope
 	eGlobal,
 	eParentLocal,
 	eParentParam,
-	eNewValue
+	eNewValue,
+	MAX_VAR_SCOPE 
 };
-#define MAX_VAR_SCOPE ((eVariableScope) (eNewValue+1))
 
 class VariableSelector
 {
