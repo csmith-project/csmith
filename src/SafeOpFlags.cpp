@@ -69,7 +69,7 @@ SafeOpFlags::SafeOpFlags(const SafeOpFlags &flags)
 SafeOpFlags*
 SafeOpFlags::make_dummy_flags()
 {
-	return new SafeOpFlags();
+	return new SafeOpFlags(false, false, false, sInt8);
 }
 
 eSimpleType
