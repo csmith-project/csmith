@@ -460,7 +460,7 @@ string
 ArrayVariable::build_init_recursive(size_t dimen, const vector<string>& init_strings) const
 {
 	assert (dimen < get_dimension());
-	static int seed = 0xABCDEF; 
+	static unsigned seed = 0xABCDEF; 
 	string ret = "{";
 	for (size_t i=0; i<sizes[dimen]; i++) {
 		if (dimen == sizes.size() - 1) {
