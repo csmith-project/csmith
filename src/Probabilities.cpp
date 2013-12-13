@@ -176,10 +176,10 @@ single_elem_less(SingleProbElem *elem1, SingleProbElem *elem2)
 	return (val1 < val2);
 }
 
-GroupProbElem::GroupProbElem(bool is_equal, const std::string &sname, ProbName pname)
+GroupProbElem::GroupProbElem(bool is_equal, const std::string &sname)
 	: is_equal_(is_equal),
-	  sname_(sname),
-	  pname_(pname)
+	  sname_(sname)
+	  // pname_(pname)
 {
 
 }
@@ -623,7 +623,7 @@ void
 Probabilities::set_group_prob(bool is_equal, ProbName pname, const std::map<ProbName, int> &m)
 {
 	string sname = get_sname(pname);
-	GroupProbElem *g_elem = new GroupProbElem(is_equal, sname, pname);
+	GroupProbElem *g_elem = new GroupProbElem(is_equal, sname);
 	g_elem->initialize(this, m);
 	probabilities_[pname] = g_elem;
 }

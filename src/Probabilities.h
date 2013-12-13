@@ -306,7 +306,7 @@ class Probabilities;
 class GroupProbElem : public ProbElem {
 	friend class ProbabilityFilter;
 public:
-	GroupProbElem(bool is_equal, const std::string &sname, ProbName pname);
+	GroupProbElem(bool is_equal, const std::string &sname);
 
 	virtual ~GroupProbElem();
 
@@ -347,7 +347,7 @@ private:
 	const std::string sname_;
 
 	// the name used by csmith internally
-	const ProbName pname_;
+	// const ProbName pname_;
 
 	std::map<ProbName, SingleProbElem*> probs_;
 };
