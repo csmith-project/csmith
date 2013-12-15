@@ -147,7 +147,11 @@ sub doit ($$) {
 
 	$cmd = "ccg $SEED $swarm --output $cfile";
     } else {
-	$cmd = "$CSMITH_HOME/src/csmith $SEED $SWARM_OPTS $PACK $XTRA --output $cfile";
+	if ($number >= 16) {
+	    $cmd = "$CSMITH_HOME/src/csmith $SEED $SWARM_OPTS $PACK $XTRA --output $cfile";
+	} else {
+	    $cmd = "$CSMITH_HOME/src/csmith $SEED $PACK $XTRA --output $cfile";
+	}
     }
 
     if ($PROVIDE_SEED) {
