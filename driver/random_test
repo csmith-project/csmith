@@ -147,7 +147,8 @@ sub doit ($$) {
 
 	$cmd = "ccg $SEED $swarm --output $cfile";
     } else {
-	if ($number >= 16) {
+	my $CPUS = Sys::CPU::cpu_count();    
+	if ($number >= ($CPUS/2)) {
 	    $cmd = "$CSMITH_HOME/src/csmith $SEED $SWARM_OPTS $PACK $XTRA --output $cfile";
 	} else {
 	    $cmd = "$CSMITH_HOME/src/csmith $SEED $PACK $XTRA --output $cfile";
