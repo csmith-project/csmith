@@ -56,11 +56,11 @@ my @occomp = ("-fall");
 # my @occomp = (" -fbitfields -fstruct-return ");
 
 my @gcccurrent = ("gcc",
-		  "/mnt/local/randomtest/compiler-install/gcc-r205227-install/bin/gcc",
+		  "/home/regehr/z/compiler-install/gcc-r205951-install/bin/gcc",
 		  \@gcc_opts);
 
 my @clang = ("clang",
-	     "/mnt/local/randomtest/compiler-install/llvm-r195369-install/bin/clang",
+	     "/home/regehr/z/compiler-install/llvm-r197202-install/bin/clang",
 	     \@gcc_opts);
 
 my @ccomp = ("ccomp",
@@ -160,7 +160,7 @@ my @compilers_to_test = (
     #\@clang,
     #\@gcccurrent,
     #\@ccomp,
-
+    
     \@gcc320,
     \@gcc330,
     \@gcc340,

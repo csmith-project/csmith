@@ -33,17 +33,17 @@ my @ALL_SWARM_OPTS = (
     "paranoid",
     "pointers",
     "structs",
-    "unions",
+    #"unions",
     "volatiles",
     "volatile-pointers",
     "inline-function",
     "return-structs",
     "arg-structs",
-    "return-unions",
-    "arg-unions",
+    #"return-unions",
+    #"arg-unions",
     "dangling-global-pointers",
     "return-dead-pointer",
-    "union-read-type-sensitive",
+    #"union-read-type-sensitive",
     "safe-math",
     );
 
@@ -56,7 +56,7 @@ my $CSMITH_TIMEOUT = 180;
 
 my $PROVIDE_SEED = 1;
 
-my $XTRA = "";
+my $XTRA = "--no-unions";
 
 my $PACK = "";
 
