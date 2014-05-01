@@ -164,7 +164,7 @@ static void print_help()
 	cout << "  --unary-plus-operator | --no-unary-plus-operator: enable | disable + operator (enabled by default)." << endl << endl;
 	cout << "  --jumps | --no-jumps: enable | disable jumps (enabled by default)." << endl << endl;
 	cout << "  --longlong| --no-longlong: enable | disable long long (enabled by default)." << endl << endl;
-	cout << "  --int8 | --no-int: enable | disable int8_t (enabled by default)." << endl << endl;
+	cout << "  --int8 | --no-int8: enable | disable int8_t (enabled by default)." << endl << endl;
 	cout << "  --uint8 | --no-uint8: enable | disable uint8_t (enabled by default)." << endl << endl;
 	cout << "  --main | --nomain: enable | disable to generate main function (enabled by default)." << endl <<  endl;  
 	cout << "  --math64 | --no-math64: enable | disable 64-bit math ops (enabled by default)." << endl << endl;
