@@ -44,7 +44,7 @@ my @ALL_SWARM_OPTS = (
     "dangling-global-pointers",
     "return-dead-pointer",
     #"union-read-type-sensitive",
-    "safe-math",
+    #"safe-math",
     );
 
 my $SAVE_BADS = 0;
