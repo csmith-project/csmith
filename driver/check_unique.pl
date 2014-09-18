@@ -29,7 +29,7 @@ my $cmd = "$comp $opt -c -w small.c > crash.txt 2>&1";
 system $cmd;
 
 # FIXME
-system "cat crash.txt >> /mnt/local/randomtest/all_crash.txt";
+system "cat crash.txt >> ${HOME}/test/all_crash.txt";
 
 my $err;
 open INF, "<crash.txt" or die;

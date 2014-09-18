@@ -1,0 +1,47 @@
+#!/usr/bin/perl -w
+
+use strict;
+
+my @all_opts = (
+    "argc",
+    "arrays",
+    "bitfields",
+    "checksum",
+    "comma-operators",
+    "compound-assignment",
+    "consts",
+    "divs",
+    "embedded-assigns",
+    "jumps",
+    "longlong",
+    "force-non-uniform-arrays",
+    "math64",
+    "builtins",
+    "muls",
+    "packed-struct",
+    "paranoid",
+    "pointers",
+    "structs",
+    #"unions",
+    "volatiles",
+    "volatile-pointers",
+    "inline-function",
+    "return-structs",
+    "arg-structs",
+    #"return-unions",
+    #"arg-unions",
+    "dangling-global-pointers",
+    "return-dead-pointer",
+    #"union-read-type-sensitive",
+    );
+
+my $opts = " --no-unions --safe-math ";
+foreach my $opt (@all_opts) {
+    if (rand() < 0.5) {
+        $opts .= "--${opt} ";
+    } else {
+        $opts .= "--no-${opt} ";
+    }
+}
+
+print $opts;

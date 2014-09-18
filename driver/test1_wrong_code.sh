@@ -21,11 +21,11 @@ rm -f out*.txt
 # this should mirror the timeout in run_program 
 PROG_TIMEOUT=5
 
-ulimit -t 600
+ulimit -t 60
 ulimit -v 8000000
 ulimit -m 8000000
 
-${CSMITH_HOME}/driver/check_unique.pl XX_CRASHFILE XX_DIR XX_OPT "XX_COMMAND"
+# ${CSMITH_HOME}/driver/check_unique.pl XX_CRASHFILE XX_DIR XX_OPT "XX_COMMAND"
 
 if 
   clang -pedantic -Wall -O0 -c small.c  >out_clang.txt 2>&1 &&\
@@ -51,6 +51,7 @@ if
   ! grep 'no semicolon at end' out_gcc.txt &&\
   ! grep 'type defaults to' out_gcc.txt &&\
   ! grep 'too few arguments for format' out_gcc.txt &&\
+  ! grep 'in format' out_gcc.txt &&\
   ! grep 'incompatible pointer' out_gcc.txt &&\
   ! grep 'ordered comparison of pointer with integer' out_gcc.txt &&\
   ! grep 'declaration does not declare anything' out_gcc.txt &&\

@@ -27,9 +27,10 @@ my $COMPILER_TIMEOUT = 30;
 
 my $COMPILER_TIMEOUT_RES = 137;
 
-my $RUN_PROGRAM = 0;
+my $RUN_PROGRAM = 1;
 
-my $DO_REDUCE = 0;
+my $DO_REDUCE_CRASH = 0;
+my $DO_REDUCE_WRONG = 1;
 
 ####################################################################
 
@@ -42,11 +43,11 @@ my $LOCKFN = "/var/tmp/version_search_lockfile";
 ####################################################################
 
 my @gcc_opts = (
-    "-c -w -O0", 
-    "-c -w -O1", 
-    "-c -w -Os", 
-    "-c -w -O2", 
-    "-c -w -O3");
+    "-w -O0", 
+    "-w -O1", 
+    "-w -Os", 
+    "-w -O2", 
+    "-w -Ofast");
 
 my @o0only = (
     "-O0", 
@@ -55,13 +56,33 @@ my @o0only = (
 my @occomp = ("-fall");
 # my @occomp = (" -fbitfields -fstruct-return ");
 
+my @gcc = ("gcc",
+           "gcc",
+           \@gcc_opts);
+
+my $SOUPER = "/home/regehr/souper-regehr";
+
+my @souper_opts = (
+    "-O3", 
+    "-O3 -Xclang -load -Xclang $SOUPER/build/libsouperPass.so -mllvm -stp-path=/usr/local/bin/stp -mllvm -external-cache-souper -mllvm -internal-cache-souper -mllvm -solver-timeout=15", 
+    );
+
+my @sclang_opts = (
+    "-O2", 
+    "-O2 -Xclang -load -Xclang $SOUPER/build/libsouperPass.so -mllvm -stp-path=/usr/local/bin/stp -mllvm -external-cache-souper -mllvm -solver-timeout=15",
+    );
+
+my @clang_souper = ("clang",
+                    "$SOUPER/third_party/llvm/Release/bin/clang",
+                    \@sclang_opts);
+
+my @clang = ("clang",
+	     "$SOUPER/third_party/llvm/Debug/bin/clang",
+	     \@sclang_opts);
+
 my @gcccurrent = ("gcc",
 		  "/home/regehr/z/compiler-install/gcc-r205951-install/bin/gcc",
 		  \@gcc_opts);
-
-my @clang = ("clang",
-	     "/home/regehr/z/compiler-install/llvm-r197202-install/bin/clang",
-	     \@gcc_opts);
 
 my @ccomp = ("ccomp",
 	     "ccomp",
@@ -157,35 +178,38 @@ my @clang33 = ("clang33",
 
 my @compilers_to_test = (
 
+    #\@gcc,
     #\@clang,
+    \@clang_souper,
+
     #\@gcccurrent,
     #\@ccomp,
     
-    \@gcc320,
-    \@gcc330,
-    \@gcc340,
+    #\@gcc320,
+    #\@gcc330,
+    #\@gcc340,
 
-    \@gcc400,
-    \@gcc410,
-    \@gcc420,
-    \@gcc430,
-    \@gcc440,
-    \@gcc450,
-    \@gcc460,
-    \@gcc470,
-    \@gcc480,
+    #\@gcc400,
+    #\@gcc410,
+    #\@gcc420,
+    #\@gcc430,
+    #\@gcc440,
+    #\@gcc450,
+    #\@gcc460,
+    #\@gcc470,
+    #\@gcc480,
 
-    \@opencc40,
-    \@opencc50,
+    #\@opencc40,
+    #\@opencc50,
 
-    \@clang26,
-    \@clang27,
-    \@clang28,
-    \@clang29,
-    \@clang30,
-    \@clang31,
-    \@clang32,
-    \@clang33,
+    #\@clang26,
+    #\@clang27,
+    #\@clang28,
+    #\@clang29,
+    #\@clang30,
+    #\@clang31,
+    #\@clang32,
+    #\@clang33,
 
     );
 
@@ -319,10 +343,12 @@ sub reduce_program ($$$$$$$) {
 
     my $err;
     if ($crash) {
-	if ($fail_out =~ /internal compiler error: (.*)$/m) {
-	    $err = $1;
-	} elsif ($fail_out =~ /Assertion(.*)failed./m) {
-	    $err = $1;
+	if (
+            $fail_out =~ /internal compiler error: (.*)$/m ||
+            $fail_out =~ /Assertion(.*)failed./m ||
+            $fail_out =~ /Segmentation fault/m
+            ) {
+            $err = $1;
 	} else {
 	    print "FAILURE to reduce: no ICE message\n";
 	    return;
@@ -346,7 +372,9 @@ sub reduce_program ($$$$$$$) {
 	$err = "OOPS";
     }
 
-    my $tempdir = tempdir ("reduce_XXXXXX", DIR => "../", CLEANUP => 0 );
+    # my $tempdir = tempdir ("reduce_XXXXXX", DIR => "../", CLEANUP => 0 );
+    my $tempdir = "../../reduce_" . ($crash ? "crash" : "wrong") . "_" . int(rand(1000000));
+    mkdir $tempdir;
     print "ok: reducing ".($crash ? "crash" : "wrong code")." bug for $compiler at $fail_opt in $tempdir with '$err'\n";
     File::Copy::cp ("$root.c", $tempdir);
     runit "gcc -E -I${CSMITH_HOME}/runtime -DCSMITH_MINIMAL ${root}.c > $tempdir/small.c";
@@ -375,7 +403,7 @@ sub reduce_program ($$$$$$$) {
     chdir $tempdir or die;
     print "timestamp for creduce start: ";
     system "date";
-    runit "creduce -n 1 --slow ./test1.sh small.c";
+    runit "creduce -n 1 --sanitize --sllooww ./test1.sh small.c";
     print "timestamp for creduce stop: ";
     system "date";
     my $ofn = ($crash?"CRASH":"WRONG_CODE")."_REDUCTION_FINISHED";
@@ -462,7 +490,7 @@ sub test_compiler ($$$) {
     if ($compiler_fail > 0) {
 	print "COMPILER FAILED $compiler\n";
 	$interesting = 1;
-	if ($DO_REDUCE) {
+	if ($DO_REDUCE_CRASH) {
 	    reduce_program (1, $compiler, $fail_opt, "", $root, $base_compiler, $fail_out);
 	}
     }
@@ -479,7 +507,7 @@ sub test_compiler ($$$) {
 		    ($csum ne "TIMEOUT" && $csums{$opt} ne "TIMEOUT")) {
 		    print "INTERNAL CHECKSUM FAILURE $compiler\n";
 		    $interesting = 1;
-		    if ($DO_REDUCE) {
+		    if ($DO_REDUCE_WRONG) {
 			reduce_program (0, $compiler, $opt, $opt1, $root, $base_compiler, "");
 		    }
 		    $consistent = 0;

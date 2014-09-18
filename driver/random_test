@@ -56,7 +56,8 @@ my $CSMITH_TIMEOUT = 180;
 
 my $PROVIDE_SEED = 1;
 
-my $XTRA = "--no-unions";
+my $XTRA = "--no-unions --no-argc";
+#my $XTRA = "";
 
 my $PACK = "";
 
@@ -147,12 +148,7 @@ sub doit ($$) {
 
 	$cmd = "ccg $SEED $swarm --output $cfile";
     } else {
-	my $CPUS = Sys::CPU::cpu_count();    
-	if ($number >= ($CPUS/2)) {
-	    $cmd = "$CSMITH_HOME/src/csmith $SEED $SWARM_OPTS $PACK $XTRA --output $cfile";
-	} else {
-	    $cmd = "$CSMITH_HOME/src/csmith $SEED $PACK $XTRA --output $cfile";
-	}
+        $cmd = "$CSMITH_HOME/src/csmith $SEED $SWARM_OPTS $PACK $XTRA --output $cfile";
     }
 
     if ($PROVIDE_SEED) {
