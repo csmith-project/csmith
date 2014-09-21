@@ -1418,6 +1418,9 @@ Type::is_convertable(const Type* t) const
     if (this == t) 
         return true;
     if (eType == eSimple && t->eType == eSimple) {
+	// forbiden conversion from float to int
+	if (t->is_float() && !is_float())
+		return false;
         if ((simple_type != eVoid && t->simple_type != eVoid) ||
             simple_type == t->simple_type) 
             return true;

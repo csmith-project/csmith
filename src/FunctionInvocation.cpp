@@ -141,17 +141,15 @@ FunctionInvocation::make_random_unary(CGContext &cg_context, const Type* type)
 	DEPTH_GUARD_BY_TYPE_RETURN(dtFunctionInvocationRandomUnary, NULL);
 	assert(type);
 	eUnaryOps op;
-	do {  
+	do {
 		op = (eUnaryOps)(rnd_upto(MAX_UNARY_OP, UNARY_OPS_PROB_FILTER));
 	} while (type->is_float() && !UnaryOpWorksForFloat(op));
 	ERROR_GUARD(NULL);
 	SafeOpFlags *flags = NULL;
-	if (op == eMinus) {
-		flags = SafeOpFlags::make_random(sOpUnary);
-		ERROR_GUARD(NULL);
-		type = flags->get_lhs_type();
-		assert(type);
-	}
+	flags = SafeOpFlags::make_random_unary(type, NULL, op);
+	ERROR_GUARD(NULL);
+	type = flags->get_lhs_type();
+	assert(type);
 
 	FunctionInvocation *fi = FunctionInvocationUnary::CreateFunctionInvocationUnary(cg_context, op, flags);
 
@@ -180,7 +178,7 @@ FunctionInvocation::make_random_binary(CGContext &cg_context, const Type* type)
 	} while (type->is_float() && !BinaryOpWorksForFloat(op));
 	ERROR_GUARD(NULL);
 	assert(type);
-	SafeOpFlags *flags = SafeOpFlags::make_random(sOpBinary, op);
+	SafeOpFlags *flags = SafeOpFlags::make_random_binary(type, NULL, NULL, sOpBinary, op);
 	assert(flags);
 	ERROR_GUARD(NULL);
 	FunctionInvocationBinary *fi = FunctionInvocationBinary::CreateFunctionInvocationBinary(cg_context, op, flags);
@@ -192,6 +190,11 @@ FunctionInvocation::make_random_binary(CGContext &cg_context, const Type* type)
 	const Type* lhs_type = flags->get_lhs_type();
 	const Type* rhs_type = flags->get_rhs_type();
 	assert(lhs_type && rhs_type);
+	if (!BinaryOpWorksForFloat(op)) {
+		assert(!lhs_type->is_float() && "lhs_type is float!");
+		assert(!rhs_type->is_float() && "rhs_type is float!");
+	}
+
 	Expression *lhs = Expression::make_random(lhs_cg_context, lhs_type); 
 	ERROR_GUARD_AND_DEL1(NULL, fi);
 	Expression *rhs = 0;
@@ -233,7 +236,8 @@ FunctionInvocation::make_random_binary(CGContext &cg_context, const Type* type)
 		else {
 			rhs = Expression::make_random(rhs_cg_context, rhs_type);
 			// avoid divide by zero or possible zero (reached by pointer comparison) 
-			if ((op == eMod || op == eDiv) && (rhs->equals(0) || rhs->is_0_or_1())) {
+			if ((op == eMod || op == eDiv) && (rhs->equals(0) || rhs->is_0_or_1()) && 
+				!lhs_type->is_float() && !rhs_type->is_float()) {
 				VectorFilter f;
 				f.add(eMod).add(eDiv).add(eLShift).add(eRShift);
 				op = (eBinaryOps)(rnd_upto(MAX_BINARY_OP, &f));
@@ -244,6 +248,10 @@ FunctionInvocation::make_random_binary(CGContext &cg_context, const Type* type)
 	}
 
 	ERROR_GUARD_AND_DEL2(NULL, fi, lhs);
+	if (!BinaryOpWorksForFloat(op)) {
+		assert(!lhs->get_type().is_float() && "lhs is of float!");
+		assert(!rhs->get_type().is_float() && "rhs is of float!");
+	}
 
 	if (CompatibleChecker::compatible_check(lhs, rhs)) {
 		Error::set_error(COMPATIBLE_CHECK_ERROR);
@@ -273,7 +281,7 @@ FunctionInvocation::make_random_binary_ptr_comparison(CGContext &cg_context)
 {
 	eBinaryOps op = rnd_flipcoin(50) ? eCmpEq : eCmpNe;   
 	ERROR_GUARD(NULL);
-	SafeOpFlags *flags = SafeOpFlags::make_random(sOpBinary);
+	SafeOpFlags *flags = SafeOpFlags::make_random_binary(get_int_type(), NULL, NULL, sOpBinary, op);
 	ERROR_GUARD(NULL);
 
 	FunctionInvocation *fi = FunctionInvocationBinary::CreateFunctionInvocationBinary(cg_context, op, flags);
@@ -542,31 +550,14 @@ FunctionInvocation::visit_facts(vector<const Fact*>& inputs, CGContext& cg_conte
 }
 
 /*
- * Build an "invocation" of a unary operation.
- */
-FunctionInvocation *
-FunctionInvocation::make_unary(CGContext &cg_context, eUnaryOps op,
-							   Expression *operand)
-{
-	assert(0 && "Dead function!");
-	DEPTH_GUARD_BY_TYPE_RETURN(dtFunctionInvocationUnary, NULL);
-	SafeOpFlags *flags = SafeOpFlags::make_random(sOpUnary);
-	ERROR_GUARD(NULL);
-	FunctionInvocation *fi = FunctionInvocationUnary::CreateFunctionInvocationUnary(cg_context, op, flags);
-	fi->param_value.push_back(operand);
-
-	return fi;
-}
-
-/*
  * Build an "invocation" of a binary operation.
  */
 FunctionInvocation *
 FunctionInvocation::make_binary(CGContext &cg_context, eBinaryOps op,
-								Expression *lhs, Expression *rhs)
+				Expression *lhs, Expression *rhs)
 {
 	DEPTH_GUARD_BY_TYPE_RETURN(dtFunctionInvocationBinary, NULL);
-	SafeOpFlags *flags = SafeOpFlags::make_random(sOpBinary);
+	SafeOpFlags *flags = SafeOpFlags::make_random_binary(NULL, &(lhs->get_type()), &(rhs->get_type()), sOpBinary, op);
 	ERROR_GUARD(NULL);
 	FunctionInvocation *fi = FunctionInvocationBinary::CreateFunctionInvocationBinary(cg_context, op, flags);
 	fi->param_value.push_back(lhs);
@@ -644,7 +635,6 @@ FunctionInvocation::BinaryOpWorksForFloat(eBinaryOps op)
 		case eSub:
 		case eMul:
 		case eDiv:
-		case eMod:
 		case eCmpGt:
 		case eCmpLt:
 		case eCmpGe:

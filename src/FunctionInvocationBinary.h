@@ -92,6 +92,8 @@ private:
 
 private:
 
+	bool is_return_type_float() const;
+
 	static bool safe_ops(eBinaryOps op);
 
 	// unimplemented

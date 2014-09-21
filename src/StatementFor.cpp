@@ -201,7 +201,8 @@ StatementFor::make_iteration(CGContext& cg_context, StatementAssign*& init, Expr
 	assert(var);
 	Lhs* lhs = new Lhs(*var);
 	ERROR_GUARD_AND_DEL1(NULL, c_init);
-	SafeOpFlags *flags1 = SafeOpFlags::make_random(sOpAssign);
+	eBinaryOps bop = StatementAssign::compound_to_binary_ops(incr_op);
+	SafeOpFlags *flags1 = SafeOpFlags::make_random_binary(var->type, var->type, var->type, sOpAssign, bop);
 	ERROR_GUARD_AND_DEL2(NULL, c_init, lhs);
 
 	init = new StatementAssign(cg_context.get_current_block(), *lhs, *c_init, eSimpleAssign, flags1);
@@ -235,7 +236,7 @@ StatementFor::make_iteration(CGContext& cg_context, StatementAssign*& init, Expr
 	if (bound != INVALID_BOUND) {
 		incr = new StatementAssign(cg_context.get_current_block(), *lhs1, *c_incr, incr_op);
 	} else {
-		incr = StatementAssign::make_possible_compound_assign(cg_context, *lhs1, incr_op, *c_incr);
+		incr = StatementAssign::make_possible_compound_assign(cg_context, &(v->get_type()), *lhs1, incr_op, *c_incr);
 	}
 	return var;
 }

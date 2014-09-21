@@ -82,6 +82,7 @@ public:
 	static StatementAssign *make_random(CGContext &cg_context, const Type* type=0, const CVQualifiers* qfer=0);
 
 	static StatementAssign *make_possible_compound_assign(CGContext &cg_context,
+						 const Type *type,
 						 const Lhs &l,
 						 eAssignOps op,
 						 const Expression &e);

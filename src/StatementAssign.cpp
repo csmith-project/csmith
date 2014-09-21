@@ -210,7 +210,7 @@ StatementAssign::make_random(CGContext &cg_context, const Type* type, const CVQu
 
 	cg_context.merge_param_context(lhs_cg_context, true); 
 	ERROR_GUARD_AND_DEL2(NULL, e, lhs);
-	StatementAssign *stmt_assign = make_possible_compound_assign(cg_context, *lhs, op, *e);
+	StatementAssign *stmt_assign = make_possible_compound_assign(cg_context, type, *lhs, op, *e);
 	ERROR_GUARD_AND_DEL2(NULL, e, lhs);
 	return stmt_assign;
 }
@@ -230,6 +230,7 @@ StatementAssign::safe_assign(eAssignOps op)
 
 StatementAssign *
 StatementAssign::make_possible_compound_assign(CGContext &cg_context, 
+				 const Type *type,
 				 const Lhs &l,
 				 eAssignOps op,
 				 const Expression &e)
@@ -241,7 +242,6 @@ StatementAssign::make_possible_compound_assign(CGContext &cg_context,
 	std::string tmp2;
 
 	if (bop != MAX_BINARY_OP) {
-		//SafeOpFlags *local_fs = SafeOpFlags::make_random(sOpAssign, true);
 		SafeOpFlags *local_fs  = NULL;
 		FunctionInvocation* fi = NULL;
 		if (safe_assign(op)) {
@@ -249,7 +249,7 @@ StatementAssign::make_possible_compound_assign(CGContext &cg_context,
 			fi = new FunctionInvocationBinary(bop, local_fs);
 		}
 		else {
-			local_fs = SafeOpFlags::make_random(sOpAssign);
+			local_fs = SafeOpFlags::make_random_binary(type, &(l.get_type()), &(l.get_type()), sOpAssign, bop);
 			ERROR_GUARD(NULL);
 			fi = FunctionInvocationBinary::CreateFunctionInvocationBinary(cg_context, bop, local_fs);
 			tmp1 = dynamic_cast<FunctionInvocationBinary*>(fi)->get_tmp_var1();
@@ -272,7 +272,7 @@ StatementAssign::make_possible_compound_assign(CGContext &cg_context,
 		}
 #endif
 		if (op != eSimpleAssign) {
-			fs = SafeOpFlags::make_random(sOpAssign);
+			fs = SafeOpFlags::make_random_binary(type, &(l.get_type()), &(rhs->get_type()), sOpAssign, bop);
 			bool op1 = fs->get_op1_sign();
 			bool op2 = fs->get_op2_sign();
 			enum SafeOpSize size = fs->get_op_size();
@@ -593,7 +593,6 @@ StatementAssign::AssignOpWorksForFloat(eAssignOps op)
 		case eSimpleAssign:
 		case eMulAssign:
 		case eDivAssign:
-		case eRemAssign:
 		case eAddAssign:
 		case eSubAssign:
 			return true;

@@ -38,6 +38,7 @@
 #include "Probabilities.h"
 #include "DepthSpec.h"
 #include "MspFilters.h"
+#include "CGOptions.h"
 
 using namespace std;
 
@@ -81,6 +82,7 @@ SafeOpFlags::flags_to_type(bool sign, enum SafeOpSize size)
 		case sInt16: return eShort;
 		case sInt32: return eInt;
 		case sInt64: return eLongLong;
+		case sFloat: return eFloat;
 		default: assert(0); break;
 		}
 	}
@@ -113,18 +115,98 @@ SafeOpFlags::get_rhs_type(void)
 	return &t;
 }
 
+bool 
+SafeOpFlags::return_float_type(const Type *rv_type, const Type *op1_type, const Type *op2_type,
+				eBinaryOps bop)
+{
+	if (!CGOptions::enable_float())
+		return false;
+	if (rv_type && rv_type->is_float())
+		return true;
+	if ((op1_type && op1_type->is_float()) || (op2_type && op2_type->is_float()))
+		return true;
+	if (!FunctionInvocation::BinaryOpWorksForFloat(bop))
+		return false;
+	return false;
+}
+
+bool 
+SafeOpFlags::return_float_type(const Type *rv_type, const Type *op1_type, eUnaryOps uop)
+{
+	if (!CGOptions::enable_float())
+		return false;
+	if (rv_type && rv_type->is_float())
+		return true;
+	if (op1_type && op1_type->is_float())
+		return true;
+	if (!FunctionInvocation::UnaryOpWorksForFloat(uop))
+		return false;
+	return false;
+}
+
+
 SafeOpFlags*
-SafeOpFlags::make_random(SafeOpKind op_kind, eBinaryOps op)
+SafeOpFlags::make_random_unary(const Type *rv_type, const Type *op1_type, eUnaryOps uop)
+{
+	SafeOpFlags *flags = new SafeOpFlags();
+	assert("new SafeOpFlags fail!");
+	bool rv_is_float = return_float_type(rv_type, op1_type, uop);
+
+	// floating point is always signed
+	if (rv_is_float) {
+		assert(FunctionInvocation::UnaryOpWorksForFloat(uop) && "Invalid unary op");
+		flags->op1_ = true;
+	}
+	else {
+		flags->op1_ = rnd_flipcoin(SafeOpsSignedProb);
+	}
+	flags->op2_ = flags->op1_;
+
+	// ISSUE: in the old code, is_func is always true
+	// Probably need to be fixed later.
+	flags->is_func_ = true;
+
+	MspSafeOpSizeFilter *filter = new MspSafeOpSizeFilter(MAX_BINARY_OP);
+	Probabilities::register_extra_filter(pSafeOpsSizeProb, filter);
+	if (rv_is_float) {
+		assert(CGOptions::enable_float());
+		flags->op_size_ = sFloat;
+	}
+	else {
+		flags->op_size_ = (SafeOpSize)rnd_upto(MAX_SAFE_OP_SIZE-1, SAFE_OPS_SIZE_PROB_FILTER);
+	}
+	Probabilities::unregister_extra_filter(pSafeOpsSizeProb, filter);
+
+	delete filter;
+	return flags;
+}
+
+SafeOpFlags*
+SafeOpFlags::make_random_binary(const Type *rv_type, const Type *op1_type, const Type *op2_type, 
+			SafeOpKind op_kind, eBinaryOps bop)
 {
 	DEPTH_GUARD_BY_TYPE_RETURN_WITH_FLAG(dtSafeOpFlags, op_kind, NULL);
 	SafeOpFlags *flags = new SafeOpFlags();
 	assert("new SafeOpFlags fail!");
+	bool rv_is_float = return_float_type(rv_type, op1_type, op2_type, bop);
 
-	flags->op1_ = rnd_flipcoin(SafeOpsSignedProb);
+	// floating point is always signed
+	if (rv_is_float) {
+		if (op_kind == sOpBinary) {
+			assert(FunctionInvocation::BinaryOpWorksForFloat(bop) && "Invalid binary op");
+		}
+		flags->op1_ = true;
+	}
+	else {
+		flags->op1_ = rnd_flipcoin(SafeOpsSignedProb);
+	}
 	ERROR_GUARD_AND_DEL1(NULL, flags);
 
 	if (op_kind == sOpBinary) {
-		flags->op2_ = rnd_flipcoin(SafeOpsSignedProb);
+		if (rv_is_float)
+			flags->op2_ = true;
+		else
+			flags->op2_ = rnd_flipcoin(SafeOpsSignedProb);
 		ERROR_GUARD_AND_DEL1(NULL, flags);
 	}
 	else {
@@ -135,10 +217,16 @@ SafeOpFlags::make_random(SafeOpKind op_kind, eBinaryOps op)
 	// Probably need to be fixed later.
 	flags->is_func_ = true;
 
-	MspSafeOpSizeFilter *filter = new MspSafeOpSizeFilter(op);
+	MspSafeOpSizeFilter *filter = new MspSafeOpSizeFilter(bop);
 	Probabilities::register_extra_filter(pSafeOpsSizeProb, filter);
 
-	flags->op_size_ = (SafeOpSize)rnd_upto(MAX_SAFE_OP_SIZE, SAFE_OPS_SIZE_PROB_FILTER);
+	if (rv_is_float) {
+		assert(CGOptions::enable_float());
+		flags->op_size_ = sFloat;
+	}
+	else {
+		flags->op_size_ = (SafeOpSize)rnd_upto(MAX_SAFE_OP_SIZE-1, SAFE_OPS_SIZE_PROB_FILTER);
+	}
 	Probabilities::unregister_extra_filter(pSafeOpsSizeProb, filter);
 	ERROR_GUARD_AND_DEL2(NULL, flags, filter);
 
@@ -209,10 +297,28 @@ SafeOpFlags::~SafeOpFlags()
 	// Nothing to do
 }
 
+std::string 
+SafeOpFlags::safe_float_func_string(enum eBinaryOps op) const
+{
+	string s;
+	switch (op) {
+		case eAdd: s = "safe_add_"; break;
+		case eSub: s = "safe_sub_"; break;
+		case eMul: s = "safe_mul_"; break;
+		case eDiv: s = "safe_div_"; break;
+		default: assert(0); break;
+	}
+	s += "func_float_f_f";
+	return s;
+
+}
+
 /* find the safe math function/macro name */
 std::string 
 SafeOpFlags::to_string(enum eBinaryOps op) const
 {
+	if (op_size_ == sFloat)
+		return safe_float_func_string(op);
 	string s;
 	switch (op) {
 		case eAdd: s = "safe_add_"; break;
@@ -237,6 +343,7 @@ SafeOpFlags::to_string(enum eBinaryOps op) const
 std::string 
 SafeOpFlags::to_string(enum eUnaryOps op) const
 {
+	assert((op_size_ != sFloat) && "No safe unary function on floating point!");
 	string s;
 	switch (op) {
 		case eMinus: s = "safe_unary_minus_"; break; 
