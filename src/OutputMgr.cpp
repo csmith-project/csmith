@@ -286,6 +286,9 @@ OutputMgr::OutputHeader(int argc, char *argv[], unsigned long seed)
 		out << "#define NO_LONGLONG" << std::endl;
 		out << endl;
 	}
+	if (!CGOptions::enable_float()) {
+		out << "#include <float.h>\n";
+	}
 
 	ExtensionMgr::OutputHeader(out);
 
