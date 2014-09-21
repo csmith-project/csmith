@@ -166,6 +166,7 @@ static void print_help()
 	cout << "  --longlong| --no-longlong: enable | disable long long (enabled by default)." << endl << endl;
 	cout << "  --int8 | --no-int8: enable | disable int8_t (enabled by default)." << endl << endl;
 	cout << "  --uint8 | --no-uint8: enable | disable uint8_t (enabled by default)." << endl << endl;
+	cout << "  --float | --no-float: enable | disable float (disabled by default)." << endl << endl;
 	cout << "  --main | --nomain: enable | disable to generate main function (enabled by default)." << endl <<  endl;  
 	cout << "  --math64 | --no-math64: enable | disable 64-bit math ops (enabled by default)." << endl << endl;
 	cout << "  --inline-function | --no-inline-function: enable | disable inline attributes on generated functions." << endl << endl;
@@ -773,6 +774,16 @@ main(int argc, char **argv)
 
 		if (strcmp (argv[i], "--no-uint8") == 0) {
 			CGOptions::uint8(false);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--float") == 0) {
+			CGOptions::enable_float(true);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--no-float") == 0) {
+			CGOptions::enable_float(false);
 			continue;
 		}
 

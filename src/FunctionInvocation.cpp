@@ -75,9 +75,9 @@ using namespace std;
  */
 FunctionInvocation *
 FunctionInvocation::make_random(bool is_std_func,
-								CGContext &cg_context, 
-                                const Type* type,
-								const CVQualifiers* qfer)
+				CGContext &cg_context, 
+				const Type* type,
+				const CVQualifiers* qfer)
 {
 	FunctionInvocation *fi = 0;  
 	// If we are looking for a program-defined function, try to find one. 
@@ -140,7 +140,10 @@ FunctionInvocation::make_random_unary(CGContext &cg_context, const Type* type)
 {
 	DEPTH_GUARD_BY_TYPE_RETURN(dtFunctionInvocationRandomUnary, NULL);
 	assert(type);
-	eUnaryOps op = (eUnaryOps)(rnd_upto(MAX_UNARY_OP, UNARY_OPS_PROB_FILTER));
+	eUnaryOps op;
+	do {  
+		op = (eUnaryOps)(rnd_upto(MAX_UNARY_OP, UNARY_OPS_PROB_FILTER));
+	} while (type->is_float() && !UnaryOpWorksForFloat(op));
 	ERROR_GUARD(NULL);
 	SafeOpFlags *flags = NULL;
 	if (op == eMinus) {
@@ -171,7 +174,10 @@ FunctionInvocation::make_random_binary(CGContext &cg_context, const Type* type)
 		return make_random_binary_ptr_comparison(cg_context);
 	}
 
-	eBinaryOps op = (eBinaryOps)(rnd_upto(MAX_BINARY_OP, BINARY_OPS_PROB_FILTER));
+	eBinaryOps op;
+	do {
+		op = (eBinaryOps)(rnd_upto(MAX_BINARY_OP, BINARY_OPS_PROB_FILTER));
+	} while (type->is_float() && !BinaryOpWorksForFloat(op));
 	ERROR_GUARD(NULL);
 	assert(type);
 	SafeOpFlags *flags = SafeOpFlags::make_random(sOpBinary, op);
@@ -542,6 +548,7 @@ FunctionInvocation *
 FunctionInvocation::make_unary(CGContext &cg_context, eUnaryOps op,
 							   Expression *operand)
 {
+	assert(0 && "Dead function!");
 	DEPTH_GUARD_BY_TYPE_RETURN(dtFunctionInvocationUnary, NULL);
 	SafeOpFlags *flags = SafeOpFlags::make_random(sOpUnary);
 	ERROR_GUARD(NULL);
@@ -624,6 +631,43 @@ bool
 FunctionInvocation::IsOrderedStandardFunc(eBinaryOps eFunc)
 {
 	return ((eFunc == eAnd) || (eFunc == eOr));
+}
+
+/*
+ * Return true if `op' is suitable as a floating point binary operator
+ */
+bool
+FunctionInvocation::BinaryOpWorksForFloat(eBinaryOps op)
+{
+	switch (op) {
+		case eAdd:
+		case eSub:
+		case eMul:
+		case eDiv:
+		case eMod:
+		case eCmpGt:
+		case eCmpLt:
+		case eCmpGe:
+		case eCmpLe:
+		case eCmpEq:
+		case eCmpNe: // fall-through
+			return true;
+		default:
+			return false;
+	}
+}
+
+bool
+FunctionInvocation::UnaryOpWorksForFloat(eUnaryOps op)
+{
+	switch (op) {
+		case ePlus:
+		case eMinus:
+		case eNot: // fall-through
+			return true;
+		default:
+			return false;
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////

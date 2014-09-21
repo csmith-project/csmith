@@ -302,6 +302,8 @@ ArrayVariable*
 ArrayVariable::itemize(const std::vector<const Variable*>& indices, Block* blk) const
 {
 	size_t i;
+	// Looks like this function is dead.
+	assert(0 && "Invoke a dead function?");
 	assert(collective == 0);
 	ArrayVariable* av = new ArrayVariable(*this);
 	VariableSelector::AllVars.push_back(av);

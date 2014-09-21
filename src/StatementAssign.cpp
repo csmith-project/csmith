@@ -87,7 +87,11 @@ StatementAssign::AssignOpsProbability(const Type* type)
 	if (!CGOptions::compound_assignment()) {
 		return eSimpleAssign;
 	}
-	if (type && type->eType != eSimple) {
+	// First, floating point values do not apply to |=, &= and ^=. 
+	// Second, similar to signed integers, we don't generate pre- or post-
+	// operators for floating point values. Instead, we will wrap all 
+	// of these operations into safe_float_math later.
+	if (type && (type->eType != eSimple || type->get_base_type()->is_float())) {
 		return eSimpleAssign;
 	}
 
@@ -113,7 +117,7 @@ StatementAssign::make_random(CGContext &cg_context, const Type* type, const CVQu
 	// decide type
 	if (type == NULL) {
 		// stand_alone_assign = true;
-		type = Type::SelectLType(!cg_context.get_effect_context().is_side_effect_free(), op);
+		type = Type::SelectLType(!cg_context.get_effect_context().is_side_effect_free(), op); 
 	}
 	assert(!type->is_const_struct_union());
 	
@@ -190,6 +194,11 @@ StatementAssign::make_random(CGContext &cg_context, const Type* type, const CVQu
 	e->check_and_set_cast(type);
 	if (CGOptions::ccomp() && lhs->get_var()->isBitfield_) {
 		e->cast_type = type;
+	}
+	// e can be of float type. So, we reset its 
+	if ((lhs->get_var()->type->get_base_type()->is_float() || e->get_type().get_base_type()->is_float())
+	    && !StatementAssign::AssignOpWorksForFloat(op)) {
+		op = eSimpleAssign;
 	}
 
 	if (CompatibleChecker::compatible_check(e, lhs)) {
@@ -574,6 +583,22 @@ StatementAssign::OutputAsExpr(std::ostream &out) const
 		}
 	} else {
 		OutputSimple(out);
+	}
+}
+
+bool
+StatementAssign::AssignOpWorksForFloat(eAssignOps op) 
+{
+	switch (op) {
+		case eSimpleAssign:
+		case eMulAssign:
+		case eDivAssign:
+		case eRemAssign:
+		case eAddAssign:
+		case eSubAssign:
+			return true;
+		default:
+			return false;
 	}
 }
 

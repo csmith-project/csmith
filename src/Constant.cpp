@@ -155,11 +155,55 @@ GenerateRandomLongLongConstant(void)
 static string
 GenerateRandomFloatConstant(void)
 {
-	// Generate a random floating point value with up to 10 digits of precision. (should look up precision of float/double.. 23 bits for IEEE-32?)
 	string val = RandomDigits(5) + "." + RandomDigits(5);
 	return val;
 }
 #endif // 0
+
+/*
+ * Generate hexadecimal floating point constants [0xF.FFFFFFp-99, 0xF.FFFFFFp+99]
+ */
+static string
+GenerateRandomFloatHexConstant(void)
+{
+	int exp = pure_rnd_upto(100);
+	ostringstream oss;
+	oss << "0x" << RandomHexDigits(1) << "." << RandomHexDigits(6) << "p";
+
+	if (pure_rnd_flipcoin(50)) {
+		oss << "+";
+	}
+	else {
+		oss << "-";
+	}
+	oss << exp;
+	return oss.str();
+}
+
+/* 
+ * Generate small hexadecimal floating point constants
+ */
+static string
+GenerateSmallRandomFloatHexConstant(int num)
+{
+	ostringstream oss;
+	if (num >= 0) {
+		oss << "0x";
+	}
+	else {
+		oss << "-0x";
+		num = -num;
+	}
+	oss << num << "." << RandomHexDigits(1) << "p";
+
+	if (pure_rnd_flipcoin(50)) {
+		oss << "+1";
+	}
+	else {
+		oss << "-1";
+	}
+	return oss.str();
+}
 
 static string
 GenerateRandomConstantInRange(const Type* type, int bound)
@@ -247,77 +291,95 @@ GenerateRandomUnionConstant(const Type* type)
 static string
 GenerateRandomConstant(const Type* type)
 {
-    string v;
+	string v;
 	if (type == 0) {
 		v = "0";
 	}
-    else if (type->eType == eStruct) {
-        v = GenerateRandomStructConstant(type);
+	else if (type->eType == eStruct) {
+		v = GenerateRandomStructConstant(type);
 		ERROR_GUARD("");
-    }
+	}
 	else if (type->eType == eUnion) {
-        v = GenerateRandomUnionConstant(type);
+		v = GenerateRandomUnionConstant(type);
 		ERROR_GUARD("");
-    }
-    // the only possible constant for a pointer is "0"
-    else if (type->eType == ePointer) {
-        v = "0";
-    }
-    else if (type->eType == eSimple) {
-        eSimpleType st = type->simple_type;
-	    assert(st != eVoid);
-	    //assert((eType >= 0) && (eType <= MAX_SIMPLE_TYPES)); 
-	    if (pure_rnd_flipcoin(50)) {
-		    ERROR_GUARD("");
-		    int num = 0;
-		    if (pure_rnd_flipcoin(50)) {
-			    ERROR_GUARD("");
-			    num = pure_rnd_upto(3)-1;
-		    } else {
-			    ERROR_GUARD("");
-			    num = pure_rnd_upto(20)-10;
-		    }
+	}
+	// the only possible constant for a pointer is "0"
+	else if (type->eType == ePointer) {
+		v = "0";
+	}
+	else if (type->eType == eSimple) {
+		eSimpleType st = type->simple_type;
+		assert(st != eVoid);
+		//assert((eType >= 0) && (eType <= MAX_SIMPLE_TYPES)); 
+		if (pure_rnd_flipcoin(50)) {
+			ERROR_GUARD("");
+			int num = 0;
+			if (pure_rnd_flipcoin(50)) {
+				ERROR_GUARD("");
+				num = pure_rnd_upto(3)-1;
+			} else {
+				ERROR_GUARD("");
+				num = pure_rnd_upto(20)-10;
+			}
 			// don't use negative number for unsigned type, as this causes 
 			//trouble for some static analyzers  
-		    ostringstream oss; 
-			switch (type->simple_type) {
-				case eUChar:     oss << (unsigned int)(unsigned char)num;		break;
-				case eUShort:    oss << (unsigned short)num;	break;
-				case eUInt:      oss << (unsigned int)num;		break;
-				case eULong: 
-				case eULongLong:  
-					if (!CGOptions::longlong()) {
-						oss << (unsigned int)num;
-					} else { 
-						oss << ((type->simple_type == eULong) ? (unsigned long)num : (unsigned INT64)num);
-					}
-					break; 
-				default:		 oss << num; break;
-			} 
-			if (CGOptions::ccomp())
-				v = oss.str() + (type->is_signed() ? "" : "U");
-			else
-				v = oss.str() + (type->is_signed() ? "L" : "UL");
-	    } else {
+			ostringstream oss; 
+			switch (st) {
+			case eUChar:
+				oss << (unsigned int)(unsigned char)num; 
+				break;
+			case eUShort:
+				oss << (unsigned short)num; 
+				break;
+			case eUInt:
+				oss << (unsigned int)num;
+				break;
+			case eULong: 
+			case eULongLong:  
+				if (!CGOptions::longlong()) {
+					oss << (unsigned int)num;
+				} else { 
+					oss << ((type->simple_type == eULong) ? (unsigned long)num : (unsigned INT64)num);
+				}
+				break; 
+			case eFloat:
+				oss << GenerateSmallRandomFloatHexConstant(num);
+				break;
+			default: 
+				oss << num;
+				break;
+			}
+			if (type->simple_type == eFloat) {
+				v = oss.str();
+			}
+			else {
+				if (CGOptions::ccomp())
+					v = oss.str() + (type->is_signed() ? "" : "U");
+				else
+					v = oss.str() + (type->is_signed() ? "L" : "UL");
+			}
+		} else {
 		    switch (st) {
-		    case eVoid:      v = "/* void */";						break;
-		    case eChar:      v = GenerateRandomCharConstant();		break;
-		    case eInt:       v = GenerateRandomIntConstant();		break;
-		    case eShort:     v = GenerateRandomShortConstant();		break;
-		    case eLong:      v = GenerateRandomLongConstant();		break;
-	        case eLongLong:  v = GenerateRandomLongLongConstant();	break;
-		    case eUChar:     v = GenerateRandomCharConstant();		break;
-		    case eUInt:      v = GenerateRandomIntConstant();		break;
-		    case eUShort:    v = GenerateRandomShortConstant();		break;
-		    case eULong:     v = GenerateRandomLongConstant();		break;
-	        case eULongLong: v = GenerateRandomLongLongConstant();	break;
-    //	    case eFloat:     v = GenerateRandomFloatConstant();		break;
-    //	    case eDouble:    v = GenerateRandomFloatConstant();		break;
+			case eVoid:      v = "/* void */";				break;
+			case eChar:      v = GenerateRandomCharConstant();		break;
+			case eInt:       v = GenerateRandomIntConstant();		break;
+			case eShort:     v = GenerateRandomShortConstant();		break;
+			case eLong:      v = GenerateRandomLongConstant();		break;
+			case eLongLong:  v = GenerateRandomLongLongConstant();		break;
+			case eUChar:     v = GenerateRandomCharConstant();		break;
+			case eUInt:      v = GenerateRandomIntConstant();		break;
+			case eUShort:    v = GenerateRandomShortConstant();		break;
+			case eULong:     v = GenerateRandomLongConstant();		break;
+			case eULongLong: v = GenerateRandomLongLongConstant();		break;
+			case eFloat:     v = GenerateRandomFloatHexConstant();		break;
+			// case eDouble:    v = GenerateRandomFloatConstant();		break;
+			default:
+				assert(0 && "Unsupported type!");
 		    }
-        }
-    } else {
-        assert(0);  // no support for types other than integers and structs for now
-    }
+		}
+	} else {
+		assert(0);  // no support for types other than integers and structs for now
+    	}
 	return (type->eType == eSimple && CGOptions::mark_mutable_const()) ? "(" + v + ")" : v;
 }
 

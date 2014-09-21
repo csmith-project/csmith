@@ -107,6 +107,8 @@ public:
 
 	static eBinaryOps compound_to_binary_ops(eAssignOps op);
 
+	static bool AssignOpWorksForFloat(eAssignOps op);
+
 	virtual ~StatementAssign(void);
 
 	virtual void get_blocks(std::vector<const Block*>& /* blks */) const {}; 
@@ -124,7 +126,7 @@ public:
 	virtual void OutputAsExpr(std::ostream &out) const;
 
 	void OutputSimple(std::ostream &out) const;
-	
+
 private:
 	static eAssignOps AssignOpsProbability(const Type* type);
 

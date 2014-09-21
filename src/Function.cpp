@@ -278,6 +278,10 @@ Function::choose_func(vector<Function *> funcs,
 		// if type = 0, we don't care
 		if (type && !type->is_convertable((*i)->return_type))
 			continue;
+		// Changing the behavior of is_convertable is quite dangerous.
+		// Making constraint here has less global effect.
+		if (type && (*i)->return_type->is_float() && !type->is_float())
+			continue;
 		if (qfer && (*i)->rv && !qfer->match((*i)->rv->qfer))
 			continue;
 		// We cannot call a function that has an as-yet unknown effect.
