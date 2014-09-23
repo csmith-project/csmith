@@ -297,7 +297,7 @@ FUNC_NAME(add_func_$1_f_f)($1 sf1, $1 sf2 LOG_INDEX)
   LOG_EXEC
   return 
 #ifndef UNSAFE_FLOAT
-    (fabs((0.5 * sf1) + (0.5 * sf2)) > (0.5 * FLT_MAX)) ? 
+    (fabs$2((0.5$2 * sf1) + (0.5$2 * sf2)) > (0.5$2 * $3)) ? 
     UNDEFINED(sf1) :
 #endif
     (sf1 + sf2);
@@ -309,7 +309,7 @@ FUNC_NAME(sub_func_$1_f_f)($1 sf1, $1 sf2 LOG_INDEX)
   LOG_EXEC
   return 
 #ifndef UNSAFE_FLOAT
-    (fabs((0.5 * sf1) - (0.5 * sf2)) > (0.5 * FLT_MAX)) ? 
+    (fabs$2((0.5$2 * sf1) - (0.5$2 * sf2)) > (0.5$2 * $3)) ? 
     UNDEFINED(sf1) :
 #endif
     (sf1 - sf2);
@@ -319,9 +319,9 @@ STATIC $1
 FUNC_NAME(mul_func_$1_f_f)($1 sf1, $1 sf2 LOG_INDEX)
 {
   LOG_EXEC
-  return 
+  return
 #ifndef UNSAFE_FLOAT
-    (fabs((0x1.0p-512 * sf1) * (0x1.0p-512 * sf2)) > (0x1.0p-1024 * FLT_MAX)) ?
+    (fabs((0x1.0p-100$2 * sf1) * ($4 * sf2)) > (0x1.0p-100$2 * ($4 * $3))) ?
     UNDEFINED(sf1) :
 #endif
     (sf1 * sf2);
@@ -331,9 +331,9 @@ STATIC $1
 FUNC_NAME(div_func_$1_f_f)($1 sf1, $1 sf2 LOG_INDEX)
 {
   LOG_EXEC
-  return 
+  return
 #ifndef UNSAFE_FLOAT
-    (((sf2 == 0.0) || (fabs((0x1.0p-600 * sf1) / (0x1.0p600 * sf2))) > (0x1.0p-1000 * FLT_MAX))) ?
+    ((fabs(sf2) < 1.0$2) && (((sf2 == 0.0$2) || (fabs(($5 * sf1) / (0x1.0p100$2 * sf2))) > (0x1.0p-100$2 * ($5 * $3))))) ?
     UNDEFINED(sf1) :
 #endif
     (sf1 / sf2);
@@ -341,7 +341,8 @@ FUNC_NAME(div_func_$1_f_f)($1 sf1, $1 sf2 LOG_INDEX)
 
 ')
 
-safe_float_math(float)
+safe_float_math(float,f,FLT_MAX,0x1.0p-28f,0x1.0p-49f)
+safe_float_math(double,,DBL_MAX,0x1.0p-924,0x1.0p-974)
 
 define(`safe_float_conversion',`
 STATIC $2
