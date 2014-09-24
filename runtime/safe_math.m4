@@ -321,7 +321,7 @@ FUNC_NAME(mul_func_$1_f_f)($1 sf1, $1 sf2 LOG_INDEX)
   LOG_EXEC
   return
 #ifndef UNSAFE_FLOAT
-    (fabs((0x1.0p-100$2 * sf1) * ($4 * sf2)) > (0x1.0p-100$2 * ($4 * $3))) ?
+    (fabs$2((0x1.0p-100$2 * sf1) * ($4 * sf2)) > (0x1.0p-100$2 * ($4 * $3))) ?
     UNDEFINED(sf1) :
 #endif
     (sf1 * sf2);
@@ -333,7 +333,7 @@ FUNC_NAME(div_func_$1_f_f)($1 sf1, $1 sf2 LOG_INDEX)
   LOG_EXEC
   return
 #ifndef UNSAFE_FLOAT
-    ((fabs(sf2) < 1.0$2) && (((sf2 == 0.0$2) || (fabs(($5 * sf1) / (0x1.0p100$2 * sf2))) > (0x1.0p-100$2 * ($5 * $3))))) ?
+    ((fabs$2(sf2) < 1.0$2) && (((sf2 == 0.0$2) || (fabs$2(($5 * sf1) / (0x1.0p100$2 * sf2))) > (0x1.0p-100$2 * ($5 * $3))))) ?
     UNDEFINED(sf1) :
 #endif
     (sf1 / sf2);
