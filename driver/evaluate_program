@@ -27,9 +27,9 @@ my $COMPILER_TIMEOUT = 30;
 
 my $COMPILER_TIMEOUT_RES = 137;
 
-my $RUN_PROGRAM = 1;
+my $RUN_PROGRAM = 0;
 
-my $DO_REDUCE_CRASH = 0;
+my $DO_REDUCE_CRASH = 1;
 my $DO_REDUCE_WRONG = 1;
 
 ####################################################################
@@ -43,11 +43,23 @@ my $LOCKFN = "/var/tmp/version_search_lockfile";
 ####################################################################
 
 my @gcc_opts = (
-    "-w -O0", 
-    "-w -O1", 
-    "-w -Os", 
-    "-w -O2", 
-    "-w -Ofast");
+    "-w -O0 -march=core-avx2 -mtune=core-avx2", 
+    "-w -O1 -march=core-avx2 -mtune=core-avx2", 
+    "-w -Og -march=core-avx2 -mtune=core-avx2",
+    "-w -Os -march=core-avx2 -mtune=core-avx2", 
+    "-w -O2 -march=core-avx2 -mtune=core-avx2", 
+    "-w -O3 -march=core-avx2 -mtune=core-avx2",
+    "-w -Ofast -march=core-avx2 -mtune=core-avx2",
+    );
+
+my @clang_opts = (
+    "-w -O0 -march=core-avx2 -mtune=core-avx2", 
+    "-w -O1 -march=core-avx2 -mtune=core-avx2", 
+    "-w -Os -march=core-avx2 -mtune=core-avx2", 
+    "-w -O2 -march=core-avx2 -mtune=core-avx2", 
+    "-w -O3 -march=core-avx2 -mtune=core-avx2",
+    "-w -Ofast -march=core-avx2 -mtune=core-avx2",
+    );
 
 my @o0only = (
     "-O0", 
@@ -81,8 +93,12 @@ my @clang = ("clang",
 	     \@sclang_opts);
 
 my @gcccurrent = ("gcc",
-		  "/home/regehr/z/compiler-install/gcc-r205951-install/bin/gcc",
-		  \@gcc_opts);
+                  "/home/regehr/z/compiler-install/gcc-r215698-install/bin/gcc",
+                  \@gcc_opts);
+
+my @clangcurrent = ("clang",
+                    "/home/regehr/z/compiler-install/llvm-r218640-install/bin/clang",
+                    \@clang_opts);
 
 my @ccomp = ("ccomp",
 	     "ccomp",
@@ -178,11 +194,8 @@ my @clang33 = ("clang33",
 
 my @compilers_to_test = (
 
-    #\@gcc,
-    #\@clang,
-    \@clang_souper,
-
-    #\@gcccurrent,
+    \@clangcurrent,
+    \@gcccurrent,
     #\@ccomp,
     
     #\@gcc320,

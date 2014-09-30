@@ -56,8 +56,7 @@ my $CSMITH_TIMEOUT = 180;
 
 my $PROVIDE_SEED = 1;
 
-my $XTRA = "--no-unions --no-argc";
-#my $XTRA = "";
+my $XTRA = "--no-unions --float --no-argc";
 
 my $PACK = "";
 
