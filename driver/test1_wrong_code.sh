@@ -28,7 +28,7 @@ ulimit -m 8000000
 # ${CSMITH_HOME}/driver/check_unique.pl XX_CRASHFILE XX_DIR XX_OPT "XX_COMMAND"
 
 if 
-  clang -pedantic -Wall -O0 -c small.c  >out_clang.txt 2>&1 &&\
+  clang -pedantic -Wall -O -fsanitize=undefined -fno-sanitize-recover small.c -o smallz >out_clang.txt 2>&1 &&\
   ! grep 'conversions than data arguments' out_clang.txt &&\
   ! grep 'incompatible redeclaration' out_clang.txt &&\
   ! grep 'ordered comparison between pointer' out_clang.txt &&\
@@ -41,6 +41,7 @@ if
   ! grep 'incompatible pointer to' out_clang.txt &&\
   ! grep 'incompatible integer to' out_clang.txt &&\
   ! grep 'type specifier missing' out_clang.txt &&\
+  RunSafely ${PROG_TIMEOUT} 1 /dev/null out_small1.txt ./smallz &&\
   gcc -Wall -Wextra -O1 small.c -o smallz >out_gcc.txt 2>&1 &&\
   ! grep 'uninitialized' out_gcc.txt &&\
   ! grep 'without a cast' out_gcc.txt &&\
@@ -60,7 +61,7 @@ if
   ! grep 'incompatible implicit' out_gcc.txt &&\
   ! grep 'excess elements in struct initializer' out_gcc.txt &&\
   ! grep 'comparison between pointer and integer' out_gcc.txt &&\
-  XX_COMMAND XX_OPT small.c -o small1 > /dev/null 2>&1 &&\ # DOWNGRADE 
+  XX_COMMAND XX_OPT small.c -o small1 > /dev/null 2>&1 &&\
   RunSafely ${PROG_TIMEOUT} 1 /dev/null out_small1.txt ./small1 &&\
   XX_COMMAND XX_GOOD small.c -o small2 > /dev/null 2>&1 &&\
   RunSafely ${PROG_TIMEOUT} 1 /dev/null out_small2.txt ./small2 &&\

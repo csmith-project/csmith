@@ -49,7 +49,7 @@ my @gcc_opts = (
     "-w -Os -march=core-avx2 -mtune=core-avx2", 
     "-w -O2 -march=core-avx2 -mtune=core-avx2", 
     "-w -O3 -march=core-avx2 -mtune=core-avx2",
-    "-w -Ofast -march=core-avx2 -mtune=core-avx2",
+    # "-w -Ofast -march=core-avx2 -mtune=core-avx2",
     );
 
 my @clang_opts = (
@@ -58,7 +58,7 @@ my @clang_opts = (
     "-w -Os -march=core-avx2 -mtune=core-avx2", 
     "-w -O2 -march=core-avx2 -mtune=core-avx2", 
     "-w -O3 -march=core-avx2 -mtune=core-avx2",
-    "-w -Ofast -march=core-avx2 -mtune=core-avx2",
+    # "-w -Ofast -march=core-avx2 -mtune=core-avx2",
     );
 
 my @o0only = (
