@@ -153,6 +153,10 @@ public:
 
 	static bool IsOrderedStandardFunc(eBinaryOps eFunc);
 
+	static bool BinaryOpWorksForFloat(eBinaryOps op);
+
+	static bool UnaryOpWorksForFloat(eUnaryOps op);
+
 	virtual const Type &get_type(void) const = 0;
 
 	virtual bool compatible(const Variable *) const { return false; }

@@ -467,6 +467,9 @@ Probabilities::set_single_name_maps()
 	// for choosing union as LType
 	set_single_name("union_as_ltype_prob", pUnionAsLTypeProb);
 
+	// for choosing float as LType
+	set_single_name("float_as_ltype_prob", pFloatAsLTypeProb);
+
 	// for creating new array var 
 	set_single_name("new_array_var_prob", pNewArrayVariableProb);
 
@@ -571,6 +574,10 @@ Probabilities::initialize_single_probs()
 	m[pShiftByNonConstantProb] = 50;
 	m[pStructAsLTypeProb] = 30;
 	m[pUnionAsLTypeProb] = 25;
+	if (CGOptions::enable_float())
+		m[pFloatAsLTypeProb] = 40;
+	else
+		m[pFloatAsLTypeProb] = 0;
 	if (CGOptions::arrays()) 
 		m[pNewArrayVariableProb] = 20;
 	else
@@ -700,6 +707,13 @@ Probabilities::set_default_simple_types_prob()
 	else {
 		SET_SINGLE_NAME("long_long_prob", LongLong, 0);
 		SET_SINGLE_NAME("ulong_long_prob", ULongLong, 0);
+	}
+
+	if (CGOptions::enable_float()) {
+		SET_SINGLE_NAME("float_prob", Float, 1);
+	}
+	else {
+		SET_SINGLE_NAME("float_prob", Float, 0);
 	}
 
 	set_group_prob(true, pSimpleTypesProb, m);

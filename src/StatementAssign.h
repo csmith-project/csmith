@@ -82,6 +82,7 @@ public:
 	static StatementAssign *make_random(CGContext &cg_context, const Type* type=0, const CVQualifiers* qfer=0);
 
 	static StatementAssign *make_possible_compound_assign(CGContext &cg_context,
+						 const Type *type,
 						 const Lhs &l,
 						 eAssignOps op,
 						 const Expression &e);
@@ -107,6 +108,8 @@ public:
 
 	static eBinaryOps compound_to_binary_ops(eAssignOps op);
 
+	static bool AssignOpWorksForFloat(eAssignOps op);
+
 	virtual ~StatementAssign(void);
 
 	virtual void get_blocks(std::vector<const Block*>& /* blks */) const {}; 
@@ -124,7 +127,7 @@ public:
 	virtual void OutputAsExpr(std::ostream &out) const;
 
 	void OutputSimple(std::ostream &out) const;
-	
+
 private:
 	static eAssignOps AssignOpsProbability(const Type* type);
 

@@ -115,6 +115,10 @@ StatementArrayOp::make_random_array_init(CGContext &cg_context)
 		Variable *cv = NULL;
 		do {
 			cv = VariableSelector::SelectLoopCtrlVar(cg_context, invalid_vars); 
+			if (cv->type->is_float()) {
+				invalid_vars.push_back(cv);
+				continue;
+			}
 			if (cv->is_volatile())
 				vol_count++;
 			if ((CGOptions::strict_volatile_rule() && (vol_count > 1) && cv->is_volatile())

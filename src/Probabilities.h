@@ -60,6 +60,7 @@ enum ProbName {
 	pPointerAsLTypeProb,
 	pStructAsLTypeProb,
 	pUnionAsLTypeProb,
+	pFloatAsLTypeProb,
 	pNewArrayVariableProb,
 	pAccessOnceVariableProb,
 	pInlineFunctionProb,
@@ -137,6 +138,7 @@ enum ProbName {
 	pUShortProb,
 	pULongProb,
 	pULongLongProb,
+	pFloatProb,
 
 	// for safe math ops
 	pSafeOpsSizeProb,
@@ -205,6 +207,9 @@ enum ProbName {
 
 #define UnionAsLTypeProb \
 	Probabilities::get_prob(pUnionAsLTypeProb)
+
+#define FloatAsLTypeProb \
+	Probabilities::get_prob(pFloatAsLTypeProb)
 
 #define NewArrayVariableProb \
 	Probabilities::get_prob(pNewArrayVariableProb)

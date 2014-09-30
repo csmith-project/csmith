@@ -87,7 +87,11 @@ StatementAssign::AssignOpsProbability(const Type* type)
 	if (!CGOptions::compound_assignment()) {
 		return eSimpleAssign;
 	}
-	if (type && type->eType != eSimple) {
+	// First, floating point values do not apply to |=, &= and ^=. 
+	// Second, similar to signed integers, we don't generate pre- or post-
+	// operators for floating point values. Instead, we will wrap all 
+	// of these operations into safe_float_math later.
+	if (type && (type->eType != eSimple || type->get_base_type()->is_float())) {
 		return eSimpleAssign;
 	}
 
@@ -113,7 +117,7 @@ StatementAssign::make_random(CGContext &cg_context, const Type* type, const CVQu
 	// decide type
 	if (type == NULL) {
 		// stand_alone_assign = true;
-		type = Type::SelectLType(!cg_context.get_effect_context().is_side_effect_free(), op);
+		type = Type::SelectLType(!cg_context.get_effect_context().is_side_effect_free(), op); 
 	}
 	assert(!type->is_const_struct_union());
 	
@@ -191,6 +195,11 @@ StatementAssign::make_random(CGContext &cg_context, const Type* type, const CVQu
 	if (CGOptions::ccomp() && lhs->get_var()->isBitfield_) {
 		e->cast_type = type;
 	}
+	// e can be of float type. So, we reset its 
+	if ((lhs->get_var()->type->get_base_type()->is_float() || e->get_type().get_base_type()->is_float())
+	    && !StatementAssign::AssignOpWorksForFloat(op)) {
+		op = eSimpleAssign;
+	}
 
 	if (CompatibleChecker::compatible_check(e, lhs)) {
 		Error::set_error(COMPATIBLE_CHECK_ERROR);
@@ -201,7 +210,7 @@ StatementAssign::make_random(CGContext &cg_context, const Type* type, const CVQu
 
 	cg_context.merge_param_context(lhs_cg_context, true); 
 	ERROR_GUARD_AND_DEL2(NULL, e, lhs);
-	StatementAssign *stmt_assign = make_possible_compound_assign(cg_context, *lhs, op, *e);
+	StatementAssign *stmt_assign = make_possible_compound_assign(cg_context, type, *lhs, op, *e);
 	ERROR_GUARD_AND_DEL2(NULL, e, lhs);
 	return stmt_assign;
 }
@@ -221,6 +230,7 @@ StatementAssign::safe_assign(eAssignOps op)
 
 StatementAssign *
 StatementAssign::make_possible_compound_assign(CGContext &cg_context, 
+				 const Type *type,
 				 const Lhs &l,
 				 eAssignOps op,
 				 const Expression &e)
@@ -232,7 +242,6 @@ StatementAssign::make_possible_compound_assign(CGContext &cg_context,
 	std::string tmp2;
 
 	if (bop != MAX_BINARY_OP) {
-		//SafeOpFlags *local_fs = SafeOpFlags::make_random(sOpAssign, true);
 		SafeOpFlags *local_fs  = NULL;
 		FunctionInvocation* fi = NULL;
 		if (safe_assign(op)) {
@@ -240,7 +249,7 @@ StatementAssign::make_possible_compound_assign(CGContext &cg_context,
 			fi = new FunctionInvocationBinary(bop, local_fs);
 		}
 		else {
-			local_fs = SafeOpFlags::make_random(sOpAssign);
+			local_fs = SafeOpFlags::make_random_binary(type, &(l.get_type()), &(l.get_type()), sOpAssign, bop);
 			ERROR_GUARD(NULL);
 			fi = FunctionInvocationBinary::CreateFunctionInvocationBinary(cg_context, bop, local_fs);
 			tmp1 = dynamic_cast<FunctionInvocationBinary*>(fi)->get_tmp_var1();
@@ -263,7 +272,7 @@ StatementAssign::make_possible_compound_assign(CGContext &cg_context,
 		}
 #endif
 		if (op != eSimpleAssign) {
-			fs = SafeOpFlags::make_random(sOpAssign);
+			fs = SafeOpFlags::make_random_binary(type, &(l.get_type()), &(rhs->get_type()), sOpAssign, bop);
 			bool op1 = fs->get_op1_sign();
 			bool op2 = fs->get_op2_sign();
 			enum SafeOpSize size = fs->get_op_size();
@@ -574,6 +583,21 @@ StatementAssign::OutputAsExpr(std::ostream &out) const
 		}
 	} else {
 		OutputSimple(out);
+	}
+}
+
+bool
+StatementAssign::AssignOpWorksForFloat(eAssignOps op) 
+{
+	switch (op) {
+		case eSimpleAssign:
+		case eMulAssign:
+		case eDivAssign:
+		case eAddAssign:
+		case eSubAssign:
+			return true;
+		default:
+			return false;
 	}
 }
 

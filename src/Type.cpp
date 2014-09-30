@@ -402,6 +402,9 @@ Type::get_type_from_string(const string &type_string)
 	else if (type_string == "ULonglong") {
 		return &Type::get_simple_type(eULongLong);
 	}
+	else if (type_string == "Float") {
+		return &Type::get_simple_type(eFloat);
+	}
 
 	assert(0 && "Unsupported type string!");
 	return NULL;
@@ -1397,6 +1400,7 @@ Type::is_promotable(const Type* t) const
 			case eULong: return (t2 == eLong || t2 == eULong || t2 == eLongLong || t2 == eULongLong);
 			case eLongLong:
 			case eULongLong: return (t2 == eLongLong || t2 == eULongLong);
+			case eFloat: return (t2 != eVoid);
 			default: break;
 		}
 	}
@@ -1413,20 +1417,26 @@ Type::is_convertable(const Type* t) const
 {
     if (this == t) 
         return true;
-	if (eType == eSimple && t->eType == eSimple) {
+    if (eType == eSimple && t->eType == eSimple) {
+	// forbiden conversion from float to int
+	if (t->is_float() && !is_float())
+		return false;
         if ((simple_type != eVoid && t->simple_type != eVoid) ||
             simple_type == t->simple_type) 
             return true;
     }
     else if (eType == ePointer && t->eType == ePointer) {
-		if (ptr_type == t->ptr_type) {
-			return true;
-		}
-		if (ptr_type->eType == eSimple && t->ptr_type->eType == eSimple) {
-			return ptr_type->SizeInBytes() == t->ptr_type->SizeInBytes();
-		}
+        if (ptr_type == t->ptr_type) {
+		return true;
+	}
+	if (ptr_type->eType == eSimple && t->ptr_type->eType == eSimple) {
+                if(ptr_type->simple_type == eFloat && t->ptr_type->simple_type == eFloat)
+                    return true;
+		else
+		    return ptr_type->SizeInBytes() == t->ptr_type->SizeInBytes();
+	}
         //return ptr_type->is_convertable(t->ptr_type);
-		//return t->ptr_type->is_promotable(ptr_type);
+	//return t->ptr_type->is_promotable(ptr_type);
     }
     return false;
 }
@@ -1517,7 +1527,7 @@ Type::SizeInBytes(void) const
 		case eUShort:	return 2;
 		case eULong:	return 4;
 		case eULongLong:return 8;
-//		case eFloat:	return 4;
+		case eFloat:	return 4;
 //		case eDouble:	return 8;
 		}
 		break;
@@ -1583,6 +1593,13 @@ Type::SelectLType(bool no_volatile, eAssignOps op)
 		}
 	}
 
+	// choose float as LHS type
+	if (!type) {
+		if (StatementAssign::AssignOpWorksForFloat(op) && rnd_flipcoin(FloatAsLTypeProb)) {
+			type = &Type::get_simple_type(eFloat);
+		}
+	}
+
 	// default is any integer type
 	if (!type) {
 		type = get_int_type();
@@ -1636,15 +1653,17 @@ Type::Output(std::ostream &out) const
 	case eSimple:
 		if (this->simple_type == eVoid) {
 			out << "void";
+		} else if (this->simple_type == eFloat) {
+		        out << "float";
 		} else {
 			out << (is_signed() ? "int" : "uint");
 			out << (SizeInBytes() * 8);
 			out << "_t";
 		} 
 		break;
-    case ePointer:   ptr_type->Output( out ); out << "*"; break;
-    case eUnion:     out << "union U" << sid; break;
-    case eStruct:    out << "struct S" << sid; break;
+	case ePointer:   ptr_type->Output( out ); out << "*"; break;
+	case eUnion:     out << "union U" << sid; break;
+	case eStruct:    out << "struct S" << sid; break;
 	}
 }
 

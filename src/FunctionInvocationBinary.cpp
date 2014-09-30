@@ -53,6 +53,7 @@ FunctionInvocationBinary::CreateFunctionInvocationBinary(CGContext &cg_context,
 						SafeOpFlags *flags)
 {
 	FunctionInvocationBinary *fi = NULL;
+	assert(flags);
 
 	if (flags && FunctionInvocationBinary::safe_ops(op)) {
 		bool op1 = flags->get_op1_sign();
@@ -188,12 +189,21 @@ FunctionInvocationBinary::is_0_or_1(void) const
 	return eFunc==eCmpGt || eFunc==eCmpLt || eFunc==eCmpGe || eFunc==eCmpLe || eFunc==eCmpEq || eFunc==eCmpNe;
 }
 
+bool
+FunctionInvocationBinary::is_return_type_float() const
+{
+	assert(op_flags);
+	return op_flags->get_op_size() == sFloat;
+}
+
 /*
  * XXX --- we should memoize the types of "standard functions."
  */
 const Type &
 FunctionInvocationBinary::get_type(void) const
 {
+	if (is_return_type_float())
+		return Type::get_simple_type(eFloat);
 	switch (eFunc) {
 	default:
 		assert(!"invalid operator in FunctionInvocationBinary::get_type()");

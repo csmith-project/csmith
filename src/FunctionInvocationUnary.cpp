@@ -209,21 +209,28 @@ FunctionInvocationUnary::Output(std::ostream &out) const
 		break;
 
 	case eMinus:
-		if (CGOptions::avoid_signed_overflow()) { 
+		if (CGOptions::avoid_signed_overflow()) {
 			assert(op_flags);
-			string fname = op_flags->to_string(eFunc);
-			int id = SafeOpFlags::to_id(fname);
-			// don't use safe math wrapper if this function is specified in "--safe-math-wrapper"
-			if (CGOptions::safe_math_wrapper(id)) {
-				out << fname << "(";  
-				if (CGOptions::math_notmp()) {
-					out << tmp_var << ", ";
+			if (op_flags->get_op_size() != sFloat) {
+				string fname = op_flags->to_string(eFunc);
+				int id = SafeOpFlags::to_id(fname);
+				// don't use safe math wrapper if this function is specified in "--safe-math-wrapper"
+				if (CGOptions::safe_math_wrapper(id)) {
+					out << fname << "(";  
+					if (CGOptions::math_notmp()) {
+						out << tmp_var << ", ";
+					}
+					param_value[0]->Output(out);
+					if (CGOptions::identify_wrappers()) {
+						out << ", " << id;
+					}
+					out << ")"; 
+					break;
 				}
+			}
+			else {
+				OutputStandardFuncName(eFunc, out);
 				param_value[0]->Output(out);
-				if (CGOptions::identify_wrappers()) {
-					out << ", " << id;
-				}
-				out << ")"; 
 				break;
 			}
 		}

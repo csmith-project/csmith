@@ -47,12 +47,16 @@ enum SafeOpSize {
 	sInt16,
 	sInt32,
 	sInt64,
+	sFloat,
 };
-#define MAX_SAFE_OP_SIZE ((SafeOpSize) (sInt64+1))
+#define MAX_SAFE_OP_SIZE ((SafeOpSize) (sFloat+1))
 
 class SafeOpFlags {
 public:
-	static SafeOpFlags *make_random(SafeOpKind op_kind, eBinaryOps op = MAX_BINARY_OP);
+	static SafeOpFlags *make_random_binary(const Type *rv_type, const Type *op1_type, const Type *op2_type,
+					SafeOpKind op_kind, eBinaryOps op);
+
+	static SafeOpFlags *make_random_unary(const Type *rv_type, const Type *op1_type, eUnaryOps op);
 
 	static SafeOpFlags *make_dummy_flags();
 
@@ -75,7 +79,7 @@ public:
 
 	bool get_op2_sign() { return op2_; }
 
-	enum SafeOpSize get_op_size() { return op_size_; }
+	enum SafeOpSize get_op_size() const { return op_size_; }
 
 	std::string to_string(enum eBinaryOps op) const;
 	std::string to_string(enum eUnaryOps  op) const;
@@ -91,6 +95,14 @@ private:
 	SafeOpSize op_size_;
 
 	void OutputSign(std::ostream &out, bool sgnd) const;
+
+	bool static return_float_type(const Type *rv_type, const Type *op1_type, const Type *op2_type,
+					eBinaryOps op);
+
+	bool static return_float_type(const Type *rv_type, const Type *op1_type, 
+					eUnaryOps uop);
+
+	std::string safe_float_func_string(enum eBinaryOps op) const;
 
 	SafeOpFlags();
 
