@@ -18,7 +18,7 @@ use Cwd;
 
 ####################################################################
 
-my $xxtra = "-DCSMITH_MINIMAL";
+my $xxtra = "";
 
 #my $notmp = "-DUSE_MATH_MACROS_NOTMP";
 my $notmp = "";
@@ -27,7 +27,7 @@ my $COMPILER_TIMEOUT = 30;
 
 my $COMPILER_TIMEOUT_RES = 137;
 
-my $RUN_PROGRAM = 0;
+my $RUN_PROGRAM = 1;
 
 my $DO_REDUCE_CRASH = 1;
 my $DO_REDUCE_WRONG = 1;
@@ -55,6 +55,7 @@ my @gcc_opts = (
 my @clang_opts = (
     "-w -O0 -march=core-avx2 -mtune=core-avx2", 
     "-w -O1 -march=core-avx2 -mtune=core-avx2", 
+    "-w -O1 -march=core-avx2 -mtune=core-avx2 -fsanitize=undefined", 
     "-w -Os -march=core-avx2 -mtune=core-avx2", 
     "-w -O2 -march=core-avx2 -mtune=core-avx2", 
     "-w -O3 -march=core-avx2 -mtune=core-avx2",
@@ -390,7 +391,7 @@ sub reduce_program ($$$$$$$) {
     mkdir $tempdir;
     print "ok: reducing ".($crash ? "crash" : "wrong code")." bug for $compiler at $fail_opt in $tempdir with '$err'\n";
     File::Copy::cp ("$root.c", $tempdir);
-    runit "gcc -E -I${CSMITH_HOME}/runtime -DCSMITH_MINIMAL ${root}.c > $tempdir/small.c";
+    runit "gcc -E -I${CSMITH_HOME}/runtime ${root}.c > $tempdir/small.c";
     if ($crash) {
 	open INF, "<${CSMITH_HOME}/driver/test1_crash.sh" or die;
     } else {
