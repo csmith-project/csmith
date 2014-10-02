@@ -64,7 +64,7 @@ static inline void crc32_gentab (void)
 
 #define _CSMITH_BITFIELD(x) ((x>32)?(x%32):x)
 
-int crc32_context;
+uint64_t crc32_context;
 
 #ifdef TCC
 int strcmp (const char *s1, const char *s2)
@@ -79,7 +79,7 @@ extern int strcmp (const char *, const char *);
 #endif
 
 static inline void 
-transparent_crc (uint32_t val, char* vname, int flag)
+transparent_crc (uint64_t val, char* vname, int flag)
 {
 #ifndef NO_PRINTF
   if (flag) printf ("%s %d\n", vname, val);
@@ -121,20 +121,20 @@ void put_hex (int x)
 #endif
 
 static inline void
-platform_main_end (int x, int flag)
+platform_main_end (uint64_t x, int flag)
 {
 #ifndef NOT_PRINT_CHECKSUM
   if (!flag) {
 #ifdef NO_PRINTF
     int i;
     my_puts ("checksum = ");
-    for (i=0; i<8; i++) {
+    for (i=0; i<16; i++) {
       put_hex (x & 0xf);
       x >>= 4;
     }
     putchar ('\n');
 #else
-    printf ("checksum = %x\n", x);
+    printf ("checksum = %llx\n", x);
 #endif
   }
 #endif
