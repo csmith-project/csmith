@@ -39,6 +39,7 @@
 
 #include <string.h>
 #include <float.h>
+#include <math.h>
 
 #define __STDC_LIMIT_MACROS
 #include "random_inc.h"
