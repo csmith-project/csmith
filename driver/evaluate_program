@@ -55,7 +55,7 @@ my @gcc_opts = (
 my @clang_opts = (
     "-w -O0 -march=core-avx2 -mtune=core-avx2", 
     "-w -O1 -march=core-avx2 -mtune=core-avx2", 
-    "-w -O1 -march=core-avx2 -mtune=core-avx2 -fsanitize=undefined", 
+    "-w -O1 -march=core-avx2 -mtune=core-avx2 -fsanitize=undefined  -fno-sanitize-recover", 
     "-w -Os -march=core-avx2 -mtune=core-avx2", 
     "-w -O2 -march=core-avx2 -mtune=core-avx2", 
     "-w -O3 -march=core-avx2 -mtune=core-avx2",
