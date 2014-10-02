@@ -114,7 +114,20 @@ transparent_crc (uint64_t val, char* vname, int flag)
   		printf("...checksum after hashing %s : %lX\n", vname, crc32_context ^ 0xFFFFFFFFUL);
 	}
 }
+
 #endif
+
+static void 
+transparent_crc_bytes (char *ptr, int nbytes, char* vname, int flag)
+{
+    int i;
+    for (i=0; i<nbytes; i++) {
+        crc32_byte(ptr[i]);
+    }
+	if (flag) {
+  		printf("...checksum after hashing %s : %lX\n", vname, crc32_context ^ 0xFFFFFFFFUL);
+	}
+}
 
 /*****************************************************************************/
 

@@ -825,8 +825,16 @@ ArrayVariable::hash(std::ostream& out) const
 	vname = oss.str();
 	if (CGOptions::compute_hash()) {
 		for (j=0; j<field_names.size(); j++) {
-			output_tab(out, indent);
-			out << "transparent_crc(" << vname << field_names[j] << ", \"" << vname << field_names[j] << "\", print_hash_value);" << endl;
+            if (type->eType == eSimple && type->simple_type == eFloat) {
+                output_tab(out, indent);
+                out << "transparent_crc_bytes(&" << vname << field_names[j] << ", ";
+                out << "sizeof(" << vname << field_names[j] << "), ";
+                out << "\"" << vname << field_names[j] << "\", print_hash_value);" << endl;
+            } else {
+                output_tab(out, indent);
+                out << "transparent_crc(" << vname << field_names[j] << ", \"";
+                out << vname << field_names[j] << "\", print_hash_value);" << endl;
+            }
 		}
 		// print the index value
 		if (CGOptions::hash_value_printf()) {

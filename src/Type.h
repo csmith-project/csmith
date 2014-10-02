@@ -81,7 +81,7 @@ enum eSimpleType
 	eUShort,
 	eULong,
 	eFloat,
-//	eDouble,
+	// eDouble,
 	eULongLong,
 };
 #define MAX_SIMPLE_TYPES ((eSimpleType) (eULongLong+1))
