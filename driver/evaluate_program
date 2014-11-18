@@ -1,4 +1,4 @@
-#!/usr/bin/perl 
+#!/usr/bin/perl
 
 use strict;
 use warnings;
@@ -35,7 +35,7 @@ my $DO_REDUCE_WRONG = 1;
 ####################################################################
 
 my $CSMITH_HOME=$ENV{"CSMITH_HOME"};
-die "oops: CSMITH_HOME environment variable needs to be set" 
+die "oops: CSMITH_HOME environment variable needs to be set"
     unless defined($CSMITH_HOME);
 
 my $LOCKFN = "/var/tmp/version_search_lockfile";
@@ -43,27 +43,21 @@ my $LOCKFN = "/var/tmp/version_search_lockfile";
 ####################################################################
 
 my @gcc_opts = (
-    "-w -O0 -march=core-avx2 -mtune=core-avx2", 
-    "-w -O1 -march=core-avx2 -mtune=core-avx2", 
+    "-w -O0 -march=core-avx2 -mtune=core-avx2",
+    "-w -O1 -march=core-avx2 -mtune=core-avx2",
     "-w -Og -march=core-avx2 -mtune=core-avx2",
-    "-w -Os -march=core-avx2 -mtune=core-avx2", 
-    "-w -O2 -march=core-avx2 -mtune=core-avx2", 
+    "-w -Os -march=core-avx2 -mtune=core-avx2",
+    "-w -O2 -march=core-avx2 -mtune=core-avx2",
     "-w -O3 -march=core-avx2 -mtune=core-avx2",
     # "-w -Ofast -march=core-avx2 -mtune=core-avx2",
     );
 
 my @clang_opts = (
-    "-w -O0 -march=core-avx2 -mtune=core-avx2", 
-    "-w -O1 -march=core-avx2 -mtune=core-avx2", 
-    "-w -O1 -march=core-avx2 -mtune=core-avx2 -fsanitize=undefined  -fno-sanitize-recover", 
-    "-w -Os -march=core-avx2 -mtune=core-avx2", 
-    "-w -O2 -march=core-avx2 -mtune=core-avx2", 
-    "-w -O3 -march=core-avx2 -mtune=core-avx2",
-    # "-w -Ofast -march=core-avx2 -mtune=core-avx2",
+    "-O -w",
     );
 
 my @o0only = (
-    "-O0", 
+    "-O0",
     );
 
 my @occomp = ("-fall");
@@ -73,7 +67,11 @@ my @gcc = ("gcc",
            "gcc",
            \@gcc_opts);
 
-my $SOUPER = "/home/regehr/souper-regehr";
+my $SOUPER = "/home/regehr/f/souper-regehr";
+
+my @souper_bare_opts = (
+    "-w",
+    );
 
 my @souper_opts = (
     "-O3", 
@@ -90,8 +88,12 @@ my @clang_souper = ("clang",
                     \@sclang_opts);
 
 my @clang = ("clang",
-	     "$SOUPER/third_party/llvm/Debug/bin/clang",
-	     \@sclang_opts);
+	     "$SOUPER/third_party/llvm/Release/bin/clang",
+	     \@clang_opts);
+
+my @souper_bare = ("clang",
+                    "souper.pl",
+                    \@souper_bare_opts);
 
 my @gcccurrent = ("gcc",
                   "/home/regehr/z/compiler-install/gcc-r215698-install/bin/gcc",
@@ -195,10 +197,12 @@ my @clang33 = ("clang33",
 
 my @compilers_to_test = (
 
-    \@clangcurrent,
-    \@gcccurrent,
+    \@clang,
+    \@souper_bare,
+
+    #\@gcccurrent,
     #\@ccomp,
-    
+
     #\@gcc320,
     #\@gcc330,
     #\@gcc340,
@@ -510,10 +514,10 @@ sub test_compiler ($$$) {
     }
 
     if ($success > 0) {
-	
+
 	my $consistent = 1;
 	my $opt1;
-	
+
 	foreach my $opt (keys %results) {
 
 	    if (defined($result)) {
@@ -531,7 +535,7 @@ sub test_compiler ($$$) {
 		$writes = $num_writes{$opt};
 		$opt1 = $opt;
 		$result = $results{$opt};
-		$csum = $csums{$opt};				
+		$csum = $csums{$opt};
 	    }
 	}
 
@@ -561,13 +565,13 @@ sub test_program ($$) {
 	    test_compiler ($root, $compiler_ref, $custom_options);
 
 	return -1 if ($abort_test != 0);
-	
+
 	if ($tmp_interesting) {
 	    $interesting = 1;
 	}
-	
+
 	print "COMPLETED TEST $compiler\n";
-	
+
 	# ignore internally inconsistent results
 	if ($consistent) {
 	    if (defined ($result) &&

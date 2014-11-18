@@ -54,4 +54,9 @@
 
 #  define CHAR_BIT	8
 
+/* Limits of FP types.  */
+
+#define FLT_MAX 3.40282347e+38F
+#define DBL_MAX 1.7976931348623158e+308
+
 #endif

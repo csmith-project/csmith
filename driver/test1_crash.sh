@@ -12,7 +12,7 @@ ulimit -t 120
 ulimit -v 8000000
 ulimit -m 8000000
 
-${CSMITH_HOME}/driver/check_unique.pl XX_CRASHFILE XX_DIR XX_OPT "XX_COMMAND"
+# ${CSMITH_HOME}/driver/check_unique.pl XX_CRASHFILE XX_DIR XX_OPT "XX_COMMAND"
 
 gcc -c small.c > gcc.out 2>&1 &&\
 ! grep 'data definition has no type or storage class' gcc.out &&\
