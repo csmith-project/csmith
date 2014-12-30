@@ -90,10 +90,10 @@ make_random_loop_control(int &init, int &limit, int &incr,
 		ERROR_RETURN();
 		// Do `++' or `--', pre- or post-.
 		// make sure the limit can be reached without wrap-around
-		if (limit >= init) {
-			incr_op = pure_rnd_flipcoin(50) ? ePreIncr : ePostIncr;
-		} else {
+		if ((limit < init) || ((limit == init) && (test_op == eCmpGe))) {
 			incr_op = pure_rnd_flipcoin(50) ? ePreDecr : ePostDecr;
+		} else {
+			incr_op = pure_rnd_flipcoin(50) ? ePreIncr : ePostIncr;
 		}
 		if (((incr_op == ePreIncr) && !CGOptions::pre_incr_operator())
 			|| ((incr_op == ePostIncr) && !CGOptions::post_incr_operator())
