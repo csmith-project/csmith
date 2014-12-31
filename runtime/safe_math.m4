@@ -1,6 +1,6 @@
 dnl -*- mode: m4 -*-
 dnl
-dnl Copyright (c) 2008, 2009 The University of Utah
+dnl Copyright (c) 2008, 2009, 2013, 2014 The University of Utah
 dnl All rights reserved.
 dnl
 dnl This file is part of `csmith', a random generator of C programs.

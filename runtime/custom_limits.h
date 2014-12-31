@@ -1,3 +1,7 @@
+/* -*- mode: C -*-
+ *
+ * Copyright (c) 2014 The University of Utah
+ */
 /* Copyright (C) 1997,1998,1999,2000,2001,2006 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
