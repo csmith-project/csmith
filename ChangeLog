@@ -1,10 +1,136 @@
+Changes since 2.1.0 release:
+
+	Expanded documentation about configuring the probability values that
+	Csmith uses to randomly generate programs.  See file
+	"doc/probabilities.txt".
+
+	Added ability to generate programs that use floating-point.  The use of
+	floating-point is controlled by new command-line options --float and
+	--no-float.  The default is --no-float.  Thanks to Alastair Donaldson
+	for providing the initial implementation of this feature.
+
+	Added ability to generate C++-compatible code, controlled by new
+	command-line option --lang-cpp.  Thanks to Sweta Seethamraju for
+	contributing greatly to this feature.  To generate C++-compatible code,
+	use the command line below:
+	csmith --lang-cpp --no-consts --no-volatiles
+
+	Added two command-line options related to marking function as inline.
+	--inline-function: enable or disable the functionality of marking a
+	  function as inline (disabled by default)
+	--inline-function-prob <num>: set the probability of marking each
+	  function as inline, where <num> is an integer in the range [0, 100]
+          (default is 50)
+
+	Added command-line options for testing builtin functions.
+	--builtins / --no-builtins: enable or disable invocations of builtin
+	  functions (disabled by default)
+	--builtin-function-prob <num>: set the probability of choosing a
+	  builtin function (default is 50)
+	--enable-builtin-kinds <k1>,<k2> / --disable-builtin-kinds <k1>,<k2>:
+	  enable or disable certain builtins.  Currently, all builtins such as:
+	    "UInt; __builtin_bswap32; (UInt)"
+	  are be enabled by default.  Builtins with a <kind> flag will be
+	  enabled only if "--enable-builtin-kinds <kind>" is passed.
+	  All default builtins, i.e. those without a <kind> flag, can be
+	  disabled by passing "--disable-builtin-kinds generic".
+	See the list of builtins in file "src/Function.cpp".
+	Thanks to Hal Finkel for helping to flesh out this feature.
+
+	Removed command-line options --incr-decr-operators and
+	--no-incr-decr-operators.  Added command-line options to enable and
+	disable use of the various operators individually.
+	--pre-incr-operator / --no-pre-incr-operator
+	--pre-decr-operator / --no-pre-decr-operator
+	--post-incr-operator / --no-post-incr-operator
+	--post-decr-operator / --no-post-incr-operator
+	All of the operators are enabled by default.
+
+	Added command-line options to enable/disable use of the unary plus
+	operator.
+	--unary-plus-operator (default)
+	--no-unary-plus-operator
+
+	Added command-line options to enable/disable use of int8_t and uint8_t.
+	--int8 / --no-int8
+	--uint8 / --no-uint8
+	Both types are allowed by default.
+
+	Added command-line options to allow/disallow use of const pointers.
+	--const-pointers (default)
+	--no-const-pointers
+
+	Added command-line options to allow/disallow taking the addresses of
+	union fields.
+	--take-union-field-addr (default)
+	--take-no-union-field-addr
+
+	Added command-line options to allow/disallow taking the addresses of
+	local variables.
+	--addr-taken-of-locals (default)
+	--no-addr-taken-of-locals
+
+	Added command-line option --no-sign-char-index.  When set, do not allow
+	a variable of signed char type to be used as an array index.
+
+	Added command-line option --fresh-array-ctrl-var-names.  If this option
+	is specified, then the generated program will use fresh names for array
+	control vars rather than unique ones such as i, j, k.  With this option,
+	we can also avoid name shadowing in different local scopes.
+
+	Added command-line option --no-hash-value-printf.  When specified,
+	don't emit printf on array indices when computing hash values.
+
+	Added command-line option --safe-math to complement the already
+	implemented --no-safe-math option.
+
+	Added command-line option --enable-access-once to enable testing the
+	ACCESS_ONCE macro.
+
+	Added command-line option --strict-volatile-rule, which forces only one
+	volatile access between any pair of sequence points.
+
+	Added command-line options --vol-struct-union-fields and
+	--no-vol-struct-union-fields, which enable/disable the use of volatile
+	struct/union fields.
+
+	Removed command-line option --vol-addr-file.  Because we no longer rely
+	on Csmith to generate volatile addresses, there no need to keep this
+	option.
+
+	Removed command-line option --enable-volatile-tests.  Because we track
+	volatile accesses differently now, we no longer need this option.
+
+	Runtime no longer prints the final checksum if macro NO_PRINT_CHECKSUM
+	is defined.
+
+	Include "stdio.h" in generated program if command-line option
+	--enable-volatile-tests is specified.
+
+	Implemented updates for recent CompCert (ccomp).  When command-line
+	option --ccomp is specified:
+	+ Allow 64-bit data (which was previously disallowed)
+	+ Don't generate packed structs with long long fields.
+	+ Disable bitfields in unions.
+	+ Don't generate assignments from a long long to a bitfield.
+
+	Fixed various bugs that would cause Csmith to crash.
+
+	Fixed various bugs that would cause Csmith to generate programs with
+	unspecified and/or defined behaviors.
+
+	Moved "c_delta" C-program reducer work to a separate GitHub repository.
+	That work was in the Csmith GitHub repository, but it was never
+	included in an official Csmith release.  If you are interested in our
+	reducer work, see <http://embed.cs.utah.edu/creduce/>.
+
 Changes since 2.0.0 release:
 
 	Renamed environment variable `CSMITH_PATH' to be `CSMITH_HOME'.
 	`HOME' is the common naming convention for variables that identify
 	a single directory; `PATH' is the convention for lists of
 	directories.
-	
+
 	By default, mark variables and functions as "static" since some
 	compilers can exploit this to optimize more aggressively.
 
@@ -12,44 +138,44 @@ Changes since 2.0.0 release:
 	should be read or written, and which variables should not be read
 	or written.
 
-	Based on the above controls, generate generalized array-traversing 
+	Based on the above controls, generate generalized array-traversing
 	loops in which the array variable must be read/written while the loop
 	control variable(s) must not be written.
 
-	Remove the modulus operations applied on array indices because all 
+	Remove the modulus operations applied on array indices because all
 	array accesses are guaranteed safe by the code generation mechanism.
 
 	Support unions in the random programs. Allow pointers to be unions
 	fields (Pointers as structure fields are yet to be supported).
-	
-	When asked, intentionally create unsafe pointer dereferences for 
+
+	When asked, intentionally create unsafe pointer dereferences for
 	testing static analyzers.
-	
+
 	Support comma operators in the random programs. A comma expression
 	is outputted as (e1 , e2) to make it more distinguishable (note the
 	extra space in front of the comma).
-	 
+
 	Support embedded assignments in the random programs.
-	
+
 	Support prefix/postfix ++/-- operators in the random programs.
-	
+
 	Provide more controls on code generation about the expression complexity
 	and nested block depth.
-	
-	Allow array members to be initialized to different values. 
-	
-	add command line options:
+
+	Allow array members to be initialized to different values.
+
+	Add command line options:
 		--force-non-uniform-arrays
 		--strict-const-arrays
 		--null-ptr-deref-prob <N>
 		--dangling-ptr-deref-prob <N>
-		--union-read-type-sensitive 
+		--union-read-type-sensitive
 		--no-union-read-type-sensitive
 		--upper-expr-complexity <N>
 		--max-block-depth <N>
- 
+
 	Quite a few bugs were fixed, many found by Pascal Cuoq using
 	Frama-C to detect undefined or unspecified behaviors in programs
 	generated by Csmith.
-	
+
 	Re-organize and clean up unnecessary code.
