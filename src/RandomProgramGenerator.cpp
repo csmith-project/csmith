@@ -149,7 +149,7 @@ static void print_help()
 	// enabling/disabling options
 	cout << "  --argc | --no-argc: genereate main function with/without argv and argc being passed (enabled by default)." << endl << endl;
 	cout << "  --arrays | --no-arrays: enable | disable arrays (enabled by default)." << endl << endl;
-	cout << "  --bitfields | --no-bitfields: enable | disable full-bitfields structs (disabled by default)." << endl << endl;
+	cout << "  --bitfields | --no-bitfields: enable | disable full-bitfields structs (enabled by default)." << endl << endl;
 	cout << "  --checksum | --no-checksum: enable | disable checksum calculation (enabled by default)." << endl << endl;
 	cout << "  --comma-operators | --no-comma-operators: enable | disable comma operators (enabled by default)." << endl << endl;
 	cout << "  --compound-assignment | --no-compound-assignment: enable | disable compound assignments (enabled by default)." << endl << endl;
@@ -185,7 +185,7 @@ static void print_help()
 
 	cout << "  --muls | --no-muls: enable | disable multiplications (enabled by default)." << endl << endl;
 	cout << "  --safe-math | --no-safe-math: Emit safe math wrapper functions (enabled by default)." << endl << endl;
-	cout << "  --packed-struct | --no-packed-struct: enable | disable packed structs by adding #pragma pack(1) before struct definition (disabled by default)." << endl << endl;
+	cout << "  --packed-struct | --no-packed-struct: enable | disable packed structs by adding #pragma pack(1) before struct definition (enabled by default)." << endl << endl;
 	cout << "  --paranoid | --no-paranoid: enable | disable pointer-related assertions (disabled by default)." << endl << endl;
 	cout << "  --pointers | --no-pointers: enable | disable pointers (enabled by default)." << endl << endl;
 	cout << "  --quiet: generate programs with less comments (disabled by default)." << endl << endl;
