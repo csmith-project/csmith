@@ -35,15 +35,15 @@
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////////
-class Statement;  
+class Statement;
 class Block;
 
 /*
  *
  */
-class CFGEdge 
+class CFGEdge
 {
-public:  
+public:
 	CFGEdge(const Statement* src, const Statement* dest, bool post_dest, bool back_link);
 	CFGEdge(const CFGEdge &edge);
 	virtual ~CFGEdge(void);

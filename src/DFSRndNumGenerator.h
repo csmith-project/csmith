@@ -105,7 +105,7 @@ private:
 	//static std::string name_prefix;
 
 	std::string trace_string_;
-	
+
 	// The current decision depth which should be less than SEARCH_STATE_SIZE
 	// It represents the current depth where we are making random choices
 	int decision_depth_;
@@ -119,7 +119,7 @@ private:
 
 	bool use_debug_sequence_;
 
-	// Holds the vector representation of all DFS nodes. 
+	// Holds the vector representation of all DFS nodes.
 	std::vector<SearchState*> states_;
 
 	// disallow copy and assignment constructors

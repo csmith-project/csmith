@@ -137,8 +137,8 @@ public:
 
 	static void init_is_bitfield_enumerator(Enumerator<string> &enumerator, int bitfield_prob);
 
-	static void init_fields_enumerator(Enumerator<std::string> &enumerator, 
-				Enumerator<string> &bitfield_enumerator, 
+	static void init_fields_enumerator(Enumerator<std::string> &enumerator,
+				Enumerator<string> &bitfield_enumerator,
 				int type_bound, int qual_bound, int bitfield_qual_bound);
 
 	static bool make_one_normal_field_by_enum(Enumerator<string> &enumerator, vector<const Type*> &all_types,
@@ -155,11 +155,11 @@ public:
 	static int get_bitfield_length(int length_flag);
 
 	static void make_all_struct_types_(Enumerator<string> &bitfields_enumerator, vector<const Type*> &accum_types,
-				vector<const Type*> &all_types, vector<CVQualifiers> &all_quals, 
+				vector<const Type*> &all_types, vector<CVQualifiers> &all_quals,
 				vector<CVQualifiers> &all_bitfield_quals);
 
-	static void make_all_struct_types_with_bitfields(Enumerator<string> &enumerator, 
-					Enumerator<string> &bitfields_enumerator, 
+	static void make_all_struct_types_with_bitfields(Enumerator<string> &enumerator,
+					Enumerator<string> &bitfields_enumerator,
 					vector<const Type*> &accum_types, vector<const Type*> &all_types,
 					vector<CVQualifiers> &all_quals, vector<CVQualifiers> &all_bitfield_quals);
 
@@ -175,17 +175,17 @@ public:
 				vector<CVQualifiers> &qualifiers,
 				vector<int> &fields_length);
 
-	static void make_one_struct_field(vector<const Type*> &random_fields, 
-					vector<CVQualifiers> &qualifiers, 
+	static void make_one_struct_field(vector<const Type*> &random_fields,
+					vector<CVQualifiers> &qualifiers,
 					vector<int> &fields_length);
 
 	static void make_one_union_field(vector<const Type*> &fields, vector<CVQualifiers> &qfers, vector<int> &lens);
 
-	static void make_full_bitfields_struct_fields(size_t field_cnt, vector<const Type*> &random_fields, 
+	static void make_full_bitfields_struct_fields(size_t field_cnt, vector<const Type*> &random_fields,
 					vector<CVQualifiers> &qualifiers,
 					vector<int> &fields_length);
 
-	static void make_normal_struct_fields(size_t field_cnt, vector<const Type*> &random_fields, 
+	static void make_normal_struct_fields(size_t field_cnt, vector<const Type*> &random_fields,
 					vector<CVQualifiers> &qualifiers,
 					vector<int> &fields_length);
 
@@ -210,14 +210,14 @@ public:
 	static bool has_longlong_field(const vector<const Type *> &fields);
 
 	explicit Type(eSimpleType simple_type);
-	Type(vector<const Type*>& fields, bool isStruct, bool packed, 
+	Type(vector<const Type*>& fields, bool isStruct, bool packed,
 			vector<CVQualifiers> &qfers, vector<int> &fields_length);
 	Type(vector<unsigned int>& array_dims, eSimpleType st);
 	explicit Type(const Type* t);
 	~Type(void);
-	
+
 	static const Type &get_simple_type(eSimpleType simple_type);
-	
+
 	static void doFinalization(void);
 
 	const Type* get_base_type(void) const;
@@ -259,24 +259,24 @@ public:
 	static Type* find_pointer_type(const Type* t, bool add);
 	static Type* find_type(const Type* t);
 
-// private:	
+// private:
 	eTypeDesc eType;
 	const Type *ptr_type;
 	eSimpleType simple_type;
 	vector<unsigned int> dimensions;    // for array types
 	vector<const Type*> fields;         // for struct/union types
 	unsigned int sid;                   // sequence id, for struct/union types
-    
+
 	bool used;                          // whether any variable declared with this type
 	bool printed;                       // whether this struct/union has been printed in the random program
 	const bool packed_;					// whether this struct/union should be packed
-	vector<CVQualifiers> qfers_;		// conresponds to each element of fields 
+	vector<CVQualifiers> qfers_;		// conresponds to each element of fields
 					// It's a tradeoff between the current implementation and the
-					// need of struct's level type qualifiers. 
+					// need of struct's level type qualifiers.
 	vector<int> bitfields_length_;		// -1 means it's a regular field
 
 	static Type *void_type;
-private:	
+private:
 	DISALLOW_COPY_AND_ASSIGN(Type);
 
 	static const Type *simple_types[MAX_SIMPLE_TYPES];

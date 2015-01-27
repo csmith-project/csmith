@@ -35,7 +35,7 @@
 #include "CGOptions.h"
 #include "Function.h"
 #include "Variable.h"
-#include "Fact.h" 
+#include "Fact.h"
 #include "Type.h"
 #include "FactPointTo.h"
 #include "FactMgr.h"
@@ -58,9 +58,9 @@ using namespace std;
 Lhs *
 Lhs::make_random(CGContext &cg_context, const Type* t, const CVQualifiers* qfer, bool compound_assign, bool no_signed_overflow)
 {
-	Function *curr_func = cg_context.get_current_func();  
+	Function *curr_func = cg_context.get_current_func();
 	FactMgr* fm = get_fact_mgr_for_func(curr_func);
-	vector<const Variable*> dummy;  
+	vector<const Variable*> dummy;
 	//static int cnt = 0;				// for debug
 
 	// save effects, in case we need to backtrack
@@ -87,7 +87,7 @@ Lhs::make_random(CGContext &cg_context, const Type* t, const CVQualifiers* qfer,
 			CVQualifiers new_qfer(*qfer);
 			if (!(new_qfer.wildcard)) {
 				new_qfer.restrict(Effect::WRITE, cg_context);
-			}  
+			}
 			var = VariableSelector::select(Effect::WRITE, cg_context, t, &new_qfer, dummy, eDerefExact);
 			ERROR_GUARD(NULL);
 			int deref_level = var->type->get_indirect_level() - t->get_indirect_level();
@@ -97,7 +97,7 @@ Lhs::make_random(CGContext &cg_context, const Type* t, const CVQualifiers* qfer,
 		assert(var);
 		bool valid = FactPointTo::opportunistic_validate(var, t, fm->global_facts) && !cg_context.get_effect_stm().is_written(var);
 		// we don't want signed integer for some operations, such as ++/-- which has potential of overflowing
-		// it's possible for unsigned bitfield to overflow: consider a 31-bit unsigned field that is promoted to 32-bit signed int before arithematics  
+		// it's possible for unsigned bitfield to overflow: consider a 31-bit unsigned field that is promoted to 32-bit signed int before arithematics
 		if (valid && t->eType == eSimple && no_signed_overflow && (var->type->get_base_type()->is_signed() || var->isBitfield_)) {
 			valid = false;
 		}
@@ -108,13 +108,13 @@ Lhs::make_random(CGContext &cg_context, const Type* t, const CVQualifiers* qfer,
 			valid = false;
 		}
 		if (valid) {
-			assert(var); 
+			assert(var);
 			Lhs tmp(*var, t, compound_assign);
 			if (tmp.visit_facts(fm->global_facts, cg_context)) {
 				// bookkeeping
 				int deref_level = tmp.get_indirect_level();
 				if (deref_level > 0) {
-					incr_counter(Bookkeeper::write_dereference_cnts, deref_level); 
+					incr_counter(Bookkeeper::write_dereference_cnts, deref_level);
 				}
 				Bookkeeper::record_volatile_access(var, deref_level, true);
 				return new Lhs(*var, t, compound_assign);
@@ -138,7 +138,7 @@ Lhs::Lhs(const Variable &v)
       var(v),
       type(v.type),
 	  for_compound_assign(false)
-{ 
+{
 }
 
 /*
@@ -160,7 +160,7 @@ Lhs::Lhs(const Variable &v, const Type* t, bool compound_assign)
       var(v),
       type(t),
 	  for_compound_assign(compound_assign)
-{ 
+{
 }
 
 /*
@@ -191,8 +191,8 @@ Lhs::get_type(void) const
 void
 Lhs::get_lvars(const vector<const Fact*>& facts, vector<const Variable*>& vars) const
 {
-	vars = FactPointTo::merge_pointees_of_pointer(get_var()->get_collective(), get_indirect_level(), facts); 
-}			
+	vars = FactPointTo::merge_pointees_of_pointer(get_var()->get_collective(), get_indirect_level(), facts);
+}
 
 /*
  *
@@ -206,7 +206,7 @@ Lhs::get_indirect_level(void) const
 /*
  *
  */
-CVQualifiers 
+CVQualifiers
 Lhs::get_qualifiers(void) const
 {
 	int indirect = get_indirect_level();
@@ -220,7 +220,7 @@ Lhs::get_qualifiers(void) const
  */
 void
 Lhs::Output(std::ostream &out) const
-{ 
+{
 	ExpressionVariable ev(var, type);
 	if (var.is_volatile() && CGOptions::wrap_volatiles()) {
 		out << "VOL_LVAL(";
@@ -236,11 +236,11 @@ Lhs::Output(std::ostream &out) const
 bool
 Lhs::is_volatile(void) const
 {
-	int indirect = get_indirect_level(); 
+	int indirect = get_indirect_level();
 	return var.is_volatile_after_deref(indirect);
 }
 
-std::vector<const ExpressionVariable*> 
+std::vector<const ExpressionVariable*>
 Lhs::get_dereferenced_ptrs(void) const
 {
 	// return a empty vector by default
@@ -251,18 +251,18 @@ Lhs::get_dereferenced_ptrs(void) const
 	return refs;
 }
 
-void 
+void
 Lhs::get_referenced_ptrs(std::vector<const Variable*>& ptrs) const
-{ 
+{
 	if (var.is_pointer()) {
 		ptrs.push_back(&var);
 	}
 }
 
-bool 
+bool
 Lhs::ptr_modified_in_rhs(vector<const Fact*>& inputs, CGContext& cg_context) const
 {
-	int indirect = get_indirect_level(); 
+	int indirect = get_indirect_level();
 	assert(indirect > 0);
 	if (cg_context.get_effect_stm().is_written(&var)) {
 		return true;
@@ -271,7 +271,7 @@ Lhs::ptr_modified_in_rhs(vector<const Fact*>& inputs, CGContext& cg_context) con
 	tmp.push_back(get_var()->get_collective());
 	// recursively trace the pointer(s) to find real variables they point to
 	// only dereferenced pointers (not including the target variables) need to
-	// be checked with context derived from RHS 
+	// be checked with context derived from RHS
 	while (indirect-- > 1) {
 		tmp = FactPointTo::merge_pointees_of_pointers(tmp, inputs);
 		for (size_t i=0; i<tmp.size(); i++) {
@@ -284,7 +284,7 @@ Lhs::ptr_modified_in_rhs(vector<const Fact*>& inputs, CGContext& cg_context) con
 	return false;
 }
 
-bool 
+bool
 Lhs::visit_indices(vector<const Fact*>& inputs, CGContext& cg_context) const
 {
 	string dummy;
@@ -294,7 +294,7 @@ Lhs::visit_indices(vector<const Fact*>& inputs, CGContext& cg_context) const
 	// use RHS accumulated effects as context effects to validate index expressions
 	Effect eff = cg_context.get_effect_context();
 	eff.add_effect(cg_context.get_effect_stm());
-	CGContext rhs_context(cg_context.get_current_func(), eff, 0); 
+	CGContext rhs_context(cg_context.get_current_func(), eff, 0);
 	for (size_t i=0; i<av->get_indices().size(); i++) {
 		const Expression* e = av->get_indices()[i];
 		if (!e->visit_facts(inputs, rhs_context)) {
@@ -307,7 +307,7 @@ Lhs::visit_indices(vector<const Fact*>& inputs, CGContext& cg_context) const
 // conservatively assume two fields overlap if they are both part of the same union variable
 bool
 have_overlapping_fields(const Expression* e1, const Expression* e2, const vector<const Fact*>& facts)
-{ 
+{
 	vector<const Variable*> vars1, vars2;
 	if (FactPointTo::find_union_pointees(facts, e1, vars1)) {
 		FactPointTo::find_union_pointees(facts, e2, vars2);
@@ -320,9 +320,9 @@ have_overlapping_fields(const Expression* e1, const Expression* e2, const vector
 	return false;
 }
 
-bool 
+bool
 Lhs::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const
-{ 
+{
 	bool valid = false;
 	const Variable* v = get_var();
 	// if LHS is for compound assignments, it's should be validated against a read first
@@ -356,12 +356,12 @@ Lhs::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const
 		if (ptr_modified_in_rhs(inputs, cg_context)) {
 			return false;
 		}
-		valid = cg_context.check_read_var(v, inputs) && cg_context.write_pointed(this, inputs) && 
+		valid = cg_context.check_read_var(v, inputs) && cg_context.write_pointed(this, inputs) &&
 			cg_context.check_deref_volatile(v, deref_level);
 	}
 	else {
 		valid = cg_context.check_write_var(v, inputs);
-	} 
+	}
 	if (valid) {
 		if (cg_context.get_effect_accum()) {
 			Effect* eff = cg_context.get_effect_accum();

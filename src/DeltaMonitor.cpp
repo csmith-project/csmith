@@ -26,7 +26,7 @@
 // CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
-#ifdef WIN32 
+#ifdef WIN32
 #pragma warning(disable : 4786)   /* Disable annoying warning messages */
 #endif
 
@@ -130,12 +130,12 @@ DeltaMonitor::init(std::string &msg, const std::string &monitor_type, const std:
 	if (!DeltaMonitor::set_delta_type(msg, monitor_type)) {
 		return false;
 	}
-		
+
 	return true;
 }
 
 bool
-DeltaMonitor::init_for_running(std::string &msg, const std::string &monitor_type, 
+DeltaMonitor::init_for_running(std::string &msg, const std::string &monitor_type,
 		const std::string &o_file, const std::string &i_file, bool no_delta)
 {
 	assert(!monitor_type.empty());
@@ -151,12 +151,12 @@ DeltaMonitor::init_for_running(std::string &msg, const std::string &monitor_type
 		DeltaMonitor::output_file_ = o_file;
 	}
 	DeltaMonitor::input_file_ = i_file;
-		
+
 	if (!DeltaMonitor::set_delta_type(msg, monitor_type)) {
 		return false;
 	}
 
-	DeltaMonitor::is_delta_ = true;	
+	DeltaMonitor::is_delta_ = true;
 	DeltaMonitor::no_delta_reduction_ = no_delta;
 	return true;
 }
@@ -179,7 +179,7 @@ DeltaMonitor::Output(ostream &out)
 {
 	if (!DeltaMonitor::is_running_)
 		return;
-	
+
 	if (is_delta_)
 		DeltaMonitor::OutputStatistics(out);
 

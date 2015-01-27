@@ -47,9 +47,9 @@ public:
 	Effect(void);
 	Effect(const Effect &e);
 	~Effect(void);
-	
+
 	Effect &operator=(const Effect &e);
-	
+
 	void read_var(const Variable *v);
 	void access_deref_volatile(const Variable *v, int deref_level);
 	void write_var(const Variable *v);
@@ -70,7 +70,7 @@ public:
 	bool field_is_written(const Variable *v) const;
 	bool sibling_union_field_is_read(const Variable *v) const;
 	bool sibling_union_field_is_written(const Variable *v) const;
-	bool is_read_partially(const Variable* v) const;  
+	bool is_read_partially(const Variable* v) const;
 	bool is_written_partially(const Variable* v) const;
 	bool union_field_is_read(void) const;
 	bool has_race_with(const Effect &e) const;
@@ -87,12 +87,12 @@ public:
 	typedef enum {
 		READ, WRITE
 	} Access;
-	
+
 	void Output(std::ostream &out) const;
 	bool has_global_effect(void) const;
 	void update_purity(void);
-	
-private:	
+
+private:
 	std::vector<const Variable *> read_vars;
 	std::vector<const Variable *> write_vars;
 	std::vector<const Variable *> lhs_write_vars;

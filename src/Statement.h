@@ -36,7 +36,7 @@
 // July, 2005
 //
 
-#ifdef WIN32 
+#ifdef WIN32
 #pragma warning(disable : 4786)   /* Disable annoying warning messages */
 #endif
 #include <vector>
@@ -61,7 +61,7 @@ class Block;
 class Effect;
 class CFGEdge;
 
-template <class Key, class Value> 
+template <class Key, class Value>
 class ProbabilityTable;
 class StatementGoto;
 class Variable;
@@ -127,7 +127,7 @@ public:
 
 	void add_back_return_facts(FactMgr* fm, std::vector<const Fact*>& facts) const;
 
-	bool in_block(const Block* b) const; 
+	bool in_block(const Block* b) const;
 
 	bool dominate(const Statement* s) const;
 
@@ -139,7 +139,7 @@ public:
 
 	static bool is_compound(eStatementType t) {return t==eBlock || t==eFor || t==eIfElse || t==eArrayOp;}
 
-	bool is_ctrl_stmt(void) const {return eType == eContinue || eType == eBreak || eType == eGoto;} 
+	bool is_ctrl_stmt(void) const {return eType == eContinue || eType == eBreak || eType == eGoto;}
 
 	bool is_1st_stm(void) const;
 
@@ -161,9 +161,9 @@ public:
 
 	virtual bool must_jump(void) const {return false;}
 
-	virtual std::vector<const ExpressionVariable*> get_dereferenced_ptrs(void) const; 
-		
-	void get_referenced_ptrs(std::vector<const Variable*>& ptrs) const; 
+	virtual std::vector<const ExpressionVariable*> get_dereferenced_ptrs(void) const;
+
+	void get_referenced_ptrs(std::vector<const Variable*>& ptrs) const;
 	bool is_ptr_used(void) const;
 
 	virtual void Output(std::ostream &out, FactMgr* fm=0, int indent = 0) const = 0;

@@ -84,7 +84,7 @@ enum eTermType
 };
 #define MAX_TERM_TYPES ((eTermType) (eCommaExpr+1))
 
-template <class Key, class Value> 
+template <class Key, class Value>
 class ProbabilityTable;
 
 /*
@@ -105,7 +105,7 @@ public:
 	Expression(const Expression &expr);
 
 	virtual ~Expression(void);
-	
+
 	virtual Expression *clone() const = 0;
 
 	virtual const Type &get_type(void) const = 0;
@@ -138,13 +138,13 @@ public:
 
 #if 0
 	void OutputBinaryOp(std::ostream &) const;
-#endif 
+#endif
 
 	unsigned int func_count(void) const;
-	
+
 	std::string to_string(void) const;
 
-	static void record_dereference_level(int level); 
+	static void record_dereference_level(int level);
 
 	virtual bool compatible(const Expression *) const { return false;}
 

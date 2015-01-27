@@ -101,7 +101,7 @@ PartialExpander::set_stmt_expand(eStatementType t, bool value)
 bool
 PartialExpander::set_expand(const std::string s)
 {
-	
+
 	if (!s.compare("assignment")) {
 		PartialExpander::set_stmt_expand(eAssign, true);
 	}
@@ -139,7 +139,7 @@ PartialExpander::copy_expands(std::map<eStatementType, bool> &dest, const map<eS
 	}
 }
 
-void 
+void
 PartialExpander::restore_init_values()
 {
 	PartialExpander::copy_expands(PartialExpander::expands_, PartialExpander::expands_backup_);
@@ -171,7 +171,7 @@ PartialExpander::expand_check(eStatementType t)
 	if (rv) {
 		set_stmt_expand(MAX_STATEMENT_TYPE, false);
 	}
-	
+
 	return rv;
 }
 

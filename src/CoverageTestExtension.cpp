@@ -62,7 +62,7 @@ CoverageTestExtension::GenerateValues()
 	}
 }
 
-void 
+void
 CoverageTestExtension::output_array_init(std::ostream &out, int count)
 {
 	if (inputs_size_ == 1) {

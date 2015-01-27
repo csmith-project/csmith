@@ -39,7 +39,7 @@ template <class Name>
 class Enumerator {
 public:
 	Enumerator();
-	
+
 	~Enumerator();
 
 	void add_elem(Name name, int bound);
@@ -195,7 +195,7 @@ Enumerator<Name>::add_bool_elem_of_bool(Name name, bool value)
 	assert(i == objs_.end());
 
 	int bound = value ? 2 : 1;
-		
+
 	EnumObject *obj = new EnumObject(bound, true, false);
 	objs_[name] = obj;
 }
@@ -217,7 +217,7 @@ Enumerator<Name>::add_bool_elem(Name name, int value)
 	else {
 		bound = 2;
 	}
-		
+
 	typename map<Name, EnumObject*>::iterator i = objs_.find(name);
 	assert(i == objs_.end());
 
@@ -335,7 +335,7 @@ Enumerator<Name>::next()
 		if (forward_pos_ == objs_.end()) {
 			if(roll_back_current_pos())
 				return this;
-			else 
+			else
 				return NULL;
 		}
 		else {

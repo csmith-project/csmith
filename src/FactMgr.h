@@ -27,7 +27,7 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef WIN32 
+#ifdef WIN32
 #pragma warning(disable : 4786)   /* Disable annoying warning messages */
 #endif
 
@@ -58,7 +58,7 @@ class CFGEdge;
 #include <map>
 #include "Effect.h"
 #include "Fact.h"
-using namespace std; 
+using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -68,15 +68,15 @@ public:
 	FactMgr(const Function* f);
 
 	FactMgr(const Function* f, const FactVec& facts);
-    
+
 	static void doFinalization();
 
 	static void add_interested_facts(int interests);
 
-	~FactMgr(void); 
+	~FactMgr(void);
 
 	//FactMgr* clone(void);
-	
+
 	bool validate_fact(const Fact* f, const FactVec& facts);
 
 	bool validate_assign(const Lhs* v, const Expression* e);
@@ -84,8 +84,8 @@ public:
 	void restore_facts(vector<const Fact*>& old_facts);
 
 	void makeup_new_var_facts(vector<const Fact*>& old_facts, const vector<const Fact*>& new_facts);
- 
-	void add_new_var_fact_and_update_inout_maps(const Block* blk, const Variable* var); 
+
+	void add_new_var_fact_and_update_inout_maps(const Block* blk, const Variable* var);
 
 	void setup_in_out_maps(bool first_time);
 
@@ -113,7 +113,7 @@ public:
 	/* remove facts related to return variables (except rv of this function) from env */
 	void remove_rv_facts(FactVec& facts);
 
-	static void remove_loop_local_facts(const Statement* s, FactVec& facts);	
+	static void remove_loop_local_facts(const Statement* s, FactVec& facts);
 	/* remove facts localized to a given function up to a given return statement */
 	static void remove_function_local_facts(std::vector<const Fact*>& inputs, const Statement* stm);
 	static bool merge_jump_facts(FactVec& facts, const FactVec& jump_facts);
@@ -134,13 +134,13 @@ public:
 
 	/* update fact(s) for a jump destination */
 	static void update_facts_for_dest(const FactVec& facts_in, FactVec& facts_out, const Statement* dest);
-	
+
 	void sanity_check_map() const;
 
-	static std::vector<Fact*> meta_facts; 
+	static std::vector<Fact*> meta_facts;
 
 	// maps to track facts and effects at historical generation points.
-	// they are used for bypassing analyzing statements if possible 
+	// they are used for bypassing analyzing statements if possible
 	std::map<const Statement*, FactVec> map_facts_in;
 	std::map<const Statement*, FactVec> map_facts_out;
 	std::map<const Statement*, std::vector<Fact*> > map_facts_in_final;
@@ -150,7 +150,7 @@ public:
 	std::map<const Statement*, bool> map_visited;
 
 	std::vector<const CFGEdge*> cfg_edges;
-	FactVec global_facts; 
+	FactVec global_facts;
 
 	const Function* func;
 };

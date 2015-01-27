@@ -31,7 +31,7 @@
 #define VECTOR_FILTER_H
 
 #include <vector>
-#include "Filter.h" 
+#include "Filter.h"
 
 class DistributionTable;
 

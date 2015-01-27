@@ -243,11 +243,11 @@ GroupProbElem::initialize(Probabilities *impl, const std::map<ProbName, int> pai
 		if (valid)
 			valid_probs.push_back(elem);
 	}
-	
+
 	int size = valid_probs.size();
 	if (CGOptions::random_random()) {
 		// we can't allow all 0 vals for equal prob group
-		// if we got one, just use the default settings. 
+		// if we got one, just use the default settings.
 		if (is_equal_ && size == 0) {
 			for (i = pairs.begin(); i != pairs.end(); ++i) {
 				int val = (*i).second;
@@ -269,7 +269,7 @@ GroupProbElem::initialize(Probabilities *impl, const std::map<ProbName, int> pai
 bool
 GroupProbElem::elem_exist(ProbName pname)
 {
-	std::map<ProbName, SingleProbElem*>::iterator i = probs_.find(pname);	
+	std::map<ProbName, SingleProbElem*>::iterator i = probs_.find(pname);
 	return (!(i == probs_.end()));
 }
 
@@ -389,7 +389,7 @@ Probabilities::set_single_name(const char *sname, ProbName pname)
 	string s = sname;
 
 	sname_to_pname_[s] = pname;
-	pname_to_sname_[pname] = s; 
+	pname_to_sname_[pname] = s;
 }
 
 void
@@ -407,7 +407,7 @@ Probabilities::set_single_name(const char *sname, ProbName pname, unsigned int t
 	set_single_name(str, p##type##Prob, s##type); \
 	m[p##type##Prob] = value;
 
-void 
+void
 Probabilities::set_single_name_maps()
 {
 	// for single probs
@@ -425,7 +425,7 @@ Probabilities::set_single_name_maps()
 	// for single field in exhaustive mode
 	set_single_name("exhaustive_bitfield_prob", pExhaustiveBitFieldsProb);
 
-	// for signed flag of struct/union fields. 
+	// for signed flag of struct/union fields.
 	set_single_name("bitfields_signed_prob", pBitFieldsSignedProb);
 
 	// for signed flag of safe ops
@@ -437,13 +437,13 @@ Probabilities::set_single_name_maps()
 	// for regular volatile
 	set_single_name("regular_volatile_prob", pRegularVolatileProb);
 
-	// for regular const 
+	// for regular const
 	set_single_name("regular_const_prob", pRegularConstProb);
 
-	// for stricter const 
+	// for stricter const
 	set_single_name("stricter_const_prob", pStricterConstProb);
 
-	// for looser const 
+	// for looser const
 	set_single_name("looser_const_prob", pLooserConstProb);
 
 	// for field
@@ -470,7 +470,7 @@ Probabilities::set_single_name_maps()
 	// for choosing float as LType
 	set_single_name("float_as_ltype_prob", pFloatAsLTypeProb);
 
-	// for creating new array var 
+	// for creating new array var
 	set_single_name("new_array_var_prob", pNewArrayVariableProb);
 
 	// for wrapping all accesses to a var by ACCESS_ONCE macro
@@ -513,14 +513,14 @@ unsigned int
 Probabilities::pname_to_type(ProbName pname)
 {
 	assert(Probabilities::instance_);
-	
+
 	return instance_->pname_to_type_[pname];
 }
 
-int 
+int
 Probabilities::get_random_single_prob(int orig_val)
 {
-	// orig_val == 0 means that we disallow it explicitly before, 
+	// orig_val == 0 means that we disallow it explicitly before,
 	// so don't change it.
 	if (orig_val == 0)
 		return orig_val;
@@ -578,7 +578,7 @@ Probabilities::initialize_single_probs()
 		m[pFloatAsLTypeProb] = 40;
 	else
 		m[pFloatAsLTypeProb] = 0;
-	if (CGOptions::arrays()) 
+	if (CGOptions::arrays())
 		m[pNewArrayVariableProb] = 20;
 	else
 		m[pNewArrayVariableProb] = 0;
@@ -620,10 +620,10 @@ Probabilities::initialize_group_probs()
 	set_default_safe_ops_size_prob();
 
 	// setup random distribution of assignment operators (=, +=, /=...)
-	StatementAssign::InitProbabilityTable();	
+	StatementAssign::InitProbabilityTable();
 
 	// setup random distribution of expression term types (const, variable, function ...)
-	Expression::InitProbabilityTables();		
+	Expression::InitProbabilityTables();
 }
 
 void
@@ -641,14 +641,14 @@ Probabilities::set_default_safe_ops_size_prob()
 	std::map<ProbName, int> m;
 
 	// each op has equivalent probability
-	
+
 	if (CGOptions::int8() && CGOptions::uint8()) {
 		SET_SINGLE_NAME1("safe_ops_size_int8", Int8, 1);
 	}
 	else {
 		SET_SINGLE_NAME1("safe_ops_size_int8", Int8, 0);
 	}
-		
+
 	SET_SINGLE_NAME1("safe_ops_size_int16", Int16, 1);
 	SET_SINGLE_NAME1("safe_ops_size_int32", Int32, 1);
 	if (CGOptions::allow_int64()) {
@@ -667,7 +667,7 @@ Probabilities::set_default_simple_types_prob()
 	std::map<ProbName, int> m;
 
 	// each op has equivalent probability
-	
+
 	// We only use void for function's parameter, so
 	// disallow choosing void type from other places
 	SET_SINGLE_NAME("void_prob", Void, 0);
@@ -696,7 +696,7 @@ Probabilities::set_default_simple_types_prob()
 	else {
 		SET_SINGLE_NAME("uchar_prob", UChar, 0);
 	}
-		
+
 	SET_SINGLE_NAME("uint_prob", UInt, 1);
 	SET_SINGLE_NAME("ushort_prob", UShort, 1);
 
@@ -748,21 +748,21 @@ Probabilities::set_default_binary_ops_prob()
 	// each op has equivalent probability
 	SET_SINGLE_NAME("binary_add_prob", Add, 1);
 	SET_SINGLE_NAME("binary_sub_prob", Sub, 1);
-	
+
 	if (CGOptions::muls()) {
 		SET_SINGLE_NAME("binary_mul_prob", Mul, 1);
-	} 
+	}
 	else {
 		SET_SINGLE_NAME("binary_mul_prob", Mul, 0);
 	}
-	
+
 	if (CGOptions::divs()) {
 		SET_SINGLE_NAME("binary_div_prob", Div, 1);
-	} 
+	}
 	else {
 		SET_SINGLE_NAME("binary_div_prob", Div, 0);
 	}
-	
+
 	SET_SINGLE_NAME("binary_mod_prob", Mod, 1);
 	SET_SINGLE_NAME("binary_gt_prob", CmpGt, 1);
 	SET_SINGLE_NAME("binary_lt_prob", CmpLt, 1);
@@ -786,7 +786,7 @@ void
 Probabilities::set_default_statement_prob()
 {
 	std::map<ProbName, int> m;
- 
+
 	// never generate stand-alone blocks
 	SET_SINGLE_NAME("statement_block_prob", Block, 0);
 	SET_SINGLE_NAME("statement_ifelse_prob", IfElse, 15);
@@ -794,7 +794,7 @@ Probabilities::set_default_statement_prob()
 	SET_SINGLE_NAME("statement_return_prob", Return, 35);
 	SET_SINGLE_NAME("statement_continue_prob", Continue, 40);
 	SET_SINGLE_NAME("statement_break_prob", Break, 45);
-	if (CGOptions::jumps() && CGOptions::arrays()) { 
+	if (CGOptions::jumps() && CGOptions::arrays()) {
 		SET_SINGLE_NAME("statement_goto_prob", Goto, 50);
 		SET_SINGLE_NAME("statement_arrayop_prob", ArrayOp, 60);
 	}
@@ -802,11 +802,11 @@ Probabilities::set_default_statement_prob()
 		SET_SINGLE_NAME("statement_arrayop_prob", ArrayOp, 0);
 		SET_SINGLE_NAME("statement_goto_prob", Goto, 50);
 	}
-	else if (!CGOptions::jumps() && CGOptions::arrays()) { 
+	else if (!CGOptions::jumps() && CGOptions::arrays()) {
 		SET_SINGLE_NAME("statement_goto_prob", Goto, 0);
 		SET_SINGLE_NAME("statement_arrayop_prob", ArrayOp, 55);
 	}
-	else { 
+	else {
 		SET_SINGLE_NAME("statement_goto_prob", Goto, 0);
 		SET_SINGLE_NAME("statement_arrayop_prob", ArrayOp, 0);
 	}
@@ -872,7 +872,7 @@ bool
 Probabilities::check_extra_filter(ProbName pname, int v)
 {
 	assert(v >= 0);
-	std::map<ProbName, Filter*>::iterator i = extra_filters_.find(pname);	
+	std::map<ProbName, Filter*>::iterator i = extra_filters_.find(pname);
 	if (i != extra_filters_.end())
 		return (*i).second->filter(v);
 	else
@@ -904,7 +904,7 @@ Probabilities::get_prob(ProbName pname)
 ProbName
 Probabilities::get_pname(const string &sname)
 {
-	std::map<std::string, ProbName>::iterator i = sname_to_pname_.find(sname);	
+	std::map<std::string, ProbName>::iterator i = sname_to_pname_.find(sname);
 	if (i == sname_to_pname_.end())
 		assert("invalid string in the configuration file:" && sname.c_str() && 0);
 	return (*i).second;
@@ -913,7 +913,7 @@ Probabilities::get_pname(const string &sname)
 std::string
 Probabilities::get_sname(ProbName pname)
 {
-	std::map<ProbName, std::string>::iterator i = pname_to_sname_.find(pname);	
+	std::map<ProbName, std::string>::iterator i = pname_to_sname_.find(pname);
 	if (i == pname_to_sname_.end())
 		assert("invalid string in the configuration file" && 0);
 	return (*i).second;
@@ -967,7 +967,7 @@ Probabilities::setup_group_probabilities(bool is_equal, const vector<string> &el
 			assert(val >= 0 && val <= 100);
 			if ((val > 0) && (vals.find(val) != vals.end()))
 				assert("duplicated values in a group probability" && 0);
-			else 
+			else
 				vals.insert(val);
 		}
 	}
@@ -983,9 +983,9 @@ Probabilities::parse_group_probabilities(bool is_equal, std::string &error_msg, 
 	string s;
 	if (is_equal)
 		s = StringUtils::get_substring(line, GroupProbElem::equal_open_delim, GroupProbElem::equal_close_delim);
-	else 
+	else
 		s = StringUtils::get_substring(line, GroupProbElem::group_open_delim, GroupProbElem::group_close_delim);
-		
+
 	if (s.empty()) {
 		error_msg = "empty group probabilities!";
 		return false;
@@ -1119,13 +1119,13 @@ Probabilities::~Probabilities()
 }
 
 void DistributionTable::add_entry(int key, int prob)
-{ 
-	keys_.push_back(key); 
-	probs_.push_back(prob);  
-	max_prob_ += prob; 
+{
+	keys_.push_back(key);
+	probs_.push_back(prob);
+	max_prob_ += prob;
 }
 
-int DistributionTable::key_to_prob(int key) const 
+int DistributionTable::key_to_prob(int key) const
 {
 	for (size_t i=0; i<keys_.size(); i++) {
 		if (keys_[i] == key) {

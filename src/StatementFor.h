@@ -50,12 +50,12 @@ class StatementFor : public Statement
 public:
 	// Factory method.
 	static StatementFor *make_random(CGContext &cg_context);
-	
+
 	static StatementFor *make_random_array_loop(const CGContext &cg_context);
 
 	static const Variable* make_iteration(CGContext& cg_context, StatementAssign*& begin, Expression*& exit_cond, StatementAssign*& step, unsigned int& bound);
 
-	StatementFor(Block* b, 
+	StatementFor(Block* b,
 				 const StatementAssign &init,
 				 const Expression &test,
 				 const StatementAssign &incr,

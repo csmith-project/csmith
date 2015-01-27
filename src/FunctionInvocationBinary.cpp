@@ -33,7 +33,7 @@
 #include "Common.h"
 
 #include "CGOptions.h"
-#include "Expression.h" 
+#include "Expression.h"
 #include "FactMgr.h"
 #include "Type.h"
 #include "SafeOpFlags.h"
@@ -48,7 +48,7 @@ static vector<bool> needcomma;  // Flag to track output of commas
 ///////////////////////////////////////////////////////////////////////////////
 
 FunctionInvocationBinary *
-FunctionInvocationBinary::CreateFunctionInvocationBinary(CGContext &cg_context, 
+FunctionInvocationBinary::CreateFunctionInvocationBinary(CGContext &cg_context,
 						eBinaryOps op,
 						SafeOpFlags *flags)
 {
@@ -68,9 +68,9 @@ FunctionInvocationBinary::CreateFunctionInvocationBinary(CGContext &cg_context,
 
 		std::string tmp_var1 = blk->create_new_tmp_var(type1);
 		std::string tmp_var2;
-		if (op == eLShift || op == eRShift) 
+		if (op == eLShift || op == eRShift)
 			tmp_var2 = blk->create_new_tmp_var(type2);
-		else 
+		else
 			tmp_var2 = blk->create_new_tmp_var(type1);
 
 		fi = new FunctionInvocationBinary(op, flags, tmp_var1, tmp_var2);
@@ -161,12 +161,12 @@ FunctionInvocationBinary::safe_ops(eBinaryOps op)
 }
 
 /* do some constant folding */
-bool 
-FunctionInvocationBinary::equals(int num) const 
+bool
+FunctionInvocationBinary::equals(int num) const
 {
 	assert(param_value.size() == 2);
 	if (num == 0) {
-		if (param_value[0]->equals(0) && 
+		if (param_value[0]->equals(0) &&
 			(eFunc==eMul || eFunc==eDiv || eFunc==eMod || eFunc==eLShift || eFunc==eRShift || eFunc==eAnd || eFunc==eBitAnd)) {
 			return true;
 		}
@@ -183,9 +183,9 @@ FunctionInvocationBinary::equals(int num) const
 	return false;
 }
 
-bool 
-FunctionInvocationBinary::is_0_or_1(void) const 
-{ 
+bool
+FunctionInvocationBinary::is_0_or_1(void) const
+{
 	return eFunc==eCmpGt || eFunc==eCmpLt || eFunc==eCmpGe || eFunc==eCmpLe || eFunc==eCmpEq || eFunc==eCmpNe;
 }
 
@@ -272,7 +272,7 @@ OutputStandardFuncName(eBinaryOps eFunc, std::ostream &out)
 	case eMul:		out << "*";     break;
 	case eDiv:		out << "/";     break;
 	case eMod:		out << "%";     break;
-		
+
 		// Logical Ops
 	case eAnd:		out << "&&";	break;
 	case eOr:		out << "||";	break;
@@ -282,7 +282,7 @@ OutputStandardFuncName(eBinaryOps eFunc, std::ostream &out)
 	case eCmpLt:	out << "<";		break;
 	case eCmpLe:	out << "<=";	break;
 	case eCmpGe:	out << ">=";	break;
-		
+
 		// Bitwise Ops
 	case eBitAnd:	out << "&";		break;
 	case eBitOr:	out << "|";		break;
@@ -322,13 +322,13 @@ FunctionInvocationBinary::Output(std::ostream &out) const
 	// special case for mutated array subscripts, see ArrayVariable::rnd_mutate
 	// the rational is we don't need overflow check for this addition because
 	// the induction variable is small --- less than the size of array, which
-	// has a small upper bound	
+	// has a small upper bound
 	if (eFunc == eAdd && op_flags == 0) {
 		param_value[0]->Output(out);
 		out << " + ";
 		param_value[1]->Output(out);
 	}
-	else { 
+	else {
 		switch (eFunc) {
 		case eAdd:
 		case eSub:
@@ -338,11 +338,11 @@ FunctionInvocationBinary::Output(std::ostream &out) const
 		case eLShift:
 		case eRShift:
 			if (CGOptions::avoid_signed_overflow()) {
-				string fname = op_flags->to_string(eFunc); 
+				string fname = op_flags->to_string(eFunc);
 				int id = SafeOpFlags::to_id(fname);
 				// don't use safe math wrapper if this function is specified in "--safe-math-wrapper"
 				if (CGOptions::safe_math_wrapper(id)) {
-					out << fname << "(";  
+					out << fname << "(";
 					if (CGOptions::math_notmp()) {
 						out << tmp_var1 << ", ";
 					}
@@ -356,17 +356,17 @@ FunctionInvocationBinary::Output(std::ostream &out) const
 					if (CGOptions::identify_wrappers()) {
 						out << ", " << id;
 					}
-					out << ")";				
+					out << ")";
 					break;
 				}
-			} 
+			}
 			need_cast = true;
 			// fallthrough!
 
 		default:
 			// explicit type casting for op1
 			if (need_cast) {
-				out << "("; 
+				out << "(";
 				op_flags->OutputSize(out);
 				out << ")";
 			}
@@ -376,7 +376,7 @@ FunctionInvocationBinary::Output(std::ostream &out) const
 			out << " ";
 			// explicit type casting for op2
 			if (need_cast) {
-				out << "("; 
+				out << "(";
 				op_flags->OutputSize(out);
 				out << ")";
 			}
@@ -402,14 +402,14 @@ FunctionInvocationBinary::indented_output(std::ostream &out, int indent) const
 	// special case for mutated array subscripts, see ArrayVariable::rnd_mutate
 	// the rational is we don't need overflow check for this addition because
 	// the induction variable is small --- less than the size of array, which
-	// by default is 10 at most	
+	// by default is 10 at most
 	if (eFunc == eAdd && op_flags == 0) {
 		param_value[0]->indented_output(out, indent);
 		out << " + ";
 		outputln(out);
 		param_value[1]->indented_output(out, indent);
 	}
-	else { 
+	else {
 		switch (eFunc) {
 		case eAdd:
 		case eSub:
@@ -422,7 +422,7 @@ FunctionInvocationBinary::indented_output(std::ostream &out, int indent) const
 				output_tab(out, indent);
 				out << op_flags->to_string(eFunc);
 				outputln(out);
-				output_open_encloser("(", out, indent); 
+				output_open_encloser("(", out, indent);
 				if (CGOptions::math_notmp()) {
 					output_tab(out, indent);
 					out << tmp_var1 << ", ";
@@ -437,46 +437,46 @@ FunctionInvocationBinary::indented_output(std::ostream &out, int indent) const
 				}
 				outputln(out);
 				param_value[1]->indented_output(out, indent);
-				output_close_encloser(")", out, indent); 				
+				output_close_encloser(")", out, indent);
 				break;
-			} 
+			}
 			// fallthrough!
 
 		default:
 			param_value[0]->indented_output(out, indent);
 			out << " ";
 			OutputStandardFuncName(eFunc, out);
-			out << " "; 
+			out << " ";
 			outputln(out);
 			param_value[1]->indented_output(out, indent);
 			break;
 		}
 	}
-	output_close_encloser(")", out, indent); 
+	output_close_encloser(")", out, indent);
 }
 
-bool 
+bool
 FunctionInvocationBinary::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const
-{   
-	bool skippable = IsOrderedStandardFunc(eFunc); 
-	assert(param_value.size() == 2); 
+{
+	bool skippable = IsOrderedStandardFunc(eFunc);
+	assert(param_value.size() == 2);
 	if (skippable) {
-		const Expression* value = param_value[0];  
-		if (value->visit_facts(inputs, cg_context)) { 
-			vector<const Fact*> inputs_copy = inputs; 
-			value = param_value[1];   
+		const Expression* value = param_value[0];
+		if (value->visit_facts(inputs, cg_context)) {
+			vector<const Fact*> inputs_copy = inputs;
+			value = param_value[1];
 			if (value->visit_facts(inputs, cg_context)) {
-				// the second parameter may or may not be evaludated, thus need to 
+				// the second parameter may or may not be evaludated, thus need to
 				// merge with the post-param0 env.
 				merge_facts(inputs, inputs_copy);
 				return true;
-			} 
+			}
 		}
 		return false;
-	}   
+	}
 	// for other binary invocations, use the standard visitor
-	return FunctionInvocation::visit_facts(inputs, cg_context); 
-}  
+	return FunctionInvocation::visit_facts(inputs, cg_context);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 

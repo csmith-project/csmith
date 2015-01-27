@@ -58,7 +58,7 @@ public:
 
 	static bool init(std::string &msg, const std::string &monitor_type, const std::string &o_file);
 
-	static bool init_for_running(std::string &msg, const std::string &monitor_type, 
+	static bool init_for_running(std::string &msg, const std::string &monitor_type,
 				const std::string &o_file, const std::string &i_file, bool no_delta);
 
 	static bool set_delta_type(std::string &msg, const std::string &monitor_type);

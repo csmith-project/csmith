@@ -46,7 +46,7 @@ public:
 
 private:
 	PartialExpander();
-	
+
 	~PartialExpander();
 
 	static void init_map(map<eStatementType, bool> &m, bool value);

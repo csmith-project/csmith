@@ -27,7 +27,7 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef WIN32 
+#ifdef WIN32
 #pragma warning(disable : 4786)   /* Disable annoying warning messages */
 #endif
 
@@ -61,7 +61,7 @@
 #include "Constant.h"
 #include "CVQualifiers.h"
 #include "FactMgr.h"
-	
+
 Reducer::Reducer(string fname)
 : dump_block_entry(false),
   dump_all_block_info(false),
@@ -76,18 +76,18 @@ Reducer::Reducer(string fname)
   monitored_call_id(""),
   dump_stms_in_blocks(NULL),
   configured(false),
-  fname_(fname)	
+  fname_(fname)
 {
 	// nothing else to do
 }
-	
+
 Reducer::~Reducer(void)
 {
 }
 
 void
-Reducer::configure(void) 
-{ 
+Reducer::configure(void)
+{
 	ifstream conf(fname_.c_str());
 	std::string line;
 	// default: use the first function as mian
@@ -107,13 +107,13 @@ Reducer::configure(void)
 			// make sure the focus var is marked as used var
 			const Variable* key = VariableSelector::find_var_by_name(line);
 			if (key == NULL) {
-				// it's possible an array variable that is not specifically itemized in the 
+				// it's possible an array variable that is not specifically itemized in the
 				// program that is the focus var. we manually itemize it here
 				vector<string> strs;
 				StringUtils::split_string(line, strs, "[]");
 				const Variable* ary = VariableSelector::find_var_by_name(strs[0]);
 				assert(ary && ary->isArray);
-				const ArrayVariable* av = (const ArrayVariable*)ary; 
+				const ArrayVariable* av = (const ArrayVariable*)ary;
 				vector<int> indices;
 				for (size_t k=0; k<av->get_dimension(); k++) {
 					assert(k + 1 < strs.size());
@@ -139,7 +139,7 @@ Reducer::configure(void)
 					assert(v);
 					add_variable_to_set(used_vars, v);
 				}
-			} 
+			}
 			crc_lines = line;
 		}
 		else if (line.find("keep variable") == 0) {
@@ -196,13 +196,13 @@ Reducer::configure(void)
 	configured = true;
 }
 
-const Statement* 
+const Statement*
 Reducer::find_stm_by_id(int stm_id)
 {
 	size_t j;
 	map<const Block*, int>::const_iterator iter;
 	for(iter = map_active_blks.begin(); iter != map_active_blks.end(); ++iter) {
-		const Block* b = iter->first; 
+		const Block* b = iter->first;
 		for (j=0; j<b->stms.size(); j++) {
 			if (b->stms[j]->stm_id == stm_id) {
 				return b->stms[j];
@@ -219,9 +219,9 @@ Reducer::is_ptr_written_in_stm(const Statement* stm)
 	FactMgr* fm = get_fact_mgr_for_func(stm->func);
 	const vector<const Variable *>& write_vars = fm->map_stm_effect[stm].get_write_vars();
 	for (i=0; i<write_vars.size(); i++) {
-		const Variable* wvar = write_vars[i]; 
+		const Variable* wvar = write_vars[i];
 		if (wvar->is_pointer()) {
-			const Block* blk = (stm->eType == eBlock) ? (const Block*)stm : stm->parent; 
+			const Block* blk = (stm->eType == eBlock) ? (const Block*)stm : stm->parent;
 			if (wvar->is_visible(blk) && is_var_used(wvar)) {
 				return true;
 			}
@@ -230,7 +230,7 @@ Reducer::is_ptr_written_in_stm(const Statement* stm)
 	return false;
 }
 
-bool 
+bool
 Reducer::is_exp_replaced(const Expression* e)
 {
 	if (e->term_type == eVariable || e->term_type == eLhs) {
@@ -244,27 +244,27 @@ Reducer::is_exp_replaced(const Expression* e)
 	return false;
 }
 
-bool 
+bool
 Reducer::is_var_init_reduced(const Variable* v)
 {
 	return map_reduced_var_inits.find(v) != map_reduced_var_inits.end();
 }
 
-bool 
+bool
 Reducer::is_label_used(const string l)
 {
 	if (l == "") return false;
 	return std::find(used_labels.begin(), used_labels.end(), l) != used_labels.end();
 }
 
-string 
+string
 Reducer::find_jump_label(const Statement* stm)
 {
 	string label = stm->find_jump_label();
 	return (is_label_used(label)) ? label : "";
 }
 
-int 
+int
 Reducer::find_required_labels(const Statement* stm, vector<string>& labels)
 {
 	string label = find_jump_label(stm);
@@ -286,7 +286,7 @@ Reducer::find_required_labels(const Statement* stm, vector<string>& labels)
 	return labels.size();
 }
 
-int 
+int
 Reducer::find_missing_labels(const Statement* stm, const Statement* alt_stm, vector<string>& labels)
 {
 	labels.clear();
@@ -307,7 +307,7 @@ Reducer::find_missing_labels(const Statement* stm, const Statement* alt_stm, vec
 	return labels.size();
 }
 
-void 
+void
 Reducer::output_block_skeleton(const Block* blk, vector<const Block*>& work_blks, vector<const Function*>& work_funcs, std::ostream& out)
 {
 	size_t i, j;
@@ -367,7 +367,7 @@ Reducer::is_blk_deleted(const Block* b) const
 	return map_active_blks.find(b) == map_active_blks.end();
 }
 
-bool 
+bool
 Reducer::is_stm_deleted(const Statement* stm) const
 {
 	const Statement* s = stm;
@@ -386,7 +386,7 @@ Reducer::is_param_dropped(const Function* f, int i)
 	return !is_var_used(f->param[i]);
 }
 
-void 
+void
 Reducer::replace_stm(const Statement* stm, const Statement* new_stm, string pre_stm)
 {
 	replaced_stms[stm] = new_stm;
@@ -406,7 +406,7 @@ Reducer::delete_stms_after(const Statement* stm, bool include_parent_blks)
 	assert(return_stm);
 	for (i=0; i<parent->stms.size(); i++) {
 		const Statement* s = parent->stms[i];
-		vector<string> labels; 
+		vector<string> labels;
 
 		if (begin_delete) {
 			if (find_required_labels(s, labels)==0 && s != return_stm) {
@@ -438,24 +438,24 @@ Reducer::delete_stms_after(const Statement* stm, bool include_parent_blks)
 }
 
 // find local variables that have to be lifted to global, most likely because
-// they are used via pointer in a callee function at the bottom of a call chain 
+// they are used via pointer in a callee function at the bottom of a call chain
 int
 Reducer::find_local_vars_to_lift(vector<const Variable*>& vars)
 {
-	size_t i; 
+	size_t i;
 	vars.clear();
-	if (monitored_func) { 
+	if (monitored_func) {
 		for (i=0; i<used_vars.size(); i++) {
 			const Variable* v = used_vars[i];
 			if (monitored_func->feffect.is_read(v) || monitored_func->feffect.is_written(v)) {
 				// if there is a variable that is read by the function externally,
 				// but is neither a global or a parameter, this must be a local variable
 				// of one of the functions in the call chain
-				
+
 				// Note this can not handle parameters not belong to monitored function,
 				// so taking address of parameters and passing into a function call is forbidden
-				// see ExpressionVariable::make_random 
-				if (!v->is_global() && !v->is_argument()) {  
+				// see ExpressionVariable::make_random
+				if (!v->is_global() && !v->is_argument()) {
 					vars.push_back(v);
 					break;
 				}
@@ -467,10 +467,10 @@ Reducer::find_local_vars_to_lift(vector<const Variable*>& vars)
 
 void
 Reducer::expand_used_vars(void)
-{ 
+{
 	size_t i, j;
 	for (i=0; i<used_vars.size(); i++) {
-		const Variable* v = used_vars[i]; 
+		const Variable* v = used_vars[i];
 		vector<const Expression*> init_values;
 		if (v->isArray) {
 			const ArrayVariable* av = dynamic_cast<const ArrayVariable*>(v);
@@ -491,9 +491,9 @@ Reducer::expand_used_vars(void)
 					}
 					// if addr_var is a field, get the container var
 					addr_var = addr_var->get_named_var();
-					if (!is_var_used(addr_var)) {  
+					if (!is_var_used(addr_var)) {
 						used_vars.push_back(addr_var);
-					} 
+					}
 				}
 			}
 		}
@@ -503,14 +503,14 @@ Reducer::expand_used_vars(void)
 bool
 Reducer::is_replaced_var(const ExpressionVariable* ev, string& str_out)
 {
-	if (map_reduced_vars.find(ev) != map_reduced_vars.end()) { 
+	if (map_reduced_vars.find(ev) != map_reduced_vars.end()) {
 		str_out = map_reduced_vars[ev];
 		return true;
 	}
 	return false;
 }
 
-const Expression* 
+const Expression*
 Reducer::get_replaced_invocation(const FunctionInvocation* fi)
 {
 	if (map_reduced_invocations.find(fi) != map_reduced_invocations.end()) {
@@ -538,11 +538,11 @@ Reducer::get_used_vars_and_funcs_and_labels(const FunctionInvocation* fi, vector
 			// anyway, so which constant we use doesn't matter
 			if (is_blk_deleted(call->get_func()->body)) {
 				if (call->get_type().is_aggregate()) {
-					// it's not a real constant, but we don't want to go through the trouble 
+					// it's not a real constant, but we don't want to go through the trouble
 					// of creating an ExpressionVariable
 					string vname = add_artificial_globals(&call->get_type());
 					map_reduced_invocations[fi] = new Constant(&call->get_type(), vname);
-				} 
+				}
 				else {
 					map_reduced_invocations[fi] = new Constant(&fi->get_type(), "0");
 				}
@@ -553,7 +553,7 @@ Reducer::get_used_vars_and_funcs_and_labels(const FunctionInvocation* fi, vector
 
 			get_used_vars_and_funcs_and_labels(f->body, vars, funcs, labels);
 			funcs.push_back(f);
-			// remember the parameters we dropped 
+			// remember the parameters we dropped
 			for (i=0; i<f->param.size(); i++) {
 				if (is_param_dropped(f, i)) {
 					dropped_params.push_back(f->param[i]);
@@ -568,15 +568,15 @@ Reducer::get_used_vars_and_funcs_and_labels(const FunctionInvocation* fi, vector
 		}
 	}
 	else {
-		for (i=0; i<fi->param_value.size(); i++) { 
+		for (i=0; i<fi->param_value.size(); i++) {
 			get_used_vars_and_funcs_and_labels(fi->param_value[i], vars, funcs, labels);
 		}
 	}
 }
 
-void 
+void
 Reducer::get_used_vars_and_funcs_and_labels(const Expression* e, vector<const Variable*>& vars, vector<const Function*>& funcs, vector<string>& labels)
-{ 
+{
 	string tmp;
 	switch (e->term_type) {
 	case eLhs: {
@@ -595,15 +595,15 @@ Reducer::get_used_vars_and_funcs_and_labels(const Expression* e, vector<const Va
 	// check if the variable is replaced by a constant
 	case eVariable: {
 		const ExpressionVariable* ev = (const ExpressionVariable*)e;
-		if (!is_replaced_var(ev, tmp) && !ev->get_var()->is_tmp_var()) { 
-			add_variable_to_set(vars, ev->get_var()->get_named_var()); 
+		if (!is_replaced_var(ev, tmp) && !ev->get_var()->is_tmp_var()) {
+			add_variable_to_set(vars, ev->get_var()->get_named_var());
 		}
 		break;
 	}
 	// check if invocation is replaced by a variable or constant
 	case eFunction: {
 		const ExpressionFuncall* funcall = (const ExpressionFuncall*)e;
-		get_used_vars_and_funcs_and_labels(funcall->get_invoke(), vars, funcs, labels); 
+		get_used_vars_and_funcs_and_labels(funcall->get_invoke(), vars, funcs, labels);
 		break;
 	}
 	case eAssignment: {
@@ -634,10 +634,10 @@ Reducer::find_called_funcs(const FunctionInvocation* fi, string id, vector<const
 		}
 		return;
 	}
-		
+
 	const FunctionInvocationUser* func_call = NULL;
 	if (fi->invoke_type == eFuncCall) {
-		func_call = (const FunctionInvocationUser*)fi; 
+		func_call = (const FunctionInvocationUser*)fi;
 		funcs.push_back(func_call);
 		ids.push_back(id);
 	}
@@ -650,12 +650,12 @@ Reducer::find_called_funcs(const FunctionInvocation* fi, string id, vector<const
 				find_called_funcs(fi, id + "_" + StringUtils::int2str(i), funcs, ids);
 			}
 		}
-	} 
+	}
 }
 
 int
 Reducer::reduce_const_binary_op(const FunctionInvocationBinary* fib)
-{  
+{
 	const Expression* op1 = fib->param_value[0];
 	const Expression* op2 = fib->param_value[1];
 	if (op1->get_invoke() != NULL && map_reduced_invocations.find(op1->get_invoke()) != map_reduced_invocations.end()) {
@@ -676,7 +676,7 @@ Reducer::reduce_const_binary_op(const FunctionInvocationBinary* fib)
 				case eSub: result = v1 - v2; break;
 				case eMul: result = v1 * v2; break;
 				case eDiv: result = v2 ? v1 / v2 : v1; break;
-				case eMod: result = v2 ? v1 % v2 : v1; break; 
+				case eMod: result = v2 ? v1 % v2 : v1; break;
 				case eCmpGt: result = v1 > v2; break;
 				case eCmpLt: result = v1 < v2; break;
 				case eCmpGe: result = v1 >= v2; break;
@@ -688,8 +688,8 @@ Reducer::reduce_const_binary_op(const FunctionInvocationBinary* fib)
 				case eBitXor: result = v1 ^ v2; break;
 				case eBitAnd: result = v1 & v2; break;
 				case eBitOr:  result = v1 | v2; break;
-				case eRShift: result = (v2 > 0) ? v1 >> v2 : v1; break; 
-				case eLShift: result = (v2 > 0) ? v1 << v2 : v1; break; 
+				case eRShift: result = (v2 > 0) ? v1 >> v2 : v1; break;
+				case eLShift: result = (v2 > 0) ? v1 << v2 : v1; break;
 			}
 			Constant* cst = new Constant(&fib->get_type(), StringUtils::longlong2str(result));
 			map_reduced_invocations[fib] = cst;
@@ -697,7 +697,7 @@ Reducer::reduce_const_binary_op(const FunctionInvocationBinary* fib)
 		}
 	}
 	return 0;
-}		
+}
 
 void
 Reducer::reduce_const_binary_ops(vector<const FunctionInvocationBinary*>& ops)
@@ -712,15 +712,15 @@ Reducer::reduce_const_binary_ops(vector<const FunctionInvocationBinary*>& ops)
 			len--;
 		}
 	}
-}			
+}
 
 int
 Reducer::find_binary_operations(const Statement* stm, vector<const FunctionInvocationBinary*>& ops, vector<int>& ids, bool no_ptr_cmp)
 {
 	int cnt = 0;
-	vector<const Expression*> exprs; 
+	vector<const Expression*> exprs;
 	stm->get_exprs(exprs);
-	for (size_t i=0; i<exprs.size(); i++) {  
+	for (size_t i=0; i<exprs.size(); i++) {
 		cnt += find_binary_operations(exprs[i], ops, ids, no_ptr_cmp);
 	}
 	return cnt;
@@ -737,8 +737,8 @@ Reducer::find_binary_operations(const Expression* exp, vector<const FunctionInvo
 		}
 
 		if (fi->invoke_type == eBinaryPrim) {
-			const FunctionInvocationBinary* fib = (const FunctionInvocationBinary*)fi; 
-			if (!reduce_const_binary_op(fib)) { 
+			const FunctionInvocationBinary* fib = (const FunctionInvocationBinary*)fi;
+			if (!reduce_const_binary_op(fib)) {
 				if (!no_ptr_cmp || !fib->ptr_cmp) {
 					ops.push_back(fib);
 					ids.push_back(exp->expr_id);
@@ -752,7 +752,7 @@ Reducer::find_binary_operations(const Expression* exp, vector<const FunctionInvo
 		// find binary operations in parameters, skip dropped parameters
 		for (size_t i=0; i<fi->param_value.size(); i++) {
 			const Expression* param = fi->param_value[i];
-			if (func_call==NULL || !is_param_dropped(func_call->get_func(), i)) { 
+			if (func_call==NULL || !is_param_dropped(func_call->get_func(), i)) {
 				find_binary_operations(param, ops, ids, no_ptr_cmp);
 			}
 		}
@@ -764,9 +764,9 @@ const FunctionInvocation*
 Reducer::find_invoke_by_eid(const Statement* s, int id) const
 {
 	size_t i;
-	vector<const Expression*> exprs; 
+	vector<const Expression*> exprs;
 	s->get_exprs(exprs);
-	for (i=0; i<exprs.size(); i++) {   
+	for (i=0; i<exprs.size(); i++) {
 		const FunctionInvocation* fi = find_invoke_by_eid(exprs[i], id);
 		if (fi) {
 			return fi;
@@ -781,8 +781,8 @@ Reducer::find_invoke_by_eid(const Expression* e, int id) const
 	const FunctionInvocation* fi = e->get_invoke();
 	if (e->expr_id == id) {
 		return fi;
-	}	
-	if (fi) { 
+	}
+	if (fi) {
 		for (size_t i=0; i<fi->param_value.size(); i++) {
 			const Expression* param = fi->param_value[i];
 			const FunctionInvocation* tmp = find_invoke_by_eid(param, id);
@@ -790,11 +790,11 @@ Reducer::find_invoke_by_eid(const Expression* e, int id) const
 				return tmp;
 			}
 		}
-	} 
+	}
 	return NULL;
 }
 
-void 
+void
 Reducer::build_left_right_binary_trees(vector<const FunctionInvocationBinary*>& ops, vector<intvec>& left_trees, vector<intvec>& right_trees)
 {
 	size_t i, j, k;
@@ -839,14 +839,14 @@ Reducer::build_left_right_binary_trees(vector<const FunctionInvocationBinary*>& 
 /*
  * find all the variables and functions used in this statement
  */
-void 
+void
 Reducer::get_used_vars_and_funcs_and_labels(const Statement* stm, vector<const Variable*>& vars, vector<const Function*>& funcs, vector<string>& labels)
-{ 
+{
 	if (stm == NULL) return;
 	// for if statements with both branches deleted
 	if (stm->eType == eIfElse) {
 		const StatementIf* si = (const StatementIf*)stm;
-		if (is_blk_deleted(si->get_true_branch()) && is_blk_deleted(si->get_false_branch())) { 
+		if (is_blk_deleted(si->get_true_branch()) && is_blk_deleted(si->get_false_branch())) {
 			replace_stm(si, NULL, "");
 			delete_stms_after(si, false);
 		}
@@ -856,7 +856,7 @@ Reducer::get_used_vars_and_funcs_and_labels(const Statement* stm, vector<const V
 		const StatementGoto* sg = (const StatementGoto*)stm;
 		if (is_blk_deleted(sg->dest->parent)) {
 			bool keep = false;
-			// special case: if goto jump into a for-loop that use the monitored variable as 
+			// special case: if goto jump into a for-loop that use the monitored variable as
 			// induction variable, we keep the jump, for seed 355297830
 			const Statement* s = sg->dest->find_container_stm();
 			if (s && s->eType == eFor) {
@@ -884,7 +884,7 @@ Reducer::get_used_vars_and_funcs_and_labels(const Statement* stm, vector<const V
 	}
 	// used replacement for replaced statements
 	bool must_visit = std::find(must_use_var_stms.begin(), must_use_var_stms.end(), stm) != must_use_var_stms.end();
-	if (!must_visit && replaced_stms.find(stm) != replaced_stms.end()) { 
+	if (!must_visit && replaced_stms.find(stm) != replaced_stms.end()) {
 		get_used_vars_and_funcs_and_labels(replaced_stms[stm], vars, funcs, labels);
 		return;
 	}
@@ -915,7 +915,7 @@ Reducer::get_used_vars_and_funcs_and_labels(const Statement* stm, vector<const V
 	for (i=0; i<blks.size(); i++) {
 		if (is_blk_deleted(blks[i])) {
 			continue;
-		} 
+		}
 		for (j=0; j<blks[i]->stms.size(); j++) {
 			const Statement* s = blks[i]->stms[j];
 			get_used_vars_and_funcs_and_labels(s, vars, funcs, labels);
@@ -929,14 +929,14 @@ Reducer::get_used_vars_and_funcs_and_labels(const Statement* stm, vector<const V
 int
 Reducer::configure_diff_active_blks(string line, int first_bid)
 {
-	vector<int> ids; 
-	StringUtils::split_int_string(line, ids, ",()");  
+	vector<int> ids;
+	StringUtils::split_int_string(line, ids, ",()");
 	size_t i;
-	assert(!ids.empty()); 
-	const Block* one_branch = find_block_by_id(first_bid); 
+	assert(!ids.empty());
+	const Block* one_branch = find_block_by_id(first_bid);
 	assert(one_branch);
 	const Statement* stm = one_branch->find_container_stm();
-	if (stm && stm->eType == eIfElse) { 
+	if (stm && stm->eType == eIfElse) {
 		for (i=0; i<ids.size(); i+=2) {
 			int id = ids[i];
 			if (1) { //id <= first_bid) {
@@ -980,7 +980,7 @@ Reducer::config_active_blks(string cmd)
 		bool take_diff_branch = false;
 		if (cmd.find("||") != string::npos) {
 			StringUtils::split_string(cmd, tmp_strs, "|");
-			assert(tmp_strs.size() == 2); 
+			assert(tmp_strs.size() == 2);
 			cmd = tmp_strs[0];
 			int blkid = StringUtils::str2int(tmp_strs[1]);
 			take_diff_branch = configure_diff_active_blks(cmd, blkid);
@@ -1039,14 +1039,14 @@ Reducer::config_stm_reduction(string cmd)
 	size_t i, j;
 	if (cmd.find(":") == string::npos) {
 		size_t pos = cmd.find(" blind");
-		if (pos != string::npos) { 
-			cmd = cmd.substr(0, pos); 
+		if (pos != string::npos) {
+			cmd = cmd.substr(0, pos);
 			if (cmd == "main") cmd = "func_1";
 			const Function* f = find_function_by_name(cmd);
 			assert(f);
 			dump_stms_in_blocks = f;
-		} 
-		else { 
+		}
+		else {
 			// the reducer treats func_1 as main
 			if (cmd == "main") cmd = "func_1";
 			const Function* f = find_function_by_name(cmd);
@@ -1098,7 +1098,7 @@ Reducer::config_binary_reduction(string cmd)
 {
 	if (cmd.find(":") == string::npos) {
 		// the reducer treats func_1 as main
-		reduce_binaries = (cmd == "all"); 
+		reduce_binaries = (cmd == "all");
 	}
 	else {
 		size_t i;
@@ -1114,7 +1114,7 @@ Reducer::config_binary_reduction(string cmd)
 		const Statement* stm = find_stm_by_id(ints[0]);
 		assert(stm);
 		ints.erase(ints.begin());
-		// must be pairs of "<exp_id>:<choice>" where choice is 1 (select left) or 2 (select right) 
+		// must be pairs of "<exp_id>:<choice>" where choice is 1 (select left) or 2 (select right)
 		assert(ints.size() % 2 == 0);
 
 		for (i = 0; i < ints.size(); i += 2) {
@@ -1131,7 +1131,7 @@ Reducer::config_binary_reduction(string cmd)
 			assert(fi && fi->invoke_type == eBinaryPrim);
 			int choice = ints[i+1] - 1;
 			assert(choice == 0 || choice == 1);
-			const Expression* op = fi->param_value[choice]; 
+			const Expression* op = fi->param_value[choice];
 			if (last == '+') {
 				must_use_var_invocations.push_back(fi);
 			}
@@ -1145,7 +1145,7 @@ Reducer::config_if_reduction(string cmd)
 {
 	if (cmd.find(",") == string::npos) {
 		// the reducer treats func_1 as main
-		output_if_ids = (cmd == "poll"); 
+		output_if_ids = (cmd == "poll");
 	}
 	else {
 		size_t i;
@@ -1159,11 +1159,11 @@ Reducer::config_if_reduction(string cmd)
 				rollback = true;
 			}
 			const Statement* stm = find_stm_by_id(StringUtils::str2int(s));
-			assert(stm && stm->eType == eIfElse); 
+			assert(stm && stm->eType == eIfElse);
 			const StatementIf* si = (const StatementIf*)stm;
 			if (is_blk_deleted(si->get_false_branch())) {
 				replace_stm(si, si->get_true_branch(), "");
-			} 
+			}
 			else if (is_blk_deleted(si->get_true_branch())) {
 				replace_stm(si, si->get_false_branch(), "");
 			}
@@ -1192,7 +1192,7 @@ Reducer::config_var_init_reduction(string cmd)
 string
 Reducer::add_artificial_globals(const Type* t, string name)
 {
-	static int cnt = 0; 
+	static int cnt = 0;
 	ostringstream oss;
 	t->Output(oss);
 	if (name == "") {
@@ -1218,25 +1218,25 @@ Reducer::find_addressed_var(string addr)
 	return NULL;
 }
 
-vector<const Variable*> 
-Reducer::find_used_vars(string assigns) 
+vector<const Variable*>
+Reducer::find_used_vars(string assigns)
 {
 	size_t i;
 	vector<const Variable*> vars;
 	vector<string> vnames, values;
 	StringUtils::breakup_assigns(assigns, vnames, values);
-	
+
 	// parse the assignment string
 	for (i=0; i<vnames.size(); i++) {
 		string vname = vnames[i];
 		size_t bracket = vname.find("[");
-		if (bracket != string::npos) { 
+		if (bracket != string::npos) {
 			vname = vname.substr(0, bracket);
 		}
 		const Variable* v = VariableSelector::find_var_by_name(vname);
-		assert(v); 
+		assert(v);
 		vars.push_back(v);
-			 
+
 		// if value is the address of a variable, mark it as used
 		string value = values[i];
 		v = find_addressed_var(value);
@@ -1246,31 +1246,31 @@ Reducer::find_used_vars(string assigns)
 	}
 	return vars;
 }
-		
+
 bool
 Reducer::is_var_used(const Variable* v)
-{   
+{
 	return is_variable_in_set(used_vars, v);
 }
 
-/* 
+/*
  * replace a call in a statement with it's value + optional assignments to compensate for the function call effect
  * for example: a = func_1() + c can be replaced with
  *              global_ptr = &global_v1;
  *              a = 1234 + c;
  * if func_1 returns 1234 and global_ptr is initialized to &global_v1 in func_1
- * 
+ *
  * special case: if value == delete, the whole statement will be deleted
  */
-int 
+int
 Reducer::reduce_call_with_assigns(const string& tmp_name, const string& value, const string& extra_assigns)
 {
 	// find statement id and invoke id
 	size_t dash = tmp_name.find('_');
-	int stm_id = StringUtils::str2int(tmp_name.substr(1, dash-1)); 
+	int stm_id = StringUtils::str2int(tmp_name.substr(1, dash-1));
 
 	const Statement* stm = find_stm_by_id(stm_id);
-	assert(stm); 
+	assert(stm);
 	// special case
 	if (value == "delete") {
 		// when we delete the condition for a if...else..., keep one branch alive
@@ -1290,8 +1290,8 @@ Reducer::reduce_call_with_assigns(const string& tmp_name, const string& value, c
 	vector<const FunctionInvocationUser*> calls;
 	vector<string> ids;
 	const FunctionInvocation* invoke = NULL;
-	const FunctionInvocation* fi = stm->get_direct_invocation(); 
-	assert(fi); 
+	const FunctionInvocation* fi = stm->get_direct_invocation();
+	assert(fi);
 	find_called_funcs(fi, tmp_name.substr(0, dash), calls, ids);
 	size_t i;
 	for (i=0; i<ids.size(); i++) {
@@ -1301,10 +1301,10 @@ Reducer::reduce_call_with_assigns(const string& tmp_name, const string& value, c
 		}
 	}
 	assert(invoke);
- 
+
 	const Type* type = &(invoke->get_type());
 	Constant* cst = new Constant(type, value);
-	// record this reduction 
+	// record this reduction
 	map_reduced_invocations[invoke] = cst; //tmp_ev;
 	if (!extra_assigns.empty()) {
 		map_pre_stm_assigns[stm] = extra_assigns;
@@ -1313,14 +1313,14 @@ Reducer::reduce_call_with_assigns(const string& tmp_name, const string& value, c
 	return 0;
 }
 
-int 
+int
 Reducer::reduce_stms_with_assigns(int id1, int id2, const string& assigns)
 {
 	const Statement* stm = find_stm_by_id(id1);
 	assert(stm);
 	const Block* blk = stm->parent;
 	assert(blk);
-	
+
 	size_t i;
 	int begin = -1;
 	int end = -1;
@@ -1346,13 +1346,13 @@ Reducer::reduce_stms_with_assigns(int id1, int id2, const string& assigns)
 	return 0;
 }
 
-int 
-Reducer::output_expr(const Expression* e, std::ostream &out) 
+int
+Reducer::output_expr(const Expression* e, std::ostream &out)
 {
 	string tmp;
 	if (e->term_type == eVariable) {
 		const ExpressionVariable* ev = (const ExpressionVariable*)e;
-		if (is_replaced_var(ev, tmp)) { 
+		if (is_replaced_var(ev, tmp)) {
 			out << tmp;
 			return 1;
 		}

@@ -45,7 +45,7 @@ class Variable;
 class SafeOpFlags;
 class FactMgr;
 class Lhs;
-template <class Key, class Value> 
+template <class Key, class Value>
 class ProbabilityTable;
 
 /*
@@ -89,7 +89,7 @@ public:
 
 	StatementAssign(Block* b, const Lhs &l, const Expression &e, eAssignOps op = eSimpleAssign, const SafeOpFlags *flags = NULL);
 
-	StatementAssign(Block* b, const Lhs &l, eAssignOps op, const Expression &e, 
+	StatementAssign(Block* b, const Lhs &l, eAssignOps op, const Expression &e,
 			const Expression *er, const SafeOpFlags *flags,
 			std::string &tmp_name1, std::string &tmp_name2);
 
@@ -112,7 +112,7 @@ public:
 
 	virtual ~StatementAssign(void);
 
-	virtual void get_blocks(std::vector<const Block*>& /* blks */) const {}; 
+	virtual void get_blocks(std::vector<const Block*>& /* blks */) const {};
 	virtual void get_exprs(std::vector<const Expression*>& exps) const {exps.push_back(&expr); exps.push_back(&lhs);}
 	virtual bool visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const;
 
@@ -135,7 +135,7 @@ private:
 	const Lhs   &lhs;
 	const Expression &expr;
 	// the real rhs canonized from compound operators, for example rhs for "i += 1" is "i + 1"
-	const Expression* rhs;			
+	const Expression* rhs;
 	const SafeOpFlags *op_flags;
 	// used for AssignAdd etc;
 	std::string tmp_var1;

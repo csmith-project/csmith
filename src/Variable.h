@@ -75,7 +75,7 @@ public:
 	static void doFinalization(void);
 
 	virtual ~Variable(void);
-	virtual bool is_global(void) const; 
+	virtual bool is_global(void) const;
 	virtual bool is_local(void) const;
 	virtual bool is_visible_local(const Block* blk) const;
 	virtual size_t get_dimension(void) const { return 0;}
@@ -88,7 +88,7 @@ public:
 	bool is_const_after_deref(int deref_level) const;
 	bool is_volatile_after_deref(int deref_level) const;
 	bool is_packed_aggregate_field_var() const;
-	bool has_field_var(const Variable* v) const; 
+	bool has_field_var(const Variable* v) const;
 	bool is_field_var(void) const { return field_var_of != 0; };
 	const Variable* get_top_container(void) const;
 	const Variable* get_container_union(void) const;
@@ -120,12 +120,12 @@ public:
 	virtual int get_index_vars(vector<const Variable*>& /* vars */) const { return 0;}
 
 	///////////////////////////////////////////////////////////////////////
-	
-	virtual void Output(std::ostream &) const; 
+
+	virtual void Output(std::ostream &) const;
 	int output_runtime_value(ostream &out, string prefix, string suffix, int indent, bool multi_lines=false) const;
 	int output_addressable_name(ostream &out, int indent) const;
 	int output_volatile_address(ostream &out, int indent, const string &fp_string, vector<string> &seen_names) const;
-	int output_volatile_fprintf(ostream &out, int indent, const string &name, 
+	int output_volatile_fprintf(ostream &out, int indent, const string &name,
 		const string &sizeof_string, const string &fp_string) const;
 	bool is_seen_name(vector<std::string> &seen_names, const std::string &name) const;
 	bool is_valid_volatile(void) const;
@@ -135,7 +135,7 @@ public:
 	virtual void OutputDef(std::ostream &out, int indent) const;
 	virtual void OutputDecl(std::ostream &) const;
 	virtual void output_qualified_type(std::ostream &out) const;
-	virtual void OutputLowerBound(std::ostream &) const; 
+	virtual void OutputLowerBound(std::ostream &) const;
 	virtual void OutputUpperBound(std::ostream &) const;
 
 	static size_t GetMaxArrayDimension(const vector<Variable*>& vars);
@@ -149,7 +149,7 @@ public:
 	const bool isAuto;
 	// bool isExtern;
 	const bool isStatic;
-	const bool isRegister; 
+	const bool isRegister;
 	const bool isBitfield_; // expanded from a full-bitfield struct var
 	bool isAddrTaken;
 	bool isAccessOnce;
@@ -174,7 +174,7 @@ private:
 
 	void create_field_vars(const Type* type);
 };
- 
+
 void OutputVariableList(const std::vector<Variable*> &var, std::ostream &out, int indent = 0);
 void OutputVariableDeclList(const std::vector<Variable*> &var, std::ostream &out, std::string prefix = "", int indent = 0);
 void OutputArrayInitializers(const vector<Variable*>& vars, std::ostream &out, int indent);

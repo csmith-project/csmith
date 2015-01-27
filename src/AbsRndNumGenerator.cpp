@@ -70,10 +70,10 @@ AbsRndNumGenerator::make_rndnum_generator(RNDNUM_GENERATOR impl, const unsigned 
 
 	AbsRndNumGenerator::seedrand(seed);
 	switch (impl) {
-		case rDefaultRndNumGenerator: 
+		case rDefaultRndNumGenerator:
 			rImpl = DefaultRndNumGenerator::make_rndnum_generator(seed);
 			break;
-		case rDFSRndNumGenerator: 
+		case rDFSRndNumGenerator:
 			rImpl = DFSRndNumGenerator::make_rndnum_generator();
 			break;
 		case rSimpleDeltaRndNumGenerator:
@@ -119,7 +119,7 @@ AbsRndNumGenerator::rnd_shuffle(unsigned int n)
 }
 #endif
 
-unsigned long 
+unsigned long
 AbsRndNumGenerator::genrand(void)
 {
 	return lrand48();

@@ -59,7 +59,7 @@ LinearSequence::init_sequence()
 
 }
 
-void 
+void
 LinearSequence::add_number(int v, int /*bound*/, int k)
 {
 	seq_map_[k] = v;
@@ -79,7 +79,7 @@ LinearSequence::get_number_by_pos(int pos)
 	return rv;
 }
 
-void 
+void
 LinearSequence::clear()
 {
 	seq_map_.clear();
@@ -89,7 +89,7 @@ void
 LinearSequence::get_sequence(ostream &ss)
 {
 	assert(!seq_map_.empty());
-	
+
 	size_t i = 0;
 	for (i = 0; i < seq_map_.size() - 1; ++i) {
 		ss << seq_map_[i] << sep_char_;

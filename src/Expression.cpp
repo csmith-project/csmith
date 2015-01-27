@@ -65,8 +65,8 @@ DistributionTable Expression::paramTable_;
 
 void
 Expression::InitExprProbabilityTable()
-{ 
-	exprTable_.add_entry((int)eFunction, 70);  
+{
+	exprTable_.add_entry((int)eFunction, 70);
 	exprTable_.add_entry((int)eVariable, 20);
 	exprTable_.add_entry((int)eConstant, 10);
 	if (CGOptions::use_embedded_assigns()) {
@@ -80,10 +80,10 @@ Expression::InitExprProbabilityTable()
 void
 Expression::InitParamProbabilityTable()
 {
-	paramTable_.add_entry((int)eFunction, 40);  
+	paramTable_.add_entry((int)eFunction, 40);
 	paramTable_.add_entry((int)eVariable, 40);
-	// constant parameters lead to non-interesting code 
-	paramTable_.add_entry((int)eConstant, 0);  
+	// constant parameters lead to non-interesting code
+	paramTable_.add_entry((int)eConstant, 0);
 	if (CGOptions::use_embedded_assigns()) {
 		paramTable_.add_entry((int)eAssignment, 10);
 	}
@@ -129,11 +129,11 @@ std::string
 Expression::to_string(void) const
 {
 	ostringstream oss;
-	Output(oss); 
+	Output(oss);
 	return oss.str();
 }
 
-std::vector<const ExpressionVariable*> 
+std::vector<const ExpressionVariable*>
 Expression::get_dereferenced_ptrs(void) const
 {
 	// return a empty vector by default
@@ -141,10 +141,10 @@ Expression::get_dereferenced_ptrs(void) const
 	return empty;
 }
 
-void 
-Expression::indented_output(std::ostream &out, int indent) const 
-{ 
-	output_tab(out, indent); 
+void
+Expression::indented_output(std::ostream &out, int indent) const
+{
+	output_tab(out, indent);
 	Output(out);
 }
 
@@ -155,9 +155,9 @@ Expression *
 Expression::make_random(CGContext &cg_context, const Type* type, const CVQualifiers* qfer, bool no_func, bool no_const, enum eTermType tt)
 {
 	DEPTH_GUARD_BY_TYPE_RETURN_WITH_FLAG(dtExpression, tt, NULL);
-	Expression *e = 0;  
+	Expression *e = 0;
 	if (type == NULL) {
-		do { 
+		do {
 			type = cg_context.get_effect_context().is_side_effect_free() ? Type::choose_random_nonvoid() : Type::choose_random_nonvoid_nonvolatile();
 		} while (type->eType == eStruct && tt == eConstant);
 	}
@@ -165,20 +165,20 @@ Expression::make_random(CGContext &cg_context, const Type* type, const CVQualifi
 	assert(!(no_const && tt == eConstant));
 	// constant struct variables can not be a subexpression?
 	assert(!(type->eType == eStruct && tt == eConstant));
-	 
+
 	// if no term type is provided, choose a random term type with restrictions
 	if (tt == MAX_TERM_TYPES) {
 		VectorFilter filter(&Expression::exprTable_);
-		if (no_func || 
+		if (no_func ||
 			(!CGOptions::return_structs() && type->eType == eStruct) ||
 			(!CGOptions::return_unions() && type->eType == eUnion)) {
 			filter.add(eFunction);
 		}
-		// struct constants can't be subexpressions (union constant can't either?) 
+		// struct constants can't be subexpressions (union constant can't either?)
 		if (no_const || type->eType == eStruct || type->eType == eUnion) {
 			filter.add(eConstant);
 		}
-		// can't assign to constant struct/unions. on the other hand, assign to a volatile 
+		// can't assign to constant struct/unions. on the other hand, assign to a volatile
 		// struct/union cause too much trouble for effect analysis, disable it for now
 		if (type->is_const_struct_union() || type->is_volatile_struct_union()) {
 			filter.add(eAssignment);
@@ -186,9 +186,9 @@ Expression::make_random(CGContext &cg_context, const Type* type, const CVQualifi
 		if (cg_context.expr_depth + 2 > CGOptions::max_expr_depth()) {
 			filter.add(eFunction).add(eAssignment).add(eCommaExpr);
 		}
-		tt = ExpressionTypeProbability(&filter); 
+		tt = ExpressionTypeProbability(&filter);
 	}
-	    
+
 	ERROR_GUARD(NULL);
 
 	switch (tt) {
@@ -200,13 +200,13 @@ Expression::make_random(CGContext &cg_context, const Type* type, const CVQualifi
 	case eVariable:
 		e = ExpressionVariable::make_random(cg_context, type, qfer);
 		break;
-	case eFunction: 
+	case eFunction:
 		e = ExpressionFuncall::make_random(cg_context, type, qfer);
 		break;
 	case eAssignment:
 		e = ExpressionAssign::make_random(cg_context, type, qfer);
 		break;
-	case eCommaExpr: 
+	case eCommaExpr:
 		e = ExpressionComma::make_random(cg_context, type, qfer);
 		break;
 	default: break;
@@ -218,7 +218,7 @@ Expression::make_random(CGContext &cg_context, const Type* type, const CVQualifi
 #endif
 
 	// increment expression depth. A function call increase the depth by 1
-	if (e->term_type == eConstant || e->term_type == eVariable || 
+	if (e->term_type == eConstant || e->term_type == eVariable ||
 		(e->get_invoke() && e->get_invoke()->invoke_type == eFuncCall)) {
 		cg_context.expr_depth++;
 	}
@@ -251,7 +251,7 @@ Expression *
 Expression::make_random_param(CGContext &cg_context, const Type* type, const CVQualifiers* qfer, enum eTermType tt)
 {
 	DEPTH_GUARD_BY_TYPE_RETURN_WITH_FLAG(dtExpressionRandomParam, tt, NULL);
-	Expression *e = 0;  
+	Expression *e = 0;
 	assert(type);
 	// if a term type is provided, no need to choose random term type
 	if (tt == MAX_TERM_TYPES) {
@@ -269,7 +269,7 @@ Expression::make_random_param(CGContext &cg_context, const Type* type, const CVQ
 		}
 		tt = ExpressionTypeProbability(&filter);
 	}
-	 
+
 	ERROR_GUARD(NULL);
 
 	switch (tt) {
@@ -280,20 +280,20 @@ Expression::make_random_param(CGContext &cg_context, const Type* type, const CVQ
 		break;
 	case eVariable:
 		e = ExpressionVariable::make_random(cg_context, type, qfer, true);
-		break; 
+		break;
 	case eFunction:
-		e = ExpressionFuncall::make_random(cg_context, type, qfer); 
+		e = ExpressionFuncall::make_random(cg_context, type, qfer);
 		break;
 	case eAssignment:
 		e = ExpressionAssign::make_random(cg_context, type, qfer);
 		break;
-	case eCommaExpr: 
+	case eCommaExpr:
 		e = ExpressionComma::make_random(cg_context, type, qfer);
 		break;
 	default: break;
-	} 
+	}
 
-	if (e->term_type == eConstant || e->term_type == eVariable || 
+	if (e->term_type == eConstant || e->term_type == eVariable ||
 		(e->get_invoke() && e->get_invoke()->invoke_type == eFuncCall)) {
 		cg_context.expr_depth++;
 	}
@@ -316,7 +316,7 @@ Expression::Expression(const Expression &expr) :
 	term_type(expr.term_type),
 	cast_type(NULL)
 {
-	
+
 }
 /*
  *

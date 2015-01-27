@@ -32,7 +32,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <vector> 
+#include <vector>
 #include <map>
 #include "Effect.h"
 using namespace std;
@@ -55,7 +55,7 @@ class Lhs;
 class Expression;
 class FactMgr;
 class Statement;
-class ExpressionVariable; 
+class ExpressionVariable;
 class ArrayVariable;
 
 typedef std::vector<const Variable *> VariableSet;
@@ -63,10 +63,10 @@ typedef std::vector<const Variable *> VariableSet;
 class RWDirective
 {
 public:
-	RWDirective(const VariableSet& no_reads, const VariableSet& no_writes, VariableSet& reads, VariableSet& writes) 
+	RWDirective(const VariableSet& no_reads, const VariableSet& no_writes, VariableSet& reads, VariableSet& writes)
 		: no_read_vars(no_reads),
 		  no_write_vars(no_writes),
-		  must_read_vars(reads), 
+		  must_read_vars(reads),
 		  must_write_vars(writes)
 	{};
 
@@ -91,7 +91,7 @@ class CGContext
 {
 public:
 	static const VariableSet empty_variable_set;
- 
+
 	// original constructor, created at the beginning of generating a function
 	CGContext(Function *current_func, const Effect &eff_context, Effect *eff_accum);
 	// create a CGContext for parameters from an existing CGContext
@@ -115,7 +115,7 @@ public:
 
 	Block *get_current_block(void) const;
 
-	static const CGContext& get_empty_context(void) { return empty_context;} 
+	static const CGContext& get_empty_context(void) { return empty_context;}
 
 	const Effect &get_effect_context(void) const	{ return effect_context; }
 	Effect *get_effect_accum(void) const			{ return effect_accum; }
@@ -147,24 +147,24 @@ public:
 
 	void reset_effect_accum(const Effect& e) { if (effect_accum) *effect_accum = e;}
 	void reset_effect_stm(const Effect& e) { effect_stm = e;}
- 
+
 	bool allow_volatile() const;
 	bool allow_const(Effect::Access access) const;
 
 private:
 	Function * const current_func; // may be null.
-    
+
 
 public: // XXX
 	int blk_depth;
 	int expr_depth;
 	unsigned int flags;
 	std::vector<const Block*> call_chain;
-	const Block* curr_blk; 
-	RWDirective* rw_directive; 
+	const Block* curr_blk;
+	RWDirective* rw_directive;
 	// induction variables for loops, with each IV controls one nested loop
 	map<const Variable*, unsigned int> iv_bounds;
-	
+
 	const Expression* curr_rhs;   // only used in the context of LHS
 
 private:

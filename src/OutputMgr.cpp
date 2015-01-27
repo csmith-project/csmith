@@ -81,7 +81,7 @@ OutputMgr::is_monitored_func(void)
 {
 	if (OutputMgr::monitored_funcs_.empty())
 		return true;
-	std::vector<string>::iterator result = 
+	std::vector<string>::iterator result =
 		find(monitored_funcs_.begin(), monitored_funcs_.end(), curr_func_);
 	return (result != monitored_funcs_.end());
 }
@@ -102,7 +102,7 @@ OutputMgr::OutputMain(std::ostream &out)
 	CGContext cg_context(GetFirstFunction() /* BOGUS -- not in first func. */,
 						 Effect::get_empty_effect(),
 						 0);
-	
+
 	FunctionInvocation *invoke = NULL;
 	invoke = ExtensionMgr::MakeFuncInvocation(GetFirstFunction(), cg_context);
 	out << endl << endl;
@@ -138,12 +138,12 @@ OutputMgr::OutputMain(std::ostream &out)
 		out << "    ";
 		invoke->Output(out);
 		out << ";" << endl;
-	#endif 
+	#endif
 		// resetting all global dangling pointer to null per Rohit's request
 		if (!CGOptions::dangling_global_ptrs()) {
 			OutputPtrResets(out, GetFirstFunction()->dead_globals);
 		}
-		
+
 		if (CGOptions::step_hash_by_stmt())
 			OutputMgr::OutputHashFuncInvocation(out, 1);
 		else
@@ -238,13 +238,13 @@ OutputMgr::OutputTail(std::ostream &out)
 {
 	if (!CGOptions::concise()) {
 		out << endl << "/************************ statistics *************************" << endl;
-		Bookkeeper::output_statistics(out); 
+		Bookkeeper::output_statistics(out);
 		out << "********************* end of statistics **********************/" << endl;
 		out << endl;
 	}
 }
 
-void 
+void
 OutputMgr::OutputHeader(int argc, char *argv[], unsigned long seed)
 {
 	std::ostream &out = get_main_out();
@@ -343,12 +343,12 @@ OutputMgr::output_comment_line(ostream &out, const std::string &comment)
 /*
  * resetting pointers to null by outputing "p = 0;"
  */
-void 
+void
 OutputMgr::OutputPtrResets(ostream &out, const vector<const Variable*>& ptrs)
 {
 	size_t i;
 	for (i=0; i<ptrs.size(); i++) {
-		const Variable* v = ptrs[i]; 
+		const Variable* v = ptrs[i];
 		if (v->isArray) {
 			const ArrayVariable* av = (const ArrayVariable*)v;
 			Constant zero(get_int_type(), "0");

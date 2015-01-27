@@ -27,14 +27,14 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef WIN32 
+#ifdef WIN32
 #pragma warning(disable : 4786)   /* Disable annoying warning messages */
 #endif
 
 #include "CFGEdge.h"
 #include "Statement.h"
 
-	
+
 CFGEdge::CFGEdge(const Statement* src, const Statement* dest, bool post_dest, bool back_link)
     : src(src),
       dest(dest),
@@ -43,7 +43,7 @@ CFGEdge::CFGEdge(const Statement* src, const Statement* dest, bool post_dest, bo
 {
 	// nothing else to do
 }
-	
+
 CFGEdge::CFGEdge(const CFGEdge &edge)
 	: src(edge.src),
 	  dest(edge.dest),
@@ -52,7 +52,7 @@ CFGEdge::CFGEdge(const CFGEdge &edge)
 {
 	// nothing else to do
 }
-	
+
 CFGEdge::~CFGEdge(void)
 {
 }

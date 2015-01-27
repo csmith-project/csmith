@@ -101,7 +101,7 @@ SafeOpFlags::flags_to_type(bool sign, enum SafeOpSize size)
 
 const Type*
 SafeOpFlags::get_lhs_type(void)
-{  
+{
 	eSimpleType st = flags_to_type(op1_, op_size_);
 	const Type& t = Type::get_simple_type(st);
 	return &t;
@@ -109,13 +109,13 @@ SafeOpFlags::get_lhs_type(void)
 
 const Type*
 SafeOpFlags::get_rhs_type(void)
-{  
+{
 	eSimpleType st = flags_to_type(op2_, op_size_);
 	const Type& t = Type::get_simple_type(st);
 	return &t;
 }
 
-bool 
+bool
 SafeOpFlags::return_float_type(const Type *rv_type, const Type *op1_type, const Type *op2_type,
 				eBinaryOps bop)
 {
@@ -130,7 +130,7 @@ SafeOpFlags::return_float_type(const Type *rv_type, const Type *op1_type, const 
 	return false;
 }
 
-bool 
+bool
 SafeOpFlags::return_float_type(const Type *rv_type, const Type *op1_type, eUnaryOps uop)
 {
 	if (!CGOptions::enable_float())
@@ -182,7 +182,7 @@ SafeOpFlags::make_random_unary(const Type *rv_type, const Type *op1_type, eUnary
 }
 
 SafeOpFlags*
-SafeOpFlags::make_random_binary(const Type *rv_type, const Type *op1_type, const Type *op2_type, 
+SafeOpFlags::make_random_binary(const Type *rv_type, const Type *op1_type, const Type *op2_type,
 			SafeOpKind op_kind, eBinaryOps bop)
 {
 	DEPTH_GUARD_BY_TYPE_RETURN_WITH_FLAG(dtSafeOpFlags, op_kind, NULL);
@@ -273,7 +273,7 @@ SafeOpFlags::OutputFuncOrMacro(std::ostream &out) const
 		: (out << "macro_");
 }
 
-void 
+void
 SafeOpFlags::OutputSign(std::ostream &out, bool is_signed) const
 {
 	is_signed ? (out << "_s")
@@ -297,7 +297,7 @@ SafeOpFlags::~SafeOpFlags()
 	// Nothing to do
 }
 
-std::string 
+std::string
 SafeOpFlags::safe_float_func_string(enum eBinaryOps op) const
 {
 	string s;
@@ -314,7 +314,7 @@ SafeOpFlags::safe_float_func_string(enum eBinaryOps op) const
 }
 
 /* find the safe math function/macro name */
-std::string 
+std::string
 SafeOpFlags::to_string(enum eBinaryOps op) const
 {
 	if (op_size_ == sFloat)
@@ -329,38 +329,38 @@ SafeOpFlags::to_string(enum eBinaryOps op) const
 		case eLShift: s = "safe_lshift_"; break;
 		case eRShift: s = "safe_rshift_"; break;
 		default: break;
-	} 
+	}
 	ostringstream oss;
 	OutputFuncOrMacro(oss);
 	OutputSize(oss);
-	OutputOp1(oss); 
+	OutputOp1(oss);
 	(op == eLShift || op == eRShift) ? OutputOp2(oss) : OutputOp1(oss);
 	s += oss.str();
 	return s;
 }
 
 /* find the safe math function/macro name */
-std::string 
+std::string
 SafeOpFlags::to_string(enum eUnaryOps op) const
 {
 	assert((op_size_ != sFloat) && "No safe unary function on floating point!");
 	string s;
 	switch (op) {
-		case eMinus: s = "safe_unary_minus_"; break; 
+		case eMinus: s = "safe_unary_minus_"; break;
 		default: break;
-	} 
+	}
 	ostringstream oss;
 	OutputFuncOrMacro(oss);
 	OutputSize(oss);
-	OutputOp1(oss);  
+	OutputOp1(oss);
 	s += oss.str();
 	return s;
 }
 
 /* assign id to safe math function */
-int 
+int
 SafeOpFlags::to_id(std::string fname)
-{ 
+{
 	for (size_t i=0; i<wrapper_names.size(); i++) {
 		if (wrapper_names[i] == fname) {
 			return i+1;

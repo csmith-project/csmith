@@ -27,7 +27,7 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef WIN32 
+#ifdef WIN32
 #pragma warning(disable : 4786)   /* Disable annoying warning messages */
 #endif
 
@@ -55,7 +55,7 @@ StatementContinue *
 StatementContinue::make_random(CGContext &cg_context)
 {
 	//static int g =0;
-	FactMgr* fm = get_fact_mgr(&cg_context); 
+	FactMgr* fm = get_fact_mgr(&cg_context);
 	// find the closest looping parent block: the one "continue"
 	// would apply to
 	//int h = g++;
@@ -71,9 +71,9 @@ StatementContinue::make_random(CGContext &cg_context)
 	assert(b);
 	cg_context.get_effect_stm().clear();
 	Expression *expr = Expression::make_random(cg_context, get_int_type(), 0, true, true, eVariable);
-	ERROR_GUARD(NULL); 
-	StatementContinue* sc = new StatementContinue(cg_context.get_current_block(), *expr, *b); 
-	fm->create_cfg_edge(sc, b, false, true);  
+	ERROR_GUARD(NULL);
+	StatementContinue* sc = new StatementContinue(cg_context.get_current_block(), *expr, *b);
+	fm->create_cfg_edge(sc, b, false, true);
     return sc;
 }
 
@@ -107,11 +107,11 @@ StatementContinue::~StatementContinue(void)
 	delete &test;
 }
 
-/* 
+/*
  * return true if condition is always true
  */
-bool 
-StatementContinue::must_jump(void) const 
+bool
+StatementContinue::must_jump(void) const
 {
 	return test.not_equals(0);
 }
@@ -127,14 +127,14 @@ StatementContinue::Output(std::ostream &out, FactMgr* /*fm*/, int indent) const
 	test.Output(out);
 	out << ")";
 	outputln(out);
-	output_tab(out, indent+1); 
-	out << "continue;"; 
-	outputln(out); 
+	output_tab(out, indent+1);
+	out << "continue;";
+	outputln(out);
 }
 
-bool 
+bool
 StatementContinue::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const
-{    
+{
 	// evaludate condition first
 	if (!test.visit_facts(inputs, cg_context)) {
 		return false;

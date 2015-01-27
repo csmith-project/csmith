@@ -46,7 +46,7 @@ class Filter;
 class RandomNumber
 {
 public:
-	// Make it singleton for now. 
+	// Make it singleton for now.
 	static void CreateInstance(RNDNUM_GENERATOR rImpl, const unsigned long seed);
 
 	static RandomNumber *GetInstance();
@@ -65,7 +65,7 @@ public:
 	void get_sequence(std::string &sequence);
 
 	// Probably it's not a good idea to define those functions with default arguments.
-	// It would have potential problem to be misused. 
+	// It would have potential problem to be misused.
 	// I defined them in this way only for compatible to the previous code.
 	// Use it carefully.
 	virtual unsigned int rnd_upto(const unsigned int n, const Filter *f = NULL, const std::string *where = NULL);

@@ -41,13 +41,13 @@ class ExpressionComma : public Expression
 {
 public:
 	// Factory method.
-	static ExpressionComma *make_random(CGContext &cg_context, const Type* type, const CVQualifiers* qfer=0);  
+	static ExpressionComma *make_random(CGContext &cg_context, const Type* type, const CVQualifiers* qfer=0);
 
-	virtual ~ExpressionComma(void);  
+	virtual ~ExpressionComma(void);
 
 	Expression* clone(void) const;
 
-	virtual CVQualifiers get_qualifiers(void) const { return rhs.get_qualifiers();}  
+	virtual CVQualifiers get_qualifiers(void) const { return rhs.get_qualifiers();}
 
 	virtual void get_eval_to_subexps(vector<const Expression*>& subs) const;
 
@@ -57,8 +57,8 @@ public:
 
 	virtual bool visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const;
 
-	virtual bool has_uncertain_call_recursive(void) const { return lhs.has_uncertain_call_recursive() || rhs.has_uncertain_call_recursive();} 
- 
+	virtual bool has_uncertain_call_recursive(void) const { return lhs.has_uncertain_call_recursive() || rhs.has_uncertain_call_recursive();}
+
 	virtual bool use_var(const Variable* v) const { return lhs.use_var(v) || rhs.use_var(v);}
 
 	virtual bool equals(int num) const { return rhs.equals(num);}

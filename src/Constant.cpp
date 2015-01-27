@@ -57,7 +57,7 @@ static string GenerateRandomConstant(const Type* type);
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * 
+ *
  */
 Constant::Constant(const Type *t, const string &v)
 	: Expression(eConstant),
@@ -67,7 +67,7 @@ Constant::Constant(const Type *t, const string &v)
 }
 
 /*
- * 
+ *
  */
 Constant::Constant(const Constant &c)
 	: Expression(eConstant),
@@ -77,7 +77,7 @@ Constant::Constant(const Constant &c)
 }
 
 /*
- * 
+ *
  */
 Constant::~Constant(void)
 {
@@ -114,7 +114,7 @@ GenerateRandomIntConstant(void)
 		val = "0x" + RandomHexDigits( 8 );
 	else
 		val = "0x" + RandomHexDigits( 8 ) + "L";
-	
+
 	return val;
 }
 
@@ -180,7 +180,7 @@ GenerateRandomFloatHexConstant(void)
 	return oss.str();
 }
 
-/* 
+/*
  * Generate small hexadecimal floating point constants
  */
 static string
@@ -219,7 +219,7 @@ GenerateRandomConstantInRange(const Type* type, int bound)
 		ERROR_GUARD("");
 		if (flag)
 			oss << num;
-		else 
+		else
 			oss << "-" << num;
 	}
 	else if (type->simple_type == eUInt) {
@@ -237,12 +237,12 @@ GenerateRandomConstantInRange(const Type* type, int bound)
 }
 
 // --------------------------------------------------------------
-  /* generate a constant struct in the form of 
+  /* generate a constant struct in the form of
    * "{2, 4, {2, 4}, 6.0}"
    *************************************************************/
 static string
 GenerateRandomStructConstant(const Type* type)
-{ 
+{
 	string value = "{";
 	size_t i;
 	assert(type->eType == eStruct);
@@ -270,21 +270,21 @@ GenerateRandomStructConstant(const Type* type)
         		value += v;
 		}
 	}
-	value += "}"; 
+	value += "}";
 	return value;
 }
 
 // --------------------------------------------------------------
   /* generate an union initializer: unlike struct, initializing
-     the first field is enough 
+     the first field is enough
    *************************************************************/
 static string
 GenerateRandomUnionConstant(const Type* type)
-{ 
-	string value = "{"; 
+{
+	string value = "{";
 	assert(type->eType == eUnion && type->fields.size() == type->bitfields_length_.size());
 	value += GenerateRandomConstant(type->fields[0]);
-	value += "}"; 
+	value += "}";
 	return value;
 }
 
@@ -310,7 +310,7 @@ GenerateRandomConstant(const Type* type)
 	else if (type->eType == eSimple) {
 		eSimpleType st = type->simple_type;
 		assert(st != eVoid);
-		//assert((eType >= 0) && (eType <= MAX_SIMPLE_TYPES)); 
+		//assert((eType >= 0) && (eType <= MAX_SIMPLE_TYPES));
 		if (pure_rnd_flipcoin(50)) {
 			ERROR_GUARD("");
 			int num = 0;
@@ -321,31 +321,31 @@ GenerateRandomConstant(const Type* type)
 				ERROR_GUARD("");
 				num = pure_rnd_upto(20)-10;
 			}
-			// don't use negative number for unsigned type, as this causes 
-			//trouble for some static analyzers  
-			ostringstream oss; 
+			// don't use negative number for unsigned type, as this causes
+			//trouble for some static analyzers
+			ostringstream oss;
 			switch (st) {
 			case eUChar:
-				oss << (unsigned int)(unsigned char)num; 
+				oss << (unsigned int)(unsigned char)num;
 				break;
 			case eUShort:
-				oss << (unsigned short)num; 
+				oss << (unsigned short)num;
 				break;
 			case eUInt:
 				oss << (unsigned int)num;
 				break;
-			case eULong: 
-			case eULongLong:  
+			case eULong:
+			case eULongLong:
 				if (!CGOptions::longlong()) {
 					oss << (unsigned int)num;
-				} else { 
+				} else {
 					oss << ((type->simple_type == eULong) ? (unsigned long)num : (unsigned INT64)num);
 				}
-				break; 
+				break;
 			case eFloat:
 				oss << GenerateSmallRandomFloatHexConstant(num);
 				break;
-			default: 
+			default:
 				oss << num;
 				break;
 			}
@@ -391,7 +391,7 @@ GenerateRandomConstant(const Type* type)
 Constant *
 Constant::make_random(const Type* type)
 {
-	string v = GenerateRandomConstant(type);    
+	string v = GenerateRandomConstant(type);
 	ERROR_GUARD(NULL);
 	return new Constant(type, v);
 }
@@ -400,7 +400,7 @@ Constant *
 Constant::make_random_upto(unsigned int limit)
 {
 	ostringstream oss;
-	oss << rnd_upto(limit);    
+	oss << rnd_upto(limit);
 	ERROR_GUARD(NULL);
 	return new Constant(&Type::get_simple_type(eUInt), oss.str());
 }
@@ -408,10 +408,10 @@ Constant::make_random_upto(unsigned int limit)
 Constant*
 Constant::make_random_nonzero(const Type* type)
 {
-	string v = GenerateRandomConstant(type);    
+	string v = GenerateRandomConstant(type);
 	ERROR_GUARD(NULL);
 	while (StringUtils::str2int(v) == 0) {
-		v = GenerateRandomConstant(type); 
+		v = GenerateRandomConstant(type);
 	}
 	return new Constant(type, v);
 }
@@ -424,7 +424,7 @@ Constant *
 Constant::make_int(int v)
 {
 	// Commented out code for the cache:
-	// It's hard for releasint the memory for those cached Constants. 
+	// It's hard for releasint the memory for those cached Constants.
 #if 0
 	static const int cache_size = 256;
 	static bool cache_inited = false;
@@ -477,19 +477,19 @@ Constant::compatible(const Expression *exp) const
 	return false;
 }
 
-bool 
+bool
 Constant::less_than(int num) const
 {
 	return StringUtils::str2int(value) < num;
 }
 
-bool 
+bool
 Constant::not_equals(int num) const
 {
 	return StringUtils::str2int(value) != num;
 }
 
-bool 
+bool
 Constant::equals(int num) const
 {
 	return StringUtils::str2int(value) == num;

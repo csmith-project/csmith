@@ -33,7 +33,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <string>
-#include <vector> 
+#include <vector>
 #include <ostream>
 #define intvec std::vector<int>
 

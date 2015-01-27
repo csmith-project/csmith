@@ -143,7 +143,7 @@ FunctionInvocationUnary::get_type(void) const
 /*
  *
  */
-bool 
+bool
 FunctionInvocationUnary::compatible(const Variable *v) const
 {
 	if (!param_value.empty())
@@ -152,8 +152,8 @@ FunctionInvocationUnary::compatible(const Variable *v) const
 }
 
 /* do some constant folding */
-bool 
-FunctionInvocationUnary::equals(int num) const 
+bool
+FunctionInvocationUnary::equals(int num) const
 {
 	assert(!param_value.empty());
 	if (num == 0 && eFunc == eNot && param_value[0]->not_equals(0)) {
@@ -216,7 +216,7 @@ FunctionInvocationUnary::Output(std::ostream &out) const
 				int id = SafeOpFlags::to_id(fname);
 				// don't use safe math wrapper if this function is specified in "--safe-math-wrapper"
 				if (CGOptions::safe_math_wrapper(id)) {
-					out << fname << "(";  
+					out << fname << "(";
 					if (CGOptions::math_notmp()) {
 						out << tmp_var << ", ";
 					}
@@ -224,7 +224,7 @@ FunctionInvocationUnary::Output(std::ostream &out) const
 					if (CGOptions::identify_wrappers()) {
 						out << ", " << id;
 					}
-					out << ")"; 
+					out << ")";
 					break;
 				}
 			}
@@ -243,7 +243,7 @@ FunctionInvocationUnary::Output(std::ostream &out) const
 		OutputStandardFuncName(eFunc, out);
 		// explicit type casting for op1
 		if (need_cast) {
-			out << "("; 
+			out << "(";
 			op_flags->OutputSize(out);
 			out << ")";
 		}
@@ -267,10 +267,10 @@ FunctionInvocationUnary::indented_output(std::ostream &out, int indent) const
 
 	case eMinus:
 		if (CGOptions::avoid_signed_overflow()) {
-			out << op_flags->to_string(eFunc); 
-			output_open_encloser("(", out, indent);  
+			out << op_flags->to_string(eFunc);
+			output_open_encloser("(", out, indent);
 			param_value[0]->indented_output(out, indent);
-			output_close_encloser(")", out, indent); 
+			output_close_encloser(")", out, indent);
 			break;
 		}
 		// Fallthrough!

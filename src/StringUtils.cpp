@@ -43,7 +43,7 @@ StringUtils::empty_line(const std::string &line)
         return (found == string::npos);
 }
 
-bool 
+bool
 StringUtils::is_space(const char c)
 {
 	return ((c == ' ') ||
@@ -65,7 +65,7 @@ StringUtils::get_substring(const std::string &s, const char open_delim, const ch
 		return "";
 	size_t pos = 0;
 	ignore_spaces(s, pos);
-	
+
 	if (s[pos] != open_delim)
 		return "";
 
@@ -186,7 +186,7 @@ std::string
 StringUtils::int2str(int i)
 {
 	ostringstream oss;
-	oss << i; 
+	oss << i;
 	return oss.str();
 }
 
@@ -219,16 +219,16 @@ std::string
 StringUtils::longlong2str(INT64 i)
 {
 	ostringstream oss;
-	oss << i; 
+	oss << i;
 	return oss.str();
 }
 
 
-void 
+void
 StringUtils::chop(string& str)
 {
 	string s;
-	size_t last; 
+	size_t last;
 	while (str[0] == '\t' || str[0] == ' ') {
 		str = str.substr(1);
 	}
@@ -248,7 +248,7 @@ StringUtils::breakup_assigns(const string& assigns, vector<string>& vars, vector
 	vector<string> tmp_strs;
 	StringUtils::split_string(assigns, tmp_strs, ';');
 	size_t i;
-	
+
 	string short_assigns;
 	for (i=0; i<tmp_strs.size(); i++) {
 		vector<string> pair;
@@ -262,7 +262,7 @@ StringUtils::breakup_assigns(const string& assigns, vector<string>& vars, vector
 }
 
 bool
-StringUtils::end_with(string s, string tail) 
+StringUtils::end_with(string s, string tail)
 {
 	if (tail.length() < s.length()) {
 		s = s.substr(s.length() - tail.length());

@@ -62,12 +62,12 @@ DFSOutputMgr::CreateInstance()
 		instance_->struct_output_ = DEFAULT_STRUCT_OUTPUT;
 	else
 		instance_->struct_output_ = s_output;
-			
+
 	assert(DFSOutputMgr::instance_);
 	return DFSOutputMgr::instance_;
 }
 
-void 
+void
 DFSOutputMgr::OutputHeader(int argc, char *argv[], unsigned long seed)
 {
 	if (!CGOptions::compact_output())
@@ -96,7 +96,7 @@ DFSOutputMgr::Output()
 		OutputMgr::OutputHashFuncDef(out);
 		OutputMgr::OutputStepHashFuncDef(out);
 	}
-		
+
 	if (!CGOptions::compact_output())
 		OutputMain(out);
 }
@@ -111,7 +111,7 @@ void
 DFSOutputMgr::outputln(ostream &out)
 {
 	if (!CGOptions::compact_output())
-		out << std::endl;	
+		out << std::endl;
 }
 
 void

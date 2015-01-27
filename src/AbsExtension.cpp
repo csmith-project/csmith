@@ -62,7 +62,7 @@ FunctionInvocation*
 AbsExtension::MakeFuncInvocation(Function *func, std::vector<ExtensionValue *> &values)
 {
 	FunctionInvocationUser *fi = new FunctionInvocationUser(func, true, NULL);
-	
+
 	vector<ExtensionValue *>::iterator i;
 	for (i = values.begin(); i != values.end(); ++i) {
 		assert(*i);

@@ -64,9 +64,9 @@ static unsigned long long read_time(void) {
 #ifdef WIN32
 static unsigned __int64 read_time(void) {
         unsigned l, h;
-        _asm {rdtsc    
-        mov l, eax  
-        mov h, edx 
+        _asm {rdtsc
+        mov l, eax
+        mov h, edx
         }
         return (h << 32) + l ;
 }

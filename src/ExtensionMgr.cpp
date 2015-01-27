@@ -85,7 +85,7 @@ ExtensionMgr::GetExtension()
 void
 ExtensionMgr::GenerateFirstParameterList(Function &curFunc)
 {
-	if (ExtensionMgr::extension_ == NULL) 
+	if (ExtensionMgr::extension_ == NULL)
 		return;
 	std::vector<ExtensionValue *> &values = ExtensionMgr::extension_->get_values();
 	ExtensionMgr::extension_->GenerateFirstParameterList(curFunc, values);
@@ -94,7 +94,7 @@ ExtensionMgr::GenerateFirstParameterList(Function &curFunc)
 void
 ExtensionMgr::GenerateValues()
 {
-	if (ExtensionMgr::extension_ == NULL) 
+	if (ExtensionMgr::extension_ == NULL)
 		return;
 	ExtensionMgr::extension_->GenerateValues();
 }
@@ -122,7 +122,7 @@ ExtensionMgr::OutputHeader(std::ostream &out)
 	}
 }
 
-void 
+void
 ExtensionMgr::OutputTail(ostream &out)
 {
 	if (ExtensionMgr::extension_ == NULL) {

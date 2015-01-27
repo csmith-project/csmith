@@ -88,8 +88,8 @@ ExpressionComma::clone(void) const
 	return new ExpressionComma(*lhs.clone(), *rhs.clone());
 }
 
-bool 
-ExpressionComma::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const 
+bool
+ExpressionComma::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const
 {
 	if (!lhs.visit_facts(inputs, cg_context)) {
 		return false;
@@ -97,7 +97,7 @@ ExpressionComma::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context)
 	return rhs.visit_facts(inputs, cg_context);
 }
 
-vector<const ExpressionVariable*> 
+vector<const ExpressionVariable*>
 ExpressionComma::get_dereferenced_ptrs(void) const
 {
 	vector<const ExpressionVariable*> ptrs1 = lhs.get_dereferenced_ptrs();
@@ -105,8 +105,8 @@ ExpressionComma::get_dereferenced_ptrs(void) const
 	ptrs1.insert(ptrs1.end(), ptrs2.begin(), ptrs2.end());
 	return ptrs1;
 }
-	
-void 
+
+void
 ExpressionComma::get_eval_to_subexps(vector<const Expression*>& subs) const
 {
 	vector<const Expression*> exps;
@@ -121,7 +121,7 @@ ExpressionComma::Output(std::ostream &out) const
 	Reducer* reducer = CGOptions::get_reducer();
 	if (reducer && reducer->output_expr(this, out)) {
 		return;
-	} 
+	}
 	out << "(";
 	lhs.Output(out);
 	out << " , ";
@@ -129,9 +129,9 @@ ExpressionComma::Output(std::ostream &out) const
 	out << ")";
 }
 
-void 
-ExpressionComma::indented_output(std::ostream &out, int indent) const 
-{ 
+void
+ExpressionComma::indented_output(std::ostream &out, int indent) const
+{
 	output_tab(out, indent);
 	Output(out);
 }

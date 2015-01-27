@@ -44,7 +44,7 @@ class SimpleDeltaSequence::ValuePair
 {
 public:
 	ValuePair(int value, int bound);
-	
+
 	~ValuePair();
 
 	int get_value() const { return value_; }
@@ -62,7 +62,7 @@ public:
 
 private:
 	int value_;
-	
+
 	int bound_;
 };
 
@@ -106,7 +106,7 @@ SimpleDeltaSequence::CreateInstance(const char sep_char)
 
 	impl_ = new SimpleDeltaSequence(sep_char);
 	assert(impl_);
-	
+
 	return impl_;
 }
 
@@ -148,7 +148,7 @@ SimpleDeltaSequence::init_sequence()
 	seqf.close();
 }
 
-void 
+void
 SimpleDeltaSequence::add_number(int v, int bound, int k)
 {
 	SimpleDeltaSequence::ValuePair *p = new SimpleDeltaSequence::ValuePair(v, bound);
@@ -165,7 +165,7 @@ SimpleDeltaSequence::get_number_by_pos(int /*pos*/)
 int
 SimpleDeltaSequence::get_number(int bound)
 {
-	
+
 	SimpleDeltaSequence::ValuePair *p = sequence_[current_pos_];
 	assert("SimpleDeltaSequence: get_number p is NULL!" && p);
 	int b = p->get_bound();
@@ -175,7 +175,7 @@ SimpleDeltaSequence::get_number(int bound)
 	return p->get_value();
 }
 
-void 
+void
 SimpleDeltaSequence::clear()
 {
 	std::map<int, SimpleDeltaSequence::ValuePair*>::iterator i;
@@ -186,7 +186,7 @@ SimpleDeltaSequence::clear()
 	seq_map_.clear();
 }
 
-void SimpleDeltaSequence::output_one(ostream &out, 
+void SimpleDeltaSequence::output_one(ostream &out,
 					const SimpleDeltaSequence::ValuePair *p)
 {
 	assert(p);
@@ -200,7 +200,7 @@ void
 SimpleDeltaSequence::get_sequence(ostream &out)
 {
 	assert(!seq_map_.empty());
-	
+
 	std::map<int, SimpleDeltaSequence::ValuePair*>::iterator i;
 	for (i = seq_map_.begin(); i != seq_map_.end(); ++i) {
 		output_one(out, (*i).second);

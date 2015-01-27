@@ -36,12 +36,12 @@
 #include <vector>
 using namespace std;
 
-enum eFactCategory { 
+enum eFactCategory {
     ePointTo=1,
-	eUnionWrite=2, 
+	eUnionWrite=2,
     /* todo
-	eIntRange=8, 
-    eEquality=16, 
+	eIntRange=8,
+    eEquality=16,
     eAlias=32,
 	*/
 };
@@ -60,24 +60,24 @@ class ExpressionVariable;
 class Fact
 {
 public:
-	Fact(eFactCategory e); 
+	Fact(eFactCategory e);
 
-	virtual ~Fact(void); 
-	
-	virtual Fact* clone(void) const = 0;  
+	virtual ~Fact(void);
 
-	virtual int join(const Fact& /*fact*/) {return 0; };  
+	virtual Fact* clone(void) const = 0;
+
+	virtual int join(const Fact& /*fact*/) {return 0; };
 
 	virtual int join_visits(const Fact& fact) { return join(fact);}
 
-	virtual bool imply(const Fact& /*fact*/) const = 0; 
+	virtual bool imply(const Fact& /*fact*/) const = 0;
 
 	// lattice functions
 	virtual bool is_top(void) const = 0;
 	virtual bool is_bottom(void) const = 0;
 	virtual void set_top(void) = 0;
 	virtual void set_bottom(void) = 0;
-	
+
 	virtual bool is_assertable(const Statement* s) const = 0;
 
 	virtual bool is_related(const Fact& fact) const { return eCat == fact.eCat && get_var() == fact.get_var();}
@@ -86,7 +86,7 @@ public:
 
 	virtual void Output(std::ostream &out) const = 0;
 
-	virtual void OutputAssertion(std::ostream &out, const Statement* s = NULL) const; 
+	virtual void OutputAssertion(std::ostream &out, const Statement* s = NULL) const;
 
 	virtual const Variable* get_var(void) const { return 0;};
 
@@ -100,7 +100,7 @@ public:
 
 	enum eFactCategory eCat;
 
-protected: 
+protected:
 	// keep track all created facts. used for releasing memory in doFinalization
 	static std::vector<Fact*> facts_;
 };
@@ -111,10 +111,10 @@ typedef FactVec* FactVecP;
 
 /******************* Fact Manipulating Functions **********************/
 /* find a fact from facts env */
-int find_fact(const FactVec& facts, const Fact* fact);  
+int find_fact(const FactVec& facts, const Fact* fact);
 
 /* find a specific type of fact (same variable most likely) from facts env */
-const Fact* find_related_fact(const FactVec& facts, const Fact* new_fact);  
+const Fact* find_related_fact(const FactVec& facts, const Fact* new_fact);
 const Fact* find_related_fact(const vector<Fact*>& facts, const Fact* new_fact);
 
 /* merge a fact into env */

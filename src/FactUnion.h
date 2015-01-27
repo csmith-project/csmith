@@ -35,7 +35,7 @@
 #include <vector>
 #include "Fact.h"
 #include "Variable.h"
- 
+
 class Function;
 class Statement;
 class Block;
@@ -48,28 +48,28 @@ using namespace std;
 
 class FactUnion : public Fact
 {
-public: 
-	static FactUnion *make_fact(const Variable* v, int fid = 0);  
-	static vector<const Fact*> make_facts(const vector<const Variable*>& vars, int fid);  
+public:
+	static FactUnion *make_fact(const Variable* v, int fid = 0);
+	static vector<const Fact*> make_facts(const vector<const Variable*>& vars, int fid);
 	static void doFinalization();
 	static bool is_nonreadable_field(const Variable *v, const std::vector<const Fact*>& facts);
- 
-	virtual ~FactUnion(void) {}; 
+
+	virtual ~FactUnion(void) {};
 
 	virtual const Variable* get_var(void) const { return var;};
 	void set_var(const Variable* v) { var = v;}
 	const Type* get_last_written_type(void) const;
 	int   get_last_written_fid(void) const { return last_written_fid; };
 	static bool is_field_readable(const Variable* v, int fid, const vector<const Fact*>& facts);
-	
+
 	// lattice functions
 	virtual bool is_top(void) const { return last_written_fid == TOP;}
 	virtual bool is_bottom(void) const { return last_written_fid == BOTTOM;}
 	virtual void set_top(void) { last_written_fid = TOP;}
-	virtual void set_bottom(void) { last_written_fid = BOTTOM;} 
+	virtual void set_bottom(void) { last_written_fid = BOTTOM;}
 	virtual bool imply(const Fact& fact) const;
 	virtual bool equal(const Fact& fact) const;
-	virtual int join(const Fact& fact);  
+	virtual int join(const Fact& fact);
 
 	// transfer functions
 	vector<const Fact*> rhs_to_lhs_transfer(const vector<const Fact*>& facts, const vector<const Variable*>& lvars, const Expression* rhs);
@@ -82,18 +82,18 @@ public:
 	virtual bool is_assertable(const Statement* /*s*/) const { return false;}
 	virtual void Output(std::ostream &out) const;
 	virtual void OutputAssertion(std::ostream &/*out*/, const Statement* /*s*/) const {};
-   	
+
 	// constants to indicate lattice top/bottom
 	static const int TOP;
 	static const int BOTTOM;
-private:   
+private:
 	FactUnion(const Variable* v);
 	FactUnion(const Variable* v, int fid);
 
 	const Variable* var;
-	
-	// last written field id 
-	int  last_written_fid;	
+
+	// last written field id
+	int  last_written_fid;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
