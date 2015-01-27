@@ -28,7 +28,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 #include "StatementArrayOp.h"
-#include <cassert> 
+#include <cassert>
 #include "Common.h"
 #include "Block.h"
 #include "CGContext.h"
@@ -36,7 +36,7 @@
 #include "Constant.h"
 #include "ExpressionFuncall.h"
 #include "ExpressionVariable.h"
-#include "Function.h" 
+#include "Function.h"
 #include "FunctionInvocation.h"
 #include "FunctionInvocationBinary.h"
 #include "VariableSelector.h"
@@ -58,7 +58,7 @@ using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Randomly determine the iteration over an array: initial value, 
+ * Randomly determine the iteration over an array: initial value,
  * increment value (negative means going backwards), given the size
  * of array
  */
@@ -69,7 +69,7 @@ StatementArrayOp::make_random_iter_ctrl(int size, int &init, int &incr)
 	// to get pure random numbers, and in this case, we cannot get
 	// errors
 	init = pure_rnd_flipcoin(50) ? 0 : pure_rnd_upto(size);
-	incr = pure_rnd_flipcoin(50) ? 1 : pure_rnd_upto(size) + 1; 
+	incr = pure_rnd_flipcoin(50) ? 1 : pure_rnd_upto(size) + 1;
 }
 
 /*
@@ -77,19 +77,19 @@ StatementArrayOp::make_random_iter_ctrl(int size, int &init, int &incr)
  */
 Statement*
 StatementArrayOp::make_random(CGContext &cg_context)
-{ 
+{
 	bool ary_init = rnd_flipcoin(5);
 	ERROR_GUARD(NULL);
-	if (ary_init) { 
+	if (ary_init) {
 		return make_random_array_init(cg_context);
 	}
-	StatementFor* sf = StatementFor::make_random_array_loop(cg_context); 
+	StatementFor* sf = StatementFor::make_random_array_loop(cg_context);
 	return sf;
 }
 
 StatementArrayOp *
 StatementArrayOp::make_random_array_init(CGContext &cg_context)
-{ 
+{
 	// select the array to initialize
 	//static int g = 0;
 	//int h = g++;
@@ -97,13 +97,13 @@ StatementArrayOp::make_random_array_init(CGContext &cg_context)
 	ERROR_GUARD(NULL);
 	cg_context.get_effect_stm().clear();
 	// Select the loop control variable.
-	vector<const Variable*> invalid_vars; 
+	vector<const Variable*> invalid_vars;
 	vector<const Variable*> cvs;
 	ERROR_GUARD(NULL);
 	// the iteration settings are simple: start from index 0, step through all members
 	vector<int> inits, incrs;
 	size_t i;
-	cg_context.get_effect_stm().clear(); 
+	cg_context.get_effect_stm().clear();
 	FactMgr* fm = get_fact_mgr(&cg_context);
 	int vol_count = 0;
 	if (av->is_volatile())
@@ -111,10 +111,10 @@ StatementArrayOp::make_random_array_init(CGContext &cg_context)
 
 	for (i=0; i<av->get_dimension(); i++) {
 		inits.push_back(0);
-		incrs.push_back(1); 
+		incrs.push_back(1);
 		Variable *cv = NULL;
 		do {
-			cv = VariableSelector::SelectLoopCtrlVar(cg_context, invalid_vars); 
+			cv = VariableSelector::SelectLoopCtrlVar(cg_context, invalid_vars);
 			if (cv->type->is_float()) {
 				invalid_vars.push_back(cv);
 				continue;
@@ -128,7 +128,7 @@ StatementArrayOp::make_random_array_init(CGContext &cg_context)
 				continue;
 			}
 			else {
-				break;	
+				break;
 			}
 		} while (true);
 		invalid_vars.push_back(cv);
@@ -139,7 +139,7 @@ StatementArrayOp::make_random_array_init(CGContext &cg_context)
 		cg_context.iv_bounds[cv] = av->get_sizes()[i];
 	}
 	cg_context.write_var(av);
-	
+
 	// JYTODO: initialize only field(s) of array members if they are of type struct
 	Block* b = cg_context.get_current_block()->random_parent_block();
 	Expression* init = VariableSelector::make_init_value(Effect::READ, cg_context, av->type, &av->qfer, b);
@@ -150,7 +150,7 @@ StatementArrayOp::make_random_array_init(CGContext &cg_context)
 		cg_context.get_current_func()->fact_changed = true;
 	}
 	fm->map_stm_effect[sa] = cg_context.get_effect_stm();
-	
+
 	// clear IV list from cg_context
 	for (i=0; i<cvs.size(); i++) {
 		cg_context.iv_bounds.erase(cvs[i]);
@@ -161,10 +161,10 @@ StatementArrayOp::make_random_array_init(CGContext &cg_context)
 /*
  *
  */
-StatementArrayOp::StatementArrayOp(Block* b, const ArrayVariable* av, 
-				   const std::vector<const Variable*>& cvs, 
+StatementArrayOp::StatementArrayOp(Block* b, const ArrayVariable* av,
+				   const std::vector<const Variable*>& cvs,
 				   const std::vector<int>& inits,
-				   const std::vector<int>& incrs, 
+				   const std::vector<int>& incrs,
 				   const Block *body)
 	: Statement(eArrayOp, b),
 	  array_var(av),
@@ -180,10 +180,10 @@ StatementArrayOp::StatementArrayOp(Block* b, const ArrayVariable* av,
 /*
  *
  */
-StatementArrayOp::StatementArrayOp(Block* b, const ArrayVariable* av, 
-				   const std::vector<const Variable*>& cvs, 
+StatementArrayOp::StatementArrayOp(Block* b, const ArrayVariable* av,
+				   const std::vector<const Variable*>& cvs,
 				   const std::vector<int>& inits,
-				   const std::vector<int>& incrs, 
+				   const std::vector<int>& incrs,
 				   const Expression *e)
 	: Statement(eArrayOp, b),
 	  array_var(av),
@@ -233,8 +233,8 @@ StatementArrayOp::output_header(std::ostream& out, int& indent) const
 		else {
 			out << " += " << incrs[i] << ")";
 		}
-		outputln(out); 
-	} 
+		outputln(out);
+	}
 }
 
 /*
@@ -287,13 +287,13 @@ StatementArrayOp::Output(std::ostream &out, FactMgr* fm, int indent) const
 	}
 }
 
-bool 
+bool
 StatementArrayOp::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const
-{   
+{
 	// walk the iterations
 	size_t i;
-	for (i=0; i<array_var->get_dimension(); i++) { 
-		const Variable *cv = ctrl_vars[i];  
+	for (i=0; i<array_var->get_dimension(); i++) {
+		const Variable *cv = ctrl_vars[i];
 		if (!cg_context.check_write_var(cv, inputs)) {
 			return false;
 		}
@@ -312,11 +312,11 @@ StatementArrayOp::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context
 		} else {
 			inputs = fm->map_facts_in[body];
 		}
-		// include the facts from "break" statements 
-		// find edges leading to the end of this statement, and merge 
+		// include the facts from "break" statements
+		// find edges leading to the end of this statement, and merge
 		vector<const CFGEdge*> edges;
 		find_edges_in(edges, true, false);
-		for (i=0; i<edges.size(); i++) { 
+		for (i=0; i<edges.size(); i++) {
 			const Statement* src = edges[i]->src;
 			FactMgr::merge_jump_facts(inputs, fm->map_facts_out[src]);
 		}
@@ -328,15 +328,15 @@ StatementArrayOp::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context
 		Lhs lhs(*array_var);
 		if (!init_value->visit_facts(inputs, cg_context)) {
 			return false;
-		} 
+		}
 		if (!lhs.visit_facts(inputs, cg_context)) {
 			return false;
 		}
 		FactMgr::update_fact_for_assign(&lhs, init_value, inputs);
 		fm->map_stm_effect[this] = cg_context.get_effect_stm();
-	} 
+	}
 	return true;
-} 
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 

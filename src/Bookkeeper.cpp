@@ -26,19 +26,19 @@
 // CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
-#ifdef WIN32 
+#ifdef WIN32
 #pragma warning(disable : 4786)   /* Disable annoying warning messages */
 #endif
 
 #include "Bookkeeper.h"
-#include <cassert> 
+#include <cassert>
 #include <iostream>
 #include "Variable.h"
 #include "Type.h"
 #include "Function.h"
 #include "Expression.h"
 #include "ExpressionVariable.h"
-#include "Fact.h" 
+#include "Fact.h"
 #include "FactPointTo.h"
 #include "FactMgr.h"
 #include "CVQualifiers.h"
@@ -49,9 +49,9 @@
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////////
- 
+
 // counter for all levels of struct depth
-std::vector<int> Bookkeeper::struct_depth_cnts; 
+std::vector<int> Bookkeeper::struct_depth_cnts;
 int Bookkeeper::union_var_cnt = 0;
 std::vector<int> Bookkeeper::expr_depth_cnts;
 std::vector<int> Bookkeeper::blk_depth_cnts;
@@ -61,7 +61,7 @@ std::vector<int> Bookkeeper::read_dereference_cnts;
 std::vector<int> Bookkeeper::write_dereference_cnts;
 int Bookkeeper::cmp_ptr_to_null = 0;
 int Bookkeeper::cmp_ptr_to_ptr = 0;
-int Bookkeeper::cmp_ptr_to_addr = 0; 
+int Bookkeeper::cmp_ptr_to_addr = 0;
 int Bookkeeper::read_volatile_cnt = 0;
 int Bookkeeper::write_volatile_cnt = 0;
 int Bookkeeper::read_non_volatile_cnt = 0;
@@ -102,7 +102,7 @@ Bookkeeper::Bookkeeper()
 Bookkeeper::~Bookkeeper(void)
 {
 	// Nothing to do.
-} 
+}
 
 static void
 formated_output(std::ostream &out, const char* msg, int num)
@@ -128,20 +128,20 @@ Bookkeeper::doFinalization()
 	Bookkeeper::cmp_ptr_to_null = 0;
 	Bookkeeper::cmp_ptr_to_ptr = 0;
 	Bookkeeper::cmp_ptr_to_addr = 0;
-	
+
 }
 
-int 
+int
 Bookkeeper::stat_blk_depths_for_stmt(const Statement* s)
 {
-	size_t i, j; 
+	size_t i, j;
 	int cnt = 0;
 	if (s->eType != eBlock) {
 		incr_counter(blk_depth_cnts, s->get_blk_depth() -1);
 		cnt++;
 	}
-	vector<const Block*> blks; 
-	s->get_blocks(blks); 
+	vector<const Block*> blks;
+	s->get_blocks(blks);
 	for (i=0; i<blks.size(); i++) {
 		for (j=0; j<blks[i]->stms.size(); j++) {
 			cnt += stat_blk_depths_for_stmt(blks[i]->stms[j]);
@@ -150,8 +150,8 @@ Bookkeeper::stat_blk_depths_for_stmt(const Statement* s)
 	return cnt;
 }
 
-int 
-Bookkeeper::stat_blk_depths(void) 
+int
+Bookkeeper::stat_blk_depths(void)
 {
 	const vector<Function*>& funcs = get_all_functions();
 	int cnt = 0;
@@ -216,16 +216,16 @@ Bookkeeper::output_struct_union_statistics(std::ostream &out)
 	Bookkeeper::output_bitfields(out);
 }
 
-void 
+void
 Bookkeeper::stat_expr_depths_for_stmt(const Statement* s)
 {
 	size_t i, j;
 	vector<const Expression*> exprs;
 	vector<const Block*> blks;
-	s->get_exprs(exprs); 
+	s->get_exprs(exprs);
 	for (i=0; i<exprs.size(); i++) {
 		incr_counter(expr_depth_cnts, exprs[i]->get_complexity());
-	} 
+	}
 	s->get_blocks(blks);
 	for (i=0; i<blks.size(); i++) {
 		for (j=0; j<blks[i]->stms.size(); j++) {
@@ -234,7 +234,7 @@ Bookkeeper::stat_expr_depths_for_stmt(const Statement* s)
 	}
 }
 
-void 
+void
 Bookkeeper::stat_expr_depths(void)
 {
 	const vector<Function*>& funcs = get_all_functions();
@@ -261,17 +261,17 @@ Bookkeeper::output_expr_statistics(std::ostream &out)
 
 void
 Bookkeeper::output_pointer_statistics(std::ostream &out)
-{ 	
+{
 	size_t i;
 	int total_alias_cnt = 0;
-	int total_has_null_ptr = 0;	
+	int total_has_null_ptr = 0;
 	int point_to_scalar = 0;
 	int point_to_struct = 0;
 	int point_to_pointer = 0;
 	const vector<const Variable*>& ptrs = FactPointTo::all_ptrs;
 	const vector<vector<const Variable*> >& aliases = FactPointTo::all_aliases;
 	for (i=0; i<ptrs.size(); i++) {
-		total_alias_cnt += aliases[i].size(); 
+		total_alias_cnt += aliases[i].size();
 		if (find_variable_in_set(aliases[i], FactPointTo::null_ptr) >= 0) {
 			total_has_null_ptr++;
 		}
@@ -290,7 +290,7 @@ Bookkeeper::output_pointer_statistics(std::ostream &out)
 	}
 
 	formated_output(out, "total number of pointers: ", ptrs.size());
-	if (ptrs.size() > 0) { 
+	if (ptrs.size() > 0) {
 		out << endl;
 		formated_output(out, "times a variable address is taken: ", address_taken_cnt);
 		formated_output(out, "times a pointer is dereferenced on RHS: ", calc_total(read_dereference_cnts));
@@ -316,7 +316,7 @@ Bookkeeper::output_pointer_statistics(std::ostream &out)
 			for (i=0; i<dereference_level_cnts.size(); i++) {
 				out << "   level: " << i << ", occurrence: " << dereference_level_cnts[i] << endl;
 			}
-		} 
+		}
 		formated_output(out, "number of pointers point to pointers: ", point_to_pointer);
 		formated_output(out, "number of pointers point to scalars: ", point_to_scalar);
 		formated_output(out, "number of pointers point to structs: ", point_to_struct);
@@ -375,7 +375,7 @@ Bookkeeper::record_bitfields_writes(const Variable *var)
  */
 void
 Bookkeeper::record_pointer_comparisons(const Expression* lhs, const Expression* rhs)
-{ 
+{
 	if (lhs->term_type != eFunction && rhs->term_type != eFunction) {
 		assert(lhs->get_type().eType == ePointer && rhs->get_type().eType == ePointer);
 		if ((lhs->term_type == eVariable && rhs->term_type == eConstant) ||
@@ -398,13 +398,13 @@ Bookkeeper::record_pointer_comparisons(const Expression* lhs, const Expression* 
 /*
  * count volatile/non-volatile reads/writes, specifically access thru pointers
  */
-void 
+void
 Bookkeeper::record_volatile_access(const Variable* var, int deref_level, bool write)
-{ 
+{
 	assert(var);
 	int i;
 	write ? record_bitfields_writes(var) : record_bitfields_reads(var);;
-	for (i=0; i<=deref_level; i++) { 
+	for (i=0; i<=deref_level; i++) {
 		if (write) {
 			if (var->qfer.is_volatile_after_deref(i)) {
 				if (i) {
@@ -441,9 +441,9 @@ Bookkeeper::output_volatile_access_statistics(std::ostream &out)
 	formated_output(out, "   times read thru a pointer: ", read_volatile_thru_ptr_cnt);
 	formated_output(out, "times a volatile is write: ", write_volatile_cnt);
 	formated_output(out, "   times written thru a pointer: ", write_volatile_thru_ptr_cnt);
-	double percentage = (read_non_volatile_cnt + write_non_volatile_cnt) * 100.0 / 
+	double percentage = (read_non_volatile_cnt + write_non_volatile_cnt) * 100.0 /
 		                (read_non_volatile_cnt + write_non_volatile_cnt + read_volatile_cnt + write_volatile_cnt);
-	
+
 	formated_outputf(out, "times a volatile is available for access: ", volatile_avail);
 	out.precision(3);
 	formated_outputf(out, "percentage of non-volatile access: ", percentage);
@@ -487,14 +487,14 @@ Bookkeeper::record_vars_with_bitfields(const Type *type)
 void
 Bookkeeper::record_type_with_bitfields(const Type *typ)
 {
-	if (!typ->is_aggregate()) return;	
+	if (!typ->is_aggregate()) return;
 
 	if (typ->has_bitfields()) {
 		Bookkeeper::structs_with_bitfields++;
 		size_t len = typ->bitfields_length_.size();
 		assert(len == typ->fields.size());
 		for (size_t i = 0; i < len; ++i) {
-			if (!typ->is_bitfield(i)) 
+			if (!typ->is_bitfield(i))
 				continue;
 
 			Bookkeeper::bitfields_in_total++;
@@ -526,7 +526,7 @@ Bookkeeper::output_var_freshness(std::ostream &out)
 }
 
 void
-Bookkeeper::output_counters(std::ostream &out, const char* prefix_msg, 
+Bookkeeper::output_counters(std::ostream &out, const char* prefix_msg,
 		const char* breakdown_msg, const std::vector<int> &counters, int starting_pos)
 {
 	assert(prefix_msg && breakdown_msg);

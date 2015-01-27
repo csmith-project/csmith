@@ -57,7 +57,7 @@
 #include "StringUtils.h"
 #include "FactMgr.h"
 
-using namespace std; 
+using namespace std;
 
 #define BINARY_REDUCTION_LIMIT 18
 
@@ -69,10 +69,10 @@ struct binary_reduced_stm {
 
 std::ostream &
 ReducerOutputMgr::get_main_out()
-{ 
+{
 	if (ofile_) return *ofile_;
 	if (!CGOptions::output_file().empty()) {
-		ofile_ = new ofstream(CGOptions::output_file().c_str());	
+		ofile_ = new ofstream(CGOptions::output_file().c_str());
 		return *ofile_;
 	}
 	else {
@@ -95,9 +95,9 @@ ReducerOutputMgr::~ReducerOutputMgr()
 	}
 }
 
-void 
+void
 ReducerOutputMgr::OutputHeader(int argc, char *argv[], unsigned long /*seed*/)
-{ 
+{
 	// output shortened header: csmith options + random_inc.h include
 	ostream& out = get_main_out();
 	out << "// Options:  ";
@@ -118,10 +118,10 @@ ReducerOutputMgr::output_var(const Variable* v, std::ostream &out, int indent)
 	if (!reducer->is_var_init_reduced(v)) {
 		v->OutputDef(out, indent);
 	}
-	else { 
+	else {
 		string init = reducer->map_reduced_var_inits[v];
-		output_tab(out, indent); 
-		v->OutputDecl(out);  
+		output_tab(out, indent);
+		v->OutputDecl(out);
 		out << " = " << init << ";" << endl;
 	}
 }
@@ -151,8 +151,8 @@ ReducerOutputMgr::output_vars(const vector<Variable*> &vars, std::ostream &out, 
 	if (dimen > 0) {
 		vector <const Variable*> &ctrl_vars = Variable::get_new_ctrl_vars();
 		OutputArrayCtrlVars(ctrl_vars, out, dimen, indent);
-		for (i=0; i<avs.size(); i++) { 
-			const ArrayVariable* av = avs[i]; 
+		for (i=0; i<avs.size(); i++) {
+			const ArrayVariable* av = avs[i];
 			av->output_init(out, av->init, ctrl_vars, indent);
 		}
 	}
@@ -203,12 +203,12 @@ ReducerOutputMgr::output_block(const Block* blk, std::ostream& out, int indent, 
 		output_tab(out, indent);
 		out << s << endl;
 	}
-  
-	FactMgr* fm = get_fact_mgr_for_func(blk->func); 
+
+	FactMgr* fm = get_fact_mgr_for_func(blk->func);
 	for (i=0; i<blk->stms.size(); i++) {
 		const Statement* stm = blk->stms[i];
 		output_stm(stm, out, fm, indent);
-	} 
+	}
 
 	if (!no_bracelet) {
 		output_close_encloser("}", out, indent, true);
@@ -241,32 +241,32 @@ ReducerOutputMgr::output_func_header(const Function* f, std::ostream& out)
 	return 0;
 }
 
-void 
+void
 ReducerOutputMgr::output_crc_lines(std::ostream& out)
-{ 
+{
 	// declare loop variables if they are used in crc lines
 	for (char c = 'i'; c <= 'z'; c++) {
 		string pattern = string("; ") + c + "++)";
-		if (reducer->crc_lines.find(pattern) != string::npos) { 
-			output_tab(out, 1); 
+		if (reducer->crc_lines.find(pattern) != string::npos) {
+			output_tab(out, 1);
 			out << "int " << c << " = 0;" << endl;
 		}
 	}
 	if (reducer->crc_lines.find("print_hash_value") != string::npos) {
-		output_tab(out, 1); 
+		output_tab(out, 1);
 		out << "int print_hash_value = 0;"  << endl;
-	} 
+	}
 	// print the real CRC lines
 	output_tab(out, 1);
 	out << reducer->crc_lines << endl;
 }
 
-int 
+int
 ReducerOutputMgr::output_main_func(std::ostream& out)
-{ 	
+{
 	size_t i;
 	const Function* f = reducer->main;
-	if (f->param.size() == 0 && (reducer->main_str == "" || reducer->main_str.find("func_")==0)) { 
+	if (f->param.size() == 0 && (reducer->main_str == "" || reducer->main_str.find("func_")==0)) {
 		out << "int  main(void)" << endl;
 		if (reducer->is_blk_deleted(f->body)) {
 			out << "{" << endl;
@@ -276,7 +276,7 @@ ReducerOutputMgr::output_main_func(std::ostream& out)
 			output_tab(out, 1);
 			out << "return 0;" << endl;
 			out << "}" << endl;
-		} 
+		}
 		else {
 			output_block(f->body, out, 0);
 		}
@@ -289,11 +289,11 @@ ReducerOutputMgr::output_main_func(std::ostream& out)
 		vector<string> strs;
 		StringUtils::split_string(reducer->main_str, strs, "();");
 		assert(strs.size() == 2 || strs.size() == 1);
-		string func_name = strs[0]; 
+		string func_name = strs[0];
 		out << func_name << "(";
 		if (strs.size() == 2) {
 			const Function* f = find_function_by_name(func_name);
-			assert(f); 
+			assert(f);
 			string params = strs[1];
 			strs.clear();
 			StringUtils::split_string(params, strs, ",");
@@ -315,9 +315,9 @@ ReducerOutputMgr::output_main_func(std::ostream& out)
 	}
 	return 0;
 }
-int 
+int
 ReducerOutputMgr::output_func(const Function* f, std::ostream& out)
-{ 	
+{
 	output_func_header(f, out);
 	out << endl;
 	output_block(f->body, out, 0);
@@ -334,11 +334,11 @@ ReducerOutputMgr::output_pre_stm_assigns(const Statement* stm, std::ostream &out
 		outputln(out);
 	}
 }
- 
+
 void
 ReducerOutputMgr::output_block_entry_msg(const Block* blk, std::ostream &out, int indent)
 {
-	if (reducer->dump_block_entry) { 
+	if (reducer->dump_block_entry) {
 		const Statement* s = blk->find_container_stm();
 		if (s && s->eType == eFor) {
 			output_tab(out, indent);
@@ -356,14 +356,14 @@ ReducerOutputMgr::output_block_entry_msg(const Block* blk, std::ostream &out, in
 	}
 }
 
-void 
+void
 ReducerOutputMgr::output_pre_stm_values(const Statement* stm, std::ostream &out, FactMgr* fm, int indent)
 {
 	if (find_stm_in_set(reducer->dump_value_before, stm) != -1) {
 		assert(stm->parent);
 		string blkid = StringUtils::int2str(stm->parent->stm_id);
 		string id = StringUtils::int2str(stm->stm_id);
-		out << "/* replacing " << blkid << " " << id << " before"  << endl; 
+		out << "/* replacing " << blkid << " " << id << " before"  << endl;
 		output_write_var_values("values before " + id + "...\\n", stm, out, fm, indent, true);
 		out << "*/" << endl;
 	}
@@ -372,8 +372,8 @@ ReducerOutputMgr::output_pre_stm_values(const Statement* stm, std::ostream &out,
 void
 ReducerOutputMgr::output_post_stm_values(const Statement* stm, std::ostream &out, FactMgr* fm, int indent)
 {
-	// print value of variables that may have been written by the statement 
-	if (find_stm_in_set(reducer->dump_value_after, stm) != -1) { 
+	// print value of variables that may have been written by the statement
+	if (find_stm_in_set(reducer->dump_value_after, stm) != -1) {
 		assert(stm->parent);
 		string blkid = StringUtils::int2str(stm->parent->stm_id);
 		string id = StringUtils::int2str(stm->stm_id);
@@ -384,11 +384,11 @@ ReducerOutputMgr::output_post_stm_values(const Statement* stm, std::ostream &out
 	}
 }
 
-/* 
+/*
  * compute the real "meaningful" length of statement or expression
  * anything not affecting the program complexity is ignored
  */
-int real_length(string exp) 
+int real_length(string exp)
 {
 	int len = 0;
 	size_t i;
@@ -411,7 +411,7 @@ int real_length(string exp)
 	return len;
 }
 
-/* 
+/*
  * insert an output for a  binary reduced statement into the ordered array
  */
 void insert_alt_stm_cmd(vector<struct binary_reduced_stm>& stms, const string& cmd, const string& stm)
@@ -420,7 +420,7 @@ void insert_alt_stm_cmd(vector<struct binary_reduced_stm>& stms, const string& c
 	struct binary_reduced_stm alt = {cmd, stm, len};
 	for (size_t i=0; i<stms.size(); i++) {
 		if (stm == stms[i].stm) return;
-		if (len < stms[i].len) { 
+		if (len < stms[i].len) {
 			stms.insert(stms.begin() + i, alt);
 			return;
 		}
@@ -455,7 +455,7 @@ ReducerOutputMgr::limit_binarys(vector<const FunctionInvocationBinary*>& binarys
 			binarys.pop_back();
 			ids.pop_back();
 		}
-	}  
+	}
 }
 
 /*******************************************************************************
@@ -467,34 +467,34 @@ void
 ReducerOutputMgr::output_alt_exprs(const Statement* stm, std::ostream &out, int indent)
 {
 	size_t i, j, k, len;
-	if (!reducer->reduce_binaries || stm->get_direct_invocation() == NULL) return; 
+	if (!reducer->reduce_binaries || stm->get_direct_invocation() == NULL) return;
 	vector<const FunctionInvocationBinary*> binarys;
-	vector<int> ids; 
-	reducer->find_binary_operations(stm, binarys, ids, true);  
+	vector<int> ids;
+	reducer->find_binary_operations(stm, binarys, ids, true);
 	assert(ids.size() == binarys.size());
 
-	// reduce runtime by limiting the number of binary operations we try to reduce 
+	// reduce runtime by limiting the number of binary operations we try to reduce
 	limit_binarys(binarys, ids);
-	vector<intvec> combinations; 
+	vector<intvec> combinations;
 	vector<intvec> left_trees, right_trees;
-	
+
 	reducer->build_left_right_binary_trees(binarys, left_trees, right_trees);
 	assert(binarys.size() == left_trees.size() && binarys.size() == right_trees.size());
-	
+
 	// special case: output "if (1)" for if conditions
 	if (stm->eType == eIfElse) {
 		output_tab(out, indent);
 		out << "// [" << StringUtils::int2str(stm->stm_id) << ":0:-1] " << "if (1)" << endl;
 	}
 	// output the selections at single points
-	for (i=0; i<binarys.size(); i++) { 
-		const FunctionInvocation* fi = binarys[i];  
+	for (i=0; i<binarys.size(); i++) {
+		const FunctionInvocation* fi = binarys[i];
 		for (j=0; j<2; j++) {
 			output_tab(out, indent);
 			out << "// [" << StringUtils::int2str(stm->stm_id);
-			const Expression* op = fi->param_value[j];  
+			const Expression* op = fi->param_value[j];
 			reducer->map_reduced_invocations[fi] = op;
-			out << ":" + StringUtils::int2str(ids[i]) << ":" << StringUtils::int2str(j+1) << "] ";  
+			out << ":" + StringUtils::int2str(ids[i]) << ":" << StringUtils::int2str(j+1) << "] ";
 			stm->eType == eIfElse ? ((const StatementIf*)stm)->output_condition(out, 0, 0) : stm->Output(out, 0, 0);
 			reducer->map_reduced_invocations.erase(fi);
 		}
@@ -512,9 +512,9 @@ ReducerOutputMgr::output_alt_exprs(const Statement* stm, std::ostream &out, int 
 		len = combinations.size();
 		for (j=0; j<len; j++) {
 			const intvec& curr = combinations[j];
-			if (curr[i] == 0) { 
-				// make choice, select left, fork a new combination 
-				intvec combination = curr; 
+			if (curr[i] == 0) {
+				// make choice, select left, fork a new combination
+				intvec combination = curr;
 				combination[i] = 1;
 				intvec& skipped = right_trees[i];
 				for (k=0; k<skipped.size(); k++) {
@@ -522,8 +522,8 @@ ReducerOutputMgr::output_alt_exprs(const Statement* stm, std::ostream &out, int 
 				}
 				combinations.push_back(combination);
 				//combinations.push_back(combination);
-				// make choice, select left, fork a new combination 
-				combination = combinations[j]; 
+				// make choice, select left, fork a new combination
+				combination = combinations[j];
 				combination[i] = 2;
 				skipped = left_trees[i];
 				for (k=0; k<skipped.size(); k++) {
@@ -544,14 +544,14 @@ ReducerOutputMgr::output_alt_exprs(const Statement* stm, std::ostream &out, int 
 			const FunctionInvocation* fi = binarys[j];
 			if (tmp[j] == 1 || tmp[j] == 2) {
 				int choice = tmp[j];
-				const Expression* op = binarys[j]->param_value[choice - 1];  
+				const Expression* op = binarys[j]->param_value[choice - 1];
 				reducer->map_reduced_invocations[fi] = op;
 				cmd += ":" + StringUtils::int2str(ids[j]) + ":" + StringUtils::int2str(choice);
 				reduced_invokes.push_back(fi);
-			} 
+			}
 		}
 		cmd += "]";
-		ostringstream oss; 
+		ostringstream oss;
 		stm->eType == eIfElse ? ((const StatementIf*)stm)->output_condition(oss, 0, 0) : stm->Output(oss, 0, 0);
 		insert_alt_stm_cmd(alt_stms, cmd, oss.str());
 		// impose an artificial upper limit on number of alternatives so reducer can finish quicker
@@ -563,7 +563,7 @@ ReducerOutputMgr::output_alt_exprs(const Statement* stm, std::ostream &out, int 
 			reducer->map_reduced_invocations.erase(reduced_invokes[j]);
 		}
 	}
-	for (i=0; i<alt_stms.size(); i++) { 
+	for (i=0; i<alt_stms.size(); i++) {
 		output_tab(out, indent);
 		out << alt_stms[i].cmd << " " << alt_stms[i].stm;
 	}
@@ -571,7 +571,7 @@ ReducerOutputMgr::output_alt_exprs(const Statement* stm, std::ostream &out, int 
 
 void
 ReducerOutputMgr::output_if_stm(const StatementIf* si, std::ostream &out, int indent)
-{ 
+{
 	if (reducer->is_blk_deleted(si->get_true_branch()) && reducer->is_blk_deleted(si->get_false_branch())) {
 		assert(0); // should have been taken care in get_used_vars_and_funcs_and_labels
 	}
@@ -593,10 +593,10 @@ ReducerOutputMgr::output_if_stm(const StatementIf* si, std::ostream &out, int in
 			if (reducer->output_if_ids) {
 				out << "/* if reduction candidate: " << StringUtils::int2str(si->stm_id) << " */" << endl;
 			}
-			// special case: if condition is replaced, don't flip it by outputting "!" 
+			// special case: if condition is replaced, don't flip it by outputting "!"
 			if (reducer->is_exp_replaced(si->get_test())) {
 				si->output_condition(out, 0, indent);
-			} 
+			}
 			else {
 				output_tab(out, indent);
 				out << "if (!(";
@@ -608,7 +608,7 @@ ReducerOutputMgr::output_if_stm(const StatementIf* si, std::ostream &out, int in
 	}
 	else {
 		si->output_condition(out, 0, indent);
-		output_block(si->get_true_branch(), out, indent); 
+		output_block(si->get_true_branch(), out, indent);
 		output_tab(out, indent);
 		out << "else" << endl;
 		output_block(si->get_false_branch(), out, indent);
@@ -623,8 +623,8 @@ ReducerOutputMgr::output_reduced_stm(const Statement* stm, std::ostream &out, in
 	if (blks.empty()) {
 		// insert printing value for focus variable
 		if (stm->eType == eReturn) {
-			// output value(s) of monitor variable(s) before return 
-			if (reducer->dump_monitored_var && stm->func->feffect.is_written_partially(reducer->monitored_var)) { 
+			// output value(s) of monitor variable(s) before return
+			if (reducer->dump_monitored_var && stm->func->feffect.is_written_partially(reducer->monitored_var)) {
 				output_tab(out, indent);
 				string vname = reducer->monitored_var->name;
 				out <<"printf(\"   " << vname << " = %d\", " << vname <<");";
@@ -632,11 +632,11 @@ ReducerOutputMgr::output_reduced_stm(const Statement* stm, std::ostream &out, in
 				output_tab(out, indent);
 				out << "printf(\" before leaving " << stm->func->name << ":%d\\n\", call_id);";
 				outputln(out);
-			} 
+			}
 			// output value of key variable for the main function before return
 			else if (stm->func == reducer->main) {
 				if (reducer->monitored_var) {
-					ostringstream oss; 
+					ostringstream oss;
 					const Variable* key = reducer->monitored_var;
 					oss << "checksum " << key->get_actual_name() << " = ";
 					key->output_runtime_value(out, oss.str(), "\\n", indent, 0);
@@ -652,7 +652,7 @@ ReducerOutputMgr::output_reduced_stm(const Statement* stm, std::ostream &out, in
 				out << "return 0;" << endl;
 				return;
 			}
-		} 
+		}
 		else if (stm->eType == eGoto && reducer->dump_block_entry) {
 			const StatementGoto* sg = (const StatementGoto*)stm;
 			output_tab(out, indent);
@@ -662,7 +662,7 @@ ReducerOutputMgr::output_reduced_stm(const Statement* stm, std::ostream &out, in
 			output_open_encloser("{", out, indent);
 			output_block_entry_msg(sg->dest->parent, out, indent);
 			output_tab(out, indent);
-			out << "goto " << sg->label << ";" << endl; 
+			out << "goto " << sg->label << ";" << endl;
 			output_close_encloser("}", out, indent);
 			return;
 		}
@@ -732,8 +732,8 @@ ReducerOutputMgr::output_stm(const Statement* stm, std::ostream &out, FactMgr* f
 		const Statement* alt_stm = reducer->replaced_stms[stm];
 		vector<string> labels;
 		// special case for goto target: if the jump source is still around, we have to keep the label somehow
-		if (reducer->find_missing_labels(stm, alt_stm, labels)) { 
-			for (size_t i=0; i<labels.size(); i++) { 
+		if (reducer->find_missing_labels(stm, alt_stm, labels)) {
+			for (size_t i=0; i<labels.size(); i++) {
 				out << labels[i] << ": ;" << endl;
 			}
 		}
@@ -744,7 +744,7 @@ ReducerOutputMgr::output_stm(const Statement* stm, std::ostream &out, FactMgr* f
 		}
 		return;
 	}
-		
+
 	if (stm->func == reducer->rewrite_calls_inside) {
 		rewrite_func_calls(stm, out, indent);
 	}
@@ -754,12 +754,12 @@ ReducerOutputMgr::output_stm(const Statement* stm, std::ostream &out, FactMgr* f
 
 	output_alt_exprs(stm, out, indent);
 
-	output_reduced_stm(stm, out, indent); 
+	output_reduced_stm(stm, out, indent);
 
 	output_post_stm_values(stm, out, fm, indent);
 }
 
-void 
+void
 ReducerOutputMgr::rewrite_func_call(const Statement* stm, const FunctionInvocation* invoke, string tmp_id, std::ostream& out, int indent)
 {
 	// output pre-values
@@ -770,7 +770,7 @@ ReducerOutputMgr::rewrite_func_call(const Statement* stm, const FunctionInvocati
 	Expression* tmp_call = new ExpressionFuncall(*(invoke->clone()));
 	CVQualifiers qfer = CVQualifiers::random_qualifiers(type, 0, 0);
 	Variable* tmp_var = Variable::CreateVariable(tmp_id, type, tmp_call, &qfer);
-	tmp_var->OutputDef(out, indent); 
+	tmp_var->OutputDef(out, indent);
 
 	// output the value of the tmp variable
 	ostringstream oss;
@@ -784,9 +784,9 @@ ReducerOutputMgr::rewrite_func_call(const Statement* stm, const FunctionInvocati
 		output_memory_addrs(stm, out, indent);
 	}
 	ExpressionVariable* tmp_ev = new ExpressionVariable(*tmp_var);
-	reducer->map_reduced_invocations[invoke] = tmp_ev; 
+	reducer->map_reduced_invocations[invoke] = tmp_ev;
 	// output stm with call replaced with tmp_id
-	(stm->eType == eIfElse) ? ((const StatementIf*)stm)->output_condition(out, 0, indent) : stm->Output(out, 0, indent); 
+	(stm->eType == eIfElse) ? ((const StatementIf*)stm)->output_condition(out, 0, indent) : stm->Output(out, 0, indent);
 
 	// clean up
 	reducer->map_reduced_invocations.erase(invoke);
@@ -821,35 +821,35 @@ ReducerOutputMgr::rewrite_func_calls(const Statement* stm, std::ostream &out, in
 	return calls.size();
 }
 
-/* 
+/*
  * dumping global states at the function entry point for path shortcutting purpose
  */
-void 
+void
 ReducerOutputMgr::output_global_state_for_func(const Function* f, std::ostream &out, int indent)
 {
 	if (!reducer->dump_monitored_var) return;
 	size_t i;
 	if (reducer->monitored_func && f == reducer->main) {
-		output_global_values("values before main\\n", out, indent);		
+		output_global_values("values before main\\n", out, indent);
 	}
 	// output statement to increment call counter for delta purpose
 	if (f->feffect.is_written(reducer->monitored_var)) {
 		output_tab(out, indent);
-		out <<"int call_id = ++global_call_id;"; 
+		out <<"int call_id = ++global_call_id;";
 		outputln(out);
 
 		// output global state if we are interested in this particular function call
-		if (f == reducer->monitored_func) { 
+		if (f == reducer->monitored_func) {
 			assert(reducer->monitored_call_id != "");
 			output_tab(out, indent);
 			out << "if (call_id == " << reducer->monitored_call_id << ")" << endl;
 			output_open_encloser("{", out, indent);
-			
+
 			// dump addresses of global variables
 			output_memory_addrs(f->body, out, indent);
-			
+
 			// dump global state at the beginning of this call
-			output_global_values("values after main and before " + f->name + "\\n", out, indent); 
+			output_global_values("values after main and before " + f->name + "\\n", out, indent);
 
 			// output parameter values for this call
 			output_print_str(out, "\\n", "", indent);
@@ -874,7 +874,7 @@ ReducerOutputMgr::output_global_state_for_func(const Function* f, std::ostream &
 
 void
 ReducerOutputMgr::output_write_var_values(string title, const Statement* stm, std::ostream &out, FactMgr* fm, int indent, bool cover_block_writes)
-{ 
+{
 	output_print_str(out, title, "", indent);
 	outputln(out);
 	size_t i;
@@ -885,9 +885,9 @@ ReducerOutputMgr::output_write_var_values(string title, const Statement* stm, st
 	}
 	const vector<const Variable *>& write_vars = fm->map_stm_effect[s].get_write_vars();
 	for (i=0; i<write_vars.size(); i++) {
-		const Variable* wvar = write_vars[i]; 
+		const Variable* wvar = write_vars[i];
 		if (wvar->is_visible(stm->parent) && reducer->is_var_used(wvar)) {
-			// output printf statements to record the type of the variable 
+			// output printf statements to record the type of the variable
 			ostringstream oss;
 			//wvar->OutputDecl(oss);
 			string dimen = StringUtils::int2str(wvar->get_dimension());
@@ -904,14 +904,14 @@ void
 ReducerOutputMgr::output_memory_addrs(const Statement* stm, std::ostream& out, int indent)
 {
 	size_t i;
-	vector<Variable*> all_vars = VariableSelector::find_all_visible_vars(stm->parent); 
+	vector<Variable*> all_vars = VariableSelector::find_all_visible_vars(stm->parent);
 	//combine_variable_sets(beffect.get_read_vars(), beffect.get_write_vars(), all_vars);
 	//remove_field_vars(all_vars);
 	output_print_str(out, "begin memory dump \\n", "", indent);
 	outputln(out);
 	for (i=0; i<all_vars.size(); i++) {
-		const Variable* v = all_vars[i]; 
-		if (reducer->is_var_used(v)) { 
+		const Variable* v = all_vars[i];
+		if (reducer->is_var_used(v)) {
 			v->output_addressable_name(out, indent);
 		}
 	}
@@ -930,7 +930,7 @@ ReducerOutputMgr::output_global_values(string header, std::ostream& out, int ind
 	for (i=0; i<reducer->used_vars.size(); i++) {
 		const Variable* v = reducer->used_vars[i];
 		if (v->is_global()) {
-			ostringstream oss; 
+			ostringstream oss;
 			string dimen = StringUtils::int2str(v->get_dimension());
 			oss << "<" << v->get_actual_name() << "(" << dimen << ")" << " = ";
 			v->output_runtime_value(out, oss.str(), ">\\n", indent);
@@ -941,8 +941,8 @@ ReducerOutputMgr::output_global_values(string header, std::ostream& out, int ind
 	outputln(out);
 }
 
-void 
-ReducerOutputMgr::OutputStructUnions(ostream& out) 
+void
+ReducerOutputMgr::OutputStructUnions(ostream& out)
 {
 	size_t i;
 	for (i=0; i<reducer->used_vars.size(); i++) {
@@ -963,7 +963,7 @@ ReducerOutputMgr::output_artificial_globals(ostream& out)
 	}
 }
 
-void 
+void
 ReducerOutputMgr::output_tail(ostream& out)
 {
 	size_t i;
@@ -976,7 +976,7 @@ ReducerOutputMgr::output_tail(ostream& out)
 		out << endl;
 	}
 	if (reducer->drop_params && reducer->dump_dropped_params) {
-		out << "// all dropped parameters: "; 
+		out << "// all dropped parameters: ";
 		for (i=0; i<reducer->dropped_params.size(); i++) {
 			out << reducer->dropped_params[i]->name << ", ";
 		}
@@ -995,7 +995,7 @@ ReducerOutputMgr::Output()
 	reducer->get_used_vars_and_funcs_and_labels(main->body, reducer->used_vars, reducer->used_funcs, reducer->used_labels);
 	reducer->expand_used_vars();
 
-	std::ostream &out = get_main_out(); 
+	std::ostream &out = get_main_out();
 	OutputStructUnions(out);
 	output_vars(*VariableSelector::GetGlobalVariables(), out, 0);
 	output_artificial_globals(out);
@@ -1003,9 +1003,9 @@ ReducerOutputMgr::Output()
 	for (i=0; i<reducer->used_funcs.size(); i++) {
 		output_func_header(reducer->used_funcs[i], out);
 		out << ";" << endl;
-	} 
+	}
 	for (int j=reducer->used_funcs.size(); j>0; j--) {
-		const Function* f = reducer->used_funcs[j-1]; 
+		const Function* f = reducer->used_funcs[j-1];
 		outputln(out);
 		output_func(f, out);
 		outputln(out);

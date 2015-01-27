@@ -46,14 +46,14 @@ class ExpressionAssign : public Expression
 {
 public:
 	// Factory method.
-	static Expression *make_random(CGContext &cg_context, const Type* type, const CVQualifiers* qfer=0);  
+	static Expression *make_random(CGContext &cg_context, const Type* type, const CVQualifiers* qfer=0);
 
 	ExpressionAssign(const StatementAssign* sa);
-	virtual ~ExpressionAssign(void);  
+	virtual ~ExpressionAssign(void);
 
 	virtual Expression *clone() const;
 
-	virtual CVQualifiers get_qualifiers(void) const;  
+	virtual CVQualifiers get_qualifiers(void) const;
 
 	virtual void get_eval_to_subexps(vector<const Expression*>& subs) const;
 
@@ -63,8 +63,8 @@ public:
 
 	virtual bool visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const;
 
-	virtual bool has_uncertain_call_recursive(void) const { return assign->has_uncertain_call_recursive();} 
- 
+	virtual bool has_uncertain_call_recursive(void) const { return assign->has_uncertain_call_recursive();}
+
 	virtual bool use_var(const Variable* v) const;
 
 	virtual bool equals(int num) const;

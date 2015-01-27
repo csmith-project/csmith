@@ -44,7 +44,7 @@ public:
 	~SequenceLineParser();
 
 	static bool parse_sequence(Container &q, const std::string &seq, const char sep_char = ',');
-	
+
 private:
 	static int str2int(const std::string &s);
 };

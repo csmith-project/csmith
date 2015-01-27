@@ -35,7 +35,7 @@
 // Bryan Turner (bryan.turner@pobox.com)
 // July, 2005
 //
-#ifdef WIN32 
+#ifdef WIN32
 #pragma warning(disable : 4786)   /* Disable annoying warning messages */
 #endif
 
@@ -70,13 +70,13 @@ static vector<const FunctionInvocationUser*> invocations;   // list of function 
 static vector<const Fact*> return_facts;              // list of return facts
 
 const Fact*
-get_return_fact_for_invocation(const FunctionInvocationUser* fiu, const Variable* var, enum eFactCategory cat) 
+get_return_fact_for_invocation(const FunctionInvocationUser* fiu, const Variable* var, enum eFactCategory cat)
 {
 	assert(invocations.size() == return_facts.size());
 	for (size_t i=0; i<return_facts.size(); i++) {
 		if (invocations[i] == fiu) {
 			const Fact* fact = return_facts[i];
-			if (fact->eCat == cat && fact->get_var() == var) { 
+			if (fact->eCat == cat && fact->get_var() == var) {
 				return fact;
 			}
 		}
@@ -99,7 +99,7 @@ add_return_fact_for_invocation(const FunctionInvocationUser* fiu, const Fact* f)
 	return_facts.push_back(f);
 }
 
-/* 
+/*
  * find the functions from a list of function calls.
  */
 void
@@ -108,13 +108,13 @@ calls_to_funcs(const vector<const FunctionInvocationUser*>& calls, vector<const 
 	size_t i;
 	for (i=0; i<calls.size(); i++) {
 		const Function* func = calls[i]->get_func();
-		if (find_function_in_set(funcs, func) == -1) { 
+		if (find_function_in_set(funcs, func) == -1) {
 			funcs.push_back(func);
 		}
 	}
 }
 
-/* 
+/*
  * find the functions from a list of function calls. If this is a new function, find the invocations
  * inside it recursively
  */
@@ -124,10 +124,10 @@ calls_to_funcs_recursive(const vector<const FunctionInvocationUser*>& calls, vec
 	size_t i;
 	for (i=0; i<calls.size(); i++) {
 		const Function* func = calls[i]->get_func();
-		if (find_function_in_set(funcs, func) == -1) { 
+		if (find_function_in_set(funcs, func) == -1) {
 			funcs.push_back(func);
 			// find the calls made this function and add callees recursively
-			vector<const FunctionInvocationUser*> calls; 
+			vector<const FunctionInvocationUser*> calls;
 			func->body->get_called_funcs(calls);
 			calls_to_funcs_recursive(calls, funcs);
 		}
@@ -174,27 +174,27 @@ FunctionInvocationUser::clone() const
 	return new FunctionInvocationUser(*this);
 }
 
-/* build parameters first, then the function body. this way the generation order is in sync 
-   with execution order, and the dataflow analyzer doesn't need to visit the function twice 
+/* build parameters first, then the function body. this way the generation order is in sync
+   with execution order, and the dataflow analyzer doesn't need to visit the function twice
  */
 FunctionInvocationUser*
 FunctionInvocationUser::build_invocation_and_function(CGContext &cg_context, const Type* type, const CVQualifiers* qfer)
 {
 	assert(type);		// return type must be provided
 	FactMgr* caller_fm = get_fact_mgr(&cg_context);
-	Effect running_eff_context(cg_context.get_effect_context()); 
+	Effect running_eff_context(cg_context.get_effect_context());
 	Function* func = Function::make_random_signature(cg_context, type, qfer);
 
 	if (func->name == "func_51")
 		BREAK_NOP;		// for debugging
 	vector<const Expression*> param_values;
 	size_t i;
-	for (i = 0; i < func->param.size(); i++) { 
-		Effect param_eff_accum;  
+	for (i = 0; i < func->param.size(); i++) {
+		Effect param_eff_accum;
 		CGContext param_cg_context(cg_context, running_eff_context, &param_eff_accum);
 		Variable* v = func->param[i];
 		// to avoid too much function invocations as parameters
-		Expression *p = Expression::make_random_param(param_cg_context, v->type, &v->qfer); 
+		Expression *p = Expression::make_random_param(param_cg_context, v->type, &v->qfer);
 		// typecast, if needed.
 		p->check_and_set_cast(v->type);
 		param_values.push_back(p);
@@ -202,33 +202,33 @@ FunctionInvocationUser::build_invocation_and_function(CGContext &cg_context, con
 		// when we generate subsequent parameters within this invocation.
 		running_eff_context.add_effect(param_eff_accum);
 		// Update the total effect of this invocation, too.
-		cg_context.merge_param_context(param_cg_context);  
-	}  
-	  
+		cg_context.merge_param_context(param_cg_context);
+	}
+
 	FunctionInvocationUser* fiu = new FunctionInvocationUser(func, false, NULL);
 	fiu->param_value = param_values;
-	// hand-over from caller to callee 
+	// hand-over from caller to callee
 	FactMgr* fm = get_fact_mgr_for_func(func);
 	fm->global_facts = caller_fm->global_facts;
-	fm->caller_to_callee_handover(fiu, fm->global_facts); 
+	fm->caller_to_callee_handover(fiu, fm->global_facts);
 
 	// create function body
-	Effect effect_accum; 
-	func->generate_body_with_known_params(cg_context, effect_accum); 
+	Effect effect_accum;
+	func->generate_body_with_known_params(cg_context, effect_accum);
 
 	// post creation processing
 	FactVec ret_facts = fm->map_facts_out[func->body];
 	func->body->add_back_return_facts(fm, ret_facts);
-	fiu->save_return_fact(ret_facts);  
-	 
+	fiu->save_return_fact(ret_facts);
+
 	// remove facts related to passing parameters
-	//FactMgr::update_facts_for_oos_vars(func->param, fm->global_facts); 
+	//FactMgr::update_facts_for_oos_vars(func->param, fm->global_facts);
 	fm->setup_in_out_maps(true);
 	// hand-over from callee to caller: points-to facts
-	renew_facts(caller_fm->global_facts, ret_facts); 
+	renew_facts(caller_fm->global_facts, ret_facts);
 
 	// hand-over from callee to caller: effects
-	func->accum_eff_context.add_external_effect(cg_context.get_effect_context()); 
+	func->accum_eff_context.add_external_effect(cg_context.get_effect_context());
 	Effect& func_effect = func->feffect;
 	func_effect.add_external_effect(effect_accum, cg_context.call_chain);
 	cg_context.add_visible_effect(effect_accum, cg_context.get_current_block());
@@ -236,14 +236,14 @@ FunctionInvocationUser::build_invocation_and_function(CGContext &cg_context, con
 	// hand-over from callee to caller: new global variables
 	Function* caller_func = cg_context.get_current_func();
 	caller_func->new_globals.insert(caller_func->new_globals.end(), func->new_globals.begin(), func->new_globals.end());
-	// include facts for globals just created 
+	// include facts for globals just created
 	for (i=0; i<func->new_globals.size(); i++) {
 		const Variable* var = func->new_globals[i];
 		caller_fm->add_new_var_fact_and_update_inout_maps(NULL, var);
 	}
 
 	func->visited_cnt = 1;
-	return fiu; 
+	return fiu;
 }
 
 /*
@@ -254,19 +254,19 @@ FunctionInvocationUser::build_invocation(Function *target, CGContext &cg_context
 {
 	unsigned int i;
 	func = target;			// XXX: unnecessary; done by constructor
-	Effect running_eff_context(cg_context.get_effect_context()); 
+	Effect running_eff_context(cg_context.get_effect_context());
 	FactMgr* fm = get_fact_mgr(&cg_context);
 	// XXX DEBUGGING
 	if (func->name == "func_36" && cg_context.get_current_func()->name=="func_22") {
 	 	i = 0; // Set breakpoint here.
 	}
 
-	for (i = 0; i < func->param.size(); i++) { 
-		Effect param_eff_accum;  
+	for (i = 0; i < func->param.size(); i++) {
+		Effect param_eff_accum;
 		CGContext param_cg_context(cg_context, running_eff_context, &param_eff_accum);
 		Variable* v = func->param[i];
 		// to avoid too much function invocations as parameters
-		Expression *p = Expression::make_random_param(param_cg_context, v->type, &v->qfer);   
+		Expression *p = Expression::make_random_param(param_cg_context, v->type, &v->qfer);
 		ERROR_GUARD(false);
 		// typecast, if needed.
 		p->check_and_set_cast(v->type);
@@ -275,23 +275,23 @@ FunctionInvocationUser::build_invocation(Function *target, CGContext &cg_context
 		// when we generate subsequent parameters within this invocation.
 		running_eff_context.add_effect(param_eff_accum);
 		// Update the total effect of this invocation, too.
-		cg_context.merge_param_context(param_cg_context);  
-	} 
+		cg_context.merge_param_context(param_cg_context);
+	}
 
-	// no need to validate func_1 as it has no parameters and it's called only once 
+	// no need to validate func_1 as it has no parameters and it's called only once
 	// in addition, the hack (calling func_1 in a func_1 context) we used would
 	// ruin DFA
 	failed = false;
 	if (target != GetFirstFunction() && (target->fact_changed || target->union_field_read || target->is_pointer_referenced())) {
 		// revisit with a new context
-		Effect effect_accum; 
+		Effect effect_accum;
 		// retrive the context effect in prev. visits, and include them for this visit
 		Effect effect_context = cg_context.get_effect_context();
 		effect_context.add_effect(func->accum_eff_context);
-		CGContext new_context(cg_context, func, effect_context, &effect_accum); 
-		failed = !revisit(fm->global_facts, new_context);  
+		CGContext new_context(cg_context, func, effect_context, &effect_accum);
+		failed = !revisit(fm->global_facts, new_context);
 		// incorporate facts from revisit
-		if (!failed) { 
+		if (!failed) {
 			assert(cg_context.get_current_block());
 			cg_context.add_visible_effect(*new_context.get_effect_accum(), cg_context.get_current_block());
 			Effect& func_effect = func->feffect;
@@ -300,10 +300,10 @@ FunctionInvocationUser::build_invocation(Function *target, CGContext &cg_context
 	}
 	else {
 		// if the function neither change pointer facts, nor dereference pointer (which means
-		// the read/write set are static, no need to re-analyze 
+		// the read/write set are static, no need to re-analyze
 		cg_context.add_external_effect(func->get_feffect());
-	}  
-	return !failed; 
+	}
+	return !failed;
 }
 
 /*
@@ -311,10 +311,10 @@ FunctionInvocationUser::build_invocation(Function *target, CGContext &cg_context
  *
  * side effects: update input facts and FactMgr in cg_context if the invocation is found valid
  */
-bool 
+bool
 FunctionInvocationUser::revisit(std::vector<const Fact*>& inputs, CGContext& cg_context) const
 {
-	FactMgr* fm = get_fact_mgr_for_func(func); 
+	FactMgr* fm = get_fact_mgr_for_func(func);
 	fm->clear_map_visited();
 	if (func->visited_cnt++ == 0) {
 		fm->setup_in_out_maps(true);
@@ -327,45 +327,45 @@ FunctionInvocationUser::revisit(std::vector<const Fact*>& inputs, CGContext& cg_
 	}
 
 	// make copies so we can back up if fail
-	vector<const Fact*> inputs_copy = inputs;  
-	
+	vector<const Fact*> inputs_copy = inputs;
+
 	// add facts related to pass parameters
-	fm->caller_to_callee_handover(this, inputs);  
+	fm->caller_to_callee_handover(this, inputs);
 
 	map<const Statement*, FactVec> facts_in_copy = fm->map_facts_in;
 	map<const Statement*, FactVec> facts_out_copy = fm->map_facts_out;
 	map<const Statement*, Effect>  stm_effect_copy = fm->map_stm_effect;
 	map<const Statement*, Effect>  accum_effect_copy = fm->map_accum_effect;
-	// TODO: revisit only if "contingent variable" has been changed? 
+	// TODO: revisit only if "contingent variable" has been changed?
 	if (!func->body->visit_facts(inputs, cg_context)) {
-		// restore facts and effect 
+		// restore facts and effect
 		fm->map_facts_in = facts_in_copy;
 		fm->map_facts_out = facts_out_copy;
 		fm->map_stm_effect = stm_effect_copy;
 		fm->map_accum_effect = accum_effect_copy;
-		inputs = inputs_copy; 
+		inputs = inputs_copy;
 		return false;
-	}  
+	}
 	cg_context.add_effect(fm->map_stm_effect[func->body]);
 	FactVec ret_facts;
 	func->body->add_back_return_facts(fm, ret_facts);
-	save_return_fact(ret_facts); 
-	// incorporate early return facts   
-	merge_facts(inputs, ret_facts); 
-	 
+	save_return_fact(ret_facts);
+	// incorporate early return facts
+	merge_facts(inputs, ret_facts);
+
 	// remove facts related to passing parameters
-	FactMgr::update_facts_for_oos_vars(func->param, inputs); 
+	FactMgr::update_facts_for_oos_vars(func->param, inputs);
 
 	fm->setup_in_out_maps(false);
 	// remember the effect context during this visit to this function
 	func->accum_eff_context.add_external_effect(cg_context.get_effect_context());
 	// update the original facts with new facts changed by function call
-	renew_facts(inputs_copy, inputs);  
-	inputs = inputs_copy;   
-	return true;	
+	renew_facts(inputs_copy, inputs);
+	inputs = inputs_copy;
+	return true;
 }
 
-/* 
+/*
  * save the return fact for later use
  */
 void
@@ -415,7 +415,7 @@ OutputActualParamExpression(const Expression *expr, std::ostream *pOut)
 	needcomma.back() = true;
 	expr->Output(out);
     // for MSVC: must return something to be able to pass to a "map" function
-    return 0;             
+    return 0;
 }
 
 /*
@@ -455,7 +455,7 @@ FunctionInvocationUser::indented_output(std::ostream &out, int indent) const
 	output_tab(out, indent);
 	out << func->name;
 	outputln(out);
-	output_open_encloser("(", out, indent); 
+	output_open_encloser("(", out, indent);
 	size_t i;
 	for (i=0; i<param_value.size(); i++) {
 		if (i > 0) outputln(out);

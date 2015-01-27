@@ -65,7 +65,7 @@ public:
 	static Block *make_random(CGContext &cg_context, bool looping = false);
 
 	static Block *make_dummy_block(CGContext &cg_context);
-	 
+
 	Block(Block* b, int block_size);
 	virtual ~Block(void);
 
@@ -74,7 +74,7 @@ public:
 	virtual bool get_depth_protect(void) { return depth_protect; }
 
 	virtual void Output(std::ostream &out, FactMgr* fm, int indent=0) const;
-	
+
 	void OutputTmpVariableList(std::ostream &out, int indent) const;
 
     Block* random_parent_block(void);
@@ -83,14 +83,14 @@ public:
 	// These are currently accessed directly.
 	std::vector<Statement *> stms;
 	std::vector<Statement *> deleted_stms;
-	std::vector<Variable *> local_vars; 
+	std::vector<Variable *> local_vars;
 	mutable std::map<std::string, enum eSimpleType> macro_tmp_vars;
 
 	std::string create_new_tmp_var(enum eSimpleType type) const;
 
 	virtual void get_blocks(std::vector<const Block*>& blks) const { blks.push_back(this);}
 	virtual void get_exprs(std::vector<const Expression*>& /* exps */) const {};
-	const Statement* get_last_stm(void) const; 
+	const Statement* get_last_stm(void) const;
 	bool is_var_on_stack(const Variable* v) const;
 	std::vector<const ExpressionVariable*> get_dereferenced_ptrs(void) const;
 
@@ -111,7 +111,7 @@ public:
 	void post_creation_analysis(CGContext& cg_context, const Effect& pre_effect);
 
 	size_t remove_stmt(const Statement* s);
-	
+
 	bool looping;
 
 	bool in_array_loop;
@@ -121,8 +121,8 @@ public:
 	std::vector<const Statement*> break_stms;
 
 private:
-	
-	bool depth_protect;     
+
+	bool depth_protect;
 
 	// maximum block size
 	const int block_size_;

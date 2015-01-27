@@ -74,7 +74,7 @@ public:
 
 private:
 	Key curr_max_key_;
-	std::vector<Entry *> table_; 
+	std::vector<Entry *> table_;
 };
 
 template <class Key, class Value>
@@ -95,7 +95,7 @@ template <class Key, class Value>
 ProbabilityTable<Key, Value>::~ProbabilityTable()
 {
 	typename vector<Entry *>::iterator i;
-	for (i = table_.begin(); i != table_.end(); ++i) 
+	for (i = table_.begin(); i != table_.end(); ++i)
 		delete (*i);
 	table_.clear();
 }
@@ -126,7 +126,7 @@ void
 ProbabilityTable<Key, Value>::sorted_insert(Entry *t)
 {
 	assert(t);
-	
+
 	Key k = t->get_key();
 
 	if (table_.empty()) {
@@ -134,7 +134,7 @@ ProbabilityTable<Key, Value>::sorted_insert(Entry *t)
 		curr_max_key_ = k;
 		return;
 	}
-	
+
 	typename vector<Entry *>::iterator i;
 	for (i=table_.begin(); i!=table_.end(); i++) {
 		if (my_greater<Key, Value>(*i, k)) {
@@ -144,7 +144,7 @@ ProbabilityTable<Key, Value>::sorted_insert(Entry *t)
 	//i = find_if(table_.begin(), table_.end(), std::bind2nd(std::ptr_fun(my_greater<Key, Value>), k));
 
 	if (i != table_.end()) {
-		table_.insert(i, t);	
+		table_.insert(i, t);
 	}
 	else {
 		table_.push_back(t);
@@ -173,19 +173,19 @@ ProbabilityTable<Key, Value>::get_value(Key k)
 	return (*i)->get_value();
 }
 
-class DistributionTable {  
+class DistributionTable {
 public:
-	DistributionTable() { max_prob_ = 0;} 
-	~DistributionTable() {}; 
+	DistributionTable() { max_prob_ = 0;}
+	~DistributionTable() {};
 
-	void add_entry(int key, int prob); 
+	void add_entry(int key, int prob);
 	int get_max(void) const { return max_prob_;}
 	int key_to_prob(int key) const;
 	int rnd_num_to_key(int rnd) const;
 private:
 	int max_prob_;
 	vector<int> keys_;
-	vector<int> probs_; 
+	vector<int> probs_;
 };
 
 #endif

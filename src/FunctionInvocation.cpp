@@ -66,7 +66,7 @@
 #include "Constant.h"
 #include "CGOptions.h"
 
-using namespace std; 
+using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -75,27 +75,27 @@ using namespace std;
  */
 FunctionInvocation *
 FunctionInvocation::make_random(bool is_std_func,
-				CGContext &cg_context, 
+				CGContext &cg_context,
 				const Type* type,
 				const CVQualifiers* qfer)
 {
-	FunctionInvocation *fi = 0;  
-	// If we are looking for a program-defined function, try to find one. 
-	if (!is_std_func) { 
+	FunctionInvocation *fi = 0;
+	// If we are looking for a program-defined function, try to find one.
+	if (!is_std_func) {
 		Function* callee = NULL;
 		if (pure_rnd_flipcoin(50)) {
 			callee = Function::choose_func(get_all_functions(), cg_context, type, qfer);
 		}
 		if (callee != NULL) {
 			FunctionInvocationUser *fiu = new FunctionInvocationUser(callee, true, NULL);
-			fiu->build_invocation(callee, cg_context);  
+			fiu->build_invocation(callee, cg_context);
 			fi = fiu;
-			if (!fiu->failed) { 
+			if (!fiu->failed) {
 				cg_context.get_current_func()->fact_changed |= fiu->func->fact_changed;
 			}
-		} 
+		}
 		else if (!Function::reach_max_functions_cnt()) {
-			fi = FunctionInvocationUser::build_invocation_and_function(cg_context, type, qfer); 
+			fi = FunctionInvocationUser::build_invocation_and_function(cg_context, type, qfer);
 		} else {
 			// we can not find/create a function because we reach the limit, so give up
 			fi = new FunctionInvocationUser(NULL, false, NULL);
@@ -104,8 +104,8 @@ FunctionInvocation::make_random(bool is_std_func,
 		}
 	}
 	// now use standard functions, i.e., binary/unary operators to create an invocation
-	if (fi == NULL) { 
-		int rnd_flag = rnd_flipcoin(StdUnaryFuncProb); 
+	if (fi == NULL) {
+		int rnd_flag = rnd_flipcoin(StdUnaryFuncProb);
 		if (rnd_flag) {
 			fi = make_random_unary(cg_context, type);
 		} else {
@@ -186,7 +186,7 @@ FunctionInvocation::make_random_binary(CGContext &cg_context, const Type* type)
 	Effect lhs_eff_accum;
 	CGContext lhs_cg_context(cg_context, cg_context.get_effect_context(), &lhs_eff_accum);
 
-	// Generate an expression with the correct type required by safe math operands 
+	// Generate an expression with the correct type required by safe math operands
 	const Type* lhs_type = flags->get_lhs_type();
 	const Type* rhs_type = flags->get_rhs_type();
 	assert(lhs_type && rhs_type);
@@ -195,7 +195,7 @@ FunctionInvocation::make_random_binary(CGContext &cg_context, const Type* type)
 		assert(!rhs_type->is_float() && "rhs_type is float!");
 	}
 
-	Expression *lhs = Expression::make_random(lhs_cg_context, lhs_type); 
+	Expression *lhs = Expression::make_random(lhs_cg_context, lhs_type);
 	ERROR_GUARD_AND_DEL1(NULL, fi);
 	Expression *rhs = 0;
 
@@ -212,7 +212,7 @@ FunctionInvocation::make_random_binary(CGContext &cg_context, const Type* type)
 	// If we are guaranteed that the LHS will be evaluated before the RHS,
 	// or if the LHS is pure (not merely side-effect-free),
 	// then we can generate the RHS under the original effect context.
-	if (IsOrderedStandardFunc(op)) { // || lhs_eff_accum.is_pure()) { TODO: need more thoughts on the purity issue. 
+	if (IsOrderedStandardFunc(op)) { // || lhs_eff_accum.is_pure()) { TODO: need more thoughts on the purity issue.
 		rhs = Expression::make_random(cg_context, rhs_type);
 	}
 	else {
@@ -235,8 +235,8 @@ FunctionInvocation::make_random_binary(CGContext &cg_context, const Type* type)
 		}
 		else {
 			rhs = Expression::make_random(rhs_cg_context, rhs_type);
-			// avoid divide by zero or possible zero (reached by pointer comparison) 
-			if ((op == eMod || op == eDiv) && (rhs->equals(0) || rhs->is_0_or_1()) && 
+			// avoid divide by zero or possible zero (reached by pointer comparison)
+			if ((op == eMod || op == eDiv) && (rhs->equals(0) || rhs->is_0_or_1()) &&
 				!lhs_type->is_float() && !rhs_type->is_float()) {
 				VectorFilter f;
 				f.add(eMod).add(eDiv).add(eLShift).add(eRShift);
@@ -279,13 +279,13 @@ FunctionInvocation::make_random_binary(CGContext &cg_context, const Type* type)
 FunctionInvocation *
 FunctionInvocation::make_random_binary_ptr_comparison(CGContext &cg_context)
 {
-	eBinaryOps op = rnd_flipcoin(50) ? eCmpEq : eCmpNe;   
+	eBinaryOps op = rnd_flipcoin(50) ? eCmpEq : eCmpNe;
 	ERROR_GUARD(NULL);
 	SafeOpFlags *flags = SafeOpFlags::make_random_binary(get_int_type(), NULL, NULL, sOpBinary, op);
 	ERROR_GUARD(NULL);
 
 	FunctionInvocation *fi = FunctionInvocationBinary::CreateFunctionInvocationBinary(cg_context, op, flags);
-	const Type* type = Type::choose_random_pointer_type();  
+	const Type* type = Type::choose_random_pointer_type();
 	ERROR_GUARD_AND_DEL1(NULL, fi);
 
 	Effect lhs_eff_accum;
@@ -301,7 +301,7 @@ FunctionInvocation::make_random_binary_ptr_comparison(CGContext &cg_context)
 	if (lhs->term_type == eConstant) {
 		tt = eVariable;
 	}
-	Expression *rhs = 0; 
+	Expression *rhs = 0;
 
 	// If we are guaranteed that the LHS will be evaluated before the RHS,
 	// or if the LHS is pure (not merely side-effect-free),
@@ -336,15 +336,15 @@ FunctionInvocation::make_random_binary_ptr_comparison(CGContext &cg_context)
 	fi->param_value.push_back(rhs);
 	fi->ptr_cmp = true;
 
-	// bookkeeping for pointers  
-	Bookkeeper::record_pointer_comparisons(lhs, rhs); 
+	// bookkeeping for pointers
+	Bookkeeper::record_pointer_comparisons(lhs, rhs);
 	return fi;
 }
 
 /*
- * 
+ *
  */
-void 
+void
 FunctionInvocation::add_operand(const Expression* e)
 {
     param_value.push_back(e);
@@ -357,34 +357,34 @@ FunctionInvocation::get_called_funcs(std::vector<const FunctionInvocationUser*>&
 	for (size_t i=0; i<param_value.size(); i++) {
 		const Expression* value = param_value[i];
 		value->get_called_funcs(funcs);
-	} 
+	}
 	if (invoke_type == eFuncCall) {
-		const FunctionInvocationUser* func_call = (const FunctionInvocationUser*)this; 
+		const FunctionInvocationUser* func_call = (const FunctionInvocationUser*)this;
 		funcs.push_back(func_call);
 	}
 }
 
 bool
 FunctionInvocation::has_uncertain_call(void) const
-{   
+{
 	// if there are more than two function calls in two separate parameters,
 	// we judge both calls as uncertain because the evaluation order can be
 	// either left-to-right or right-to-left
 	int has_func_param_cnt = 0;
-	size_t i; 
-	for (i=0; i<param_value.size(); i++) { 
+	size_t i;
+	for (i=0; i<param_value.size(); i++) {
 		if (param_value[i]->func_count() > 0) {
 			has_func_param_cnt++;
 		}
-	} 
-	return has_func_param_cnt >= 2; 
+	}
+	return has_func_param_cnt >= 2;
 }
 
 bool
 FunctionInvocation::has_uncertain_call_recursive(void) const
-{   
+{
 	size_t i;
-	for (i=0; i<param_value.size(); i++) { 
+	for (i=0; i<param_value.size(); i++) {
 		const Expression* e = param_value[i];
 		if (e->term_type == eFunction) {
 			const ExpressionFuncall* ef = (const ExpressionFuncall*)e;
@@ -392,20 +392,20 @@ FunctionInvocation::has_uncertain_call_recursive(void) const
 				return true;
 			}
 		}
-	} 
+	}
 	return has_uncertain_call();
 }
 
 bool
 FunctionInvocation::has_simple_params(void) const
-{   
+{
 	size_t i;
-	for (i=0; i<param_value.size(); i++) { 
+	for (i=0; i<param_value.size(); i++) {
 		const Expression* e = param_value[i];
 		if (e->term_type == eFunction) {
 			return false;
 		}
-	} 
+	}
 	return true;
 }
 
@@ -428,14 +428,14 @@ FunctionInvocation::permute_param_oders(void) const
 		return ret;
 	}
 	// get initial order, mark those paramters that invoke function call
-	for (i=0; i<param_value.size(); i++) { 
+	for (i=0; i<param_value.size(); i++) {
 		if (param_value[i]->func_count() > 0) {
 			base.push_back(i);
 		}
 		ret_base.push_back(i);
-	} 
+	}
 	// permute
-	vector<intvec> permuted = permute(base); 
+	vector<intvec> permuted = permute(base);
 	for (i=0; i<permuted.size(); i++) {
 		intvec new_seq = permuted[i];
 		intvec tmp = ret_base;
@@ -450,7 +450,7 @@ FunctionInvocation::permute_param_oders(void) const
 	return ret;
 }
 
-bool 
+bool
 FunctionInvocation::visit_unordered_params(vector<const Fact*>& inputs, CGContext& cg_context) const
 {
 	vector<const Fact*> inputs_copy = inputs;
@@ -464,13 +464,13 @@ FunctionInvocation::visit_unordered_params(vector<const Fact*>& inputs, CGContex
 		inputs = inputs_copy;
 		for (j=0; j<order.size(); j++) {
 			int param_id = order[j];
-			const Expression* value = param_value[param_id];  
-			if (!value->visit_facts(inputs, cg_context)) { 
+			const Expression* value = param_value[param_id];
+			if (!value->visit_facts(inputs, cg_context)) {
 				return false;
-			} 
+			}
 		}
 		if (i==0) {
-			tmp = inputs; 
+			tmp = inputs;
 		}
 		else {
 			merge_facts(tmp, inputs);
@@ -480,11 +480,11 @@ FunctionInvocation::visit_unordered_params(vector<const Fact*>& inputs, CGContex
 	return true;
 }
 
-CVQualifiers 
+CVQualifiers
 FunctionInvocation::get_qualifiers(void) const
 {
 	CVQualifiers qfer;
-	if (invoke_type == eFuncCall) { 
+	if (invoke_type == eFuncCall) {
 		const FunctionInvocationUser* func_call = dynamic_cast<const FunctionInvocationUser*>(this);
 		assert(func_call->get_func());
 		assert(func_call->get_func()->rv);
@@ -498,15 +498,15 @@ FunctionInvocation::get_qualifiers(void) const
 	return qfer;
 }
 
-bool 
+bool
 FunctionInvocation::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const
-{   
-	bool unordered = false; //has_uncertain_call();  
+{
+	bool unordered = false; //has_uncertain_call();
 	bool ok = false;
 	bool is_func_call = (invoke_type == eFuncCall);
 	static int g = 0;
 	Effect running_eff_context(cg_context.get_effect_context());
-	if (!unordered) {  
+	if (!unordered) {
 		// unsigned int flags = ptr_cmp ? (cg_context.flags | NO_DANGLING_PTR) : cg_context.flags;
 		for (size_t i=0; i<param_value.size(); i++) {
 			Effect param_eff_accum;
@@ -516,17 +516,17 @@ FunctionInvocation::visit_facts(vector<const Fact*>& inputs, CGContext& cg_conte
 			const Expression* value = param_value[i];
 			if (h == 236)
 				BREAK_NOP;	// for debugging
-			if (!value->visit_facts(inputs, param_cg_context)) { 
+			if (!value->visit_facts(inputs, param_cg_context)) {
 				return false;
 			}
 			// Update the "running effect context": the context that we must use
 			// when we generate subsequent parameters within this invocation.
 			running_eff_context.add_effect(param_eff_accum);
 			// Update the total effect of this invocation, too.
-			cg_context.merge_param_context(param_cg_context, !is_func_call); 
+			cg_context.merge_param_context(param_cg_context, !is_func_call);
 		}
 		ok = true;
-	} 
+	}
 	else {
 		ok = visit_unordered_params(inputs, cg_context);
 	}
@@ -534,10 +534,10 @@ FunctionInvocation::visit_facts(vector<const Fact*>& inputs, CGContext& cg_conte
 		// make a copy of env
 		vector<const Fact*> inputs_copy = inputs;
 		const FunctionInvocationUser* func_call = dynamic_cast<const FunctionInvocationUser*>(this);
-		Effect effect_accum;  
+		Effect effect_accum;
 		//CGContext new_context(func_call->func, cg_context.get_effect_context(), &effect_accum);
 		CGContext new_context(cg_context, func_call->func, cg_context.get_effect_context(), &effect_accum);
-		ok = func_call->revisit(inputs, new_context); 
+		ok = func_call->revisit(inputs, new_context);
 		if (ok) {
 			assert(cg_context.curr_blk);
 			//cg_context.add_external_effect(*new_context.get_effect_accum());
@@ -593,7 +593,7 @@ FunctionInvocation::FunctionInvocation(const FunctionInvocation &fi)
 		const Expression *expr = (*i)->clone();
 		param_value.push_back(expr);
 	}
-	//assert(fi.op_flags); 
+	//assert(fi.op_flags);
 	op_flags = fi.op_flags ? fi.op_flags->clone() : 0;
 }
 

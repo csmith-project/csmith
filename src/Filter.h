@@ -56,7 +56,7 @@ protected:
 	bool valid_filter() const;
 
 	// What kind of mode this filter can apply to
-	// By default, it can work for all modes. 
+	// By default, it can work for all modes.
 	std::bitset<MAX_FILTER_KIND_SIZE> kinds_;
 
 private:

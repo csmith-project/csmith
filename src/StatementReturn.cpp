@@ -56,9 +56,9 @@ StatementReturn::make_random(CGContext &cg_context)
 	Function *curr_func = cg_context.get_current_func();
 	assert(curr_func);
 	FactMgr* fm = get_fact_mgr(&cg_context);
-	assert(fm); 
+	assert(fm);
 
-	ExpressionVariable* ev = ExpressionVariable::make_random(cg_context, curr_func->return_type, &curr_func->rv->qfer, false, true); 
+	ExpressionVariable* ev = ExpressionVariable::make_random(cg_context, curr_func->return_type, &curr_func->rv->qfer, false, true);
 	// typecast, if needed.
 	ev->check_and_set_cast(curr_func->return_type);
 	// XXX
@@ -68,15 +68,15 @@ StatementReturn::make_random(CGContext &cg_context)
 	return sr;
 }
 
-std::vector<const ExpressionVariable*> 
+std::vector<const ExpressionVariable*>
 StatementReturn::get_dereferenced_ptrs(void) const
-{ 
+{
 	return var.get_dereferenced_ptrs();
 }
 
-bool 
+bool
 StatementReturn::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const
-{ 
+{
 	if (CGOptions::no_return_dead_ptr()) {
 		const Variable* v = var.get_var();
 		int indirection = var.get_indirect_level();
@@ -86,11 +86,11 @@ StatementReturn::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context)
 			return false;
 		}
 	}
-			
+
 	if (!var.visit_facts(inputs, cg_context)) {
 		return false;
 	}
-	FactMgr::update_fact_for_return(this, inputs); 
+	FactMgr::update_fact_for_return(this, inputs);
 	FactMgr* fm = get_fact_mgr(&cg_context);
 	fm->map_stm_effect[this] = cg_context.get_effect_stm();
 	return true;
@@ -134,8 +134,8 @@ StatementReturn::Output(std::ostream &out, FactMgr* /*fm*/, int indent) const
 	// XXX --- Fix this.  Outputting two stmts instead of one is bad mojo.
 	if (CGOptions::depth_protect()) {
 		out << "DEPTH--;" << endl;
-	} 
-	out << "return "; 
+	}
+	out << "return ";
 	var.Output(out);
 	out << ";";
 	outputln(out);

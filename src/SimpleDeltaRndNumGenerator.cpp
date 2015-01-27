@@ -26,7 +26,7 @@
 // CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
-#ifdef WIN32 
+#ifdef WIN32
 #pragma warning(disable : 4786)   /* Disable annoying warning messages */
 #endif
 #include "SimpleDeltaRndNumGenerator.h"
@@ -81,7 +81,7 @@ SimpleDeltaRndNumGenerator::make_rndnum_generator(const unsigned long /*seed*/)
 	impl_->random_point_ = SimpleDeltaRndNumGenerator::pure_rnd_upto(seq->sequence_length());
 
 	assert(impl_);
-	
+
 	return impl_;
 }
 
@@ -121,7 +121,7 @@ SimpleDeltaRndNumGenerator::get_sequence(std::string &sequence)
 	sequence = ss.str();
 }
 
-std::string 
+std::string
 SimpleDeltaRndNumGenerator::get_prefixed_name(const std::string &name)
 {
 	return name;
@@ -152,7 +152,7 @@ SimpleDeltaRndNumGenerator::rnd_flipcoin(const unsigned int, const Filter *f, co
 	return y;
 }
 
-unsigned long 
+unsigned long
 SimpleDeltaRndNumGenerator::genrand(void)
 {
 	return AbsRndNumGenerator::genrand();

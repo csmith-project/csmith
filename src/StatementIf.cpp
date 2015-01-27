@@ -27,7 +27,7 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef WIN32 
+#ifdef WIN32
 #pragma warning(disable : 4786)   /* Disable annoying warning messages */
 #endif
 
@@ -56,12 +56,12 @@ StatementIf *
 StatementIf::make_random(CGContext &cg_context)
 {
 	DEPTH_GUARD_BY_TYPE_RETURN(dtStatementIf, NULL);
-	FactMgr* fm = get_fact_mgr(&cg_context); 
+	FactMgr* fm = get_fact_mgr(&cg_context);
 	FactVec pre_facts;
 	Effect pre_effect;
 	// func_1 hacking, save the env in case we need to re-analyze
 	if (cg_context.get_current_func()->name == "func_1" && !(cg_context.flags & IN_LOOP)) {
-		pre_effect = cg_context.get_accum_effect(); 
+		pre_effect = cg_context.get_accum_effect();
 		pre_facts = fm->global_facts;
 	}
 	cg_context.get_effect_stm().clear();
@@ -72,8 +72,8 @@ StatementIf::make_random(CGContext &cg_context)
 		if (expr->has_uncertain_call_recursive()) {
 			fm->makeup_new_var_facts(pre_facts, fm->global_facts);
 			cg_context.reset_effect_accum(pre_effect);
-			cg_context.curr_blk = cg_context.get_current_block(); 
-			bool ok = expr->visit_facts(pre_facts, cg_context);  
+			cg_context.curr_blk = cg_context.get_current_block();
+			bool ok = expr->visit_facts(pre_facts, cg_context);
 			if (!ok) {
 			//	print_facts(pre_facts);
 			//	expr->indented_output(cout, 0);
@@ -86,12 +86,12 @@ StatementIf::make_random(CGContext &cg_context)
 
 	// this will save global_facts to map_facts_in[if_true], and update
 	// facts for new variables created while generating if_true
-	Block *if_true = Block::make_random(cg_context);    
+	Block *if_true = Block::make_random(cg_context);
 	ERROR_GUARD_AND_DEL1(NULL, expr);
 
 	// generate false branch with the same env as true branch
-	fm->global_facts = fm->map_facts_in[if_true];  
-	Block *if_false = Block::make_random(cg_context); 
+	fm->global_facts = fm->map_facts_in[if_true];
+	Block *if_false = Block::make_random(cg_context);
 	ERROR_GUARD_AND_DEL2(NULL, expr, if_true);
 
 	StatementIf* si = new StatementIf(cg_context.get_current_block(), *expr, *if_true, *if_false);
@@ -146,7 +146,7 @@ StatementIf::Output(std::ostream &out, FactMgr* fm, int indent) const
 	output_branches(out, fm, indent);
 }
 
-void 
+void
 StatementIf::output_condition(std::ostream &out, FactMgr* /*fm*/, int indent) const
 {
 	output_tab(out, indent);
@@ -155,8 +155,8 @@ StatementIf::output_condition(std::ostream &out, FactMgr* /*fm*/, int indent) co
 	out << ")";
 	outputln(out);
 }
-	
-void 
+
+void
 StatementIf::output_branches(std::ostream &out, FactMgr* fm, int indent) const
 {
 	if_true.Output(out, fm, indent);
@@ -166,23 +166,23 @@ StatementIf::output_branches(std::ostream &out, FactMgr* fm, int indent) const
 	if_false.Output(out, fm, indent);
 }
 
-bool 
+bool
 StatementIf::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const
-{    
+{
 	vector<const Fact*> inputs_copy = inputs;
 	// evaludate condition first
 	if (!test.visit_facts(inputs, cg_context)) {
 		return false;
 	}
 	Effect eff = cg_context.get_effect_stm();
-	FactVec inputs_true = inputs; 
+	FactVec inputs_true = inputs;
 	if (!if_true.visit_facts(inputs_true, cg_context)) {
 		return false;
 	}
 	FactVec inputs_false = inputs;
 	if (!if_false.visit_facts(inputs_false, cg_context)) {
 		return false;
-	} 
+	}
 	// compute accumulated effect for this statement
 	set_accumulated_effect_after_block(eff, &if_true, cg_context);
 	set_accumulated_effect_after_block(eff, &if_false, cg_context);
@@ -208,22 +208,22 @@ StatementIf::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) con
 	return true;
 }
 
-bool 
-StatementIf::must_return(void) const 
+bool
+StatementIf::must_return(void) const
 {
 	return if_true.must_return() && if_false.must_return();
 }
 
-bool 
-StatementIf::must_jump(void) const 
+bool
+StatementIf::must_jump(void) const
 {
 	return if_true.must_jump() && if_false.must_jump();
 }
 
 void
 StatementIf::combine_branch_facts(vector<const Fact*>& pre_facts) const
-{ 
-	FactMgr* fm = get_fact_mgr_for_func(func); 
+{
+	FactMgr* fm = get_fact_mgr_for_func(func);
 	FactVec& outputs = fm->global_facts;
 	fm->makeup_new_var_facts(pre_facts, fm->map_facts_out[&if_true]);
 	fm->makeup_new_var_facts(pre_facts, fm->map_facts_out[&if_false]);
@@ -235,14 +235,14 @@ StatementIf::combine_branch_facts(vector<const Fact*>& pre_facts) const
 		outputs = pre_facts;
 	}
 	else if (true_must_return) {
-		// since false branch is created after true branch, it's output should 
+		// since false branch is created after true branch, it's output should
 		// have all the variables created in true branch already
 		outputs = fm->map_facts_out[&if_false];
 	}
 	else if (false_must_return) {
 		outputs = fm->map_facts_out[&if_true];
 		// if skip the outcome from false branch, don't forget facts of those variables
-		// created in false branch 
+		// created in false branch
 		fm->makeup_new_var_facts(outputs, fm->map_facts_in[&if_false]);
 	}
 	else {

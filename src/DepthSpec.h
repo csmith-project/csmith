@@ -120,7 +120,7 @@ enum dType {
 
 #define GETTER_DECL(type) \
 	static int \
-	type##_minimal_depth(int flag = -1); 
+	type##_minimal_depth(int flag = -1);
 
 class DepthSpec
 {

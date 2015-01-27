@@ -27,7 +27,7 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef WIN32 
+#ifdef WIN32
 #pragma warning(disable : 4786)   /* Disable annoying warning messages */
 #endif
 
@@ -62,9 +62,9 @@ StatementGoto::make_random(CGContext &cg_context)
 {
 	//static int g = 0;
 	//int h = g++;
-	Block* curr_blk = cg_context.get_current_block(); 
+	Block* curr_blk = cg_context.get_current_block();
 	Function* func = cg_context.get_current_func();
-	FactMgr* fm = get_fact_mgr(&cg_context); 
+	FactMgr* fm = get_fact_mgr(&cg_context);
 
 	// find blocks that are good for backward or forward jump (a good block is the one
 	// doesn't create un-initialized variables with the jump)
@@ -74,7 +74,7 @@ StatementGoto::make_random(CGContext &cg_context)
 	bool select_back_edge = rnd_flipcoin(40);
 	ERROR_GUARD(NULL);
 	if (select_back_edge) {
-		// create a backward "goto", this creates a loop when other_stm leads to stm 
+		// create a backward "goto", this creates a loop when other_stm leads to stm
 		back_edge = true;
 		ok_blk = find_good_jump_block(blks, curr_blk, true);
 	}
@@ -85,7 +85,7 @@ StatementGoto::make_random(CGContext &cg_context)
 	}
 	if (ok_blk == NULL) return NULL;
 
-	const Statement* stm = 0; 
+	const Statement* stm = 0;
 	const Statement* other_stm = 0;
 	if (!curr_blk->stms.empty()) {
 		stm = curr_blk->stms.back();
@@ -93,7 +93,7 @@ StatementGoto::make_random(CGContext &cg_context)
 	// find statements that are good for backward/forward jumps (a good statement has
 	// the type other than break/continue/goto/return) (relax this constriction?)
 	size_t i;
-	vector<const Statement*> ok_stms; 
+	vector<const Statement*> ok_stms;
 	for (i=0; i<ok_blk->stms.size(); i++) {
 		const Statement* s = ok_blk->stms[i];
 		if (s != stm) {
@@ -108,17 +108,17 @@ StatementGoto::make_random(CGContext &cg_context)
 	if (ok_stms.size() > 0) {
 		size_t stm_id = rnd_upto(ok_stms.size());
 		ERROR_GUARD(NULL);
-		other_stm = ok_stms[stm_id]; 
+		other_stm = ok_stms[stm_id];
 		cg_context.get_effect_stm().clear();
 		//Expression* test = Expression::make_random(cg_context, get_int_type(), true, true, eVariable);
 		// use a variable that is already read in the context to avoid introducing conflict by the condition
 		const Variable* cond_var = NULL;
 		if (back_edge) {
-			cond_var = VariableSelector::choose_visible_read_var(curr_blk, 
+			cond_var = VariableSelector::choose_visible_read_var(curr_blk,
 				cg_context.get_effect_accum()->get_read_vars(), get_int_type(), fm->global_facts);
 		} else {
 			// travel in time, find a suitable variable read at generation time of the other statement
-			cond_var = VariableSelector::choose_visible_read_var(ok_blk, 
+			cond_var = VariableSelector::choose_visible_read_var(ok_blk,
 				fm->map_accum_effect[other_stm].get_read_vars(), get_int_type(), fm->map_facts_out[other_stm]);
 		}
 		if (cond_var == 0) {
@@ -133,7 +133,7 @@ StatementGoto::make_random(CGContext &cg_context)
 			sg = new StatementGoto(curr_blk, *test, other_stm, skipped_vars);
 			fm->create_cfg_edge(sg, other_stm, false, true);
 			// find the least incomplete block that contains both stm and other_stm,
-			// which is the block that needs to be re-analyzed due to this "goto" once 
+			// which is the block that needs to be re-analyzed due to this "goto" once
 			// done with creation
 			Block* b = curr_blk;
 			while (!b->contains_stmt(other_stm)) {
@@ -146,8 +146,8 @@ StatementGoto::make_random(CGContext &cg_context)
 		}
 		else {
 			// create a forward "goto", insert after "other_stm"
-			// make sure the jump doesn't cause trouble to the existing DFA analyzer 
-			FactVec goto_out, stm_in, stm_out; 
+			// make sure the jump doesn't cause trouble to the existing DFA analyzer
+			FactVec goto_out, stm_in, stm_out;
 			bool ok = true;
 			bool found_new_facts = false;
 			// JYTODO: don't assume facts_in == facts_out for control statements
@@ -164,28 +164,28 @@ StatementGoto::make_random(CGContext &cg_context)
 				fm->backup_stm_fact_maps(stm, facts_in_copy, facts_out_copy);
 				ok = stm->stm_visit_facts(stm_out, cg_context);
 				if (!ok) {
-					fm->restore_stm_fact_maps(stm, facts_in_copy, facts_out_copy); 
+					fm->restore_stm_fact_maps(stm, facts_in_copy, facts_out_copy);
 					cg_context.reset_effect_accum(pre_effect);
 					return NULL;
 				}
 				// in cases where "stm" contains "other_stm", the above "stm_visit_facts" will cause "map_facts_in[other_stm]" to be updated
-				if (stm->contains_stmt(other_stm)) { 
+				if (stm->contains_stmt(other_stm)) {
 					FactMgr::update_facts_for_dest(goto_in, goto_out, stm);
 				}
-			} 
-			
+			}
+
 			Block* other_blk = other_stm->parent;
 			sg = new StatementGoto(other_blk, *test, stm, skipped_vars);
 			for (i=0; i<other_blk->stms.size(); i++) {
-				if (other_blk->stms[i] == other_stm) { 
+				if (other_blk->stms[i] == other_stm) {
 					// note we don't return goto statement for forward edges, instead the
 					// statement is inserted into an existing block
 					other_blk->stms.insert(other_blk->stms.begin()+i+1, sg);
 					break;
 				}
 			}
-			// take care in/out facts for newly created goto statement, and the jump destination  
-			fm->set_fact_in(sg, goto_in); 
+			// take care in/out facts for newly created goto statement, and the jump destination
+			fm->set_fact_in(sg, goto_in);
 			fm->map_facts_out[sg] = goto_out;
 			fm->map_visited[sg] = true;
 			if (found_new_facts) {
@@ -256,9 +256,9 @@ StatementGoto::Output(std::ostream &out, FactMgr* /*fm*/, int indent) const
 	test.Output(out);
 	out << ")";
 	outputln(out);
-	output_tab(out, indent+1); 
-	out << "goto " << label << ";"; 
-	outputln(out); 
+	output_tab(out, indent+1);
+	out << "goto " << label << ";";
+	outputln(out);
 }
 
 /*
@@ -275,7 +275,7 @@ StatementGoto::output_skipped_var_inits(std::ostream &out, int indent) const
 		assert(v->init);
 		v->init->Output(out);
 		out << ";";
-		outputln(out); 
+		outputln(out);
 	}
 }
 
@@ -294,8 +294,8 @@ StatementGoto::has_init_skipped_vars(const Block* src_blk, const Statement* dest
 	size_t i;
 	skipped_vars.clear();
 	for (i=0; i<local_vars.size(); i++) {
-		const Variable* v = local_vars[i]; 
-		//b==parent means the jump destination is inside a block that also 
+		const Variable* v = local_vars[i];
+		//b==parent means the jump destination is inside a block that also
 		//contains "goto", in that case, all locals in sub-blocks have been skipped
 		if (b==src_blk || !v->is_visible_local(src_blk)) {
 			// if v is a const, this re-initialize strategy would fail, therefore we have
@@ -306,7 +306,7 @@ StatementGoto::has_init_skipped_vars(const Block* src_blk, const Statement* dest
 			//}
 			//skipped_vars.push_back(v);
 			return true;
-		} 
+		}
 	}
 	return false;
 }
@@ -341,12 +341,12 @@ StatementGoto::find_good_jump_block(vector<Block*>& blocks, const Block* blk, bo
 		return find_good_jump_block(blocks, blk, as_dest);
 	}
 
-	Block* b = blocks[index]; 
+	Block* b = blocks[index];
 	if (b == blk) {
 		return b;
 	}
 	if ((as_dest && has_init_skipped_vars(blk, b->stms[0])) ||
-		(!as_dest && has_init_skipped_vars(b, blk->stms[0]))) 
+		(!as_dest && has_init_skipped_vars(b, blk->stms[0])))
 	{
 		blocks.erase(blocks.begin() + index);
 		return find_good_jump_block(blocks, blk, as_dest);
@@ -354,18 +354,18 @@ StatementGoto::find_good_jump_block(vector<Block*>& blocks, const Block* blk, bo
 	return b;
 }
 
-/* 
+/*
  * return true if condition is always true
  */
-bool 
-StatementGoto::must_jump(void) const 
+bool
+StatementGoto::must_jump(void) const
 {
 	return test.not_equals(0);
 }
 
-bool 
+bool
 StatementGoto::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const
-{    
+{
 	// evaludate condition first
 	if (!test.visit_facts(inputs, cg_context)) {
 		return false;
@@ -384,18 +384,18 @@ StatementGoto::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) c
 	 ll:     ...
 	      }
 	 and a revisit to the function caused output env {a -> {b, c}} for "goto ll",
-	 a subsequent revisit that caused output env {a -> {b}} for "goto ll" would 
+	 a subsequent revisit that caused output env {a -> {b}} for "goto ll" would
 	 bypass analyzing if statement and returns {a -> {b, c}} (from the last round)
 	 even it should be {a -> {b}}. (this is determined by Statement::contains_unfixed_goto)
 
 	 To address this problem, if a goto statement's output env is a subset of last
-	 round output (but not exact match), the jump target (and it's enclosing 
+	 round output (but not exact match), the jump target (and it's enclosing
 	 statements) is forced to re-analyze by resetting the target's input and output env
 	 (re-analysis is enforced through Statement::contains_unfixed_goto)
 	 */
 	if (!fm->map_visited[this] &&
 		!fm->map_visited[dest] &&
-		!same_facts(inputs, fm->map_facts_out[this]) && 
+		!same_facts(inputs, fm->map_facts_out[this]) &&
 		subset_facts(inputs, fm->map_facts_out[this])) {
 			//print_facts(inputs);
 			//cout << endl;
@@ -408,7 +408,7 @@ StatementGoto::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) c
 }
 
 void
-StatementGoto::doFinalization(void) 
+StatementGoto::doFinalization(void)
 {
 	stm_labels.clear();
 }

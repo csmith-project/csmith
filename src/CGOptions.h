@@ -54,14 +54,14 @@ using namespace std;
 #define CGOPTIONS_DEFAULT_MAX_UNION_FIELDS	(5)
 #define CGOPTIONS_DEFAULT_MAX_NESTED_STRUCT_LEVEL	(3)
 #define CGOPTIONS_DEFAULT_MAX_INDIRECT_LEVEL (2)
-#define CGOPTIONS_DEFAULT_MAX_ARRAY_DIMENSIONS	(3) 
+#define CGOPTIONS_DEFAULT_MAX_ARRAY_DIMENSIONS	(3)
 #define CGOPTIONS_DEFAULT_MAX_ARRAY_LENGTH_PER_DIMENSION (10)
 #define CGOPTIONS_DEFAULT_MAX_ARRAY_LENGTH	(256)
 #define CGOPTIONS_DEFAULT_MAX_ARRAY_NUM_IN_LOOP	(4)
-#define CGOPTIONS_DEFAULT_MAX_EXHAUSTIVE_DEPTH	(-1) 
+#define CGOPTIONS_DEFAULT_MAX_EXHAUSTIVE_DEPTH	(-1)
 // 0 means we output to the standard output
 #define CGOPTIONS_DEFAULT_MAX_SPLIT_FILES	(0)
-#define CGOPTIONS_DEFAULT_SPLIT_FILES_DIR	("./output") 
+#define CGOPTIONS_DEFAULT_SPLIT_FILES_DIR	("./output")
 #define CGOPTIONS_DEFAULT_OUTPUT_FILE		("")
 #define PLATFORM_CONFIG_FILE                ("platform.info")
 
@@ -380,7 +380,7 @@ public:
 	static int max_array_num_in_loop(int p);
 
 	static void init_reducer(std::string fname) { reducer_ = new Reducer(fname);}
-	static Reducer* get_reducer(void) { return reducer_; } 
+	static Reducer* get_reducer(void) { return reducer_; }
 
 	static bool x86_64();
 
@@ -594,7 +594,7 @@ private:
 	static int  pointer_size_;
 	static bool take_union_field_addr_;
 	static bool vol_struct_union_fields_;
-	static Reducer* reducer_; 
+	static Reducer* reducer_;
 
 	// flag to indicate language
 	static bool lang_cpp_;

@@ -46,7 +46,7 @@ class Constant;
 class Lhs : public Expression
 {
 public:
-	// Factory method. 
+	// Factory method.
 	static Lhs *make_random(CGContext &cg_context, const Type* t, const CVQualifiers* qfer, bool for_compound_assign, bool no_signed_overflow=false);
 
 	explicit Lhs(const Variable &v);

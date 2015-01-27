@@ -83,7 +83,7 @@ DefaultRndNumGenerator::make_rndnum_generator(const unsigned long seed)
 	impl_ = new DefaultRndNumGenerator(seed, seq);
 	assert(impl_);
 	//impl_->seedrand(seed);
-	
+
 	return impl_;
 }
 
@@ -178,7 +178,7 @@ DefaultRndNumGenerator::rnd_flipcoin(const unsigned int p, const Filter *f, cons
 }
 
 #if 0
-void 
+void
 DefaultRndNumGenerator::seedrand( unsigned long seed )
 {
 	srand48 (seed);
@@ -191,7 +191,7 @@ DefaultRndNumGenerator::trace_depth()
 	return trace_string_;
 }
 
-unsigned long 
+unsigned long
 DefaultRndNumGenerator::genrand(void)
 {
 	return AbsRndNumGenerator::genrand();

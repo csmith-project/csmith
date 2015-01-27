@@ -61,7 +61,7 @@ KleeExtension::output_symbolics(ostream &out)
 		assert(*i);
 		out << AbsExtension::tab_;
 		out << "klee_make_symbolic(&" << (*i)->get_name() << ", sizeof(" << (*i)->get_name() << "), ";
-		out << "\"" << KleeExtension::input_base_name_ << count << "\");" << endl; 
+		out << "\"" << KleeExtension::input_base_name_ << count << "\");" << endl;
 		count++;
 	}
 }

@@ -44,7 +44,7 @@ enum RNDNUM_GENERATOR {
 #define MAX_RNDNUM_GENERATOR (rSimpleDeltaRndNumGenerator+1)
 
 // I could make AbsRndNumGenerator not pure, but want to force each subclass implement
-// it's own member functions, in case of forgetting something. 
+// it's own member functions, in case of forgetting something.
 class AbsRndNumGenerator
 {
 public:
@@ -69,14 +69,14 @@ public:
 	virtual unsigned int rnd_upto(const unsigned int n, const Filter *f = NULL, const std::string *where = NULL) = 0;
 
 	virtual bool rnd_flipcoin(const unsigned int p, const Filter *f = NULL, const std::string *where = NULL) = 0;
-	
+
 	virtual std::string RandomHexDigits( int num ) = 0;
 
 	virtual std::string RandomDigits( int num ) = 0;
 
-	// Although it's not a good idea to return the kind of different implementation, 
+	// Although it's not a good idea to return the kind of different implementation,
 	// it's useful for error_handler. Basically we don't want to make the code
-	// depend on the kind, use polymorphism instead. 
+	// depend on the kind, use polymorphism instead.
 	virtual enum RNDNUM_GENERATOR kind() = 0;
 
 	virtual ~AbsRndNumGenerator(void);

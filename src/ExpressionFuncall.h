@@ -48,7 +48,7 @@ class ExpressionFuncall : public Expression
 {
 public:
 	// Factory method.
-	static Expression *make_random(CGContext &cg_context, const Type* type, const CVQualifiers* qfer=0); 
+	static Expression *make_random(CGContext &cg_context, const Type* type, const CVQualifiers* qfer=0);
 
 	explicit ExpressionFuncall(const FunctionInvocation &fi);
 
@@ -70,7 +70,7 @@ public:
 
 	virtual bool visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const;
 
-	virtual bool has_uncertain_call_recursive(void) const; 
+	virtual bool has_uncertain_call_recursive(void) const;
 
 	virtual bool compatible(const Variable *) const;
 
@@ -83,7 +83,7 @@ public:
 
 	virtual std::vector<const ExpressionVariable*> get_dereferenced_ptrs(void) const;
 	virtual void get_referenced_ptrs(std::vector<const Variable*>& ptrs) const;
-	
+
 	void Output(std::ostream &) const;
 	virtual void indented_output(std::ostream &out, int indent) const;
 

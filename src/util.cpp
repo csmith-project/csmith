@@ -40,7 +40,7 @@
 #include "AbsProgramGenerator.h"
 #include "CGOptions.h"
 
-using namespace std; 
+using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
 
 static int gensym_count = 0;
@@ -60,7 +60,7 @@ gensym(const char* basename)
 	ostringstream ss; //(basename, ios_base::ate); somehow this yields weird result on windows
 	ss << basename;
 	ss << ++gensym_count;
-	return ss.str(); 
+	return ss.str();
 }
 
 /*
@@ -109,7 +109,7 @@ vector<intvec> permute(intvec in)
 /*
  * given a multi-dimensional array sizes, expand it into all possible array indices
  * for example: a (2, 2, 2) array will be expanded into the following array of arrays
- *     (0, 0, 0), (0, 0, 1), (0, 1, 0), (0, 1, 1), 
+ *     (0, 0, 0), (0, 0, 1), (0, 1, 0), (0, 1, 1),
  *     (1, 0, 0), (1, 0, 1), (1, 1, 0), (1, 1, 1)
  * return: the size of the expanded array of arrays
  */
@@ -134,9 +134,9 @@ int expand_within_ranges(vector<unsigned int> in, vector<intvec>& out)
 			tmp.push_back(num / limits[j+1]);
 			num = num % limits[j+1];
 		}
-		tmp.push_back(num); 
+		tmp.push_back(num);
 		out.push_back(tmp);
-	} 
+	}
 	return out.size();
 }
 

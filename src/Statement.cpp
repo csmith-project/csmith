@@ -35,7 +35,7 @@
 // Bryan Turner (bryan.turner@pobox.com)
 // July, 2005
 //
-#ifdef WIN32 
+#ifdef WIN32
 #pragma warning(disable : 4786)   /* Disable annoying warning messages */
 #endif
 
@@ -88,7 +88,7 @@ class StatementFilter : public Filter
 {
 public:
 	explicit StatementFilter(const CGContext &cg_context);
-	
+
 	virtual ~StatementFilter(void);
 
 	virtual bool filter(int v) const;
@@ -140,7 +140,7 @@ bool StatementFilter::filter(int value) const
 
 	eStatementType type = Statement::number_to_type(value);
 
-	// If expand_check returns false, we filter out v. 
+	// If expand_check returns false, we filter out v.
 	if (!PartialExpander::expand_check(type))
 		return true;
 
@@ -150,7 +150,7 @@ bool StatementFilter::filter(int value) const
 	if (type == eBlock) {
 		return true;
 	}
-	if ((type == eReturn) && no_return) {	
+	if ((type == eReturn) && no_return) {
 		return true;
 	}
 
@@ -160,14 +160,14 @@ bool StatementFilter::filter(int value) const
 
 	// Limit Function complexity (depth of nested control structures)
 	if (cg_context_.blk_depth >= CGOptions::max_blk_depth()) {
-		return Statement::is_compound(type);			
-	} 
+		return Statement::is_compound(type);
+	}
 	else if (Function::reach_max_functions_cnt()) { // Limit # of functions..
 		if (type != eInvoke)
 			return false;
 		else
 			return true;
-	} 
+	}
 	else {
 		return false;
 	}
@@ -181,7 +181,7 @@ int find_stm_in_set(const vector<const Statement*>& set, const Statement* s)
     for (i=0; i<set.size(); i++) {
         if (set[i] == s) {
             return i;
-        } 
+        }
     }
     return -1;
 }
@@ -230,7 +230,7 @@ int Statement::sid = 0;
 Statement *
 Statement::make_random(CGContext &cg_context,
 					   eStatementType t)
-{ 
+{
 	DEPTH_GUARD_BY_TYPE_RETURN_WITH_FLAG(dtStatement, t, NULL);
 	// Should initialize table first
 	Statement::InitProbabilityTable();
@@ -249,12 +249,12 @@ Statement::make_random(CGContext &cg_context,
 		StatementFilter filter(cg_context);
 		t = StatementProbability(&filter);
 		ERROR_GUARD(NULL);
-	}	
-	FactMgr* fm = get_fact_mgr(&cg_context); 
-	FactVec pre_facts = fm->global_facts; 
+	}
+	FactMgr* fm = get_fact_mgr(&cg_context);
+	FactVec pre_facts = fm->global_facts;
 	Effect pre_effect = cg_context.get_accum_effect();
 	cg_context.get_effect_stm().clear();
-	cg_context.expr_depth = 0;	
+	cg_context.expr_depth = 0;
 	if (is_compound(t)) {
 		cg_context.blk_depth++;
 	}
@@ -282,7 +282,7 @@ Statement::make_random(CGContext &cg_context,
 		break;
 	case eReturn:
 		s = StatementReturn::make_random(cg_context);
-		break;	
+		break;
 	case eBreak:
 		s = StatementBreak::make_random(cg_context);
 		break;
@@ -301,17 +301,17 @@ Statement::make_random(CGContext &cg_context,
 	if (is_compound(t)) {
 		cg_context.blk_depth--;
 	}
-	// sometimes make_random may return 0 for various reasons. keep generating 
+	// sometimes make_random may return 0 for various reasons. keep generating
 	if (s == 0) {
 		return make_random(cg_context);
-	} 
-	s->func = cg_context.get_current_func(); 
+	}
+	s->func = cg_context.get_current_func();
 	s->parent = cg_context.get_current_block();
 	s->post_creation_analysis(pre_facts, pre_effect, cg_context);
 	return s;
-} 
+}
 
-std::vector<const ExpressionVariable*> 
+std::vector<const ExpressionVariable*>
 Statement::get_dereferenced_ptrs(void) const
 {
 	// return a empty vector by default
@@ -319,9 +319,9 @@ Statement::get_dereferenced_ptrs(void) const
 	return empty;
 }
 
-void 
+void
 Statement::get_referenced_ptrs(std::vector<const Variable*>& ptrs) const
-{ 
+{
 	size_t i;
 	vector<const Expression*> exprs;
 	vector<const Block*> blks;
@@ -338,7 +338,7 @@ Statement::get_referenced_ptrs(std::vector<const Variable*>& ptrs) const
 	}
 }
 
-int 
+int
 Statement::get_blk_depth(void) const
 {
 	int depth = 0;
@@ -348,7 +348,7 @@ Statement::get_blk_depth(void) const
 	return depth;
 }
 
-bool 
+bool
 Statement::is_ptr_used(void) const
 {
 	vector<const Variable*> ptrs;
@@ -416,11 +416,11 @@ Statement::dominate(const Statement* s) const
  * find the parent for-statement or while-statement (to be implemented)
  * that contains this statement or block
  */
-const Statement* 
+const Statement*
 Statement::find_container_stm(void) const
 {
-	const Block* b = (eType == eBlock) ? (const Block*)this : parent; 
-	if (b != 0 && b->parent != 0) {  
+	const Block* b = (eType == eBlock) ? (const Block*)this : parent;
+	if (b != 0 && b->parent != 0) {
 		for (size_t i=0; i<b->parent->stms.size(); i++) {
 			const Statement* s = b->parent->stms[i];
 			vector<const Block*> blks;
@@ -435,8 +435,8 @@ Statement::find_container_stm(void) const
 
 /*
  * return true if there is CFG edge(s) leading to this statement matching given attributes
- */ 
-bool 
+ */
+bool
 Statement::has_edge_in(bool post_dest, bool back_link) const
 {
 	if (func != 0) {
@@ -456,8 +456,8 @@ Statement::has_edge_in(bool post_dest, bool back_link) const
 /*
  * find CFG edges leading to this statement, found edges are stored in pass-in param "edges"
  * return the number of edges found
- */ 
-int 
+ */
+int
 Statement::find_edges_in(vector<const CFGEdge*>& edges, bool post_dest, bool back_link) const
 {
 	edges.clear();
@@ -477,10 +477,10 @@ Statement::find_edges_in(vector<const CFGEdge*>& edges, bool post_dest, bool bac
 
 /*
  * return the label if this statement is the destination of a "goto" statement
- */ 
-std::string 
+ */
+std::string
 Statement::find_jump_label(void) const
-{  
+{
 	if (func != 0) {
 		FactMgr* fm = get_fact_mgr_for_func(func);
 		assert(fm);
@@ -499,10 +499,10 @@ Statement::find_jump_label(void) const
 
 /*
  * find all "goto" statements that jumps to this statement
- */ 
-int 
+ */
+int
 Statement::find_jump_sources(std::vector<const StatementGoto*>& gotos) const
-{  
+{
 	if (func != 0) {
 		FactMgr* fm = get_fact_mgr_for_func(func);
 		assert(fm);
@@ -520,11 +520,11 @@ Statement::find_jump_sources(std::vector<const StatementGoto*>& gotos) const
 	return gotos.size();
 }
 
-/* 
+/*
  * a helper function for StatementFor and StatementIf
  * include effect caused by block, and update the effect map for this statement in fact manager
  */
-void 
+void
 Statement::set_accumulated_effect_after_block(Effect& eff, const Block* b, CGContext& cg_context) const
 {
 	FactMgr* fm = get_fact_mgr(&cg_context);
@@ -532,13 +532,13 @@ Statement::set_accumulated_effect_after_block(Effect& eff, const Block* b, CGCon
 	fm->map_stm_effect[this] = eff;
 }
 
-/* 
+/*
  * add back return_facts for skipped statement (see validate_and_update_facts)
  */
-void 
+void
 Statement::add_back_return_facts(FactMgr* fm, std::vector<const Fact*>& facts) const
-{  
-	if (eType == eReturn) { 
+{
+	if (eType == eReturn) {
 		merge_facts(facts, fm->map_facts_out[this]);
 	} else {
 		vector<const Block*> blks;
@@ -550,8 +550,8 @@ Statement::add_back_return_facts(FactMgr* fm, std::vector<const Fact*>& facts) c
 		}
 	}
 }
- 
-/* return code: 
+
+/* return code:
  *    0 means we successfully take a shortcut
  *    1 means the shortcut fails due to effect conflict
  *    2 means there is no shortcut
@@ -561,14 +561,14 @@ Statement::shortcut_analysis(vector<const Fact*>& inputs, CGContext& cg_context)
 {
 	FactMgr* fm = get_fact_mgr_for_func(func);
 	// the output facts of control statement (break/continue/goto) has removed local facts
-	// thus can not take this shortcut. (The facts we get should represent all variables 
+	// thus can not take this shortcut. (The facts we get should represent all variables
 	// visible in subsequent statement)
-	if (same_facts(inputs, fm->map_facts_in[this]) && !is_ctrl_stmt() && !contains_unfixed_goto()) 
+	if (same_facts(inputs, fm->map_facts_in[this]) && !is_ctrl_stmt() && !contains_unfixed_goto())
 	{
 		//cg_context.get_effect_context().Output(cout);
 		//print_facts(inputs);
 		//fm->map_stm_effect[this].Output(cout);
-		if (cg_context.in_conflict(fm->map_stm_effect[this])) { 
+		if (cg_context.in_conflict(fm->map_stm_effect[this])) {
 			return 1;
 		}
 		inputs = fm->map_facts_out[this];
@@ -582,10 +582,10 @@ Statement::shortcut_analysis(vector<const Fact*>& inputs, CGContext& cg_context)
 /***************************************************************************************
  * for a given input env, abstract a given statement, generate an output env, and
  * update both input/output env for this statement
- * 
- * shortcut: if this input env matches previous input env, use previous output env directly 
+ *
+ * shortcut: if this input env matches previous input env, use previous output env directly
  ***************************************************************************************/
-bool 
+bool
 Statement::validate_and_update_facts(vector<const Fact*>& inputs, CGContext& cg_context) const
 {
 	FactMgr* fm = get_fact_mgr_for_func(func);
@@ -593,13 +593,13 @@ Statement::validate_and_update_facts(vector<const Fact*>& inputs, CGContext& cg_
 	if (shortcut==0) {
 		/* mark the goto statements inside this statement as visited
 		   this is to fix scenario like the following:
-		   
+
 		   lbl:  s1
 		   for (...) {
 		      goto lbl;
 		   }
 
-		   where the "for" statement is bypassed, but the output from "goto lbl" 
+		   where the "for" statement is bypassed, but the output from "goto lbl"
 		   must be feed into s1 in order to achieve a fixed point */
 		for (size_t i=0; i<fm->cfg_edges.size(); i++) {
 			const Statement* s = fm->cfg_edges[i]->src;
@@ -610,33 +610,33 @@ Statement::validate_and_update_facts(vector<const Fact*>& inputs, CGContext& cg_
 		return true;
 	}
 	if (shortcut==1) return false;
-	
-	vector<const Fact*> inputs_copy = inputs; 
+
+	vector<const Fact*> inputs_copy = inputs;
 	if (!stm_visit_facts(inputs, cg_context)) {
 		return false;
-	}  
+	}
 	fm->set_fact_in(this, inputs_copy);
 	fm->set_fact_out(this, inputs);
 	return true;
 }
 
-bool 
+bool
 Statement::stm_visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const
-{ 
+{
 	cg_context.get_effect_stm().clear();
 	cg_context.curr_blk = parent;
 	FactMgr* fm = get_fact_mgr(&cg_context);
 	//static int g = 0;
 	//int h = g++;
 	bool ok = visit_facts(inputs, cg_context);
-	
-	
+
+
 	if (!ok && !is_compound(eType)) {
 		failed_stm = this;
 	}
 	//if (!FactPointTo::is_valid_ptr("g_75", inputs))
 	//	Output(cout, fm);
-	fm->remove_rv_facts(inputs); 
+	fm->remove_rv_facts(inputs);
 	fm->map_accum_effect[this] = *(cg_context.get_effect_accum());
 	fm->map_visited[this] = true;
 	return ok;
@@ -646,14 +646,14 @@ Statement::stm_visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) c
  * find all the control flow manipulate statements, i.e. break/continue/goto
  * (maybe return?) contained in this statement recursively
  */
-int 
+int
 Statement::find_typed_stmts(vector<const Statement*>& stms, const vector<int>& stmt_types) const
 {
-	if (std::find(stmt_types.begin(), stmt_types.end(), eType) != stmt_types.end()) { 
+	if (std::find(stmt_types.begin(), stmt_types.end(), eType) != stmt_types.end()) {
 		stms.push_back(this);
 	}
 	vector<const Block*> blks;
-	get_blocks(blks);	
+	get_blocks(blks);
 	for (size_t i=0; i<blks.size(); i++) {
 		for (size_t j=0; j<blks[i]->stms.size(); j++) {
 		const Statement* s  = blks[i]->stms[j];
@@ -663,15 +663,15 @@ Statement::find_typed_stmts(vector<const Statement*>& stms, const vector<int>& s
 	return stms.size();
 }
 
-bool 
+bool
 Statement::is_1st_stm(void) const
-{ 
+{
 	return parent && parent->stms.size() && parent->stms[0] == this;
 }
 
-bool 
+bool
 Statement::is_jump_target_from_other_blocks(void) const
-{ 
+{
 	vector<const StatementGoto*> gotos;
 	if (find_jump_sources(gotos)) {
 		size_t i;
@@ -684,7 +684,7 @@ Statement::is_jump_target_from_other_blocks(void) const
 	return false;
 }
 
-bool 
+bool
 Statement::read_union_field(void) const
 {
 	FactMgr* fm = get_fact_mgr_for_func(func);
@@ -705,14 +705,14 @@ Statement::read_union_field(void) const
 /*
  * return true if s is contained inside this statement
  */
-bool 
+bool
 Statement::contains_stmt(const Statement* s) const
-{ 
+{
 	if (this == s) {
 		return true;
-	} 
-	if (eType == eBlock) { 
-		for (const Block* tmp = s->parent; tmp; tmp = tmp->parent) { 
+	}
+	if (eType == eBlock) {
+		for (const Block* tmp = s->parent; tmp; tmp = tmp->parent) {
 			if (tmp == (const Block*)this) {
 				return true;
 			}
@@ -729,18 +729,18 @@ Statement::contains_stmt(const Statement* s) const
 	return false;
 }
 
-int 
+int
 Statement::find_contained_labels(vector<string>& labels) const
-{ 
+{
 	string label = find_jump_label();
 	if (label != "") {
 		labels.push_back(label);
 	}
-	
+
 	vector<const Block*> blks;
 	get_blocks(blks);
 	size_t i, j;
-	for (i=0; i<blks.size(); i++) { 
+	for (i=0; i<blks.size(); i++) {
 		for (j=0; j<blks[i]->stms.size(); j++) {
 			const Statement* s = blks[i]->stms[j];
 			s->find_contained_labels(labels);
@@ -754,7 +754,7 @@ Statement::find_contained_labels(vector<string>& labels) const
  */
 const FunctionInvocation*
 Statement::get_direct_invocation(void) const
-{ 
+{
 	if (eType == eAssign) {
 		const Expression* e = ((const StatementAssign*)this)->get_expr();
 		if (e->term_type == eFunction) {
@@ -777,9 +777,9 @@ Statement::get_direct_invocation(void) const
 /*
  * find all the function calls in this statement
  */
-void 
+void
 Statement::get_called_funcs(std::vector<const FunctionInvocationUser*>& funcs) const
-{ 
+{
 	size_t i;
 	vector<const Expression*> exprs;
 	vector<const Block*> blks;
@@ -800,21 +800,21 @@ Statement::get_called_funcs(std::vector<const FunctionInvocationUser*>& funcs) c
  * return true if there are some goto statement contained in this statement
  * that hasn't reached a fixed point
  */
-bool 
+bool
 Statement::contains_unfixed_goto(void) const
-{ 
+{
 	FactMgr* fm = get_fact_mgr_for_func(func);
 	assert(fm);
 	size_t i, j;
 	for (i=0; i<fm->cfg_edges.size(); i++) {
 		const CFGEdge* edge = fm->cfg_edges[i];
-		/* the following for-loop has to be analyzed at least once 
+		/* the following for-loop has to be analyzed at least once
 		   label: ...
 		   ...
 		   for (...) {
 		      goto label;
 		   }
-		*/      
+		*/
 		if (edge->src->eType == eGoto && contains_stmt(edge->src) && !fm->map_visited[edge->src] && !contains_stmt(edge->dest)) {
 			return true;
 		}
@@ -838,35 +838,35 @@ Statement::contains_unfixed_goto(void) const
 	return false;
 }
 
-bool 
+bool
 Statement::analyze_with_edges_in(vector<const Fact*>& inputs, CGContext& cg_context) const
-{ 
-	FactMgr* fm = get_fact_mgr(&cg_context); 
+{
+	FactMgr* fm = get_fact_mgr(&cg_context);
 	size_t i;
 	vector<const CFGEdge*> edges;
 	if (find_jump_label()=="lbl_101")
 		i = 0;
 	// consider output from back edges. we should not merge them if this is the first time
-	if (fm->map_visited[this] && has_edge_in(false, true)) {  
+	if (fm->map_visited[this] && has_edge_in(false, true)) {
 		find_edges_in(edges, false, true);
-		for (i=0; i<edges.size(); i++) { 
+		for (i=0; i<edges.size(); i++) {
 			const Statement* src = edges[i]->src;
-			if (fm->map_visited[src]) { 
+			if (fm->map_visited[src]) {
 				FactMgr::merge_jump_facts(inputs, fm->map_facts_out[src]);
 				cg_context.add_effect(fm->map_accum_effect[src]);
 			}
 		}
-	} 
+	}
 	// always consider output from forward edges
 	if (has_edge_in(false, false)) {
 		find_edges_in(edges, false, false);
 		for (i=0; i<edges.size(); i++) {
 			const Statement* src = edges[i]->src;
 			if (fm->map_visited[src]) {
-				FactMgr::merge_jump_facts(inputs, fm->map_facts_out[src]); 
+				FactMgr::merge_jump_facts(inputs, fm->map_facts_out[src]);
 				cg_context.add_effect(fm->map_accum_effect[src]);
 			}
-		} 
+		}
 	}
 	return validate_and_update_facts(inputs, cg_context);
 }
@@ -874,13 +874,13 @@ Statement::analyze_with_edges_in(vector<const Fact*>& inputs, CGContext& cg_cont
 /****************************************************************************
  * Entry point to pointer analysis and other DFA analysis for newly
  * created statement. remember some analysis has already been done during the
- * statement generation, some analysis work is only possible with a complete 
+ * statement generation, some analysis work is only possible with a complete
  * statement, we do it here
  ****************************************************************************/
-void 
+void
 Statement::post_creation_analysis(vector<const Fact*>& pre_facts, const Effect& pre_effect, CGContext& cg_context) const
 {
-	FactMgr* fm = get_fact_mgr_for_func(func); 
+	FactMgr* fm = get_fact_mgr_for_func(func);
 	if (eType == eIfElse) {
 		((const StatementIf*)this)->combine_branch_facts(pre_facts);
 	} else {
@@ -891,15 +891,15 @@ Statement::post_creation_analysis(vector<const Fact*>& pre_facts, const Effect& 
 	// for compound statements, it's effect is saved in make_random
 	if (!is_compound(eType)) {
 		fm->map_stm_effect[this] = cg_context.get_effect_stm();
-	} 
+	}
 
 	bool special_handled = false;
 	// special handling for non-looping statements in func_1, which we never re-visit to
 	// save run-time
 	if (cg_context.get_current_func()->name == "func_1" && !(cg_context.flags & IN_LOOP) ) {
-		if (has_uncertain_call_recursive()) { 
+		if (has_uncertain_call_recursive()) {
 			FactVec outputs = pre_facts;
-			cg_context.reset_effect_accum(pre_effect); 
+			cg_context.reset_effect_accum(pre_effect);
 			//if (stm_id == 573)
 				/*if (this->eType == eAssign) {
 					((const StatementAssign*)this)->get_rhs()->indented_output(cout, 0);
@@ -917,10 +917,10 @@ Statement::post_creation_analysis(vector<const Fact*>& pre_facts, const Effect& 
 
 	if (!special_handled) {
 		// for if...else..., we don't want to walk through the true branch and false branch again
-		// compute the output with consideration of return statement(s) in both branches 
+		// compute the output with consideration of return statement(s) in both branches
 		if (eType == eAssign) {
 			const StatementAssign* sa = (const StatementAssign*)this;
-			// abstract fact for assignment itself. No analysis on function calls 
+			// abstract fact for assignment itself. No analysis on function calls
 			// on RHS since they are already handled during statement generation
 			FactMgr::update_fact_for_assign(sa, fm->global_facts);
 		}
@@ -931,7 +931,7 @@ Statement::post_creation_analysis(vector<const Fact*>& pre_facts, const Effect& 
 	}
 	fm->remove_rv_facts(fm->global_facts);
 	fm->set_fact_in(this, pre_facts);
-	fm->set_fact_out(this, fm->global_facts); 
+	fm->set_fact_out(this, fm->global_facts);
 	fm->map_accum_effect[this] = *(cg_context.get_effect_accum());
 	fm->map_visited[this] = true;
 }
@@ -939,25 +939,25 @@ Statement::post_creation_analysis(vector<const Fact*>& pre_facts, const Effect& 
 /*
  * return: 1 means this is a goto target, 0 otherwise
  */
-int 
+int
 Statement::pre_output(std::ostream &out, FactMgr* /* fm */, int indent) const
 {
 	// output label if this is a goto target
 	vector<const StatementGoto*> gotos;
 	if (find_jump_sources(gotos)) {
 		assert(gotos.size() > 0);
-		out << gotos[0]->label << ":" << endl; 
+		out << gotos[0]->label << ":" << endl;
 		return 1;
 		//for (j=0; j<gotos.size(); j++) {
 		//	gotos[j]->output_skipped_var_inits(out, indent);
 		//}
 	}
-	// compute checksum and output, for Yang's delta 
+	// compute checksum and output, for Yang's delta
 	output_hash(out, indent);
 	return 0;
 }
-	
-void 
+
+void
 Statement::post_output(std::ostream &out, FactMgr* fm, int indent) const
 {
 	// don't print facts after block because it would mess up "if ... else ..."

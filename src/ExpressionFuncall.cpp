@@ -67,7 +67,7 @@ ExpressionFunctionProbability(const CGContext &/*cg_context*/)
 Expression *
 ExpressionFuncall::make_random(CGContext &cg_context, const Type* type, const CVQualifiers* qfer)
 {
-	Expression *e = 0; 
+	Expression *e = 0;
 	bool std_func = ExpressionFunctionProbability(cg_context);
 	ERROR_GUARD(NULL);
     // unary/binary "functions" produce scalar types only
@@ -75,14 +75,14 @@ ExpressionFuncall::make_random(CGContext &cg_context, const Type* type, const CV
 		std_func = false;
 
 	Effect effect_accum = cg_context.get_accum_effect();
-	Effect effect_stm = cg_context.get_effect_stm(); 
+	Effect effect_stm = cg_context.get_effect_stm();
 	FactMgr* fm = get_fact_mgr(&cg_context);
-	vector<const Fact*> facts_copy = fm->global_facts; 
+	vector<const Fact*> facts_copy = fm->global_facts;
 	FunctionInvocation *fi = FunctionInvocation::make_random(std_func, cg_context, type, qfer);
 	ERROR_GUARD(NULL);
 
-	if (fi->failed) { 
-		// if it's a invalid invocation, (see FunctionInvocationUser::revisit) 
+	if (fi->failed) {
+		// if it's a invalid invocation, (see FunctionInvocationUser::revisit)
 		// restore the env, and replace invocation with a simple var
 		cg_context.reset_effect_accum(effect_accum);
 		cg_context.reset_effect_stm(effect_stm);
@@ -132,16 +132,16 @@ const Type &
 ExpressionFuncall::get_type(void) const
 {
 	return invoke.get_type();
-} 
+}
 
-void 
+void
 ExpressionFuncall::get_called_funcs(std::vector<const FunctionInvocationUser*>& funcs) const
 {
 	invoke.get_called_funcs(funcs);
 }
 
-unsigned int 
-ExpressionFuncall::get_complexity(void) const 
+unsigned int
+ExpressionFuncall::get_complexity(void) const
 {
 	unsigned int comp = 0;
 	const FunctionInvocation* invoke = get_invoke();
@@ -154,17 +154,17 @@ ExpressionFuncall::get_complexity(void) const
 	return comp;
 }
 
-bool 
+bool
 ExpressionFuncall::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const
-{ 
+{
 	return invoke.visit_facts(inputs, cg_context);
 }
 
-std::vector<const ExpressionVariable*> 
+std::vector<const ExpressionVariable*>
 ExpressionFuncall::get_dereferenced_ptrs(void) const
 {
 	// return a empty vector by default
-	std::vector<const ExpressionVariable*> refs; 
+	std::vector<const ExpressionVariable*> refs;
 	for (size_t i=0; i<invoke.param_value.size(); i++) {
 		// the parameters might has pointer dereferences
 		const Expression* value = invoke.param_value[i];
@@ -175,7 +175,7 @@ ExpressionFuncall::get_dereferenced_ptrs(void) const
 }
 
 // find pointers used in the expression, recursively go into callee if this is a call
-void 
+void
 ExpressionFuncall::get_referenced_ptrs(std::vector<const Variable*>& ptrs) const
 {
 	for (size_t i=0; i<invoke.param_value.size(); i++) {
@@ -193,16 +193,16 @@ ExpressionFuncall::get_referenced_ptrs(std::vector<const Variable*>& ptrs) const
 
 bool
 ExpressionFuncall::has_uncertain_call_recursive(void) const
-{ 
+{
 	return invoke.has_uncertain_call_recursive();
 }
 
 /*
- * return the const/volatile qualifiers for function calls 
+ * return the const/volatile qualifiers for function calls
  */
-CVQualifiers 
+CVQualifiers
 ExpressionFuncall::get_qualifiers(void) const
-{ 
+{
 	return invoke.get_qualifiers();
 }
 
@@ -245,13 +245,13 @@ ExpressionFuncall::Output(std::ostream &out) const
 	Reducer* reducer = CGOptions::get_reducer();
 	if (reducer && reducer->output_expr(this, out)) {
 		return;
-	} 
+	}
 	invoke.Output(out);
 }
 
-void 
-ExpressionFuncall::indented_output(std::ostream &out, int indent) const 
-{ 
+void
+ExpressionFuncall::indented_output(std::ostream &out, int indent) const
+{
 	invoke.indented_output(out, indent);
 }
 

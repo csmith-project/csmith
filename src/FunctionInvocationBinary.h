@@ -46,7 +46,7 @@ class FunctionInvocationBinary : public FunctionInvocation
 	friend class FunctionInvocation; /* XXX --- yuck! */
 
 public:
-    
+
 	static FunctionInvocationBinary *CreateFunctionInvocationBinary(CGContext &cg_context, eBinaryOps op, SafeOpFlags *flags);
 
 	FunctionInvocationBinary(eBinaryOps op, const SafeOpFlags *flags);

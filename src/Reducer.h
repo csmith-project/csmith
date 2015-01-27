@@ -53,9 +53,9 @@ class FunctionInvocationBinary;
 /*
  *
  */
-class Reducer 
+class Reducer
 {
-public:  
+public:
 	Reducer(string fname);
 	virtual ~Reducer(void);
 	void configure(void);
@@ -82,7 +82,7 @@ public:
 	void get_used_vars_and_funcs_and_labels(const Expression* e, vector<const Variable*>& vars, vector<const Function*>& funcs, vector<string>& labels);
 	void get_used_vars_and_funcs_and_labels(const Statement* stm, vector<const Variable*>& vars, vector<const Function*>& funcs, vector<string>& labels);
 	void expand_used_vars(void);
-	const FunctionInvocation* find_invoke_by_eid(const Statement* s, int id) const; 
+	const FunctionInvocation* find_invoke_by_eid(const Statement* s, int id) const;
 	const FunctionInvocation* find_invoke_by_eid(const Expression* e, int id) const;
 	int find_binary_operations(const Statement* stm, vector<const FunctionInvocationBinary*>& ops, vector<int>& ids, bool no_ptr_cmp=false);
 	int find_binary_operations(const Expression* exp, vector<const FunctionInvocationBinary*>& ops, vector<int>& ids, bool no_ptr_cmp=false);
@@ -93,7 +93,7 @@ public:
 	// for function dropping
 	int reduce_call_with_assigns(const string& tmp_name, const string& value, const string& extra_assigns);
 
-	// for statement reduction 
+	// for statement reduction
 	void replace_stm(const Statement* stm, const Statement* new_stm, string pre_stm);
 	void delete_stms_after(const Statement* stm, bool include_parent_blks);
 	int reduce_stms_with_assigns(int id1, int id2, const string& assigns);
@@ -137,10 +137,10 @@ public:
 	std::vector<const Statement*> dump_value_after;
 	std::map<string, vector<const Variable*> > map_str_effects;
 	const Function* dump_stms_in_blocks;
-	
+
 	// for expression reduction
 	std::map<const Expression*, string> map_reduced_vars;
-	std::map<const FunctionInvocation*, const Expression*> map_reduced_invocations; 
+	std::map<const FunctionInvocation*, const Expression*> map_reduced_invocations;
 	std::map<const Statement*, string> map_pre_stm_assigns;
 	std::map<const Variable*, string> map_reduced_var_inits;
 	std::vector<const FunctionInvocation*> must_use_var_invocations;

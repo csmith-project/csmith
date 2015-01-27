@@ -107,12 +107,12 @@ public:
 //	bool isBackLink;
 
 	Effect feffect;
-	
+
 	std::vector<Block*> stack;
 	std::vector<Block*> blocks;
 	Block *body;
 	Constant *ret_c;
-	
+
 	Variable* rv;    // a dummy variable representing the return value
 	std::vector<const Variable*> new_globals;  // collection of global variables created in this function
 	std::vector<const Variable*> dead_globals; // collection of global variables that is dangling at the end of this function
@@ -149,7 +149,7 @@ void OutputForwardDeclarations(std::ostream &out);
 void OutputFunctions(std::ostream &out);
 
 const std::vector<Function*>& get_all_functions(void);
-FactMgr* get_fact_mgr_for_func(const Function* func); 
+FactMgr* get_fact_mgr_for_func(const Function* func);
 FactMgr* get_fact_mgr(const CGContext* cg);
 const Function* find_function_by_name(const string& name);
 int find_function_in_set(const vector<const Function*>& set, const Function* f);

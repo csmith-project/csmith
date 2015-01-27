@@ -30,7 +30,7 @@
 #ifndef BOOKKEEPER_H
 #define BOOKKEEPER_H
 
-/////////////////////////////////////////////////////////////////////////////// 
+///////////////////////////////////////////////////////////////////////////////
 #include <string>
 #include <vector>
 using namespace std;
@@ -44,9 +44,9 @@ class Type;
 class Bookkeeper
 {
 public:
-	Bookkeeper(void); 
-	~Bookkeeper(void);  
- 
+	Bookkeeper(void);
+	~Bookkeeper(void);
+
 	static void doFinalization();
 
 	static void output_statistics(std::ostream &out);
@@ -56,14 +56,14 @@ public:
 	static void output_expr_statistics(std::ostream &out);
 
 	static void output_pointer_statistics(std::ostream &out);
-	
+
 	static void output_jump_statistics(std::ostream &out);
 
 	static void output_stmts_statistics(std::ostream &out);
 
 	static void output_volatile_access_statistics(std::ostream &out);
 
-	static void output_counters(std::ostream &out, const char* prefix_msg, 
+	static void output_counters(std::ostream &out, const char* prefix_msg,
 		const char* breakdown_msg, const std::vector<int> &counters, int starting_pos = 0);
 
 	static void update_ptr_aliases(const vector<Fact*>& facts, vector<const Variable*>& ptrs, vector<vector<const Variable*> >& aliases);
@@ -89,12 +89,12 @@ public:
 	static void stat_expr_depths_for_stmt(const Statement* s);
 	static void stat_expr_depths(void);
 
-	static int  stat_blk_depths_for_stmt(const Statement* s); 
+	static int  stat_blk_depths_for_stmt(const Statement* s);
 	static int  stat_blk_depths(void);
 
-	static std::vector<int> struct_depth_cnts; 
+	static std::vector<int> struct_depth_cnts;
 
-	static int union_var_cnt; 
+	static int union_var_cnt;
 
 	static std::vector<int> expr_depth_cnts;
 

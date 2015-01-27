@@ -77,7 +77,7 @@ DEFINE_DEFAULT_GETTER(dtInitVariable)
 #if 0
 int DepthSpec::dtFunction_minimal_depth(int flag)
 {
-	return flag ? dtFunction_minimal_depth_() : 
+	return flag ? dtFunction_minimal_depth_() :
 			(dtFunction_minimal_depth_() + dtReturnType_minimal_depth());
 }
 #endif
@@ -184,7 +184,7 @@ int DepthSpec::dtFunctionInvocationRandomBinaryPointer_minimal_depth(int)
 	return 1 + dtSafeOpFlags_minimal_depth() +
 		dtChooseRandomPointerType_minimal_depth() +
 		2 * dtExpression_minimal_depth();
-		
+
 }
 
 int DepthSpec::dtFunctionInvocationRandomBinary_minimal_depth(int)
@@ -215,7 +215,7 @@ int DepthSpec::dtFunctionInvocationRandom_minimal_depth(int)
 	vs.push_back(dtFunctionInvocationRandomUnary_minimal_depth());
 	vs.push_back(dtFunctionInvocationRandomBinary_minimal_depth());
 	vs.push_back(dtFunctionUserBuildInvocation_minimal_depth());
-	
+
 	return *min_element(vs.begin(), vs.end());
 }
 
@@ -233,7 +233,7 @@ int DepthSpec::dtExpression_minimal_depth(int flag)
 	//vs.push_back(dtConstant_minimal_depth());
 	//vs.push_back(dtExpressionVariable_minimal_depth());
 	//vs.push_back(dtExpressionFuncall_minimal_depth());
-	
+
 	//return (*max_element(vs.begin(), vs.end()) + 1);
 }
 
@@ -300,7 +300,7 @@ int DepthSpec::dtSelectExistingVariable_minimal_depth(int flag)
 
 int dtGenerateNewGlobal_minimal_depth_(int flag)
 {
-	
+
 	return DepthSpec::dtInitVariable_minimal_depth(flag);
 }
 
@@ -311,7 +311,7 @@ int DepthSpec::dtSelectGlobal_minimal_depth(int flag)
 
 int DepthSpec::dtGenerateNewGlobal_minimal_depth(int flag)
 {
-	
+
 	return 1 + dtGenerateNewGlobal_minimal_depth_(flag);
 }
 
@@ -344,13 +344,13 @@ int DepthSpec::dtInitPointerValue_minimal_depth(int)
 	return dtRandomTypeFromType_minimal_depth() + depth;
 }
 
-int 
+int
 DepthSpec::dtSafeOpFlags_minimal_depth(int flag)
 {
 	return (flag == sOpBinary) ? 2 : 3;
 }
 
-//cout << "max_depth = " << max_depth << ", cur_depth = " << cur_depth << ", minimal = " << type##_minimal_depth(flag) << std::endl; 
+//cout << "max_depth = " << max_depth << ", cur_depth = " << cur_depth << ", minimal = " << type##_minimal_depth(flag) << std::endl;
 #define DEPTH_GUARD_CASE(type, flag) case type: \
 	{ \
 		assert(CGOptions::dfs_exhaustive()); \
@@ -361,10 +361,10 @@ DepthSpec::dtSafeOpFlags_minimal_depth(int flag)
 int
 DepthSpec::backtracking(int depth_needed)
 {
-	DFSRndNumGenerator *impl = dynamic_cast<DFSRndNumGenerator*>(RandomNumber::GetRndNumGenerator()); 
-	if(impl->eager_backtracking(depth_needed)) 
-		return BAD_DEPTH; 
-	else 
+	DFSRndNumGenerator *impl = dynamic_cast<DFSRndNumGenerator*>(RandomNumber::GetRndNumGenerator());
+	if(impl->eager_backtracking(depth_needed))
+		return BAD_DEPTH;
+	else
 		return GOOD_DEPTH;
 }
 
@@ -382,7 +382,7 @@ int DepthSpec::depth_guard_by_type(enum dType ty, int extra_flag)
 	if (!CGOptions::dfs_exhaustive()) {
 		return GOOD_DEPTH;
 	}
-		
+
 	switch (ty) {
 		DEPTH_GUARD_CASE(dtFunction, extra_flag)
 		DEPTH_GUARD_CASE(dtFirstFunction, extra_flag)

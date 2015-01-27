@@ -158,8 +158,8 @@ DEFINE_GETTER_SETTER_BOOL(divs)
 DEFINE_GETTER_SETTER_BOOL(muls)
 DEFINE_GETTER_SETTER_BOOL(accept_argc)
 DEFINE_GETTER_SETTER_BOOL(random_random)
-DEFINE_GETTER_SETTER_INT(stop_by_stmt) 
-DEFINE_GETTER_SETTER_BOOL(deputy) 
+DEFINE_GETTER_SETTER_INT(stop_by_stmt)
+DEFINE_GETTER_SETTER_BOOL(deputy)
 DEFINE_GETTER_SETTER_BOOL(step_hash_by_stmt)
 DEFINE_GETTER_SETTER_BOOL(compound_assignment)
 DEFINE_GETTER_SETTER_STRING_REF(dump_default_probabilities)
@@ -302,7 +302,7 @@ CGOptions::set_default_settings(void)
 
 	set_default_builtin_kinds();
 }
-	
+
 /*
    looking for the platform info file in the working directory
    and load platform specific information. If not found, use
@@ -310,7 +310,7 @@ CGOptions::set_default_settings(void)
    to the file
 */
 void
-CGOptions::set_platform_specific_options(void) 
+CGOptions::set_platform_specific_options(void)
 {
 	const char* int_str = "integer size = ";
 	const char* ptr_str = "pointer size = ";
@@ -331,12 +331,12 @@ CGOptions::set_platform_specific_options(void)
 				string s = line.substr(strlen(int_str));
 				StringUtils::chop(s);
 				int_size(StringUtils::str2int(s));
-			} 
+			}
 			if (line.substr(0, strlen(ptr_str)) == ptr_str) {
 				string s = line.substr(strlen(ptr_str));
 				StringUtils::chop(s);
 				pointer_size(StringUtils::str2int(s));
-			} 
+			}
 		}
 		if (!int_size_) {
 			cout << "please specify integer size in " << PLATFORM_CONFIG_FILE << endl;
@@ -347,17 +347,17 @@ CGOptions::set_platform_specific_options(void)
 			exit(-1);
 		}
 		conf.close();
-	}  
+	}
 }
 
-int 
-CGOptions::int_size(void) 
+int
+CGOptions::int_size(void)
 {
 	Bookkeeper::rely_on_int_size = true;
 	return int_size_;
-} 
+}
 
-int 
+int
 CGOptions::pointer_size(void)
 {
 	return pointer_size_;
@@ -428,7 +428,7 @@ bool CGOptions::resolve_exhaustive_options()
 		conflict_msg_ = "expand-struct cannot be used with --no-struct";
 		return true;
 	}
-	
+
 	if (CGOptions::has_extension_support()) {
 		conflict_msg_ = "exhaustive mode doesn't support splat|klee|crest|coverage-test extension";
 		return true;
@@ -475,7 +475,7 @@ CGOptions::has_extension_conflict()
 bool
 CGOptions::has_extension_support()
 {
-	return (CGOptions::splat() || CGOptions::klee() 
+	return (CGOptions::splat() || CGOptions::klee()
 		|| CGOptions::crest() || CGOptions::coverage_test());
 }
 
@@ -483,7 +483,7 @@ bool
 CGOptions::allow_int64()
 {
 	return ((!CGOptions::has_extension_support()) &&
-			CGOptions::math64() && 
+			CGOptions::math64() &&
 			CGOptions::longlong());
 }
 
@@ -537,7 +537,7 @@ CGOptions::has_conflict(void)
 			return true;
 		}
 	}
-	
+
 	if (!CGOptions::delta_monitor().empty()) {
 		string msg;
 		if (!DeltaMonitor::init(msg, CGOptions::delta_monitor(), CGOptions::delta_output())) {
@@ -548,7 +548,7 @@ CGOptions::has_conflict(void)
 
 	if (!CGOptions::go_delta().empty()) {
 		string msg;
-		if (!DeltaMonitor::init_for_running(msg, CGOptions::go_delta(), CGOptions::delta_output(), 
+		if (!DeltaMonitor::init_for_running(msg, CGOptions::go_delta(), CGOptions::delta_output(),
 				CGOptions::delta_input(), CGOptions::no_delta_reduction())) {
 			conflict_msg_ = msg;
 			return true;
@@ -578,15 +578,15 @@ CGOptions::monitored_funcs(std::string fnames)
 	parse_string_options(fnames, OutputMgr::monitored_funcs_);
 }
 
-void 
+void
 CGOptions::parse_string_options(string vname, vector<std::string> &v)
 {
 	if (vname.empty()) return;
-	// parse the string if there are multiple variable names in format "v1,v2,..." 
+	// parse the string if there are multiple variable names in format "v1,v2,..."
 	size_t pos1 = 0;
 	size_t pos2 = 0;
 	do {
-		pos2 = vname.find_first_of(',', pos1); 
+		pos2 = vname.find_first_of(',', pos1);
 		string var_name = (pos2 != string::npos) ? vname.substr(pos1, pos2 - pos1) : vname.substr(pos1);
 		v.push_back(var_name);
 		pos1 = pos2 + 1;
@@ -605,19 +605,19 @@ CGOptions::x86_64()
 
 std::string CGOptions::vol_tests_mach_ = "";
 
-std::string 
+std::string
 CGOptions::vol_tests_mach(void)
 {
 	return CGOptions::vol_tests_mach_;
 }
 
-void 
+void
 CGOptions::safe_math_wrapper(string ids)
 {
 	StringUtils::split_int_string(ids, safe_math_wrapper_ids_, ",");
 }
 
-bool 
+bool
 CGOptions::safe_math_wrapper(int id)
 {
 	// if no safe math wrapper ids specified, assume all needs wrapper

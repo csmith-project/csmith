@@ -79,7 +79,7 @@ DFSProgramGenerator::get_count_prefix(const std::string &name)
 void
 DFSProgramGenerator::goGenerator()
 {
-	DFSRndNumGenerator *impl = 
+	DFSRndNumGenerator *impl =
 		dynamic_cast<DFSRndNumGenerator*>(RandomNumber::GetRndNumGenerator());
 	//unsigned long long count = 0;
 	GenerateAllTypes();

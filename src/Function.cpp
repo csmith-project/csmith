@@ -35,7 +35,7 @@
 // Bryan Turner (bryan.turner@pobox.com)
 // July, 2005
 //
-#ifdef WIN32 
+#ifdef WIN32
 #pragma warning(disable : 4786)   /* Disable annoying warning messages */
 #endif
 #include "Function.h"
@@ -70,13 +70,13 @@ using namespace std;
 static vector<Function*> FuncList;		// List of all functions in the program
 static vector<FactMgr*>  FMList;        // list of fact managers for each function
 static long cur_func_idx;				// Index into FuncList that we are currently working on
-static bool param_first=true;			// Flag to track output of commas 
+static bool param_first=true;			// Flag to track output of commas
 static int builtin_functions_cnt;
 
 /*
  * find FactMgr for a function
  */
-FactMgr* 
+FactMgr*
 get_fact_mgr_for_func(const Function* func)
 {
 	for (size_t i=0; i<FuncList.size(); i++) {
@@ -84,15 +84,15 @@ get_fact_mgr_for_func(const Function* func)
 			return FMList[i];
 		}
 	}
-    return 0; 
+    return 0;
 }
 
 /*
  *
  */
-FactMgr* 
+FactMgr*
 get_fact_mgr(const CGContext* cg)
-{ 
+{
 	return get_fact_mgr_for_func(cg->get_current_func());
 }
 
@@ -121,7 +121,7 @@ find_function_in_set(const vector<const Function*>& set, const Function* f)
 }
 
 const Block*
-find_blk_for_var(const Variable* v) 
+find_blk_for_var(const Variable* v)
 {
 	if (v->is_global()) {
 		return NULL;
@@ -145,13 +145,13 @@ find_blk_for_var(const Variable* v)
 
 bool
 Function::is_var_on_stack(const Variable* var, const Statement* stm) const
-{  
+{
     size_t i;
     for (i=0; i<param.size(); i++) {
         if (param[i]->match(var)) {
             return true;
         }
-    } 
+    }
 	const Block* b = stm->parent;
 	while (b) {
 		if (find_variable_in_set(b->local_vars, var) != -1) {
@@ -160,15 +160,15 @@ Function::is_var_on_stack(const Variable* var, const Statement* stm) const
 		b = b->parent;
 	}
     return false;
-} 
+}
 
 /* find whether a variable is visible in the given statement
  */
 bool
 Function::is_var_visible(const Variable* var, const Statement* stm) const
-{ 
+{
     return (var->is_global() || is_var_on_stack(var, stm)) ;
-} 
+}
 
 /*
  * return true if a variable is out-of-scope at given statement
@@ -179,7 +179,7 @@ Function::is_var_visible(const Variable* var, const Statement* stm) const
 bool
 Function::is_var_oos(const Variable* var, const Statement* stm) const
 {
-	if (!is_var_visible(var, stm)) { 
+	if (!is_var_visible(var, stm)) {
 		//return true;
 		size_t i;
 		for (i=0; i<blocks.size(); i++) {
@@ -191,18 +191,18 @@ Function::is_var_oos(const Variable* var, const Statement* stm) const
 	return false;
 }
 
-bool 
+bool
 Function::reach_max_functions_cnt()
 {
 	return ((static_cast<int>(FuncList.size()) - builtin_functions_cnt) >= CGOptions::max_funcs());
 }
 
-const vector<Function*>& 
+const vector<Function*>&
 get_all_functions(void)
 {
 	return FuncList;
 }
- 
+
 /*
  *
  */
@@ -233,13 +233,13 @@ RandomFunctionName(void)
 }
 
 /*-------------------------------------------------------------
- *  choose a random return type. only struct/unions and integer types 
+ *  choose a random return type. only struct/unions and integer types
  *  (not incl. void)  are qualified, (no arrays)
  *************************************************************/
 static const Type*
 RandomReturnType(void)
 {
-	const Type* t = 0; 
+	const Type* t = 0;
         t = Type::choose_random();
 	return t;
 }
@@ -248,7 +248,7 @@ Function *
 Function::get_one_function(const vector<Function *> &ok_funcs)
 {
 	vector<Function *>::size_type ok_size = ok_funcs.size();
-	
+
 	if (ok_size == 0) {
 		return 0;
 	}
@@ -266,12 +266,12 @@ Function::get_one_function(const vector<Function *> &ok_funcs)
 Function *
 Function::choose_func(vector<Function *> funcs,
 			const CGContext& cg_context,
-			const Type* type, 
+			const Type* type,
 			const CVQualifiers* qfer)
 {
 	vector<Function *> ok_funcs;
 	vector<Function *> ok_builtin_funcs;
-	vector<Function *>::iterator i; 
+	vector<Function *>::iterator i;
 
 	for (i = funcs.begin(); i != funcs.end(); ++i) {
 		// skip any function which has incompatible return type
@@ -289,7 +289,7 @@ Function::choose_func(vector<Function *> funcs,
 		if ((*i)->is_effect_known() == false) {
 			continue;
 		}
-		// We cannot call a function with a side-effect that is in conflict with the current context 
+		// We cannot call a function with a side-effect that is in conflict with the current context
 		if (cg_context.in_conflict((*i)->get_feffect())) {
 			continue;
 		}
@@ -314,7 +314,7 @@ Function::choose_func(vector<Function *> funcs,
 		else
 			ok_funcs.push_back(*i);
 	}
-	
+
 	Function *f = NULL;
 	if (CGOptions::builtins() && rnd_flipcoin(BuiltinFunctionProb)) {
 		f = Function::get_one_function(ok_builtin_funcs);
@@ -342,7 +342,7 @@ GenerateParameterListFromString(Function &currFunc, const string &params_string)
 	int params_cnt = vs.size();
 	assert((params_cnt > 0) && "Invalid params_string!");
 	if ((params_cnt == 1) && (vs[0] == "Void")) {
-		return;	
+		return;
 	}
 	for (int i = 0; i < params_cnt; i++) {
 		assert((vs[i] != "Void") && "Invalid parameter type!");
@@ -416,14 +416,14 @@ Function::make_random_signature(const CGContext& cg_context, const Type* type, c
 	DEPTH_GUARD_BY_TYPE_RETURN(dtFunction, NULL);
 	ERROR_GUARD(NULL);
 	Function *f = new Function(RandomFunctionName(), type);
-		
+
 	// dummy variable representing return variable, we don't care about the type, so use 0
 	string rvname = f->name + "_" + "rv";
-	CVQualifiers ret_qfer = qfer==0 ? CVQualifiers::random_qualifiers(type, Effect::READ, cg_context, true) 
+	CVQualifiers ret_qfer = qfer==0 ? CVQualifiers::random_qualifiers(type, Effect::READ, cg_context, true)
 		                            : qfer->random_qualifiers(true, Effect::READ, cg_context);
 	ERROR_GUARD(NULL);
 	f->rv = Variable::CreateVariable(rvname, type, NULL, &ret_qfer);
-	GenerateParameterList(*f); 
+	GenerateParameterList(*f);
 	FMList.push_back(new FactMgr(f));
 	if (CGOptions::inline_function() && rnd_flipcoin(InlineFunctionProb))
 		f->is_inlined = true;
@@ -436,7 +436,7 @@ Function::make_random_signature(const CGContext& cg_context, const Type* type, c
 Function *
 Function::make_random(const CGContext& cg_context, const Type* type, const CVQualifiers* qfer)
 {
-	Function* f = make_random_signature(cg_context, type, qfer); 
+	Function* f = make_random_signature(cg_context, type, qfer);
 	ERROR_GUARD(NULL);
 	f->GenerateBody(cg_context);
 	ERROR_GUARD(NULL);
@@ -454,12 +454,12 @@ Function::make_first(void)
 
 	Function *f = new Function(RandomFunctionName(), ty);
 	// dummy variable representing return variable, we don't care about the type, so use 0
-	string rvname = f->name + "_" + "rv"; 
-	CVQualifiers ret_qfer = CVQualifiers::random_qualifiers(ty); 
+	string rvname = f->name + "_" + "rv";
+	CVQualifiers ret_qfer = CVQualifiers::random_qualifiers(ty);
 	ERROR_GUARD(NULL);
 	f->rv = Variable::CreateVariable(rvname, ty, NULL, &ret_qfer);
 
-	// create a fact manager for this function, with empty global facts 
+	// create a fact manager for this function, with empty global facts
 	FactMgr* fm = new FactMgr(f);
 	FMList.push_back(fm);
 
@@ -470,7 +470,7 @@ Function::make_first(void)
 	if (CGOptions::inline_function() && rnd_flipcoin(InlineFunctionProb))
 		f->is_inlined = true;
 	fm->setup_in_out_maps(true);
-		
+
 	// update global facts to merged facts at all possible function exits
 	fm->global_facts = fm->map_facts_out[f->body];
 	f->body->add_back_return_facts(fm, fm->global_facts);
@@ -494,7 +494,7 @@ OutputFormalParam(Variable *var, std::ostream *pOut)
 		assert(var->type->eType != eStruct);
 	if (!CGOptions::arg_unions() && var->type)
 		assert(var->type->eType != eUnion);
-		
+
 	var->output_qualified_type(out);
 	out << " " << var->name;
     return 0;
@@ -608,7 +608,7 @@ Function::make_return_const()
 		if (return_type->eType == eSimple)
 			assert(return_type->simple_type != eVoid);
 		Constant *c = Constant::make_random(return_type);
-		ERROR_RETURN();		
+		ERROR_RETURN();
 		this->ret_c = c;
 	}
 }
@@ -630,7 +630,7 @@ Function::GenerateBody(const CGContext &prev_context)
 	}
 
 	build_state = BUILDING;
-	Effect effect_accum; 
+	Effect effect_accum;
 	CGContext cg_context(this, prev_context.get_effect_context(), &effect_accum);
 	cg_context.extend_call_chain(prev_context);
 	FactMgr* fm = get_fact_mgr_for_func(this);
@@ -639,11 +639,11 @@ Function::GenerateBody(const CGContext &prev_context)
 			fm->global_facts.push_back(FactPointTo::make_fact(param[i], FactPointTo::tbd_ptr));
 		}
 	}
-	// Fill in the Function body. 
+	// Fill in the Function body.
 	if (is_builtin)
 		body = Block::make_dummy_block(cg_context);
 	else
-		body = Block::make_random(cg_context); 
+		body = Block::make_random(cg_context);
 	ERROR_RETURN();
 	body->set_depth_protect(true);
 
@@ -655,10 +655,10 @@ Function::GenerateBody(const CGContext &prev_context)
 	// is just the effect on globals.
 	//effect.add_external_effect(*cg_context.get_effect_accum());
 	feffect.add_external_effect(fm->map_stm_effect[body]);
-	
+
 	make_return_const();
 	ERROR_RETURN();
-	
+
 	// Mark this function as built.
 	build_state = BUILT;
 }
@@ -672,7 +672,7 @@ Function::generate_body_with_known_params(const CGContext &prev_context, Effect&
 	}
 
 	build_state = BUILDING;
-	FactMgr* fm = get_fact_mgr_for_func(this); 
+	FactMgr* fm = get_fact_mgr_for_func(this);
 	CGContext cg_context(this, prev_context.get_effect_context(), &effect_accum);
 	cg_context.extend_call_chain(prev_context);
 
@@ -681,19 +681,19 @@ Function::generate_body_with_known_params(const CGContext &prev_context, Effect&
 	prev_context.find_reachable_frame_vars(fm->global_facts, frame_vars);
 	prev_context.get_external_no_reads_writes(no_reads, no_writes, frame_vars);
 	RWDirective rwd(no_reads, no_writes, must_reads, must_writes);
-	cg_context.rw_directive = &rwd; 
-	cg_context.flags = 0;  
+	cg_context.rw_directive = &rwd;
+	cg_context.flags = 0;
 
-	// Fill in the Function body. 
-	body = Block::make_random(cg_context); 
+	// Fill in the Function body.
+	body = Block::make_random(cg_context);
 	ERROR_RETURN();
 	body->set_depth_protect(true);
 
 	compute_summary();
-	
+
 	make_return_const();
 	ERROR_RETURN();
-	
+
 	// Mark this function as built.
 	build_state = BUILT;
 }
@@ -702,7 +702,7 @@ void
 Function::initialize_builtin_functions()
 {
 	// format: return_type; builtin_func_name; (param1_type, param2_type, ...)
-	// supported type: Void, Char, UChar, Short, UShort, Int, 
+	// supported type: Void, Char, UChar, Short, UShort, Int,
 	// 		   UInt, Long, ULong, Longlong, ULonglong
 	string builtin_function_strings[] = {
 		"UInt; __builtin_ia32_crc32qi; (UInt, UChar); x86",
@@ -755,11 +755,11 @@ Function::make_builtin_function(const string &function_string)
 	Function *f = new Function(v[1], ty, /*is_builtin*/true);
 
 	// dummy variable representing return variable, we don't care about the type, so use 0
-	string rvname = f->name + "_" + "rv"; 
-	CVQualifiers ret_qfer = CVQualifiers::random_qualifiers(ty); 
+	string rvname = f->name + "_" + "rv";
+	CVQualifiers ret_qfer = CVQualifiers::random_qualifiers(ty);
 	f->rv = Variable::CreateVariable(rvname, ty, NULL, &ret_qfer);
 
-	// create a fact manager for this function, with empty global facts 
+	// create a fact manager for this function, with empty global facts
 	FactMgr* fm = new FactMgr(f);
 	FMList.push_back(fm);
 
@@ -776,17 +776,17 @@ Function::make_builtin_function(const string &function_string)
 }
 
 void
-Function::compute_summary(void) 
+Function::compute_summary(void)
 {
-	FactMgr* fm = get_fact_mgr_for_func(this); 
+	FactMgr* fm = get_fact_mgr_for_func(this);
 	// compute the pointers that are statically referenced in the function
 	// including ones referenced by its callees
 	body->get_referenced_ptrs(referenced_ptrs);
 
-	// Compute the function's externally visible effect.  
+	// Compute the function's externally visible effect.
 	//effect.add_external_effect(*cg_context.get_effect_accum());
 	feffect.add_external_effect(fm->map_stm_effect[body]);
-	
+
 	// determine whether an union field is read
 	union_field_read = body->read_union_field();
 }
@@ -796,7 +796,7 @@ Function::compute_summary(void)
  */
 void
 GenerateFunctions(void)
-{ 
+{
 	FactMgr::add_interested_facts(CGOptions::interested_facts());
 	if (CGOptions::builtins())
 		Function::initialize_builtin_functions();
@@ -804,7 +804,7 @@ GenerateFunctions(void)
 	// Create a basic first function, then generate a random graph from there.
 	/* Function *first = */ Function::make_first();
 	ERROR_RETURN();
-	
+
 	// -----------------
 	// Create body of each function, continue until no new functions are created.
 	for (cur_func_idx = 0; cur_func_idx < FuncListSize(); cur_func_idx++) {

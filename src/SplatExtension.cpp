@@ -73,7 +73,7 @@ SplatExtension::output_symbolics(ostream &out)
 		Constant *value = (*i)->get_value();
 		assert(value);
 		value->Output(out);
-		out << ");" << endl; 
+		out << ");" << endl;
 	}
 	out << "#endif" << endl << endl;
 }

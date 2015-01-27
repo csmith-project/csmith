@@ -54,7 +54,7 @@ public:
 	StatementReturn(Block* b, const ExpressionVariable &v);
 	StatementReturn(const StatementReturn &sr);
 	virtual ~StatementReturn(void);
- 
+
 	virtual void Output(std::ostream &out, FactMgr* fm, int indent = 0) const;
 
 	virtual bool must_return(void) const {return true;}
@@ -63,15 +63,15 @@ public:
 
 	virtual std::vector<const ExpressionVariable*> get_dereferenced_ptrs(void) const;
 
-	virtual void get_blocks(std::vector<const Block*>& /* blks */) const {}; 
+	virtual void get_blocks(std::vector<const Block*>& /* blks */) const {};
 	virtual void get_exprs(std::vector<const Expression*>& exps) const {exps.push_back(&var);}
 
 	virtual bool visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const;
 
-    const ExpressionVariable* get_var(void) const { return &var;}; 
+    const ExpressionVariable* get_var(void) const { return &var;};
 
 private:
-	const ExpressionVariable &var;  
+	const ExpressionVariable &var;
 	//
 
 	StatementReturn &operator=(const StatementReturn &sr); // unimplementable

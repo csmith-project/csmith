@@ -187,7 +187,7 @@ DefaultOutputMgr::RandomOutputDefs()
 	RandomOutputFuncDefs();
 }
 
-void 
+void
 DefaultOutputMgr::OutputHeader(int argc, char *argv[], unsigned long seed)
 {
 	OutputMgr::OutputHeader(argc, argv, seed);
@@ -215,7 +215,7 @@ DefaultOutputMgr::Output()
 		OutputMgr::OutputHashFuncDef(out);
 		OutputMgr::OutputStepHashFuncDef(out);
 	}
-		
+
 	if (!CGOptions::nomain())
 		OutputMain(out);
 	OutputTail(out);
@@ -225,7 +225,7 @@ DefaultOutputMgr::Output()
 std::ostream &
 DefaultOutputMgr::get_main_out()
 {
-	if (is_split()) 
+	if (is_split())
 		return *(outs[0]);
 	else if (ofile_) {
 		return *ofile_;

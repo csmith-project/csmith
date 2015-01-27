@@ -65,8 +65,8 @@ public:
 	virtual std::vector<const ExpressionVariable*> get_dereferenced_ptrs(void) const;
 
 	virtual bool has_uncertain_call_recursive(void) const;
-	
-	virtual void get_blocks(std::vector<const Block*>& /* blks */) const {}; 
+
+	virtual void get_blocks(std::vector<const Block*>& /* blks */) const {};
 	virtual void get_exprs(std::vector<const Expression*>& exps) const {exps.push_back(&expr);}
 
 	virtual void Output(std::ostream &out, FactMgr* fm, int indent = 0) const;

@@ -50,18 +50,18 @@ class FunctionInvocationBinary;
 using namespace std;
 
 class ReducerOutputMgr : public OutputMgr {
-public: 
+public:
 	ReducerOutputMgr();
 	virtual ~ReducerOutputMgr();
 	virtual void OutputHeader(int argc, char *argv[], unsigned long seed);
-	virtual void Output(); 
-	
-	virtual std::ostream &get_main_out(); 
+	virtual void Output();
+
+	virtual std::ostream &get_main_out();
 
 	void rewrite_func_call(const Statement* stm, const FunctionInvocation* invoke, string id, std::ostream& out, int indent);
 	int rewrite_func_calls(const Statement* stm, std::ostream &out, int indent);
 	void output_alt_exprs(const Statement* stm, std::ostream &out, int indent);
- 
+
 	void output_write_var_values(string title, const Statement* stm, std::ostream &out, FactMgr* fm, int indent, bool cover_block_writes=false);
 	void output_memory_addrs(const Statement* stm, std::ostream& out, int indent);
 	void output_global_values(string header, std::ostream& out, int indent);
@@ -72,7 +72,7 @@ public:
 	void output_var(const Variable* v, std::ostream &out, int indent);
 	int output_func_header(const Function* f, std::ostream& out);
 	int output_main_func(std::ostream& out);
-	int output_func(const Function* f, std::ostream& out); 
+	int output_func(const Function* f, std::ostream& out);
 	int output_funcs(std::ostream& out);
 	int output_block(const Block* blk, std::ostream& out, int indent, bool no_bracelet=false);
 	void output_if_stm(const StatementIf* si, std::ostream &out, int indent);
@@ -89,7 +89,7 @@ public:
 	void OutputGlobals(ostream& out);
 
 private:
-	void OutputGlobals(); 
+	void OutputGlobals();
 	void limit_binarys(vector<const FunctionInvocationBinary*>& binarys, vector<int>& ids);
 	std::ofstream *ofile_;
 	Reducer* reducer;

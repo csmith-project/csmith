@@ -59,7 +59,7 @@ non_empty_intersection(const vector<const Variable *> &va,
 	vector<const Variable *>::size_type vb_len = vb.size();
 	vector<const Variable *>::size_type i;
 	vector<const Variable *>::size_type j;
-	
+
 	for (i = 0; i < va_len; ++i) {
 		for (j = 0; j < vb_len; ++j) {
 			if (va[i]->match(vb[j]) || vb[j]->match(va[i])) {
@@ -73,7 +73,7 @@ non_empty_intersection(const vector<const Variable *> &va,
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * 
+ *
  */
 Effect::Effect(void) :
 	read_vars(0),
@@ -85,7 +85,7 @@ Effect::Effect(void) :
 }
 
 /*
- * 
+ *
  */
 Effect::Effect(const Effect &e) :
 	read_vars(e.read_vars),
@@ -97,7 +97,7 @@ Effect::Effect(const Effect &e) :
 }
 
 /*
- * 
+ *
  */
 Effect::~Effect(void)
 {
@@ -105,7 +105,7 @@ Effect::~Effect(void)
 }
 
 /*
- * 
+ *
  */
 Effect &
 Effect::operator=(const Effect &e)
@@ -143,7 +143,7 @@ Effect::access_deref_volatile(const Variable *v, int deref_level)
 		return;
 	while (deref_level > 0) {
 		if (v->is_volatile_after_deref(deref_level)) {
-			side_effect_free = false;	
+			side_effect_free = false;
 			return;
 		}
 		deref_level--;
@@ -163,7 +163,7 @@ Effect::write_var(const Variable *v)
 	// side_effect_free = false;
 }
 
-void 
+void
 Effect::write_var_set(const std::vector<const Variable *>& vars)
 {
 	for (size_t i=0; i<vars.size(); i++) {
@@ -172,7 +172,7 @@ Effect::write_var_set(const std::vector<const Variable *>& vars)
 }
 
 /*
- * 
+ *
  */
 void
 Effect::add_effect(const Effect &e, bool include_lhs_effects)
@@ -204,13 +204,13 @@ Effect::add_effect(const Effect &e, bool include_lhs_effects)
 
 	if (include_lhs_effects) {
 		add_variables_to_set(lhs_write_vars, e.get_lhs_write_vars());
-	} 
+	}
 	pure &= e.pure;
 	side_effect_free &= e.side_effect_free;
 }
 
 /*
- * 
+ *
  */
 void
 Effect::add_external_effect(const Effect &e)
@@ -218,7 +218,7 @@ Effect::add_external_effect(const Effect &e)
 	if (this == &e) {
 		return;
 	}
-	
+
 	vector<Variable *>::size_type len;
 	vector<Variable *>::size_type i;
 
@@ -242,7 +242,7 @@ Effect::add_external_effect(const Effect &e)
 
 /*
  * with call chains, we want to track write/read to stack
- * variables of caller(s) 
+ * variables of caller(s)
  */
 void
 Effect::add_external_effect(const Effect &e, std::vector<const Block*> call_chain)
@@ -250,7 +250,7 @@ Effect::add_external_effect(const Effect &e, std::vector<const Block*> call_chai
 	if (this == &e) {
 		return;
 	}
-	
+
 	vector<Variable *>::size_type len;
 	vector<Variable *>::size_type i, j;
 
@@ -323,7 +323,7 @@ Effect::is_read(const Variable *v) const
 }
 
 /*
- * 
+ *
  */
 bool
 Effect::is_read(string vname) const
@@ -339,9 +339,9 @@ Effect::is_read(string vname) const
 		}
 		// match name of a struct field with struct
 		if (vname.find(".") != string::npos) {
-			string tmp = vname; 
+			string tmp = vname;
 			do {
-				pos = tmp.find_last_of("."); 
+				pos = tmp.find_last_of(".");
 				tmp = tmp.substr(0, pos);
 				if (tmp == rname) {
 					return true;
@@ -352,7 +352,7 @@ Effect::is_read(string vname) const
 		if (rname.find(".") != string::npos) {
 			string tmp = rname;
 			do {
-				pos = tmp.find_last_of("."); 
+				pos = tmp.find_last_of(".");
 				tmp = tmp.substr(0, pos);
 				if (tmp == vname) {
 					return true;
@@ -364,7 +364,7 @@ Effect::is_read(string vname) const
 }
 
 /*
- * 
+ *
  */
 bool
 Effect::is_written(const Variable *v) const
@@ -385,7 +385,7 @@ Effect::is_written(const Variable *v) const
 }
 
 /*
- * 
+ *
  */
 bool
 Effect::is_written(string vname) const
@@ -401,9 +401,9 @@ Effect::is_written(string vname) const
 		}
 		// match name of a struct field with struct
 		if (vname.find(".") != string::npos) {
-			string tmp = vname; 
+			string tmp = vname;
 			do {
-				pos = tmp.find_last_of("."); 
+				pos = tmp.find_last_of(".");
 				tmp = tmp.substr(0, pos);
 				if (tmp == wname) {
 					return true;
@@ -414,7 +414,7 @@ Effect::is_written(string vname) const
 		if (wname.find(".") != string::npos) {
 			string tmp = wname;
 			do {
-				pos = tmp.find_last_of("."); 
+				pos = tmp.find_last_of(".");
 				tmp = tmp.substr(0, pos);
 				if (tmp == vname) {
 					return true;
@@ -430,13 +430,13 @@ Effect::is_written(string vname) const
  */
 bool
 Effect::field_is_read(const Variable *v) const
-{ 
+{
 	size_t j;
-	if (v->is_aggregate()) {  
+	if (v->is_aggregate()) {
 		for (j=0; j<v->field_vars.size(); j++) {
 			Variable* field_var = v->field_vars[j];
 			if (is_read(field_var) || field_is_read(field_var)) {
-				return true; 
+				return true;
 			}
 		}
 	}
@@ -448,13 +448,13 @@ Effect::field_is_read(const Variable *v) const
  */
 bool
 Effect::field_is_written(const Variable *v) const
-{ 
+{
 	size_t j;
-	if (v->is_aggregate()) {  
+	if (v->is_aggregate()) {
 		for (j=0; j<v->field_vars.size(); j++) {
 			Variable* field_var = v->field_vars[j];
 			if (is_written(field_var) || field_is_written(field_var)) {
-				return true; 
+				return true;
 			}
 		}
 	}
@@ -463,11 +463,11 @@ Effect::field_is_written(const Variable *v) const
 
 bool
 Effect::sibling_union_field_is_read(const Variable *v) const
-{   
+{
 	const Variable* you = v->get_collective()->get_container_union();
 	if (you) {
 		for (size_t i=0; i<read_vars.size(); i++) {
-			const Variable* me = read_vars[i]->get_collective()->get_container_union();  
+			const Variable* me = read_vars[i]->get_collective()->get_container_union();
 			if (you == me) {
 				return true;
 			}
@@ -478,11 +478,11 @@ Effect::sibling_union_field_is_read(const Variable *v) const
 
 bool
 Effect::sibling_union_field_is_written(const Variable *v) const
-{    
+{
 	const Variable* you = v->get_collective()->get_container_union();
 	if (you) {
 		for (size_t i=0; i<write_vars.size(); i++) {
-			const Variable* me = write_vars[i]->get_collective()->get_container_union();  
+			const Variable* me = write_vars[i]->get_collective()->get_container_union();
 			if (you == me) {
 				return true;
 			}
@@ -491,23 +491,23 @@ Effect::sibling_union_field_is_written(const Variable *v) const
 	return false;
 }
 
-bool 
+bool
 Effect::is_read_partially(const Variable* v) const
 {
 	return is_read(v) || field_is_read(v) || sibling_union_field_is_read(v);
 }
 
-bool 
+bool
 Effect::is_written_partially(const Variable* v) const
 {
 	return is_written(v) || field_is_written(v) || sibling_union_field_is_written(v);
 }
 
 /*
- * consolidate the read/write set 
+ * consolidate the read/write set
  */
 void
-Effect::consolidate(void) 
+Effect::consolidate(void)
 {
 	size_t i;
 	size_t len = read_vars.size();
@@ -531,7 +531,7 @@ Effect::consolidate(void)
 }
 
 /*
- * 
+ *
  */
 bool
 Effect::has_race_with(const Effect &e) const
@@ -542,7 +542,7 @@ Effect::has_race_with(const Effect &e) const
 }
 
 /*
- * 
+ *
  */
 bool
 Effect::is_empty(void) const
@@ -554,7 +554,7 @@ Effect::is_empty(void) const
  *
  */
 void
-Effect::clear(void) 
+Effect::clear(void)
 {
 	read_vars.clear();
 	write_vars.clear();
@@ -580,7 +580,7 @@ Effect::Output(std::ostream &out) const
 	for (i = 0; i < len; ++i) {
 		ss << " ";
 		read_vars[i]->OutputForComment(ss);
-		
+
 	}
 	ss << endl;
 
@@ -635,7 +635,7 @@ Effect::has_global_effect(void) const
  */
 bool
 Effect::union_field_is_read(void) const
-{ 
+{
 	for (size_t i=0; i<read_vars.size(); i++) {
 		if (read_vars[i]->is_inside_union_field()) {
 			return true;

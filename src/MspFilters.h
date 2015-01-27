@@ -47,9 +47,9 @@ class MspSafeOpSizeFilter : public Filter
 {
 public:
 	MspSafeOpSizeFilter(eBinaryOps op);
-	
+
 	virtual ~MspSafeOpSizeFilter();
-	
+
 	virtual bool filter(int v) const;
 private:
 	eBinaryOps bin_op_;

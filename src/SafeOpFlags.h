@@ -99,7 +99,7 @@ private:
 	bool static return_float_type(const Type *rv_type, const Type *op1_type, const Type *op2_type,
 					eBinaryOps op);
 
-	bool static return_float_type(const Type *rv_type, const Type *op1_type, 
+	bool static return_float_type(const Type *rv_type, const Type *op1_type,
 					eUnaryOps uop);
 
 	std::string safe_float_func_string(enum eBinaryOps op) const;

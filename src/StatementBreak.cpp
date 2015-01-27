@@ -27,7 +27,7 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef WIN32 
+#ifdef WIN32
 #pragma warning(disable : 4786)   /* Disable annoying warning messages */
 #endif
 
@@ -56,12 +56,12 @@ StatementBreak *
 StatementBreak::make_random(CGContext &cg_context)
 {
 	// quick fix: don't generate break statement for nested loops (this including multi-dimension array operations)
-	// JYTODO: treat "break" for nested loops as "continue", because it's effect is going back to the 
+	// JYTODO: treat "break" for nested loops as "continue", because it's effect is going back to the
 	// head of loop body, same as continue
 	//if (cg_context.focus_var && cg_context.focus_var->get_dimension() > 1) {
 	//	return 0;
 	//}
-	//FactMgr* fm = get_fact_mgr(&cg_context); 
+	//FactMgr* fm = get_fact_mgr(&cg_context);
 	// find the closest looping parent block: the one "continue"
 	// would apply to
 	Block* b = cg_context.get_current_block();
@@ -71,8 +71,8 @@ StatementBreak::make_random(CGContext &cg_context)
 	assert(b);
 	cg_context.get_effect_stm().clear();
 	Expression *expr = Expression::make_random(cg_context, get_int_type(), 0, true, true, eVariable);
-	ERROR_GUARD(NULL);    
-	StatementBreak* sc = new StatementBreak(cg_context.get_current_block(), *expr, *b); 
+	ERROR_GUARD(NULL);
+	StatementBreak* sc = new StatementBreak(cg_context.get_current_block(), *expr, *b);
 	b->break_stms.push_back(sc);
     return sc;
 }
@@ -107,11 +107,11 @@ StatementBreak::~StatementBreak(void)
 	delete &test;
 }
 
-/* 
+/*
  * return true if condition is always true
  */
-bool 
-StatementBreak::must_jump(void) const 
+bool
+StatementBreak::must_jump(void) const
 {
 	return test.not_equals(0);
 }
@@ -127,14 +127,14 @@ StatementBreak::Output(std::ostream &out, FactMgr* /*fm*/, int indent) const
 	test.Output(out);
 	out << ")";
 	outputln(out);
-	output_tab(out, indent+1); 
-	out << "break;"; 
-	outputln(out); 
+	output_tab(out, indent+1);
+	out << "break;";
+	outputln(out);
 }
 
-bool 
+bool
 StatementBreak::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const
-{    
+{
 	// evaludate condition first
 	if (!test.visit_facts(inputs, cg_context)) {
 		return false;

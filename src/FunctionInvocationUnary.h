@@ -47,7 +47,7 @@ class FunctionInvocationUnary : public FunctionInvocation
 public:
 	static FunctionInvocationUnary *CreateFunctionInvocationUnary(
 				CGContext &cg_context,
-				eUnaryOps op, 
+				eUnaryOps op,
 				SafeOpFlags *flags);
 
 	virtual ~FunctionInvocationUnary(void);

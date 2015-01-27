@@ -149,7 +149,7 @@ public:
 
 	CVQualifiers get_qualifiers(void) const;
 
-	void add_operand(const Expression* e); 
+	void add_operand(const Expression* e);
 
 	static bool IsOrderedStandardFunc(eBinaryOps eFunc);
 
@@ -178,13 +178,13 @@ public:
 	bool failed;	// indicates whether this invocation has failed to pass pointer/effect analysis
 	bool ptr_cmp;	// indicates whether this is a pointer comparison
 protected:
-	explicit FunctionInvocation(const FunctionInvocation &fi); 
+	explicit FunctionInvocation(const FunctionInvocation &fi);
 
 	const SafeOpFlags *op_flags;
 
 private:
 	// unimplemented
-	FunctionInvocation &operator=(const FunctionInvocation &fi); 
+	FunctionInvocation &operator=(const FunctionInvocation &fi);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

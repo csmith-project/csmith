@@ -49,7 +49,7 @@ public:
 	virtual void outputln(ostream &out);
 
 	virtual void output_comment_line(ostream &out, const std::string &comment);
-	
+
 	virtual void output_tab(ostream &out, int indent);
 
 private:

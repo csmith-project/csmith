@@ -25,9 +25,9 @@
 // INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
 // CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-// POSSIBILITY OF SUCH DAMAGE. 
+// POSSIBILITY OF SUCH DAMAGE.
 
-#ifdef WIN32 
+#ifdef WIN32
 #pragma warning(disable : 4786)   /* Disable annoying warning messages */
 #endif
 #include "ArrayVariable.h"
@@ -59,12 +59,12 @@
 #include "OutputMgr.h"
 #include "StringUtils.h"
 
-using namespace std;  
+using namespace std;
 
 /*
- * count the "key" variable of an binary/unary operation. 
+ * count the "key" variable of an binary/unary operation.
  * return 0 for constants, 2 for function calls
- */ 
+ */
 static int count_expr_key_var(const Expression* e)
 {
 	if (e->term_type == eVariable) {
@@ -75,7 +75,7 @@ static int count_expr_key_var(const Expression* e)
 	}
 	else if (e->term_type == eFunction) {
 		const ExpressionFuncall* ef = dynamic_cast<const ExpressionFuncall*>(e);
-		assert(ef); 
+		assert(ef);
 		const FunctionInvocation* fi = ef->get_invoke();
 		// for calls
 		if (fi->invoke_type == eFuncCall) {
@@ -95,10 +95,10 @@ static int count_expr_key_var(const Expression* e)
 }
 
 /*
- * find the "key" variable of an expression. 
- * return NULL if expression is a function call, constant, or a binary 
+ * find the "key" variable of an expression.
+ * return NULL if expression is a function call, constant, or a binary
  * operation involves at least two variables
- */ 
+ */
 static const Variable* find_expr_key_var(const Expression* e)
 {
 	if (e->term_type == eVariable) {
@@ -106,7 +106,7 @@ static const Variable* find_expr_key_var(const Expression* e)
 	}
 	else if (e->term_type == eFunction) {
 		const ExpressionFuncall* ef = dynamic_cast<const ExpressionFuncall*>(e);
-		assert(ef); 
+		assert(ef);
 		const FunctionInvocation& fi = *(ef->get_invoke());
 		if (fi.invoke_type == eBinaryPrim || fi.invoke_type == eUnaryPrim) {
 			if (fi.param_value.size()==1) {
@@ -173,26 +173,26 @@ ArrayVariable::CreateArrayVariable(const CGContext& cg_context, Block* blk, cons
 		}
 	} else {
 		for (size_t i=0; i<init_num; i++) {
-			Expression* e = NULL; 
-			if (type->eType != ePointer || CGOptions::strict_const_arrays()) { 
+			Expression* e = NULL;
+			if (type->eType != ePointer || CGOptions::strict_const_arrays()) {
 				e = Constant::make_random(type);
 			} else {
 				e = VariableSelector::make_init_value(Effect::READ, cg_context, type, qfer, blk);
 			}
-			var->add_init_value(e); 
-		} 
+			var->add_init_value(e);
+		}
 	}
 
 	// add it to global list or local variable list
 	blk? blk->local_vars.push_back(var) : VariableSelector::GetGlobalVariables()->push_back(var);
 	return var;
 }
- 
+
 /*
  *
  */
 ArrayVariable::ArrayVariable(Block* blk, const std::string &name, const Type *type, const Expression* init, const CVQualifiers* qfer, const vector<unsigned int>& sizes, const Variable* isFieldVarOf)
-	: Variable(name, type, init, qfer, isFieldVarOf, true),  
+	: Variable(name, type, init, qfer, isFieldVarOf, true),
 	  collective(NULL),
 	  parent(blk),
 	  sizes(sizes)
@@ -201,9 +201,9 @@ ArrayVariable::ArrayVariable(Block* blk, const std::string &name, const Type *ty
 }
 
 ArrayVariable::ArrayVariable(const ArrayVariable& av)
-	: Variable(av.name, av.type, av.init, &(av.qfer), av.field_var_of, true), 
+	: Variable(av.name, av.type, av.init, &(av.qfer), av.field_var_of, true),
 	collective(av.collective),
-	parent(av.parent), 
+	parent(av.parent),
 	sizes(av.sizes),
 	indices(av.indices),
 	init_values(av.init_values)
@@ -214,24 +214,24 @@ ArrayVariable::ArrayVariable(const ArrayVariable& av)
  *
  */
 ArrayVariable::~ArrayVariable(void)
-{ 
+{
 	// use Variable's destructor for collective variable
-	if (collective != 0) { 
+	if (collective != 0) {
 		size_t i;
 		for (i=0; i<indices.size(); i++) {
 			delete indices[i];
 		}
 		init = NULL;   // set to NULL to avoid being deleted twice
 	}
-} 
+}
 
-void 
+void
 ArrayVariable::add_index(const Expression* e)
 {
 	indices.push_back(e);
 }
 
-void 
+void
 ArrayVariable::set_index(size_t index, const Expression* e)
 {
 	indices[index] = e;
@@ -248,7 +248,7 @@ ArrayVariable::get_size(void) const
 	return len;
 }
 
-unsigned long 
+unsigned long
 ArrayVariable::size_in_bytes(void) const
 {
 	unsigned long len = type->SizeInBytes();
@@ -259,7 +259,7 @@ ArrayVariable::size_in_bytes(void) const
 	return len;
 }
 
-ArrayVariable* 
+ArrayVariable*
 ArrayVariable::itemize(void) const
 {
 	size_t i;
@@ -270,15 +270,15 @@ ArrayVariable::itemize(void) const
 		int index = rnd_upto(sizes[i]);
 		av->add_index(new Constant(get_int_type(), StringUtils::int2str(index)));
 	}
-	av->collective = this; 
+	av->collective = this;
 	// only expand struct/union for itemized array variable
 	if (type->is_aggregate()) {
 		av->create_field_vars(type);
 	}
 	return av;
 }
-	
-ArrayVariable* 
+
+ArrayVariable*
 ArrayVariable::itemize(const vector<int>& const_indices) const
 {
 	size_t i;
@@ -287,10 +287,10 @@ ArrayVariable::itemize(const vector<int>& const_indices) const
 	ArrayVariable* av = new ArrayVariable(*this);
 	VariableSelector::AllVars.push_back(av);
 	for (i=0; i<sizes.size(); i++) {
-		int index = const_indices[i]; 
+		int index = const_indices[i];
 		av->add_index(new Constant(get_int_type(), StringUtils::int2str(index)));
 	}
-	av->collective = this; 
+	av->collective = this;
 	// only expand struct/union for itemized array variable
 	if (type->is_aggregate()) {
 		av->create_field_vars(type);
@@ -298,7 +298,7 @@ ArrayVariable::itemize(const vector<int>& const_indices) const
 	return av;
 }
 
-ArrayVariable* 
+ArrayVariable*
 ArrayVariable::itemize(const std::vector<const Variable*>& indices, Block* blk) const
 {
 	size_t i;
@@ -320,12 +320,12 @@ ArrayVariable::itemize(const std::vector<const Variable*>& indices, Block* blk) 
 	return av;
 }
 
-ArrayVariable* 
+ArrayVariable*
 ArrayVariable::itemize(const std::vector<const Expression*>& indices, Block* blk) const
 {
 	size_t i;
 	assert(collective == 0);
-	ArrayVariable* av = new ArrayVariable(*this); 
+	ArrayVariable* av = new ArrayVariable(*this);
 	VariableSelector::AllVars.push_back(av);
 	for (i=0; i<sizes.size(); i++) {
 		av->add_index(indices[i]);
@@ -340,7 +340,7 @@ ArrayVariable::itemize(const std::vector<const Expression*>& indices, Block* blk
 	return av;
 }
 
-ArrayVariable* 
+ArrayVariable*
 ArrayVariable::rnd_mutate(void)
 {
 	assert(0 && "invalid call to rnd_mutate");
@@ -362,7 +362,7 @@ ArrayVariable::rnd_mutate(void)
 		}
 	}
 	vector<const Expression*> new_indices;
-	vector<bool> mutate_flags; 
+	vector<bool> mutate_flags;
 	bool no_mutate = true;
 	for (i=0; i<get_dimension(); i++) {
 		bool mutate = rnd_flipcoin(10);
@@ -381,7 +381,7 @@ ArrayVariable::rnd_mutate(void)
 			const Expression* e = indices[i];
 			assert(e->term_type == eVariable);
 			const ExpressionVariable* ev = dynamic_cast<const ExpressionVariable*>(e);
-			// create a mutated index from the original by adding an constant offset 
+			// create a mutated index from the original by adding an constant offset
 			FunctionInvocation* fi = new FunctionInvocationBinary(eAdd, 0);
         	fi->add_operand(new ExpressionVariable(*(ev->get_var())));
 			int offset = rnd_upto(sizes[i]);
@@ -397,11 +397,11 @@ ArrayVariable::rnd_mutate(void)
 			new_indices.push_back(indices[i]->clone());
 		}
 	}
-	// if index of at least one dimension mutated, return the new variable 
+	// if index of at least one dimension mutated, return the new variable
 	return VariableSelector::create_mutated_array_var(this, new_indices);
 }
 
-bool 
+bool
 ArrayVariable::is_variant(const Variable* v) const
 {
 	if (v->isArray) {
@@ -412,15 +412,15 @@ ArrayVariable::is_variant(const Variable* v) const
 			for (i=0; i<indices.size(); i++) {
 				const Expression* e = indices[i];
 				const Expression* other_e = av->indices[i];
-				if (count_expr_key_var(e) != 1 || 
-					count_expr_key_var(other_e) != 1 || 
+				if (count_expr_key_var(e) != 1 ||
+					count_expr_key_var(other_e) != 1 ||
 					find_expr_key_var(e) != find_expr_key_var(other_e)) {
 					return false;
 				}
 			}
 			return true;
 		}
-	}	
+	}
 	return false;
 }
 
@@ -431,10 +431,10 @@ ArrayVariable::is_global(void) const
 	return parent == 0;
 }
 
-// ------------------------------------------------------------- 
+// -------------------------------------------------------------
 bool
 ArrayVariable::is_visible_local(const Block* blk) const
-{  
+{
 	const Block* b = blk;
 	while (b) {
 		if (b == parent) {
@@ -443,7 +443,7 @@ ArrayVariable::is_visible_local(const Block* blk) const
 		b = b->parent;
 	}
     return false;
-} 
+}
 
 bool
 ArrayVariable::no_loop_initializer(void) const
@@ -458,16 +458,16 @@ ArrayVariable::no_loop_initializer(void) const
 
 // print the initializer recursively for multi-dimension arrays
 // this is based on John's idea
-string 
+string
 ArrayVariable::build_init_recursive(size_t dimen, const vector<string>& init_strings) const
 {
 	assert (dimen < get_dimension());
-	static unsigned seed = 0xABCDEF; 
+	static unsigned seed = 0xABCDEF;
 	string ret = "{";
 	for (size_t i=0; i<sizes[dimen]; i++) {
 		if (dimen == sizes.size() - 1) {
-			// use magic number to choose an initial value 
-			size_t rnd_index = ((seed * seed + (i+7) * (i+13)) * 52369) % (init_strings.size()); 
+			// use magic number to choose an initial value
+			size_t rnd_index = ((seed * seed + (i+7) * (i+13)) * 52369) % (init_strings.size());
 			ret += init_strings[rnd_index];
 			seed++;
 		 } else {
@@ -482,23 +482,23 @@ ArrayVariable::build_init_recursive(size_t dimen, const vector<string>& init_str
 // build the string initializer in form of "{...}"
 string
 ArrayVariable::build_initializer_str(const vector<string>& init_strings) const
-{ 
+{
 	string str, str_dimen;
 	if (CGOptions::force_non_uniform_array_init()) {
 		return build_init_recursive(0, init_strings);
 	}
-		
+
 	for (int i=sizes.size()-1; i>=0; i--) {
 		size_t len = sizes[i];
 		str_dimen = "{";
 		for (size_t j=0; j<len; j++) {
 			// for last dimension, use magic number to choose an initial value
 			if (i == ((int)sizes.size()) - 1) {
-				unsigned int rnd_index = ((i + (j+7) * (j+13)) * 52369) % (init_strings.size());  
+				unsigned int rnd_index = ((i + (j+7) * (j+13)) * 52369) % (init_strings.size());
 				str_dimen += init_strings[rnd_index];
 			} else {
 				str_dimen += str;
-			} 
+			}
 			str_dimen += ((j<len-1) ? ", " : "");
 		}
 		str_dimen += "}";
@@ -511,10 +511,10 @@ ArrayVariable::build_initializer_str(const vector<string>& init_strings) const
 void
 ArrayVariable::OutputDef(std::ostream &out, int indent) const
 {
-	if (collective == 0) { 
+	if (collective == 0) {
 		output_tab(out, indent);
 		if (!no_loop_initializer() ) {
-			// don't print definition for array, rather use a loop initializer 
+			// don't print definition for array, rather use a loop initializer
 			OutputDecl(out);
 			out << ";";
 			outputln(out);
@@ -529,12 +529,12 @@ ArrayVariable::OutputDef(std::ostream &out, int indent) const
 			for (i=0; i<init_values.size(); i++) {
 				init_strings.push_back(init_values[i]->to_string());
 			}
-			
+
 			// force global variables to be static if necessary
 			if (CGOptions::force_globals_static() && is_global()) {
 				out << "static ";
 			}
-			
+
 			// print type, name, and dimensions
 			output_qualified_type(out);
 			out << get_actual_name();
@@ -548,7 +548,7 @@ ArrayVariable::OutputDef(std::ostream &out, int indent) const
 }
 
 void ArrayVariable::OutputDecl(std::ostream &out) const
-{	
+{
 	// force global variables to be static if necessary
 	if (CGOptions::force_globals_static() && is_global()) {
 		out << "static ";
@@ -568,7 +568,7 @@ ArrayVariable::Output(std::ostream &out) const
 	if (collective == 0) {
 		out << get_actual_name();
 	}
-	// for itemized array variables, output the modularized index 
+	// for itemized array variables, output the modularized index
 	else {
 		out << get_actual_name();
 		assert(!indices.empty());
@@ -589,7 +589,7 @@ ArrayVariable::Output(std::ostream &out) const
 					out << "(";
 					unsigned_type->Output(out);
 					out << ")";
-				} 
+				}
 				out << "(";
 				indices[i]->Output(out);
 				out << ") % " << sizes[i] << "]";
@@ -611,7 +611,7 @@ ArrayVariable::OutputUpperBound(std::ostream &out) const
 // --------------------------------------------------------------
 void
 ArrayVariable::OutputLowerBound(std::ostream &out) const
-{ 
+{
 	out << name;
 	size_t i;
 	for (i=0; i<get_dimension(); i++) {
@@ -633,7 +633,7 @@ ArrayVariable::output_with_indices(std::ostream &out, const std::vector<const Va
 }
 
 void
-ArrayVariable::output_checksum_with_indices(std::ostream &out, 
+ArrayVariable::output_checksum_with_indices(std::ostream &out,
 					const std::vector<const Variable*>& cvs,
 					string field_name) const
 {
@@ -659,7 +659,7 @@ ArrayVariable::output_checksum_with_indices(std::ostream &out,
 void
 ArrayVariable::output_init(std::ostream &out, const Expression* init, const vector<const Variable*>& cvs, int indent) const
 {
-	if (collective != 0) return; 
+	if (collective != 0) return;
 	size_t i;
 
 	for (i=0; i<get_dimension(); i++) {
@@ -671,25 +671,25 @@ ArrayVariable::output_init(std::ostream &out, const Expression* init, const vect
 		}
 		output_tab(out, indent);
 		out << "for (";
-		out << cvs[i]->get_actual_name(); 
+		out << cvs[i]->get_actual_name();
 		out << " = 0; ";
 		out << cvs[i]->get_actual_name();
-		out << " < " << sizes[i] << "; "; 
+		out << " < " << sizes[i] << "; ";
 		out << cvs[i]->get_actual_name();
 		if (CGOptions::post_incr_operator()) {
-			out << "++)"; 
+			out << "++)";
 		}
 		else {
-			out << " = " << cvs[i]->get_actual_name() << " + 1)"; 
+			out << " = " << cvs[i]->get_actual_name() << " + 1)";
 		}
-		outputln(out); 
-	}  
+		outputln(out);
+	}
 	output_tab(out, indent+1);
 	output_with_indices(out, cvs);
 	out << " = ";
 	init->Output(out);
 	out << ";";
-	outputln(out); 
+	outputln(out);
 	// output the closing bracelets
 	for (i=1; i<get_dimension(); i++) {
 		indent--;
@@ -710,20 +710,20 @@ ArrayVariable::output_addr_checks(std::ostream &out, const Variable* var, string
 	for (i=0; i<get_dimension(); i++) {
 		output_tab(out, indent);
 		out << "for (";
-		out << ctrl_vars[i]->get_actual_name(); 
+		out << ctrl_vars[i]->get_actual_name();
 		out << " = 0; ";
 		out << ctrl_vars[i]->get_actual_name();
-		out << " < " << sizes[i] << "; "; 
+		out << " < " << sizes[i] << "; ";
 		out << ctrl_vars[i]->get_actual_name();
 		if (CGOptions::post_incr_operator()) {
-			out << "++)"; 
+			out << "++)";
 		}
 		else {
-			out << " = " << ctrl_vars[i]->get_actual_name() << " + 1)"; 
+			out << " = " << ctrl_vars[i]->get_actual_name() << " + 1)";
 		}
-		outputln(out); 
+		outputln(out);
 		output_open_encloser("{", out, indent);
-	}  
+	}
 	output_tab(out, indent);
 	out << "if (";
 	var->Output(out);
@@ -738,7 +738,7 @@ ArrayVariable::output_addr_checks(std::ostream &out, const Variable* var, string
 	out << " = &";
 	out << get_actual_name();
 	for (i=0; i<get_dimension(); i++) {
-		out << "[%d]"; 
+		out << "[%d]";
 	}
 	out << ";\\n\"";
 	for (i=0; i<get_dimension(); i++) {
@@ -747,8 +747,8 @@ ArrayVariable::output_addr_checks(std::ostream &out, const Variable* var, string
 	}
 	out << ");" << endl;
 	output_tab(out, indent);
-	out << "break;"; 
-	output_close_encloser("}", out, indent); 
+	out << "break;";
+	output_close_encloser("}", out, indent);
 	// output the closing bracelets
 	for (i=0; i<get_dimension(); i++) {
 		output_close_encloser("}", out, indent);
@@ -777,15 +777,15 @@ ArrayVariable::make_print_index_str(const vector<const Variable *> &cvs) const
 /* -------------------------------------------------------------
  *  hash all array items
  ***************************************************************/
-void 
+void
 ArrayVariable::hash(std::ostream& out) const
-{ 
-	if (collective != 0) return; 
+{
+	if (collective != 0) return;
 	vector<string> field_names;
 	// for unions, find the fields that we don't want to hash due to union field read rules. So FactUnion.cpp
 	vector<int> excluded_fields;
 	if (type->eType == eUnion) {
-		FactMgr* fm = get_fact_mgr_for_func(GetFirstFunction()); 
+		FactMgr* fm = get_fact_mgr_for_func(GetFirstFunction());
 		assert(fm);
 		for (size_t i=0; i<field_vars.size(); i++) {
 			if (!FactUnion::is_field_readable(this, i, fm->global_facts)) {
@@ -805,20 +805,20 @@ ArrayVariable::hash(std::ostream& out) const
 	for (i=0; i<get_dimension(); i++) {
 		output_tab(out, indent);
 		out << "for (";
-		out << cvs[i]->get_actual_name(); 
+		out << cvs[i]->get_actual_name();
 		out << " = 0; ";
 		out << cvs[i]->get_actual_name();
-		out << " < " << sizes[i] << "; "; 
+		out << " < " << sizes[i] << "; ";
 		out << cvs[i]->get_actual_name();
 		if (CGOptions::post_incr_operator()) {
-			out << "++)"; 
+			out << "++)";
 		}
 		else {
-			out << " = " << cvs[i]->get_actual_name() << " + 1)"; 
+			out << " = " << cvs[i]->get_actual_name() << " + 1)";
 		}
-		outputln(out); 
+		outputln(out);
 		output_open_encloser("{", out, indent);
-	}  
+	}
 	string vname;
 	ostringstream oss;
 	output_with_indices(oss, cvs);

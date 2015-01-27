@@ -38,7 +38,7 @@ using namespace std;
 class StringUtils {
 public:
 	static bool empty_line(const std::string &line);
-	
+
 	static bool is_space(const char c);
 
 	static bool end_with(string s, string tail);
@@ -48,7 +48,7 @@ public:
 	static std::string get_substring(const std::string &s, const char open_delim, const char close_delim);
 
 	static std::string get_substring_before(const std::string &s, size_t &pos, const char close_delim);
-	
+
 	static int str2int(const std::string &s);
 
 	static std::string int2str(int i);

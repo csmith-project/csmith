@@ -118,20 +118,20 @@ CGContext::CGContext(const CGContext &cgc, RWDirective* rwd, const Variable* iv,
 	  flags(cgc.flags | IN_LOOP),
 	  call_chain(cgc.call_chain),
 	  curr_blk(cgc.curr_blk),
-	  rw_directive(rwd), 
+	  rw_directive(rwd),
 	  iv_bounds(cgc.iv_bounds),
 	  curr_rhs(NULL),
 	  effect_context(cgc.effect_context),
 	  effect_accum(cgc.effect_accum)
 {
-	// add loop induction variable 
+	// add loop induction variable
 	if (iv) {
 		iv_bounds[iv] = bound;
 	}
 }
 
 /*
- * 
+ *
  */
 CGContext::~CGContext(void)
 {
@@ -163,7 +163,7 @@ bool
 CGContext::is_nonwritable(const Variable *v) const
 {
 	if (rw_directive) {
-		VariableSet::size_type len = rw_directive->no_write_vars.size(); 
+		VariableSet::size_type len = rw_directive->no_write_vars.size();
 		for (size_t i = 0; i < len; ++i) {
 			const Variable* no_write_var = rw_directive->no_write_vars[i];
 			if (no_write_var->loose_match(v) || v->loose_match(no_write_var)) {
@@ -173,7 +173,7 @@ CGContext::is_nonwritable(const Variable *v) const
 	}
 	// not writing to loop IVs (to avoid infinite loops)
 	map<const Variable*, unsigned int>::const_iterator iter;
-	for (iter = iv_bounds.begin(); iter != iv_bounds.end(); ++iter) {  
+	for (iter = iv_bounds.begin(); iter != iv_bounds.end(); ++iter) {
 		if (v->loose_match(iter->first)) {
 			return true;
 		}
@@ -194,7 +194,7 @@ bool CGContext::check_deref_volatile(const Variable *v, int deref_level)
 				return false;
 			level--;
 		}
-	} 
+	}
 	if (effect_accum)
 		effect_accum->access_deref_volatile(v, deref_level);
 
@@ -229,19 +229,19 @@ CGContext::check_read_var(const Variable *v, const std::vector<const Fact*>& fac
 	if (!read_indices(v, facts)) {
 		return false;
 	}
-	v = v->get_collective();	
+	v = v->get_collective();
 	if (FactUnion::is_nonreadable_field(v, facts)) {
 		return false;
 	}
 	if (is_nonreadable(v)) {
 		return false;
-	} 
+	}
 	if (effect_context.is_written_partially(v)) {
 		return false;
 	}
 	if (v->is_volatile() && !effect_context.is_side_effect_free()) {
 		return false;
-	} 
+	}
 	if (v->is_pointer() && FactPointTo::is_dangling_ptr(v, facts)) {
 		return false;
 	}
@@ -253,7 +253,7 @@ bool CGContext::read_pointed(const ExpressionVariable* v, const std::vector<cons
 {
 	size_t i;
 	Effect effect_accum_copy = *effect_accum;
-	int indirect = v->get_indirect_level(); 
+	int indirect = v->get_indirect_level();
 	assert(indirect > 0);
 	incr_counter(Bookkeeper::dereference_level_cnts, indirect);
 
@@ -264,12 +264,12 @@ bool CGContext::read_pointed(const ExpressionVariable* v, const std::vector<cons
 	}
 	vector<const Variable*> tmp;
 	tmp.push_back(v->get_var()->get_collective());
-	// recursively trace the pointer(s) to find real variables they point to 
+	// recursively trace the pointer(s) to find real variables they point to
 	while (indirect-- > 0) {
 		tmp = FactPointTo::merge_pointees_of_pointers(tmp, facts);
 		// make sure there is no null/dead pointers
-		if (tmp.size()==0 || 
-			(!allow_null_ptr && is_variable_in_set(tmp, FactPointTo::null_ptr)) || 
+		if (tmp.size()==0 ||
+			(!allow_null_ptr && is_variable_in_set(tmp, FactPointTo::null_ptr)) ||
 			(!allow_dead_ptr && is_variable_in_set(tmp, FactPointTo::garbage_ptr))) {
 			*effect_accum = effect_accum_copy;
 			return false;
@@ -284,7 +284,7 @@ bool CGContext::read_pointed(const ExpressionVariable* v, const std::vector<cons
 				}
 			}
 		}
-	} 
+	}
 	return true;
 }
 
@@ -292,7 +292,7 @@ bool CGContext::write_pointed(const Lhs* v, const std::vector<const Fact*>& fact
 {
 	size_t i;
 	Effect effect_accum_copy = *effect_accum;
-	int indirect = v->get_indirect_level(); 
+	int indirect = v->get_indirect_level();
 	assert(indirect > 0);
 	incr_counter(Bookkeeper::dereference_level_cnts, indirect);
 	//vector<const Variable*> tmp = FactPointTo::merge_pointees_of_pointer(v->get_var(), indirect, facts);
@@ -305,12 +305,12 @@ bool CGContext::write_pointed(const Lhs* v, const std::vector<const Fact*>& fact
 
 	bool allow_null_ptr = CGOptions::null_pointer_dereference_prob() > 0;
 	bool allow_dead_ptr = CGOptions::dead_pointer_dereference_prob() > 0;
-	// recursively trace the pointer(s) to find real variables they point to 
+	// recursively trace the pointer(s) to find real variables they point to
 	while (indirect-- > 0) {
 		tmp = FactPointTo::merge_pointees_of_pointers(tmp, facts);
 		// make sure there is no null/dead pointers
-		if (tmp.size()==0 || 
-			(!allow_null_ptr && is_variable_in_set(tmp, FactPointTo::null_ptr)) || 
+		if (tmp.size()==0 ||
+			(!allow_null_ptr && is_variable_in_set(tmp, FactPointTo::null_ptr)) ||
 			(!allow_dead_ptr && is_variable_in_set(tmp, FactPointTo::garbage_ptr))) {
 			*effect_accum = effect_accum_copy;
 			return false;
@@ -325,14 +325,14 @@ bool CGContext::write_pointed(const Lhs* v, const std::vector<const Fact*>& fact
 				}
 				else {
 					succ = check_read_var(pointee, facts);
-				} 
+				}
 				if (!succ) {
 					*effect_accum = effect_accum_copy;
 					return false;
 				}
 			}
 		}
-	} 
+	}
 	return true;
 }
 
@@ -384,7 +384,7 @@ CGContext::check_write_var(const Variable *v, const std::vector<const Fact*>& fa
 }
 
 /*
- * 
+ *
  */
 bool
 CGContext::read_indices(const Variable* v, const vector<const Fact*>& facts)
@@ -417,7 +417,7 @@ CGContext::read_indices(const Variable* v, const vector<const Fact*>& facts)
 }
 
 /*
- * 
+ *
  */
 void
 CGContext::add_effect(const Effect &e, bool include_lhs_effects)
@@ -429,7 +429,7 @@ CGContext::add_effect(const Effect &e, bool include_lhs_effects)
 	sanity_check();
 }
 
-void 
+void
 CGContext::merge_param_context(const CGContext& param_cg_context, bool include_lhs_effects)
 {
 	add_effect(*param_cg_context.get_effect_accum(), include_lhs_effects);
@@ -437,7 +437,7 @@ CGContext::merge_param_context(const CGContext& param_cg_context, bool include_l
 }
 
 /*
- * 
+ *
  */
 void
 CGContext::add_external_effect(const Effect &e)
@@ -450,7 +450,7 @@ CGContext::add_external_effect(const Effect &e)
 }
 
 /*
- * 
+ *
  */
 void
 CGContext::add_visible_effect(const Effect &e, const Block* b)
@@ -471,13 +471,13 @@ CGContext::add_visible_effect(const Effect &e, const Block* b)
   *          1 if from top level block of same function
   *          ...
   *          n if from block of depth n
-  *          INVISIBLE if not visible in current context 
-  *          INACTIVE if not visible in current context, and not 
-  *          active on stack frame neither 
+  *          INVISIBLE if not visible in current context
+  *          INACTIVE if not visible in current context, and not
+  *          active on stack frame neither
   **************************************************************/
-int 
+int
 CGContext::find_variable_scope(const Variable* var) const
-{ 
+{
 	if (var->is_global()) {
 		return -1;
 	}
@@ -495,8 +495,8 @@ CGContext::find_variable_scope(const Variable* var) const
 	const Block* b = get_current_block();
 	i = 1;
 	do {
-		if (find_variable_in_set(b->local_vars, var) != -1) { 
-			return i; 
+		if (find_variable_in_set(b->local_vars, var) != -1) {
+			return i;
 		}
 		b = b->parent;
 		i++;
@@ -506,8 +506,8 @@ CGContext::find_variable_scope(const Variable* var) const
 	for (i=call_chain.size()-1; i>=0; i--) {
 		b = call_chain[i];
 		do {
-			if (find_variable_in_set(b->local_vars, var) != -1) { 
-				return INVISIBLE; 
+			if (find_variable_in_set(b->local_vars, var) != -1) {
+				return INVISIBLE;
 			}
 			b = b->parent;
 			i++;
@@ -529,7 +529,7 @@ void CGContext::extend_call_chain(const CGContext& cg_context)
 	}
 }
 
-void 
+void
 CGContext::output_call_chain(std::ostream &out)
 {
 	size_t i;
@@ -603,7 +603,7 @@ CGContext::in_conflict(const Effect& eff) const
 		}
 		if (effect_context.is_written_partially(v)) {
 			return true;
-		} 
+		}
 		// Yang: do we need to consider deref level here?
 		if (v->is_volatile() && !effect_context.is_side_effect_free()) {
 			return true;
@@ -647,11 +647,11 @@ CGContext::find_reachable_frame_vars(vector<const Fact*>& facts, VariableSet& fr
 
 void
 CGContext::get_external_no_reads_writes(VariableSet& no_reads, VariableSet& no_writes, const VariableSet& frame_vars) const
-{  
+{
 	no_reads.clear();
 	no_writes.clear();
 	size_t i;
-	 
+
 	if (rw_directive) {
 		for (i=0; i<rw_directive->no_read_vars.size(); i++) {
 			const Variable* v = rw_directive->no_read_vars[i];
@@ -664,8 +664,8 @@ CGContext::get_external_no_reads_writes(VariableSet& no_reads, VariableSet& no_w
 			if (v->is_global() || find_variable_in_set(frame_vars, v) != -1) {
 				no_writes.push_back(v);
 			}
-		} 
-	} 
+		}
+	}
 	// convert global IVs into non-writables
 	map<const Variable*, unsigned int>::const_iterator iter;
 	for (iter = iv_bounds.begin(); iter != iv_bounds.end(); ++iter) {
@@ -678,7 +678,7 @@ CGContext::get_external_no_reads_writes(VariableSet& no_reads, VariableSet& no_w
 void
 RWDirective::find_must_use_arrays(vector<const Variable*>& avs) const
 {
-	avs.clear(); 
+	avs.clear();
 	size_t i;
 	for (i=0; i<must_read_vars.size(); i++) {
 		const Variable* v = must_read_vars[i];

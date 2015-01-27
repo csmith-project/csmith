@@ -81,7 +81,7 @@ CVQualifiers::~CVQualifiers()
 
 CVQualifiers &
 CVQualifiers::operator=(const CVQualifiers &qfer)
-{	
+{
 	if (this == &qfer) {
 		return *this;
 	}
@@ -101,25 +101,25 @@ CVQualifiers::operator=(const CVQualifiers &qfer)
   *    const is NOT more qualified than volatile
   *    ...
   *  notice "const int**" is not convertable from "int**"
-  *  as explained in 
+  *  as explained in
   * http://www.embedded.com/columns/programmingpointers/180205632?_requestid=488055
   **************************************************************/
-bool 
+bool
 CVQualifiers::stricter_than(const CVQualifiers& qfer) const
 {
-	size_t i; 
+	size_t i;
 	assert(is_consts.size() == is_volatiles.size());
 	const vector<bool>& v_consts = qfer.get_consts();
 	const vector<bool>& v_volatiles = qfer.get_volatiles();
 	if (is_consts.size() != v_consts.size() || is_volatiles.size() != v_volatiles.size()) {
 		return false;
 	}
-	
+
 	size_t depth = is_consts.size();
-	// check "const" qualifier first 
+	// check "const" qualifier first
 	for (i=0; i<depth; i++) {
 		// for special rule: "const int**" is not convertable from "int**"
-		// actually for a level that is followed by two "*"s, we have to match 
+		// actually for a level that is followed by two "*"s, we have to match
 		// "const" qualifier
 		if (depth - i > 2 && is_consts[i] != v_consts[i]) {
 			return false;
@@ -144,11 +144,11 @@ CVQualifiers::stricter_than(const CVQualifiers& qfer) const
 		if (v_volatiles[i] && !is_volatiles[i]) {
 			return false;
 		}
-	}		
+	}
 	return true;
 }
 
-bool 
+bool
 CVQualifiers::match(const CVQualifiers& qfer) const
 {
 	if (wildcard) {
@@ -165,7 +165,7 @@ CVQualifiers::match(const CVQualifiers& qfer) const
 	return (!accept_stricter && stricter_than(qfer)) || (accept_stricter && qfer.stricter_than(*this));
 }
 
-bool 
+bool
 CVQualifiers::match_indirect(const CVQualifiers& qfer) const
 {
 	if (wildcard) {
@@ -205,10 +205,10 @@ CVQualifiers::make_scalar_consts(std::vector<bool> &consts)
 	}
 }
 
-/* 
+/*
  * generate a random CV qualifier vector that is looser or stricter than this one
  */
-CVQualifiers 
+CVQualifiers
 CVQualifiers::random_qualifiers(bool no_volatile, Effect::Access access, const CGContext &cg_context) const
 {
 	std::vector<bool> volatiles;
@@ -241,10 +241,10 @@ CVQualifiers::random_qualifiers(bool no_volatile, Effect::Access access, const C
 	return CVQualifiers(consts, volatiles);
 }
 
-/* 
+/*
  * generate a random CV qualifier vector that is looser than this one
  */
-CVQualifiers 
+CVQualifiers
 CVQualifiers::random_loose_qualifiers(bool no_volatile, Effect::Access access, const CGContext &cg_context) const
 {
 	std::vector<bool> volatiles;
@@ -278,16 +278,16 @@ CVQualifiers::random_loose_qualifiers(bool no_volatile, Effect::Access access, c
 }
 
 CVQualifiers
-CVQualifiers::random_qualifiers(const Type* t, Effect::Access access, 
+CVQualifiers::random_qualifiers(const Type* t, Effect::Access access,
 				const CGContext &cg_context, bool no_volatile)
 {
 	return random_qualifiers(t, access, cg_context, no_volatile, RegularConstProb, RegularVolatileProb);
 }
 
-CVQualifiers 
-CVQualifiers::random_qualifiers(const Type* t, Effect::Access access, const CGContext &cg_context, bool no_volatile, 
+CVQualifiers
+CVQualifiers::random_qualifiers(const Type* t, Effect::Access access, const CGContext &cg_context, bool no_volatile,
 					unsigned int const_prob, unsigned int volatile_prob)
-{ 
+{
 	CVQualifiers ret_qfer;
 	if (t==0) {
 		return ret_qfer;
@@ -295,15 +295,15 @@ CVQualifiers::random_qualifiers(const Type* t, Effect::Access access, const CGCo
 	bool isVolatile = false;
 	bool isConst = false;
 	std::vector<bool> is_consts, is_volatiles;
-	const Effect &effect_context = cg_context.get_effect_context(); 
+	const Effect &effect_context = cg_context.get_effect_context();
 
 	// set random volatile/const properties for each level of indirection for pointers
 	const Type* tmp = t->ptr_type;
-	while (tmp) {   
+	while (tmp) {
 		DEPTH_GUARD_BY_DEPTH_RETURN(2, ret_qfer);
 		isVolatile = rnd_flipcoin(volatile_prob);
 		ERROR_GUARD(ret_qfer);
-		isConst = rnd_flipcoin(const_prob); 
+		isConst = rnd_flipcoin(const_prob);
 		ERROR_GUARD(ret_qfer);
 		if (isVolatile && isConst && !CGOptions::allow_const_volatile()) {
 			isConst = false;
@@ -324,7 +324,7 @@ CVQualifiers::random_qualifiers(const Type* t, Effect::Access access, const CGCo
 		isVolatile = rnd_flipcoin(volatile_prob);
 		ERROR_GUARD(ret_qfer);
 		isConst = rnd_flipcoin(const_prob);
-		ERROR_GUARD(ret_qfer);  
+		ERROR_GUARD(ret_qfer);
 	}
 	else if (volatile_ok) {
 		DEPTH_GUARD_BY_DEPTH_RETURN(1, ret_qfer);
@@ -353,27 +353,27 @@ CVQualifiers::random_qualifiers(const Type* t, Effect::Access access, const CGCo
 	return CVQualifiers(is_consts, is_volatiles);
 }
 
-/* 
+/*
  * make a random qualifier for type t, assuming non context,
  * and no volatile allowed
  */
-CVQualifiers 
+CVQualifiers
 CVQualifiers::random_qualifiers(const Type* t)
-{ 
+{
 	return random_qualifiers(t, Effect::READ, CGContext::get_empty_context(), true);
 }
 
-/* 
- * be careful to use it because it will generate volatile without knowing the context. 
+/*
+ * be careful to use it because it will generate volatile without knowing the context.
  * Only used to generate qulifiers for struct/unions
  */
-CVQualifiers 
+CVQualifiers
 CVQualifiers::random_qualifiers(const Type* t, unsigned int const_prob, unsigned int volatile_prob)
-{ 
+{
 	return random_qualifiers(t, Effect::READ, CGContext::get_empty_context(), false, const_prob, volatile_prob);
 }
 
-vector<bool> 
+vector<bool>
 CVQualifiers::random_stricter_consts(void) const
 {
 	vector<bool> consts;
@@ -401,7 +401,7 @@ CVQualifiers::random_stricter_consts(void) const
 	return consts;
 }
 
-vector<bool> 
+vector<bool>
 CVQualifiers::random_stricter_volatiles(void) const
 {
 	vector<bool> volatiles;
@@ -428,7 +428,7 @@ CVQualifiers::random_stricter_volatiles(void) const
 	return volatiles;
 }
 
-vector<bool> 
+vector<bool>
 CVQualifiers::random_looser_consts(void) const
 {
 	vector<bool> consts;
@@ -450,7 +450,7 @@ CVQualifiers::random_looser_consts(void) const
 	return consts;
 }
 
-vector<bool> 
+vector<bool>
 CVQualifiers::random_looser_volatiles(void) const
 {
 	vector<bool> volatiles;
@@ -472,7 +472,7 @@ CVQualifiers::random_looser_volatiles(void) const
 	return volatiles;
 }
 
-void 
+void
 CVQualifiers::add_qualifiers(bool is_const, bool is_volatile)
 {
 	is_consts.push_back(is_const);
@@ -481,7 +481,7 @@ CVQualifiers::add_qualifiers(bool is_const, bool is_volatile)
 
 
 // actually add qualifiers to pointers
-CVQualifiers 
+CVQualifiers
 CVQualifiers::random_add_qualifiers(bool no_volatile) const
 {
 	CVQualifiers qfer = *this;
@@ -503,7 +503,7 @@ CVQualifiers::random_add_qualifiers(bool no_volatile) const
 	else
 		is_const = rnd_flipcoin(RegularConstProb);
 	ERROR_GUARD(qfer);
-	//bool is_volatile = no_volatile ? false : rnd_upto(RegularVolatileProb);  
+	//bool is_volatile = no_volatile ? false : rnd_upto(RegularVolatileProb);
 	bool is_volatile;
 	if (no_volatile || !CGOptions::volatile_pointers())
 		is_volatile = false;
@@ -515,7 +515,7 @@ CVQualifiers::random_add_qualifiers(bool no_volatile) const
 	return qfer;
 }
 
-void 
+void
 CVQualifiers::remove_qualifiers(int len)
 {
 	int i;
@@ -525,7 +525,7 @@ CVQualifiers::remove_qualifiers(int len)
 	}
 }
 
-CVQualifiers 
+CVQualifiers
 CVQualifiers::indirect_qualifiers(int level) const
 {
 	if (level == 0 || wildcard) {
@@ -549,7 +549,7 @@ CVQualifiers::indirect_qualifiers(int level) const
 /*
  * check if the indirect depth of type matches qualifier size
  */
-bool 
+bool
 CVQualifiers::sanity_check(const Type* t) const
 {
 	assert(t);
@@ -618,8 +618,8 @@ CVQualifiers::output_qualified_type_with_deputy_annotation(const Type* t, std::o
 	}
 }
 
-bool 
-CVQualifiers::is_const_after_deref(int deref_level) const 
+bool
+CVQualifiers::is_const_after_deref(int deref_level) const
 {
 	if (deref_level < 0) {
 		return false;
@@ -628,9 +628,9 @@ CVQualifiers::is_const_after_deref(int deref_level) const
 	assert(len > static_cast<size_t>(deref_level));
 	return is_consts[len - deref_level - 1];
 }
-	
-bool 
-CVQualifiers::is_volatile_after_deref(int deref_level) const 
+
+bool
+CVQualifiers::is_volatile_after_deref(int deref_level) const
 {
 	if (deref_level < 0) {
 		return false;
@@ -646,7 +646,7 @@ CVQualifiers::is_volatile_after_deref(int deref_level) const
 	return is_volatiles[len - deref_level - 1];
 }
 
-void 
+void
 CVQualifiers::set_const(bool is_const, int pos)
 {
 	int len = is_consts.size();
@@ -655,7 +655,7 @@ CVQualifiers::set_const(bool is_const, int pos)
 	}
 }
 
-void 
+void
 CVQualifiers::set_volatile(bool is_volatile, int pos)
 {
 	int len = is_volatiles.size();
@@ -674,10 +674,10 @@ CVQualifiers::restrict(Effect::Access access, const CGContext& cg_context)
 		set_volatile(false);
 	}
 }
-	
+
 /*
- * For now, only used to generate all qualifiers for struct fields. 
- * Also, since we don't support fields with pointer types, we only 
+ * For now, only used to generate all qualifiers for struct fields.
+ * Also, since we don't support fields with pointer types, we only
  * enumerate the first level of qualifiers.
  */
 void
@@ -718,7 +718,7 @@ CVQualifiers::OutputFirstQuals(std::ostream &out) const
 	}
 }
 
-void 
+void
 CVQualifiers::output() const
 {
 	size_t i;

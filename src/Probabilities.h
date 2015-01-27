@@ -298,7 +298,7 @@ private:
 
 	// the name used by csmith internally
 	const ProbName pname_;
- 
+
 	// default probability
 	const int default_val_;
 

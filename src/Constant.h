@@ -59,10 +59,10 @@ public:
 
 	// Factory method.
 	static Constant *make_int(int v);
-	
+
 	Expression *clone() const;
 
-	CVQualifiers get_qualifiers(void) const { return CVQualifiers(true, false);} 
+	CVQualifiers get_qualifiers(void) const { return CVQualifiers(true, false);}
 
 	virtual void get_eval_to_subexps(vector<const Expression*>& subs) const {subs.push_back(this);}
 
@@ -75,7 +75,7 @@ public:
 	virtual const Type &get_type(void) const;
 	// Unused:
 	const std::string &get_value(void) const { return value; }
-	
+
 	string get_field(size_t fid) const;
 
 	virtual bool less_than(int num) const;
@@ -87,7 +87,7 @@ public:
 	// unsigned long SizeInBytes(void) const;
 	virtual void Output(std::ostream &) const;
 
-private:	
+private:
 	const Type* type;
 	const std::string value;
 };

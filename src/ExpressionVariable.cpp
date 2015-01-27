@@ -54,24 +54,24 @@ ExpressionVariable *
 ExpressionVariable::make_random(CGContext &cg_context, const Type* type, const CVQualifiers* qfer, bool as_param, bool as_return)
 {
 	DEPTH_GUARD_BY_TYPE_RETURN(dtExpressionVariable, NULL);
-	Function *curr_func = cg_context.get_current_func(); 
+	Function *curr_func = cg_context.get_current_func();
 	FactMgr* fm = get_fact_mgr_for_func(curr_func);
-	vector<const Variable*> dummy; 
+	vector<const Variable*> dummy;
 
-	// save current effects, in case we need to reset 
+	// save current effects, in case we need to reset
 	Effect eff_accum = cg_context.get_accum_effect();
 	Effect eff_stmt = cg_context.get_effect_stm();
-  
+
 	ExpressionVariable *ev = 0;
 	do {
-		const Variable* var = 0; 
-		// try to use one of must_read_vars in CGContext 
-		var = VariableSelector::select_must_use_var(Effect::READ, cg_context, type, qfer);  
+		const Variable* var = 0;
+		// try to use one of must_read_vars in CGContext
+		var = VariableSelector::select_must_use_var(Effect::READ, cg_context, type, qfer);
 		if (var == NULL) {
 			var = VariableSelector::select(Effect::READ, cg_context, type, qfer, dummy, eFlexible);
 		}
 		ERROR_GUARD(NULL);
-		if (!var) 
+		if (!var)
 			continue;
 		if (!type->is_float() && var->type->is_float())
 			continue;
@@ -95,11 +95,11 @@ ExpressionVariable::make_random(CGContext &cg_context, const Type* type, const C
 		int valid = FactPointTo::opportunistic_validate(var, type, fm->global_facts);
 		if (valid) {
 			ExpressionVariable tmp(*var, type);
-			if (tmp.visit_facts(fm->global_facts, cg_context)) { 
-				ev = tmp.get_indirect_level() == 0 ? new ExpressionVariable(*var) : new ExpressionVariable(*var, type); 
+			if (tmp.visit_facts(fm->global_facts, cg_context)) {
+				ev = tmp.get_indirect_level() == 0 ? new ExpressionVariable(*var) : new ExpressionVariable(*var, type);
 				cg_context.curr_blk = cg_context.get_current_block();
 				break;
-			}  
+			}
 			else {
 				cg_context.reset_effect_accum(eff_accum);
 				cg_context.reset_effect_stm(eff_stmt);
@@ -111,11 +111,11 @@ ExpressionVariable::make_random(CGContext &cg_context, const Type* type, const C
 	// statistics
 	int deref_level = ev->get_indirect_level();
 	if (deref_level > 0) {
-		incr_counter(Bookkeeper::read_dereference_cnts, deref_level); 
+		incr_counter(Bookkeeper::read_dereference_cnts, deref_level);
 	}
 	if (deref_level < 0) {
 		Bookkeeper::record_address_taken(ev->get_var());
-	}   
+	}
 	Bookkeeper::record_volatile_access(ev->get_var(), deref_level, false);
 	return ev;
 }
@@ -127,7 +127,7 @@ ExpressionVariable::ExpressionVariable(const Variable &v)
 	: Expression(eVariable),
       var(v),
       type(v.type)
-{ 
+{
 }
 
 /*
@@ -137,7 +137,7 @@ ExpressionVariable::ExpressionVariable(const Variable &v, const Type* t)
 	: Expression(eVariable),
 	  var(v),
 	  type(t)
-{ 
+{
 }
 
 /*
@@ -148,7 +148,7 @@ ExpressionVariable::ExpressionVariable(const ExpressionVariable &expr)
 	  var(expr.var),
 	  type(expr.type)
 {
-	// Nothing to do	
+	// Nothing to do
 }
 
 Expression *
@@ -188,7 +188,7 @@ ExpressionVariable::get_indirect_level(void) const
 /*
  *
  */
-CVQualifiers 
+CVQualifiers
 ExpressionVariable::get_qualifiers(void) const
 {
 	int indirect = get_indirect_level();
@@ -207,7 +207,7 @@ ExpressionVariable::Output(std::ostream &out) const
 		return;
 	}
 	int i;
-    int indirect_level = get_indirect_level(); 
+    int indirect_level = get_indirect_level();
     if (indirect_level > 0) {
         out << "(";
 		for (i=0; i<indirect_level; i++) {
@@ -224,7 +224,7 @@ ExpressionVariable::Output(std::ostream &out) const
     }
 }
 
-std::vector<const ExpressionVariable*> 
+std::vector<const ExpressionVariable*>
 ExpressionVariable::get_dereferenced_ptrs(void) const
 {
 	// return a empty vector by default
@@ -235,38 +235,38 @@ ExpressionVariable::get_dereferenced_ptrs(void) const
 	return refs;
 }
 
-void 
+void
 ExpressionVariable::get_referenced_ptrs(std::vector<const Variable*>& ptrs) const
-{ 
+{
 	if (var.is_pointer()) {
 		ptrs.push_back(&var);
 	}
 }
 
-bool 
+bool
 ExpressionVariable::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const
-{ 
+{
 	int deref_level = get_indirect_level();
-	const Variable* v = get_var();   
-	if (deref_level > 0) { 
+	const Variable* v = get_var();
+	if (deref_level > 0) {
 		if (!FactPointTo::is_valid_ptr(v, inputs)) {
 			return false;
 		}
 		// Yang: do we need to consider the deref_level?
-		bool valid = cg_context.check_read_var(v, inputs) && cg_context.read_pointed(this, inputs) && 
+		bool valid = cg_context.check_read_var(v, inputs) && cg_context.read_pointed(this, inputs) &&
 			cg_context.check_deref_volatile(v, deref_level);
 		return valid;
 	}
 	// we filter out bitfield
 	if (deref_level < 0) {
-		if (v->isBitfield_) 
-			return false; 
-		// it's actually valid to take address of a null/dead pointer  
+		if (v->isBitfield_)
+			return false;
+		// it's actually valid to take address of a null/dead pointer
 		return true;
 	}
 	else {
 		return cg_context.check_read_var(v, inputs);
-	} 
+	}
 }
 
 /*

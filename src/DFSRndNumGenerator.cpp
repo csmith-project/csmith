@@ -66,7 +66,7 @@ public:
 
 private:
 	// Whether this state has been initialized
-	bool init_; 
+	bool init_;
 	// Current value from 0...(bound - 1)
 	int value_;
 
@@ -165,7 +165,7 @@ DFSRndNumGenerator::make_rndnum_generator()
 	impl_ = new DFSRndNumGenerator(seq);
 
 	assert(impl_);
-	
+
 	std::string debug_sequence = CGOptions::dfs_debug_sequence();
 	if (!debug_sequence.empty()) {
 		std::vector<int> nums;
@@ -175,7 +175,7 @@ DFSRndNumGenerator::make_rndnum_generator()
 		impl_->initialize_sequence(nums);
 		impl_->use_debug_sequence_ = true;
 	}
-		
+
 	return impl_;
 }
 
@@ -185,7 +185,7 @@ DFSRndNumGenerator::initialize_sequence(const vector<int> &v)
 	size_t i = 0;
 	for (i = 0; i < v.size(); i++) {
 		seq_->add_number(v[i], 0, i);
-	} 
+	}
 }
 
 #ifdef DEBUG
@@ -204,7 +204,7 @@ DFSRndNumGenerator::dumpCurrentState(int, const string &)
 #endif
 
 /*
- * invoked from DepthSpec.cpp. 
+ * invoked from DepthSpec.cpp.
  * returning true means that we do eager backtracking.
  */
 bool
@@ -280,7 +280,7 @@ DFSRndNumGenerator::random_choice (int bound, const Filter *filter, const string
 	}
 	else if (err != SUCCESS) {
 		assert("request random number in an error state. " && 0);
-	} 
+	}
 
 	++current_pos_;
 	if (use_debug_sequence_) {
@@ -296,7 +296,7 @@ DFSRndNumGenerator::random_choice (int bound, const Filter *filter, const string
 
 	int local_current_pos = current_pos_;
 
-	if (current_pos_ >= CGOptions::max_exhaustive_depth() || 
+	if (current_pos_ >= CGOptions::max_exhaustive_depth() ||
 		decision_depth_ >= CGOptions::max_exhaustive_depth()) {
 		Error::set_error(EXCEED_MAX_DEPTH_ERROR);
 		return -1;
@@ -325,7 +325,7 @@ DFSRndNumGenerator::random_choice (int bound, const Filter *filter, const string
 		} while (v < bound && ((filter && filter->filter(v)) || filter_invalid_nums(invalid_nums, v)));
 
 		state->set_value(v);
-		
+
 		if (state->value() >= bound) { // backtracking
 			current_pos_ = local_current_pos;
 			for (int i = current_pos_; i < CGOptions::max_exhaustive_depth(); ++i) {
@@ -408,7 +408,7 @@ DFSRndNumGenerator::init_states(int size)
 	}
 }
 
-void 
+void
 DFSRndNumGenerator::reset_state(void)
 {
 	current_pos_ = -1;
@@ -427,7 +427,7 @@ DFSRndNumGenerator::get_sequence(std::string &sequence)
 	sequence = ss.str();
 }
 
-std::string 
+std::string
 DFSRndNumGenerator::get_prefixed_name(const std::string &name)
 {
 	std::ostringstream ss;
@@ -474,7 +474,7 @@ DFSRndNumGenerator::rnd_flipcoin(const unsigned int n, const Filter *f, const st
 	return y;
 }
 
-unsigned long 
+unsigned long
 DFSRndNumGenerator::genrand(void)
 {
 	return AbsRndNumGenerator::genrand();
