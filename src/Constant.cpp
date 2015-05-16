@@ -39,7 +39,6 @@
 #include "CGContext.h"
 #include "Type.h"
 #include "Variable.h"
-#include "Error.h"
 #include "CGOptions.h"
 #include "StringUtils.h"
 #include "random.h"
@@ -218,9 +217,7 @@ GenerateRandomConstantInRange(const Type* type, int bound)
 	if (type->simple_type == eInt) {
 		int b = static_cast<int>(pow(2, static_cast<double>(bound) / 2));
 		int num = pure_rnd_upto(b);
-		ERROR_GUARD("");
 		bool flag = pure_rnd_flipcoin(50);
-		ERROR_GUARD("");
 		if (flag)
 			oss << num;
 		else
@@ -231,7 +228,6 @@ GenerateRandomConstantInRange(const Type* type, int bound)
 		if (b < 0)
 			b = INT_MAX;
 		int num = pure_rnd_upto(b);
-		ERROR_GUARD("");
 		oss << num;
 	}
 	else {
@@ -259,19 +255,17 @@ GenerateRandomStructConstant(const Type* type)
 			if (bound == 0)
 				continue;
 			string v = GenerateRandomConstantInRange(type->fields[i], bound);
-			ERROR_GUARD("");
 			if (i > 0) {
 				value += ",";
 			}
 			value += v;
 		}
 		else {
-        		string v = GenerateRandomConstant(type->fields[i]);
-			ERROR_GUARD("");
-        		if (i > 0) {
-            			value += ",";
+            string v = GenerateRandomConstant(type->fields[i]);
+            if (i > 0) {
+                value += ",";
 			}
-        		value += v;
+            value += v;
 		}
 	}
 	value += "}";
@@ -301,11 +295,9 @@ GenerateRandomConstant(const Type* type)
 	}
 	else if (type->eType == eStruct) {
 		v = GenerateRandomStructConstant(type);
-		ERROR_GUARD("");
 	}
 	else if (type->eType == eUnion) {
 		v = GenerateRandomUnionConstant(type);
-		ERROR_GUARD("");
 	}
 	// the only possible constant for a pointer is "0"
 	else if (type->eType == ePointer) {
@@ -316,13 +308,10 @@ GenerateRandomConstant(const Type* type)
 		assert(st != eVoid);
 		//assert((eType >= 0) && (eType <= MAX_SIMPLE_TYPES));
 		if (pure_rnd_flipcoin(50)) {
-			ERROR_GUARD("");
 			int num = 0;
 			if (pure_rnd_flipcoin(50)) {
-				ERROR_GUARD("");
 				num = pure_rnd_upto(3)-1;
 			} else {
-				ERROR_GUARD("");
 				num = pure_rnd_upto(20)-10;
 			}
 			// don't use negative number for unsigned type, as this causes
@@ -396,7 +385,6 @@ Constant *
 Constant::make_random(const Type* type)
 {
 	string v = GenerateRandomConstant(type);
-	ERROR_GUARD(NULL);
 	return new Constant(type, v);
 }
 
@@ -405,7 +393,6 @@ Constant::make_random_upto(unsigned int limit)
 {
 	ostringstream oss;
 	oss << rnd_upto(limit);
-	ERROR_GUARD(NULL);
 	return new Constant(&Type::get_simple_type(eUInt), oss.str());
 }
 
@@ -413,7 +400,6 @@ Constant*
 Constant::make_random_nonzero(const Type* type)
 {
 	string v = GenerateRandomConstant(type);
-	ERROR_GUARD(NULL);
 	while (StringUtils::str2int(v) == 0) {
 		v = GenerateRandomConstant(type);
 	}
@@ -436,7 +422,6 @@ Constant::make_int(int v)
 #endif
 
 	const Type &int_type = Type::get_simple_type(eInt);
-	ERROR_GUARD(NULL);
 
 #if 0
 	// Initialize our cache of small-number constants.

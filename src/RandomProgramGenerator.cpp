@@ -93,7 +93,7 @@ FUTURE:
 
 using namespace std;
 
-//#define PACKAGE_STRING "csmith 1.1.1"
+#define PACKAGE_STRING "csmith 3.0.0"
 ///////////////////////////////////////////////////////////////////////////////
 
 // ----------------------------------------------------------------------------
@@ -212,28 +212,17 @@ static void print_advanced_help()
 	cout << "  --max-split-files <num>: evenly split a generated program into <num> different files(default 0)." << endl << endl;
 	cout << "  --split-files-dir <dir>: generate split-files into <dir> (default ./output)." << endl << endl;
 
-	// dfs-exhaustive mode options
-	cout << "  --dfs-exhaustive: enable depth first exhaustive random generation (disabled by default)." << endl << endl;
-	cout << "  --expand-struct: enable the expansion of struct in the exhaustive mode. ";
-	cout << "Only works in the exhaustive mode and cannot used with --no-structs." << endl << endl;
-
-	cout << "  --compact-output: print generated programs in compact way. ";
-	cout << "Only works in the exhaustive mode." << endl << endl;
-
 	cout << "  --max-nested-struct-level <num>: limit maximum nested level of structs to <num>(default 0). ";
-	cout << "Only works in the exhaustive mode." << endl << endl;
-
-	cout << "  --struct-output <file>: dump structs declarations to <file>. ";
-	cout << "Only works in the exhaustive mode." << endl << endl;
+	cout << endl << endl;
 
 	cout << "  --prefix-name: prefix names of global functions and variables with increasing numbers. ";
-	cout << "Only works in the exhaustive mode." << endl << endl;
+	cout << endl << endl;
 
 	cout << "  --sequence-name-prefix: prefix names of global functions and variables with sequence numbers.";
-	cout << "Only works in the exhaustive mode." << endl << endl;
+	cout << endl << endl;
 
 	cout << "  --compatible-check: disallow trivial code such as i = i in random programs. ";
-	cout << "Only works in the exhaustive mode." << endl << endl;
+	cout << endl << endl;
 
 	// target platforms
 	cout << "  --msp: enable certain msp related features " << endl << endl;
@@ -260,15 +249,7 @@ static void print_advanced_help()
 	cout << "  --arg-unions | --no-arg-unions: enable | disable unions being used as args (enabled by default)." << endl << endl;
 	cout << "  --take-union-field-addr | --take-no-union-field-addr: allow | disallow addresses of union fields to be taken (allowed by default)." << endl << endl;
 	cout << "  --vol-struct-union-fields | --no-vol-struct-union-fields: enable | disable volatile struct/union fields (enabled by default)" << endl << endl;
-
-	// delta related options
-	cout << "  --delta-monitor [simple]: specify the type of delta monitor. Only [simple] type is supported now." << endl << endl;
-	cout << "  --delta-input [file]: specify the file for delta input." << endl << endl;
-	cout << "  --delta-output [file]: specify the file for delta output (default to <delta-input>)." << endl << endl;
-	cout << "  --go-delta [simple]: run delta reduction on <delta-input>." << endl << endl;
-	cout << "  --no-delta-reduction: output the same program as <delta-input>. ";
-	cout << "Only works with --go-delta option." << endl << endl;
-
+    
 	// probability options
 	cout << "  --dump-default-probabilities <file>: dump the default probability settings into <file>" << endl << endl;
 	cout << "  --dump-random-probabilities <file>: dump the randomized probabilities into <file>" << endl << endl;
@@ -306,8 +287,6 @@ static void print_advanced_help()
 	cout << "  --const-as-condition: enable const to be conditions of if-statements. " << endl << endl;
 
 	cout << "  --match-exact-qualifiers: match exact const/volatile qualifiers for LHS and RHS of assignments." << endl << endl;
-
-	cout << "  --reduce <file>: reduce random program under the direction of the configuration file." << endl << endl;
 
 	cout << "  --return-dead-pointer | --no-return-dead-pointer: allow | disallow functions from returning dangling pointers (disallowed by default)." << endl << endl;
 
@@ -460,17 +439,6 @@ main(int argc, char **argv)
 				exit(-1);
 			}
 			CGOptions::split_files_dir(dir);
-			continue;
-		}
-
-		if (strcmp (argv[i], "--dfs-exhaustive") == 0) {
-			CGOptions::dfs_exhaustive(true);
-			CGOptions::random_based(false);
-			continue;
-		}
-
-		if (strcmp (argv[i], "--compact-output") == 0) {
-			CGOptions::compact_output(true);
 			continue;
 		}
 
@@ -630,36 +598,6 @@ main(int argc, char **argv)
 			continue;
 		}
 
-		if (strcmp (argv[i], "--struct-output") == 0) {
-			string s;
-			i++;
-			arg_check(argc, i);
-			if (!parse_string_arg(argv[i], s))
-				exit(-1);
-			CGOptions::struct_output(s);
-			continue;
-		}
-
-		if (strcmp (argv[i], "--dfs-debug-sequence") == 0) {
-			string s;
-			i++;
-			arg_check(argc, i);
-			if (!parse_string_arg(argv[i], s))
-				exit(-1);
-			CGOptions::dfs_debug_sequence(s);
-			continue;
-		}
-
-		if (strcmp (argv[i], "--max-exhaustive-depth") ==0 ) {
-			unsigned long ret;
-			i++;
-			arg_check(argc, i);
-			if (!parse_int_arg(argv[i], &ret))
-				exit(-1);
-			CGOptions::max_exhaustive_depth(ret);
-			continue;
-		}
-
 		if (strcmp (argv[i], "--max-pointer-depth") ==0 ) {
 			unsigned long ret;
 			i++;
@@ -678,47 +616,6 @@ main(int argc, char **argv)
 			if (!parse_string_arg(argv[i], o_file))
 				exit(-1);
 			CGOptions::output_file(o_file);
-			continue;
-		}
-
-		if (strcmp (argv[i], "--delta-monitor") == 0) {
-			string monitor;
-			i++;
-			arg_check(argc, i);
-			if (!parse_string_arg(argv[i], monitor)) {
-				cout<< "please specify one delta monitor!" << std::endl;
-				exit(-1);
-			}
-			CGOptions::delta_monitor(monitor);
-			continue;
-		}
-
-		if (strcmp (argv[i], "--delta-output") == 0) {
-			string o_file;
-			i++;
-			arg_check(argc, i);
-			if (!parse_string_arg(argv[i], o_file)) {
-				cout<< "please specify delta output file!" << std::endl;
-				exit(-1);
-			}
-			CGOptions::delta_output(o_file);
-			continue;
-		}
-
-		if (strcmp (argv[i], "--go-delta") == 0) {
-			string monitor;
-			i++;
-			arg_check(argc, i);
-			if (!parse_string_arg(argv[i], monitor)) {
-				cout<< "please specify one delta type!" << std::endl;
-				exit(-1);
-			}
-			CGOptions::go_delta(monitor);
-			continue;
-		}
-
-		if (strcmp (argv[i], "--no-delta-reduction") == 0) {
-			CGOptions::no_delta_reduction(true);
 			continue;
 		}
 
@@ -1036,18 +933,6 @@ main(int argc, char **argv)
 
 		if (strcmp (argv[i], "--deputy") == 0) {
 			CGOptions::deputy(true);
-			continue;
-		}
-
-		if (strcmp (argv[i], "--delta-input") == 0) {
-			string filename;
-			i++;
-			arg_check(argc, i);
-			if (!parse_string_arg(argv[i], filename)) {
-				cout<< "please specify delta output file!" << std::endl;
-				exit(-1);
-			}
-			CGOptions::delta_input(filename);
 			continue;
 		}
 
@@ -1370,22 +1255,6 @@ main(int argc, char **argv)
 			continue;
 		}
 
-		if (strcmp (argv[i], "--reduce") == 0) {
-			string filename;
-			i++;
-			arg_check(argc, i);
-			if (!parse_string_arg(argv[i], filename)) {
-				cout<< "please specify reduction directive file!" << std::endl;
-				exit(-1);
-			}
-			ifstream conf(filename.c_str());
-			if (conf.fail()) {
-				cout<< "can't read reduction directive file " << filename << "!" << std::endl;
-				exit(-1);
-			}
-			CGOptions::init_reducer(filename);
-			continue;
-		}
 		// OMIT help
 
 		// OMIT compute-hash

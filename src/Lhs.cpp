@@ -42,8 +42,6 @@
 #include "VariableSelector.h"
 #include "ExpressionVariable.h"
 #include "Bookkeeper.h"
-#include "Error.h"
-#include "DepthSpec.h"
 #include "CGOptions.h"
 #include "ArrayVariable.h"
 #include "random.h"
@@ -68,7 +66,6 @@ Lhs::make_random(CGContext &cg_context, const Type* t, const CVQualifiers* qfer,
 	Effect effect_stm = cg_context.get_effect_stm();
 
 	do {
-		DEPTH_GUARD_BY_TYPE_RETURN(dtLhs, NULL);
 		const Variable* var = 0;
 		// try to use one of the "must_use" variables
 		var = VariableSelector::select_must_use_var(Effect::WRITE, cg_context, t, qfer);
@@ -76,7 +73,6 @@ Lhs::make_random(CGContext &cg_context, const Type* t, const CVQualifiers* qfer,
 			bool flag = rnd_flipcoin(SelectDerefPointerProb);
 			if (flag) {
 				var = VariableSelector::select_deref_pointer(Effect::WRITE, cg_context, t, qfer, dummy);
-				ERROR_GUARD(NULL);
 				if (var) {
 					int deref_level = var->type->get_indirect_level() - t->get_indirect_level();
 					assert(!var->qfer.is_const_after_deref(deref_level));
@@ -89,11 +85,10 @@ Lhs::make_random(CGContext &cg_context, const Type* t, const CVQualifiers* qfer,
 				new_qfer.restrict(Effect::WRITE, cg_context);
 			}
 			var = VariableSelector::select(Effect::WRITE, cg_context, t, &new_qfer, dummy, eDerefExact);
-			ERROR_GUARD(NULL);
 			int deref_level = var->type->get_indirect_level() - t->get_indirect_level();
 			assert(!var->qfer.is_const_after_deref(deref_level));
 		}
-		ERROR_GUARD(NULL);
+		 
 		assert(var);
 		bool valid = FactPointTo::opportunistic_validate(var, t, fm->global_facts) && !cg_context.get_effect_stm().is_written(var);
 		// we don't want signed integer for some operations, such as ++/-- which has potential of overflowing

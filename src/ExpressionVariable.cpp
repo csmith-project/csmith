@@ -38,8 +38,6 @@
 #include "FactPointTo.h"
 #include "FactMgr.h"
 #include "Bookkeeper.h"
-#include "Error.h"
-#include "DepthSpec.h"
 #include "ArrayVariable.h"
 
 #include "random.h"
@@ -53,7 +51,6 @@
 ExpressionVariable *
 ExpressionVariable::make_random(CGContext &cg_context, const Type* type, const CVQualifiers* qfer, bool as_param, bool as_return)
 {
-	DEPTH_GUARD_BY_TYPE_RETURN(dtExpressionVariable, NULL);
 	Function *curr_func = cg_context.get_current_func();
 	FactMgr* fm = get_fact_mgr_for_func(curr_func);
 	vector<const Variable*> dummy;
@@ -70,7 +67,6 @@ ExpressionVariable::make_random(CGContext &cg_context, const Type* type, const C
 		if (var == NULL) {
 			var = VariableSelector::select(Effect::READ, cg_context, type, qfer, dummy, eFlexible);
 		}
-		ERROR_GUARD(NULL);
 		if (!var)
 			continue;
 		if (!type->is_float() && var->type->is_float())
@@ -202,10 +198,6 @@ void
 ExpressionVariable::Output(std::ostream &out) const
 {
 	output_cast(out);
-	Reducer* reducer = CGOptions::get_reducer();
-	if (reducer && reducer->output_expr(this, out)) {
-		return;
-	}
 	int i;
     int indirect_level = get_indirect_level();
     if (indirect_level > 0) {

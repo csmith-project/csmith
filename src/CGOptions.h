@@ -33,7 +33,6 @@
 #include <string>
 #include <vector>
 #include <map>
-#include "Reducer.h"
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -58,7 +57,6 @@ using namespace std;
 #define CGOPTIONS_DEFAULT_MAX_ARRAY_LENGTH_PER_DIMENSION (10)
 #define CGOPTIONS_DEFAULT_MAX_ARRAY_LENGTH	(256)
 #define CGOPTIONS_DEFAULT_MAX_ARRAY_NUM_IN_LOOP	(4)
-#define CGOPTIONS_DEFAULT_MAX_EXHAUSTIVE_DEPTH	(-1)
 // 0 means we output to the standard output
 #define CGOPTIONS_DEFAULT_MAX_SPLIT_FILES	(0)
 #define CGOPTIONS_DEFAULT_SPLIT_FILES_DIR	("./output")
@@ -118,9 +116,6 @@ public:
 	static int max_nested_struct_level();
 	static int max_nested_struct_level(int p);
 
-	static std::string struct_output();
-	static std::string struct_output(std::string p);
-
 	static bool fixed_struct_fields();
 	static bool fixed_struct_fields(bool p);
 
@@ -166,18 +161,6 @@ public:
 	static bool random_based(void);
 	static bool random_based(bool p);
 
-	static bool dfs_exhaustive(void);
-	static bool dfs_exhaustive(bool p);
-
-	static std::string dfs_debug_sequence(void);
-	static std::string dfs_debug_sequence(std::string p);
-
-	static int max_exhaustive_depth(void);
-	static int max_exhaustive_depth(int p);
-
-	static bool compact_output(void);
-	static bool compact_output(bool p);
-
 	static bool msp(void);
 	static bool msp(bool p);
 
@@ -219,21 +202,6 @@ public:
 
 	static std::string partial_expand(void);
 	static std::string partial_expand(std::string p);
-
-	static std::string delta_monitor(void);
-	static std::string delta_monitor(std::string p);
-
-	static std::string delta_output(void);
-	static std::string delta_output(std::string p);
-
-	static std::string go_delta(void);
-	static std::string go_delta(std::string p);
-
-	static std::string delta_input(void);
-	static std::string delta_input(std::string p);
-
-	static bool no_delta_reduction(void);
-	static bool no_delta_reduction(bool p);
 
 	static bool math_notmp(void);
 	static bool math_notmp(bool p);
@@ -379,9 +347,6 @@ public:
 	static int max_array_num_in_loop();
 	static int max_array_num_in_loop(int p);
 
-	static void init_reducer(std::string fname) { reducer_ = new Reducer(fname);}
-	static Reducer* get_reducer(void) { return reducer_; }
-
 	static bool x86_64();
 
 	static bool identify_wrappers(void);
@@ -461,10 +426,6 @@ private:
 
 	static void set_default_builtin_kinds();
 
-	static bool resolve_exhaustive_options();
-
-	static bool has_delta_conflict();
-
 	static bool has_extension_conflict();
 
 	static void parse_string_options(string vname, vector<std::string> &v);
@@ -486,7 +447,6 @@ private:
 	static int  max_struct_fields_;
 	static int  max_union_fields_;
 	static int  max_nested_struct_level_;
-	static std::string struct_output_;
 	static bool  fixed_struct_fields_;
 	static bool  expand_struct_;
 	static bool use_struct_;
@@ -506,10 +466,6 @@ private:
 	static bool step_hash_by_stmt_;
 	static bool blind_check_global_;
 	static bool	random_based_;
-	static bool	dfs_exhaustive_;
-	static std::string dfs_debug_sequence_;
-	static int	max_exhaustive_depth_;
-	static bool	compact_output_;
 	static bool	msp_;
 	static int	func1_max_params_;
 	static bool	splat_;
@@ -524,11 +480,6 @@ private:
 	static bool	sequence_name_prefix_;
 	static bool	compatible_check_;
 	static std::string	partial_expand_;
-	static std::string	delta_monitor_;
-	static std::string	delta_output_;
-	static std::string	go_delta_;
-	static std::string	delta_input_;
-	static bool	no_delta_reduction_;
 	static bool	math64_;
 	static bool	inline_function_;
 	static bool	math_notmp_;
@@ -594,7 +545,6 @@ private:
 	static int  pointer_size_;
 	static bool take_union_field_addr_;
 	static bool vol_struct_union_fields_;
-	static Reducer* reducer_;
 
 	// flag to indicate language
 	static bool lang_cpp_;

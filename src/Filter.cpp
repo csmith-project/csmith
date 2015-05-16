@@ -71,8 +71,6 @@ Filter::current_kind(void) const
 {
 	if (CGOptions::random_based())
 		return fDefault;
-	else if (CGOptions::dfs_exhaustive())
-		return fDFS;
 	return MAX_FILTER_KIND_SIZE;
 }
 

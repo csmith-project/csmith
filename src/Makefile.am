@@ -63,27 +63,15 @@ csmith_SOURCES = \
 	CoverageTestExtension.h \
 	CrestExtension.cpp \
 	CrestExtension.h \
-	DFSOutputMgr.cpp \
-	DFSOutputMgr.h \
-	DFSProgramGenerator.cpp \
-	DFSProgramGenerator.h \
-	DFSRndNumGenerator.cpp \
-	DFSRndNumGenerator.h \
 	DefaultOutputMgr.cpp \
 	DefaultOutputMgr.h \
 	DefaultProgramGenerator.cpp \
 	DefaultProgramGenerator.h \
 	DefaultRndNumGenerator.cpp \
 	DefaultRndNumGenerator.h \
-	DeltaMonitor.cpp \
-	DeltaMonitor.h \
-	DepthSpec.cpp \
-	DepthSpec.h \
 	Effect.cpp \
 	Effect.h \
 	Enumerator.h \
-	Error.cpp \
-	Error.h \
 	Expression.cpp \
 	Expression.h \
 	ExpressionAssign.cpp \
@@ -138,10 +126,6 @@ csmith_SOURCES = \
 	RandomNumber.cpp \
 	RandomNumber.h \
 	RandomProgramGenerator.cpp \
-	Reducer.cpp \
-	Reducer.h \
-	ReducerOutputMgr.cpp \
-	ReducerOutputMgr.h \
 	SafeOpFlags.cpp \
 	SafeOpFlags.h \
 	Sequence.cpp \
@@ -149,10 +133,6 @@ csmith_SOURCES = \
 	SequenceFactory.cpp \
 	SequenceFactory.h \
 	SequenceLineParser.h \
-	SimpleDeltaRndNumGenerator.cpp \
-	SimpleDeltaRndNumGenerator.h \
-	SimpleDeltaSequence.cpp \
-	SimpleDeltaSequence.h \
 	SplatExtension.cpp \
 	SplatExtension.h \
 	Statement.cpp \

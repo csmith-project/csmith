@@ -38,9 +38,7 @@
 #include "FactMgr.h"
 #include "FactPointTo.h"
 #include "Bookkeeper.h"
-#include "Error.h"
 #include "util.h"
-#include "DepthSpec.h"
 
 using namespace std;
 
@@ -52,7 +50,6 @@ using namespace std;
 StatementReturn *
 StatementReturn::make_random(CGContext &cg_context)
 {
-	DEPTH_GUARD_BY_TYPE_RETURN(dtStatementReturn, NULL);
 	Function *curr_func = cg_context.get_current_func();
 	assert(curr_func);
 	FactMgr* fm = get_fact_mgr(&cg_context);
@@ -61,8 +58,6 @@ StatementReturn::make_random(CGContext &cg_context)
 	ExpressionVariable* ev = ExpressionVariable::make_random(cg_context, curr_func->return_type, &curr_func->rv->qfer, false, true);
 	// typecast, if needed.
 	ev->check_and_set_cast(curr_func->return_type);
-	// XXX
-	ERROR_GUARD(NULL);
 
 	StatementReturn* sr = new StatementReturn(cg_context.get_current_block(), *ev);
 	return sr;

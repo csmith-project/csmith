@@ -46,7 +46,6 @@
 #include "Type.h"
 #include "FactMgr.h"
 #include "random.h"
-#include "Error.h"
 #include "Bookkeeper.h"
 
 using namespace std;
@@ -72,7 +71,6 @@ StatementGoto::make_random(CGContext &cg_context)
 	vector<Block*> blks = func->blocks;
 	Block* ok_blk = 0;
 	bool select_back_edge = rnd_flipcoin(40);
-	ERROR_GUARD(NULL);
 	if (select_back_edge) {
 		// create a backward "goto", this creates a loop when other_stm leads to stm
 		back_edge = true;
@@ -107,7 +105,6 @@ StatementGoto::make_random(CGContext &cg_context)
 
 	if (ok_stms.size() > 0) {
 		size_t stm_id = rnd_upto(ok_stms.size());
-		ERROR_GUARD(NULL);
 		other_stm = ok_stms[stm_id];
 		cg_context.get_effect_stm().clear();
 		//Expression* test = Expression::make_random(cg_context, get_int_type(), true, true, eVariable);
@@ -323,7 +320,6 @@ StatementGoto::find_good_jump_block(vector<Block*>& blocks, const Block* blk, bo
 	if (last_stm && last_stm->must_return() && as_dest) return NULL;
 
 	size_t index = rnd_upto(blocks.size());
-	ERROR_GUARD(NULL);
 	// disallow jumping to a block that is inside an array traversing loop
 	if (blocks[index]->in_array_loop && as_dest) {
 		blocks.erase(blocks.begin() + index);

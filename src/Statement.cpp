@@ -73,8 +73,6 @@
 #include "Fact.h"
 #include "FactMgr.h"
 #include "CFGEdge.h"
-#include "Error.h"
-#include "DepthSpec.h"
 #include "OutputMgr.h"
 #include "util.h"
 #include "StringUtils.h"
@@ -217,7 +215,6 @@ static eStatementType
 StatementProbability(const StatementFilter *filter)
 {
 	int value = rnd_upto(100, filter);
-	ERROR_GUARD(MAX_STATEMENT_TYPE);
 	assert(value != -1);
 	assert(value >= 0 && value < 100);
 	return Statement::number_to_type(value);
@@ -231,7 +228,6 @@ Statement *
 Statement::make_random(CGContext &cg_context,
 					   eStatementType t)
 {
-	DEPTH_GUARD_BY_TYPE_RETURN_WITH_FLAG(dtStatement, t, NULL);
 	// Should initialize table first
 	Statement::InitProbabilityTable();
 
@@ -248,7 +244,6 @@ Statement::make_random(CGContext &cg_context,
 	if (t == MAX_STATEMENT_TYPE) {
 		StatementFilter filter(cg_context);
 		t = StatementProbability(&filter);
-		ERROR_GUARD(NULL);
 	}
 	FactMgr* fm = get_fact_mgr(&cg_context);
 	FactVec pre_facts = fm->global_facts;
@@ -297,7 +292,6 @@ Statement::make_random(CGContext &cg_context,
 		break;
 	}
 
-	ERROR_GUARD(NULL);
 	if (is_compound(t)) {
 		cg_context.blk_depth--;
 	}

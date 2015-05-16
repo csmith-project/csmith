@@ -165,8 +165,6 @@ public:
 
 	static void make_all_struct_types(int level, vector<const Type*> &accum_types);
 
-	static void make_all_struct_union_types();
-
 	// make a random struct or union type
 	static Type* make_random_struct_type(void);
 	static Type* make_random_union_type(void);

@@ -62,7 +62,6 @@
 #include "ExpressionVariable.h"
 #include "Bookkeeper.h"
 #include "Filter.h"
-#include "Error.h"
 #include "ArrayVariable.h"
 #include "StringUtils.h"
 
@@ -395,11 +394,9 @@ Variable::CreateVariable(const std::string &name, const Type *type,
 	while (top->field_var_of) top = top->field_var_of;
 	var->init = (top->type->eType == eUnion) ? 0 : Constant::make_random(type);
 
-	ERROR_GUARD_AND_DEL1(NULL, var);
 	if (type->is_aggregate()) {
 		var->create_field_vars(type);
 	}
-	ERROR_GUARD_AND_DEL1(NULL, var);
 	return var;
 }
 
@@ -414,7 +411,6 @@ Variable::CreateVariable(const std::string &name, const Type *type, const Expres
 	if (type->is_aggregate()) {
 		var->create_field_vars(type);
 	}
-	ERROR_GUARD_AND_DEL1(NULL, var);
 	return var;
 }
 

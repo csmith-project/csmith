@@ -54,8 +54,6 @@
 #include "FactMgr.h"
 #include "random.h"
 #include "util.h"
-#include "DepthSpec.h"
-#include "Error.h"
 #include "CFGEdge.h"
 #include "Expression.h"
 #include "VectorFilter.h"
@@ -119,8 +117,6 @@ Block *
 Block::make_random(CGContext &cg_context, bool looping)
 {
 	//static int bid = 0;
-	DEPTH_GUARD_BY_TYPE_RETURN(dtBlock, NULL);
-
 	Function *curr_func = cg_context.get_current_func();
 	assert(curr_func);
 
@@ -142,29 +138,17 @@ Block::make_random(CGContext &cg_context, bool looping)
 	Effect pre_effect = cg_context.get_accum_effect();
 
 	unsigned int max = BlockProbability(*b);
-	if (Error::get_error() != SUCCESS) {
-		curr_func->stack.pop_back();
-		delete b;
-		return NULL;
-	}
 	unsigned int i;
 	if (b->stm_id == 1)
 		BREAK_NOP;			// for debugging
 	for (i = 0; i <= max; ++i) {
 		Statement *s = Statement::make_random(cg_context);
-		// In the exhaustive mode, Statement::make_random could return NULL;
 		if (!s)
 			break;
 		b->stms.push_back(s);
 		if (s->must_return()) {
 			break;
 		}
-	}
-
-	if (Error::get_error() != SUCCESS) {
-		curr_func->stack.pop_back();
-		delete b;
-		return NULL;
 	}
 
 	// append nested loop if some must-read/write variables hasn't been accessed
@@ -175,22 +159,7 @@ Block::make_random(CGContext &cg_context, bool looping)
 	// perform DFA analysis after creation
 	b->post_creation_analysis(cg_context, pre_effect);
 
-	if (Error::get_error() != SUCCESS) {
-		curr_func->stack.pop_back();
-		delete b;
-		return NULL;
-	}
-
 	curr_func->stack.pop_back();
-	if (Error::get_error() != SUCCESS) {
-		//curr_func->stack.pop_back();
-		delete b;
-		return NULL;
-	}
-
-	// ISSUE: in the exhaustive mode, do we need a return statement here
-	// if the last statement is not?
-	Error::set_error(SUCCESS);
 	return b;
 }
 
@@ -342,7 +311,6 @@ Block::random_parent_block(void)
 		tmp = tmp->parent;
 	}
 	int index = rnd_upto(blks.size());
-	ERROR_GUARD(NULL);
 	return blks[index];
 }
 
@@ -423,7 +391,6 @@ Block::append_return_stmt(CGContext& cg_context)
 	FactVec pre_facts = fm->global_facts;
 	cg_context.get_effect_stm().clear();
 	Statement* sr = Statement::make_random(cg_context, eReturn);
-	ERROR_GUARD(NULL);
 	stms.push_back(sr);
 	fm->makeup_new_var_facts(pre_facts, fm->global_facts);
 	assert(sr->visit_facts(fm->global_facts, cg_context));
@@ -473,7 +440,6 @@ Block::append_nested_loop(CGContext& cg_context)
 	cg_context.get_effect_stm().clear();
 
 	Statement* sf = Statement::make_random(cg_context, eFor);
-	ERROR_GUARD(NULL);
 	stms.push_back(sf);
 	fm->makeup_new_var_facts(pre_facts, fm->global_facts);
 	//assert(sf->visit_facts(fm->global_facts, cg_context));

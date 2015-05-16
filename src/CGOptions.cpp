@@ -39,13 +39,11 @@
 #include "Bookkeeper.h"
 #include "CompatibleChecker.h"
 #include "PartialExpander.h"
-#include "DeltaMonitor.h"
 #include "Probabilities.h"
 #include "OutputMgr.h"
 #include "StringUtils.h"
 
 using namespace std;
-Reducer* CGOptions::reducer_ = NULL;
 vector<int> CGOptions::safe_math_wrapper_ids_;
 map<string, bool> CGOptions::enabled_builtin_kinds_;
 int CGOptions::int_size_ = 0;
@@ -91,7 +89,6 @@ DEFINE_GETTER_SETTER_BOOL(avoid_signed_overflow)
 DEFINE_GETTER_SETTER_INT (max_struct_fields)
 DEFINE_GETTER_SETTER_INT (max_union_fields)
 DEFINE_GETTER_SETTER_INT (max_nested_struct_level)
-DEFINE_GETTER_SETTER_STRING_REF(struct_output)
 DEFINE_GETTER_SETTER_BOOL (fixed_struct_fields)
 DEFINE_GETTER_SETTER_BOOL (expand_struct)
 DEFINE_GETTER_SETTER_BOOL (use_struct)
@@ -106,10 +103,6 @@ DEFINE_GETTER_SETTER_BOOL(quiet)
 DEFINE_GETTER_SETTER_BOOL(concise)
 DEFINE_GETTER_SETTER_BOOL(nomain)
 DEFINE_GETTER_SETTER_BOOL(random_based)
-DEFINE_GETTER_SETTER_BOOL(dfs_exhaustive)
-DEFINE_GETTER_SETTER_STRING_REF(dfs_debug_sequence)
-DEFINE_GETTER_SETTER_INT (max_exhaustive_depth)
-DEFINE_GETTER_SETTER_BOOL(compact_output)
 DEFINE_GETTER_SETTER_BOOL(msp)
 DEFINE_GETTER_SETTER_INT(func1_max_params)
 DEFINE_GETTER_SETTER_BOOL(splat)
@@ -124,11 +117,6 @@ DEFINE_GETTER_SETTER_BOOL(prefix_name)
 DEFINE_GETTER_SETTER_BOOL(sequence_name_prefix)
 DEFINE_GETTER_SETTER_BOOL(compatible_check)
 DEFINE_GETTER_SETTER_STRING_REF(partial_expand)
-DEFINE_GETTER_SETTER_STRING_REF(delta_monitor)
-DEFINE_GETTER_SETTER_STRING_REF(delta_output)
-DEFINE_GETTER_SETTER_STRING_REF(go_delta)
-DEFINE_GETTER_SETTER_STRING_REF(delta_input)
-DEFINE_GETTER_SETTER_BOOL(no_delta_reduction)
 DEFINE_GETTER_SETTER_BOOL(math64)
 DEFINE_GETTER_SETTER_BOOL(inline_function)
 DEFINE_GETTER_SETTER_BOOL(math_notmp)
@@ -218,7 +206,6 @@ CGOptions::set_default_settings(void)
 	max_array_dimensions(CGOPTIONS_DEFAULT_MAX_ARRAY_DIMENSIONS);
 	max_array_length_per_dimension(CGOPTIONS_DEFAULT_MAX_ARRAY_LENGTH_PER_DIMENSION);
 	max_array_length(CGOPTIONS_DEFAULT_MAX_ARRAY_LENGTH);
-	max_exhaustive_depth(CGOPTIONS_DEFAULT_MAX_EXHAUSTIVE_DEPTH);
 	max_indirect_level(CGOPTIONS_DEFAULT_MAX_INDIRECT_LEVEL);
 	output_file(CGOPTIONS_DEFAULT_OUTPUT_FILE);
 	interested_facts(ePointTo | eUnionWrite);
@@ -231,7 +218,6 @@ CGOptions::set_default_settings(void)
 	random_based(true);
 	use_struct(true);
 	use_union(true);
-	compact_output(false);
 	msp(false);
 	func1_max_params(CGOPTIONS_DEFAULT_FUNC1_MAX_PARAMS);
 	splat(false);
@@ -394,61 +380,7 @@ bool CGOptions::has_random_based_conflict(void)
 			return rv;
 		}
 	}
-	else {
-		if (CGOptions::sequence_name_prefix()) {
-			conflict_msg_ = "--sequence-name-prefix option can only be \
-					used with --dfs-exhaustive";
-			rv = true;
-		}
-	}
 	return rv;
-}
-
-bool CGOptions::resolve_exhaustive_options()
-{
-	if (!CGOptions::dfs_exhaustive())
-		return false;
-
-	bool rv = false;
-
-	if (CGOptions::compatible_check())
-		CompatibleChecker::enable_compatible_check();
-	if (!CGOptions::partial_expand().empty()) {
-		if (!PartialExpander::init_partial_expander(CGOptions::partial_expand())) {
-			conflict_msg_ = "wrong partial-expand options!";
-			return true;
-		}
-	}
-	if (CGOptions::max_exhaustive_depth() <= 0) {
-		conflict_msg_ = "max-exhaustive-depth must be at least 0";
-		return true;
-	}
-
-	if (!CGOptions::use_struct() && CGOptions::expand_struct()) {
-		conflict_msg_ = "expand-struct cannot be used with --no-struct";
-		return true;
-	}
-
-	if (CGOptions::has_extension_support()) {
-		conflict_msg_ = "exhaustive mode doesn't support splat|klee|crest|coverage-test extension";
-		return true;
-	}
-	// For effeciency reason, we fix the size of struct fields
-	CGOptions::fixed_struct_fields(true);
-	return rv;
-}
-
-bool
-CGOptions::has_delta_conflict()
-{
-	if (!CGOptions::delta_monitor().empty() &&
-		!CGOptions::go_delta().empty()) {
-		conflict_msg_ = "you cannot specify --delta-monitor and \
-			--go-delta monitor at the same time. --go-delta \
-			will invoke the corresponding delta monitor implicitly.";
-		return true;
-	}
-	return false;
 }
 
 bool
@@ -493,13 +425,7 @@ CGOptions::has_conflict(void)
 	if (CGOptions::has_random_based_conflict())
 		return true;
 
-	if (resolve_exhaustive_options())
-		return true;
-
 	if (CGOptions::has_extension_conflict())
-		return true;
-
-	if (CGOptions::has_delta_conflict())
 		return true;
 
 	if ((CGOptions::inline_function_prob() < 0) ||
@@ -534,23 +460,6 @@ CGOptions::has_conflict(void)
 	if (CGOptions::max_split_files() > 0) {
 		if (!DefaultOutputMgr::create_output_dir(CGOptions::split_files_dir())) {
 			conflict_msg_ = "cannot create dir for split files!";
-			return true;
-		}
-	}
-
-	if (!CGOptions::delta_monitor().empty()) {
-		string msg;
-		if (!DeltaMonitor::init(msg, CGOptions::delta_monitor(), CGOptions::delta_output())) {
-			conflict_msg_ = msg;
-			return true;
-		}
-	}
-
-	if (!CGOptions::go_delta().empty()) {
-		string msg;
-		if (!DeltaMonitor::init_for_running(msg, CGOptions::go_delta(), CGOptions::delta_output(),
-				CGOptions::delta_input(), CGOptions::no_delta_reduction())) {
-			conflict_msg_ = msg;
 			return true;
 		}
 	}

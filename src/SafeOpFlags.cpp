@@ -34,9 +34,7 @@
 
 #include "SafeOpFlags.h"
 #include "random.h"
-#include "Error.h"
 #include "Probabilities.h"
-#include "DepthSpec.h"
 #include "MspFilters.h"
 #include "CGOptions.h"
 
@@ -185,7 +183,6 @@ SafeOpFlags*
 SafeOpFlags::make_random_binary(const Type *rv_type, const Type *op1_type, const Type *op2_type,
 			SafeOpKind op_kind, eBinaryOps bop)
 {
-	DEPTH_GUARD_BY_TYPE_RETURN_WITH_FLAG(dtSafeOpFlags, op_kind, NULL);
 	SafeOpFlags *flags = new SafeOpFlags();
 	assert("new SafeOpFlags fail!");
 	bool rv_is_float = return_float_type(rv_type, op1_type, op2_type, bop);
@@ -200,14 +197,12 @@ SafeOpFlags::make_random_binary(const Type *rv_type, const Type *op1_type, const
 	else {
 		flags->op1_ = rnd_flipcoin(SafeOpsSignedProb);
 	}
-	ERROR_GUARD_AND_DEL1(NULL, flags);
 
 	if (op_kind == sOpBinary) {
 		if (rv_is_float)
 			flags->op2_ = true;
 		else
 			flags->op2_ = rnd_flipcoin(SafeOpsSignedProb);
-		ERROR_GUARD_AND_DEL1(NULL, flags);
 	}
 	else {
 		flags->op2_ = flags->op1_;
@@ -228,7 +223,6 @@ SafeOpFlags::make_random_binary(const Type *rv_type, const Type *op1_type, const
 		flags->op_size_ = (SafeOpSize)rnd_upto(MAX_SAFE_OP_SIZE-1, SAFE_OPS_SIZE_PROB_FILTER);
 	}
 	Probabilities::unregister_extra_filter(pSafeOpsSizeProb, filter);
-	ERROR_GUARD_AND_DEL2(NULL, flags, filter);
 
 	//Probabilities::unregister_extra_filter(pSafeOpsSizeProb, filter);
 	delete filter;

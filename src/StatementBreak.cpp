@@ -43,7 +43,6 @@
 #include "FactMgr.h"
 #include "Bookkeeper.h"
 #include "ArrayVariable.h"
-#include "Error.h"
 
 using namespace std;
 
@@ -71,7 +70,6 @@ StatementBreak::make_random(CGContext &cg_context)
 	assert(b);
 	cg_context.get_effect_stm().clear();
 	Expression *expr = Expression::make_random(cg_context, get_int_type(), 0, true, true, eVariable);
-	ERROR_GUARD(NULL);
 	StatementBreak* sc = new StatementBreak(cg_context.get_current_block(), *expr, *b);
 	b->break_stms.push_back(sc);
     return sc;

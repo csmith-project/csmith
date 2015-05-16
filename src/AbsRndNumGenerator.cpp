@@ -34,8 +34,6 @@
 #include <iostream>
 
 #include "DefaultRndNumGenerator.h"
-#include "DFSRndNumGenerator.h"
-#include "SimpleDeltaRndNumGenerator.h"
 
 using namespace std;
 
@@ -72,12 +70,6 @@ AbsRndNumGenerator::make_rndnum_generator(RNDNUM_GENERATOR impl, const unsigned 
 	switch (impl) {
 		case rDefaultRndNumGenerator:
 			rImpl = DefaultRndNumGenerator::make_rndnum_generator(seed);
-			break;
-		case rDFSRndNumGenerator:
-			rImpl = DFSRndNumGenerator::make_rndnum_generator();
-			break;
-		case rSimpleDeltaRndNumGenerator:
-			rImpl = SimpleDeltaRndNumGenerator::make_rndnum_generator(seed);
 			break;
 		default:
 			assert(!"unknown random generator");

@@ -43,7 +43,7 @@ std::string	RandomDigits(int num);
 // New stuff.
 unsigned int	rnd_upto(const unsigned int n, const Filter *f = NULL, const std::string* where = NULL);
 bool		rnd_flipcoin(const unsigned int p, const Filter *f = NULL, const std::string* where = NULL);
-// return pure random numbers even if csmith is in other mode, e.g., exhaustive mode
+// return pure random numbers
 std::string	PureRandomHexDigits(int num);
 std::string	PureRandomDigits(int num);
 unsigned int	pure_rnd_upto(const unsigned int n, const Filter *f = NULL, const std::string* where = NULL);

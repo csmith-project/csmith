@@ -39,7 +39,6 @@
 #include "SequenceFactory.h"
 #include "Sequence.h"
 #include "CGOptions.h"
-#include "DeltaMonitor.h"
 
 #ifdef WIN32
 extern "C" {
@@ -107,8 +106,7 @@ DefaultRndNumGenerator::get_prefixed_name(const std::string &name)
 void
 DefaultRndNumGenerator::add_number(int v, int bound, int k)
 {
-	if (DeltaMonitor::is_running())
-		seq_->add_number(v, bound, k);
+    seq_->add_number(v, bound, k);
 }
 
 /*

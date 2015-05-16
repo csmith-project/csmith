@@ -43,10 +43,8 @@
 #include "FactMgr.h"
 #include "Lhs.h"
 #include "SafeOpFlags.h"
-#include "Error.h"
 #include "PartialExpander.h"
 #include "Bookkeeper.h"
-#include "DepthSpec.h"
 #include "StatementBreak.h"
 #include "StatementFor.h"
 #include "CFGEdge.h"
@@ -79,7 +77,6 @@ Statement*
 StatementArrayOp::make_random(CGContext &cg_context)
 {
 	bool ary_init = rnd_flipcoin(5);
-	ERROR_GUARD(NULL);
 	if (ary_init) {
 		return make_random_array_init(cg_context);
 	}
@@ -94,12 +91,10 @@ StatementArrayOp::make_random_array_init(CGContext &cg_context)
 	//static int g = 0;
 	//int h = g++;
 	ArrayVariable* av =  VariableSelector::select_array(cg_context);
-	ERROR_GUARD(NULL);
 	cg_context.get_effect_stm().clear();
 	// Select the loop control variable.
 	vector<const Variable*> invalid_vars;
 	vector<const Variable*> cvs;
-	ERROR_GUARD(NULL);
 	// the iteration settings are simple: start from index 0, step through all members
 	vector<int> inits, incrs;
 	size_t i;

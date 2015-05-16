@@ -60,7 +60,6 @@
 #include "Block.h"
 #include "Fact.h"
 #include "SafeOpFlags.h"
-#include "Error.h"
 
 using namespace std;
 
@@ -267,7 +266,7 @@ FunctionInvocationUser::build_invocation(Function *target, CGContext &cg_context
 		Variable* v = func->param[i];
 		// to avoid too much function invocations as parameters
 		Expression *p = Expression::make_random_param(param_cg_context, v->type, &v->qfer);
-		ERROR_GUARD(false);
+		
 		// typecast, if needed.
 		p->check_and_set_cast(v->type);
 		param_value.push_back(p);

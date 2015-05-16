@@ -31,9 +31,9 @@
 #include <iostream>
 #include <cassert>
 #include <string>
+#include <stdlib.h> 
 #include "CGOptions.h"
 #include "DefaultProgramGenerator.h"
-#include "DFSProgramGenerator.h"
 #include "Probabilities.h"
 
 using namespace std;
@@ -49,14 +49,8 @@ AbsProgramGenerator::GetOutputMgr()
 
 AbsProgramGenerator *
 AbsProgramGenerator::CreateInstance(int argc, char *argv[], unsigned long seed)
-{
-	if (CGOptions::dfs_exhaustive()) {
-		AbsProgramGenerator::current_generator_ = new DFSProgramGenerator(argc, argv, seed);
-	}
-	else
-	{
-		AbsProgramGenerator::current_generator_ = new DefaultProgramGenerator(argc, argv, seed);
-	}
+{ 
+	AbsProgramGenerator::current_generator_ = new DefaultProgramGenerator(argc, argv, seed);
 
 	AbsProgramGenerator::current_generator_->initialize();
 
