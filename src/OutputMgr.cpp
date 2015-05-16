@@ -44,7 +44,7 @@
 #include "ArrayVariable.h"
 #include "random.h"
 #include "util.h"
-#define PACKAGE_STRING "csmith 3.0.0"
+//#define PACKAGE_STRING "csmith 3.0.0"
 
 const char *OutputMgr::hash_func_name = "csmith_compute_hash";
 
