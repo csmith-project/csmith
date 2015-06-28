@@ -59,6 +59,7 @@
 #include "Probabilities.h"
 #include "ProbabilityTable.h"
 #include "StringUtils.h"
+#include "Parameter.h"
 
 using namespace std;
 
@@ -102,7 +103,7 @@ VariableSelectFilter::filter(int v) const
 	eVariableScope scope = VariableSelector::scopeTable_->get_value(v);
 	if (scope == eParentParam) {
 		Function &parent = *cg_context_.get_current_func();
-		return parent.param.empty();
+		return parent.params.empty();
 	}
 	return false;
 }
@@ -134,13 +135,6 @@ static string
 RandomLocalName(void)
 {
 	return gensym("l_");
-}
-
-// --------------------------------------------------------------
-static string
-RandomParamName(void)
-{
-	return gensym("p_");
 }
 
 // -------------------------------------------------------------
@@ -672,8 +666,8 @@ VariableSelector::find_all_non_array_visible_vars(const Block *b, vector<Variabl
 			vars.push_back(GlobalList[i]);
 	}
 	if (b) {
-		for (i=0; i<b->func->param.size(); i++) {
-			vars.push_back(b->func->param[i]);
+		for (i=0; i<b->func->params.size(); i++) {
+			vars.push_back(b->func->params[i]);
 		}
 		while (b) {
 			for (i = 0; i < b->local_vars.size(); i++) {
@@ -887,38 +881,6 @@ VariableSelector::GenerateNewParentLocal(Block &block,
 	return var;
 }
 
-/*
- * generate parameter for func_1
- */
-Variable *
-VariableSelector::GenerateParameterVariable(const Type *type, const CVQualifiers *qfer)
-{
-	return new_variable(RandomParamName(), type, 0, qfer);
-}
-
-// --------------------------------------------------------------
-// choose a random type for parameter
-// --------------------------------------------------------------
-void
-VariableSelector::GenerateParameterVariable(Function &curFunc)
-{
-	// Add this type to our parameter list.
-	const Type* t = 0;
-	bool rnd = rnd_flipcoin(40);
-	if (Type::has_pointer_type() && rnd) {
-		t= Type::choose_random_pointer_type();
-	}
-	else {
-		t = Type::choose_random_nonvoid_nonvolatile();
-	}
-	if (t->eType == eSimple)
-		assert(t->simple_type != eVoid);
-
-	CVQualifiers qfer = CVQualifiers::random_qualifiers(t);
-	Variable *param = new_variable(RandomParamName(), t, 0, &qfer);
-	curFunc.param.push_back(param);
-}
-
 // --------------------------------------------------------------
 Variable *
 VariableSelector::SelectParentLocal(Effect::Access access,
@@ -1013,9 +975,9 @@ VariableSelector::SelectParentParam(Effect::Access access,
 				  const vector<const Variable*>& invalid_vars)
 {
 	Function &parent = *cg_context.get_current_func();
-	if (parent.param.empty())
+	if (parent.params.empty())
 		return SelectParentLocal(access, cg_context, type, qfer, mt, invalid_vars);
-	Variable* var = choose_var(parent.param, access, cg_context, type, qfer, mt, invalid_vars);
+	Variable* var = choose_var(parent.params, access, cg_context, type, qfer, mt, invalid_vars);
 	return var ? var : SelectParentLocal(access, cg_context, type, qfer, mt, invalid_vars);
 }
 
@@ -1160,7 +1122,7 @@ VariableSelector::select_deref_pointer(Effect::Access access, const CGContext &c
 	}
 	// add function parameters
 	const Function* f = cg_context.get_current_func();
-	vars.insert(vars.end(), f->param.begin(), f->param.end());
+	vars.insert(vars.end(), f->params.begin(), f->params.end());
 
 	Variable* var = choose_var(vars, access, cg_context, type, qfer, eDereference, invalid_vars);
 	if (var == 0) {

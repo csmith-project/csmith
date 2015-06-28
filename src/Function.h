@@ -56,6 +56,7 @@ class CGContext;
 class Fact;
 class Constant;
 class CVQualifiers;
+class Parameter;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -101,7 +102,7 @@ public:
 	bool is_pointer_referenced(void) { return !referenced_ptrs.empty();} const
 
 	std::string name;
-	std::vector<Variable*> param;
+	std::vector<Variable*> params;
 //	vector<Expression*> param_value;
 	const Type* return_type;
 //	bool isBackLink;

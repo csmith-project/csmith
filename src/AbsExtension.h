@@ -58,8 +58,6 @@ public:
 
 	void Initialize(unsigned int num, std::vector<ExtensionValue *> &values);
 
-	void GenerateFirstParameterList(Function &curfunc, std::vector<ExtensionValue *> &values);
-
 	FunctionInvocation *MakeFuncInvocation(Function *func, std::vector<ExtensionValue *> &values);
 
 protected:

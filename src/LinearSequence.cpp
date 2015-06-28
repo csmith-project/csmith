@@ -62,7 +62,11 @@ LinearSequence::init_sequence()
 void
 LinearSequence::add_number(int v, int /*bound*/, int k)
 {
+	static int last =0;
+	if (k != last + 1)
+		k = k;
 	seq_map_[k] = v;
+	last = k;
 }
 
 int

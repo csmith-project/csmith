@@ -60,6 +60,7 @@
 #include "VectorFilter.h"
 #include "ExtensionMgr.h"
 #include "OutputMgr.h"
+#include "Parameter.h"
 
 using namespace std;
 
@@ -128,7 +129,7 @@ find_blk_for_var(const Variable* v)
 	for (i=0; i<FuncList.size(); i++) {
 		const Function* func = FuncList[i];
 		// for a parameter of a function, pretend it's a variable belongs to the top block
-		if (v->is_argument() && find_variable_in_set(func->param, v) != -1) {
+		if (v->is_param() && find_variable_in_set(func->params, v) != -1) {
 			return func->body;
 		}
 		for (j=0; j<func->blocks.size(); j++) {
@@ -145,8 +146,8 @@ bool
 Function::is_var_on_stack(const Variable* var, const Statement* stm) const
 {
     size_t i;
-    for (i=0; i<param.size(); i++) {
-        if (param[i]->match(var)) {
+    for (i=0; i<params.size(); i++) {
+        if (params[i]->match(var)) {
             return true;
         }
     }
@@ -321,56 +322,7 @@ Function::choose_func(vector<Function *> funcs,
 		f = Function::get_one_function(ok_funcs);
 	}
 	return f;
-}
-
-/*
- *
- */
-static unsigned int
-ParamListProbability()
-{
-	return rnd_upto(CGOptions::max_params());
-}
-
-static void
-GenerateParameterListFromString(Function &currFunc, const string &params_string)
-{
-	vector<string> vs;
-	StringUtils::split_string(params_string, vs, ",");
-	int params_cnt = vs.size();
-	assert((params_cnt > 0) && "Invalid params_string!");
-	if ((params_cnt == 1) && (vs[0] == "Void")) {
-		return;
-	}
-	for (int i = 0; i < params_cnt; i++) {
-		assert((vs[i] != "Void") && "Invalid parameter type!");
-		CVQualifiers qfer;
-		qfer.add_qualifiers(false, false);
-		const Type *ty = Type::get_type_from_string(vs[0]);
-		Variable *v = VariableSelector::GenerateParameterVariable(ty, &qfer);
-		assert(v);
-		currFunc.param.push_back(v);
-	}
-}
-
-/*
- *
- */
-static void
-GenerateParameterList(Function &curFunc)
-{
-	unsigned int max = ParamListProbability();
-
-	for (unsigned int i =0; i <= max; i++) {
-		// With some probability, choose a new random variable, or one from
-		// parentParams, parentLocals, or the globals list.
-		//
-		// Also, build the parent's link structure for this invocation and push
-		// it onto the back.
-		//
-		VariableSelector::GenerateParameterVariable(curFunc);
-	}
-}
+} 
 
 /*
  *
@@ -416,7 +368,7 @@ Function::make_random_signature(const CGContext& cg_context, const Type* type, c
 	CVQualifiers ret_qfer = qfer==0 ? CVQualifiers::random_qualifiers(type, Effect::READ, cg_context, true)
 		                            : qfer->random_qualifiers(true, Effect::READ, cg_context);
 	f->rv = Variable::CreateVariable(rvname, type, NULL, &ret_qfer);
-	GenerateParameterList(*f);
+	Parameter::GenerateParameterList(*f);
 	FMList.push_back(new FactMgr(f));
 	if (CGOptions::inline_function() && rnd_flipcoin(InlineFunctionProb))
 		f->is_inlined = true;
@@ -495,13 +447,13 @@ OutputFormalParam(Variable *var, std::ostream *pOut)
 void
 Function::OutputFormalParamList(std::ostream &out)
 {
-	if (param.size() == 0) {
+	if (params.size() == 0) {
 		assert(Type::void_type);
 		Type::void_type->Output(out);
 	} else {
 		param_first = true;
-		for_each(param.begin(),
-				 param.end(),
+		for_each(params.begin(),
+				 params.end(),
 				 std::bind2nd(std::ptr_fun(OutputFormalParam), &out));
 	}
 }
@@ -622,9 +574,9 @@ Function::GenerateBody(const CGContext &prev_context)
 	CGContext cg_context(this, prev_context.get_effect_context(), &effect_accum);
 	cg_context.extend_call_chain(prev_context);
 	FactMgr* fm = get_fact_mgr_for_func(this);
-	for (size_t i=0; i<param.size(); i++) {
-		if (param[i]->type->ptr_type != 0) {
-			fm->global_facts.push_back(FactPointTo::make_fact(param[i], FactPointTo::tbd_ptr));
+	for (size_t i=0; i<params.size(); i++) {
+		if (params[i]->type->ptr_type != 0) {
+			fm->global_facts.push_back(FactPointTo::make_fact(params[i], FactPointTo::tbd_ptr));
 		}
 	}
 	// Fill in the Function body.
@@ -747,7 +699,7 @@ Function::make_builtin_function(const string &function_string)
 	FactMgr* fm = new FactMgr(f);
 	FMList.push_back(fm);
 
-	GenerateParameterListFromString(*f, StringUtils::get_substring(v[2], '(', ')'));
+	Parameter::GenerateParametersFromString(*f, StringUtils::get_substring(v[2], '(', ')'));
 	f->GenerateBody(CGContext::get_empty_context());
 
 	// update global facts to merged facts at all possible function exits
@@ -879,7 +831,10 @@ Function::doFinalization(void)
 
 Function::~Function()
 {
-	param.clear();
+    for (size_t i=0; i<params.size(); i++)
+        delete params[i];
+
+	params.clear();
 
 	assert(stack.empty());
 

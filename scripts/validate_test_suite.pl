@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 ##
-## Copyright (c) 2015 Xuejun Yang
+## Copyright (c) 2015-2016 Xuejun Yang
 ## All rights reserved.
 ##
 ## This file is part of `csmith', a random generator of C programs.
@@ -96,8 +96,18 @@ sub validate_test ($) {
 	}
 	
 	for (my $j=$header_len; $j< scalar(@lines2); $j++) {
+	    if ($lines[$j] =~ /statistics/) {
+		    last;
+		}
+
+		# convert to unix-style line ending
+		$lines[$j] =~ s/\r\n$/\n/;
+		$lines2[$j] =~ s/\r\n$/\n/;
+
 		if ($lines[$j] ne $lines2[$j]) {
 			print "Generated program has wrong content with $cmd\n";
+			print "line $j in base: <$lines[$j]>\n";
+			print "line $j in generated: <$lines2[$j]>\n";
 			return 0;
 		}
 	}
@@ -114,15 +124,16 @@ sub validate_tests () {
 		print $file . "\n";
 		$cnt++;
 		if (!validate_test($file)) {
+			$fail++;
 			if ($UPDATE) {
 				copy("tmp.c", $file);
-			}
-			$fail++;
-			last;
+			} else {
+			    last;
+            }
 		}
 	}
 	unlink("tmp.c");
-	print "$fail out of $cnt test cases in the suite ". $UPDATE ? "updated" : "failed" . "\n";
+	print "$fail out of $cnt test cases in the suite ". ($UPDATE ? "updated" : "failed") . "\n";
 } 
 
 ########################### main ##################################

@@ -485,8 +485,8 @@ CGContext::find_variable_scope(const Variable* var) const
 	assert(func);
 
 	int i;
-	for (i=0; i<(int)func->param.size(); i++) {
-		if (func->param[i]->match(var)) {
+	for (i=0; i<(int)func->params.size(); i++) {
+		if (func->params[i]->match(var)) {
 			return 0;
 		}
 	}

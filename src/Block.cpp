@@ -57,6 +57,7 @@
 #include "CFGEdge.h"
 #include "Expression.h"
 #include "VectorFilter.h"
+#include "Parameter.h"
 
 using namespace std;
 
@@ -461,8 +462,8 @@ bool
 Block::is_var_on_stack(const Variable* var) const
 {
     size_t i;
-    for (i=0; i<func->param.size(); i++) {
-        if (func->param[i]->match(var)) {
+    for (i=0; i<func->params.size(); i++) {
+        if (func->params[i]->match(var)) {
             return true;
         }
     }

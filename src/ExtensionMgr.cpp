@@ -37,6 +37,7 @@
 #include "CoverageTestExtension.h"
 #include "ExtensionValue.h"
 #include "Function.h"
+#include "Parameter.h"
 #include "FunctionInvocation.h"
 #include "CGContext.h"
 
@@ -88,7 +89,7 @@ ExtensionMgr::GenerateFirstParameterList(Function &curFunc)
 	if (ExtensionMgr::extension_ == NULL)
 		return;
 	std::vector<ExtensionValue *> &values = ExtensionMgr::extension_->get_values();
-	ExtensionMgr::extension_->GenerateFirstParameterList(curFunc, values);
+	Parameter::GenerateParametersFromValues(curFunc, values);
 }
 
 void

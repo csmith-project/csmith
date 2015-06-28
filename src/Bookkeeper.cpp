@@ -181,27 +181,29 @@ Bookkeeper::output_stmts_statistics(std::ostream &out)
 void
 Bookkeeper::output_statistics(std::ostream &out)
 {
-	output_struct_union_statistics(out);
-	out << endl;
-	output_expr_statistics(out);
-	out << endl;
-	output_pointer_statistics(out);
-	out << endl;
-	output_volatile_access_statistics(out);
-	out << endl;
-	output_jump_statistics(out);
-	out << endl;
-	output_stmts_statistics(out);
-	out << endl;
-	output_var_freshness(out);
-	if (rely_on_int_size) {
-		out << "FYI: the random generator makes assumptions about the integer size. See ";
-		out << PLATFORM_CONFIG_FILE << " for more details." << endl;
-	}
-	if (rely_on_ptr_size) {
-		out << "FYI: the random generator makes assumptions about the pointer size. See ";
-		out << PLATFORM_CONFIG_FILE << " for more details." << endl;
-	}
+    output_struct_union_statistics(out);
+    out << endl;
+    output_expr_statistics(out);
+    out << endl;
+    output_pointer_statistics(out);
+    out << endl;
+    output_volatile_access_statistics(out);
+    out << endl;
+    output_jump_statistics(out);
+    out << endl;
+    output_stmts_statistics(out);
+    out << endl;
+    output_var_freshness(out);
+    if (rely_on_int_size) {
+	    out << "FYI: the random generator makes assumptions about the integer size. See ";
+	    out << PLATFORM_CONFIG_FILE << " for more details." << endl;
+    }
+    if (rely_on_ptr_size) {
+	    out << "FYI: the random generator makes assumptions about the pointer size. See ";
+	    out << PLATFORM_CONFIG_FILE << " for more details." << endl;
+    }
+    // TODO: dump random sequence for easier debugging
+    //output_random_sequence(out);
 }
 
 void
@@ -535,6 +537,14 @@ Bookkeeper::output_counters(std::ostream &out, const char* prefix_msg,
 	for (size_t i=starting_pos; i<counters.size(); i++) {
 		out << "   " << breakdown_msg << ": " << i << ", occurrence: " << counters[i] << endl;
 	}
+}
+
+void
+Bookkeeper::output_random_sequence(std::ostream &out)
+{
+	string seq;
+	get_sequence(seq);
+	out << "random sequence used by this generation: " + seq;
 }
 
 void incr_counter(std::vector<int>& counters, int pos)

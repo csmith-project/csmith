@@ -500,8 +500,8 @@ Variable::is_visible_local(const Block* blk) const
 	}
 	size_t i;
 	const Function* func = blk->func;
-	for (i=0; i<func->param.size(); i++) {
-		if (func->param[i]->match(this)) {
+	for (i=0; i<func->params.size(); i++) {
+		if (func->params[i]->match(this)) {
 			return true;
  		}
 	}
@@ -513,14 +513,6 @@ Variable::is_visible_local(const Block* blk) const
 		b = b->parent;
 	}
     return false;
-}
-
-// --------------------------------------------------------------
-bool
-Variable::is_argument(void) const
-{
-	// JYTODO: need stronger criteria?
-	return (name.find("p_") == 0);
 }
 
 // --------------------------------------------------------------

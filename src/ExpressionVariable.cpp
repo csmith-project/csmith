@@ -73,12 +73,12 @@ ExpressionVariable::make_random(CGContext &cg_context, const Type* type, const C
 			continue;
 		// forbid a parameter to take the address of an argument
 		// this is to simplify the path shortcutting delta
-		if (as_param && var->is_argument() && var->type->is_dereferenced_from(type)) {
+		if (as_param && var->is_param() && var->type->is_dereferenced_from(type)) {
 			continue;
 		}
 		if (!CGOptions::addr_taken_of_locals()
 			&& var->type->is_dereferenced_from(type)
-			&& (var->is_argument() || var->is_local())) {
+			&& (var->is_param() || var->is_local())) {
 			continue;
 		}
 

@@ -86,6 +86,8 @@ public:
 
 	static void output_var_freshness(std::ostream &out);
 
+	static void output_random_sequence(std::ostream &out);
+
 	static void stat_expr_depths_for_stmt(const Statement* s);
 	static void stat_expr_depths(void);
 

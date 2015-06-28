@@ -188,10 +188,10 @@ FunctionInvocationUser::build_invocation_and_function(CGContext &cg_context, con
 		BREAK_NOP;		// for debugging
 	vector<const Expression*> param_values;
 	size_t i;
-	for (i = 0; i < func->param.size(); i++) {
+	for (i = 0; i < func->params.size(); i++) {
 		Effect param_eff_accum;
 		CGContext param_cg_context(cg_context, running_eff_context, &param_eff_accum);
-		Variable* v = func->param[i];
+		Variable* v = func->params[i];
 		// to avoid too much function invocations as parameters
 		Expression *p = Expression::make_random_param(param_cg_context, v->type, &v->qfer);
 		// typecast, if needed.
@@ -260,10 +260,10 @@ FunctionInvocationUser::build_invocation(Function *target, CGContext &cg_context
 	 	i = 0; // Set breakpoint here.
 	}
 
-	for (i = 0; i < func->param.size(); i++) {
+	for (i = 0; i < func->params.size(); i++) {
 		Effect param_eff_accum;
 		CGContext param_cg_context(cg_context, running_eff_context, &param_eff_accum);
-		Variable* v = func->param[i];
+		Variable* v = func->params[i];
 		// to avoid too much function invocations as parameters
 		Expression *p = Expression::make_random_param(param_cg_context, v->type, &v->qfer);
 		
@@ -353,7 +353,7 @@ FunctionInvocationUser::revisit(std::vector<const Fact*>& inputs, CGContext& cg_
 	merge_facts(inputs, ret_facts);
 
 	// remove facts related to passing parameters
-	FactMgr::update_facts_for_oos_vars(func->param, inputs);
+	FactMgr::update_facts_for_oos_vars(func->params, inputs);
 
 	fm->setup_in_out_maps(false);
 	// remember the effect context during this visit to this function

@@ -80,7 +80,7 @@ public:
 	virtual bool is_visible_local(const Block* blk) const;
 	virtual size_t get_dimension(void) const { return 0;}
 	bool is_visible(const Block* blk) const { return is_global() || is_visible_local(blk);}
-	bool is_argument(void) const;
+    virtual bool is_param(void) const { return false;}
 	bool is_tmp_var(void) const;
 	bool is_const(void) const;
 	bool is_volatile(void) const;
@@ -161,8 +161,10 @@ public:
 
 	static const char sink_var_name[];
 
-private:
+protected:
 	Variable(const std::string &name, const Type *type, const Expression* init, const CVQualifiers* qfer);
+
+private:
 	Variable(const std::string &name, const Type *type, const Expression* init, const CVQualifiers* qfer, const Variable* isFieldVarOf, bool isArray);
 	Variable(const std::string &name, const Type *type,
 			 const vector<bool>& isConsts, const vector<bool>& isVolatiles,

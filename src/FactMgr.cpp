@@ -58,6 +58,7 @@
 #include "ExpressionVariable.h"
 #include "Lhs.h"
 #include "CFGEdge.h"
+#include "Parameter.h"
 
 using namespace std;
 
@@ -104,8 +105,8 @@ FactMgr::add_new_var_fact_and_update_inout_maps(const Block* blk, const Variable
 void
 FactMgr::add_param_facts(const vector<const Expression*>& param_values, FactVec& facts)
 {
-	for (size_t i=0; i<func->param.size(); i++) {
-		const Variable* var = func->param[i];
+	for (size_t i=0; i<func->params.size(); i++) {
+		const Variable* var = func->params[i];
 		const Expression* value = param_values[i];
 		Lhs lhs(*var);
 		FactMgr::update_fact_for_assign(&lhs, value, facts);
@@ -329,7 +330,7 @@ FactMgr::caller_to_callee_handover(const FunctionInvocationUser* fiu, std::vecto
 	// move global facts and parameter facts to a separate "keep" list
 	for (i=0; i<len; i++) {
 		const Variable* v = inputs[i]->get_var();
-		if (v->is_global() || find_variable_in_set(func->param, v) >=0) {
+		if (v->is_global() || find_variable_in_set(func->params, v) >=0) {
 			keep_facts.push_back(inputs[i]);
 			inputs.erase(inputs.begin() + i);
 			i--;
@@ -743,7 +744,7 @@ FactMgr::sanity_check_map() const
 			const Variable* v = facts[i]->get_var();
 			if (!v->is_visible(stm->parent)) {
 				// exception: the input facts to a function body could include the parameter facts
-				if (stm->parent == 0 && find_variable_in_set(func->param, v) != -1) {
+				if (stm->parent == 0 && find_variable_in_set(func->params, v) != -1) {
 					continue;
 				}
 				//assert(0);
