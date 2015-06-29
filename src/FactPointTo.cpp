@@ -48,6 +48,7 @@
 #include "FactMgr.h"
 #include "Lhs.h"
 #include "random.h"
+#include "Parameter.h"
 
 #include <assert.h>
 
@@ -125,6 +126,33 @@ FactPointTo::mark_dead_var(const Variable* v)
 			var_set[pos] = garbage_ptr;
 		}
 		return FactPointTo::make_fact(var, var_set);
+	}
+	return 0;
+}
+
+/* mark a parameter in point_to_vars as dead, but replace it with a set of variables 
+   that could be passed in as the possible actual values of the parameter.
+ */
+bool
+FactPointTo::mark_dead_param(const Parameter* param, const vector<const Variable*>& param_value_vars)
+{
+	vector<const Variable*>& var_set = point_to_vars;
+	
+    // check if the param is one of the points-to variables 
+    int pos = find_variable_in_set(var_set, param); 
+
+	if (pos >= 0) { 
+        // remove param from the points-to list
+        var_set.erase(var_set.begin() + pos);
+
+        // if param is not associated with any actutal paramter variables 
+        // as in an output parameter, the pointer is now possibly pointing to garbage
+        if (param_value_vars.empty())
+            add_variable_to_set(var_set, garbage_ptr);
+        // otherwise, remember the fact that even with the parameter OOS,
+        // the pointer may still points to variables in scope at the call site.
+        else
+            add_variables_to_set(var_set, param_value_vars); 
 	}
 	return 0;
 }

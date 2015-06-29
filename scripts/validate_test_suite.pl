@@ -81,7 +81,7 @@ sub validate_test ($) {
     my $cmd = "$CSMITH_HOME/src/csmith $options -s $seed --output tmp.c";
     my $res = runit ($cmd, "csmith.out"); 
     if ($res != 0 || !(-f "tmp.c") ) {
-		print "Failed to generate program: $cmd\n";
+		print "Failed (code: " . $res . ") to generate program: $cmd\n";
 		return 0;
     }  
 	
@@ -127,9 +127,7 @@ sub validate_tests () {
 			$fail++;
 			if ($UPDATE) {
 				copy("tmp.c", $file);
-			} else {
-			    last;
-            }
+			}
 		}
 	}
 	unlink("tmp.c");

@@ -39,6 +39,7 @@
 class CGContext;
 class Variable;
 class Constant;
+class ExpressionVariable;
 
 /*
  *
@@ -52,6 +53,8 @@ public:
 	explicit Lhs(const Variable &v);
 
 	Lhs(const Variable &v, const Type* t, bool compound_assign);
+
+    Lhs(const ExpressionVariable* ev);
 
 	virtual ~Lhs(void);
 

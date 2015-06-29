@@ -661,7 +661,9 @@ Function::initialize_builtin_functions()
 		"ULonglong; __builtin_bswap64; (ULonglong); x86",
 		"Int; __builtin_ctzs; (UShort); clang",
 		"Int; __builtin_clzs; (UShort); clang",
-		"UShort; __builtin_bswap16; (UShort); ppc | clang"
+		"UShort; __builtin_bswap16; (UShort); ppc | clang",
+        // Fake builtin for testing purpose
+        "Int; __builtin_fake; (UInt inout, ULong in); x86",
 	};
 
 	int cnt = sizeof(builtin_function_strings) / sizeof(builtin_function_strings[0]);

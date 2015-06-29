@@ -158,6 +158,15 @@ Lhs::Lhs(const Variable &v, const Type* t, bool compound_assign)
 {
 }
 
+// construct a Lhs out of a variable expression
+Lhs::Lhs(const ExpressionVariable* ev)
+    : Expression(eLhs),
+      var(*ev->get_var()),
+      type(&ev->get_type()),
+	  for_compound_assign(false)
+{
+}
+
 /*
  *
  */

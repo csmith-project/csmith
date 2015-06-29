@@ -437,7 +437,8 @@ CGContext::merge_param_context(const CGContext& param_cg_context, bool include_l
 }
 
 /*
- *
+ * Add reads/writes on global variables to this context and 
+ * the effects of current statement under generation.
  */
 void
 CGContext::add_external_effect(const Effect &e)
@@ -450,7 +451,8 @@ CGContext::add_external_effect(const Effect &e)
 }
 
 /*
- *
+ * Add reads/writes on global variables (and locals visible in blocks along
+ * the call chain) to this context and the effects of current statement under generation.
  */
 void
 CGContext::add_visible_effect(const Effect &e, const Block* b)

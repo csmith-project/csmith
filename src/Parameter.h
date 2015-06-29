@@ -48,7 +48,8 @@ enum eParamInOutType {
 	eParamNone,
 	eParamIn, 
 	eParamOut,
-	eParamInOut
+	eParamInOut,
+    eParamRef
 };
 
 class ExtensionValue;
@@ -61,7 +62,7 @@ public:
     static void GenerateParameterList(Function &curFunc);
     
 	// TODO: configure the inout string based on external file (for languages other than C/C++)
-    static void ConfigureInOutTypeNames(string noneStr="", string inputStr="in", string outputStr="out", string bothStr="inout");
+    static void ConfigureInOutTypeNames(string noneStr="", string inputStr="in", string outputStr="out", string bothStr="inout", string refStr="&");
 
     static enum eParamInOutType string_to_inout_type(string s);
     static string inout_type_to_string(enum eParamInOutType inout);
@@ -70,6 +71,8 @@ public:
     virtual bool is_param(void) const {return true;}
     eParamInOutType get_param_inout_type(void) const { return _inout; }  
 	virtual void Output(std::ostream &) const;    
+
+    bool is_output_param(void) const { return _inout == eParamOut || _inout == eParamInOut || _inout == eParamRef;}
 
 private:
 	Parameter(const std::string &name, const Type *type, const Expression* init, const CVQualifiers* qfer, enum eParamInOutType inout);  

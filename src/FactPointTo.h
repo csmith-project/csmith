@@ -43,6 +43,7 @@ class Block;
 class Type;
 class StatementAssign;
 class StatementReturn;
+class Parameter;
 
 using namespace std;
 
@@ -74,6 +75,7 @@ public:
 
 	FactPointTo* mark_dead_var(const Variable* v);
 	FactPointTo* mark_func_end(const Statement* stm);
+    bool mark_dead_param(const Parameter* param, const vector<const Variable*>& param_value_vars);
 	const FactPointTo* update_with_modified_index(const Variable* index_var) const;
 
 	// lattice functions

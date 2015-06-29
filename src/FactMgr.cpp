@@ -174,6 +174,69 @@ FactMgr::update_facts_for_oos_vars(const vector<const Variable*>& vars, FactVec&
 	}
 }
 
+// Update facts for params at the end of the invocation:
+// 1) transfer all facts regarding an out/inout paramter back to the associated actual parameter (if it's a variable)
+// 2) an out/inout paramter contained in the points-to set of a pointer is replaced with the associated actual parameter (if it's a variable)
+void
+FactMgr::update_facts_for_params(const FunctionInvocationUser* fiu, FactVec& facts)
+{ 
+	size_t i, j;
+    const vector<Variable*>& params = fiu->get_func()->params; 
+    const vector<const Expression*>& param_values = fiu->param_value;
+    assert(params.size() == param_values.size());
+    
+	for (i=0; i<params.size(); i++) {
+        assert(params[i]->is_param());
+		const Parameter* param = (const Parameter*)params[i];
+
+        // link the facts related to output params to the variable passed in.
+        if ((param->is_output_param()) && 
+        // TODO: allow the parameter value to be something can be EVALUATED to a variable?
+            param_values[i]->term_type == eVariable) {
+                 
+            const ExpressionVariable* exprvar = (const ExpressionVariable*)param_values[i];
+            update_fact_for_assign(new Lhs(exprvar), new ExpressionVariable(*param), facts); 
+        }
+
+        // With all param-related facts transfered, remove all facts related to params, as they become irrelevant going out of scope. 
+		size_t len = facts.size();
+		for (j=0; j<len; j++) {
+			//print_facts(facts);
+			// remove all facts related to this parameter
+			const Fact* f = facts[j];
+			if (param->match(f->get_var())) {
+				facts.erase(facts.begin() + j);
+				len--;
+				j--;
+			}
+		}
+	}
+
+	// mark any remaining facts that may point to a out-of-scope parameter as "point to garbage"
+    // except for pass-by-reference parameters.
+	for (i=0; i<params.size(); i++) {
+        assert(params[i]->is_param());
+		const Parameter* param = (const Parameter*)params[i];
+
+		for (j=0; j<facts.size(); j++) {
+			if (facts[j]->eCat == ePointTo) {
+				FactPointTo* f = (FactPointTo*)(facts[j]);
+
+                vector<const Variable*> actual_param_vars;
+                // pointing to a ref parameter is equivalent to pointing to the actual parameter variable(s) passed in
+                if (param->get_param_inout_type() == eParamRef && 
+                // TODO: allow the parameter value to be something can be EVALUATED to a variable?
+                    param_values[i]->term_type == eVariable) {
+
+                    const ExpressionVariable* exprvar = (const ExpressionVariable*)param_values[i];
+                    actual_param_vars = FactPointTo::merge_pointees_of_pointer(exprvar->get_var()->get_collective(), exprvar->get_indirect_level(), facts);
+				    f->mark_dead_param(param, actual_param_vars); 
+                }
+			}
+		}
+	}
+}
+
 /*
  * remove facts concerning variables local to a function
  * hint: relevant facts are those concerns variable visible at the end of this function

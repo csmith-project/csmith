@@ -55,6 +55,7 @@
 #include "PartialExpander.h"
 #include "random.h"
 #include "CVQualifiers.h"
+#include "Parameter.h"
 
 int eid = 0;
 
@@ -238,28 +239,37 @@ Expression::output_cast(std::ostream& out) const
 }
 
 /*
- *
+ * Generate a random Expression for the parameter
  */
 Expression *
-Expression::make_random_param(CGContext &cg_context, const Type* type, const CVQualifiers* qfer, enum eTermType tt)
+Expression::make_random_param_value(CGContext &cg_context, const Parameter* param, enum eTermType tt)
 {
 	Expression *e = 0;
+    const Type* type = param->type;
+    const CVQualifiers* qfer = &param->qfer;
 	assert(type);
+
 	// if a term type is provided, no need to choose random term type
 	if (tt == MAX_TERM_TYPES) {
-		VectorFilter filter(&Expression::paramTable_);
-		filter.add(eConstant);   // don't call functions with constant parameters because it is not interesting
-		if ((!CGOptions::return_structs() && type->eType == eStruct) ||
-			(!CGOptions::return_unions() && type->eType == eUnion)) {
-			filter.add(eFunction);
-		}
-		if (type->is_const_struct_union()) {
-			filter.add(eAssignment);
-		}
-		if (cg_context.expr_depth + 2 > CGOptions::max_expr_depth()) {
-			filter.add(eFunction).add(eAssignment).add(eCommaExpr);
-		}
-		tt = ExpressionTypeProbability(&filter);
+        if (param->is_output_param()) {
+            // for params with out attribute, generate variable expressions as actual parameters
+            tt = eVariable;
+        }
+        else {
+		    VectorFilter filter(&Expression::paramTable_);
+		    filter.add(eConstant);   // don't call functions with constant parameters because it is not interesting
+		    if ((!CGOptions::return_structs() && type->eType == eStruct) ||
+			    (!CGOptions::return_unions() && type->eType == eUnion)) {
+			    filter.add(eFunction);
+		    }
+		    if (type->is_const_struct_union()) {
+			    filter.add(eAssignment);
+		    }
+		    if (cg_context.expr_depth + 2 > CGOptions::max_expr_depth()) {
+			    filter.add(eFunction).add(eAssignment).add(eCommaExpr);
+		    }
+		    tt = ExpressionTypeProbability(&filter);
+        }
 	}
 
 	switch (tt) {

@@ -210,7 +210,7 @@ Effect::add_effect(const Effect &e, bool include_lhs_effects)
 }
 
 /*
- *
+ * Add effects with all the local read/write effects filtered
  */
 void
 Effect::add_external_effect(const Effect &e)
@@ -241,8 +241,9 @@ Effect::add_external_effect(const Effect &e)
 }
 
 /*
- * with call chains, we want to track write/read to stack
- * variables of caller(s)
+ * Add effects with all the local read/write effects filtered except for
+ * the read/write on a local variable visible within one of the call 
+ * chain blocks.
  */
 void
 Effect::add_external_effect(const Effect &e, std::vector<const Block*> call_chain)

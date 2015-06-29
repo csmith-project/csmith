@@ -125,6 +125,8 @@ public:
 	static void update_facts_for_oos_vars(const vector<Variable*>& vars, FactVec& facts);
 	static void update_facts_for_oos_vars(const vector<const Variable*>& vars, FactVec& facts);
 
+    static void update_facts_for_params(const FunctionInvocationUser* fiu, FactVec& facts);
+
 	/* update fact(s) from assignments */
 	static bool update_fact_for_assign(const StatementAssign* sa, FactVec& inputs);
 	static bool update_fact_for_assign(const Lhs* lhs, const Expression* rhs, FactVec& inputs);

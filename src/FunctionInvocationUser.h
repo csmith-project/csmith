@@ -97,6 +97,8 @@ private:
 	//FunctionInvocationUser &operator=(const FunctionInvocationUser &fi);
 
 	bool build_invocation(Function *target, CGContext &cg_context);
+
+    bool link_param_effects(Effect* effect, const std::vector<const Fact*>& facts) const;
 };
 
 const Fact* get_return_fact_for_invocation(const FunctionInvocationUser* fiu, const Variable* var, enum eFactCategory cat);

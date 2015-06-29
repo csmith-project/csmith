@@ -48,16 +48,22 @@ Parameter::~Parameter(void)
 {
 } 
 
+// -----------------------------------------------------------------
+// Configure/initialize strings for in/out modes
+// -----------------------------------------------------------------
 void 
-Parameter::ConfigureInOutTypeNames(string noneStr, string inputStr, string outputStr, string bothStr)
+Parameter::ConfigureInOutTypeNames(string noneStr, string inputStr, string outputStr, string bothStr, string refStr)
 {
-	_inOutTypeNames[eParamNone] = noneStr;
-	_inOutTypeNames[eParamIn] = inputStr;
-	_inOutTypeNames[eParamOut] = outputStr;
-	_inOutTypeNames[eParamInOut] = bothStr;
+    _inOutTypeNames.push_back(noneStr);
+	_inOutTypeNames.push_back(inputStr);
+	_inOutTypeNames.push_back(outputStr);
+	_inOutTypeNames.push_back(bothStr);
+    _inOutTypeNames.push_back(refStr);
 }
 
+// -----------------------------------------------------------------
 // Convert a string, e.g. "inout", to enum eParamInOutType
+// -----------------------------------------------------------------
 enum eParamInOutType 
 Parameter::string_to_inout_type(string s)
 {
@@ -73,7 +79,9 @@ Parameter::string_to_inout_type(string s)
     return eParamNone;
 }
  
+// -----------------------------------------------------------------
 // Convert eParamInOutType to string
+// -----------------------------------------------------------------
 string 
 Parameter::inout_type_to_string(enum eParamInOutType inoutType)
 {
@@ -84,15 +92,19 @@ Parameter::inout_type_to_string(enum eParamInOutType inoutType)
     return _inOutTypeNames[inoutType];
 }
 
-// --------------------------------------------------------------
+// -----------------------------------------------------------------
+// generate a random parameter name
+// -----------------------------------------------------------------
 static string
 RandomParamName(void)
 {
 	return gensym("p_");
 }
 
+// -----------------------------------------------------------------
 // Generate parameters out of type/qualifier of existing values 
 // TODO: use ExpressionVariable instead of ExtensionValue
+// -----------------------------------------------------------------
 void
 Parameter::GenerateParametersFromValues(Function &curFunc, std::vector<ExtensionValue *> &values)
 {
@@ -141,15 +153,21 @@ Parameter::GenerateParameter(Function &curFunc)
 	curFunc.params.push_back(param);
 }
 
-/*
- *
- */
+// -----------------------------------------------------------------
+// Determine how many parameters are to be generated
+// -----------------------------------------------------------------
 static unsigned int
 ParamListProbability()
 {
 	return rnd_upto(CGOptions::max_params());
 }
 
+// -----------------------------------------------------------------
+// Create parameters out of strings in the format of: 
+//   "UInt, UChar" or 
+//   "UInt inout, ULong in"
+//   ...
+// -----------------------------------------------------------------
 void
 Parameter::GenerateParametersFromString(Function &currFunc, const string &params_string)
 {
@@ -164,9 +182,11 @@ Parameter::GenerateParametersFromString(Function &currFunc, const string &params
 		const Type *ty = Type::get_type_from_string(tokens[0]);
 		assert(!ty->is_void() && "Invalid parameter type!");
 		
+        // dummy qualifier
         CVQualifiers qfer;
 		qfer.add_qualifiers(false, false);
 
+        // get inout type if specified (default none)
         string inoutStr = tokens.size() > 1 ? tokens[1] : "";
         enum eParamInOutType inout = string_to_inout_type(inoutStr);
 
@@ -176,6 +196,9 @@ Parameter::GenerateParametersFromString(Function &currFunc, const string &params
 	}
 }
 
+// ----------------------------------------------------------------
+// Create random parameters for a function
+// ----------------------------------------------------------------
 void
 Parameter::GenerateParameterList(Function &curFunc)
 {

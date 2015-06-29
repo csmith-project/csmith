@@ -59,7 +59,9 @@
 #include "StatementAssign.h"
 #include "Block.h"
 #include "Fact.h"
+#include "FactPointTo.h"
 #include "SafeOpFlags.h"
+#include "Parameter.h"
 
 using namespace std;
 
@@ -173,8 +175,10 @@ FunctionInvocationUser::clone() const
 	return new FunctionInvocationUser(*this);
 }
 
-/* build parameters first, then the function body. this way the generation order is in sync
-   with execution order, and the dataflow analyzer doesn't need to visit the function twice
+/* 
+ * We are building the actual parameters and the function in one round. We build parameters first, 
+ * then the function body. this way the generation order is in sync with execution order, and the 
+ * dataflow analyzer doesn't need to visit the function twice.
  */
 FunctionInvocationUser*
 FunctionInvocationUser::build_invocation_and_function(CGContext &cg_context, const Type* type, const CVQualifiers* qfer)
@@ -184,19 +188,20 @@ FunctionInvocationUser::build_invocation_and_function(CGContext &cg_context, con
 	Effect running_eff_context(cg_context.get_effect_context());
 	Function* func = Function::make_random_signature(cg_context, type, qfer);
 
-	if (func->name == "func_51")
-		BREAK_NOP;		// for debugging
 	vector<const Expression*> param_values;
 	size_t i;
 	for (i = 0; i < func->params.size(); i++) {
 		Effect param_eff_accum;
 		CGContext param_cg_context(cg_context, running_eff_context, &param_eff_accum);
-		Variable* v = func->params[i];
+		Parameter* param = dynamic_cast<Parameter*>(func->params[i]);
+        assert(param != NULL);
+
 		// to avoid too much function invocations as parameters
-		Expression *p = Expression::make_random_param(param_cg_context, v->type, &v->qfer);
+		Expression *pvalue = Expression::make_random_param_value(param_cg_context, param);
 		// typecast, if needed.
-		p->check_and_set_cast(v->type);
-		param_values.push_back(p);
+		pvalue->check_and_set_cast(param->type);
+		param_values.push_back(pvalue);
+
 		// Update the "running effect context": the context that we must use
 		// when we generate subsequent parameters within this invocation.
 		running_eff_context.add_effect(param_eff_accum);
@@ -214,6 +219,9 @@ FunctionInvocationUser::build_invocation_and_function(CGContext &cg_context, con
 	// create function body
 	Effect effect_accum;
 	func->generate_body_with_known_params(cg_context, effect_accum);
+
+    // associate output param effects with the actual parameters
+    fiu->link_param_effects(&effect_accum, fm->global_facts);
 
 	// post creation processing
 	FactVec ret_facts = fm->map_facts_out[func->body];
@@ -246,7 +254,7 @@ FunctionInvocationUser::build_invocation_and_function(CGContext &cg_context, con
 }
 
 /*
- * Internal helper function.
+ * Build an invocation of a function that has already been generated
  */
 bool
 FunctionInvocationUser::build_invocation(Function *target, CGContext &cg_context)
@@ -255,21 +263,20 @@ FunctionInvocationUser::build_invocation(Function *target, CGContext &cg_context
 	func = target;			// XXX: unnecessary; done by constructor
 	Effect running_eff_context(cg_context.get_effect_context());
 	FactMgr* fm = get_fact_mgr(&cg_context);
-	// XXX DEBUGGING
-	if (func->name == "func_36" && cg_context.get_current_func()->name=="func_22") {
-	 	i = 0; // Set breakpoint here.
-	}
 
 	for (i = 0; i < func->params.size(); i++) {
 		Effect param_eff_accum;
 		CGContext param_cg_context(cg_context, running_eff_context, &param_eff_accum);
-		Variable* v = func->params[i];
+		Parameter* param = dynamic_cast<Parameter*>(func->params[i]);
+        assert(param != NULL);
+
 		// to avoid too much function invocations as parameters
-		Expression *p = Expression::make_random_param(param_cg_context, v->type, &v->qfer);
+		Expression *pvalue = Expression::make_random_param_value(param_cg_context, param);
 		
 		// typecast, if needed.
-		p->check_and_set_cast(v->type);
-		param_value.push_back(p);
+		pvalue->check_and_set_cast(param->type);
+		param_value.push_back(pvalue);
+
 		// Update the "running effect context": the context that we must use
 		// when we generate subsequent parameters within this invocation.
 		running_eff_context.add_effect(param_eff_accum);
@@ -353,7 +360,10 @@ FunctionInvocationUser::revisit(std::vector<const Fact*>& inputs, CGContext& cg_
 	merge_facts(inputs, ret_facts);
 
 	// remove facts related to passing parameters
-	FactMgr::update_facts_for_oos_vars(func->params, inputs);
+	FactMgr::update_facts_for_params(this, inputs);
+
+    // associate output param effects with the actual parameters
+    link_param_effects(cg_context.get_effect_accum(), inputs);
 
 	fm->setup_in_out_maps(false);
 	// remember the effect context during this visit to this function
@@ -362,6 +372,40 @@ FunctionInvocationUser::revisit(std::vector<const Fact*>& inputs, CGContext& cg_
 	renew_facts(inputs_copy, inputs);
 	inputs = inputs_copy;
 	return true;
+}
+
+// When a call exits the function, reads/writes on parameters with output mode 
+// should be linked to the actual variables used as actual parameters by the call. 
+// Return true if any of the parameter effects is relinked.
+bool 
+FunctionInvocationUser::link_param_effects(Effect* effect, const std::vector<const Fact*>& facts) const
+{
+    bool changed = false;
+    const vector<Variable*>& params = this->get_func()->params; 
+    const vector<const Expression*>& param_values = this->param_value;
+    assert(params.size() == param_values.size());
+
+    for (size_t i=0; i<params.size(); i++) {
+        assert(params[i]->is_param());
+	    const Parameter* param = (const Parameter*)params[i];
+        
+        vector<const Variable*> actual_param_vars; 
+        if ((param->is_output_param()) && 
+        // TODO: allow the parameter value to be something can be EVALUATED to a variable?
+            param_values[i]->term_type == eVariable) { 
+            const ExpressionVariable* exprvar = (const ExpressionVariable*)param_values[i];
+            actual_param_vars = FactPointTo::merge_pointees_of_pointer(exprvar->get_var()->get_collective(), exprvar->get_indirect_level(), facts);
+
+            // relink the effect to actual parameters
+            if (effect->is_written(param)) {
+                for (size_t j=0; j<actual_param_vars.size(); j++) {
+                    effect->write_var(actual_param_vars[i]);
+                }
+                changed = true;
+            }
+        }
+    }
+    return changed;
 }
 
 /*
