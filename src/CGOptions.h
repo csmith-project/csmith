@@ -70,6 +70,10 @@ using namespace std;
  */
 class CGOptions {
 public:
+
+	static bool float_test(void);
+	static bool float_test(bool p);
+
 	static bool compute_hash(void);
 	static bool compute_hash(bool p);
 
@@ -468,6 +472,9 @@ private:
 	static bool has_extension_conflict();
 
 	static void parse_string_options(string vname, vector<std::string> &v);
+
+	//float_test
+	static bool float_test_;
 
 	// Until I do this right, just make them all static.
 	static bool	compute_hash_;

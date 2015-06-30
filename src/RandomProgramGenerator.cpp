@@ -349,6 +349,18 @@ main(int argc, char **argv)
 
 	for (int i=1; i<argc; i++) {
 
+		/// float_test
+
+		if (strcmp (argv[i], "--float-test") == 0) {
+			CGOptions::float_test(true);
+			CGOptions::enable_float(true);
+			continue;
+		}
+
+		///
+
+
+
 		if (strcmp (argv[i], "--help") == 0 ||
 			strcmp (argv[i], "-h") == 0) {
 			print_help();
@@ -783,6 +795,10 @@ main(int argc, char **argv)
 		}
 
 		if (strcmp (argv[i], "--no-float") == 0) {
+			if (CGOptions::float_test()) {
+				cout << "Invalid argument combination: --no-float and --float-test" << endl;
+				exit(-1);
+			}
 			CGOptions::enable_float(false);
 			continue;
 		}

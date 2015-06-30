@@ -295,6 +295,14 @@ OutputMgr::OutputHeader(int argc, char *argv[], unsigned long seed)
 
 	out << runtime_include << endl;
 
+	//float_test
+	// FloatTest.h is in runtime directory !!!
+	if (CGOptions::float_test()) {
+		out << "#include \"FloatTest.h\"" << endl;
+	} else {
+		out << "#define __FLOAT float" << endl;
+	}
+
  	if (!CGOptions::compute_hash()) {
 		if (CGOptions::allow_int64())
 			out << "volatile uint64_t " << Variable::sink_var_name << " = 0;" << endl;
