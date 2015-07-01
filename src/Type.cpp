@@ -1654,7 +1654,11 @@ Type::Output(std::ostream &out) const
 		if (this->simple_type == eVoid) {
 			out << "void";
 		} else if (this->simple_type == eFloat) {
-		        out << "__FLOAT";
+		    if(CGOptions::float_test()){
+		    	out << "__FLOAT";
+		    }else{
+		    	out << "float";
+		    }
 		} else {
 			out << (is_signed() ? "int" : "uint");
 			out << (SizeInBytes() * 8);

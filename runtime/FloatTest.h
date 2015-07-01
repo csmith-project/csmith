@@ -4,8 +4,18 @@
 #ifndef FLOAT_TEST_H
 #define FLOAT_TEST_H
 
-#include "FloatTest.cpp"
+#ifdef FLOAT_TEST_ENABLED
 
+////////////////////////////////////
+
+#include <boots/numeric/interval.hpp>
+#define __FLOAT interval<float>
+
+
+////////////////////////////////////
+
+#else
 #define __FLOAT float
+#endif
 
 #endif
