@@ -5,11 +5,22 @@
 #define FLOAT_TEST_H
 
 #ifdef FLOAT_TEST_ENABLED
-
+#define __FLOAT float_interval_t
 ////////////////////////////////////
 
-#include <boots/numeric/interval.hpp>
-#define __FLOAT interval<float>
+typedef struct float_interval {
+	float lower;
+	float upper;
+} float_interval_t;
+
+
+
+float_interval_t float_test_add_func(float_interval_t in1, float_interval_t in2);
+float_interval_t float_test_sub_func(float_interval_t in1, float_interval_t in2);
+float_interval_t float_test_mul_func(float_interval_t in1, float_interval_t in2);
+float_interval_t float_test_div_func(float_interval_t in1, float_interval_t in2);
+
+float_interval_t float_test_interval_to_uint(float_interval_t val);
 
 
 ////////////////////////////////////

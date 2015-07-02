@@ -293,13 +293,13 @@ OutputMgr::OutputHeader(int argc, char *argv[], unsigned long seed)
 
 	ExtensionMgr::OutputHeader(out);
 
-	out << runtime_include << endl;
-
 	//float_test
 	// FloatTest.h is in runtime directory
 	if(CGOptions::float_test()){
 		out << "#include \"FloatTest.h\"" << endl;
 	}
+
+	out << runtime_include << endl;
 
 
  	if (!CGOptions::compute_hash()) {

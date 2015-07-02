@@ -139,6 +139,19 @@ ExpressionAssign::Output(std::ostream &out) const
 	out << ")";
 }
 
+
+//float_test
+/*
+void
+ExpressionAssign::OutputInterval(std::ostream &out) const
+{
+	out << "assign_to_interval(";
+	ExpressionAssign::Output(out);
+	out << ")";
+}
+*/
+
+
 void
 ExpressionAssign::indented_output(std::ostream &out, int indent) const
 {

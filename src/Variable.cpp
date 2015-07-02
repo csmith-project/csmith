@@ -770,6 +770,9 @@ Variable::get_array(string& field) const
 }
 
 // --------------------------------------------------------------
+
+// float_test : need to account for interval assignment
+
 void
 Variable::OutputDef(std::ostream &out, int indent) const
 {
@@ -781,7 +784,20 @@ Variable::OutputDef(std::ostream &out, int indent) const
 	output_qualified_type(out);
 	out << get_actual_name() << " = ";
 	assert(init);
-	init->Output(out);
+
+	//
+    //float_test
+	if (CGOptions::float_test() && type->simple_type == eFloat){
+		//init->OutputInterval(out);
+		out << "expr_to_interval(";
+		init->Output(out);
+		out << ")";
+	}else{
+		init->Output(out);
+	}
+
+	//
+
 	out << ";";
 	if (is_volatile()) {
 		string comment = "VOLATILE GLOBAL " + get_actual_name();
@@ -1074,7 +1090,13 @@ Variable::hash(std::ostream& out) const
 		if (CGOptions::compute_hash()) {
             // FIXME handle double here too, once we generate those
             if (type->simple_type == eFloat) {
-                out << "    transparent_crc_bytes (&";
+
+				if (CGOptions::float_test()){
+					out << "    transparent_crc_bytes_float_test(";
+				}else{
+					out << "    transparent_crc_bytes(&";
+				}
+
                 Output(out);
                 out << ", sizeof(";
                 Output(out);

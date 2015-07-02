@@ -827,7 +827,11 @@ ArrayVariable::hash(std::ostream& out) const
 		for (j=0; j<field_names.size(); j++) {
             if (type->eType == eSimple && type->simple_type == eFloat) {
                 output_tab(out, indent);
-                out << "transparent_crc_bytes(&" << vname << field_names[j] << ", ";
+				if (CGOptions::float_test()){
+					out << "transparent_crc_bytes_float_test(" << vname << field_names[j] << ", ";
+				}else{
+					out << "transparent_crc_bytes(&" << vname << field_names[j] << ", ";
+				}
                 out << "sizeof(" << vname << field_names[j] << "), ";
                 out << "\"" << vname << field_names[j] << "\", print_hash_value);" << endl;
             } else {

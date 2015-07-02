@@ -244,6 +244,7 @@ Expression::output_cast(std::ostream& out) const
 	}
 }
 
+
 /*
  *
  */

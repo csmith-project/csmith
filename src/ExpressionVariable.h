@@ -82,6 +82,8 @@ public:
 
 	virtual void Output(std::ostream &) const;
 
+	virtual void OutputInterval(std::ostream &) const;
+
 private:
 	explicit ExpressionVariable(const ExpressionVariable &expr);
 
