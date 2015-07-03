@@ -341,7 +341,11 @@ FUNC_NAME(div_func_$1_f_f)($1 sf1, $1 sf2 LOG_INDEX)
 
 ')
 
+//float_test
+#ifndef FLOAT_TEST_ENABLED
 safe_float_math(float,f,FLT_MAX,0x1.0p-28f,0x1.0p-49f)
+//float_test
+#endif
 safe_float_math(double,,DBL_MAX,0x1.0p-924,0x1.0p-974)
 
 define(`safe_float_conversion',`
@@ -360,5 +364,46 @@ FUNC_NAME(convert_func_$1_to_$2)($1 sf1 LOG_INDEX)
 
 safe_float_conversion(float, int32_t, INT32_MIN, INT32_MAX)
 
+
+
+//float_test
+
+define(`float_interval_math',`
+
+#ifdef FLOAT_TEST_ENABLED
+
+STATIC $6
+FUNC_NAME(add_func_$1_f_f)($6 sf1, $6 sf2 LOG_INDEX)
+{
+  LOG_EXEC
+  return add_float_interval(sf1, sf2);
+}
+
+STATIC $6
+FUNC_NAME(sub_func_$1_f_f)($6 sf1, $6 sf2 LOG_INDEX)
+{
+  LOG_EXEC
+  return sub_float_interval(sf1, sf2);
+}
+
+STATIC $6
+FUNC_NAME(mul_func_$1_f_f)($6 sf1, $6 sf2 LOG_INDEX)
+{
+  LOG_EXEC
+  return mul_float_interval(sf1, sf2);
+}
+
+STATIC $6
+FUNC_NAME(div_func_$1_f_f)($6 sf1, $6 sf2 LOG_INDEX)
+{
+  LOG_EXEC
+  return div_float_interval(sf1, sf2);
+}
+
+#endif
+
+')
+
+float_interval_math(float,f,FLT_MAX,0x1.0p-28f,0x1.0p-49f,float_interval_t)
 
 #endif
