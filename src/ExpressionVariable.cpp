@@ -224,6 +224,7 @@ ExpressionVariable::Output(std::ostream &out) const
     }
 }
 
+//float_test
 void
 ExpressionVariable::OutputInterval(std::ostream& out) const
 {

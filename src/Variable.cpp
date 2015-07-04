@@ -782,21 +782,18 @@ Variable::OutputDef(std::ostream &out, int indent) const
 		out << "static ";
 	}
 	output_qualified_type(out);
+
 	out << get_actual_name() << " = ";
 	assert(init);
 
-	//
-    //float_test
+	/*
 	if (CGOptions::float_test() && type->simple_type == eFloat){
-		//init->OutputInterval(out);
-		out << "expr_to_interval(";
-		init->Output(out);
-		out << ")";
-	}else{
-		init->Output(out);
+		//float_test
+		out << endl << "#ifndef FLOAT_TEST_ENABLED" << endl;
 	}
+	*/
 
-	//
+	init->Output(out);
 
 	out << ";";
 	if (is_volatile()) {
@@ -805,6 +802,24 @@ Variable::OutputDef(std::ostream &out, int indent) const
 	} else {
 		outputln(out);
 	}
+
+	/*
+	//float_test
+	if (CGOptions::float_test() && type->simple_type == eFloat) {
+		out << "#else" << endl;
+		out << "{";
+		init->Output(out);
+		out << ", ";
+		init->Output(out);
+		out << "};" << endl;
+		out << "#endif" << endl;
+
+	}
+	*/
+
+
+
+
 }
 
 void Variable::OutputDecl(std::ostream &out) const

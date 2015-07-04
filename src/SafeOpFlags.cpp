@@ -301,25 +301,14 @@ std::string
 SafeOpFlags::safe_float_func_string(enum eBinaryOps op) const
 {
 	string s;
-	if (!CGOptions::float_test()){
-		switch (op) {
-			case eAdd: s = "safe_add_"; break;
-			case eSub: s = "safe_sub_"; break;
-			case eMul: s = "safe_mul_"; break;
-			case eDiv: s = "safe_div_"; break;
-			default: assert(0); break;
-		}
-		s += "func_float_f_f";
-	}else{
-		switch (op) {
-			case eAdd: s = "float_test_add_"; break;
-			case eSub: s = "float_test_sub_"; break;
-			case eMul: s = "float_test_mul_"; break;
-			case eDiv: s = "float_test_div_"; break;
-			default: assert(0); break;
-		}
-		s += "func";
+	switch (op) {
+		case eAdd: s = "safe_add_"; break;
+		case eSub: s = "safe_sub_"; break;
+		case eMul: s = "safe_mul_"; break;
+		case eDiv: s = "safe_div_"; break;
+		default: assert(0); break;
 	}
+	s += "func_float_f_f";
 
 	return s;
 
