@@ -313,7 +313,7 @@ FunctionInvocationBinary::get_binop_string(eBinaryOps bop)
 
 //float_test
 
-void
+static void
 output_cast_to_interval_macro(std::ostream &out, const Type& type){
 	string s = "";
 	switch (type.simple_type) {

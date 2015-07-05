@@ -470,6 +470,53 @@ StatementAssign::Output(std::ostream &out, FactMgr* /*fm*/, int indent) const
 	outputln(out);
 }
 
+
+//float_test : THIS IS DUPLICATED CODE, CLEAN THIS LATER
+
+void
+output_cast_to_interval_macro_assign(std::ostream &out, const Type& type){
+	string s = "";
+	switch (type.simple_type) {
+	case eChar:
+		s = "char_to_float_interval";
+		break;
+	case eInt:
+		s = "int_to_float_interval";
+		break;
+	case eShort:
+		s = "short_to_float_interval";
+		break;
+	case eLong:
+		s = "long_to_float_interval";
+		break;
+	case eLongLong:
+		s = "long_long_to_float_interval";
+		break;
+	case eUChar:
+		s = "uchar_to_float_interval";
+		break;
+	case eUInt:
+		s = "uint_to_float_interval";
+		break;
+	case eUShort:
+		s = "ushort_to_float_interval";
+		break;
+	case eULong:
+		s = "ulong_to_float_interval";
+		break;
+	case eULongLong:
+		s = "ulong_long_to_float_interval";
+		break;
+	case eVoid:
+	default:
+		assert(0);
+		break;
+	}
+	s += "(";
+	out << s;
+}
+
+
 void
 StatementAssign::OutputSimple(std::ostream &out) const
 {
@@ -479,7 +526,23 @@ StatementAssign::OutputSimple(std::ostream &out) const
 		out << " ";
 		output_op(out);
 		out << " ";
+		//expr.Output(out);
+
+		//float_test
+
+		if (CGOptions::float_test() && lhs.get_type().simple_type == eFloat
+				&& expr.get_type().simple_type != eFloat){
+			output_cast_to_interval_macro_assign(out, expr.get_type());
+		}
+
 		expr.Output(out);
+
+		if (CGOptions::float_test() && lhs.get_type().simple_type == eFloat
+				&& expr.get_type().simple_type != eFloat){
+			out << ")";
+		}
+
+
 		break;
 
 	case ePreIncr:
@@ -496,12 +559,20 @@ StatementAssign::OutputSimple(std::ostream &out) const
 	}
 }
 
+
+
+
 /*
  *
  */
 void
 StatementAssign::OutputAsExpr(std::ostream &out) const
 {
+	//float_test
+	if (CGOptions::float_test() && lhs.get_type().simple_type == eFloat){
+
+	}
+
 	if (CGOptions::avoid_signed_overflow() && op_flags) {
 		switch (op) {
 
@@ -522,7 +593,18 @@ StatementAssign::OutputAsExpr(std::ostream &out) const
 			else {
 				output_op(out);
 				out << " ";
+				//float_test
+				/*
+				if (CGOptions::float_test() && lhs.get_type().simple_type == eFloat){
+					output_cast_to_interval_macro_assign(out, expr.get_type());
+				}
+				*/
 				expr.Output(out);
+				/*
+				if (CGOptions::float_test() && lhs.get_type().simple_type == eFloat){
+					out << ")";
+				}
+				*/
 			}
 			break;
 		}
