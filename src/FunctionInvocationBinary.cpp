@@ -312,9 +312,20 @@ FunctionInvocationBinary::get_binop_string(eBinaryOps bop)
 }
 
 //float_test
-
-static void
+// returns true if should close brackets
+static bool
 output_cast_to_interval_macro(std::ostream &out, const Type& type){
+
+	//float_test
+	// this is quite ugly, but basically we don't want to output cast from float to float
+	if (type.simple_type == eFloat){
+		return false;
+	}
+
+	if (type.eType == ePointer){
+		return output_cast_to_interval_macro(out, *type.ptr_type);
+	}
+
 	string s = "";
 	switch (type.simple_type) {
 	case eChar:
@@ -348,12 +359,14 @@ output_cast_to_interval_macro(std::ostream &out, const Type& type){
 		s = "ulong_long_to_float_interval";
 		break;
 	case eVoid:
+	case eFloat:
 	default:
 		assert(0);
 		break;
 	}
 	s += "(";
 	out << s;
+	return true;
 }
 
 /*
@@ -392,16 +405,16 @@ FunctionInvocationBinary::Output(std::ostream &out) const
 						out << tmp_var1 << ", ";
 					}
 					//float_test
-					if (CGOptions::float_test() && is_return_type_float()
-							&& param_value[0]->get_type().simple_type != eFloat) {
-						output_cast_to_interval_macro(out, param_value[0]->get_type());
+					bool should_close_brackets = false;
+					if (CGOptions::float_test() && is_return_type_float()) {
+						should_close_brackets = output_cast_to_interval_macro(out, param_value[0]->get_type());
 					}
 
 					param_value[0]->Output(out);
 
 					//float_test
 					if (CGOptions::float_test() && is_return_type_float()
-							&& param_value[0]->get_type().simple_type != eFloat) {
+							&& should_close_brackets) {
 						out<< ")";
 					}
 
@@ -411,17 +424,16 @@ FunctionInvocationBinary::Output(std::ostream &out) const
 						out << tmp_var2 << ", ";
 					}
 
-					//float_test
-					if (CGOptions::float_test() && is_return_type_float()
-							&& param_value[1]->get_type().simple_type != eFloat) {
-						output_cast_to_interval_macro(out, param_value[1]->get_type());
+					should_close_brackets = false;
+					if (CGOptions::float_test() && is_return_type_float()) {
+						should_close_brackets = output_cast_to_interval_macro(out, param_value[1]->get_type());
 					}
 
 					param_value[1]->Output(out);
 
 					//float_test
 					if (CGOptions::float_test() && is_return_type_float()
-							&& param_value[1]->get_type().simple_type != eFloat) {
+							&& should_close_brackets) {
 						out<< ")";
 					}
 

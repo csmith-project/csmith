@@ -1105,19 +1105,13 @@ Variable::hash(std::ostream& out) const
 		if (CGOptions::compute_hash()) {
             // FIXME handle double here too, once we generate those
             if (type->simple_type == eFloat) {
-
-				if (CGOptions::float_test()){
-					out << "    transparent_crc_bytes_float_test(";
-				}else{
-					out << "    transparent_crc_bytes(&";
-				}
-
+				out << "    transparent_crc_bytes(&";
                 Output(out);
                 out << ", sizeof(";
                 Output(out);
                 out << "), \"" << name << "\", print_hash_value);" << endl;
             } else {
-                out << "    transparent_crc(";
+                out << "    transparent_crc(" << "/*XXXouter*/";
                 Output(out);
                 out << ", \"" << name << "\", print_hash_value);" << endl;
             }

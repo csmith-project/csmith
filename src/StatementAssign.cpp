@@ -473,8 +473,19 @@ StatementAssign::Output(std::ostream &out, FactMgr* /*fm*/, int indent) const
 
 //float_test : THIS IS DUPLICATED CODE, CLEAN THIS LATER
 
-void
+bool
 output_cast_to_interval_macro_assign(std::ostream &out, const Type& type){
+
+	//float_test
+	// this is quite ugly, but basically we don't want to output cast from float to float
+	if (type.simple_type == eFloat){
+		return false;
+	}
+
+	if (type.eType == ePointer){
+		return output_cast_to_interval_macro_assign(out, *type.ptr_type);
+	}
+
 	string s = "";
 	switch (type.simple_type) {
 	case eChar:
@@ -514,12 +525,85 @@ output_cast_to_interval_macro_assign(std::ostream &out, const Type& type){
 	}
 	s += "(";
 	out << s;
+	return true;
 }
+
+bool
+output_cast_from_interval_macro_assign(std::ostream &out, const Type& type){
+	//float_test
+	// this is quite ugly, but basically we don't want to output cast from float to float
+	if (type.simple_type == eFloat){
+		return false;
+	}
+
+	if (type.eType == ePointer){
+		return output_cast_to_interval_macro_assign(out, *type.ptr_type);
+	}
+
+	string s = "";
+	switch (type.simple_type) {
+	case eChar:
+		s = "float_interval_to_char";
+		break;
+	case eInt:
+		s = "float_interval_to_int";
+		break;
+	case eShort:
+		s = "float_interval_to_short";
+		break;
+	case eLong:
+		s = "float_interval_to_long";
+		break;
+	case eLongLong:
+		s = "float_interval_to_long_long";
+		break;
+	case eUChar:
+		s = "float_interval_to_uchar";
+		break;
+	case eUInt:
+		s = "float_interval_to_uint";
+		break;
+	case eUShort:
+		s = "float_interval_to_ushort";
+		break;
+	case eULong:
+		s = "float_interval_to_ulong";
+		break;
+	case eULongLong:
+		s = "float_interval_to_ulong_long";
+		break;
+	case eVoid:
+	default:
+		assert(0);
+		break;
+	}
+	s += "(";
+	out << s;
+	return true;
+}
+
+// checks if the type if float or pointer (possibly multiple) to float
+
+bool
+is_float_ptr_type(const Type& type){
+	if (type.simple_type == eFloat){
+		return true;
+	}
+	if (type.eType == ePointer){
+		return is_float_ptr_type(*type.ptr_type);
+	}
+	return false;
+}
+
+
 
 
 void
 StatementAssign::OutputSimple(std::ostream &out) const
 {
+	//float_test
+	bool should_close_brackets = false;
+
 	switch (op) {
 	default:
 		lhs.Output(out);
@@ -530,15 +614,15 @@ StatementAssign::OutputSimple(std::ostream &out) const
 
 		//float_test
 
-		if (CGOptions::float_test() && lhs.get_type().simple_type == eFloat
-				&& expr.get_type().simple_type != eFloat){
-			output_cast_to_interval_macro_assign(out, expr.get_type());
+		if (CGOptions::float_test() && is_float_ptr_type(lhs.get_type())){
+			should_close_brackets = output_cast_to_interval_macro_assign(out, expr.get_type());
+		} else if (CGOptions::float_test() && is_float_ptr_type(expr.get_type())){
+			should_close_brackets = output_cast_from_interval_macro_assign(out, lhs.get_type());
 		}
 
 		expr.Output(out);
 
-		if (CGOptions::float_test() && lhs.get_type().simple_type == eFloat
-				&& expr.get_type().simple_type != eFloat){
+		if (CGOptions::float_test() && should_close_brackets){
 			out << ")";
 		}
 

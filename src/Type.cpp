@@ -1611,7 +1611,12 @@ void
 Type::get_int_subfield_names(string prefix, vector<string>& names, const vector<int>& excluded_fields) const
 {
 	if (eType == eSimple) {
-		names.push_back(prefix);
+		//float_test : we dont want hashing of floats
+		if (CGOptions::float_test() && simple_type == eFloat){
+			return;
+		}else{
+			names.push_back(prefix);
+		}
 	}
 	else if (is_aggregate()) {
 		size_t i;

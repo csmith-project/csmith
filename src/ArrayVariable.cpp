@@ -777,6 +777,7 @@ ArrayVariable::make_print_index_str(const vector<const Variable *> &cvs) const
 /* -------------------------------------------------------------
  *  hash all array items
  ***************************************************************/
+
 void
 ArrayVariable::hash(std::ostream& out) const
 {
@@ -827,17 +828,13 @@ ArrayVariable::hash(std::ostream& out) const
 		for (j=0; j<field_names.size(); j++) {
             if (type->eType == eSimple && type->simple_type == eFloat) {
                 output_tab(out, indent);
-				if (CGOptions::float_test()){
-					out << "transparent_crc_bytes_float_test(" << vname << field_names[j] << ", ";
-				}else{
-					out << "transparent_crc_bytes(&" << vname << field_names[j] << ", ";
-				}
+                out << "transparent_crc_bytes(&" << vname << field_names[j] << ", ";
                 out << "sizeof(" << vname << field_names[j] << "), ";
                 out << "\"" << vname << field_names[j] << "\", print_hash_value);" << endl;
             } else {
                 output_tab(out, indent);
-                out << "transparent_crc(" << vname << field_names[j] << ", \"";
-                out << vname << field_names[j] << "\", print_hash_value);" << endl;
+                out << "transparent_crc(" << vname << field_names[j];
+                out  << ", \"" << vname << field_names[j] << "\", print_hash_value);" << endl;
             }
 		}
 		// print the index value
