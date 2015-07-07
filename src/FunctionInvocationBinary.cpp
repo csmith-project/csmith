@@ -292,6 +292,39 @@ OutputStandardFuncName(eBinaryOps eFunc, std::ostream &out)
 	}
 }
 
+//float_test
+static void
+output_func_float_macro(eBinaryOps eFunc, std::ostream &out)
+{
+	switch (eFunc) {
+		// Logical Ops
+	case eAnd:		out << "float_and_macro(";		break;
+	case eOr:		out << "float_or_macro(";		break;
+	case eCmpEq:	out << "float_cmpeq_macro(";	break;
+	case eCmpNe:	out << "float_cmpne_macro(";	break;
+	case eCmpGt:	out << "float_cmpgt_macro(";	break;
+	case eCmpLt:	out << "float_cmplt_macro(";	break;
+	case eCmpLe:	out << "float_cmple_macro(";	break;
+	case eCmpGe:	out << "float_cmpge_macro(";	break;
+
+		// Bitwise Ops
+	case eBitAnd:	out << "float_bitand_macro(";	break;
+	case eBitOr:	out << "float_bitor_macro(";	break;
+	case eBitXor:	out << "float_bitxor_macro(";	break;
+	case eLShift:	out << "float_lshift_macro(";   break;
+	case eRShift:	out << "float_rshift_macro(";   break;
+
+	case eAdd:
+	case eSub:
+	case eMul:
+	case eDiv:
+	case eMod:
+	default:
+		assert(false && "Trying to output macro for invalid func");
+		break;
+	}
+}
+
 std::string
 FunctionInvocationBinary::get_binop_string(eBinaryOps bop)
 {
@@ -313,18 +346,8 @@ FunctionInvocationBinary::get_binop_string(eBinaryOps bop)
 
 //float_test
 // returns true if should close brackets
-static bool
+void
 output_cast_to_interval_macro(std::ostream &out, const Type& type){
-
-	//float_test
-	// this is quite ugly, but basically we don't want to output cast from float to float
-	if (type.simple_type == eFloat){
-		return false;
-	}
-
-	if (type.eType == ePointer){
-		return output_cast_to_interval_macro(out, *type.ptr_type);
-	}
 
 	string s = "";
 	switch (type.simple_type) {
@@ -361,12 +384,19 @@ output_cast_to_interval_macro(std::ostream &out, const Type& type){
 	case eVoid:
 	case eFloat:
 	default:
-		assert(0);
+		if(type.eType != eSimple){
+			cerr << "NOT SIMPLE" << endl;
+		}else{
+			cerr << "GOT SIMPLE" << endl;
+			if (type.simple_type == eFloat){
+				cerr << "FLOAT" << endl;
+			}
+		}
+		assert(false && "Unexpected type : output_cast_to_interval_macro");
 		break;
 	}
 	s += "(";
 	out << s;
-	return true;
 }
 
 /*
@@ -406,15 +436,16 @@ FunctionInvocationBinary::Output(std::ostream &out) const
 					}
 					//float_test
 					bool should_close_brackets = false;
-					if (CGOptions::float_test() && is_return_type_float()) {
-						should_close_brackets = output_cast_to_interval_macro(out, param_value[0]->get_type());
+					if (CGOptions::float_test() && is_return_type_float()
+							&& !param_value[0]->get_type().is_float()) {
+						output_cast_to_interval_macro(out, param_value[0]->get_type());
+						should_close_brackets = true;
 					}
 
 					param_value[0]->Output(out);
 
 					//float_test
-					if (CGOptions::float_test() && is_return_type_float()
-							&& should_close_brackets) {
+					if (CGOptions::float_test() && should_close_brackets) {
 						out<< ")";
 					}
 
@@ -425,15 +456,16 @@ FunctionInvocationBinary::Output(std::ostream &out) const
 					}
 
 					should_close_brackets = false;
-					if (CGOptions::float_test() && is_return_type_float()) {
-						should_close_brackets = output_cast_to_interval_macro(out, param_value[1]->get_type());
+					if (CGOptions::float_test() && is_return_type_float()
+							&& !param_value[1]->get_type().is_float()) {
+						output_cast_to_interval_macro(out, param_value[1]->get_type());
+						should_close_brackets = true;
 					}
 
 					param_value[1]->Output(out);
 
 					//float_test
-					if (CGOptions::float_test() && is_return_type_float()
-							&& should_close_brackets) {
+					if (CGOptions::float_test() && should_close_brackets) {
 						out<< ")";
 					}
 
@@ -455,9 +487,35 @@ FunctionInvocationBinary::Output(std::ostream &out) const
 				op_flags->OutputSize(out);
 				out << ")";
 			}
+
+			//float_test
+			bool should_use_float_macro = false;
+			if (CGOptions::float_test() &&
+					(param_value[0]->get_type().is_float() || param_value[1]->get_type().is_float())){
+				should_use_float_macro = true;
+				output_func_float_macro(eFunc, out);
+			}
+
+			bool should_close_brackets = false;
+			if (CGOptions::float_test() && should_use_float_macro
+					&& !param_value[0]->get_type().is_float()){
+				output_cast_to_interval_macro(out, param_value[0]->get_type());
+				should_close_brackets = true;
+			}
+
 			param_value[0]->Output(out);
+
+			if (CGOptions::float_test() && should_close_brackets) {
+				out<< ")";
+			}
+
 			out << " ";
-			OutputStandardFuncName(eFunc, out);
+			if(should_use_float_macro){
+				out << ",";
+			}else{
+				OutputStandardFuncName(eFunc, out);
+			}
+
 			out << " ";
 			// explicit type casting for op2
 			if (need_cast) {
@@ -465,7 +523,24 @@ FunctionInvocationBinary::Output(std::ostream &out) const
 				op_flags->OutputSize(out);
 				out << ")";
 			}
+
+			should_close_brackets = false;
+			if (CGOptions::float_test() && should_use_float_macro
+					&& !param_value[1]->get_type().is_float()){
+				output_cast_to_interval_macro(out, param_value[1]->get_type());
+				should_close_brackets = true;
+			}
+
 			param_value[1]->Output(out);
+
+			if (CGOptions::float_test() && should_close_brackets) {
+				out<< ")";
+			}
+
+			if(should_use_float_macro){
+				out << ")";
+			}
+
 			break;
 		}
 	}

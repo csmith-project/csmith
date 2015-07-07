@@ -528,16 +528,16 @@ output_cast_to_interval_macro_assign(std::ostream &out, const Type& type){
 	return true;
 }
 
-bool
+void
 output_cast_from_interval_macro_assign(std::ostream &out, const Type& type){
 	//float_test
 	// this is quite ugly, but basically we don't want to output cast from float to float
 	if (type.simple_type == eFloat){
-		return false;
+		assert(false && "Cast from float to float should not be required");
 	}
 
 	if (type.eType == ePointer){
-		return output_cast_to_interval_macro_assign(out, *type.ptr_type);
+		assert(false && "Attempt to assign from float to pointer");
 	}
 
 	string s = "";
@@ -574,27 +574,12 @@ output_cast_from_interval_macro_assign(std::ostream &out, const Type& type){
 		break;
 	case eVoid:
 	default:
-		assert(0);
+		assert(0 && "Unexpected type in cast from float");
 		break;
 	}
 	s += "(";
 	out << s;
-	return true;
 }
-
-// checks if the type if float or pointer (possibly multiple) to float
-
-bool
-is_float_ptr_type(const Type& type){
-	if (type.simple_type == eFloat){
-		return true;
-	}
-	if (type.eType == ePointer){
-		return is_float_ptr_type(*type.ptr_type);
-	}
-	return false;
-}
-
 
 
 
@@ -614,10 +599,12 @@ StatementAssign::OutputSimple(std::ostream &out) const
 
 		//float_test
 
-		if (CGOptions::float_test() && is_float_ptr_type(lhs.get_type())){
-			should_close_brackets = output_cast_to_interval_macro_assign(out, expr.get_type());
-		} else if (CGOptions::float_test() && is_float_ptr_type(expr.get_type())){
-			should_close_brackets = output_cast_from_interval_macro_assign(out, lhs.get_type());
+		if (CGOptions::float_test() && lhs.get_type().is_float() && !expr.get_type().is_float()){
+			output_cast_to_interval_macro_assign(out, expr.get_type());
+			should_close_brackets = true;
+		} else if (CGOptions::float_test() && expr.get_type().is_float() && !lhs.get_type().is_float()){
+			output_cast_from_interval_macro_assign(out, lhs.get_type());
+			should_close_brackets = true;
 		}
 
 		expr.Output(out);

@@ -112,6 +112,24 @@ float_interval_t ulong_long_to_float_interval(uint64_t x){
 	  return result;
 }
 
+// comparison operators
+
+int float_and_macro(float_interval_t in1, float_interval_t in2) {return 0;}
+int float_or_macro(float_interval_t in1, float_interval_t in2) {return 0;}
+int float_cmpeq_macro(float_interval_t in1, float_interval_t in2) {return 0;}
+int float_cmpne_macro(float_interval_t in1, float_interval_t in2) {return 0;}
+int float_cmpgt_macro(float_interval_t in1, float_interval_t in2) {return 0;}
+int float_cmplt_macro(float_interval_t in1, float_interval_t in2) {return 0;}
+int float_cmple_macro(float_interval_t in1, float_interval_t in2) {return 0;}
+int float_cmpge_macro(float_interval_t in1, float_interval_t in2) {return 0;}
+
+		// Bitwise Ops
+int float_bitand_macro(float_interval_t in1, float_interval_t in2) {return 0;}
+int float_bitor_macro(float_interval_t in1, float_interval_t in2) {return 0;}
+int float_bitxor_macro(float_interval_t in1, float_interval_t in2) {return 0;}
+int float_lshift_macro(float_interval_t in1, float_interval_t in2) {return 0;}
+int float_rshift_macro(float_interval_t in1, float_interval_t in2) {return 0;}
+
 
 ///////////////////////////////////
 

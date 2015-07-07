@@ -47,7 +47,22 @@ uint32_t float_interval_to_uint(float_interval_t in);
 uint32_t float_interval_to_ulong(float_interval_t in);
 uint64_t float_interval_to_ulong_long(float_interval_t in);
 
+//comparison operators
+int float_and_macro(float_interval_t in1, float_interval_t in2);
+int float_or_macro(float_interval_t in1, float_interval_t in2);
+int float_cmpeq_macro(float_interval_t in1, float_interval_t in2);
+int float_cmpne_macro(float_interval_t in1, float_interval_t in2);
+int float_cmpgt_macro(float_interval_t in1, float_interval_t in2);
+int float_cmplt_macro(float_interval_t in1, float_interval_t in2);
+int float_cmple_macro(float_interval_t in1, float_interval_t in2);
+int float_cmpge_macro(float_interval_t in1, float_interval_t in2);
 
+		// Bitwise Ops
+int float_bitand_macro(float_interval_t in1, float_interval_t in2);
+int float_bitor_macro(float_interval_t in1, float_interval_t in2);
+int float_bitxor_macro(float_interval_t in1, float_interval_t in2);
+int float_lshift_macro(float_interval_t in1, float_interval_t in2);
+int float_rshift_macro(float_interval_t in1, float_interval_t in2);
 
 
 ////////////////////////////////////
