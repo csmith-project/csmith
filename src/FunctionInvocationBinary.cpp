@@ -41,6 +41,8 @@
 #include "Block.h"
 #include "random.h"
 
+#include "FloatTestUtils.h"
+
 using namespace std;
 
 static vector<bool> needcomma;  // Flag to track output of commas
@@ -292,38 +294,7 @@ OutputStandardFuncName(eBinaryOps eFunc, std::ostream &out)
 	}
 }
 
-//float_test
-static void
-output_func_float_macro(eBinaryOps eFunc, std::ostream &out)
-{
-	switch (eFunc) {
-		// Logical Ops
-	case eAnd:		out << "float_and_macro(";		break;
-	case eOr:		out << "float_or_macro(";		break;
-	case eCmpEq:	out << "float_cmpeq_macro(";	break;
-	case eCmpNe:	out << "float_cmpne_macro(";	break;
-	case eCmpGt:	out << "float_cmpgt_macro(";	break;
-	case eCmpLt:	out << "float_cmplt_macro(";	break;
-	case eCmpLe:	out << "float_cmple_macro(";	break;
-	case eCmpGe:	out << "float_cmpge_macro(";	break;
 
-		// Bitwise Ops
-	case eBitAnd:	out << "float_bitand_macro(";	break;
-	case eBitOr:	out << "float_bitor_macro(";	break;
-	case eBitXor:	out << "float_bitxor_macro(";	break;
-	case eLShift:	out << "float_lshift_macro(";   break;
-	case eRShift:	out << "float_rshift_macro(";   break;
-
-	case eAdd:
-	case eSub:
-	case eMul:
-	case eDiv:
-	case eMod:
-	default:
-		assert(false && "Trying to output macro for invalid func");
-		break;
-	}
-}
 
 std::string
 FunctionInvocationBinary::get_binop_string(eBinaryOps bop)
@@ -344,60 +315,8 @@ FunctionInvocationBinary::get_binop_string(eBinaryOps bop)
 	return op_string;
 }
 
-//float_test
-// returns true if should close brackets
-void
-output_cast_to_interval_macro(std::ostream &out, const Type& type){
-
-	string s = "";
-	switch (type.simple_type) {
-	case eChar:
-		s = "char_to_float_interval";
-		break;
-	case eInt:
-		s = "int_to_float_interval";
-		break;
-	case eShort:
-		s = "short_to_float_interval";
-		break;
-	case eLong:
-		s = "long_to_float_interval";
-		break;
-	case eLongLong:
-		s = "long_long_to_float_interval";
-		break;
-	case eUChar:
-		s = "uchar_to_float_interval";
-		break;
-	case eUInt:
-		s = "uint_to_float_interval";
-		break;
-	case eUShort:
-		s = "ushort_to_float_interval";
-		break;
-	case eULong:
-		s = "ulong_to_float_interval";
-		break;
-	case eULongLong:
-		s = "ulong_long_to_float_interval";
-		break;
-	case eVoid:
-	case eFloat:
-	default:
-		if(type.eType != eSimple){
-			cerr << "NOT SIMPLE" << endl;
-		}else{
-			cerr << "GOT SIMPLE" << endl;
-			if (type.simple_type == eFloat){
-				cerr << "FLOAT" << endl;
-			}
-		}
-		assert(false && "Unexpected type : output_cast_to_interval_macro");
-		break;
-	}
-	s += "(";
-	out << s;
-}
+//
+//
 
 /*
  *

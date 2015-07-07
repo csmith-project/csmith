@@ -42,6 +42,10 @@
 #include "util.h"
 #include "DepthSpec.h"
 
+//float_test
+#include "Block.h"
+#include "FloatTestUtils.h"
+
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -136,7 +140,26 @@ StatementReturn::Output(std::ostream &out, FactMgr* /*fm*/, int indent) const
 		out << "DEPTH--;" << endl;
 	}
 	out << "return ";
+
+	//float_test
+
+	if (CGOptions::float_test() && (*parent).func->return_type->is_float()){
+		out << "/*should return float*/";
+	}
+
+	bool should_close_brackets = false;
+	if (CGOptions::float_test() && (*parent).func->return_type->is_float() && !var.get_type().is_float()){
+		output_cast_to_interval_macro(out, var.get_type());
+		should_close_brackets = true;
+	}
+
 	var.Output(out);
+
+	if (CGOptions::float_test() && should_close_brackets){
+		out << ")";
+	}
+
+
 	out << ";";
 	outputln(out);
 }

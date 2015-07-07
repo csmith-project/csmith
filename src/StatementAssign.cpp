@@ -54,6 +54,7 @@
 #include "VectorFilter.h"
 
 #include "random.h"
+#include "FloatTestUtils.h"
 
 using namespace std;
 
@@ -471,115 +472,7 @@ StatementAssign::Output(std::ostream &out, FactMgr* /*fm*/, int indent) const
 }
 
 
-//float_test : THIS IS DUPLICATED CODE, CLEAN THIS LATER
 
-bool
-output_cast_to_interval_macro_assign(std::ostream &out, const Type& type){
-
-	//float_test
-	// this is quite ugly, but basically we don't want to output cast from float to float
-	if (type.simple_type == eFloat){
-		return false;
-	}
-
-	if (type.eType == ePointer){
-		return output_cast_to_interval_macro_assign(out, *type.ptr_type);
-	}
-
-	string s = "";
-	switch (type.simple_type) {
-	case eChar:
-		s = "char_to_float_interval";
-		break;
-	case eInt:
-		s = "int_to_float_interval";
-		break;
-	case eShort:
-		s = "short_to_float_interval";
-		break;
-	case eLong:
-		s = "long_to_float_interval";
-		break;
-	case eLongLong:
-		s = "long_long_to_float_interval";
-		break;
-	case eUChar:
-		s = "uchar_to_float_interval";
-		break;
-	case eUInt:
-		s = "uint_to_float_interval";
-		break;
-	case eUShort:
-		s = "ushort_to_float_interval";
-		break;
-	case eULong:
-		s = "ulong_to_float_interval";
-		break;
-	case eULongLong:
-		s = "ulong_long_to_float_interval";
-		break;
-	case eVoid:
-	default:
-		assert(0);
-		break;
-	}
-	s += "(";
-	out << s;
-	return true;
-}
-
-void
-output_cast_from_interval_macro_assign(std::ostream &out, const Type& type){
-	//float_test
-	// this is quite ugly, but basically we don't want to output cast from float to float
-	if (type.simple_type == eFloat){
-		assert(false && "Cast from float to float should not be required");
-	}
-
-	if (type.eType == ePointer){
-		assert(false && "Attempt to assign from float to pointer");
-	}
-
-	string s = "";
-	switch (type.simple_type) {
-	case eChar:
-		s = "float_interval_to_char";
-		break;
-	case eInt:
-		s = "float_interval_to_int";
-		break;
-	case eShort:
-		s = "float_interval_to_short";
-		break;
-	case eLong:
-		s = "float_interval_to_long";
-		break;
-	case eLongLong:
-		s = "float_interval_to_long_long";
-		break;
-	case eUChar:
-		s = "float_interval_to_uchar";
-		break;
-	case eUInt:
-		s = "float_interval_to_uint";
-		break;
-	case eUShort:
-		s = "float_interval_to_ushort";
-		break;
-	case eULong:
-		s = "float_interval_to_ulong";
-		break;
-	case eULongLong:
-		s = "float_interval_to_ulong_long";
-		break;
-	case eVoid:
-	default:
-		assert(0 && "Unexpected type in cast from float");
-		break;
-	}
-	s += "(";
-	out << s;
-}
 
 
 
@@ -600,7 +493,7 @@ StatementAssign::OutputSimple(std::ostream &out) const
 		//float_test
 
 		if (CGOptions::float_test() && lhs.get_type().is_float() && !expr.get_type().is_float()){
-			output_cast_to_interval_macro_assign(out, expr.get_type());
+			output_cast_to_interval_macro(out, expr.get_type());
 			should_close_brackets = true;
 		} else if (CGOptions::float_test() && expr.get_type().is_float() && !lhs.get_type().is_float()){
 			output_cast_from_interval_macro_assign(out, lhs.get_type());
