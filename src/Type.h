@@ -250,7 +250,7 @@ public:
 	bool contain_pointer_field(void) const;
 	bool is_const_struct_union() const;
 	bool is_volatile_struct_union() const;
-	bool is_int(void) const { return eType == eSimple && simple_type != eVoid;}
+	bool is_int(void) const { return (eType == eSimple) && (simple_type != eVoid) && (simple_type != eFloat);}
 	bool is_aggregate(void) const { return eType == eStruct || eType == eUnion;}
 	bool match(const Type* t, enum eMatchType mt) const;
 	unsigned long SizeInBytes(void) const;

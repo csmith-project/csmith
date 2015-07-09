@@ -104,9 +104,17 @@ Lhs::make_random(CGContext &cg_context, const Type* t, const CVQualifiers* qfer,
 		if (valid && CGOptions::ccomp() && var->isBitfield_ && t->is_long_long()) {
 			valid = false;
 		}
+		//float_test : why is this check here?
+		//float_test : why is one way allowed and the other one isnt
 		if (!t->is_float() && var->type->is_float()) {
 			valid = false;
 		}
+
+		//float_test : added this check to prevent implicit conversions from float to int
+        if (t->is_float() && !(var->type->is_float())) {
+            valid = false;
+        }
+
 		if (valid) {
 			assert(var);
 			Lhs tmp(*var, t, compound_assign);

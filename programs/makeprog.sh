@@ -1,2 +1,2 @@
 #!/bin/bash
-../src/csmith ${1} >prog.c
+../src/csmith --seed ${1} ${2} >prog.c

@@ -496,7 +496,7 @@ StatementAssign::OutputSimple(std::ostream &out) const
 			output_cast_to_interval_macro(out, expr.get_type());
 			should_close_brackets = true;
 		} else if (CGOptions::float_test() && expr.get_type().is_float() && !lhs.get_type().is_float()){
-			output_cast_from_interval_macro_assign(out, lhs.get_type());
+			output_cast_from_interval_macro(out, lhs.get_type());
 			should_close_brackets = true;
 		}
 
@@ -505,6 +505,58 @@ StatementAssign::OutputSimple(std::ostream &out) const
 		if (CGOptions::float_test() && should_close_brackets){
 			out << ")";
 		}
+
+		out << "/*sim lhs:";
+		if (lhs.get_type().eType == ePointer){
+			out << "pointer,";
+		}
+		if (lhs.get_type().eType == eStruct){
+			out << "struct,";
+		}
+		if (lhs.get_type().eType == eUnion){
+			out << "union,";
+		}
+		if (lhs.get_type().eType == eSimple && lhs.get_type().is_int()){
+		    out << "int,";
+		}
+		if (lhs.get_type().is_float()){
+			out << "float,";
+		}
+
+		out << ", lhs_var:";
+		if (lhs.get_var()->type->eType == ePointer){
+			out << "pointer,";
+		}
+		if (lhs.get_var()->type->eType == eStruct){
+			out << "struct,";
+		}
+		if (lhs.get_var()->type->eType == eUnion){
+			out << "union,";
+		}
+		if (lhs.get_var()->type->eType == eSimple && lhs.get_var()->type->is_int()){
+		    out << "int,";
+		}
+		if (lhs.get_var()->type->is_float()){
+			out << "float,";
+		}
+
+		out <<": rhs:";
+		if (expr.get_type().eType == ePointer){
+			out << "pointer,";
+		}
+		if (expr.get_type().eType == eStruct){
+			out << "struct,";
+		}
+		if (expr.get_type().eType == eUnion){
+			out << "union,";
+		}
+		if (expr.get_type().eType == eSimple && expr.get_type().is_int()){
+		    out << "int,";
+		}
+		if (expr.get_type().is_float()){
+			out << "float,";
+		}
+		out <<"*/";
 
 
 		break;
@@ -532,10 +584,9 @@ StatementAssign::OutputSimple(std::ostream &out) const
 void
 StatementAssign::OutputAsExpr(std::ostream &out) const
 {
-	//float_test
-	if (CGOptions::float_test() && lhs.get_type().simple_type == eFloat){
 
-	}
+	//float_test
+	bool should_close_brackets = false;
 
 	if (CGOptions::avoid_signed_overflow() && op_flags) {
 		switch (op) {
@@ -557,18 +608,39 @@ StatementAssign::OutputAsExpr(std::ostream &out) const
 			else {
 				output_op(out);
 				out << " ";
-				//float_test
-				/*
-				if (CGOptions::float_test() && lhs.get_type().simple_type == eFloat){
-					output_cast_to_interval_macro_assign(out, expr.get_type());
+
+				if (CGOptions::float_test() && lhs.get_type().is_float() && !expr.get_type().is_float()){
+					output_cast_to_interval_macro(out, expr.get_type());
+					should_close_brackets = true;
+				} else if (CGOptions::float_test() && expr.get_type().is_float() && !lhs.get_type().is_float()){
+					output_cast_from_interval_macro(out, lhs.get_type());
+					should_close_brackets = true;
 				}
-				*/
+
+
 				expr.Output(out);
-				/*
-				if (CGOptions::float_test() && lhs.get_type().simple_type == eFloat){
+
+				if (CGOptions::float_test() && should_close_brackets){
 					out << ")";
 				}
-				*/
+
+				out << "/*exp lhs:";
+				if (lhs.get_type().eType == ePointer){
+					out << "pointer";
+				}else if (lhs.get_type().eType == eStruct){
+					out << "struct";
+				}else if (lhs.get_type().eType == eUnion){
+					out << "union";
+				}
+				out <<": rhs:";
+				if (expr.get_type().eType == ePointer){
+					out << "pointer";
+				}else if (expr.get_type().eType == eStruct){
+					out << "struct";
+				}else if (expr.get_type().eType == eUnion){
+					out << "union";
+				}
+				out <<"*/";
 			}
 			break;
 		}

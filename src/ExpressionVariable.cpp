@@ -75,6 +75,11 @@ ExpressionVariable::make_random(CGContext &cg_context, const Type* type, const C
 			continue;
 		if (!type->is_float() && var->type->is_float())
 			continue;
+
+		//float_test : prevent exprs which are int but simple_type == eFloat
+		if (type->is_float() && !var->type->is_float())
+					continue;
+
 		// forbid a parameter to take the address of an argument
 		// this is to simplify the path shortcutting delta
 		if (as_param && var->is_argument() && var->type->is_dereferenced_from(type)) {

@@ -630,17 +630,19 @@ FunctionInvocation::IsOrderedStandardFunc(eBinaryOps eFunc)
 bool
 FunctionInvocation::BinaryOpWorksForFloat(eBinaryOps op)
 {
+	//float_test : comment out comparison operators to prevernt assigning
+	// float x = (a < b);
 	switch (op) {
 		case eAdd:
 		case eSub:
 		case eMul:
 		case eDiv:
-		case eCmpGt:
-		case eCmpLt:
-		case eCmpGe:
-		case eCmpLe:
-		case eCmpEq:
-		case eCmpNe: // fall-through
+		//case eCmpGt:
+		//case eCmpLt:
+		//case eCmpGe:
+		//case eCmpLe:
+		//case eCmpEq:
+		//case eCmpNe: // fall-through
 			return true;
 		default:
 			return false;

@@ -298,7 +298,9 @@ Block::Output(std::ostream &out, FactMgr* fm, int indent) const
 	if (CGOptions::math_notmp())
 		OutputTmpVariableList(out, indent);
 
+	out << "/*variables*/";
 	OutputVariableList(local_vars, out, indent);
+	out << "/*statements*/";
 	OutputStatementList(stms, out, fm, indent);
 
 	if (CGOptions::depth_protect()) {
