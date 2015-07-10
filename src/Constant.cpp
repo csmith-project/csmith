@@ -577,12 +577,15 @@ Constant::Output(std::ostream &out) const
 
 	string s;
 	if(CGOptions::float_test() && type->simple_type == eFloat){
+		s = "FLOAT_TEST_CONSTANT(" + oss.str() + ")";
+		/*
 		s = "\n";
 		s = s + "#ifndef FLOAT_TEST_ENABLED\n";
 		s = s + oss.str() + "\n";
 		s = s + "#else\n";
 		s = s + "(float_interval_t){"+oss.str()+", "+oss.str()+"}\n";
 		s = s + "#endif\n";
+		*/
 	}else{
 		s = oss.str();
 	}
