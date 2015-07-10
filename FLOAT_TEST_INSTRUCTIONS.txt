@@ -1,0 +1,8 @@
+1) generate with --float-test option
+2) while compiling add path to runtime/FloatTest.c
+
+3) To run in float_test mode add -DFLOAT_TEST_ENABLED
+eg. gcc prog.c runtime/FloatTest.c -w -Iruntime -DFLOAT_TEST_ENABLED -o prog
+
+4) To run in normal mode do not add -DFLOAT_TEST_ENABLED
+eg. gcc prog.c runtime/FloatTest.c -w -Iruntime -o prog
