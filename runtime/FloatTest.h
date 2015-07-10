@@ -15,11 +15,18 @@ typedef struct float_interval {
 	float upper;
 } float_interval_t;
 
-
+//binary operators
 float_interval_t add_float_interval(float_interval_t in1, float_interval_t in2);
 float_interval_t sub_float_interval(float_interval_t in1, float_interval_t in2);
 float_interval_t mul_float_interval(float_interval_t in1, float_interval_t in2);
 float_interval_t div_float_interval(float_interval_t in1, float_interval_t in2);
+
+//unary operators
+float_interval_t plus_float_interval(float_interval_t in);
+float_interval_t minus_float_interval(float_interval_t in);
+int not_float_interval(float_interval_t in);
+float_interval_t bitnot_float_interval(float_interval_t in);
+
 
 // casts to float_interval
 float_interval_t char_to_float_interval(int8_t x);

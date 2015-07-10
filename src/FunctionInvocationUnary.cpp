@@ -39,6 +39,8 @@
 #include "CGContext.h"
 #include "random.h"
 
+#include "FloatTestUtils.h"
+
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -202,6 +204,9 @@ void
 FunctionInvocationUnary::Output(std::ostream &out) const
 {
 	bool need_cast = false;
+
+	bool should_close_brackets = false;
+
 	out << "(";
 	switch (eFunc) {
 	default:
@@ -224,13 +229,29 @@ FunctionInvocationUnary::Output(std::ostream &out) const
 					if (CGOptions::identify_wrappers()) {
 						out << ", " << id;
 					}
-					out << ")";
+					//float_test
+					//out << ")";
+					out << "/*unary wrapper*/)";
 					break;
 				}
 			}
 			else {
-				OutputStandardFuncName(eFunc, out);
+				should_close_brackets = false;
+				if (CGOptions::float_test() && param_value[0]->get_type().is_float()){
+					output_func_float_macro(eFunc, out);
+					should_close_brackets = true;
+				}else{
+					OutputStandardFuncName(eFunc, out);
+				}
+
 				param_value[0]->Output(out);
+				//float_test
+				out<<"/*no unary wrapper*/";
+
+				if(CGOptions::float_test() && should_close_brackets){
+					out << ")";
+				}
+
 				break;
 			}
 		}
@@ -240,7 +261,15 @@ FunctionInvocationUnary::Output(std::ostream &out) const
 	case ePlus:
 	case eNot:
 	case eBitNot:
-		OutputStandardFuncName(eFunc, out);
+
+		should_close_brackets = false;
+		if (CGOptions::float_test() && param_value[0]->get_type().is_float()){
+			output_func_float_macro(eFunc, out);
+			should_close_brackets = true;
+		}else{
+			OutputStandardFuncName(eFunc, out);
+		}
+
 		// explicit type casting for op1
 		if (need_cast) {
 			out << "(";
@@ -248,6 +277,11 @@ FunctionInvocationUnary::Output(std::ostream &out) const
 			out << ")";
 		}
 		param_value[0]->Output(out);
+
+		if(CGOptions::float_test() && should_close_brackets){
+			out << ")";
+		}
+
 		break;
 	}
 	out << ")";

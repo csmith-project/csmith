@@ -1,9 +1,9 @@
 // Extension to CSmith to test floating point optimizations
 // Jacek Burys, Imperial College London 2015
 
-#include "FloatTest.h"
 
 #ifdef FLOAT_TEST_ENABLED
+#include "FloatTest.h"
 
 ///////////////////////////////////
 
@@ -29,6 +29,36 @@ float_interval_t mul_float_interval(float_interval_t in1, float_interval_t in2){
 }
 
 float_interval_t div_float_interval(float_interval_t in1, float_interval_t in2){
+	  float_interval_t result;
+	  result.lower = 0.0f;
+	  result.upper = 0.0f;
+	  return result;
+}
+
+
+//////////////
+
+float_interval_t plus_float_interval(float_interval_t in){
+	  float_interval_t result;
+	  result.lower = 0.0f;
+	  result.upper = 0.0f;
+	  return result;
+}
+
+float_interval_t minus_float_interval(float_interval_t in){
+	  float_interval_t result;
+	  result.lower = 0.0f;
+	  result.upper = 0.0f;
+	  return result;
+}
+
+
+int not_float_interval(float_interval_t in){
+	  return 0;
+}
+
+
+float_interval_t bitnot_float_interval(float_interval_t in){
 	  float_interval_t result;
 	  result.lower = 0.0f;
 	  result.upper = 0.0f;

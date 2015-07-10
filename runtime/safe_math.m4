@@ -371,6 +371,7 @@ safe_float_conversion(float, int32_t, INT32_MIN, INT32_MAX)
 define(`float_interval_math',`
 
 #ifdef FLOAT_TEST_ENABLED
+#include "FloatTest.h"
 
 STATIC $6
 FUNC_NAME(add_func_$1_f_f)($6 sf1, $6 sf2 LOG_INDEX)
