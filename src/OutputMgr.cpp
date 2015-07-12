@@ -117,7 +117,14 @@ OutputMgr::OutputMain(std::ostream &out)
 		ExtensionMgr::OutputFirstFunInvocation(out, invoke);
 		std::vector<Variable *>& vars = *VariableSelector::GetGlobalVariables();
 		for (size_t i=0; i<vars.size(); i++) {
-			vars[i]->output_value_dump(out, "checksum ", 1);
+			if (CGOptions::float_test()){
+				if (vars[i]->type->simple_type == eFloat){
+					vars[i]->output_value_dump(out, "float checksum ", 1);
+				}
+			}else{
+				vars[i]->output_value_dump(out, "checksum ", 1);
+			}
+
 		}
 	}
 	else {

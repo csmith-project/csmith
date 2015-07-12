@@ -1424,8 +1424,18 @@ Variable::output_value_dump(ostream &out, string prefix, int indent) const
 		}
 	}
 	else if (type->eType == eSimple) {
-		output_print_str(out, prefix + to_string() + " = " + type->printf_directive() + "\\n", to_string(), indent);
-		outputln(out);
+		//float_test
+		if(CGOptions::float_test()){
+			out << "OUTPUT_FLOAT_INTERVAL_MACRO(" << to_string() << ");";
+			outputln(out);
+			//string s = to_string();
+			//output_print_str(out, prefix + to_string() + " = " + type->printf_directive() + "\\n",
+			//		s +".lower, "+s+".upper" , indent);
+			//outputln(out);
+		}else{
+			output_print_str(out, prefix + to_string() + " = " + type->printf_directive() + "\\n", to_string(), indent);
+			outputln(out);
+		}
 	}
 	else if (type->eType == eStruct) {
 		for (i=0; i<field_vars.size(); i++) {

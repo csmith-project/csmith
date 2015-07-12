@@ -176,6 +176,9 @@ FunctionInvocation::make_random_binary(CGContext &cg_context, const Type* type)
 	do {
 		op = (eBinaryOps)(rnd_upto(MAX_BINARY_OP, BINARY_OPS_PROB_FILTER));
 	} while (type->is_float() && !BinaryOpWorksForFloat(op));
+
+
+
 	ERROR_GUARD(NULL);
 	assert(type);
 	SafeOpFlags *flags = SafeOpFlags::make_random_binary(type, NULL, NULL, sOpBinary, op);

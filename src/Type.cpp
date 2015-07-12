@@ -1787,6 +1787,11 @@ Type::printf_directive(void) const
 	size_t i;
 	switch (eType) {
 	case eSimple:
+		if (CGOptions::float_test() && simple_type == eFloat){
+			ret = "%f - %f";
+			break;
+		}
+
 		if (SizeInBytes() >= 8) {
 			ret = is_signed() ? "%lld" : "%llu";
 		} else {
