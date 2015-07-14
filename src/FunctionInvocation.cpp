@@ -181,7 +181,10 @@ FunctionInvocation::make_random_binary(CGContext &cg_context, const Type* type)
 
 	ERROR_GUARD(NULL);
 	assert(type);
-	SafeOpFlags *flags = SafeOpFlags::make_random_binary(type, NULL, NULL, sOpBinary, op);
+	const Type* returnType =
+			type->is_float() && BinaryOpIsBoolean(op) ? &Type::get_simple_type(eInt) : type;
+
+	SafeOpFlags *flags = SafeOpFlags::make_random_binary(returnType, NULL, NULL, sOpBinary, op);
 	assert(flags);
 	ERROR_GUARD(NULL);
 	FunctionInvocationBinary *fi = FunctionInvocationBinary::CreateFunctionInvocationBinary(cg_context, op, flags);
@@ -640,12 +643,31 @@ FunctionInvocation::BinaryOpWorksForFloat(eBinaryOps op)
 		case eSub:
 		case eMul:
 		case eDiv:
-		//case eCmpGt:
-		//case eCmpLt:
-		//case eCmpGe:
-		//case eCmpLe:
-		//case eCmpEq:
-		//case eCmpNe: // fall-through
+		case eCmpGt:
+		case eCmpLt:
+		case eCmpGe:
+		case eCmpLe:
+		case eCmpEq:
+		case eCmpNe: // fall-through
+			return true;
+		default:
+			return false;
+	}
+}
+
+/*
+ * Return true if `op' is a boolean operator
+ */
+bool
+FunctionInvocation::BinaryOpIsBoolean(eBinaryOps op)
+{
+	switch (op) {
+		case eCmpGt:
+		case eCmpLt:
+		case eCmpGe:
+		case eCmpLe:
+		case eCmpEq:
+		case eCmpNe: // fall-through
 			return true;
 		default:
 			return false;
