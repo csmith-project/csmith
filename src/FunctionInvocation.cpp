@@ -181,12 +181,15 @@ FunctionInvocation::make_random_binary(CGContext &cg_context, const Type* type)
 
 	ERROR_GUARD(NULL);
 	assert(type);
+	//float_test
 	const Type* returnType =
-			type->is_float() && BinaryOpIsBoolean(op) ? &Type::get_simple_type(eInt) : type;
+			type->is_float() && BinaryOpReturnsBoolean(op) ? &Type::get_simple_type(eInt) : type;
 
 	SafeOpFlags *flags = SafeOpFlags::make_random_binary(returnType, NULL, NULL, sOpBinary, op);
 	assert(flags);
 	ERROR_GUARD(NULL);
+
+
 	FunctionInvocationBinary *fi = FunctionInvocationBinary::CreateFunctionInvocationBinary(cg_context, op, flags);
 
 	Effect lhs_eff_accum;
@@ -636,8 +639,7 @@ FunctionInvocation::IsOrderedStandardFunc(eBinaryOps eFunc)
 bool
 FunctionInvocation::BinaryOpWorksForFloat(eBinaryOps op)
 {
-	//float_test : comment out comparison operators to prevernt assigning
-	// float x = (a < b);
+
 	switch (op) {
 		case eAdd:
 		case eSub:
@@ -659,7 +661,7 @@ FunctionInvocation::BinaryOpWorksForFloat(eBinaryOps op)
  * Return true if `op' is a boolean operator
  */
 bool
-FunctionInvocation::BinaryOpIsBoolean(eBinaryOps op)
+FunctionInvocation::BinaryOpReturnsBoolean(eBinaryOps op)
 {
 	switch (op) {
 		case eCmpGt:

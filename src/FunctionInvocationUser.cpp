@@ -62,6 +62,8 @@
 #include "SafeOpFlags.h"
 #include "Error.h"
 
+#include "FloatTestUtils.h"
+
 using namespace std;
 
 static vector<bool> needcomma;  // Flag to track output of commas
@@ -430,6 +432,57 @@ OutputExpressionVector(const vector<const Expression*> &var, std::ostream &out)
 	needcomma.pop_back();
 }
 
+// float_test
+
+int
+OutputActualParamExpressionFloatTest(const Expression *expr,
+		Variable* par, std::ostream *pOut)
+{
+	std::ostream &out = *pOut;
+	if (needcomma.back()) {
+		out << ", ";
+	}
+	needcomma.back() = true;
+
+	bool should_close_brackets = false;
+	if (CGOptions::float_test() && par->type->is_float() && expr->get_type().is_int()){
+		output_cast_to_interval_macro(out, expr->get_type());
+		should_close_brackets = true;
+	} else if(CGOptions::float_test() && par->type->is_int() && expr->get_type().is_float()){
+		output_cast_from_interval_macro(out, *(par->type));
+		should_close_brackets = true;
+	}
+
+	expr->Output(out);
+
+	if (CGOptions::float_test() && should_close_brackets){
+		out << ")";
+	}
+
+
+    // for MSVC: must return something to be able to pass to a "map" function
+    return 0;
+}
+
+void
+OutputExpressionVectorFloatTest(const vector<const Expression*> &var,
+		vector<Variable*> &param, std::ostream &out){
+
+	assert(var.size() == param.size() && "var and param need to have the same size");
+
+	needcomma.push_back(false);
+
+	//for_each(var.begin(), var.end(),
+	//		 std::bind2nd(std::ptr_fun(OutputActualParamExpression), &out));
+
+	for(unsigned int i=0; i<var.size(); i++){
+		OutputActualParamExpressionFloatTest(var[i], param[i], &out);
+	}
+
+	needcomma.pop_back();
+}
+
+
 /*
  *
  */
@@ -437,7 +490,12 @@ void
 FunctionInvocationUser::Output(std::ostream &out) const
 {
 	out << func->name << "(";
-	OutputExpressionVector(param_value, out);
+	if (CGOptions::float_test()){
+		// need to check whether types of param_value agree with those in function signature
+		OutputExpressionVectorFloatTest(param_value, func->param, out);
+	}else{
+		OutputExpressionVector(param_value, out);
+	}
 	out << ")";
 }
 

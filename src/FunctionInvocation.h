@@ -153,7 +153,7 @@ public:
 
 	static bool IsOrderedStandardFunc(eBinaryOps eFunc);
 
-	static bool BinaryOpIsBoolean(eBinaryOps op);
+	static bool BinaryOpReturnsBoolean(eBinaryOps op);
 
 	static bool BinaryOpWorksForFloat(eBinaryOps op);
 
