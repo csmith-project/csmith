@@ -230,6 +230,7 @@ SafeOpFlags::make_random_binary(const Type *rv_type, const Type *op1_type, const
 	Probabilities::unregister_extra_filter(pSafeOpsSizeProb, filter);
 	ERROR_GUARD_AND_DEL2(NULL, flags, filter);
 
+
 	//Probabilities::unregister_extra_filter(pSafeOpsSizeProb, filter);
 	delete filter;
 	return flags;

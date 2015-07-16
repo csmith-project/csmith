@@ -181,14 +181,33 @@ FunctionInvocation::make_random_binary(CGContext &cg_context, const Type* type)
 
 	ERROR_GUARD(NULL);
 	assert(type);
-	//float_test
-	const Type* returnType =
-			type->is_float() && BinaryOpReturnsBoolean(op) ? &Type::get_simple_type(eInt) : type;
+	//float_test : UGLY, REMOVE THAT
+//	const Type* returnType = type;
+//			type->is_float() && BinaryOpReturnsBoolean(op) ? &Type::get_simple_type(eInt) : type;
 
-	SafeOpFlags *flags = SafeOpFlags::make_random_binary(returnType, NULL, NULL, sOpBinary, op);
+	/*
+	bool float_test = false;
+	if (BinaryOpReturnsBoolean(op)){
+		cerr << "trying to make comparison" << endl;
+		float_test = true;
+	}
+	*/
+
+	SafeOpFlags *flags = SafeOpFlags::make_random_binary(type, NULL, NULL, sOpBinary, op);
 	assert(flags);
 	ERROR_GUARD(NULL);
 
+/*
+	if(float_test){
+		cerr << "ok" << endl;
+
+		if (flags->get_lhs_type()->is_int()) cerr << "lhs int ";
+		if (flags->get_lhs_type()->is_float()) cerr << "lhs float ";
+		if (flags->get_rhs_type()->is_int()) cerr << "rhs int ";
+		if (flags->get_rhs_type()->is_float()) cerr << "rhs float ";
+		cerr << endl;
+	}
+*/
 
 	FunctionInvocationBinary *fi = FunctionInvocationBinary::CreateFunctionInvocationBinary(cg_context, op, flags);
 
@@ -279,6 +298,9 @@ FunctionInvocation::make_random_binary(CGContext &cg_context, const Type* type)
 	// Currently, the "fix" is handled in `FunctionInvocationBinary::Output'.
 	fi->param_value.push_back(lhs);
 	fi->param_value.push_back(rhs);
+
+
+
 	return fi;
 }
 

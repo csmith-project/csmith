@@ -195,6 +195,10 @@ bool
 FunctionInvocationBinary::is_return_type_float() const
 {
 	assert(op_flags);
+	//float_test
+	if(BinaryOpReturnsBoolean(eFunc)){
+		return false;
+	}
 	return op_flags->get_op_size() == sFloat;
 }
 
