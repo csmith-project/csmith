@@ -619,6 +619,11 @@ Type::choose_random_nonvoid_simple(void)
 
 	simple_type = (eSimpleType) rnd_upto(MAX_SIMPLE_TYPES, SIMPLE_TYPES_PROB_FILTER);
 
+	//float_test : hacky and ugly - increase probability of producing floats
+	if (rnd_flipcoin(80)){
+		simple_type = eFloat;
+	}
+
 	return simple_type;
 }
 

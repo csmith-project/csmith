@@ -51,8 +51,8 @@ printf(" = [%.8a, %.8a]\n", x.lower, x.upper);
 #define BITNOT_FLOAT_INTERVAL(x) not_float_interval(x)
 
 
-#define FLOAT_AND_MACRO(x, y) float_test_and(x, y)
-#define FLOAT_OR_MACRO(x, y) float_test_or(x, y)
+#define FLOAT_AND_MACRO(x, y) float_interval_to_bool(x) && float_interval_to_bool(y)
+#define FLOAT_OR_MACRO(x, y) float_interval_to_bool(x) || float_interval_to_bool(y)
 #define FLOAT_CMPEQ_MACRO(x, y) float_test_cmpeq(x, y)
 #define FLOAT_CMPNE_MACRO(x, y) float_test_cmpne(x, y)
 #define FLOAT_CMPGT_MACRO(x, y) float_test_cmpgt(x, y)

@@ -783,7 +783,9 @@ Variable::OutputDef(std::ostream &out, int indent) const
 	}
 	output_qualified_type(out);
 
-	out << "/*type is :";
+
+	//out << "/*type is :";
+	/*
 	if (type->eType == ePointer){
 		out << "pointer,";
 	}
@@ -799,7 +801,8 @@ Variable::OutputDef(std::ostream &out, int indent) const
 	if (type->is_float()){
 		out << "float,";
 	}
-	out << "*/";
+	*/
+	//out << "*/";
 
 
 	out << get_actual_name() << " = ";
@@ -815,7 +818,6 @@ Variable::OutputDef(std::ostream &out, int indent) const
 	init->Output(out);
 
 	out << ";";
-	out << "/* var out assignment */";
 
 	if (is_volatile()) {
 		string comment = "VOLATILE GLOBAL " + get_actual_name();
