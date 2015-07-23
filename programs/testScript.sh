@@ -13,6 +13,7 @@ GEN_ERROR_FILE="${RESULTS_DIR}/genError.txt"
 COMP_ERROR_FILE="${RESULTS_DIR}/compError.txt"
 RUN_ERROR_FILE="${RESULTS_DIR}/runError.txt"
 RESULT_ERROR_FILE="${RESULTS_DIR}/resError.txt"
+WIDE_COUNT_FILE="${RESULTS_DIR}/wideCount.txt"
 
 makeProg(){
   ${TIMEOUT_MACRO} ${CSMITH_PATH}src/csmith --seed ${1} --float-test --check-global > ${TEMP_DIR}/prog.c
@@ -48,9 +49,9 @@ runInNormalMode(){
 }
 
 validateResults(){
-  python3 validate.py ${TEMP_DIR}/outNormalMode1.txt ${TEMP_DIR}/outFloatTestMode.txt && \
-  python3 validate.py ${TEMP_DIR}/outNormalMode2.txt ${TEMP_DIR}/outFloatTestMode.txt && \
-  python3 validate.py ${TEMP_DIR}/outNormalMode3.txt ${TEMP_DIR}/outFloatTestMode.txt
+  python3 validate.py ${TEMP_DIR}/outNormalMode1.txt ${TEMP_DIR}/outFloatTestMode.txt >> "${WIDE_COUNT_FILE}" && \
+  python3 validate.py ${TEMP_DIR}/outNormalMode2.txt ${TEMP_DIR}/outFloatTestMode.txt >> "${WIDE_COUNT_FILE}" && \
+  python3 validate.py ${TEMP_DIR}/outNormalMode3.txt ${TEMP_DIR}/outFloatTestMode.txt >> "${WIDE_COUNT_FILE}"
   return $?
 }
 
@@ -89,6 +90,7 @@ touch ${GEN_ERROR_FILE}
 touch ${COMP_ERROR_FILE}
 touch ${RUN_ERROR_FILE}
 touch ${RESULT_ERROR_FILE}
+touch ${WIDE_COUNT_FILE}
 
 for seed in $(seq $1 $2); do
   echo "$seed"

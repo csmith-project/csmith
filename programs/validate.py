@@ -26,12 +26,19 @@ def isInInterval(value, lower, upper):
 f1 = open(str(sys.argv[1]), 'r')
 f2 = open(str(sys.argv[2]), 'r')
 
+wide = 0
+total = 0
+result = 0
 for line1, line2 in zip(f1.readlines(), f2.readlines()):
+  total+=1
   value = extractValue(line1)
   lower, upper = extractInterval(line2)
+  if lower!=upper:
+    wide+=1
   if not isInInterval(value, lower, upper):
-    sys.exit(1)
+    result = 1
 
+print(total, wide)
 f1.close()
 f2.close()
-sys.exit(0)
+sys.exit(result)
