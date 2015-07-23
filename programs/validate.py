@@ -29,10 +29,9 @@ f2 = open(str(sys.argv[2]), 'r')
 for line1, line2 in zip(f1.readlines(), f2.readlines()):
   value = extractValue(line1)
   lower, upper = extractInterval(line2)
-  if isInInterval(value, lower, upper):
-    sys.exit(0)
-  else:
+  if not isInInterval(value, lower, upper):
     sys.exit(1)
 
 f1.close()
 f2.close()
+sys.exit(0)
