@@ -18,7 +18,7 @@ typedef struct float_interval {
 #define FLOAT_TEST_CONSTANT(c) (float_interval_t){c, c}
 
 #define OUTPUT_FLOAT_INTERVAL_MACRO(x) printf(#x);\
-printf(" = [%.8a, %.8a]\n", x.lower, x.upper);
+printf(" = [%a, %a]\n", x.lower, x.upper);
 
 #define CHAR_TO_FLOAT_INTERVAL(x) char_to_float_interval(x)
 #define INT_TO_FLOAT_INTERVAL(x) int_to_float_interval(x)
@@ -135,7 +135,7 @@ int float_test_rshift(float_interval_t in1, float_interval_t in2);
 #define FLOAT_TEST_CONSTANT(c) c
 
 #define OUTPUT_FLOAT_INTERVAL_MACRO(x) printf(#x);\
-printf(" = %.8a\n", x);
+printf(" = %a\n", x);
 
 #define CHAR_TO_FLOAT_INTERVAL(x) x
 #define INT_TO_FLOAT_INTERVAL(x) x
