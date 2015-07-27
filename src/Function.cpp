@@ -348,7 +348,7 @@ GenerateParameterListFromString(Function &currFunc, const string &params_string)
 		assert((vs[i] != "Void") && "Invalid parameter type!");
 		CVQualifiers qfer;
 		qfer.add_qualifiers(false, false);
-		const Type *ty = Type::get_type_from_string(vs[0]);
+		const Type *ty = Type::get_type_from_string(vs[i]);
 		Variable *v = VariableSelector::GenerateParameterVariable(ty, &qfer);
 		assert(v);
 		currFunc.param.push_back(v);
