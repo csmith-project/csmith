@@ -18,8 +18,8 @@ for i in $(seq ${1} ${2}); do
     echo "$i TIMEOUT $OK  $ERROR  $TIMEOUT"
     continue
   fi
-  gcc prog.c -I${RUNTIME_PATH} -c -o prog.o > err.txt 2>&1
-  g++ prog.o ${ADAPTER_PATH} -o prog
+  timeout 30 gcc prog.c -I${RUNTIME_PATH} -c -o prog.o > err.txt 2>&1
+  timeout 30 g++ prog.o ${ADAPTER_PATH} -o prog
   if grep 'incompatible' err.txt; then
     ERROR=$((ERROR+1))
     echo "$i ERROR $OK  $ERROR  $TIMEOUT"

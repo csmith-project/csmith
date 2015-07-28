@@ -49,6 +49,10 @@ public:
 	// Factory method.
 	static Lhs *make_random(CGContext &cg_context, const Type* t, const CVQualifiers* qfer, bool for_compound_assign, bool no_signed_overflow=false);
 
+	//floa_test
+	static Lhs *make_random_no_incompatible_pointers(CGContext &cg_context, const Type* t, const Expression *e, const CVQualifiers* qfer, bool for_compound_assign, bool no_signed_overflow=false);
+
+
 	explicit Lhs(const Variable &v);
 
 	Lhs(const Variable &v, const Type* t, bool compound_assign);
