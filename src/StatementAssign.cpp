@@ -187,7 +187,23 @@ StatementAssign::make_random(CGContext &cg_context, const Type* type, const CVQu
 
 	bool prev_flag = CGOptions::match_exact_qualifiers(); // keep a copy of previous flag
 	if (qf) CGOptions::match_exact_qualifiers(true);      // force exact qualifier match when selecting vars
+
+
 	lhs = Lhs::make_random(lhs_cg_context, type, &qfer, op != eSimpleAssign, need_no_rhs(op));
+
+	//float_test if lhs is a pointer, make sure it's compatible
+	//this gets stuck sometimes
+	/*
+	while (lhs->get_type().eType == ePointer &&
+			!(lhs->get_type().get_base_type()->is_float()) && e->get_type().get_base_type()->is_float()){
+		delete lhs;
+		lhs = Lhs::make_random(lhs_cg_context, type, &qfer, op != eSimpleAssign, need_no_rhs(op));
+		cerr << "made new" <<endl;
+	}
+	cerr << "finished" << endl;
+	*/
+	//
+
 	if (qf) CGOptions::match_exact_qualifiers(prev_flag); // restore flag
 	ERROR_GUARD_AND_DEL2(NULL, e, lhs);
 
@@ -213,6 +229,18 @@ StatementAssign::make_random(CGContext &cg_context, const Type* type, const CVQu
 	ERROR_GUARD_AND_DEL2(NULL, e, lhs);
 	StatementAssign *stmt_assign = make_possible_compound_assign(cg_context, type, *lhs, op, *e);
 	ERROR_GUARD_AND_DEL2(NULL, e, lhs);
+
+	//float_test : this is quite ugly, for now we will just terminate when
+	//             and incompatible assignment is created
+	if (stmt_assign->lhs.get_type().eType == ePointer && stmt_assign->lhs.get_type().get_base_type()->is_int() &&
+			stmt_assign->rhs->get_type().get_base_type()->is_float()){
+		assert(false && "terminated due to creation of incompatible pointer assignment");
+	}
+	if (stmt_assign->lhs.get_type().eType == ePointer && stmt_assign->lhs.get_type().get_base_type()->is_float() &&
+			stmt_assign->rhs->get_type().get_base_type()->is_int()/* && stmt_assign->rhs->term_type != eFunction*/){
+		assert(false && "terminated due to creation of incompatible pointer assignment");
+	}
+
 	return stmt_assign;
 }
 
@@ -289,6 +317,7 @@ StatementAssign::make_possible_compound_assign(CGContext &cg_context,
 			ERROR_GUARD(NULL);
 		}
 	}
+
 	StatementAssign *sa = new StatementAssign(cg_context.get_current_block(), l, op, e, rhs, fs, tmp1, tmp2);
 	return sa;
 }
@@ -506,9 +535,15 @@ StatementAssign::OutputSimple(std::ostream &out) const
 			out << ")";
 		}
 
-		out << "/*sim lhs:";
+		out << "/*assign sim lhs:";
 		if (lhs.get_type().eType == ePointer){
-			out << "pointer,";
+			out << "pointer ";
+			if (lhs.get_type().get_base_type()->is_int()){
+				out << "int";
+			}else if(lhs.get_type().get_base_type()->is_float()){
+				out << "float";
+			}
+			out << ",";
 		}
 		if (lhs.get_type().eType == eStruct){
 			out << "struct,";
@@ -525,7 +560,13 @@ StatementAssign::OutputSimple(std::ostream &out) const
 
 		out << ", lhs_var:";
 		if (lhs.get_var()->type->eType == ePointer){
-			out << "pointer,";
+			out << "pointer ";
+			if (lhs.get_var()->type->get_base_type()->is_int()){
+				out << "int";
+			}else if(lhs.get_var()->type->get_base_type()->is_float()){
+				out << "float";
+			}
+			out << ",";
 		}
 		if (lhs.get_var()->type->eType == eStruct){
 			out << "struct,";
@@ -542,7 +583,13 @@ StatementAssign::OutputSimple(std::ostream &out) const
 
 		out <<": rhs:";
 		if (expr.get_type().eType == ePointer){
-			out << "pointer,";
+			out << "pointer ";
+			if (expr.get_type().get_base_type()->is_int()){
+				out << "int";
+			}else if(expr.get_type().get_base_type()->is_float()){
+				out << "float";
+			}
+			out << ",";
 		}
 		if (expr.get_type().eType == eStruct){
 			out << "struct,";

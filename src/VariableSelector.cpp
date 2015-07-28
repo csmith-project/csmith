@@ -419,11 +419,16 @@ VariableSelector::choose_var(vector<Variable *> vars,
         if (no_bitfield && (*i)->isBitfield_)
 			continue;
 
-        //float test: prevent incompatible pointer assignments
+        //float test: prevent incompatible pointer assignments, dont know if this works
+        if (type && type->eType == ePointer && type->get_base_type()->simple_type == eFloat
+        		&& (*i)->type->eType == ePointer && (*i)->type->get_base_type()->simple_type != eFloat){
+        	continue;
+        }
         if (type && type->eType == ePointer && type->get_base_type()->simple_type != eFloat
         		&& (*i)->type->eType == ePointer && (*i)->type->get_base_type()->simple_type == eFloat){
         	continue;
         }
+        //
 
         if (type && !type->match((*i)->type, mt)) {
             continue;
