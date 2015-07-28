@@ -27,4 +27,5 @@ for i in $(seq ${1} ${2}); do
     OK=$((OK+1))
     echo "$i OK $OK  $ERROR  $TIMEOUT"
   fi
+  echo "$i : OK $OK, ERROR $ERROR, TIMEOUT $TIMEOUT" > "$LOG_FILE"
 done
