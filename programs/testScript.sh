@@ -21,7 +21,7 @@ makeProg(){
 }
 
 compileInFloatTestMode(){
-  ${TIMEOUT_MACRO} ${GCC} ${TEMP_DIR}/prog.c -O0 -w -c -I${CSMITH_PATH}runtime -DFLOAT_TEST_ENABLED -o ${TEMP_DIR}/progFloatTestMode.o && \
+  ${TIMEOUT_MACRO} ${GCC} ${TEMP_DIR}/prog.c -O0 -w -c -I${CSMITH_PATH}runtime -DUNSAFE_FLOAT -DFLOAT_TEST_ENABLED -o ${TEMP_DIR}/progFloatTestMode.o && \
   ${TIMEOUT_MACRO} g++ ${TEMP_DIR}/progFloatTestMode.o ${ADAPTER_OBJECT_PATH} -o ${TEMP_DIR}/progFloatTestMode
   return $?
 }
@@ -32,11 +32,11 @@ runInFloatTestMode(){
 }
 
 compileInNormalMode(){
-  ${TIMEOUT_MACRO} ${GCC} ${TEMP_DIR}/prog.c -O1 -w -c -I${CSMITH_PATH}runtime -o ${TEMP_DIR}/progNormalMode1.o && \
+  ${TIMEOUT_MACRO} ${GCC} ${TEMP_DIR}/prog.c -O1 -w -c -I${CSMITH_PATH}runtime -DUNSAFE_FLOAT -o ${TEMP_DIR}/progNormalMode1.o && \
   ${TIMEOUT_MACRO} g++ ${TEMP_DIR}/progNormalMode1.o ${ADAPTER_OBJECT_PATH} -o ${TEMP_DIR}/progNormal1 && \
-  ${TIMEOUT_MACRO} ${GCC} ${TEMP_DIR}/prog.c -O2 -w -c -I${CSMITH_PATH}runtime -o ${TEMP_DIR}/progNormalMode2.o && \
+  ${TIMEOUT_MACRO} ${GCC} ${TEMP_DIR}/prog.c -O2 -w -c -I${CSMITH_PATH}runtime -DUNSAFE_FLOAT -o ${TEMP_DIR}/progNormalMode2.o && \
   ${TIMEOUT_MACRO} g++ ${TEMP_DIR}/progNormalMode2.o ${ADAPTER_OBJECT_PATH} -o ${TEMP_DIR}/progNormal2 && \
-  ${TIMEOUT_MACRO} ${GCC} ${TEMP_DIR}/prog.c -O3 -w -c -I${CSMITH_PATH}runtime -o ${TEMP_DIR}/progNormalMode3.o && \
+  ${TIMEOUT_MACRO} ${GCC} ${TEMP_DIR}/prog.c -O3 -w -c -I${CSMITH_PATH}runtime -DUNSAFE_FLOAT -o ${TEMP_DIR}/progNormalMode3.o && \
   ${TIMEOUT_MACRO} g++ ${TEMP_DIR}/progNormalMode3.o ${ADAPTER_OBJECT_PATH} -o ${TEMP_DIR}/progNormal3
   return $?
 }
