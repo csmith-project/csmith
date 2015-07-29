@@ -3,6 +3,9 @@
 // Copyright (c) 2007, 2008, 2009, 2010, 2011 The University of Utah
 // All rights reserved.
 //
+// Copyright (c) 2015-2016 Huawei Technologies Co., Ltd
+// All rights reserved.
+//
 // This file is part of `csmith', a random generator of C programs.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -32,6 +35,7 @@
 #include "CGOptions.h"
 #include "Fact.h"
 #include "Type.h"
+#include "AggregateType.h"
 #include "Common.h"
 #include "Function.h"
 #include "FactMgr.h"
@@ -289,7 +293,7 @@ FactUnion::imply(const Fact& f) const
 bool
 FactUnion::is_field_readable(const Variable* v, int fid, const vector<const Fact*>& facts)
 {
-	assert(v->type->eType == eUnion && fid >=0 && fid < (int)(v->type->fields.size()));
+	assert(v->type->eType == eUnion && fid >=0 && fid < (int)((dynamic_cast<const AggregateType *>(v->type))->fields.size()));
 	FactUnion tmp(v, fid);
 	const FactUnion* fu = dynamic_cast<const FactUnion*>(find_related_fact(facts, &tmp));
 	return (fu && tmp.imply(*fu)) ;

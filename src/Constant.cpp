@@ -3,6 +3,9 @@
 // Copyright (c) 2007, 2008, 2009, 2010, 2011, 2013, 2014 The University of Utah
 // All rights reserved.
 //
+// Copyright (c) 2015-2016 Huawei Technologies Co., Ltd
+// All rights reserved.
+//
 // This file is part of `csmith', a random generator of C programs.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -241,11 +244,12 @@ GenerateRandomConstantInRange(const Type* type, int bound)
    * "{2, 4, {2, 4}, 6.0}"
    *************************************************************/
 static string
-GenerateRandomStructConstant(const Type* type)
+GenerateRandomStructConstant(const Type* t)
 {
 	string value = "{";
 	size_t i;
-	assert(type->eType == eStruct);
+	assert(t->eType == eStruct);
+	const AggregateType * type = dynamic_cast<const AggregateType *>(t);
 	assert(type->fields.size() == type->bitfields_length_.size());
 
 	for (i = 0; i < type->fields.size(); i++) {
@@ -277,10 +281,12 @@ GenerateRandomStructConstant(const Type* type)
      the first field is enough
    *************************************************************/
 static string
-GenerateRandomUnionConstant(const Type* type)
+GenerateRandomUnionConstant(const Type* t)
 {
 	string value = "{";
-	assert(type->eType == eUnion && type->fields.size() == type->bitfields_length_.size());
+	assert (t->eType == eUnion);
+	const AggregateType * type = dynamic_cast<const AggregateType *>(t);
+	assert(type->fields.size() == type->bitfields_length_.size());
 	value += GenerateRandomConstant(type->fields[0]);
 	value += "}";
 	return value;

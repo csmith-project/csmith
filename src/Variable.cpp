@@ -3,6 +3,9 @@
 // Copyright (c) 2007, 2008, 2009, 2010, 2011, 2013, 2014 The University of Utah
 // All rights reserved.
 //
+// Copyright (c) 2015-2016 Huawei Technologies Co., Ltd
+// All rights reserved.
+//
 // This file is part of `csmith', a random generator of C programs.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -304,7 +307,8 @@ Variable::is_packed_aggregate_field_var() const
 {
 	if (!field_var_of)
 		return false;
-	if (field_var_of->type->packed_)
+	const AggregateType * aggregate_type = dynamic_cast<const AggregateType *>(field_var_of->type);
+	if (aggregate_type && aggregate_type->packed_)
 		return true;
 	return field_var_of->is_packed_aggregate_field_var();
 }
@@ -335,9 +339,10 @@ Variable::get_field_id(void) const
 ///////////////////////////////////////////////////////////////////////////////
  /* expand field variables of struct, assigned names, f0, f1, etc, to them
   ************************************************************************/
-void Variable::create_field_vars(const Type *type)
+void Variable::create_field_vars(const Type *aggregate_type)
 {
 	assert(type->is_aggregate());
+	const AggregateType * type = dynamic_cast<const AggregateType *>(aggregate_type);
     size_t i, j;
     assert(type->fields.size() == type->qfers_.size());
 	j = 0;
@@ -550,7 +555,7 @@ Variable::is_const_after_deref(int deref_level) const
 		int i;
 		const Type* t = type;
 		for (i=0; i<deref_level; i++) {
-			t = t->ptr_type;
+			t = (dynamic_cast<const PointerType *>(t))->ptr_type;
 		}
 		assert(t);
 		return t->is_const_struct_union();
@@ -573,7 +578,7 @@ Variable::is_volatile_after_deref(int deref_level) const
 		int i;
 		const Type* t = type;
 		for (i=0; i<deref_level; i++) {
-			t = t->ptr_type;
+			t = (t->eType == ePointer) ? (dynamic_cast<const PointerType *>(t))->ptr_type : NULL;
 		}
 		assert(t);
 		return t->is_volatile_struct_union();
@@ -1425,7 +1430,7 @@ Variable::is_packed_after_bitfield(void) const
 {
 	const Variable* parent = this->field_var_of;
 	if (parent == NULL) return false;
-	if (parent->type->eType == eStruct && parent->type->packed_) {
+	if (parent->type->eType == eStruct && (dynamic_cast<const AggregateType *>(parent->type))->packed_) {
 		for (size_t i=0; i<parent->field_vars.size(); i++) {
 			if (parent->field_vars[i] == this) {
 				break;

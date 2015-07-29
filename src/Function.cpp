@@ -3,6 +3,9 @@
 // Copyright (c) 2007, 2008, 2010, 2011, 2013, 2014 The University of Utah
 // All rights reserved.
 //
+// Copyright (c) 2015-2016 Huawei Technologies Co., Ltd
+// All rights reserved.
+//
 // This file is part of `csmith', a random generator of C programs.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -575,7 +578,7 @@ Function::GenerateBody(const CGContext &prev_context)
 	cg_context.extend_call_chain(prev_context);
 	FactMgr* fm = get_fact_mgr_for_func(this);
 	for (size_t i=0; i<params.size(); i++) {
-		if (params[i]->type->ptr_type != 0) {
+		if (params[i]->type->eType == ePointer) {
 			fm->global_facts.push_back(FactPointTo::make_fact(params[i], FactPointTo::tbd_ptr));
 		}
 	}

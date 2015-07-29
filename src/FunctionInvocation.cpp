@@ -3,6 +3,9 @@
 // Copyright (c) 2007, 2008, 2009, 2010, 2011, 2013, 2014 The University of Utah
 // All rights reserved.
 //
+// Copyright (c) 2015-2016 Huawei Technologies Co., Ltd
+// All rights reserved.
+//
 // This file is part of `csmith', a random generator of C programs.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -160,7 +163,7 @@ FunctionInvocation::make_random_unary(CGContext &cg_context, const Type* type)
 FunctionInvocation *
 FunctionInvocation::make_random_binary(CGContext &cg_context, const Type* type)
 {
-	if (rnd_flipcoin(10) && Type::has_pointer_type()) {
+	if (rnd_flipcoin(10) && PointerType::has_pointer_type()) {
 		return make_random_binary_ptr_comparison(cg_context);
 	}
 
@@ -270,7 +273,7 @@ FunctionInvocation::make_random_binary_ptr_comparison(CGContext &cg_context)
 	SafeOpFlags *flags = SafeOpFlags::make_random_binary(get_int_type(), NULL, NULL, sOpBinary, op);
 	
 	FunctionInvocation *fi = FunctionInvocationBinary::CreateFunctionInvocationBinary(cg_context, op, flags);
-	const Type* type = Type::choose_random_pointer_type();
+	const Type* type = PointerType::choose_random_pointer_type();
 
 	Effect lhs_eff_accum;
 	CGContext lhs_cg_context(cg_context, cg_context.get_effect_context(), &lhs_eff_accum);

@@ -97,6 +97,7 @@ am_csmith_OBJECTS = csmith-AbsExtension.$(OBJEXT) \
 	csmith-LinearSequence.$(OBJEXT) csmith-MspFilters.$(OBJEXT) \
 	csmith-OutputMgr.$(OBJEXT) csmith-PartialExpander.$(OBJEXT) \
 	csmith-Probabilities.$(OBJEXT) csmith-RandomNumber.$(OBJEXT) \
+	csmith-Parameter.$(OBJEXT) \
 	csmith-RandomProgramGenerator.$(OBJEXT) \
 	csmith-SafeOpFlags.$(OBJEXT) csmith-Sequence.$(OBJEXT) \
 	csmith-SequenceFactory.$(OBJEXT) \
@@ -108,7 +109,8 @@ am_csmith_OBJECTS = csmith-AbsExtension.$(OBJEXT) \
 	csmith-StatementExpr.$(OBJEXT) csmith-StatementFor.$(OBJEXT) \
 	csmith-StatementGoto.$(OBJEXT) csmith-StatementIf.$(OBJEXT) \
 	csmith-StatementReturn.$(OBJEXT) csmith-StringUtils.$(OBJEXT) \
-	csmith-Type.$(OBJEXT) csmith-Variable.$(OBJEXT) \
+	csmith-Type.$(OBJEXT) csmith-PointerType.$(OBJEXT) \
+	csmith-AggregateType.$(OBJEXT) csmith-Variable.$(OBJEXT) \
 	csmith-VariableSelector.$(OBJEXT) \
 	csmith-VectorFilter.$(OBJEXT) csmith-platform.$(OBJEXT) \
 	csmith-random.$(OBJEXT) csmith-util.$(OBJEXT)
@@ -361,6 +363,8 @@ csmith_SOURCES = \
 	MspFilters.h \
 	OutputMgr.cpp \
 	OutputMgr.h \
+	Parameter.cpp \
+	Parameter.h \
 	PartialExpander.cpp \
 	PartialExpander.h \
 	Probabilities.cpp \
@@ -402,6 +406,10 @@ csmith_SOURCES = \
 	StringUtils.h \
 	Type.cpp \
 	Type.h \
+	PointerType.cpp \
+	PointerType.h \
+	AggregateType.cpp \
+	AggregateType.h \
 	Variable.cpp \
 	Variable.h \
 	VariableSelector.cpp \
@@ -562,6 +570,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-MspFilters.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-OutputMgr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-PartialExpander.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-Parameter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-Probabilities.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-RandomNumber.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-RandomProgramGenerator.Po@am__quote@
@@ -581,6 +590,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-StatementReturn.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-StringUtils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-Type.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-PointerType.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-AggregateType.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-Variable.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-VariableSelector.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-VectorFilter.Po@am__quote@
@@ -1462,6 +1473,48 @@ csmith-Type.obj: Type.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Type.cpp' object='csmith-Type.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-Type.obj `if test -f 'Type.cpp'; then $(CYGPATH_W) 'Type.cpp'; else $(CYGPATH_W) '$(srcdir)/Type.cpp'; fi`
+
+csmith-Parameter.o: Parameter.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-Parameter.o -MD -MP -MF $(DEPDIR)/csmith-Parameter.Tpo -c -o csmith-Parameter.o `test -f 'Parameter.cpp' || echo '$(srcdir)/'`Parameter.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/csmith-Parameter.Tpo $(DEPDIR)/csmith-Parameter.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Parameter.cpp' object='csmith-Parameter.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-Parameter.o `test -f 'Parameter.cpp' || echo '$(srcdir)/'`Parameter.cpp
+
+csmith-Parameter.obj: Parameter.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-Parameter.obj -MD -MP -MF $(DEPDIR)/csmith-Parameter.Tpo -c -o csmith-Parameter.obj `if test -f 'Parameter.cpp'; then $(CYGPATH_W) 'Parameter.cpp'; else $(CYGPATH_W) '$(srcdir)/Parameter.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/csmith-Parameter.Tpo $(DEPDIR)/csmith-Parameter.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Parameter.cpp' object='csmith-Parameter.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-Parameter.obj `if test -f 'Parameter.cpp'; then $(CYGPATH_W) 'Parameter.cpp'; else $(CYGPATH_W) '$(srcdir)/Parameter.cpp'; fi`
+
+csmith-PointerType.o: PointerType.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-PointerType.o -MD -MP -MF $(DEPDIR)/csmith-PointerType.Tpo -c -o csmith-PointerType.o `test -f 'PointerType.cpp' || echo '$(srcdir)/'`PointerType.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/csmith-PointerType.Tpo $(DEPDIR)/csmith-PointerType.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='PointerType.cpp' object='csmith-PointerType.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-PointerType.o `test -f 'PointerType.cpp' || echo '$(srcdir)/'`PointerType.cpp
+
+csmith-PointerType.obj: PointerType.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-PointerType.obj -MD -MP -MF $(DEPDIR)/csmith-PointerType.Tpo -c -o csmith-PointerType.obj `if test -f 'PointerType.cpp'; then $(CYGPATH_W) 'PointerType.cpp'; else $(CYGPATH_W) '$(srcdir)/PointerType.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/csmith-PointerType.Tpo $(DEPDIR)/csmith-PointerType.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='PointerType.cpp' object='csmith-PointerType.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-PointerType.obj `if test -f 'PointerType.cpp'; then $(CYGPATH_W) 'PointerType.cpp'; else $(CYGPATH_W) '$(srcdir)/PointerType.cpp'; fi`
+
+csmith-AggregateType.o: AggregateType.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-AggregateType.o -MD -MP -MF $(DEPDIR)/csmith-AggregateType.Tpo -c -o csmith-AggregateType.o `test -f 'AggregateType.cpp' || echo '$(srcdir)/'`AggregateType.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/csmith-AggregateType.Tpo $(DEPDIR)/csmith-AggregateType.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='AggregateType.cpp' object='csmith-AggregateType.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-AggregateType.o `test -f 'AggregateType.cpp' || echo '$(srcdir)/'`AggregateType.cpp
+
+csmith-AggregateType.obj: AggregateType.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-AggregateType.obj -MD -MP -MF $(DEPDIR)/csmith-AggregateType.Tpo -c -o csmith-AggregateType.obj `if test -f 'AggregateType.cpp'; then $(CYGPATH_W) 'AggregateType.cpp'; else $(CYGPATH_W) '$(srcdir)/AggregateType.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/csmith-AggregateType.Tpo $(DEPDIR)/csmith-AggregateType.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='AggregateType.cpp' object='csmith-AggregateType.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-AggregateType.obj `if test -f 'AggregateType.cpp'; then $(CYGPATH_W) 'AggregateType.cpp'; else $(CYGPATH_W) '$(srcdir)/AggregateType.cpp'; fi`
 
 csmith-Variable.o: Variable.cpp
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-Variable.o -MD -MP -MF $(DEPDIR)/csmith-Variable.Tpo -c -o csmith-Variable.o `test -f 'Variable.cpp' || echo '$(srcdir)/'`Variable.cpp

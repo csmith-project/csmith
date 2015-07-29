@@ -3,6 +3,9 @@
 // Copyright (c) 2015-2016 Xuejun Yang
 // All rights reserved.
 //
+// Copyright (c) 2015-2016 Huawei Technologies Co., Ltd
+// All rights reserved.
+//
 // This file is part of `csmith', a random generator of C programs.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -139,8 +142,8 @@ Parameter::GenerateParameter(Function &curFunc)
 	// Add this type to our parameter list.
 	const Type* t = 0;
 	bool rnd = rnd_flipcoin(40);
-	if (Type::has_pointer_type() && rnd) {
-		t= Type::choose_random_pointer_type();
+	if (PointerType::has_pointer_type() && rnd) {
+		t= PointerType::choose_random_pointer_type();
 	}
 	else {
 		t = Type::choose_random_nonvoid_nonvolatile();
