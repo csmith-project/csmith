@@ -138,8 +138,8 @@ Lhs::make_random(CGContext &cg_context, const Type* t, const CVQualifiers* qfer,
 	return 0;
 }
 
-//float_test
-
+//float_test : this doesn't work, will just loop with invalid variables
+/*
 Lhs *
 Lhs::make_random_no_incompatible_pointers(CGContext &cg_context, const Type* t, const Expression* e, const CVQualifiers* qfer, bool compound_assign, bool no_signed_overflow)
 {
@@ -206,7 +206,7 @@ Lhs::make_random_no_incompatible_pointers(CGContext &cg_context, const Type* t, 
     		valid = false;
     	}
     	if (var->type->eType == ePointer && var->type->get_base_type()->is_float() &&
-    			e->get_type().get_base_type()->is_int()/* && stmt_assign->rhs->term_type != eFunction*/){
+    			e->get_type().get_base_type()->is_int()){
     		valid = false;
     	}
 
@@ -232,7 +232,7 @@ Lhs::make_random_no_incompatible_pointers(CGContext &cg_context, const Type* t, 
 	assert(0);
 	return 0;
 }
-
+*/
 /*
  *
  */

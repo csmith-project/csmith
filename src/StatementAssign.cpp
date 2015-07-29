@@ -189,20 +189,7 @@ StatementAssign::make_random(CGContext &cg_context, const Type* type, const CVQu
 	if (qf) CGOptions::match_exact_qualifiers(true);      // force exact qualifier match when selecting vars
 
 
-	lhs = Lhs::make_random_no_incompatible_pointers(lhs_cg_context, type, e, &qfer, op != eSimpleAssign, need_no_rhs(op));
-
-	//float_test if lhs is a pointer, make sure it's compatible
-	//this gets stuck sometimes
-	/*
-	while (lhs->get_type().eType == ePointer &&
-			!(lhs->get_type().get_base_type()->is_float()) && e->get_type().get_base_type()->is_float()){
-		delete lhs;
-		lhs = Lhs::make_random(lhs_cg_context, type, &qfer, op != eSimpleAssign, need_no_rhs(op));
-		cerr << "made new" <<endl;
-	}
-	cerr << "finished" << endl;
-	*/
-	//
+	lhs = Lhs::make_random(lhs_cg_context, type, &qfer, op != eSimpleAssign, need_no_rhs(op));
 
 	if (qf) CGOptions::match_exact_qualifiers(prev_flag); // restore flag
 	ERROR_GUARD_AND_DEL2(NULL, e, lhs);
@@ -233,14 +220,14 @@ StatementAssign::make_random(CGContext &cg_context, const Type* type, const CVQu
 	//float_test : this is quite ugly, for now we will just terminate when
 	//             and incompatible assignment is created
 
-	//if (stmt_assign->lhs.get_type().eType == ePointer && stmt_assign->lhs.get_type().get_base_type()->is_int() &&
-	//		stmt_assign->rhs->get_type().get_base_type()->is_float()){
-	//	assert(false && "terminated due to creation of incompatible pointer assignment");
-	//}
-	//if (stmt_assign->lhs.get_type().eType == ePointer && stmt_assign->lhs.get_type().get_base_type()->is_float() &&
-	//		stmt_assign->rhs->get_type().get_base_type()->is_int()/* && stmt_assign->rhs->term_type != eFunction*/){
-	//	assert(false && "terminated due to creation of incompatible pointer assignment");
-	//}
+	if (stmt_assign->lhs.get_type().eType == ePointer && stmt_assign->lhs.get_type().get_base_type()->is_int() &&
+			stmt_assign->rhs->get_type().get_base_type()->is_float()){
+		assert(false && "terminated due to creation of incompatible pointer assignment");
+	}
+	if (stmt_assign->lhs.get_type().eType == ePointer && stmt_assign->lhs.get_type().get_base_type()->is_float() &&
+			stmt_assign->rhs->get_type().get_base_type()->is_int()/* && stmt_assign->rhs->term_type != eFunction*/){
+		assert(false && "terminated due to creation of incompatible pointer assignment");
+	}
 
 
 	return stmt_assign;
