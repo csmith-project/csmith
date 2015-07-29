@@ -92,6 +92,19 @@ PointerType::find_pointer_type(const Type* t, bool add)
 
 // ---------------------------------------------------------------------
 PointerType*
+PointerType::find_pointer_type(const Type * t, int indirect)
+{ 
+	assert(indirect >= 1 && (t->eType != ePointer));
+	Type * rvtype = const_cast<Type*> (t);
+	while(indirect--)
+	{
+		rvtype = find_pointer_type(rvtype,true);
+	}
+	return dynamic_cast<PointerType*> (rvtype);
+}
+
+// ---------------------------------------------------------------------
+PointerType*
 PointerType::make_random_pointer_type(void)
 {
     //Type* new_type = 0;

@@ -3,6 +3,9 @@
 // Copyright (c) 2008, 2009, 2010, 2011, 2012, 2013, 2014 The University of Utah
 // All rights reserved.
 //
+// Copyright (c) 2015-2016 Huawei Technologies Co., Ltd
+// All rights reserved.
+//
 // This file is part of `csmith', a random generator of C programs.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -76,6 +79,9 @@ public:
 
 	static int max_split_files(void);
 	static int max_split_files(int p);
+
+    static std::string init_builtin_config_filepath(void);
+    static std::string init_builtin_config_filepath(std::string p);
 
 	static std::string split_files_dir(void);
 	static std::string split_files_dir(std::string p);
@@ -548,6 +554,8 @@ private:
 
 	// flag to indicate language
 	static bool lang_cpp_;
+
+    static std::string init_builtin_config_filepath_;
 private:
 	CGOptions(void);
 	CGOptions(CGOptions &cgo);

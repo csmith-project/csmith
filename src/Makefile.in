@@ -72,6 +72,7 @@ am_csmith_OBJECTS = csmith-AbsExtension.$(OBJEXT) \
 	csmith-AbsRndNumGenerator.$(OBJEXT) \
 	csmith-ArrayVariable.$(OBJEXT) csmith-Block.$(OBJEXT) \
 	csmith-Bookkeeper.$(OBJEXT) csmith-CFGEdge.$(OBJEXT) \
+	csmith-BuiltinConfig.$(OBJEXT) \
 	csmith-CGContext.$(OBJEXT) csmith-CGOptions.$(OBJEXT) \
 	csmith-CVQualifiers.$(OBJEXT) \
 	csmith-CompatibleChecker.$(OBJEXT) csmith-Constant.$(OBJEXT) \
@@ -113,7 +114,8 @@ am_csmith_OBJECTS = csmith-AbsExtension.$(OBJEXT) \
 	csmith-AggregateType.$(OBJEXT) csmith-Variable.$(OBJEXT) \
 	csmith-VariableSelector.$(OBJEXT) \
 	csmith-VectorFilter.$(OBJEXT) csmith-platform.$(OBJEXT) \
-	csmith-random.$(OBJEXT) csmith-util.$(OBJEXT)
+	csmith-random.$(OBJEXT) csmith-util.$(OBJEXT) \
+	csmith-tinyxml.$(OBJEXT) csmith-tinyxmlerror.$(OBJEXT) csmith-tinyxmlparser.$(OBJEXT) csmith-tinystr.$(OBJEXT)
 csmith_OBJECTS = $(am_csmith_OBJECTS)
 csmith_DEPENDENCIES =
 csmith_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
@@ -290,6 +292,8 @@ csmith_SOURCES = \
 	Block.h \
 	Bookkeeper.cpp \
 	Bookkeeper.h \
+	BuiltinConfig.cpp \
+	BuiltinConfig.h \
 	CFGEdge.cpp \
 	CFGEdge.h \
 	CGContext.cpp \
@@ -421,7 +425,13 @@ csmith_SOURCES = \
 	random.cpp \
 	random.h \
 	util.cpp \
-	util.h
+	util.h \
+	tinyxml.cpp \
+	tinyxml.h \
+	tinyxmlerror.cpp \
+	tinyxmlparser.cpp \
+	tinystr.cpp \
+	tinystr.h
 
 
 # Include VC project files in the distribution.
@@ -534,6 +544,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-ArrayVariable.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-Block.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-Bookkeeper.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-BuiltinConfig.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-CFGEdge.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-CGContext.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-CGOptions.Po@am__quote@
@@ -598,6 +609,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-platform.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-random.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-util.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-tinyxml.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-tinyxmlerror.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-tinyxmlparser.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-tinystr.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -703,6 +718,21 @@ csmith-Bookkeeper.obj: Bookkeeper.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Bookkeeper.cpp' object='csmith-Bookkeeper.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-Bookkeeper.obj `if test -f 'Bookkeeper.cpp'; then $(CYGPATH_W) 'Bookkeeper.cpp'; else $(CYGPATH_W) '$(srcdir)/Bookkeeper.cpp'; fi`
+
+csmith-BuiltinConfig.o: BuiltinConfig.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-BuiltinConfig.o -MD -MP -MF $(DEPDIR)/csmith-BuiltinConfig.Tpo -c -o csmith-BuiltinConfig.o `test -f 'BuiltinConfig.cpp' || echo '$(srcdir)/'`BuiltinConfig.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/csmith-BuiltinConfig.Tpo $(DEPDIR)/csmith-BuiltinConfig.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='BuiltinConfig.cpp' object='csmith-BuiltinConfig.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-BuiltinConfig.o `test -f 'BuiltinConfig.cpp' || echo '$(srcdir)/'`BuiltinConfig.cpp
+
+csmith-BuiltinConfig.obj: BuiltinConfig.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-BuiltinConfig.obj -MD -MP -MF $(DEPDIR)/csmith-BuiltinConfig.Tpo -c -o csmith-BuiltinConfig.obj `if test -f 'BuiltinConfig.cpp'; then $(CYGPATH_W) 'BuiltinConfig.cpp'; else $(CYGPATH_W) '$(srcdir)/BuiltinConfig.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/csmith-BuiltinConfig.Tpo $(DEPDIR)/csmith-BuiltinConfig.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='BuiltinConfig.cpp' object='csmith-BuiltinConfig.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-BuiltinConfig.obj `if test -f 'BuiltinConfig.cpp'; then $(CYGPATH_W) 'BuiltinConfig.cpp'; else $(CYGPATH_W) '$(srcdir)/BuiltinConfig.cpp'; fi`
+
 
 csmith-CFGEdge.o: CFGEdge.cpp
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-CFGEdge.o -MD -MP -MF $(DEPDIR)/csmith-CFGEdge.Tpo -c -o csmith-CFGEdge.o `test -f 'CFGEdge.cpp' || echo '$(srcdir)/'`CFGEdge.cpp
@@ -1599,6 +1629,61 @@ csmith-util.obj: util.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='util.cpp' object='csmith-util.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-util.obj `if test -f 'util.cpp'; then $(CYGPATH_W) 'util.cpp'; else $(CYGPATH_W) '$(srcdir)/util.cpp'; fi`
+
+csmith-tinyxml.o: tinyxml.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-tinyxml.o -MD -MP -MF $(DEPDIR)/csmith-tinyxml.Tpo -c -o csmith-tinyxml.o `test -f 'tinyxml.cpp' || echo '$(srcdir)/'`tinyxml.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/csmith-tinyxml.Tpo $(DEPDIR)/csmith-tinyxml.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='tinyxml.cpp' object='csmith-tinyxml.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-tinyxml.o `test -f 'tinyxml.cpp' || echo '$(srcdir)/'`tinyxml.cpp
+
+csmith-tinyxml.obj: tinyxml.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-tinyxml.obj -MD -MP -MF $(DEPDIR)/csmith-tinyxml.Tpo -c -o csmith-tinyxml.obj `if test -f 'tinyxml.cpp'; then $(CYGPATH_W) 'tinyxml.cpp'; else $(CYGPATH_W) '$(srcdir)/tinyxml.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/csmith-tinyxml.Tpo $(DEPDIR)/csmith-tinyxml.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='tinyxml.cpp' object='csmith-tinyxml.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-tinyxml.obj `if test -f 'tinyxml.cpp'; then $(CYGPATH_W) 'tinyxml.cpp'; else $(CYGPATH_W) '$(srcdir)/tinyxml.cpp'; fi`
+csmith-tinyxmlerror.o: tinyxmlerror.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-tinyxmlerror.o -MD -MP -MF $(DEPDIR)/csmith-tinyxmlerror.Tpo -c -o csmith-tinyxmlerror.o `test -f 'tinyxmlerror.cpp' || echo '$(srcdir)/'`tinyxmlerror.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/csmith-tinyxmlerror.Tpo $(DEPDIR)/csmith-tinyxmlerror.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='tinyxmlerror.cpp' object='csmith-tinyxmlerror.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-tinyxmlerror.o `test -f 'tinyxmlerror.cpp' || echo '$(srcdir)/'`tinyxmlerror.cpp
+
+csmith-tinyxmlerror.obj: tinyxmlerror.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-tinyxmlerror.obj -MD -MP -MF $(DEPDIR)/csmith-tinyxmlerror.Tpo -c -o csmith-tinyxmlerror.obj `if test -f 'tinyxmlerror.cpp'; then $(CYGPATH_W) 'tinyxmlerror.cpp'; else $(CYGPATH_W) '$(srcdir)/tinyxmlerror.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/csmith-tinyxmlerror.Tpo $(DEPDIR)/csmith-tinyxmlerror.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='tinyxmlerror.cpp' object='csmith-tinyxmlerror.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-tinyxmlerror.obj `if test -f 'tinyxmlerror.cpp'; then $(CYGPATH_W) 'tinyxmlerror.cpp'; else $(CYGPATH_W) '$(srcdir)/tinyxmlerror.cpp'; fi`
+csmith-tinyxmlparser.o: tinyxmlparser.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-tinyxmlparser.o -MD -MP -MF $(DEPDIR)/csmith-tinyxmlparser.Tpo -c -o csmith-tinyxmlparser.o `test -f 'tinyxmlparser.cpp' || echo '$(srcdir)/'`tinyxmlparser.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/csmith-tinyxmlparser.Tpo $(DEPDIR)/csmith-tinyxmlparser.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='tinyxmlparser.cpp' object='csmith-tinyxmlparser.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-tinyxmlparser.o `test -f 'tinyxmlparser.cpp' || echo '$(srcdir)/'`tinyxmlparser.cpp
+
+csmith-tinyxmlparser.obj: tinyxmlparser.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-tinyxmlparser.obj -MD -MP -MF $(DEPDIR)/csmith-tinyxmlparser.Tpo -c -o csmith-tinyxmlparser.obj `if test -f 'tinyxmlparser.cpp'; then $(CYGPATH_W) 'tinyxmlparser.cpp'; else $(CYGPATH_W) '$(srcdir)/tinyxmlparser.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/csmith-tinyxmlparser.Tpo $(DEPDIR)/csmith-tinyxmlparser.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='tinyxmlparser.cpp' object='csmith-tinyxmlparser.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-tinyxmlparser.obj `if test -f 'tinyxmlparser.cpp'; then $(CYGPATH_W) 'tinyxmlparser.cpp'; else $(CYGPATH_W) '$(srcdir)/tinyxmlparser.cpp'; fi`
+
+csmith-tinystr.o: tinystr.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-tinystr.o -MD -MP -MF $(DEPDIR)/csmith-tinystr.Tpo -c -o csmith-tinystr.o `test -f 'tinystr.cpp' || echo '$(srcdir)/'`tinystr.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/csmith-tinystr.Tpo $(DEPDIR)/csmith-tinystr.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='tinystr.cpp' object='csmith-tinystr.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-tinystr.o `test -f 'tinystr.cpp' || echo '$(srcdir)/'`tinystr.cpp
+
+csmith-tinystr.obj: tinystr.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-tinystr.obj -MD -MP -MF $(DEPDIR)/csmith-tinystr.Tpo -c -o csmith-tinystr.obj `if test -f 'tinystr.cpp'; then $(CYGPATH_W) 'tinystr.cpp'; else $(CYGPATH_W) '$(srcdir)/tinystr.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/csmith-tinystr.Tpo $(DEPDIR)/csmith-tinystr.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='tinystr.cpp' object='csmith-tinystr.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-tinystr.obj `if test -f 'tinystr.cpp'; then $(CYGPATH_W) 'tinystr.cpp'; else $(CYGPATH_W) '$(srcdir)/tinystr.cpp'; fi`
+
 
 mostlyclean-libtool:
 	-rm -f *.lo

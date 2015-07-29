@@ -43,6 +43,7 @@
 using namespace std;
 
 #include "Variable.h" 
+#include "ParameterBuiltin.h"
 
 enum eParamInOutType {
 	eParamNone,
@@ -59,6 +60,7 @@ class Parameter : public Variable
 public:
     static void GenerateParametersFromValues(Function &curFunc, std::vector<ExtensionValue *> &values);
     static void GenerateParametersFromString(Function &currFunc, const string &params_string); 
+    static void GenerateParameterFromXmlConfig(Function &currFunc, std::vector<ParameterBuiltin*> params_configs);
     static void GenerateParameterList(Function &curFunc);
     
 	// TODO: configure the inout string based on external file (for languages other than C/C++)
@@ -74,11 +76,17 @@ public:
 
     bool is_output_param(void) const { return _inout == eParamOut || _inout == eParamInOut || _inout == eParamRef;}
 
+    int imm_bottom;
+    int imm_top;
+    bool is_imm;
+
 private:
-	Parameter(const std::string &name, const Type *type, const Expression* init, const CVQualifiers* qfer, enum eParamInOutType inout);  
+	Parameter(const std::string &name, const Type *type, const Expression* init, const CVQualifiers* qfer, enum eParamInOutType inout);
+    Parameter(const std::string &name, const Type *type, const Expression* init, const CVQualifiers* qfer, int bottom, int top, enum eParamInOutType inout);
      
     static void GenerateParameter(Function &curFunc);
 	static Parameter* GenerateParameter(const Type *type, const CVQualifiers *qfer, enum eParamInOutType inout=eParamNone);
+    static Parameter* GenerateParameter(const Type *type, const CVQualifiers *qfer, int bottom, int top, enum eParamInOutType inout=eParamNone);// for the parameter which has [bottom, top] range.
 
     eParamInOutType _inout;
     static vector<string> _inOutTypeNames;

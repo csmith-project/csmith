@@ -3,6 +3,9 @@
 // Copyright (c) 2007, 2008, 2010, 2011, 2013 The University of Utah
 // All rights reserved.
 //
+// Copyright (c) 2015-2016 Huawei Technologies Co., Ltd
+// All rights reserved.
+//
 // This file is part of `csmith', a random generator of C programs.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -249,6 +252,10 @@ Expression::make_random_param_value(CGContext &cg_context, const Parameter* para
     const CVQualifiers* qfer = &param->qfer;
 	assert(type);
 
+    // if param is immediate, tt should be nothing but eConstant
+    if (param->is_imm)
+        tt = eConstant;
+
 	// if a term type is provided, no need to choose random term type
 	if (tt == MAX_TERM_TYPES) {
         if (param->is_output_param()) {
@@ -276,7 +283,12 @@ Expression::make_random_param_value(CGContext &cg_context, const Parameter* para
 	case eConstant:
 		if (type->eType == eSimple)
 			assert(type->simple_type != eVoid);
-		e = Constant::make_random(type);
+        if (param->is_imm) {
+            assert(param->imm_bottom <= param->imm_top);
+            e = Constant::make_int(param->imm_bottom + rnd_upto(param->imm_top - param->imm_bottom));
+        } else {
+		    e = Constant::make_random(type);
+        }
 		break;
 	case eVariable:
 		e = ExpressionVariable::make_random(cg_context, type, qfer, true);
