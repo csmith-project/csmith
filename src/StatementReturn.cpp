@@ -68,6 +68,16 @@ StatementReturn::make_random(CGContext &cg_context)
 	// XXX
 	ERROR_GUARD(NULL);
 
+	//float_test : prevent incompatible pointers being returned by functions
+	if (CGOptions::float_test() && curr_func->return_type->eType == ePointer &&
+			curr_func->return_type->get_base_type()->is_int() && ev->get_type().get_base_type()->is_float()){
+		assert(false && "terminated due to creation of incompatible pointer as a return value");
+	}
+	if (CGOptions::float_test() && curr_func->return_type->eType == ePointer &&
+			curr_func->return_type->get_base_type()->is_float() && ev->get_type().get_base_type()->is_int()){
+		assert(false && "terminated due to creation of incompatible pointer as a return value");
+	}
+
 	StatementReturn* sr = new StatementReturn(cg_context.get_current_block(), *ev);
 	return sr;
 }

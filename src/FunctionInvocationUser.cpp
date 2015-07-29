@@ -308,19 +308,19 @@ FunctionInvocationUser::build_invocation(Function *target, CGContext &cg_context
 
 	// float_test : prevent incompatible pointer arguments being passed to a function
 	//              for now we abort, maybe later find a nicer solution
-
-	assert(func->param.size() == param_value.size() && "param and param_value should have the same size");
-	for (int i=0; i < func->param.size(); i++){
-		if(func->param[i]->type->eType == ePointer && func->param[i]->type->get_base_type()->is_int() &&
-				param_value[i]->get_type().get_base_type()->is_float()){
-			assert(false && "terminated due to creation of incompatible pointer in function invocation");
-		}
-		if(func->param[i]->type->eType == ePointer && func->param[i]->type->get_base_type()->is_float() &&
-				param_value[i]->get_type().get_base_type()->is_int()){
-			assert(false && "terminated due to creation of incompatible pointer in function invocation");
+	if (CGOptions::float_test()){
+		assert(func->param.size() == param_value.size() && "param and param_value should have the same size");
+		for (unsigned int i=0; i < func->param.size(); i++){
+			if(func->param[i]->type->eType == ePointer && func->param[i]->type->get_base_type()->is_int() &&
+					param_value[i]->get_type().get_base_type()->is_float()){
+				assert(false && "terminated due to creation of incompatible pointer in function invocation");
+			}
+			if(func->param[i]->type->eType == ePointer && func->param[i]->type->get_base_type()->is_float() &&
+					param_value[i]->get_type().get_base_type()->is_int()){
+				assert(false && "terminated due to creation of incompatible pointer in function invocation");
+			}
 		}
 	}
-
 
 	return !failed;
 }

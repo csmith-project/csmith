@@ -220,12 +220,14 @@ StatementAssign::make_random(CGContext &cg_context, const Type* type, const CVQu
 	//float_test : this is quite ugly, for now we will just terminate when
 	//             and incompatible assignment is created
 
-	if (stmt_assign->lhs.get_type().eType == ePointer && stmt_assign->lhs.get_type().get_base_type()->is_int() &&
+	if (CGOptions::float_test() && stmt_assign->lhs.get_type().eType == ePointer &&
+			stmt_assign->lhs.get_type().get_base_type()->is_int() &&
 			stmt_assign->rhs->get_type().get_base_type()->is_float()){
 		assert(false && "terminated due to creation of incompatible pointer assignment");
 	}
-	if (stmt_assign->lhs.get_type().eType == ePointer && stmt_assign->lhs.get_type().get_base_type()->is_float() &&
-			stmt_assign->rhs->get_type().get_base_type()->is_int()/* && stmt_assign->rhs->term_type != eFunction*/){
+	if (CGOptions::float_test() && stmt_assign->lhs.get_type().eType == ePointer &&
+			stmt_assign->lhs.get_type().get_base_type()->is_float() &&
+			stmt_assign->rhs->get_type().get_base_type()->is_int()){
 		assert(false && "terminated due to creation of incompatible pointer assignment");
 	}
 
