@@ -1,6 +1,6 @@
 #!/bin/bash
 
-COMPILER="gcc-4.4"
+COMPILER="gcc"
 CSMITH_PATH="/home/jacek/Desktop/Imperial/UROP/csmith/"
 ADAPTER_OBJECT_PATH="/home/jacek/Desktop/Imperial/UROP/Adapter/boost_interval_adapter/adapter.o"
 GEN_ERROR_FILE="genError.txt"
@@ -16,7 +16,7 @@ RESULT_ERROR_FILE="${RESULTS_DIR}/resError.txt"
 WIDE_COUNT_FILE="${RESULTS_DIR}/wideCount.txt"
 
 makeProg(){
-  ${TIMEOUT_MACRO} ${CSMITH_PATH}src/csmith --seed ${1} --float-test --check-global > ${TEMP_DIR}/prog.c
+  ${TIMEOUT_MACRO} ${CSMITH_PATH}src/csmith --seed ${1} --strict-float --float-test --check-global > ${TEMP_DIR}/prog.c
   return $?
 }
 
