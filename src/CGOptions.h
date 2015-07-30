@@ -256,6 +256,9 @@ public:
 	static bool enable_float(void);
 	static bool enable_float(bool p);
 
+	static bool strict_float(void);
+	static bool strict_float(bool p);
+
 	static bool pointers(void);
 	static bool pointers(bool p);
 
@@ -536,6 +539,7 @@ private:
 	static bool	int8_;
 	static bool	uint8_;
 	static bool	enable_float_;
+	static bool	strict_float_;
 	static bool	pointers_;
 	static bool	arrays_;
 	static bool	strict_const_arrays_;
