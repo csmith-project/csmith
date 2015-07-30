@@ -12,7 +12,7 @@ ERROR=0
 OK=0
 
 for i in $(seq ${1} ${2}); do
-  timeout 60 ${CSMITH_PATH} --seed $i --float-test --check-global >prog.c
+  timeout 60 ${CSMITH_PATH} --seed $i --strict-float --float-test --check-global >prog.c
   if [ $? -ne 0 ]; then
     TIMEOUT=$((TIMEOUT+1))
     echo "$i TIMEOUT $OK  $ERROR  $TIMEOUT"
