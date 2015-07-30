@@ -1435,8 +1435,12 @@ Type::is_convertable(const Type* t) const
 		return true;
 	}
 	if (ptr_type->eType == eSimple && t->ptr_type->eType == eSimple) {
-                if(ptr_type->simple_type == eFloat && t->ptr_type->simple_type == eFloat)
+                if (ptr_type->simple_type == eFloat && t->ptr_type->simple_type == eFloat)
                     return true;
+                else if (CGOptions::strict_float() &&
+			 ((ptr_type->simple_type == eFloat && t->ptr_type->simple_type != eFloat) ||
+                	 (ptr_type->simple_type != eFloat && t->ptr_type->simple_type == eFloat)))
+		    return false;
 		else
 		    return ptr_type->SizeInBytes() == t->ptr_type->SizeInBytes();
 	}

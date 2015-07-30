@@ -329,6 +329,7 @@ static void print_advanced_help()
 	cout << "  --max-struct-nested-level: controls the max depth of nested structs (default is 3)." << endl << endl;
 	cout << "  --no-hash-value-printf: do not emit printf on the index of an array" << endl << endl;
 	cout << "  --no-signed-char-index: do not allow a var of type char to be used as array index" << endl << endl;
+	cout << "  --strict-float: do not allow assignments between floats and integers" << endl << endl;
 }
 
 void arg_check(int argc, int i)
@@ -800,6 +801,11 @@ main(int argc, char **argv)
 				exit(-1);
 			}
 			CGOptions::enable_float(false);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--strict-float") == 0) {
+			CGOptions::strict_float(true);
 			continue;
 		}
 

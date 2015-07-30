@@ -139,6 +139,7 @@ DEFINE_GETTER_SETTER_BOOL(longlong)
 DEFINE_GETTER_SETTER_BOOL(int8)
 DEFINE_GETTER_SETTER_BOOL(uint8)
 DEFINE_GETTER_SETTER_BOOL(enable_float)
+DEFINE_GETTER_SETTER_BOOL(strict_float)
 DEFINE_GETTER_SETTER_BOOL(pointers)
 DEFINE_GETTER_SETTER_BOOL(arrays)
 DEFINE_GETTER_SETTER_BOOL(strict_const_arrays)
@@ -259,6 +260,7 @@ CGOptions::set_default_settings(void)
 	int8(true);
 	uint8(true);
 	enable_float(false);
+	strict_float(false);
 	pointers(true);
 	arrays(true);
 	strict_const_arrays(false);

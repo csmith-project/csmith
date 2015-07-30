@@ -55,7 +55,7 @@
 static bool
 ExpressionFunctionProbability(const CGContext &/*cg_context*/)
 {
-	if (Function::reach_max_functions_cnt()) {
+	if (Function::reach_max_functions_cnt() && !CGOptions::builtins()) {
 		return true;
 	}
 	return rnd_flipcoin(80);
