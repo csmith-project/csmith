@@ -1,6 +1,7 @@
 #!/bin/bash
 
 COMPILER="gcc"
+COMPILER_PP="g++"
 CSMITH_PATH="/home/jacek/Desktop/Imperial/UROP/csmith/"
 ADAPTER_OBJECT_PATH="/home/jacek/Desktop/Imperial/UROP/Adapter/boost_interval_adapter/adapter.o"
 GEN_ERROR_FILE="genError.txt"
@@ -33,11 +34,11 @@ runInFloatTestMode(){
 
 compileInNormalMode(){
   ${TIMEOUT_MACRO} ${COMPILER} ${TEMP_DIR}/prog.c -O1 -w -c -I${CSMITH_PATH}runtime -DUNSAFE_FLOAT -o ${TEMP_DIR}/progNormalMode1.o && \
-  ${TIMEOUT_MACRO} g++ ${TEMP_DIR}/progNormalMode1.o ${ADAPTER_OBJECT_PATH} -o ${TEMP_DIR}/progNormal1 && \
+  ${TIMEOUT_MACRO} ${COMPILER_PP} ${TEMP_DIR}/progNormalMode1.o ${ADAPTER_OBJECT_PATH} -o ${TEMP_DIR}/progNormal1 && \
   ${TIMEOUT_MACRO} ${COMPILER} ${TEMP_DIR}/prog.c -O2 -w -c -I${CSMITH_PATH}runtime -DUNSAFE_FLOAT -o ${TEMP_DIR}/progNormalMode2.o && \
-  ${TIMEOUT_MACRO} g++ ${TEMP_DIR}/progNormalMode2.o ${ADAPTER_OBJECT_PATH} -o ${TEMP_DIR}/progNormal2 && \
+  ${TIMEOUT_MACRO} ${COMPILER_PP} ${TEMP_DIR}/progNormalMode2.o ${ADAPTER_OBJECT_PATH} -o ${TEMP_DIR}/progNormal2 && \
   ${TIMEOUT_MACRO} ${COMPILER} ${TEMP_DIR}/prog.c -O3 -w -c -I${CSMITH_PATH}runtime -DUNSAFE_FLOAT -o ${TEMP_DIR}/progNormalMode3.o && \
-  ${TIMEOUT_MACRO} g++ ${TEMP_DIR}/progNormalMode3.o ${ADAPTER_OBJECT_PATH} -o ${TEMP_DIR}/progNormal3
+  ${TIMEOUT_MACRO} ${COMPILER_PP} ${TEMP_DIR}/progNormalMode3.o ${ADAPTER_OBJECT_PATH} -o ${TEMP_DIR}/progNormal3
   return $?
 }
 
