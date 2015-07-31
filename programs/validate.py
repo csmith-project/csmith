@@ -36,6 +36,8 @@ for line1, line2 in zip(f1.readlines(), f2.readlines()):
   if lower!=upper:
     wide+=1
   if not isInInterval(value, lower, upper):
+    print(line1)
+    print(line2)
     result = 1
 
 print(total, wide)
