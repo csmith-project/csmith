@@ -45,6 +45,8 @@ csmith_SOURCES = \
 	Block.h \
 	Bookkeeper.cpp \
 	Bookkeeper.h \
+	BuiltinConfig.cpp \
+	BuiltinConfig.h \
 	CFGEdge.cpp \
 	CFGEdge.h \
 	CGContext.cpp \
@@ -118,6 +120,8 @@ csmith_SOURCES = \
 	MspFilters.h \
 	OutputMgr.cpp \
 	OutputMgr.h \
+	Parameter.cpp \
+	Parameter.h \
 	PartialExpander.cpp \
 	PartialExpander.h \
 	Probabilities.cpp \
@@ -159,6 +163,10 @@ csmith_SOURCES = \
 	StringUtils.h \
 	Type.cpp \
 	Type.h \
+	PointerType.cpp \
+	PointerType.h \
+	AggregateType.cpp \
+	AggregateType.h \
 	Variable.cpp \
 	Variable.h \
 	VariableSelector.cpp \
@@ -170,7 +178,13 @@ csmith_SOURCES = \
 	random.cpp \
 	random.h \
 	util.cpp \
-	util.h
+	util.h \
+	tinyxml.cpp \
+	tinyxml.h \
+	tinyxmlerror.cpp \
+	tinyxmlparser.cpp \
+	tinystr.cpp \
+	tinystr.h
 
 # Include VC project files in the distribution.
 EXTRA_DIST = \
