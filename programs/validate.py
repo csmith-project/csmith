@@ -1,3 +1,4 @@
+import math
 import sys
 import re
 
@@ -33,6 +34,8 @@ for line1, line2 in zip(f1.readlines(), f2.readlines()):
   total+=1
   value = extractValue(line1)
   lower, upper = extractInterval(line2)
+  if math.isnan(value):
+    continue
   if lower!=upper:
     wide+=1
   if not isInInterval(value, lower, upper):
