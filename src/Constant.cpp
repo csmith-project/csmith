@@ -304,7 +304,20 @@ GenerateRandomUnionConstant(const Type* type)
 {
 	string value = "{";
 	assert(type->eType == eUnion && type->fields.size() == type->bitfields_length_.size());
+
+	//float_test : initialize interval structs properly
+	bool should_close_brackets = false;
+	if(CGOptions::float_test() && type->fields[0]->is_float()){
+		value  += "FLOAT_TEST_CONSTANT(";
+		should_close_brackets = true;
+	}
+
 	value += GenerateRandomConstant(type->fields[0]);
+
+	if(should_close_brackets){
+		value += ")";
+	}
+
 	value += "}";
 	return value;
 }
