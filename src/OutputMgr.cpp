@@ -110,6 +110,13 @@ OutputMgr::OutputMain(std::ostream &out)
 
 	ExtensionMgr::OutputInit(out);
 
+	//float_test tracking
+	if (CGOptions::float_test()){
+		out << "#ifdef TRACKING" << endl;
+		out << "tracked = &__GLOB;" << endl;
+		out << "#endif" << endl;
+	}
+
 	// output initializers for global array variables
 	OutputArrayInitializers(*VariableSelector::GetGlobalVariables(), out, 1);
 
@@ -316,6 +323,15 @@ OutputMgr::OutputHeader(int argc, char *argv[], unsigned long seed)
 			out << "volatile uint32_t " << Variable::sink_var_name << " = 0;" << endl;
 	}
 	out << endl;
+
+	//float_test tracking
+	if (CGOptions::float_test()){
+		out << "#ifdef TRACKING" << endl;
+		out << "__FLOAT * tracked;" << endl;
+		out << "#endif" << endl;
+		out << endl;
+	}
+
 
 	out << "static long __undefined;" << endl;
 	out << endl;
