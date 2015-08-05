@@ -530,6 +530,7 @@ StatementAssign::OutputSimple(std::ostream &out) const
 			out << ")";
 		}
 
+		/*
 		out << "/*assign sim lhs:";
 		if (lhs.get_type().eType == ePointer){
 			out << "pointer ";
@@ -598,7 +599,8 @@ StatementAssign::OutputSimple(std::ostream &out) const
 		if (expr.get_type().is_float()){
 			out << "float,";
 		}
-		out <<"*/";
+		*/
+		//out <<"*/";
 
 
 		break;
@@ -666,6 +668,7 @@ StatementAssign::OutputAsExpr(std::ostream &out) const
 					out << ")";
 				}
 
+				/*
 				out << "/*exp lhs:";
 				if (lhs.get_type().eType == ePointer){
 					out << "pointer";
@@ -682,7 +685,8 @@ StatementAssign::OutputAsExpr(std::ostream &out) const
 				}else if (expr.get_type().eType == eUnion){
 					out << "union";
 				}
-				out <<"*/";
+				*/
+				//out <<"*/";
 			}
 			break;
 		}
