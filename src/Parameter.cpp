@@ -3,6 +3,9 @@
 // Copyright (c) 2015-2016 Xuejun Yang
 // All rights reserved.
 //
+// Copyright (c) 2015-2016 Huawei Technologies Co., Ltd
+// All rights reserved.
+//
 // This file is part of `csmith', a random generator of C programs.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -31,17 +34,30 @@
 #pragma warning(disable : 4786)   /* Disable annoying warning messages */
 #endif
 #include "Parameter.h"  
+#include "ParameterBuiltin.h"
 #include "Function.h"
 #include "ExtensionValue.h"
 #include "VariableSelector.h" 
 
-using namespace std;     
+using namespace std;
 vector<string> Parameter::_inOutTypeNames;
 
 Parameter::Parameter(const std::string &name, const Type *type, const Expression* init, const CVQualifiers* qfer, enum eParamInOutType inoutType)
     : Variable(name, type, init, qfer),
-    _inout(inoutType)
+    _inout(inoutType),
+    imm_bottom(0),
+    imm_top(0)
 {
+    is_imm = false;
+}
+
+Parameter::Parameter(const std::string &name, const Type *type, const Expression* init, const CVQualifiers* qfer, int bottom, int top, enum eParamInOutType inoutType)
+    : Variable(name, type, init, qfer),
+    _inout(inoutType),
+    imm_bottom(bottom),
+    imm_top(top)
+{
+    is_imm = true;
 }
   
 Parameter::~Parameter(void)
@@ -130,6 +146,13 @@ Parameter::GenerateParameter(const Type *type, const CVQualifiers *qfer, enum eP
 	return param;
 }
 
+Parameter *
+Parameter::GenerateParameter(const Type *type, const CVQualifiers *qfer, int bottom, int top, enum eParamInOutType inoutType)
+{
+    Parameter* param = new Parameter(RandomParamName(), type, NULL, qfer, bottom, top, inoutType);
+	return param;
+}
+
 // --------------------------------------------------------------
 // choose a random type for parameter
 // --------------------------------------------------------------
@@ -139,8 +162,8 @@ Parameter::GenerateParameter(Function &curFunc)
 	// Add this type to our parameter list.
 	const Type* t = 0;
 	bool rnd = rnd_flipcoin(40);
-	if (Type::has_pointer_type() && rnd) {
-		t= Type::choose_random_pointer_type();
+	if (PointerType::has_pointer_type() && rnd) {
+		t= PointerType::choose_random_pointer_type();
 	}
 	else {
 		t = Type::choose_random_nonvoid_nonvolatile();
@@ -194,6 +217,62 @@ Parameter::GenerateParametersFromString(Function &currFunc, const string &params
 		assert(p);
 		currFunc.params.push_back(p);
 	}
+}
+
+void
+Parameter::GenerateParameterFromXmlConfig(Function &currFunc, std::vector<ParameterBuiltin*> params_configs)
+{
+    for (size_t i = 0; i < params_configs.size(); i++) {
+        ParameterBuiltin* pc = params_configs[i];
+        // create Type
+        const Type* ty = NULL;
+        if (pc->ptr_level == 0) {
+            ty = Type::get_type_from_string(pc->type_name);
+        } else if (pc->ptr_level > 0) {
+            ty = PointerType::find_pointer_type(Type::get_type_from_string(pc->type_name), pc->ptr_level);
+        } else {
+            assert(0 && "Builtin Config Error: ptr_level is negative value.");
+        }
+
+        // create Qualifier
+        // construct CVQualifier
+		int const_offset = pc->const_level;
+		vector<bool> consts;
+		vector<bool> volatiles;
+		if (const_offset == -1) {
+			for (int i = 0; i <= pc->ptr_level; i++) {
+				consts.push_back(false);
+				volatiles.push_back(false);
+			}
+		} else {
+			assert(pc->ptr_level >= const_offset);
+			int size = pc->ptr_level + 1;
+			for (int i = 0; i < size; i++) {
+				if (i == const_offset) {
+					consts.push_back(true);
+					volatiles.push_back(false);
+					continue;
+				}
+				consts.push_back(false);
+				volatiles.push_back(false);
+			}
+		}
+        CVQualifiers* qfer = new CVQualifiers(consts, volatiles);
+
+        // set In/Out type
+        enum eParamInOutType inout = eParamIn;
+        if (pc->out)
+            inout = eParamInOut;
+
+        Parameter *param = NULL;
+        if (pc->is_imm && pc->has_range) {
+            param = GenerateParameter(ty, qfer, pc->bottom, pc->top, inout); // for immediate type
+        } else {
+            param = GenerateParameter(ty, qfer, inout);
+        }
+		assert(param);
+		currFunc.params.push_back(param);
+    }
 }
 
 // ----------------------------------------------------------------

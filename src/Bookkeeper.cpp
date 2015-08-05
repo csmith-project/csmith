@@ -3,6 +3,9 @@
 // Copyright (c) 2007, 2008, 2010, 2011, 2013 The University of Utah
 // All rights reserved.
 //
+// Copyright (c) 2015-2016 Huawei Technologies Co., Ltd
+// All rights reserved.
+//
 // This file is part of `csmith', a random generator of C programs.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -278,7 +281,7 @@ Bookkeeper::output_pointer_statistics(std::ostream &out)
 			total_has_null_ptr++;
 		}
 		const Variable* var = ptrs[i];
-		const Type* t = var->type;
+		const PointerType * t = dynamic_cast<const PointerType *>(var->type);
 		assert(t->eType == ePointer);
 		if (t->get_indirect_level() > 1) {
 			point_to_pointer++;
@@ -487,10 +490,10 @@ Bookkeeper::record_vars_with_bitfields(const Type *type)
 }
 
 void
-Bookkeeper::record_type_with_bitfields(const Type *typ)
+Bookkeeper::record_type_with_bitfields(const Type *type)
 {
-	if (!typ->is_aggregate()) return;
-
+	if (!type->is_aggregate()) return;
+	const AggregateType * typ = dynamic_cast<const AggregateType *>(type);
 	if (typ->has_bitfields()) {
 		Bookkeeper::structs_with_bitfields++;
 		size_t len = typ->bitfields_length_.size();

@@ -3,6 +3,9 @@
 // Copyright (c) 2008, 2010, 2011, 2012, 2013, 2014 The University of Utah
 // All rights reserved.
 //
+// Copyright (c) 2015-2016 Huawei Technologies Co., Ltd
+// All rights reserved.
+//
 // This file is part of `csmith', a random generator of C programs.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -179,6 +182,7 @@ DEFINE_GETTER_SETTER_BOOL(use_comma_exprs);
 DEFINE_GETTER_SETTER_BOOL(take_union_field_addr);
 DEFINE_GETTER_SETTER_BOOL(vol_struct_union_fields);
 DEFINE_GETTER_SETTER_BOOL(lang_cpp);
+DEFINE_GETTER_SETTER_STRING_REF(init_builtin_config_filepath);
 
 void
 CGOptions::set_default_builtin_kinds()
@@ -287,6 +291,8 @@ CGOptions::set_default_settings(void)
 	lang_cpp(false);
 
 	set_default_builtin_kinds();
+
+    init_builtin_config_filepath("");
 }
 
 /*

@@ -3,6 +3,9 @@
 // Copyright (c) 2007, 2008, 2010, 2011, 2013 The University of Utah
 // All rights reserved.
 //
+// Copyright (c) 2015-2016 Huawei Technologies Co., Ltd
+// All rights reserved.
+//
 // This file is part of `csmith', a random generator of C programs.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -47,6 +50,8 @@ using namespace std;
 
 #include "Effect.h"
 #include "Type.h"
+
+#include "FunctionBuiltin.h"
 
 class Block;
 class Variable;
@@ -123,6 +128,8 @@ public:
 	bool is_builtin;
 	int  visited_cnt;
 	Effect accum_eff_context;
+
+    static void make_builtin_function(FunctionBuiltin* _builtin);
 
 private:
 	static int deleteFunction(Function* func);

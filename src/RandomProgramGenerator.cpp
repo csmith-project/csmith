@@ -3,6 +3,9 @@
 // Copyright (c) 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014 The University of Utah
 // All rights reserved.
 //
+// Copyright (c) 2015-2016 Huawei Technologies Co., Ltd
+// All rights reserved.
+//
 // This file is part of `csmith', a random generator of C programs.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -202,6 +205,9 @@ static void print_help()
         // language options
 	cout << "  --lang-cpp : generate C++ code (C by default)." << endl << endl;
 
+        // config file path
+    cout << "  --builtin-config <builtin_file_path>: specify external builtins configuration file absolute path." << endl << endl;
+
 }
 
 static void print_advanced_help()
@@ -327,6 +333,18 @@ main(int argc, char **argv)
 	CGOptions::set_default_settings();
 
 	for (int i=1; i<argc; i++) {
+
+        if (strcmp (argv[i], "--builtin-config") == 0) {
+			string filepath;
+			i++;
+			arg_check(argc, i);
+			if (!parse_string_arg(argv[i], filepath)) {
+				cout<< "please specify external builtins configuration file absolute path!" << std::endl;
+				exit(-1);
+			}
+			CGOptions::init_builtin_config_filepath(filepath);
+			continue;
+        }
 
 		if (strcmp (argv[i], "--help") == 0 ||
 			strcmp (argv[i], "-h") == 0) {

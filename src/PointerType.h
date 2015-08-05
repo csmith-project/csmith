@@ -70,6 +70,7 @@ public:
 	static PointerType* make_random_pointer_type(void);
 
 	static PointerType* find_pointer_type(const Type* t, bool add);
+    static PointerType* find_pointer_type(const Type * t, int indirect);
 
 	// choose a random pointer type
 	static const PointerType* choose_random_pointer_type(void);

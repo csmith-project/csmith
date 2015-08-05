@@ -3,6 +3,9 @@
 // Copyright (c) 2007, 2008, 2010, 2011, 2013, 2014 The University of Utah
 // All rights reserved.
 //
+// Copyright (c) 2015-2016 Huawei Technologies Co., Ltd
+// All rights reserved.
+//
 // This file is part of `csmith', a random generator of C programs.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -61,6 +64,7 @@
 #include "ExtensionMgr.h"
 #include "OutputMgr.h"
 #include "Parameter.h"
+#include "BuiltinConfig.h"
 
 using namespace std;
 
@@ -575,7 +579,7 @@ Function::GenerateBody(const CGContext &prev_context)
 	cg_context.extend_call_chain(prev_context);
 	FactMgr* fm = get_fact_mgr_for_func(this);
 	for (size_t i=0; i<params.size(); i++) {
-		if (params[i]->type->ptr_type != 0) {
+		if (params[i]->type->eType == ePointer) {
 			fm->global_facts.push_back(FactPointTo::make_fact(params[i], FactPointTo::tbd_ptr));
 		}
 	}
@@ -714,6 +718,34 @@ Function::make_builtin_function(const string &function_string)
 }
 
 void
+Function::make_builtin_function(FunctionBuiltin* _builtin)
+{
+    if (!_builtin)
+        return;
+    const Type *ty = Type::get_type_from_string(_builtin->return_type_name);
+    Function *f = new Function(_builtin->name, ty, /*is_builtin*/true);
+
+    string rvname = f->name + "_" + "rv";
+    CVQualifiers ret_qfer = CVQualifiers::random_qualifiers(ty);
+    f->rv = Variable::CreateVariable(rvname, ty, NULL, &ret_qfer);
+
+    // create a fact manager for this function, with empty global facts
+	FactMgr* fm = new FactMgr(f);
+	FMList.push_back(fm);
+
+    Parameter::GenerateParameterFromXmlConfig(*f, _builtin->params);
+    f->GenerateBody(CGContext::get_empty_context());
+
+    // update global facts to merged facts at all possible function exits
+	fm->global_facts = fm->map_facts_out[f->body];
+	f->body->add_back_return_facts(fm, fm->global_facts);
+
+	// collect info about global dangling pointers
+	fm->find_dangling_global_ptrs(f);
+	++builtin_functions_cnt;
+}
+
+void
 Function::compute_summary(void)
 {
 	FactMgr* fm = get_fact_mgr_for_func(this);
@@ -736,8 +768,10 @@ void
 GenerateFunctions(void)
 {
 	FactMgr::add_interested_facts(CGOptions::interested_facts());
-	if (CGOptions::builtins())
+	if (CGOptions::builtins()) {
 		Function::initialize_builtin_functions();
+        BuiltinConfig::build_builtin_list_from_xml(CGOptions::init_builtin_config_filepath()); // just for test
+    }
 	// -----------------
 	// Create a basic first function, then generate a random graph from there.
 	/* Function *first = */ Function::make_first();

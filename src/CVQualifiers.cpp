@@ -3,6 +3,9 @@
 // Copyright (c) 2007, 2008, 2009, 2010, 2011, 2013 The University of Utah
 // All rights reserved.
 //
+// Copyright (c) 2015-2016 Huawei Technologies Co., Ltd
+// All rights reserved.
+//
 // This file is part of `csmith', a random generator of C programs.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -31,6 +34,7 @@
 #include <iostream>
 #include "CVQualifiers.h"
 #include "Type.h"
+#include "PointerType.h"
 #include "Effect.h"
 #include "CGContext.h"
 #include "CGOptions.h"
@@ -290,7 +294,7 @@ CVQualifiers::random_qualifiers(const Type* t, Effect::Access access, const CGCo
 	const Effect &effect_context = cg_context.get_effect_context();
 
 	// set random volatile/const properties for each level of indirection for pointers
-	const Type* tmp = t->ptr_type;
+	const Type* tmp = (t->eType == ePointer) ? (dynamic_cast<const PointerType *>(t))->ptr_type : NULL;
 	while (tmp) {
 		isVolatile = rnd_flipcoin(volatile_prob);
 		isConst = rnd_flipcoin(const_prob);
@@ -299,7 +303,7 @@ CVQualifiers::random_qualifiers(const Type* t, Effect::Access access, const CGCo
 		}
 		is_consts.push_back(isConst);
 		is_volatiles.push_back(isVolatile);
-		tmp = tmp->ptr_type;
+		tmp = (tmp->eType == ePointer) ? (dynamic_cast<const PointerType *>(tmp))->ptr_type : NULL;
 	}
 	// set random volatile/const properties for variable itself
 	bool volatile_ok = effect_context.is_side_effect_free();

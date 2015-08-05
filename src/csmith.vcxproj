@@ -134,9 +134,11 @@
     <ClCompile Include="AbsExtension.cpp" />
     <ClCompile Include="AbsProgramGenerator.cpp" />
     <ClCompile Include="AbsRndNumGenerator.cpp" />
+    <ClCompile Include="AggregateType.cpp" />
     <ClCompile Include="ArrayVariable.cpp" />
     <ClCompile Include="Block.cpp" />
     <ClCompile Include="Bookkeeper.cpp" />
+    <ClCompile Include="BuiltinConfig.cpp" />
     <ClCompile Include="CFGEdge.cpp" />
     <ClCompile Include="CGContext.cpp" />
     <ClCompile Include="CGOptions.cpp" />
@@ -176,6 +178,7 @@
     <ClCompile Include="Parameter.cpp" />
     <ClCompile Include="PartialExpander.cpp" />
     <ClCompile Include="platform.cpp" />
+    <ClCompile Include="PointerType.cpp" />
     <ClCompile Include="Probabilities.cpp" />
     <ClCompile Include="random.cpp" />
     <ClCompile Include="RandomNumber.cpp" />
@@ -196,6 +199,10 @@
     <ClCompile Include="StatementIf.cpp" />
     <ClCompile Include="StatementReturn.cpp" />
     <ClCompile Include="StringUtils.cpp" />
+    <ClCompile Include="tinystr.cpp" />
+    <ClCompile Include="tinyxml.cpp" />
+    <ClCompile Include="tinyxmlerror.cpp" />
+    <ClCompile Include="tinyxmlparser.cpp" />
     <ClCompile Include="Type.cpp" />
     <ClCompile Include="util.cpp" />
     <ClCompile Include="Variable.cpp" />
@@ -206,9 +213,11 @@
     <ClInclude Include="AbsExtension.h" />
     <ClInclude Include="AbsProgramGenerator.h" />
     <ClInclude Include="AbsRndNumGenerator.h" />
+    <ClInclude Include="AggregateType.h" />
     <ClInclude Include="ArrayVariable.h" />
     <ClInclude Include="Block.h" />
     <ClInclude Include="Bookkeeper.h" />
+    <ClInclude Include="BuiltinConfig.h" />
     <ClInclude Include="CFGEdge.h" />
     <ClInclude Include="CGContext.h" />
     <ClInclude Include="CGOptions.h" />
@@ -237,6 +246,7 @@
     <ClInclude Include="Filter.h" />
     <ClInclude Include="Finalization.h" />
     <ClInclude Include="Function.h" />
+    <ClInclude Include="FunctionBuiltin.h" />
     <ClInclude Include="FunctionInvocation.h" />
     <ClInclude Include="FunctionInvocationBinary.h" />
     <ClInclude Include="FunctionInvocationUnary.h" />
@@ -247,8 +257,10 @@
     <ClInclude Include="MspFilters.h" />
     <ClInclude Include="OutputMgr.h" />
     <ClInclude Include="Parameter.h" />
+    <ClInclude Include="ParameterBuiltin.h" />
     <ClInclude Include="PartialExpander.h" />
     <ClInclude Include="platform.h" />
+    <ClInclude Include="PointerType.h" />
     <ClInclude Include="Probabilities.h" />
     <ClInclude Include="ProbabilityTable.h" />
     <ClInclude Include="..\runtime\windows\rand48.h" />
@@ -270,6 +282,8 @@
     <ClInclude Include="StatementIf.h" />
     <ClInclude Include="StatementReturn.h" />
     <ClInclude Include="StringUtils.h" />
+    <ClInclude Include="tinystr.h" />
+    <ClInclude Include="tinyxml.h" />
     <ClInclude Include="Type.h" />
     <ClInclude Include="util.h" />
     <ClInclude Include="Variable.h" />

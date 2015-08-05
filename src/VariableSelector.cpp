@@ -3,6 +3,9 @@
 // Copyright (c) 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014 The University of Utah
 // All rights reserved.
 //
+// Copyright (c) 2015-2016 Huawei Technologies Co., Ltd
+// All rights reserved.
+//
 // This file is part of `csmith', a random generator of C programs.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -564,11 +567,11 @@ VariableSelector::eager_create_global_struct(Effect::Access access, const CGCont
 	int level = type->get_indirect_level();
 	const Type *t = 0;
 	if (level == 0) {
-		t = Type::choose_random_struct_from_type(type, false);
+		t = AggregateType::choose_random_struct_from_type(type, false);
 		GenerateNewGlobal(access, cg_context, t, qfer);
 	}
 	else if (level == 1) {
-		t = Type::choose_random_struct_from_type(t->ptr_type, false);
+		t = AggregateType::choose_random_struct_from_type(((t->eType == ePointer) ? (dynamic_cast<const PointerType *>(t))->ptr_type : NULL), false);
 		if (qfer) {
 			CVQualifiers qfer1 = qfer->indirect_qualifiers(level);
 			GenerateNewGlobal(access, cg_context, t, &qfer1);
@@ -594,11 +597,11 @@ VariableSelector::eager_create_local_struct(Block &block, Effect::Access access,
 	int level = type->get_indirect_level();
 	const Type *t = 0;
 	if (level == 0) {
-		t = Type::choose_random_struct_from_type(type, true);
+		t = AggregateType::choose_random_struct_from_type(type, true);
 		GenerateNewParentLocal(block, access, cg_context, t, qfer);
 	}
 	else if (level == 1) {
-		t = Type::choose_random_struct_from_type(t->ptr_type, true);
+		t = AggregateType::choose_random_struct_from_type(((t->eType == ePointer) ? (dynamic_cast<const PointerType *>(t))->ptr_type : NULL), true);
 		if (qfer) {
 			CVQualifiers qfer1 = qfer->indirect_qualifiers(level);
 			GenerateNewParentLocal(block, access, cg_context, t, &qfer1);
@@ -792,7 +795,7 @@ VariableSelector::make_init_value(Effect::Access access, const CGContext &cg_con
 	}
 
 	// for pointers, take address of a random visible local variable
-	const Type* type = t->ptr_type;
+	const Type* type =(dynamic_cast<const PointerType *>(t))->ptr_type;
 	assert(type);
 
 	vector<Variable*> vars = find_all_visible_vars(b);
@@ -1126,7 +1129,7 @@ VariableSelector::select_deref_pointer(Effect::Access access, const CGContext &c
 
 	Variable* var = choose_var(vars, access, cg_context, type, qfer, eDereference, invalid_vars);
 	if (var == 0) {
-		Type* ptr_type = Type::find_pointer_type(type, true);
+		PointerType* ptr_type = PointerType::find_pointer_type(type, true);
 		assert(ptr_type);
 		CVQualifiers ptr_qfer = (!qfer || qfer->wildcard)
 								? CVQualifiers::random_qualifiers(ptr_type, access, cg_context, true)
