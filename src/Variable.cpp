@@ -815,6 +815,10 @@ Variable::OutputDef(std::ostream &out, int indent) const
 	}
 	*/
 
+	if(CGOptions::float_test() && type->is_float() && is_global()){
+		out << "NO_CAST_";
+	}
+
 	init->Output(out);
 
 	out << ";";

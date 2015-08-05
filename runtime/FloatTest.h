@@ -16,6 +16,7 @@ typedef struct float_interval {
 } float_interval_t;
 
 #define FLOAT_TEST_CONSTANT(c) (float_interval_t){c, c}
+#define NO_CAST_FLOAT_TEST_CONSTANT(c) {c, c}
 
 #define OUTPUT_FLOAT_INTERVAL_MACRO(x) printf(#x);\
 printf(" = [%a, %a]\n", x.lower, x.upper);
@@ -133,6 +134,7 @@ int float_test_rshift(float_interval_t in1, float_interval_t in2);
 
 #define __FLOAT float
 #define FLOAT_TEST_CONSTANT(c) c
+#define NO_CAST_FLOAT_TEST_CONSTANT(c) c
 
 #define OUTPUT_FLOAT_INTERVAL_MACRO(x) printf(#x);\
 printf(" = %a\n", x);
