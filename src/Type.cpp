@@ -1753,7 +1753,7 @@ void OutputStructUnion(Type* type, std::ostream &out)
 			}
 			really_outputln(out);
         }
-        out << "};";
+        out << "};"; ///*STRUCT DECLARATION*/";
 		really_outputln(out);
         if (type->packed_) {
 		if (CGOptions::ccomp()) {

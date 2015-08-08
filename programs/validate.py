@@ -35,6 +35,10 @@ for line1, line2 in zip(f1.readlines(), f2.readlines()):
   value = extractValue(line1)
   lower, upper = extractInterval(line2)
   if math.isnan(value):
+    if math.isfinite(lower) and math.isfinite(upper):
+      print(line1)
+      print(line2)
+      result = 1
     continue
   if lower!=upper:
     wide+=1

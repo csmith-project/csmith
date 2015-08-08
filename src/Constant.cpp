@@ -283,12 +283,22 @@ GenerateRandomStructConstant(const Type* type)
 			value += v;
 		}
 		else {
-        		string v = GenerateRandomConstant(type->fields[i]);
+        	string v = GenerateRandomConstant(type->fields[i]);
 			ERROR_GUARD("");
         		if (i > 0) {
             			value += ",";
 			}
+
+
+        	//float_test : initialize structs with floats properly
+        	if(CGOptions::float_test() && type->fields[i]->is_float()){
+        		value += "NO_CAST_FLOAT_TEST_CONSTANT(" + v + ")";
+        	}else{
         		value += v;
+        	}
+
+
+        	//value += "/*V*/";
 		}
 	}
 	value += "}";
@@ -603,6 +613,7 @@ Constant::Output(std::ostream &out) const
 		s = oss.str();
 	}
     out << s;
+    //out << "/*C*/";
 }
 
 ///////////////////////////////////////////////////////////////////////////////
