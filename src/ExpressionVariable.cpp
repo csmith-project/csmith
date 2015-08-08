@@ -77,7 +77,7 @@ ExpressionVariable::make_random(CGContext &cg_context, const Type* type, const C
 			continue;
 
 		//float_test : prevent exprs which are int but simple_type == eFloat
-		if (type->is_float() && !var->type->is_float())
+		if (CGOptions::float_test() && type->is_float() && !var->type->is_float())
 					continue;
 
 		// forbid a parameter to take the address of an argument

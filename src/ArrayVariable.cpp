@@ -528,7 +528,7 @@ ArrayVariable::OutputDef(std::ostream &out, int indent) const
 
 			//float_test
 			string s = "";
-			if(init->get_type().is_float()){
+			if(CGOptions::float_test() && init->get_type().is_float()){
 				s = " NO_CAST_";
 			}
 			init_strings.push_back(s + init->to_string());
