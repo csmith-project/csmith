@@ -525,9 +525,15 @@ ArrayVariable::OutputDef(std::ostream &out, int indent) const
 			size_t i;
 			vector<string> init_strings;
 			assert(init);
-			init_strings.push_back(init->to_string());
+
+			//float_test
+			string s = "";
+			if(CGOptions::float_test() && init->get_type().is_float()){
+				s = " NO_CAST_";
+			}
+			init_strings.push_back(s + init->to_string());
 			for (i=0; i<init_values.size(); i++) {
-				init_strings.push_back(init_values[i]->to_string());
+				init_strings.push_back(s + init_values[i]->to_string());
 			}
 
 			// force global variables to be static if necessary
