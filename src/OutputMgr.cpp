@@ -168,6 +168,15 @@ OutputMgr::OutputMain(std::ostream &out)
 			out << "    platform_main_end(0,0);" << endl;
 		}
 	}
+
+	//tracking
+	out << "#ifdef TRACKING" << endl;
+	out << "  #ifdef FLOAT_TEST_ENABLED" << endl;
+	out << "  printf(\"Final state of tracked variable: [%a, %a]\\n\", __GLOB.lower, __GLOB.upper);" << endl;
+	out << "  #endif" << endl;
+	out << "#endif" << endl;
+
+
 	ExtensionMgr::OutputTail(out);
 	out << "}" << endl;
 	delete invoke;
