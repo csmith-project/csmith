@@ -78,6 +78,9 @@ int CGOptions::pointer_size_ = 0;
 //float_test
 DEFINE_GETTER_SETTER_BOOL(float_test)
 
+//check_local
+DEFINE_GETTER_SETTER_BOOL(check_local)
+
 DEFINE_GETTER_SETTER_BOOL(compute_hash)
 DEFINE_GETTER_SETTER_BOOL(depth_protect)
 DEFINE_GETTER_SETTER_INT (max_split_files)

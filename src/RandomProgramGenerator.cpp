@@ -1029,6 +1029,13 @@ main(int argc, char **argv)
 			continue;
 		}
 
+		// tracking : check local
+		if(strcmp(argv[i], "--check-local") == 0){
+			CGOptions::check_local(true);
+			continue;
+		}
+
+
 		if (strcmp (argv[i], "--step-hash-by-stmt") == 0) {
 			CGOptions::step_hash_by_stmt(true);
 			continue;

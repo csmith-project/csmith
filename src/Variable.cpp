@@ -1433,6 +1433,7 @@ Variable::output_value_dump(ostream &out, string prefix, int indent) const
 	else if (type->eType == eSimple) {
 		//float_test
 		if(CGOptions::float_test()){
+			output_tab(out, indent);
 			out << "OUTPUT_FLOAT_INTERVAL_MACRO(" << to_string() << ");";
 			outputln(out);
 			//string s = to_string();

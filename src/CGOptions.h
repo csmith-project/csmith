@@ -74,6 +74,9 @@ public:
 	static bool float_test(void);
 	static bool float_test(bool p);
 
+	static bool check_local(void);
+	static bool check_local(bool p);
+
 	static bool compute_hash(void);
 	static bool compute_hash(bool p);
 
@@ -478,6 +481,9 @@ private:
 
 	//float_test
 	static bool float_test_;
+
+	//check_local
+	static bool check_local_;
 
 	// Until I do this right, just make them all static.
 	static bool	compute_hash_;

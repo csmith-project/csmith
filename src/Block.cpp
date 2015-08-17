@@ -278,6 +278,45 @@ OutputStatementList(const vector<Statement*> &stms, std::ostream &out, FactMgr* 
 	}
 }
 
+
+static void
+OutputLocalVars(const vector<Variable*> &local_vars, std::ostream &out, int indent){
+	for (size_t j=0; j<local_vars.size(); j++) {
+		if (CGOptions::float_test()){
+			if (local_vars[j]->type->simple_type == eFloat){
+				local_vars[j]->output_value_dump(out, "local ft ", indent);
+			}
+		}else{
+			local_vars[j]->output_value_dump(out, "local ", indent);
+		}
+
+	}
+}
+
+static void
+OutputStatementListCheckLocal(const vector<Statement*> &stms, const vector<Variable*> &local_vars,
+		                       std::ostream &out, FactMgr* fm, int indent)
+{
+	bool printed = false;
+	size_t i;
+	for (i=0; i<stms.size(); i++) {
+		const Statement* stm = stms[i];
+
+		if(stm->eType == eReturn){
+			OutputLocalVars(local_vars, out, indent);
+			printed = true;
+		}
+
+		stm->pre_output(out, fm, indent);
+		stm->Output(out, fm, indent);
+		stm->post_output(out, fm, indent);
+	}
+
+	if(!printed){
+		OutputLocalVars(local_vars, out, indent);
+	}
+}
+
 /*
  *
  */
@@ -301,7 +340,31 @@ Block::Output(std::ostream &out, FactMgr* fm, int indent) const
 
 	OutputVariableList(local_vars, out, indent);
 
-	OutputStatementList(stms, out, fm, indent);
+	if(CGOptions::check_local()){
+		OutputStatementListCheckLocal(stms, local_vars, out, fm, indent);
+	}else{
+		OutputStatementList(stms, out, fm, indent);
+	}
+
+
+	// check_local
+	/*
+	if(CGOptions::check_local()){
+		//output local variables
+		for (size_t i=0; i<local_vars.size(); i++) {
+			if (CGOptions::float_test()){
+				if (local_vars[i]->type->simple_type == eFloat){
+					local_vars[i]->output_value_dump(out, "local ft ", 1);
+				}
+			}else{
+				local_vars[i]->output_value_dump(out, "local ", 1);
+			}
+
+		}
+	}
+	*/
+
+
 
 	if (CGOptions::depth_protect()) {
 		out << "DEPTH--;" << endl;
