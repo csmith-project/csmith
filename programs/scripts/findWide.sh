@@ -5,6 +5,7 @@ ADAPTER="/home/jacek/Desktop/Imperial/UROP/Adapter/boost_interval_adapter/adapte
 TEMPDIR="temp"
 COMP="gcc"
 TIMEOUT="timeout 30"
+RESFILE="wide.txt"
 
 makeProg(){
   $TIMEOUT ${CSMITH}/src/csmith --seed ${1} --strict-float --float-test > ${TEMPDIR}/prog.c
@@ -24,6 +25,7 @@ checkWide(){
 }
 
 mkdir -p $TEMPDIR
+touch $RESFILE
 
 for i in $(seq $1 $2); do
   makeProg $1 &&\
@@ -34,6 +36,7 @@ for i in $(seq $1 $2); do
   checkWide
   if [ $? -eq 0 ]; then
     echo "wide $i"
+    echo "$i" >> "$RESFILE"
   else
     echo "singleton $i"
   fi
