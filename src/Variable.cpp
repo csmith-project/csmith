@@ -1139,7 +1139,7 @@ Variable::hash(std::ostream& out) const
                 Output(out);
                 out << "), \"" << name << "\", print_hash_value);" << endl;
             } else {
-                out << "    transparent_crc(" << "/*XXXouter*/";
+                out << "    transparent_crc(";
                 Output(out);
                 out << ", \"" << name << "\", print_hash_value);" << endl;
             }
