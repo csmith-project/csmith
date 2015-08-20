@@ -28,7 +28,7 @@ mkdir -p $TEMPDIR
 touch $RESFILE
 
 for i in $(seq $1 $2); do
-  makeProg $1 &&\
+  makeProg $i &&\
   compileAndRun
   if [ $? -ne 0 ]; then
     continue
