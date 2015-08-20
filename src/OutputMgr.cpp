@@ -176,6 +176,11 @@ OutputMgr::OutputMain(std::ostream &out)
 	out << "#ifdef FLOAT_TEST_ENABLED" << endl;
 	out << "#ifdef __GLOB" << endl;
 	out << "printf(\"Final state of tracked variable: [%a, %a]\\n\", __GLOB.lower, __GLOB.upper);" << endl;
+	out << "if(__GLOB.lower < __GLOB.upper){" << endl;
+	out << "  printf(\"The final value is wide\\n\");" << endl;
+	out << "}else{" << endl;
+	out << "  printf(\"The final value is a singleton\\n\");" << endl;
+	out << "}" << endl;
 	out << "#endif" << endl;
 	out << "#endif" << endl;
 	out << "#endif" << endl;
