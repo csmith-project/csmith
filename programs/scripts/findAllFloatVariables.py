@@ -32,4 +32,4 @@ def dimGen(dims):
 for line in open(sys.argv[1], 'r'):
   findDef(line, globPat)
   findDef(line, localPat)
-  findArray(line)
+  #findArray(line)
