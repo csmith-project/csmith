@@ -175,6 +175,11 @@ FunctionInvocation::make_random_binary(CGContext &cg_context, const Type* type)
 	eBinaryOps op;
 	do {
 		op = (eBinaryOps)(rnd_upto(MAX_BINARY_OP, BINARY_OPS_PROB_FILTER));
+
+		// float_test prob : make more add ops
+		if(CGOptions::float_test() && rnd_flipcoin(50)){
+			op = eAdd;
+		}
 	} while (type->is_float() && !BinaryOpWorksForFloat(op));
 
 
