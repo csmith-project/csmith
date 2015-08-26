@@ -94,11 +94,24 @@ touch ${RUN_ERROR_FILE}
 touch ${RES_ERROR_FILE}
 touch ${WIDE_COUNT_FILE}
 
-for seed in $(seq $1 $2); do
-  echo "$seed"
-  if testSeed $seed; then
-    echo 'OK'
-  else
-    echo 'ERROR'
-  fi
-done
+if [ "$2" == "" ]; then
+  seed="$1"
+  while true; do
+    echo "$seed"
+    if testSeed $seed; then
+      echo 'OK'
+    else
+      echo 'ERROR'
+    fi
+    seed=$((seed+1))
+  done
+else
+  for seed in $(seq $1 $2); do
+    echo "$seed"
+    if testSeed $seed; then
+      echo 'OK'
+    else
+      echo 'ERROR'
+    fi
+  done
+fi
