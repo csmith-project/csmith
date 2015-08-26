@@ -11,7 +11,7 @@ def extractInterval(line):
     upper = float.fromhex(match.group(3))
     return (name, lower, upper)
   else: 
-    return (0,0)
+    return ("",0,0)
 
 def isInInterval(value, lower, upper):
   return lower<=value and value<=upper
