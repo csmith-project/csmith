@@ -24,7 +24,7 @@ makeProg(){
 
 compileInFloatTestMode(){
   ${TIMEOUT_MACRO} ${TRUSTED} ${TEMP_DIR}/prog.c -O0 -w -c -I${CSMITH_PATH}runtime -DUNSAFE_FLOAT -DFLOAT_TEST_ENABLED -o ${TEMP_DIR}/progFloatTestMode.o && \
-  ${TIMEOUT_MACRO} g++ ${TEMP_DIR}/progFloatTestMode.o ${ADAPTER_OBJECT_PATH} -o ${TEMP_DIR}/progFloatTestMode
+  ${TIMEOUT_MACRO} ${COMP_PP} ${TEMP_DIR}/progFloatTestMode.o ${ADAPTER_OBJECT_PATH} -o ${TEMP_DIR}/progFloatTestMode
   return $?
 }
 
