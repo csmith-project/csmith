@@ -1,7 +1,8 @@
 #!/bin/bash
 
-COMPILER="gcc"
-COMPILER_PP="g++"
+TRUSTED="gcc-4.9"
+COMP="gcc"
+COMP_PP="g++"
 CSMITH_PATH="/home/jacek/Desktop/Imperial/UROP/csmith/"
 ADAPTER_OBJECT_PATH="/home/jacek/Desktop/Imperial/UROP/Adapter/boost_interval_adapter/adapter.o"
 GEN_ERROR_FILE="genError.txt"
@@ -9,20 +10,20 @@ COMP_ERROR_FILE="compError.txt"
 RUN_ERROR_FILE="runError.txt"
 TIMEOUT_MACRO="timeout 60 "
 TEMP_DIR="temp"
-RESULTS_DIR="results"
-GEN_ERROR_FILE="${RESULTS_DIR}/genError.txt"
-COMP_ERROR_FILE="${RESULTS_DIR}/compError.txt"
-RUN_ERROR_FILE="${RESULTS_DIR}/runError.txt"
-RESULT_ERROR_FILE="${RESULTS_DIR}/resError.txt"
-WIDE_COUNT_FILE="${RESULTS_DIR}/wideCount.txt"
+RES_DIR="results"
+GEN_ERROR_FILE="${RES_DIR}/genError.txt"
+COMP_ERROR_FILE="${RES_DIR}/compError.txt"
+RUN_ERROR_FILE="${RES_DIR}/runError.txt"
+RES_ERROR_FILE="${RES_DIR}/resError.txt"
+WIDE_COUNT_FILE="${RES_DIR}/wideCount.txt"
 
 makeProg(){
-  ${TIMEOUT_MACRO} ${CSMITH_PATH}src/csmith --seed ${1} --strict-float --float-test --check-global > ${TEMP_DIR}/prog.c
+  ${TIMEOUT_MACRO} ${CSMITH_PATH}src/csmith --seed ${1} --strict-float --float-test --check-global --check-local > ${TEMP_DIR}/prog.c
   return $?
 }
 
 compileInFloatTestMode(){
-  ${TIMEOUT_MACRO} ${COMPILER} ${TEMP_DIR}/prog.c -O0 -w -c -I${CSMITH_PATH}runtime -DUNSAFE_FLOAT -DFLOAT_TEST_ENABLED -o ${TEMP_DIR}/progFloatTestMode.o && \
+  ${TIMEOUT_MACRO} ${TRUSTED} ${TEMP_DIR}/prog.c -O0 -w -c -I${CSMITH_PATH}runtime -DUNSAFE_FLOAT -DFLOAT_TEST_ENABLED -o ${TEMP_DIR}/progFloatTestMode.o && \
   ${TIMEOUT_MACRO} g++ ${TEMP_DIR}/progFloatTestMode.o ${ADAPTER_OBJECT_PATH} -o ${TEMP_DIR}/progFloatTestMode
   return $?
 }
@@ -33,12 +34,12 @@ runInFloatTestMode(){
 }
 
 compileInNormalMode(){
-  ${TIMEOUT_MACRO} ${COMPILER} ${TEMP_DIR}/prog.c -O1 -w -c -I${CSMITH_PATH}runtime -DUNSAFE_FLOAT -o ${TEMP_DIR}/progNormalMode1.o && \
-  ${TIMEOUT_MACRO} ${COMPILER_PP} ${TEMP_DIR}/progNormalMode1.o ${ADAPTER_OBJECT_PATH} -o ${TEMP_DIR}/progNormal1 && \
-  ${TIMEOUT_MACRO} ${COMPILER} ${TEMP_DIR}/prog.c -O2 -w -c -I${CSMITH_PATH}runtime -DUNSAFE_FLOAT -o ${TEMP_DIR}/progNormalMode2.o && \
-  ${TIMEOUT_MACRO} ${COMPILER_PP} ${TEMP_DIR}/progNormalMode2.o ${ADAPTER_OBJECT_PATH} -o ${TEMP_DIR}/progNormal2 && \
-  ${TIMEOUT_MACRO} ${COMPILER} ${TEMP_DIR}/prog.c -O3 -w -c -I${CSMITH_PATH}runtime -DUNSAFE_FLOAT -o ${TEMP_DIR}/progNormalMode3.o && \
-  ${TIMEOUT_MACRO} ${COMPILER_PP} ${TEMP_DIR}/progNormalMode3.o ${ADAPTER_OBJECT_PATH} -o ${TEMP_DIR}/progNormal3
+  ${TIMEOUT_MACRO} ${COMP} ${TEMP_DIR}/prog.c -O1 -w -c -I${CSMITH_PATH}runtime -DUNSAFE_FLOAT -o ${TEMP_DIR}/progNormalMode1.o && \
+  ${TIMEOUT_MACRO} ${COMP_PP} ${TEMP_DIR}/progNormalMode1.o ${ADAPTER_OBJECT_PATH} -o ${TEMP_DIR}/progNormal1 && \
+  ${TIMEOUT_MACRO} ${COMP} ${TEMP_DIR}/prog.c -O2 -w -c -I${CSMITH_PATH}runtime -DUNSAFE_FLOAT -o ${TEMP_DIR}/progNormalMode2.o && \
+  ${TIMEOUT_MACRO} ${COMP_PP} ${TEMP_DIR}/progNormalMode2.o ${ADAPTER_OBJECT_PATH} -o ${TEMP_DIR}/progNormal2 && \
+  ${TIMEOUT_MACRO} ${COMP} ${TEMP_DIR}/prog.c -O3 -w -c -I${CSMITH_PATH}runtime -DUNSAFE_FLOAT -o ${TEMP_DIR}/progNormalMode3.o && \
+  ${TIMEOUT_MACRO} ${COMP_PP} ${TEMP_DIR}/progNormalMode3.o ${ADAPTER_OBJECT_PATH} -o ${TEMP_DIR}/progNormal3
   return $?
 }
 
@@ -78,7 +79,7 @@ testSeed(){
   runInNormalMode
   checkpoint $? $1 $RUN_ERROR_FILE || return 1
   validateResults
-  checkpoint $? $1 $RESULT_ERROR_FILE || return 1
+  checkpoint $? $1 $RES_ERROR_FILE || return 1
   return 0
 }
 
@@ -86,11 +87,11 @@ testSeed(){
 
 
 mkdir -p $TEMP_DIR
-mkdir -p $RESULTS_DIR
+mkdir -p $RES_DIR
 touch ${GEN_ERROR_FILE}
 touch ${COMP_ERROR_FILE}
 touch ${RUN_ERROR_FILE}
-touch ${RESULT_ERROR_FILE}
+touch ${RES_ERROR_FILE}
 touch ${WIDE_COUNT_FILE}
 
 for seed in $(seq $1 $2); do
