@@ -1,5 +1,7 @@
 #!/bin/bash
 
+ulimit -f 500000
+
 TRUSTED="gcc-4.9"
 COMP="gcc"
 COMP_PP="g++"
