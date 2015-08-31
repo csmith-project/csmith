@@ -80,6 +80,10 @@ ExpressionVariable::make_random(CGContext &cg_context, const Type* type, const C
 		if (CGOptions::float_test() && type->is_float() && !var->type->is_float())
 					continue;
 
+		// float_test : dont allow floats which are fields of union
+		if(CGOptions::float_test() && type->is_float() && var->is_union_field())
+			continue;
+
 		// forbid a parameter to take the address of an argument
 		// this is to simplify the path shortcutting delta
 		if (as_param && var->is_argument() && var->type->is_dereferenced_from(type)) {
