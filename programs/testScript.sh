@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ulimit -f 500000
+ulimit -f 100000
 
 TRUSTED="gcc-4.9"
 COMP="gcc"
@@ -53,9 +53,9 @@ runInNormalMode(){
 }
 
 validateResults(){
-  python3 validate.py ${TEMP_DIR}/outNormalMode1.txt ${TEMP_DIR}/outFloatTestMode.txt >> "${WIDE_COUNT_FILE}" && \
-  python3 validate.py ${TEMP_DIR}/outNormalMode2.txt ${TEMP_DIR}/outFloatTestMode.txt >> "${WIDE_COUNT_FILE}" && \
-  python3 validate.py ${TEMP_DIR}/outNormalMode3.txt ${TEMP_DIR}/outFloatTestMode.txt >> "${WIDE_COUNT_FILE}"
+  python3 validateWithMap.py ${TEMP_DIR}/outNormalMode1.txt ${TEMP_DIR}/outFloatTestMode.txt >> "${WIDE_COUNT_FILE}" && \
+  python3 validateWithMap.py ${TEMP_DIR}/outNormalMode2.txt ${TEMP_DIR}/outFloatTestMode.txt >> "${WIDE_COUNT_FILE}" && \
+  python3 validateWithMap.py ${TEMP_DIR}/outNormalMode3.txt ${TEMP_DIR}/outFloatTestMode.txt >> "${WIDE_COUNT_FILE}"
   return $?
 }
 
