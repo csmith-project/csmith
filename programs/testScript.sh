@@ -53,6 +53,14 @@ runInNormalMode(){
 }
 
 validateResults(){
+  python3 validate.py ${TEMP_DIR}/outNormalMode1.txt ${TEMP_DIR}/outFloatTestMode.txt >> "${WIDE_COUNT_FILE}" && \
+  python3 validate.py ${TEMP_DIR}/outNormalMode2.txt ${TEMP_DIR}/outFloatTestMode.txt >> "${WIDE_COUNT_FILE}" && \
+  python3 validate.py ${TEMP_DIR}/outNormalMode3.txt ${TEMP_DIR}/outFloatTestMode.txt >> "${WIDE_COUNT_FILE}"
+
+  if [ $? -eq 0 ]; then
+    return 0
+  fi
+
   python3 validateWithMap.py ${TEMP_DIR}/outNormalMode1.txt ${TEMP_DIR}/outFloatTestMode.txt >> "${WIDE_COUNT_FILE}" && \
   python3 validateWithMap.py ${TEMP_DIR}/outNormalMode2.txt ${TEMP_DIR}/outFloatTestMode.txt >> "${WIDE_COUNT_FILE}" && \
   python3 validateWithMap.py ${TEMP_DIR}/outNormalMode3.txt ${TEMP_DIR}/outFloatTestMode.txt >> "${WIDE_COUNT_FILE}"
