@@ -163,6 +163,8 @@ csmith_SOURCES = \
 	StringUtils.h \
 	Type.cpp \
 	Type.h \
+	TypeConfig.cpp \
+	TypeConfig.h \
 	PointerType.cpp \
 	PointerType.h \
 	AggregateType.cpp \
