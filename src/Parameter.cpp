@@ -38,6 +38,7 @@
 #include "Function.h"
 #include "ExtensionValue.h"
 #include "VariableSelector.h" 
+#include "TypeConfig.h"
 
 using namespace std;
 vector<string> Parameter::_inOutTypeNames;
@@ -166,7 +167,7 @@ Parameter::GenerateParameter(Function &curFunc)
 		t= PointerType::choose_random_pointer_type();
 	}
 	else {
-		t = Type::choose_random_nonvoid_nonvolatile();
+		t = Type::choose_random_nonvoid_nonvolatile(TypeConfig::get_filter_for_request(asParam));
 	}
 	if (t->eType == eSimple)
 		assert(t->simple_type != eVoid);

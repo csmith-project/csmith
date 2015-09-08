@@ -80,6 +80,7 @@ public:
 
 	static std::string get_binop_string(eBinaryOps bop);
 
+	static std::string get_op(enum eBinaryOps op) { return op_str[op]; }
 	virtual bool equals(int num) const ;
 	virtual bool is_0_or_1(void) const;
 
@@ -90,11 +91,13 @@ private:
 
 	std::string tmp_var2;
 
+	static std::string op_str[MAX_BINARY_OP];
 private:
 
 	bool is_return_type_float() const;
 
 	static bool safe_ops(eBinaryOps op);
+	static void OutputStandardFuncName(eBinaryOps eFunc, std::ostream &out);
 
 	// unimplemented
 	FunctionInvocationBinary &operator=(const FunctionInvocationBinary &fi);

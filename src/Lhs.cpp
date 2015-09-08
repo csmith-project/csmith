@@ -45,6 +45,7 @@
 #include "CGOptions.h"
 #include "ArrayVariable.h"
 #include "random.h"
+#include "TypeConfig.h"
 
 using namespace std;
 
@@ -71,7 +72,7 @@ Lhs::make_random(CGContext &cg_context, const Type* t, const CVQualifiers* qfer,
 		var = VariableSelector::select_must_use_var(Effect::WRITE, cg_context, t, qfer);
 		if (var == NULL) {
 			bool flag = rnd_flipcoin(SelectDerefPointerProb);
-			if (flag) {
+			if (flag && !TypeConfig::check_exclude_by_request(t, asPointer)) {
 				var = VariableSelector::select_deref_pointer(Effect::WRITE, cg_context, t, qfer, dummy);
 				if (var) {
 					int deref_level = var->type->get_indirect_level() - t->get_indirect_level();
@@ -99,7 +100,7 @@ Lhs::make_random(CGContext &cg_context, const Type* t, const CVQualifiers* qfer,
 		if (valid && CGOptions::ccomp() && var->isBitfield_ && t->is_long_long()) {
 			valid = false;
 		}
-		if (!t->is_float() && var->type->is_float()) {
+		if (TypeConfig::check_exclude_by_convert(var->type, t)) {
 			valid = false;
 		}
 		if (valid) {

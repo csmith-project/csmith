@@ -37,12 +37,16 @@
 #include "Probabilities.h"
 #include "MspFilters.h"
 #include "CGOptions.h"
+#include "TypeConfig.h"
 
 using namespace std;
 
 vector<string> SafeOpFlags::wrapper_names;
 
 SafeOpFlags::SafeOpFlags()
+    : lhs_(-1),
+      rhs_(-1),
+	  expr_(-1)
 {
 	//Nothing to do
 }
@@ -51,7 +55,10 @@ SafeOpFlags::SafeOpFlags(bool o1, bool o2, bool is_func, SafeOpSize osize)
 	: op1_(o1),
 	  op2_(o2),
 	  is_func_(is_func),
-	  op_size_(osize)
+      op_size_(osize),
+      lhs_(-1),
+      rhs_(-1),
+	  expr_(-1)
 {
 	//Nothing to do
 }
@@ -60,7 +67,10 @@ SafeOpFlags::SafeOpFlags(const SafeOpFlags &flags)
 	: op1_(flags.op1_),
 	  op2_(flags.op2_),
 	  is_func_(flags.is_func_),
-	  op_size_(flags.op_size_)
+      op_size_(flags.op_size_),
+      lhs_(flags.lhs_),
+      rhs_(flags.rhs_),
+      expr_(flags.expr_)
 {
 
 }
@@ -72,43 +82,61 @@ SafeOpFlags::make_dummy_flags()
 }
 
 eSimpleType
-SafeOpFlags::flags_to_type(bool sign, enum SafeOpSize size)
+SafeOpFlags::flags_to_type(bool sign, enum SafeOpSize size, bool is_lhs /*lhs = true, rhs = false*/) const
 {
-	if (sign) {
-		switch(size) {
-		case sInt8: return eChar;
-		case sInt16: return eShort;
-		case sInt32: return eInt;
-		case sInt64: return eLongLong;
-		case sFloat: return eFloat;
-		default: assert(0); break;
+	if((lhs_ == -1) && (rhs_ == -1))
+	{
+		if (sign) {
+			switch(size) {
+			case sInt8: return eChar;
+			case sInt16: return eShort;
+			case sInt32: return eInt;
+			case sInt64: return eLongLong;
+			case sFloat: return eFloat;
+			default: assert(0); break;
 		}
 	}
-	else {
-		switch(size) {
-		case sInt8: return eUChar;
-		case sInt16: return eUShort;
-		case sInt32: return eUInt;
-		case sInt64: return eULongLong;
-		default: assert(0); break;
+		else {
+			switch(size) {
+			case sInt8: return eUChar;
+			case sInt16: return eUShort;
+			case sInt32: return eUInt;
+			case sInt64: return eULongLong;
+			default: assert(0); break;
+			}
 		}
+		assert(0);
+		return eInt;	
 	}
-	assert(0);
-	return eInt;
+	if(is_lhs)
+		return (eSimpleType)lhs_;
+	else
+		return (eSimpleType)rhs_;
 }
 
-const Type*
-SafeOpFlags::get_lhs_type(void)
+const Type&
+SafeOpFlags::get_expr_type(void) const
 {
-	eSimpleType st = flags_to_type(op1_, op_size_);
+	eSimpleType st;
+	if(-1 == expr_)
+		st = flags_to_type(op1_, op_size_, true);
+	else
+		st = (eSimpleType)expr_;
+    const Type& t = Type::get_simple_type(st);
+    return t;
+}
+const Type*
+SafeOpFlags::get_lhs_type(void) const
+{
+	eSimpleType st = flags_to_type(op1_, op_size_, true);
 	const Type& t = Type::get_simple_type(st);
 	return &t;
 }
 
 const Type*
-SafeOpFlags::get_rhs_type(void)
+SafeOpFlags::get_rhs_type(void) const
 {
-	eSimpleType st = flags_to_type(op2_, op_size_);
+    eSimpleType st = flags_to_type(op2_, op_size_, false);
 	const Type& t = Type::get_simple_type(st);
 	return &t;
 }
@@ -148,6 +176,22 @@ SafeOpFlags::make_random_unary(const Type *rv_type, const Type *op1_type, eUnary
 {
 	SafeOpFlags *flags = new SafeOpFlags();
 	assert("new SafeOpFlags fail!");
+	if(rv_type)
+	{
+		flags->expr_ = rv_type->simple_type;
+		std::vector<int> vector_rhs_types;
+		if (TypeConfig::check_additional_by_unaryop(rv_type, uop, vector_rhs_types) && rnd_flipcoin(50))
+		{
+			int index = rnd_upto(vector_rhs_types.size());
+			flags->lhs_ = vector_rhs_types[index];
+			return flags;
+		}
+		if (rv_type->simple_type >= 100)
+		{
+			flags->lhs_ = rv_type->simple_type;
+			return flags;
+		}
+	}
 	bool rv_is_float = return_float_type(rv_type, op1_type, uop);
 
 	// floating point is always signed
@@ -185,6 +229,24 @@ SafeOpFlags::make_random_binary(const Type *rv_type, const Type *op1_type, const
 {
 	SafeOpFlags *flags = new SafeOpFlags();
 	assert("new SafeOpFlags fail!");
+	if(rv_type)
+	{
+		flags->expr_ = rv_type->simple_type;
+		std::vector< std::pair<int, int> > vector_rhs_types;
+		if (TypeConfig::check_additional_by_binaryop(rv_type, bop, vector_rhs_types) && rnd_flipcoin(50))
+		{
+			int index = rnd_upto(vector_rhs_types.size());
+			flags->lhs_ = vector_rhs_types[index].first;
+			flags->rhs_ = vector_rhs_types[index].second;		
+			return flags;
+		}
+		if (rv_type->simple_type >= 100)
+		{
+			flags->lhs_ = rv_type->simple_type;
+			flags->rhs_ = rv_type->simple_type;
+			return flags;
+		}
+	}
 	bool rv_is_float = return_float_type(rv_type, op1_type, op2_type, bop);
 
 	// floating point is always signed

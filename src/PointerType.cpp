@@ -122,7 +122,7 @@ PointerType::make_random_pointer_type(void)
 	}
 
     // choose a pointer to basic/aggregate types
-	const Type* t = choose_random();
+	const Type* t = choose_random(TypeConfig::get_filter_for_request(asPointer));
 	// consolidate all integer pointer types into "int*", hopefully this increase
 	// chance of pointer assignments and dereferences
 	if (t->eType == eSimple) {

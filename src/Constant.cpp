@@ -96,65 +96,19 @@ Constant::clone() const
 
 // --------------------------------------------------------------
 static string
-GenerateRandomCharConstant(void)
+GenerateRandomConstant(int size)
 {
 	string ch;
+        string suffix = "L";
+        if (size > 4)
+            suffix = "LL";
 	if (CGOptions::ccomp() || !CGOptions::longlong())
-		ch = string("0x") + RandomHexDigits(2);
+        ch = string("0x") + RandomHexDigits(2 * size);
 	else
-		ch = string("0x") + RandomHexDigits(2) + "L";
+        ch = string("0x") + RandomHexDigits(2 * size) + suffix;
 	return ch;
 }
 
-// --------------------------------------------------------------
-static string
-GenerateRandomIntConstant(void)
-{
-	string val;
-	// Int constant - Max 8 Hex digits on 32-bit platforms
-	if (CGOptions::ccomp() || !CGOptions::longlong())
-		val = "0x" + RandomHexDigits( 8 );
-	else
-		val = "0x" + RandomHexDigits( 8 ) + "L";
-
-	return val;
-}
-
-// --------------------------------------------------------------
-static string
-GenerateRandomShortConstant(void)
-{
-	string val;
-	// Short constant - Max 4 Hex digits on 32-bit platforms
-	if (CGOptions::ccomp() || !CGOptions::longlong())
-		val = "0x" + RandomHexDigits( 4 );
-	else
-		val = "0x" + RandomHexDigits( 4 ) + "L";
-
-	return val;
-}
-
-// --------------------------------------------------------------
-static string
-GenerateRandomLongConstant(void)
-{
-	string val;
-	// Long constant - Max 8 Hex digits on 32-bit platforms
-	if (!CGOptions::longlong())
-		val = "0x" + RandomHexDigits( 8 );
-	else
-		val = "0x" + RandomHexDigits( 8 ) + "L";
-	return val;
-}
-
-// --------------------------------------------------------------
-static string
-GenerateRandomLongLongConstant(void)
-{
-	// Long constant - Max 8 Hex digits on 32-bit platforms
-	string val = "0x" + RandomHexDigits( 16 ) + "LL";
-	return val;
-}
 
 // --------------------------------------------------------------
 #if 0
@@ -358,23 +312,10 @@ GenerateRandomConstant(const Type* type)
 					v = oss.str() + (type->is_signed() ? "L" : "UL");
 			}
 		} else {
-		    switch (st) {
-			case eVoid:      v = "/* void */";				break;
-			case eChar:      v = GenerateRandomCharConstant();		break;
-			case eInt:       v = GenerateRandomIntConstant();		break;
-			case eShort:     v = GenerateRandomShortConstant();		break;
-			case eLong:      v = GenerateRandomLongConstant();		break;
-			case eLongLong:  v = GenerateRandomLongLongConstant();		break;
-			case eUChar:     v = GenerateRandomCharConstant();		break;
-			case eUInt:      v = GenerateRandomIntConstant();		break;
-			case eUShort:    v = GenerateRandomShortConstant();		break;
-			case eULong:     v = GenerateRandomLongConstant();		break;
-			case eULongLong: v = GenerateRandomLongLongConstant();		break;
-			case eFloat:     v = GenerateRandomFloatHexConstant();		break;
-			// case eDouble:    v = GenerateRandomFloatConstant();		break;
-			default:
-				assert(0 && "Unsupported type!");
-		    }
+            if(st == eVoid)
+                v = "/* void */";
+            else
+                v = GenerateRandomConstant(Type::get_simple_type(st).SizeInBytes());
 		}
 	} else {
 		assert(0);  // no support for types other than integers and structs for now

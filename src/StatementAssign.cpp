@@ -50,6 +50,7 @@
 #include "CompatibleChecker.h"
 #include "Constant.h"
 #include "VectorFilter.h"
+#include "TypeConfig.h"
 
 #include "random.h"
 
@@ -60,6 +61,9 @@ using namespace std;
 // use a table to define probabilities of different kinds of statements
 // Must initialize it before use
 DistributionTable StatementAssign::assignOpsTable_;
+std::string StatementAssign::op_str[MAX_ASSIGN_OP] = {
+"=", "*=", "/=", "%=", "+=", "-=", "<<=", ">>=", "&=", "^=", "|=", " ++", " --", "++ ", "-- "
+};
 
 void
 StatementAssign::InitProbabilityTable()
@@ -89,12 +93,15 @@ StatementAssign::AssignOpsProbability(const Type* type)
 	// Second, similar to signed integers, we don't generate pre- or post-
 	// operators for floating point values. Instead, we will wrap all
 	// of these operations into safe_float_math later.
-	if (type && (type->eType != eSimple || type->get_base_type()->is_float())) {
+    if (type && (type->eType != eSimple || type->get_base_type()->is_float() ||
+        TypeConfig::check_exclude_by_request(type, asAssignExprRv))) {
 		return eSimpleAssign;
 	}
 
 	VectorFilter filter(&assignOpsTable_);
-	if (type && type->is_signed()) {
+    if (type) {
+        TypeConfig::get_filter_for_assignop(type, &filter);
+        if (type->is_signed())
 		filter.add(ePreIncr).add(ePreDecr).add(ePostIncr).add(ePostDecr);
 	}
 
@@ -268,8 +275,8 @@ StatementAssign::make_possible_compound_assign(CGContext &cg_context,
 			bool op2 = fs->get_op2_sign();
 			enum SafeOpSize size = fs->get_op_size();
 
-			eSimpleType type1 = SafeOpFlags::flags_to_type(op1, size);
-			eSimpleType type2 = SafeOpFlags::flags_to_type(op2, size);
+            eSimpleType type1 = fs->flags_to_type(op1, size, true);
+            eSimpleType type2 = fs->flags_to_type(op2, size, false);
 
 			const Block *blk = cg_context.get_current_block();
 			assert(blk);
@@ -428,24 +435,9 @@ StatementAssign::~StatementAssign(void)
 void
 StatementAssign::output_op(std::ostream &out) const
 {
-	switch (op) {
-	case eSimpleAssign: out << "="; break;
-	case eMulAssign:	out << "*="; break;
-	case eDivAssign:	out << "/="; break;
-	case eRemAssign:	out << "%="; break;
-	case eAddAssign:	out << "+="; break;
-	case eSubAssign:	out << "-="; break;
-	case eLShiftAssign:	out << "<<="; break;
-	case eRShiftAssign:	out << ">>="; break;
-	case eBitAndAssign:	out << "&="; break;
-	case eBitXorAssign:	out << "^="; break;
-	case eBitOrAssign:	out << "|="; break;
+    assert(op < MAX_ASSIGN_OP);
+    out << op_str[op];
 
-	case ePreIncr:		out << "++"; break;
-	case ePreDecr:		out << "--"; break;
-	case ePostIncr:		out << "++"; break;
-	case ePostDecr:		out << "--"; break;
-	}
 }
 
 /*

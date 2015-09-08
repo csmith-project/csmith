@@ -128,6 +128,7 @@ public:
 
 	void OutputSimple(std::ostream &out) const;
 
+	static std::string get_op(enum eAssignOps op) { return op_str[op]; }
 private:
 	static eAssignOps AssignOpsProbability(const Type* type);
 
@@ -141,6 +142,7 @@ private:
 	std::string tmp_var1;
 	std::string tmp_var2;
 
+	static std::string op_str[MAX_ASSIGN_OP];
 	static DistributionTable assignOpsTable_;
 
 	StatementAssign(const StatementAssign &sa);  // unimplemented

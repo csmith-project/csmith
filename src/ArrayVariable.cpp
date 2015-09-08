@@ -57,6 +57,7 @@
 #include "SafeOpFlags.h"
 #include "OutputMgr.h"
 #include "StringUtils.h"
+#include "TypeConfig.h"
 
 using namespace std;
 
@@ -504,7 +505,7 @@ ArrayVariable::OutputDef(std::ostream &out, int indent) const
 {
 	if (collective == 0) {
 		output_tab(out, indent);
-		if (!no_loop_initializer() ) {
+        if (!no_loop_initializer() || TypeConfig::check_exclude_by_request(type, asGlobalInit) && is_global() ) {
 			// don't print definition for array, rather use a loop initializer
 			OutputDecl(out);
 			out << ";";

@@ -125,7 +125,7 @@ private:
 	static Variable* SelectParentParam(Effect::Access access, const CGContext &cg_context, const Type* type,
 			const CVQualifiers* qfer, eMatchType mt, const vector<const Variable*> &invalid_vars);
 
-	static Variable* GenerateNewVariable(Effect::Access access, const CGContext &cg_context, const Type* type, const CVQualifiers* qfer);
+	static Variable* GenerateNewVariable(Effect::Access access, const CGContext &cg_context, const Type* type, const CVQualifiers* qfer, eVariableScope scope = MAX_VAR_SCOPE);
 
 	static Variable* GenerateNewGlobal(Effect::Access access, const CGContext &cg_context, const Type* t, const CVQualifiers* qfer);
 

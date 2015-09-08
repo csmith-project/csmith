@@ -45,6 +45,9 @@ using namespace std;
 
 static vector<bool> needcomma;  // Flag to track output of commas
 
+std::string FunctionInvocationBinary::op_str[MAX_BINARY_OP] = {
+"+", "-", "*", "/", "%", ">", "<", ">=", "<=", "==", "!=", "&&", "||", "^", "&", "|", ">>", "<<"
+};
 ///////////////////////////////////////////////////////////////////////////////
 
 FunctionInvocationBinary *
@@ -60,8 +63,8 @@ FunctionInvocationBinary::CreateFunctionInvocationBinary(CGContext &cg_context,
 		bool op2 = flags->get_op2_sign();
 		enum SafeOpSize size = flags->get_op_size();
 
-		eSimpleType type1 = SafeOpFlags::flags_to_type(op1, size);
-		eSimpleType type2 = SafeOpFlags::flags_to_type(op2, size);
+        eSimpleType type1 = flags->flags_to_type(op1, size, true);
+        eSimpleType type2 = flags->flags_to_type(op2, size, false);
 
 		const Block *blk = cg_context.get_current_block();
 		assert(blk);
@@ -202,8 +205,10 @@ FunctionInvocationBinary::is_return_type_float() const
 const Type &
 FunctionInvocationBinary::get_type(void) const
 {
+    return op_flags->get_expr_type();
+ #if 0
 	if (is_return_type_float())
-		return Type::get_simple_type(eFloat);
+        return Type::get_simple_type((eSimpleType)eFloat);
 	switch (eFunc) {
 	default:
 		assert(!"invalid operator in FunctionInvocationBinary::get_type()");
@@ -255,6 +260,7 @@ FunctionInvocationBinary::get_type(void) const
 	}
 	assert(0);
 	return Type::get_simple_type(eInt);
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -262,34 +268,16 @@ FunctionInvocationBinary::get_type(void) const
 /*
  *
  */
-static void
-OutputStandardFuncName(eBinaryOps eFunc, std::ostream &out)
+void
+FunctionInvocationBinary::OutputStandardFuncName(eBinaryOps eFunc, std::ostream &out)
 {
-	switch (eFunc) {
+    assert(eFunc < MAX_BINARY_OP);
 		// Math Ops
-	case eAdd:		out << "+";     break;
-	case eSub:		out << "-";     break;
-	case eMul:		out << "*";     break;
-	case eDiv:		out << "/";     break;
-	case eMod:		out << "%";     break;
 
 		// Logical Ops
-	case eAnd:		out << "&&";	break;
-	case eOr:		out << "||";	break;
-	case eCmpEq:	out << "==";	break;
-	case eCmpNe:	out << "!=";	break;
-	case eCmpGt:	out << ">";		break;
-	case eCmpLt:	out << "<";		break;
-	case eCmpLe:	out << "<=";	break;
-	case eCmpGe:	out << ">=";	break;
+    out << op_str[eFunc];
 
 		// Bitwise Ops
-	case eBitAnd:	out << "&";		break;
-	case eBitOr:	out << "|";		break;
-	case eBitXor:	out << "^";		break;
-	case eLShift:	out << "<<";    break;
-	case eRShift:	out << ">>";    break;
-	}
 }
 
 std::string
@@ -337,6 +325,8 @@ FunctionInvocationBinary::Output(std::ostream &out) const
 		case eDiv:
 		case eLShift:
 		case eRShift:
+            if(static_cast<int>(op_flags->get_expr_type().simple_type) < 100)
+            {
 			if (CGOptions::avoid_signed_overflow()) {
 				string fname = op_flags->to_string(eFunc);
 				int id = SafeOpFlags::to_id(fname);
@@ -362,12 +352,12 @@ FunctionInvocationBinary::Output(std::ostream &out) const
 			}
 			need_cast = true;
 			// fallthrough!
-
+            }
 		default:
 			// explicit type casting for op1
 			if (need_cast) {
 				out << "(";
-				op_flags->OutputSize(out);
+                op_flags->get_lhs_type()->Output(out);
 				out << ")";
 			}
 			param_value[0]->Output(out);
@@ -377,7 +367,7 @@ FunctionInvocationBinary::Output(std::ostream &out) const
 			// explicit type casting for op2
 			if (need_cast) {
 				out << "(";
-				op_flags->OutputSize(out);
+                op_flags->get_rhs_type()->Output(out);
 				out << ")";
 			}
 			param_value[1]->Output(out);

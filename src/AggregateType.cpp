@@ -50,6 +50,7 @@
 #include "util.h"
 #include "Bookkeeper.h"
 #include "Probabilities.h"
+#include "TypeConfig.h"
 
 using namespace std;
 
@@ -156,7 +157,7 @@ AggregateType::make_full_bitfields_struct_fields(size_t field_cnt, vector<const 
 	for (size_t i=0; i<field_cnt; i++) {
 		bool is_non_bitfield = rnd_flipcoin(ScalarFieldInFullBitFieldsProb);
 		if (is_non_bitfield) {
-			make_one_struct_field(random_fields, qualifiers, fields_length);
+			make_one_struct_field(random_fields, qualifiers, fields_length, TypeConfig::get_filter_for_request(asStructMember));
 		}
 		else {
 			make_one_bitfield(random_fields, qualifiers, fields_length);
@@ -167,27 +168,32 @@ AggregateType::make_full_bitfields_struct_fields(size_t field_cnt, vector<const 
 void
 AggregateType::make_one_struct_field(vector<const Type*> &random_fields,
 					vector<CVQualifiers> &qualifiers,
-					vector<int> &fields_length)
+					vector<int> &fields_length,
+					Filter * additional_filter)
 {
-	VectorFilter f;
+	VectorFilter * f = NULL;
+	if (additional_filter)
+		f = dynamic_cast<VectorFilter *>(additional_filter);
+	if (!f)
+		f = new VectorFilter();
 	unsigned int type_index = 0;
-	Type *typ = 0;
-	for( type_index = 0; type_index < AllTypes.size(); type_index++) {
-		typ = AllTypes[type_index];
-		assert(typ);
-		if (typ->eType == eSimple) {
+	vector<Type *>::iterator iter;
+	for(iter = AllTypes.begin(); iter != AllTypes.end(); ++iter)
+	{
+		if ((*iter)->eType == eSimple) {
 			Filter *filter = SIMPLE_TYPES_PROB_FILTER;
-			if(filter->filter(typ->simple_type))
-				f.add(type_index);
+			if(filter->filter((*iter)->simple_type))
+				f->add((*iter)->type_index);
 		}
-		else if ((typ->eType == eStruct) && (!CGOptions::return_structs())) {
-			f.add(type_index);
+		else if (((*iter)->eType == eStruct) && (!CGOptions::return_structs())) {
+			f->add((*iter)->type_index);
 		}
-		if (typ->get_struct_depth() >= CGOptions::max_nested_struct_level()) {
-			f.add(type_index);
+		if ((*iter)->get_struct_depth() >= CGOptions::max_nested_struct_level()) {
+			f->add((*iter)->type_index);
 		}
 	}
-	type_index = rnd_upto(AllTypes.size(), &f);
+	type_index = rnd_upto(AllTypes.size(), f);
+	delete f;
 	const Type* type = AllTypes[type_index];
 	random_fields.push_back(type);
 	CVQualifiers qual = CVQualifiers::random_qualifiers(type, FieldConstProb, FieldVolatileProb);
@@ -208,7 +214,7 @@ AggregateType::make_one_union_field(vector<const Type*> &fields, vector<CVQualif
 		// filter out struct types containing bit-fields. Their layout is implementation
 		// defined, we don't want to mess with them in unions for now
 		for (i=0; i<AllTypes.size(); i++) {
-			if (!AllTypes[i]->has_bitfields()) {
+			if (!AllTypes[i]->has_bitfields() && ! TypeConfig::check_exclude_by_request( AllTypes[i], asUnionMember)) {
 				ok_types.push_back(AllTypes[i]);
 			}
 		}
@@ -262,7 +268,7 @@ AggregateType::make_normal_struct_fields(size_t field_cnt, vector<const Type*> &
 			make_one_bitfield(random_fields, qualifiers, fields_length);
 		}
 		else {
-			make_one_struct_field(random_fields, qualifiers, fields_length);
+			make_one_struct_field(random_fields, qualifiers, fields_length, TypeConfig::get_filter_for_request(asStructMember));
 		}
 	}
 }
@@ -511,7 +517,8 @@ AggregateType::get_int_subfield_names(string prefix, vector<string>& names, cons
 	for (i=0; i<fields.size(); i++) {
 		if (is_unamed_padding(i)) continue; // skip 0 length bitfields
 		// skip excluded fields
-		if (std::find(excluded_fields.begin(), excluded_fields.end(), j) != excluded_fields.end()) {
+		if (std::find(excluded_fields.begin(), excluded_fields.end(), j) != excluded_fields.end() || 
+			is_bitfield(i)) {
 			j++;
 			continue;
 		}
