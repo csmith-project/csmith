@@ -60,10 +60,11 @@ public:
 
 	static SafeOpFlags *make_dummy_flags();
 
-	static eSimpleType flags_to_type(bool sign, enum SafeOpSize size);
+	eSimpleType flags_to_type(bool sign, enum SafeOpSize size, bool is_lhs = true) const;
 
-	const Type* get_lhs_type(void);
-	const Type* get_rhs_type(void);
+	const Type& get_expr_type(void) const;
+    const Type* get_lhs_type(void) const;
+    const Type* get_rhs_type(void) const;
 
 	SafeOpFlags *clone() const;
 
@@ -93,6 +94,9 @@ private:
 	bool op2_;
 	bool is_func_;
 	SafeOpSize op_size_;
+	int lhs_;
+	int rhs_;
+	int expr_;
 
 	void OutputSign(std::ostream &out, bool sgnd) const;
 

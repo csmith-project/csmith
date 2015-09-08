@@ -50,6 +50,7 @@
 #include "CommonMacros.h"
 #include "StatementAssign.h"
 #include "CVQualifiers.h"
+#include "Filter.h"
 
 using namespace std;
 
@@ -107,18 +108,19 @@ class Type
 public:
 	// Pseudo-factory method.  This is `choose_random()' rather than
 	// `make_random()' because the returned object is not fresh.
-	static const Type *choose_random();
+	static const Type *choose_random(Filter * additional_filter = NULL);
 
-	static const Type *choose_random_nonvoid();
+	static const Type *choose_random_nonvoid(Filter * additional_filter = NULL);
 
 	// choose a random integer type
 	static const Type *choose_random_simple(void);
+	static const Type *choose_random_simple(Filter * filter);
 
 	virtual bool has_int_field() const;
 
 	bool signed_overflow_possible() const;
 
-	static const Type * choose_random_nonvoid_nonvolatile(void);
+	static const Type * choose_random_nonvoid_nonvolatile(Filter * additional_filter = NULL);
 
 	static const Type* random_type_from_type(const Type* type, bool no_volatile=false, bool strict_simple_type=false);
 
@@ -136,6 +138,7 @@ public:
 	static const Type *SelectLType(bool no_volatile, eAssignOps op);
 
 	explicit Type(eSimpleType simple_type);
+	explicit Type(std::string name, int id, int size);
 	Type(void);
 	~Type(void);
 
@@ -173,7 +176,7 @@ public:
 	virtual bool contain_pointer_field(void) const;
 	virtual bool is_const_struct_union() const;
 	virtual bool is_volatile_struct_union() const;
-	bool is_int(void) const { return eType == eSimple && simple_type != eVoid;}
+	bool is_int(void) const { return eType == eSimple && simple_type != eVoid && simple_type != eFloat && simple_type < MAX_SIMPLE_TYPES;}
     bool is_void(void) const { return eType == eSimple && simple_type == eVoid;}
 	bool is_aggregate(void) const { return eType == eStruct || eType == eUnion;}
 	bool match(const Type* t, enum eMatchType mt) const;
@@ -181,12 +184,15 @@ public:
 	virtual void Output(std::ostream &) const;
 	virtual std::string printf_directive(void) const;
 	static Type* find_type(const Type* t);
+	static int find_type(std::string name, int id = -1, int size = -1);
+	std::string get_type_name() const { return type_name; } 
+
 
 // private:
 	eTypeDesc eType;
 	eSimpleType simple_type;
 
-
+	int type_index;
 	bool used;                          // whether any variable declared with this type
 
 	static Type *void_type;
@@ -196,8 +202,12 @@ public:
 private:
 	DISALLOW_COPY_AND_ASSIGN(Type);
 
-	static const Type *simple_types[MAX_SIMPLE_TYPES];
+	static map<int, const Type *> simple_types;
 
+	std::string type_name;
+	
+	int type_size;
+	
 	// Package init.
 	friend void GenerateAllTypes(void);
 };

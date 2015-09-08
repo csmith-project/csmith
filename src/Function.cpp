@@ -65,6 +65,7 @@
 #include "OutputMgr.h"
 #include "Parameter.h"
 #include "BuiltinConfig.h"
+#include "TypeConfig.h"
 
 using namespace std;
 
@@ -243,7 +244,7 @@ static const Type*
 RandomReturnType(void)
 {
 	const Type* t = 0;
-        t = Type::choose_random();
+        t = Type::choose_random(TypeConfig::get_filter_for_request(asReturn));
 	return t;
 }
 
@@ -770,7 +771,7 @@ GenerateFunctions(void)
 	FactMgr::add_interested_facts(CGOptions::interested_facts());
 	if (CGOptions::builtins()) {
 		Function::initialize_builtin_functions();
-        BuiltinConfig::build_builtin_list_from_xml(CGOptions::init_builtin_config_filepath()); // just for test
+        BuiltinConfig::build_builtin_list_from_xml(CGOptions::init_config_filepath()); // just for test
     }
 	// -----------------
 	// Create a basic first function, then generate a random graph from there.

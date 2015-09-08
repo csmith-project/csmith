@@ -66,6 +66,7 @@
 #include "CompatibleChecker.h"
 #include "Constant.h"
 #include "CGOptions.h"
+#include "TypeConfig.h"
 
 using namespace std;
 
@@ -142,7 +143,7 @@ FunctionInvocation::make_random_unary(CGContext &cg_context, const Type* type)
 	eUnaryOps op;
 	do {
 		op = (eUnaryOps)(rnd_upto(MAX_UNARY_OP, UNARY_OPS_PROB_FILTER));
-	} while (type->is_float() && !UnaryOpWorksForFloat(op));
+    } while (TypeConfig::check_exclude_by_unaryop(type, op));
 
 	SafeOpFlags *flags = NULL;
 	flags = SafeOpFlags::make_random_unary(type, NULL, op);
@@ -152,6 +153,7 @@ FunctionInvocation::make_random_unary(CGContext &cg_context, const Type* type)
 	FunctionInvocation *fi = FunctionInvocationUnary::CreateFunctionInvocationUnary(cg_context, op, flags);
 
 	Expression *operand = Expression::make_random(cg_context, type);
+	operand->check_and_set_cast(type);
 
 	fi->param_value.push_back(operand);
 	return fi;
@@ -170,7 +172,7 @@ FunctionInvocation::make_random_binary(CGContext &cg_context, const Type* type)
 	eBinaryOps op;
 	do {
 		op = (eBinaryOps)(rnd_upto(MAX_BINARY_OP, BINARY_OPS_PROB_FILTER));
-	} while (type->is_float() && !BinaryOpWorksForFloat(op));
+    } while (TypeConfig::check_exclude_by_binaryop(type, op));
 	assert(type);
 	SafeOpFlags *flags = SafeOpFlags::make_random_binary(type, NULL, NULL, sOpBinary, op);
 	assert(flags);
@@ -258,6 +260,8 @@ FunctionInvocation::make_random_binary(CGContext &cg_context, const Type* type)
 	}
 	// TODO: fix `rhs' for eLShift and eRShift and ...
 	// Currently, the "fix" is handled in `FunctionInvocationBinary::Output'.
+	lhs->check_and_set_cast(lhs_type);
+	rhs->check_and_set_cast(rhs_type);
 	fi->param_value.push_back(lhs);
 	fi->param_value.push_back(rhs);
 	return fi;

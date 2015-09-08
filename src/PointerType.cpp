@@ -50,6 +50,7 @@
 #include "util.h"
 #include "Bookkeeper.h"
 #include "Probabilities.h"
+#include "TypeConfig.h"
 
 using namespace std;
 
@@ -121,7 +122,7 @@ PointerType::make_random_pointer_type(void)
 	}
 
     // choose a pointer to basic/aggregate types
-	const Type* t = choose_random();
+	const Type* t = choose_random(TypeConfig::get_filter_for_request(asPointer));
 	// consolidate all integer pointer types into "int*", hopefully this increase
 	// chance of pointer assignments and dereferences
 	if (t->eType == eSimple) {
@@ -188,16 +189,13 @@ PointerType::is_convertable(const Type* t) const
 {
     if (this == t)
         return true;
-	if (t->eType == ePointer) {
-        if (ptr_type == (dynamic_cast<const PointerType *>(t))->ptr_type) {
-			return true;
-		}
-		if (ptr_type->eType == eSimple && (dynamic_cast<const PointerType *>(t))->ptr_type->eType == eSimple) {
-            if(ptr_type->simple_type == eFloat && (dynamic_cast<const PointerType *>(t))->ptr_type->simple_type == eFloat)
+        if (t->eType == ePointer) {
+            if (ptr_type == (dynamic_cast<const PointerType *>(t))->ptr_type) {
                 return true;
-			else
-				return ptr_type->SizeInBytes() == (dynamic_cast<const PointerType *>(t))->ptr_type->SizeInBytes();
-		} 
+            }
+        if (ptr_type->eType == eSimple && (dynamic_cast<const PointerType *>(t))->ptr_type->eType == eSimple) {
+            return !(TypeConfig::check_exclude_by_convert((dynamic_cast<const PointerType *>(t))->ptr_type, ptr_type));
+        } 
     }
     return false;
 }

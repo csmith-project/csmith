@@ -67,6 +67,7 @@
 #include "Filter.h"
 #include "ArrayVariable.h"
 #include "StringUtils.h"
+#include "TypeConfig.h"
 
 
 using namespace std;
@@ -772,9 +773,14 @@ Variable::OutputDef(std::ostream &out, int indent) const
 		out << "static ";
 	}
 	output_qualified_type(out);
+	if (!(TypeConfig::check_exclude_by_request(type, asGlobalInit) && is_global() ))
+    {
 	out << get_actual_name() << " = ";
 	assert(init);
 	init->Output(out);
+    }
+    else
+        out << get_actual_name();
 	out << ";";
 	if (is_volatile()) {
 		string comment = "VOLATILE GLOBAL " + get_actual_name();
@@ -1066,7 +1072,7 @@ Variable::hash(std::ostream& out) const
 	else if (type->eType == eSimple) {
 		if (CGOptions::compute_hash()) {
             // FIXME handle double here too, once we generate those
-            if (type->simple_type == eFloat) {
+            if (!isBitfield_) {
                 out << "    transparent_crc_bytes (&";
                 Output(out);
                 out << ", sizeof(";

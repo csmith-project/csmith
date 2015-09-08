@@ -41,6 +41,9 @@
 
 using namespace std;
 
+std::string FunctionInvocationUnary::op_str[MAX_UNARY_OP] = {
+"+", "-", "!", "~"
+};
 ///////////////////////////////////////////////////////////////////////////////
 
 FunctionInvocationUnary *
@@ -52,7 +55,7 @@ FunctionInvocationUnary::CreateFunctionInvocationUnary(
 		bool op1 = flags->get_op1_sign();
 		enum SafeOpSize size = flags->get_op_size();
 
-		eSimpleType type = SafeOpFlags::flags_to_type(op1, size);
+        eSimpleType type =flags->flags_to_type(op1, size, true);
 		const Block *blk = cg_context.get_current_block();
 		assert(blk);
 
@@ -173,20 +176,16 @@ FunctionInvocationUnary::equals(int num) const
 /*
  *
  */
-static void
-OutputStandardFuncName(eUnaryOps eFunc, std::ostream &out)
+void
+FunctionInvocationUnary::OutputStandardFuncName(eUnaryOps eFunc, std::ostream &out)
 {
-	switch (eFunc) {
+    assert(eFunc < MAX_UNARY_OP);
 		// Math Ops
-	case ePlus:		out << "+";	break;
-	case eMinus:	out << "-";	break;
 
 		// Logical Ops
-	case eNot:		out << "!";	break;
+    out << op_str[eFunc];
 
 		// Bitwise Ops
-	case eBitNot:	out << "~";	break;
-	}
 }
 
 bool
@@ -244,7 +243,7 @@ FunctionInvocationUnary::Output(std::ostream &out) const
 		// explicit type casting for op1
 		if (need_cast) {
 			out << "(";
-			op_flags->OutputSize(out);
+            op_flags->get_lhs_type()->Output(out);
 			out << ")";
 		}
 		param_value[0]->Output(out);

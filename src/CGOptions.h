@@ -80,8 +80,8 @@ public:
 	static int max_split_files(void);
 	static int max_split_files(int p);
 
-    static std::string init_builtin_config_filepath(void);
-    static std::string init_builtin_config_filepath(std::string p);
+    static std::string init_config_filepath(void);
+    static std::string init_config_filepath(std::string p);
 
 	static std::string split_files_dir(void);
 	static std::string split_files_dir(std::string p);
@@ -555,7 +555,7 @@ private:
 	// flag to indicate language
 	static bool lang_cpp_;
 
-    static std::string init_builtin_config_filepath_;
+    static std::string init_config_filepath_;
 private:
 	CGOptions(void);
 	CGOptions(CGOptions &cgo);

@@ -59,6 +59,7 @@
 #include "random.h"
 #include "CVQualifiers.h"
 #include "Parameter.h"
+#include "TypeConfig.h"
 
 int eid = 0;
 
@@ -171,7 +172,9 @@ Expression::make_random(CGContext &cg_context, const Type* type, const CVQualifi
 		VectorFilter filter(&Expression::exprTable_);
 		if (no_func ||
 			(!CGOptions::return_structs() && type->eType == eStruct) ||
-			(!CGOptions::return_unions() && type->eType == eUnion)) {
+			(!CGOptions::return_unions() && type->eType == eUnion) ||
+			TypeConfig::check_exclude_by_request(type, asReturn))
+		{
 			filter.add(eFunction);
 		}
 		// struct constants can't be subexpressions (union constant can't either?)
@@ -266,7 +269,8 @@ Expression::make_random_param_value(CGContext &cg_context, const Parameter* para
 		    VectorFilter filter(&Expression::paramTable_);
 		    filter.add(eConstant);   // don't call functions with constant parameters because it is not interesting
 		    if ((!CGOptions::return_structs() && type->eType == eStruct) ||
-			    (!CGOptions::return_unions() && type->eType == eUnion)) {
+			    (!CGOptions::return_unions() && type->eType == eUnion) ||
+			    TypeConfig::check_exclude_by_request(type, asReturn)) {
 			    filter.add(eFunction);
 		    }
 		    if (type->is_const_struct_union()) {

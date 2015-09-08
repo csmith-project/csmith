@@ -204,6 +204,7 @@
     <ClCompile Include="tinyxmlerror.cpp" />
     <ClCompile Include="tinyxmlparser.cpp" />
     <ClCompile Include="Type.cpp" />
+    <ClCompile Include="TypeConfig.cpp" />
     <ClCompile Include="util.cpp" />
     <ClCompile Include="Variable.cpp" />
     <ClCompile Include="VariableSelector.cpp" />
@@ -285,6 +286,7 @@
     <ClInclude Include="tinystr.h" />
     <ClInclude Include="tinyxml.h" />
     <ClInclude Include="Type.h" />
+    <ClInclude Include="TypeConfig.h" />
     <ClInclude Include="util.h" />
     <ClInclude Include="Variable.h" />
     <ClInclude Include="VariableSelector.h" />

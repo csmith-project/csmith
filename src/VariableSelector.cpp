@@ -63,6 +63,7 @@
 #include "ProbabilityTable.h"
 #include "StringUtils.h"
 #include "Parameter.h"
+#include "TypeConfig.h"
 
 using namespace std;
 
@@ -482,7 +483,7 @@ VariableSelector::create_and_initialize(Effect::Access access, const CGContext &
 	const Expression* init = NULL;
 	Variable* var = NULL;
 
-	if (rnd_flipcoin(NewArrayVariableProb)) {
+    if (rnd_flipcoin(NewArrayVariableProb) && !TypeConfig::check_exclude_by_request(t, asArray)) {
 		if (CGOptions::strict_const_arrays()) {
 			init = Constant::make_random(t);
 		} else {
@@ -989,11 +990,13 @@ Variable *
 VariableSelector::GenerateNewVariable(Effect::Access access,
 					const CGContext &cg_context,
                     const Type* type,
-					const CVQualifiers* qfer)
+                    const CVQualifiers* qfer,
+                    eVariableScope scope)
 {
 	Variable *var = 0;
 	Function &func = *cg_context.get_current_func();
-	eVariableScope scope = VariableCreationProbability();
+    if(scope == MAX_VAR_SCOPE)
+        scope = VariableCreationProbability();
 
 	const Type* t = 0;
 	switch (scope) {
@@ -1067,28 +1070,46 @@ VariableSelector::select(Effect::Access access,
 	Variable *var = 0;
 	var_created = false;
 
+    do {
 	// Note that many of the functions that select `var' can return null, if
 	// they cannot find a suitable variable.  So we loop.
 	switch (scope) {
 	case eGlobal:
+            if(!TypeConfig::check_exclude_by_request(type, asGlobal)) {
 		var = SelectGlobal(access, cg_context, type, qfer, mt, invalid_vars);
+                continue;
+            }
 		break;
 	case eParentLocal:
+            if(!TypeConfig::check_exclude_by_request(type, asLocal)){
 		// ...a local var from one of its blocks.
 		var = SelectParentLocal(access, cg_context, type, qfer, mt, invalid_vars);
+                continue;
+            }
 		break;
 	case eParentParam:
+            if(!TypeConfig::check_exclude_by_request(type, asParam)){
 		// ...one of the function's parameters.
 		var = SelectParentParam(access, cg_context, type, qfer, mt, invalid_vars);
+                continue;
+            }
 		break;
 	case eNewValue:
-		// Must decide where to put the new variable (global or parent
+            if(!TypeConfig::check_exclude_by_request(type, asGlobal)){
 		// local)?
-		var = GenerateNewVariable(access, cg_context, type, qfer);
+                var = GenerateNewVariable(access, cg_context, type, qfer, eGlobal);
+                continue;
+            }
+            if(!TypeConfig::check_exclude_by_request(type, asLocal)){
+                var = GenerateNewVariable(access, cg_context, type, qfer, eParentLocal);
+                continue;
+            }
 		break;
 	case MAX_VAR_SCOPE:
 		assert (0);
 	}
+        scope = VariableSelectionProbability(MAX_VAR_SCOPE, &filter);
+    }while(var == 0);
 
 	if (var && !cg_context.get_effect_context().is_side_effect_free()) {
 		assert(!var->is_volatile());
@@ -1193,10 +1214,13 @@ VariableSelector::create_random_array(const CGContext& cg_context)
 		blk = expand_block_for_goto(blk, cg_context);
 	}
 	const Type* type = 0;
+    Filter * filter = TypeConfig::get_filter_for_request(asArray);
 	do {
 		// don't make life complicated, restrict local variables to non-volatile
-		type = as_global ? Type::choose_random_nonvoid() : Type::choose_random_nonvoid_nonvolatile();
-	} while (type->is_const_struct_union() || !cg_context.accept_type(type));
+        type = as_global ? Type::choose_random_nonvoid(filter) : Type::choose_random_nonvoid_nonvolatile(filter);
+    } while (type->is_const_struct_union() || !cg_context.accept_type(type) ||
+    (as_global ? TypeConfig::check_exclude_by_request(type, asGlobal) :
+     TypeConfig::check_exclude_by_request(type, asLocal)));
 	CVQualifiers qfer;
 	qfer.add_qualifiers(false, false);
 

@@ -113,7 +113,8 @@ private:
 
 	static void make_one_struct_field(vector<const Type*> &random_fields,
 					vector<CVQualifiers> &qualifiers,
-					vector<int> &fields_length);
+					vector<int> &fields_length,
+					Filter * additional_filter = NULL);
 
 	static void make_one_union_field(vector<const Type*> &fields, vector<CVQualifiers> &qfers, vector<int> &lens);
 

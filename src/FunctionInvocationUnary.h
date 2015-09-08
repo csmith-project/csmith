@@ -68,15 +68,18 @@ public:
 
 	virtual bool is_0_or_1(void) const { return eFunc == eNot;}
 
+	static std::string get_op(enum eUnaryOps op) { return op_str[op]; }
 private:
 	eUnaryOps eFunc;
 
 	std::string tmp_var;
 
+	static std::string op_str[MAX_UNARY_OP];
 private:
 	FunctionInvocationUnary(eUnaryOps op, SafeOpFlags *flags, std::string &name);
 
 	FunctionInvocationUnary(eUnaryOps op, SafeOpFlags *flags);
+	static void OutputStandardFuncName(eUnaryOps eFunc, std::ostream &out);
 
 	explicit FunctionInvocationUnary(const FunctionInvocationUnary &funary);
 

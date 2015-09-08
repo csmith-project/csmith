@@ -44,7 +44,7 @@
 #include "StringUtils.h"
 #include "Block.h"
 #include "random.h"
-
+#include "TypeConfig.h"
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -69,6 +69,9 @@ ExpressionFuncall::make_random(CGContext &cg_context, const Type* type, const CV
 	bool std_func = ExpressionFunctionProbability(cg_context);
     // unary/binary "functions" produce scalar types only
 	if (type && (type->eType != eSimple || type->simple_type == eVoid))
+		std_func = false;
+	if (type && (TypeConfig::check_exclude_by_request(type, asBinaryExprRv) ||
+        TypeConfig::check_exclude_by_request(type, asUnaryExprRv)))
 		std_func = false;
 
 	Effect effect_accum = cg_context.get_accum_effect();
