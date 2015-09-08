@@ -34,20 +34,12 @@ using namespace std;
 
 TypeConfig * TypeConfig::type_config_ = NULL;
 
-TypeConfig *
+void
 TypeConfig::create_instance( std::string file_path )
 {
     std::string file_name = file_path + "/Syntax.xml";
     TypeConfig::type_config_ = new TypeConfig();
     TypeConfig::type_config_->initialize(file_name);
-    return TypeConfig::type_config_;
-}
-
-TypeConfig *
-TypeConfig::get_instance()
-{
-    assert(TypeConfig::type_config_);
-    return TypeConfig::type_config_;
 }
 
 void
@@ -452,7 +444,11 @@ Filter*
 TypeConfig::get_filter_for_request(eTypeRequestType request)
 {
     VectorFilter * filter = new VectorFilter();
-    vector<int> exclude_types = types_excluded_by_request[static_cast<int>(request)];
+
+    if (type_config_ == NULL)
+        return filter;
+
+    vector<int> exclude_types = type_config_->types_excluded_by_request[static_cast<int>(request)];
 
     vector<int>::iterator iter;
     for(iter = exclude_types.begin(); iter != exclude_types.end(); ++iter)
@@ -466,10 +462,10 @@ TypeConfig::get_filter_for_request(eTypeRequestType request)
 bool 
 TypeConfig::check_exclude_by_request(const Type * type, eTypeRequestType request)
 {
-    if(type->eType == eSimple)
+    if(type_config_ != NULL && type->eType == eSimple)
     {
         int type_index = type->simple_type;
-        vector<int> types = types_excluded_by_request[request];
+        vector<int> types =  type_config_->types_excluded_by_request[request];
         vector<int>::iterator iter = types.begin();
         for(;iter != types.end(); ++iter)
         {
@@ -486,7 +482,11 @@ TypeConfig::get_filter_for_convert(const Type* dest_type)
     assert(dest_type->eType == eSimple);
 
     VectorFilter * filter = new VectorFilter();
-    vector<int> exclude_types = types_excluded_by_convert[static_cast<int>(dest_type->simple_type)];
+
+    if (type_config_ == NULL)
+        return filter;
+
+    vector<int> exclude_types =  type_config_->types_excluded_by_convert[static_cast<int>(dest_type->simple_type)];
 
     vector<int>::iterator iter;
     for(iter = exclude_types.begin(); iter != exclude_types.end(); ++iter)
@@ -500,11 +500,11 @@ TypeConfig::get_filter_for_convert(const Type* dest_type)
 bool 
 TypeConfig::check_exclude_by_convert(const Type * src_type, const Type * dest_type)
 {
-    if((src_type->eType == eSimple) && (dest_type->eType == eSimple))
+    if((type_config_ != NULL) && (src_type->eType == eSimple) && (dest_type->eType == eSimple))
     {
         int type_src_index = src_type->simple_type;
         int type_dest_index = dest_type->simple_type;
-        vector<int> types = types_excluded_by_convert[type_dest_index];
+        vector<int> types =  type_config_->types_excluded_by_convert[type_dest_index];
         vector<int>::iterator iter = types.begin();
         for(;iter != types.end(); ++iter)
         {
@@ -520,18 +520,22 @@ TypeConfig::get_filter_for_assignop(int op)
 {
     pair<int, int> op_type;
     VectorFilter * filter = new VectorFilter();
-    vector<int> exclude_types = types_excluded_by_assignop[op];
+
+    if (type_config_ == NULL)
+        return filter;
+
+    vector<int> exclude_types =  type_config_->types_excluded_by_assignop[op];
 
     vector<int>::iterator iter;
     for(iter = exclude_types.begin(); iter != exclude_types.end(); ++iter)
     {
         op_type = std::make_pair(op, *iter);
-        if ( types_additional_by_assignop.count(op_type) > 0 )
+        if (  type_config_->types_additional_by_assignop.count(op_type) > 0 )
             continue;
         filter->add(Type::get_simple_type((eSimpleType)*iter).type_index);
     }
 
-	for(iter = types_excluded_by_request[asAssignExprRv].begin(); iter != types_excluded_by_request[asAssignExprRv].end(); ++iter)
+	for(iter =  type_config_->types_excluded_by_request[asAssignExprRv].begin(); iter !=  type_config_->types_excluded_by_request[asAssignExprRv].end(); ++iter)
     {
         filter->add(Type::get_simple_type((eSimpleType)*iter).type_index);
     }
@@ -542,63 +546,78 @@ TypeConfig::get_filter_for_assignop(int op)
 void 
 TypeConfig::get_filter_for_assignop(const Type * type, VectorFilter * filter)
 {
-    pair<int, int> op_type;
-    int op_id = 0;
-    int max_op = MAX_ASSIGN_OP;
-
-    for(; op_id < max_op; ++op_id)
+    if(type_config_ != NULL)
     {
-        op_type = std::make_pair(op_id, type->simple_type);
-        if ( types_additional_by_assignop.count(op_type) > 0 )
-            continue;
-        
-        vector<int> exclude_types = types_excluded_by_assignop[op_id];
+        pair<int, int> op_type;
+        int op_id = 0;
+        int max_op = MAX_ASSIGN_OP;
 
-        if(std::find(exclude_types.begin(), exclude_types.end(), type->simple_type) != exclude_types.end())
-            filter->add(op_id);
+        for(; op_id < max_op; ++op_id)
+        {
+            op_type = std::make_pair(op_id, type->simple_type);
+            if (  type_config_->types_additional_by_assignop.count(op_type) > 0 )
+                continue;
+            
+            vector<int> exclude_types =  type_config_->types_excluded_by_assignop[op_id];
+
+            if(std::find(exclude_types.begin(), exclude_types.end(), type->simple_type) != exclude_types.end())
+                filter->add(op_id);
+        }
     }
 }
 
 bool
 TypeConfig::check_exclude_by_unaryop(const Type * type, int op)
 {
-    pair<int, int> op_type = std::make_pair(op, type->simple_type);
+    if(type_config_ != NULL)
+    {
+        pair<int, int> op_type = std::make_pair(op, type->simple_type);
 
-    if ( types_additional_by_unaryop.count(op_type) > 0 )
+        if ( type_config_->types_additional_by_unaryop.count(op_type) > 0 )
+                return false;
+            
+        vector<int> exclude_types = type_config_->types_excluded_by_unaryop[op];
+
+        if( std::find(exclude_types.begin(), exclude_types.end(), type->simple_type) == exclude_types.end())
             return false;
-        
-    vector<int> exclude_types = types_excluded_by_unaryop[op];
 
-    if( std::find(exclude_types.begin(), exclude_types.end(), type->simple_type) == exclude_types.end())
-        return false;
+        return true;
+    }
 
-    return true;
+    return false;
 }
 
 bool
 TypeConfig::check_exclude_by_binaryop(const Type * type, int op)
 {
-    pair<int, int> op_type = std::make_pair(op, type->simple_type);
+    if(type_config_ != NULL)
+    {
+        pair<int, int> op_type = std::make_pair(op, type->simple_type);
 
-    if ( types_additional_by_binaryop.count(op_type) > 0 )
+        if (  type_config_->types_additional_by_binaryop.count(op_type) > 0 )
+                return false;
+            
+        vector<int> exclude_types =  type_config_->types_excluded_by_binaryop[op];
+
+        if( std::find(exclude_types.begin(), exclude_types.end(), type->simple_type) == exclude_types.end())
             return false;
-        
-    vector<int> exclude_types = types_excluded_by_binaryop[op];
 
-    if( std::find(exclude_types.begin(), exclude_types.end(), type->simple_type) == exclude_types.end())
-        return false;
-
-    return true;
+        return true;
+    }
+    return false;
 }
 
 bool 
 TypeConfig::check_additional_by_unaryop(const Type * type, int op, std::vector<int>& rhs )
 {
-    pair<int, int> op_type = std::make_pair(op, type->simple_type);
-    if ( types_additional_by_unaryop.count(op_type) > 0 )
+    if(type_config_ != NULL)
     {
-        rhs = types_additional_by_unaryop[op_type];
-        return true;
+        pair<int, int> op_type = std::make_pair(op, type->simple_type);
+        if ( type_config_->types_additional_by_unaryop.count(op_type) > 0 )
+        {
+            rhs = type_config_->types_additional_by_unaryop[op_type];
+            return true;
+        }
     }
     return false;    
 }
@@ -606,11 +625,14 @@ TypeConfig::check_additional_by_unaryop(const Type * type, int op, std::vector<i
 bool 
 TypeConfig::check_additional_by_binaryop(const Type * type, int op, std::vector< std::pair<int, int> >& rhs )
 {
-    pair<int, int> op_type = std::make_pair(op, type->simple_type);
-    if ( types_additional_by_binaryop.count(op_type) > 0 )
+    if(type_config_ != NULL)
     {
-        rhs = types_additional_by_binaryop[op_type];
-        return true;
+        pair<int, int> op_type = std::make_pair(op, type->simple_type);
+        if ( type_config_->types_additional_by_binaryop.count(op_type) > 0 )
+        {
+            rhs = type_config_->types_additional_by_binaryop[op_type];
+            return true;
+        }
     }
     return false;   
     

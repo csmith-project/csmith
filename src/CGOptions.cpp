@@ -182,7 +182,7 @@ DEFINE_GETTER_SETTER_BOOL(use_comma_exprs);
 DEFINE_GETTER_SETTER_BOOL(take_union_field_addr);
 DEFINE_GETTER_SETTER_BOOL(vol_struct_union_fields);
 DEFINE_GETTER_SETTER_BOOL(lang_cpp);
-DEFINE_GETTER_SETTER_STRING_REF(init_builtin_config_filepath);
+DEFINE_GETTER_SETTER_STRING_REF(init_config_filepath);
 
 void
 CGOptions::set_default_builtin_kinds()
@@ -292,7 +292,7 @@ CGOptions::set_default_settings(void)
 
 	set_default_builtin_kinds();
 
-    init_builtin_config_filepath("");
+    init_config_filepath("");
 }
 
 /*

@@ -53,6 +53,7 @@
 #include "Bookkeeper.h"
 #include "Probabilities.h"
 #include "Enumerator.h"
+#include "TypeConfig.h"
 
 using namespace std;
 
@@ -61,7 +62,17 @@ using namespace std;
 /*
  *
  */
-const Type *Type::simple_types[MAX_SIMPLE_TYPES];
+map<int, const Type *> Type::simple_types ;
+static int max_simple_type_index = -1;
+
+static const std::string type_names[MAX_SIMPLE_TYPES] = {
+"void", "int8_t", "int32_t", "int16_t", "long", "int64_t", 
+"uint8_t", "uint32_t", "uint16_t", "unsigned long", "float", "uint64_t"
+};
+
+static const int type_sizes[MAX_SIMPLE_TYPES] = {
+0, 1, 4, 2, 4, 8, 1, 4, 2, 4, 4, 8
+};
 
 Type *Type::void_type = NULL;
 
@@ -79,7 +90,17 @@ Type::Type(eSimpleType simple_type) :
 	simple_type(simple_type),
 	used(false)
 {
-	// Nothing else to do.
+	type_name = type_names[simple_type];
+	type_size = type_sizes[simple_type];
+}
+
+Type::Type(std::string name, int id, int size) :
+	eType(eSimple),
+	simple_type((eSimpleType)id),
+	used(false)
+{
+	type_name = name;
+	type_size = size;
 }
 
 // --------------------------------------------------------------
@@ -120,6 +141,7 @@ Type::get_simple_type(eSimpleType st)
 		if (Type::simple_types[st] == 0) {
 			Type *t = new Type(st);
 			Type::simple_types[st] = t;
+			t->type_index = ++max_simple_type_index;
 	    		AllTypes.push_back(t);
 		}
 	}
@@ -190,6 +212,23 @@ Type::find_type(const Type* t)
     return 0;
 }
 
+int 
+Type::find_type(std::string name, int id, int size)
+{
+    assert(!(name.empty()) );
+    for (size_t i=0; i<AllTypes.size(); i++) {
+        if (AllTypes[i]->type_name == name) {
+			return static_cast<int>(AllTypes[i]->simple_type);
+        }
+    }
+// if there is no such type, add a new type to AllTypes.
+	assert((id != -1) && (size != -1));
+    Type * extend_type = new Type(name, id, size);
+    AllTypes.push_back(extend_type);
+	extend_type->type_index = ++max_simple_type_index;
+    return id;
+}
+
 bool
 Type::is_const_struct_union() const
 {
@@ -228,8 +267,8 @@ Type::random_type_from_type(const Type* type, bool no_volatile, bool strict_simp
 	if (type == 0) {
 		t = no_volatile ? choose_random_nonvoid_nonvolatile() : choose_random_nonvoid();
 	}
-	if (type->eType == eSimple && !strict_simple_type) {
-		t = choose_random_simple();
+	if (type->eType == eSimple && !strict_simple_type ) {
+		t = choose_random_simple(TypeConfig::get_filter_for_convert(type));
 	}
 	if (t->eType == eSimple) {
 		assert(t->simple_type != eVoid);
@@ -264,27 +303,37 @@ void
 Type::GenerateSimpleTypes(void)
 {
     unsigned int st;
+	Type * type_temp = NULL;
     for (st=eChar; st<MAX_SIMPLE_TYPES; st++)
     {
-		AllTypes.push_back(new Type((enum eSimpleType)st));
+        if(st == eFloat)
+            continue;
+		type_temp = new Type((enum eSimpleType)st);
+		AllTypes.push_back(type_temp);
+		type_temp->type_index = ++max_simple_type_index;
     }
     Type::void_type = new Type((enum eSimpleType)eVoid);
+    if (CGOptions::init_config_filepath() != "")
+        TypeConfig::create_instance(CGOptions::init_config_filepath());
 }
 
 // ---------------------------------------------------------------------
 void
 GenerateAllTypes(void)
 {
+	static int index = 0;
 	Type::GenerateSimpleTypes();
     if (CGOptions::use_struct()) {
         while (MoreTypesProbability()) {
 		    Type *ty = AggregateType::make_random_struct_type();
+			ty->type_index = max_simple_type_index + (++index);
 		    Type::AllTypes.push_back(ty);
 	    }
     }
 	if (CGOptions::use_union()) {
         while (MoreTypesProbability()) {
 		    Type *ty = AggregateType::make_random_union_type();
+			ty->type_index = max_simple_type_index + (++index);
 		    Type::AllTypes.push_back(ty);
 	    }
     }
@@ -292,25 +341,31 @@ GenerateAllTypes(void)
 
 // ---------------------------------------------------------------------
 const Type *
-Type::choose_random()
+Type::choose_random(Filter * additional_filter)
 {
-	VectorFilter f;
+	VectorFilter * f = NULL;
+	if (additional_filter)
+		f = dynamic_cast<VectorFilter *>(additional_filter);
+	if (!f)
+		f = new VectorFilter();
+
 	unsigned int type_index = 0;
-	Type *type = 0;
-	for( type_index = 0; type_index < AllTypes.size(); type_index++) {
-		type = AllTypes[type_index];
-		assert(type);
-		if (type->eType == eSimple) {
+
+	vector<Type *>::iterator iter;
+	for(iter = AllTypes.begin(); iter != AllTypes.end(); ++iter)
+	{
+		if ((*iter)->eType == eSimple) {
 			Filter *filter = SIMPLE_TYPES_PROB_FILTER;
-			if(filter->filter(type->simple_type))
-				f.add(type_index);
+			if(filter->filter((*iter)->simple_type))
+				f->add((*iter)->type_index);
 		}
-		else if ((type->eType == eStruct) && (!CGOptions::return_structs())) {
-			f.add(type_index);
+		else if (((*iter)->eType == eStruct) && (!CGOptions::return_structs())) {
+			f->add((*iter)->type_index);
 		}
 	}
-	
-	type_index = rnd_upto(AllTypes.size(), &f);
+		
+	type_index = rnd_upto(AllTypes.size(), f);
+	delete f;
 	
 	Type *typ = AllTypes[type_index];
 	
@@ -323,27 +378,31 @@ Type::choose_random()
 }
 
 const Type *
-Type::choose_random_nonvoid(void)
+Type::choose_random_nonvoid(Filter * additional_filter)
 {
-	VectorFilter f;
-	unsigned int type_index = 0;
-	Type *type = 0;
+	VectorFilter * f = NULL;
+	if (additional_filter)
+		f = dynamic_cast<VectorFilter *>(additional_filter);
+	if (!f)
+		f = new VectorFilter();
 	
-	for( type_index = 0; type_index < AllTypes.size(); type_index++) {	
-		type = AllTypes[type_index];
+	unsigned int type_index = 0;
+
+	vector<Type *>::iterator iter;
+	for(iter = AllTypes.begin(); iter != AllTypes.end(); ++iter)
+	{
+		if ((*iter)->simple_type == eVoid)
+			f->add((*iter)->type_index);
 		
-		if (type->simple_type == eVoid)
-			f.add(type_index);
-		
-		if (type->eType == eSimple) {
+		if ((*iter)->eType == eSimple) {
 			Filter *filter = SIMPLE_TYPES_PROB_FILTER;
-			if(filter->filter(type->simple_type))
-				f.add(type_index);
+			if(filter->filter((*iter)->simple_type))
+				f->add((*iter)->type_index);
 		}
 	}
 	
-	type_index = rnd_upto(AllTypes.size(), &f);
-
+	type_index = rnd_upto(AllTypes.size(), f);
+	delete f;
 	Type *typ = AllTypes[type_index];
 	
 	if (!typ->used) {
@@ -355,38 +414,42 @@ Type::choose_random_nonvoid(void)
 }
 
 const Type *
-Type::choose_random_nonvoid_nonvolatile(void)
+Type::choose_random_nonvoid_nonvolatile(Filter * additional_filter)
 {
-	VectorFilter f;
-	unsigned int type_index = 0;
-	Type *type = 0;
+	VectorFilter * f = NULL;
+	if (additional_filter)
+		f = dynamic_cast<VectorFilter *>(additional_filter);
+	if (!f)
+		f = new VectorFilter();
 	
-	for( type_index = 0; type_index < AllTypes.size(); type_index++) {	
-		type = AllTypes[type_index];
-		
-		if (type->simple_type == eVoid)
-			f.add(type_index);
+	unsigned int type_index = 0;
+	
+	vector<Type *>::iterator iter;
+	for(iter = AllTypes.begin(); iter != AllTypes.end(); ++iter)
+	{
+		if ((*iter)->simple_type == eVoid)
+			f->add((*iter)->type_index);
 
-		if (type->is_aggregate() && type->is_volatile_struct_union())
-			f.add(type_index);
+		if ((*iter)->is_aggregate() && (*iter)->is_volatile_struct_union())
+			f->add((*iter)->type_index);
 
-		if ((type->eType == eStruct) && (!CGOptions::arg_structs())) {
-			f.add(type_index);
+		if (((*iter)->eType == eStruct) && (!CGOptions::arg_structs())) {
+			f->add((*iter)->type_index);
 		}
 
-		if ((type->eType == eUnion) && (!CGOptions::arg_unions())) {
-			f.add(type_index);
+		if (((*iter)->eType == eUnion) && (!CGOptions::arg_unions())) {
+			f->add((*iter)->type_index);
 		}
 
-		if (type->eType == eSimple) {
+		if ((*iter)->eType == eSimple) {
 			Filter *filter = SIMPLE_TYPES_PROB_FILTER;
-			if(filter->filter(type->simple_type))
-				f.add(type_index);
+			if(filter->filter((*iter)->simple_type))
+				f->add((*iter)->type_index);
 		}
 	}
 	
-	type_index = rnd_upto(AllTypes.size(), &f);
-
+	type_index = rnd_upto(AllTypes.size(), f);
+	delete f;
 	Type *typ = AllTypes[type_index];
 	
 	if (!typ->used) {
@@ -404,6 +467,18 @@ Type::choose_random_simple(void)
     eSimpleType ty = choose_random_nonvoid_simple();
     assert(ty != eVoid);
     return &get_simple_type(ty);
+}
+
+
+// ---------------------------------------------------------------------
+const Type *
+Type::choose_random_simple(Filter * filter)
+{
+    vector<Type *> all_simple_types(AllTypes.begin(), AllTypes.begin() + max_simple_type_index);
+    int index = rnd_upto(all_simple_types.size(), filter);
+    Type * type = AllTypes[index];
+    assert(type->simple_type != eVoid);
+    return type;
 }
 
 bool
@@ -441,19 +516,19 @@ Type::is_signed(void) const
 
 	case eSimple:
 		switch (simple_type) {
-		case eUChar:
-		case eUInt:
-		case eUShort:
-		case eULong:
-		case eULongLong:
-			return false;
+		case eChar:
+		case eInt:
+		case eShort:
+		case eLong:
+		case eLongLong:
+			return true;
 			break;
 		default:
 			break;
 		}
 		break;
 	}
-	return true;
+	return false;
 }
 
 const Type*
@@ -514,7 +589,7 @@ Type::is_convertable(const Type* t) const
         return true;
     if (eType == eSimple && t->eType == eSimple) {
 		// forbiden conversion from float to int
-		if (t->is_float() && !is_float())
+		if (TypeConfig::check_exclude_by_convert(t, this))
 			return false;
         if ((simple_type != eVoid && t->simple_type != eVoid) ||
             simple_type == t->simple_type)
@@ -540,7 +615,13 @@ Type::is_equivalent(const Type* t) const
 bool
 Type::needs_cast(const Type* t) const
 {
-	return (eType == ePointer) && !get_base_type()->is_equivalent(t->get_base_type());
+	if(t)
+	{
+		bool cast = (eType == ePointer) && !get_base_type()->is_equivalent(t->get_base_type());
+		cast |= (eType == eSimple) && !((simple_type < MAX_SIMPLE_TYPES) && (t->simple_type < MAX_SIMPLE_TYPES));
+		return cast;
+	}
+	return false;
 }
 
 bool
@@ -593,21 +674,8 @@ Type::is_derivable(const Type* t) const
 unsigned long
 Type::SizeInBytes(void) const
 {
-	switch (simple_type) {
-		case eVoid:		return 0;
-		case eInt:		return 4;
-		case eShort:	return 2;
-		case eChar:		return 1;
-		case eLong:		return 4;
-		case eLongLong:	return 8;
-		case eUChar:	return 1;
-		case eUInt:		return 4;
-		case eUShort:	return 2;
-		case eULong:	return 4;
-		case eULongLong:return 8;
-		case eFloat:	return 4;
-//		case eDouble:	return 8;
-	}
+	if(eType == eSimple)
+		return type_size;
 	return 0;
 }
 
@@ -637,9 +705,7 @@ Type::SelectLType(bool no_volatile, eAssignOps op)
 
 	// choose float as LHS type
 	if (!type) {
-		if (StatementAssign::AssignOpWorksForFloat(op) && rnd_flipcoin(FloatAsLTypeProb)) {
-			type = &Type::get_simple_type(eFloat);
-		}
+            type = Type::choose_random_simple(TypeConfig::get_filter_for_assignop(op));
 	}
 
 	// default is any integer type
@@ -668,15 +734,7 @@ Type::contain_pointer_field(void) const
 void
 Type::Output(std::ostream &out) const
 {
-	if (this->simple_type == eVoid) {
-		out << "void";
-	} else if (this->simple_type == eFloat) {
-	    out << "float";
-	} else {
-		out << (is_signed() ? "int" : "uint");
-		out << (SizeInBytes() * 8);
-		out << "_t";
-	}
+	out << type_name;
 }
 
 void

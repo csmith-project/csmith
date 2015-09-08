@@ -206,7 +206,7 @@ static void print_help()
 	cout << "  --lang-cpp : generate C++ code (C by default)." << endl << endl;
 
         // config file path
-    cout << "  --builtin-config <builtin_file_path>: specify external builtins configuration file absolute path." << endl << endl;
+    cout << "  --config <config_file_path>: specify extend syntax and builtins configuration file absolute path." << endl << endl;
 
 }
 
@@ -334,7 +334,7 @@ main(int argc, char **argv)
 
 	for (int i=1; i<argc; i++) {
 
-        if (strcmp (argv[i], "--builtin-config") == 0) {
+        if (strcmp (argv[i], "--config") == 0) {
 			string filepath;
 			i++;
 			arg_check(argc, i);
@@ -342,7 +342,7 @@ main(int argc, char **argv)
 				cout<< "please specify external builtins configuration file absolute path!" << std::endl;
 				exit(-1);
 			}
-			CGOptions::init_builtin_config_filepath(filepath);
+			CGOptions::init_config_filepath(filepath);
 			continue;
         }
 

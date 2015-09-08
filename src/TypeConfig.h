@@ -74,28 +74,27 @@ asGlobalInit
 class TypeConfig
 {
 public:
-    static TypeConfig * create_instance( std::string file_path);
-    static TypeConfig * get_instance();
+    static void create_instance( std::string file_path);
 
-    Filter* get_filter_for_request(eTypeRequestType request);
+    static Filter* get_filter_for_request(eTypeRequestType request);
     
-    Filter* get_filter_for_convert(const Type* type);
+    static Filter* get_filter_for_convert(const Type* type);
 
-    Filter* get_filter_for_assignop(int op);
+    static Filter* get_filter_for_assignop(int op);
 
-    void get_filter_for_assignop(const Type * type, VectorFilter * filter);
+    static void get_filter_for_assignop(const Type * type, VectorFilter * filter);
 
-    bool check_exclude_by_request(const Type * type, eTypeRequestType request);
+    static bool check_exclude_by_request(const Type * type, eTypeRequestType request);
     
-    bool check_exclude_by_convert(const Type * src_type, const Type * dest_type);
+    static bool check_exclude_by_convert(const Type * src_type, const Type * dest_type);
 
-    bool check_exclude_by_unaryop(const Type * type, int op = MAX_UNARY_OP);
+    static bool check_exclude_by_unaryop(const Type * type, int op = MAX_UNARY_OP);
     
-    bool check_exclude_by_binaryop(const Type * type, int op = MAX_BINARY_OP);
+    static bool check_exclude_by_binaryop(const Type * type, int op = MAX_BINARY_OP);
 
-    bool check_additional_by_unaryop(const Type * type, int op, std::vector<int>& rhs );
+    static bool check_additional_by_unaryop(const Type * type, int op, std::vector<int>& rhs );
     
-    bool check_additional_by_binaryop(const Type * type, int op, std::vector< std::pair<int, int> >& rhs);
+    static bool check_additional_by_binaryop(const Type * type, int op, std::vector< std::pair<int, int> >& rhs);
 
 private:
     TypeConfig() { /* do nothing */ }

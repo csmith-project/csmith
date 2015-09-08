@@ -327,7 +327,8 @@ dump_intrin_info(TiXmlNode* pParent, unsigned int indent = 0) {
 
 void BuiltinConfig::build_builtin_list_from_xml(std::string file_path) {
 	// read XML configuration file
-	TiXmlDocument builtinDoc(file_path.c_str());
+	std::string file_name = file_path + "/Builtin.xml";
+	TiXmlDocument builtinDoc(file_name.c_str());
     bool loadOkay = builtinDoc.LoadFile();
     if (loadOkay) {
         dump_intrin_info(&builtinDoc);
@@ -337,7 +338,8 @@ void BuiltinConfig::build_builtin_list_from_xml(std::string file_path) {
     }
 
     // config all Types CVQualifiers
-    for (int i = 0; i < BuiltinConfig::builtin_config_list.size(); i++) {
+	unsigned int i = 0;
+    for (; i < BuiltinConfig::builtin_config_list.size(); i++) {
         Function::make_builtin_function(BuiltinConfig::builtin_config_list[i]);
     }
 }

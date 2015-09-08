@@ -466,38 +466,39 @@ unsigned long
 AggregateType::SizeInBytes(void) const
 {
     size_t i;
-	switch (eType) {
-		case eUnion: {
-		    unsigned int max_size = 0;
-		    for (i=0; i<fields.size(); i++) {
-				unsigned int sz = 0;
-				if (is_bitfield(i)) {
-					assert(i < bitfields_length_.size());
-					sz = (int)(ceil(bitfields_length_[i] / 8.0) * 8);
-				} else {
-					sz = fields[i]->SizeInBytes();
-				}
-				if (sz == SIZE_UNKNOWN) return sz;
-		        if (sz > max_size) {
-		            max_size = sz;
-		        }
-		    }
-		    return max_size;
-		}
-		case eStruct: {
-			if (!this->packed_) return SIZE_UNKNOWN;
-			// give up if there are bitfields, too much compiler-dependence and machine-dependence
-			if (this->has_bitfields()) return SIZE_UNKNOWN;
-		    unsigned int total_size = 0;
-		    for (i=0; i<fields.size(); i++) {
-				unsigned int sz = fields[i]->SizeInBytes();
-				if (sz == SIZE_UNKNOWN) return sz;
-		        total_size += sz;
-		    }
-		    return total_size;
-		}
-	}
-	return 0;
+    switch (eType) {
+    	case eUnion: {
+    	    unsigned int max_size = 0;
+    	    for (i=0; i<fields.size(); i++) {
+    			unsigned int sz = 0;
+    			if (is_bitfield(i)) {
+    				assert(i < bitfields_length_.size());
+    				sz = (int)(ceil(bitfields_length_[i] / 8.0) * 8);
+    			} else {
+    				sz = fields[i]->SizeInBytes();
+    			}
+    			if (sz == SIZE_UNKNOWN) return sz;
+    	        if (sz > max_size) {
+    	            max_size = sz;
+    	        }
+    	    }
+    	    return max_size;
+    	}
+    	case eStruct: {
+    		if (!this->packed_) return SIZE_UNKNOWN;
+    		// give up if there are bitfields, too much compiler-dependence and machine-dependence
+    		if (this->has_bitfields()) return SIZE_UNKNOWN;
+    	    unsigned int total_size = 0;
+    	    for (i=0; i<fields.size(); i++) {
+    			unsigned int sz = fields[i]->SizeInBytes();
+    			if (sz == SIZE_UNKNOWN) return sz;
+    	        total_size += sz;
+    	    }
+    	    return total_size;
+        }
+        default:
+            return 0;
+    }
 }
 
 
