@@ -1,12 +1,12 @@
 #!/bin/bash
 
-ulimit -f 100000
+ulimit -f 500000
 
 TRUSTED="gcc-4.9"
 COMP="gcc"
 COMP_PP="g++"
-CSMITH_PATH="/home/jacek/Desktop/Imperial/UROP/csmith/"
-ADAPTER_OBJECT_PATH="/home/jacek/Desktop/Imperial/UROP/Adapter/boost_interval_adapter/adapter.o"
+CSMITH_PATH="/home/csmith/"
+ADAPTER_OBJECT_PATH="/home/boost_interval_adapter/adapter.o"
 GEN_ERROR_FILE="genError.txt"
 COMP_ERROR_FILE="compError.txt"
 RUN_ERROR_FILE="runError.txt"
