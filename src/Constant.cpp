@@ -182,15 +182,6 @@ GenerateRandomFloatHexConstant(void)
 	}
 	oss << exp;
 	return oss.str();
-	//float_test
-	/*
-	if(CGOptions::float_test()){
-		return " (float_interval_t){"+oss.str()+", "+oss.str()+"}";
-	}else{
-		return oss.str();
-	}
-	*/
-
 }
 
 /*
@@ -216,14 +207,6 @@ GenerateSmallRandomFloatHexConstant(int num)
 		oss << "-1";
 	}
 	return oss.str();
-	//float_test
-	/*
-	if(CGOptions::float_test()){
-		return " (float_interval_t){"+oss.str()+", "+oss.str()+"}";
-	}else{
-		return oss.str();
-	}
-	*/
 }
 
 static string
@@ -296,9 +279,6 @@ GenerateRandomStructConstant(const Type* type)
         	}else{
         		value += v;
         	}
-
-
-        	//value += "/*V*/";
 		}
 	}
 	value += "}";
@@ -567,21 +547,7 @@ Constant::get_type(void) const
 void
 Constant::Output(std::ostream &out) const
 {
-	/*
-	output_cast(out);
-	//enclose negative numbers in parenthesis to avoid syntax errors such as "--8"
-	if (!value.empty() && value[0] == '-') {
-		out << "(" << value << ")";
-	} else if (type->eType == ePointer && equals(0)){
-		if (CGOptions::lang_cpp()) {
-			out << "NULL";
-		} else {
-		out << "(void*)" << value;
-		}
-	} else {
-		out << value;
-	}
-	*/
+
 	//float_test
 	ostringstream oss;
 	output_cast(oss);
@@ -601,19 +567,10 @@ Constant::Output(std::ostream &out) const
 	string s;
 	if(CGOptions::float_test() && type->simple_type == eFloat){
 		s = "FLOAT_TEST_CONSTANT(" + oss.str() + ")";
-		/*
-		s = "\n";
-		s = s + "#ifndef FLOAT_TEST_ENABLED\n";
-		s = s + oss.str() + "\n";
-		s = s + "#else\n";
-		s = s + "(float_interval_t){"+oss.str()+", "+oss.str()+"}\n";
-		s = s + "#endif\n";
-		*/
 	}else{
 		s = oss.str();
 	}
     out << s;
-    //out << "/*C*/";
 }
 
 ///////////////////////////////////////////////////////////////////////////////

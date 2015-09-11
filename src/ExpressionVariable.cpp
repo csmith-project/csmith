@@ -233,13 +233,6 @@ ExpressionVariable::Output(std::ostream &out) const
     }
 }
 
-//float_test
-void
-ExpressionVariable::OutputInterval(std::ostream& out) const
-{
-	ExpressionVariable::Output(out);
-}
-
 std::vector<const ExpressionVariable*>
 ExpressionVariable::get_dereferenced_ptrs(void) const
 {

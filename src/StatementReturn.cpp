@@ -153,10 +153,6 @@ StatementReturn::Output(std::ostream &out, FactMgr* /*fm*/, int indent) const
 
 	//float_test
 
-	if (CGOptions::float_test() && (*parent).func->return_type->is_float()){
-		out << "/*should return float*/";
-	}
-
 	bool should_close_brackets = false;
 	if (CGOptions::float_test() && (*parent).func->return_type->is_float() && !var.get_type().is_float()){
 		output_cast_to_interval_macro(out, var.get_type());

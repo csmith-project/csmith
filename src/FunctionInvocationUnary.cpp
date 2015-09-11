@@ -229,14 +229,14 @@ FunctionInvocationUnary::Output(std::ostream &out) const
 					if (CGOptions::identify_wrappers()) {
 						out << ", " << id;
 					}
-					//float_test
-					//out << ")";
+
 					out << "/*unary wrapper*/)";
 					break;
 				}
 			}
 			else {
 				should_close_brackets = false;
+				//float_test
 				if (CGOptions::float_test() && param_value[0]->get_type().is_float()){
 					output_func_float_macro(eFunc, out);
 					should_close_brackets = true;
@@ -245,9 +245,8 @@ FunctionInvocationUnary::Output(std::ostream &out) const
 				}
 
 				param_value[0]->Output(out);
-				//float_test
-				out<<"/*no unary wrapper*/";
 
+				//float_test
 				if(CGOptions::float_test() && should_close_brackets){
 					out << ")";
 				}
@@ -262,6 +261,7 @@ FunctionInvocationUnary::Output(std::ostream &out) const
 	case eNot:
 	case eBitNot:
 
+		//float_test
 		should_close_brackets = false;
 		if (CGOptions::float_test() && param_value[0]->get_type().is_float()){
 			output_func_float_macro(eFunc, out);

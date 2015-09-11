@@ -747,16 +747,8 @@ Probabilities::set_default_binary_ops_prob()
 
 	// each op has equivalent probability
 
-	//float_test : we want more add and sub operations
-	if(CGOptions::float_test()){
-		SET_SINGLE_NAME("binary_add_prob", Add, 4);
-		SET_SINGLE_NAME("binary_sub_prob", Sub, 4);
-	}else{
-		SET_SINGLE_NAME("binary_add_prob", Add, 1);
-		SET_SINGLE_NAME("binary_sub_prob", Sub, 1);
-	}
-
-
+	SET_SINGLE_NAME("binary_add_prob", Add, 1);
+	SET_SINGLE_NAME("binary_sub_prob", Sub, 1);
 
 	if (CGOptions::muls()) {
 		SET_SINGLE_NAME("binary_mul_prob", Mul, 1);

@@ -476,8 +476,6 @@ OutputActualParamExpressionFloatTest(const Expression *expr,
 		out << ")";
 	}
 
-
-    // for MSVC: must return something to be able to pass to a "map" function
     return 0;
 }
 

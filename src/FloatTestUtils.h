@@ -5,7 +5,6 @@
 #include <cassert>
 
 //float_test
-// returns true if should close brackets
 static void
 output_cast_to_interval_macro(std::ostream &out, const Type& type){
 
@@ -116,12 +115,6 @@ output_cast_from_interval_macro(std::ostream &out, const Type& type){
 	if (type.simple_type == eFloat){
 		assert(false && "Cast from float to float should not be required");
 	}
-
-	/*
-	if (type.eType == ePointer){
-		assert(false && "Attempt to assign from float to pointer");
-	}
-	*/
 
 	string s = "";
 	switch (type.simple_type) {

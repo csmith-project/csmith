@@ -37,8 +37,6 @@
 
 #include "FunctionInvocation.h"
 
-//float_test
-//#include "FloatTestUtils.h"
 
 class Type;
 class CGContext;

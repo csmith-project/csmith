@@ -78,8 +78,6 @@ public:
 	const Lhs* get_lhs(void) const { return assign->get_lhs();}
 	const StatementAssign* get_stm_assign(void) const { return assign;}
 	void Output(std::ostream &) const;
-	//float_test
-	//void OutputInterval(std::ostream &) const;
 
 	virtual void indented_output(std::ostream &out, int indent) const;
 

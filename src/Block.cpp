@@ -282,6 +282,7 @@ OutputStatementList(const vector<Statement*> &stms, std::ostream &out, FactMgr* 
 static void
 OutputLocalVars(const vector<Variable*> &local_vars, std::ostream &out, int indent){
 	for (size_t j=0; j<local_vars.size(); j++) {
+		//float_test
 		if (CGOptions::float_test()){
 			if (local_vars[j]->type->simple_type == eFloat){
 				local_vars[j]->output_value_dump(out, "local ft ", indent);
@@ -345,26 +346,6 @@ Block::Output(std::ostream &out, FactMgr* fm, int indent) const
 	}else{
 		OutputStatementList(stms, out, fm, indent);
 	}
-
-
-	// check_local
-	/*
-	if(CGOptions::check_local()){
-		//output local variables
-		for (size_t i=0; i<local_vars.size(); i++) {
-			if (CGOptions::float_test()){
-				if (local_vars[i]->type->simple_type == eFloat){
-					local_vars[i]->output_value_dump(out, "local ft ", 1);
-				}
-			}else{
-				local_vars[i]->output_value_dump(out, "local ", 1);
-			}
-
-		}
-	}
-	*/
-
-
 
 	if (CGOptions::depth_protect()) {
 		out << "DEPTH--;" << endl;

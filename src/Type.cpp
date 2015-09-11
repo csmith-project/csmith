@@ -619,8 +619,9 @@ Type::choose_random_nonvoid_simple(void)
 
 	simple_type = (eSimpleType) rnd_upto(MAX_SIMPLE_TYPES, SIMPLE_TYPES_PROB_FILTER);
 
+	// TODO : add a way of varying the probablility of producing a float type
 	//float_test : hacky and ugly - increase probability of producing floats
-	if (rnd_flipcoin(80)){
+	if ( CGOptions::float_test() && rnd_flipcoin(80)){
 		simple_type = eFloat;
 	}
 
@@ -1668,6 +1669,7 @@ Type::Output(std::ostream &out) const
 		if (this->simple_type == eVoid) {
 			out << "void";
 		} else if (this->simple_type == eFloat) {
+			//float_test
 		    if(CGOptions::float_test()){
 		    	out << "__FLOAT";
 		    }else{

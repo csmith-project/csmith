@@ -171,20 +171,21 @@ OutputMgr::OutputMain(std::ostream &out)
 		}
 	}
 
-	//tracking
-	out << "#ifdef TRACKING" << endl;
-	out << "#ifdef FLOAT_TEST_ENABLED" << endl;
-	out << "#ifdef __GLOB" << endl;
-	out << "printf(\"Final state of tracked variable: [%a, %a]\\n\", __GLOB.lower, __GLOB.upper);" << endl;
-	out << "if(__GLOB.lower < __GLOB.upper){" << endl;
-	out << "  printf(\"The final value is wide\\n\");" << endl;
-	out << "}else{" << endl;
-	out << "  printf(\"The final value is a singleton\\n\");" << endl;
-	out << "}" << endl;
-	out << "#endif" << endl;
-	out << "#endif" << endl;
-	out << "#endif" << endl;
-
+	//float_test tracking
+	if(CGOptions::float_test()){
+		out << "#ifdef TRACKING" << endl;
+		out << "#ifdef FLOAT_TEST_ENABLED" << endl;
+		out << "#ifdef __GLOB" << endl;
+		out << "printf(\"Final state of tracked variable: [%a, %a]\\n\", __GLOB.lower, __GLOB.upper);" << endl;
+		out << "if(__GLOB.lower < __GLOB.upper){" << endl;
+		out << "  printf(\"The final value is wide\\n\");" << endl;
+		out << "}else{" << endl;
+		out << "  printf(\"The final value is a singleton\\n\");" << endl;
+		out << "}" << endl;
+		out << "#endif" << endl;
+		out << "#endif" << endl;
+		out << "#endif" << endl;
+	}
 
 	ExtensionMgr::OutputTail(out);
 	out << "}" << endl;

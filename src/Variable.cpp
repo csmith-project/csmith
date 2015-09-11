@@ -808,12 +808,6 @@ Variable::OutputDef(std::ostream &out, int indent) const
 	out << get_actual_name() << " = ";
 	assert(init);
 
-	/*
-	if (CGOptions::float_test() && type->simple_type == eFloat){
-		//float_test
-		out << endl << "#ifndef FLOAT_TEST_ENABLED" << endl;
-	}
-	*/
 
 	//float_test
 	if(CGOptions::float_test() && type->is_float() && is_global()){
@@ -830,23 +824,6 @@ Variable::OutputDef(std::ostream &out, int indent) const
 	} else {
 		outputln(out);
 	}
-
-	/*
-	//float_test
-	if (CGOptions::float_test() && type->simple_type == eFloat) {
-		out << "#else" << endl;
-		out << "{";
-		init->Output(out);
-		out << ", ";
-		init->Output(out);
-		out << "};" << endl;
-		out << "#endif" << endl;
-
-	}
-	*/
-
-
-
 
 }
 
@@ -1436,10 +1413,6 @@ Variable::output_value_dump(ostream &out, string prefix, int indent) const
 			output_tab(out, indent);
 			out << "OUTPUT_FLOAT_INTERVAL_MACRO(" << to_string() << ");";
 			outputln(out);
-			//string s = to_string();
-			//output_print_str(out, prefix + to_string() + " = " + type->printf_directive() + "\\n",
-			//		s +".lower, "+s+".upper" , indent);
-			//outputln(out);
 		}else{
 			output_print_str(out, prefix + to_string() + " = " + type->printf_directive() + "\\n", to_string(), indent);
 			outputln(out);
