@@ -1,8 +1,8 @@
-1) generate with --float-test option
-2) while compiling add path to runtime/FloatTest.c
+FLOAT TEST
+by Jacek Burys, Imperial College London, UROP 2015
 
-3) To run in float_test mode add -DFLOAT_TEST_ENABLED
-eg. gcc prog.c runtime/FloatTest.c -w -Iruntime -DFLOAT_TEST_ENABLED -o prog
-
-4) To run in normal mode do not add -DFLOAT_TEST_ENABLED
-eg. gcc prog.c runtime/FloatTest.c -w -Iruntime -o prog
+FloatTest is an extension to CSmith which allows to represent float variables as intervals.
+Use --float-test option to generate FloatTest programs.
+It could find use in testing of floating point optimizations by running the program in two different modes:
+- normal mode - on default programs generated with --float-test options behave almost exactly like normal programs generated with CSmith, the difference is increased probablility of creating float variables and operations,
+- float-test mode - when the program is compiled with -DFLOAT_TEST_ENABLED it will use intervals to represent float variables, we have also provided an adapter for Boost Interval Library which is used to perform interval arithmetics oerations,
