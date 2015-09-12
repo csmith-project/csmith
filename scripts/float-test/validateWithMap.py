@@ -30,8 +30,13 @@ def extractInterval(line):
   else: 
     return ("",0,0)
 
-def isInInterval(value, lower, upper):
-  return lower<=value and value<=upper
+def isInInterval(name, value):
+  res = false
+  for (lower, upper) in intervals[name]:
+    if lower <= value and value <= upper:
+      res = true
+      break
+  return res
 
 #arg[1] = values, arg[2] = intervals
 result = 0
@@ -44,19 +49,18 @@ intervals = {}
 with open(str(sys.argv[2]), 'r') as f:
   for line in f.readlines():
     name, lower, upper = extractInterval(line)
-    intervals[name] = (lower, upper)
+    if not name in intervals:
+      intervals[name] = []
+    intervals[name].append((lower, upper))
 
 with open(str(sys.argv[1]), 'r') as f:
   for line in f.readlines():
     name, value = extractValue(line)
     lower, upper = intervals[name]
     if math.isnan(value):
-      if math.isfinite(lower) and math.isfinite(upper):
-        print(name, value, lower, upper)
-        result = 1
       continue
-    if not isInInterval(value, lower, upper):
-      print(name, value, lower, upper)
+    if not isInInterval(name, value):
+      print(name, value)
       result = 1
 
 sys.exit(result)

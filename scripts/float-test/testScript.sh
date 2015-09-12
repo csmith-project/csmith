@@ -104,7 +104,17 @@ touch ${RUN_ERROR_FILE}
 touch ${RES_ERROR_FILE}
 touch ${WIDE_COUNT_FILE}
 
-if [ "$2" == "" ]; then
+if [ -f "$1" ]; then
+  while read -r line; do
+    seed="$line"
+    echo "$seed"
+    if testSeed $seed; then
+      echo 'OK'
+    else
+      echo 'ERROR'
+    fi
+  done < "$1"
+elif [ "$2" == "" ]; then
   seed="$1"
   while true; do
     echo "$seed"
