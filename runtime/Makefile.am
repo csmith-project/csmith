@@ -91,10 +91,12 @@ BUILT_SOURCES = \
 	safe_math.h \
 	safe_math_macros.h \
 	safe_math_macros_notmp.h \
-	adapter.o
+	adapter.o \
+	adaptertracking.o
 CLEANFILES = \
 	$(BUILT_SOURCES) \
-	adapter.o
+	adapter.o \
+	adaptertracking.o
 
 safe_math.h: safe_math.m4
 	$(M4) < $< > $@
@@ -107,6 +109,9 @@ safe_math_macros_notmp.h: safe_math_macros_notmp.m4
 
 adapter.o: adapter.cpp
 	$(CXX) adapter.cpp -c -o adapter.o
+
+adaptertracking.o: adapter.cpp
+	$(CXX) adapter.cpp -DTRACKING -c -o adaptertracking.o
 
 # We distribute, but do not build, the following Windows support files.
 EXTRA_DIST = \
