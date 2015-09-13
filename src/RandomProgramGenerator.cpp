@@ -355,6 +355,7 @@ main(int argc, char **argv)
 		if (strcmp (argv[i], "--float-test") == 0) {
 			CGOptions::float_test(true);
 			CGOptions::enable_float(true);
+			CGOptions::strict_float(true);
 			CGOptions::blind_check_global(true);
 			continue;
 		}
