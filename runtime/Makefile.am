@@ -74,7 +74,8 @@ nobase_libcsmith_a_include_HEADERS = \
 	stdint_msp430.h \
 	windows/stdint.h \
 	volatile_runtime.c \
-	volatile_runtime.h
+	volatile_runtime.h \
+	float_test.h
 noinst_HEADERS = \
 	safe_math.m4 \
 	safe_math_macros.m4 \
@@ -89,9 +90,11 @@ nodist_libcsmith_a_include_HEADERS = \
 BUILT_SOURCES = \
 	safe_math.h \
 	safe_math_macros.h \
-	safe_math_macros_notmp.h
+	safe_math_macros_notmp.h \
+	adapter.o
 CLEANFILES = \
-	$(BUILT_SOURCES)
+	$(BUILT_SOURCES) \
+	adapter.o
 
 safe_math.h: safe_math.m4
 	$(M4) < $< > $@
@@ -101,6 +104,9 @@ safe_math_macros.h: safe_math_macros.m4
 
 safe_math_macros_notmp.h: safe_math_macros_notmp.m4
 	$(M4) < $< > $@
+
+adapter.o: adapter.cpp
+	$(CXX) adapter.cpp -c -o adapter.o
 
 # We distribute, but do not build, the following Windows support files.
 EXTRA_DIST = \

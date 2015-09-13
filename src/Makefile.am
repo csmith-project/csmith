@@ -110,6 +110,7 @@ csmith_SOURCES = \
 	Filter.h \
 	Finalization.cpp \
 	Finalization.h \
+	FloatTestUtils.h \
 	Function.cpp \
 	Function.h \
 	FunctionInvocation.cpp \
