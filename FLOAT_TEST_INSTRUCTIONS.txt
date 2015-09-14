@@ -5,7 +5,8 @@ FloatTest is an extension to CSmith which allows to represent float variables as
 It could find use in testing of floating point optimizations by running the program in two different modes:
 - normal mode - on default programs generated with --float-test options behave almost exactly like normal programs generated with CSmith, the difference is increased probablility of creating float variables and operations,
 FloatTest does not yet support safe math so it is worth to add -DUNSAFE_FLOAT when running in normal mode.
-- float-test mode - when the program is compiled with -DFLOAT_TEST_ENABLED it will use intervals to represent float variables, we have also provided an adapter for Boost Interval Library which is used to perform interval arithmetics oerations,
+- float-test mode - when the program is compiled with -DFLOAT_TEST_ENABLED it will use intervals to represent float variables, we have also provided an adapter for Boost Interval Library which is used to perform interval arithmetics operations, 
+You can install Boost libraries on linux by running: sudo apt-get install libboost-all-dev
 
 
 Once the program is generated it has to be compiled with -c option and then linked with the adapter in runtime directory.
