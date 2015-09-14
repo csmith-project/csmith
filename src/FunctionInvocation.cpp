@@ -176,9 +176,23 @@ FunctionInvocation::make_random_binary(CGContext &cg_context, const Type* type)
 	do {
 		op = (eBinaryOps)(rnd_upto(MAX_BINARY_OP, BINARY_OPS_PROB_FILTER));
 
-		// float_test prob : make more add ops
+		// this is ugly
+		// float_test prob : make more add, sub, mul ops
 		if(CGOptions::float_test() && rnd_flipcoin(50)){
-			op = eAdd;
+			switch(rand()%3){
+			case 0:
+				op = eAdd;
+				break;
+			case 1:
+				op = eSub;
+				break;
+			case 2:
+				op = eMul;
+				break;
+			default:
+				op = eAdd;
+				break;
+			}
 		}
 	} while (type->is_float() && !BinaryOpWorksForFloat(op));
 
