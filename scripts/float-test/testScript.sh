@@ -5,8 +5,8 @@ ulimit -f 500000
 TRUSTED="gcc-4.9"
 COMP="gcc"
 COMP_PP="g++"
-CSMITH_PATH="/home/csmith/"
-ADAPTER_OBJECT_PATH="/home/boost_interval_adapter/adapter.o"
+CSMITH_PATH="/home/jacek/Desktop/csmith"
+ADAPTER_OBJECT_PATH="$CSMITH_PATH/runtime/adapter.o"
 GEN_ERROR_FILE="genError.txt"
 COMP_ERROR_FILE="compError.txt"
 RUN_ERROR_FILE="runError.txt"
@@ -20,12 +20,12 @@ RES_ERROR_FILE="${RES_DIR}/resError.txt"
 WIDE_COUNT_FILE="${RES_DIR}/wideCount.txt"
 
 makeProg(){
-  ${TIMEOUT_MACRO} ${CSMITH_PATH}src/csmith --seed ${1} --strict-float --float-test --check-global --check-local > ${TEMP_DIR}/prog.c
+  ${TIMEOUT_MACRO} ${CSMITH_PATH}/src/csmith --seed ${1} --strict-float --float-test --check-global --check-local > ${TEMP_DIR}/prog.c
   return $?
 }
 
 compileInFloatTestMode(){
-  ${TIMEOUT_MACRO} ${TRUSTED} ${TEMP_DIR}/prog.c -O0 -w -c -I${CSMITH_PATH}runtime -DUNSAFE_FLOAT -DFLOAT_TEST_ENABLED -o ${TEMP_DIR}/progFloatTestMode.o && \
+  ${TIMEOUT_MACRO} ${TRUSTED} ${TEMP_DIR}/prog.c -O0 -w -c -I${CSMITH_PATH}/runtime -DUNSAFE_FLOAT -DFLOAT_TEST_ENABLED -o ${TEMP_DIR}/progFloatTestMode.o && \
   ${TIMEOUT_MACRO} ${COMP_PP} ${TEMP_DIR}/progFloatTestMode.o ${ADAPTER_OBJECT_PATH} -o ${TEMP_DIR}/progFloatTestMode
   return $?
 }
@@ -36,11 +36,11 @@ runInFloatTestMode(){
 }
 
 compileInNormalMode(){
-  ${TIMEOUT_MACRO} ${COMP} ${TEMP_DIR}/prog.c -O1 -w -c -I${CSMITH_PATH}runtime -DUNSAFE_FLOAT -o ${TEMP_DIR}/progNormalMode1.o && \
+  ${TIMEOUT_MACRO} ${COMP} ${TEMP_DIR}/prog.c -O1 -w -c -I${CSMITH_PATH}/runtime -DUNSAFE_FLOAT -o ${TEMP_DIR}/progNormalMode1.o && \
   ${TIMEOUT_MACRO} ${COMP_PP} ${TEMP_DIR}/progNormalMode1.o ${ADAPTER_OBJECT_PATH} -o ${TEMP_DIR}/progNormal1 && \
-  ${TIMEOUT_MACRO} ${COMP} ${TEMP_DIR}/prog.c -O2 -w -c -I${CSMITH_PATH}runtime -DUNSAFE_FLOAT -o ${TEMP_DIR}/progNormalMode2.o && \
+  ${TIMEOUT_MACRO} ${COMP} ${TEMP_DIR}/prog.c -O2 -w -c -I${CSMITH_PATH}/runtime -DUNSAFE_FLOAT -o ${TEMP_DIR}/progNormalMode2.o && \
   ${TIMEOUT_MACRO} ${COMP_PP} ${TEMP_DIR}/progNormalMode2.o ${ADAPTER_OBJECT_PATH} -o ${TEMP_DIR}/progNormal2 && \
-  ${TIMEOUT_MACRO} ${COMP} ${TEMP_DIR}/prog.c -O3 -w -c -I${CSMITH_PATH}runtime -DUNSAFE_FLOAT -o ${TEMP_DIR}/progNormalMode3.o && \
+  ${TIMEOUT_MACRO} ${COMP} ${TEMP_DIR}/prog.c -O3 -w -c -I${CSMITH_PATH}/runtime -DUNSAFE_FLOAT -o ${TEMP_DIR}/progNormalMode3.o && \
   ${TIMEOUT_MACRO} ${COMP_PP} ${TEMP_DIR}/progNormalMode3.o ${ADAPTER_OBJECT_PATH} -o ${TEMP_DIR}/progNormal3
   return $?
 }
