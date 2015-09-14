@@ -1,3 +1,7 @@
+# Program for validating the values and intervals produced by FloatTest
+# Usage: python3 validate.py values.txt intervals.txt
+# Jacek Burys, Imperial College London, UROP 2015
+
 import math
 import sys
 import re

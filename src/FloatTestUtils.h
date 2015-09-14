@@ -1,3 +1,6 @@
+// Utility functions for FloatTest
+// Jacek Burys, Imperial College London, UROP 2015
+
 #ifndef FLOAT_TEST_UTILS
 #define FLOAT_TEST_UTILS
 
