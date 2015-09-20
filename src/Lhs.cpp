@@ -44,7 +44,6 @@
 #include "Bookkeeper.h"
 #include "Error.h"
 #include "DepthSpec.h"
-#include "CGOptions.h"
 #include "ArrayVariable.h"
 #include "random.h"
 

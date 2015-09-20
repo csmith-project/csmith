@@ -37,7 +37,6 @@
 #include "CGOptions.h"
 #include "CGContext.h"
 #include "Block.h"
-#include "Type.h"
 #include "Function.h"
 #include "Expression.h"
 #include "ExpressionVariable.h"

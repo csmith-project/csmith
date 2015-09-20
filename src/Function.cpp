@@ -56,7 +56,6 @@
 #include "util.h"
 #include "Fact.h"
 #include "FactPointTo.h"
-#include "FactMgr.h"
 #include "VectorFilter.h"
 #include "Error.h"
 #include "DepthSpec.h"
