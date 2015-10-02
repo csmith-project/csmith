@@ -847,6 +847,8 @@ uninstall-am: uninstall-libLIBRARIES uninstall-libLTLIBRARIES \
 .PRECIOUS: Makefile
 
 
+.DELETE_ON_ERROR:
+
 safe_math.h: safe_math.m4
 	$(M4) < $< > $@
 

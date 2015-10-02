@@ -1,6 +1,6 @@
 ## -*- mode: Makefile-Automake -*-
 ##
-## Copyright (c) 2010, 2011, 2012 The University of Utah
+## Copyright (c) 2010, 2011, 2012, 2015 The University of Utah
 ## All rights reserved.
 ##
 ## This file is part of `csmith', a random generator of C programs.
@@ -28,6 +28,8 @@
 ## POSSIBILITY OF SUCH DAMAGE.
 
 ###############################################################################
+
+.DELETE_ON_ERROR:
 
 lib_LIBRARIES = libcsmith.a
 libcsmith_a_SOURCES = \
