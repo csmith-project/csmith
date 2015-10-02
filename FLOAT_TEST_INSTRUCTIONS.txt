@@ -16,8 +16,8 @@ Use gcc to compile and g++ to link, eg:
   g++ prog.o (csmith-root)/runtime/adapter.o -o prog
 
 TRACKING
-The provided adapter supports tracking of global variables. Use adaptertracking.o object in runtime directory for linking.
-The generated program has to be compiled with -DTRACKING and -D__GLOB=(name of the tracked variable )eg:
+The provided adapter supports tracking of global variables.
+The generated program has to be compiled with -D__GLOB=(name of the tracked variable )eg:
   csmiht --float-test --seed 123 > prog.c
-  gcc prog.c -c -I(csmith-root)/runtime -DFLOAT_TEST_ENABLED -DTRACKING -D__GLOB=g_123 -o prog.o
-  g++ prog.o (csmith-root)/runtime/adaptertracking.o -o prog
+  gcc prog.c -c -I(csmith-root)/runtime -DFLOAT_TEST_ENABLED -D__GLOB=g_123 -o prog.o
+  g++ prog.o (csmith-root)/runtime/adapter.o -o prog
