@@ -112,10 +112,8 @@ OutputMgr::OutputMain(std::ostream &out)
 
 	//float_test tracking
 	if (CGOptions::float_test()){
-		out << "#ifdef TRACKING" << endl;
 		out << "#ifdef __GLOB" << endl;
 		out << "tracked = &__GLOB;" << endl;
-		out << "#endif" << endl;
 		out << "#endif" << endl;
 	}
 
@@ -173,7 +171,6 @@ OutputMgr::OutputMain(std::ostream &out)
 
 	//float_test tracking
 	if(CGOptions::float_test()){
-		out << "#ifdef TRACKING" << endl;
 		out << "#ifdef FLOAT_TEST_ENABLED" << endl;
 		out << "#ifdef __GLOB" << endl;
 		out << "printf(\"Final state of tracked variable: [%a, %a]\\n\", __GLOB.lower, __GLOB.upper);" << endl;
@@ -182,7 +179,6 @@ OutputMgr::OutputMain(std::ostream &out)
 		out << "}else{" << endl;
 		out << "  printf(\"The final value is a singleton\\n\");" << endl;
 		out << "}" << endl;
-		out << "#endif" << endl;
 		out << "#endif" << endl;
 		out << "#endif" << endl;
 	}
@@ -345,9 +341,7 @@ OutputMgr::OutputHeader(int argc, char *argv[], unsigned long seed)
 
 	//float_test tracking
 	if (CGOptions::float_test()){
-		out << "#ifdef TRACKING" << endl;
 		out << "__FLOAT * tracked = NULL;" << endl;
-		out << "#endif" << endl;
 		out << endl;
 	}
 

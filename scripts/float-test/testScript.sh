@@ -5,7 +5,7 @@ ulimit -f 500000
 TRUSTED="gcc-4.9"
 COMP="gcc"
 COMP_PP="g++"
-CSMITH_PATH="/home/jacek/Desktop/csmith"
+CSMITH_PATH="/home/csmith"
 ADAPTER_OBJECT_PATH="$CSMITH_PATH/runtime/adapter.o"
 GEN_ERROR_FILE="genError.txt"
 COMP_ERROR_FILE="compError.txt"

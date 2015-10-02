@@ -10,14 +10,13 @@ using namespace boost::numeric;
 using namespace interval_lib;
 typedef interval<float> I;
 
-#ifdef TRACKING
 extern float_interval_t* tracked;
 static float_interval_t previous;
 
 bool initialized = false;
 
 void 
-check()
+check_tracking()
 {
     if (tracked == NULL) return;
     if (!initialized) {
@@ -30,8 +29,6 @@ check()
     printf("Change detected: %a, %a\n", previous.lower, previous.upper);
     previous = *tracked;
 }
-
-#endif
 
 #ifdef WIDE
 void 
@@ -60,9 +57,7 @@ interval_to_struct(I in)
 float_interval_t 
 add_float_interval(float_interval_t in1, float_interval_t in2)
 {
-#ifdef TRACKING
-    check();
-#endif
+    check_tracking();
 #ifdef WIDE
     check_wide(in1);
     check_wide(in2);
@@ -73,9 +68,7 @@ add_float_interval(float_interval_t in1, float_interval_t in2)
 float_interval_t 
 sub_float_interval(float_interval_t in1, float_interval_t in2)
 {
-#ifdef TRACKING
-    check();
-#endif
+    check_tracking();
 #ifdef WIDE
     check_wide(in1);
     check_wide(in2);
@@ -86,9 +79,7 @@ sub_float_interval(float_interval_t in1, float_interval_t in2)
 float_interval_t 
 mul_float_interval(float_interval_t in1, float_interval_t in2)
 {
-#ifdef TRACKING
-    check();
-#endif
+    check_tracking();
 #ifdef WIDE
     check_wide(in1);
     check_wide(in2);
@@ -99,9 +90,7 @@ mul_float_interval(float_interval_t in1, float_interval_t in2)
 float_interval_t 
 div_float_interval(float_interval_t in1, float_interval_t in2)
 {
-#ifdef TRACKING
-    check();
-#endif
+    check_tracking();
 #ifdef WIDE
     check_wide(in1);
     check_wide(in2);
@@ -114,9 +103,7 @@ div_float_interval(float_interval_t in1, float_interval_t in2)
 float_interval_t 
 plus_float_interval(float_interval_t in)
 {
-#ifdef TRACKING
-    check();
-#endif
+    check_tracking();
 #ifdef WIDE
     check_wide(in);
 #endif
@@ -126,9 +113,7 @@ plus_float_interval(float_interval_t in)
 float_interval_t 
 minus_float_interval(float_interval_t in)
 {
-#ifdef TRACKING
-    check();
-#endif
+    check_tracking();
 #ifdef WIDE
     check_wide(in);
 #endif
@@ -195,9 +180,7 @@ int float_test_or(float_interval_t in1, float_interval_t in2){
 int 
 float_test_cmpeq(float_interval_t in1, float_interval_t in2)
 {
-#ifdef TRACKING
-    check();
-#endif
+    check_tracking();
 #ifdef WIDE
     check_wide(in1);
     check_wide(in2);
@@ -208,9 +191,7 @@ float_test_cmpeq(float_interval_t in1, float_interval_t in2)
 int 
 float_test_cmpne(float_interval_t in1, float_interval_t in2)
 {
-#ifdef TRACKING
-    check();
-#endif
+    check_tracking();
 #ifdef WIDE
     check_wide(in1);
     check_wide(in2);
@@ -221,9 +202,7 @@ float_test_cmpne(float_interval_t in1, float_interval_t in2)
 int 
 float_test_cmpgt(float_interval_t in1, float_interval_t in2)
 {
-#ifdef TRACKING
-    check();
-#endif
+    check_tracking();
 #ifdef WIDE
     check_wide(in1);
     check_wide(in2);
@@ -234,9 +213,7 @@ float_test_cmpgt(float_interval_t in1, float_interval_t in2)
 int 
 float_test_cmplt(float_interval_t in1, float_interval_t in2)
 {
-#ifdef TRACKING
-    check();
-#endif
+    check_tracking();
 #ifdef WIDE
     check_wide(in1);
     check_wide(in2);
@@ -247,9 +224,7 @@ float_test_cmplt(float_interval_t in1, float_interval_t in2)
 int 
 float_test_cmple(float_interval_t in1, float_interval_t in2)
 {
-#ifdef TRACKING
-    check();
-#endif
+    check_tracking();
 #ifdef WIDE
     check_wide(in1);
     check_wide(in2);
@@ -260,9 +235,7 @@ float_test_cmple(float_interval_t in1, float_interval_t in2)
 int 
 float_test_cmpge(float_interval_t in1, float_interval_t in2)
 {
-#ifdef TRACKING
-    check();
-#endif
+    check_tracking();
 #ifdef WIDE
     check_wide(in1);
     check_wide(in2);
@@ -311,90 +284,70 @@ float_test_rshift(float_interval_t in1, float_interval_t in2)
 float_interval_t 
 char_to_float_interval(int8_t x)
 {
-#ifdef TRACKING
-    check();
-#endif
+    check_tracking();
     return (float_interval_t){x,x};
 }
 
 float_interval_t 
 short_to_float_interval(int16_t x)
 {
-#ifdef TRACKING
-    check();
-#endif
+    check_tracking();
     return (float_interval_t){x,x};
 }
 
 float_interval_t 
 int_to_float_interval(int32_t x)
 {
-#ifdef TRACKING
-    check();
-#endif
+    check_tracking();
     return (float_interval_t){x,x};
 }
 
 float_interval_t 
 long_to_float_interval(int32_t x)
 {
-#ifdef TRACKING
-    check();
-#endif
+    check_tracking();
     return (float_interval_t){x,x};
 }
 
 float_interval_t 
 long_long_to_float_interval(int64_t x)
 {
-#ifdef TRACKING
-    check();
-#endif
+    check_tracking();
     return (float_interval_t){x,x};
 }
 
 float_interval_t 
 uchar_to_float_interval(uint8_t x)
 {
-#ifdef TRACKING
-    check();
-#endif
+    check_tracking();
     return (float_interval_t){x,x};
 }
 
 float_interval_t 
 ushort_to_float_interval(uint16_t x)
 {
-#ifdef TRACKING
-    check();
-#endif
+    check_tracking();
     return (float_interval_t){x,x};
 }
 
 float_interval_t 
 uint_to_float_interval(uint32_t x)
 {
-#ifdef TRACKING
-    check();
-#endif
+    check_tracking();
     return (float_interval_t){x,x};
 }
 
 float_interval_t 
 ulong_to_float_interval(uint32_t x)
 {
-#ifdef TRACKING
-    check();
-#endif
+    check_tracking();
     return (float_interval_t){x,x};
 }
 
 float_interval_t 
 ulong_long_to_float_interval(uint64_t x)
 {
-#ifdef TRACKING
-    check();
-#endif
+    check_tracking();
     return (float_interval_t){x,x};
 }
 
@@ -403,9 +356,7 @@ ulong_long_to_float_interval(uint64_t x)
 int8_t 
 float_interval_to_char(float_interval_t in)
 {
-#ifdef TRACKING
-    check();
-#endif
+    check_tracking();
 #ifdef WIDE
     check_wide(in);
 #endif
@@ -417,9 +368,7 @@ float_interval_to_char(float_interval_t in)
 int16_t 
 float_interval_to_short(float_interval_t in)
 {
-#ifdef TRACKING
-    check();
-#endif
+    check_tracking();
 #ifdef WIDE
     check_wide(in);
 #endif
@@ -431,9 +380,7 @@ float_interval_to_short(float_interval_t in)
 int32_t 
 float_interval_to_int(float_interval_t in)
 {
-#ifdef TRACKING
-    check();
-#endif
+    check_tracking();
 #ifdef WIDE
     check_wide(in);
 #endif
@@ -445,9 +392,7 @@ float_interval_to_int(float_interval_t in)
 int32_t 
 float_interval_to_long(float_interval_t in)
 {
-#ifdef TRACKING
-    check();
-#endif
+    check_tracking();
 #ifdef WIDE
     check_wide(in);
 #endif
@@ -459,9 +404,7 @@ float_interval_to_long(float_interval_t in)
 int64_t 
 float_interval_to_long_long(float_interval_t in)
 {
-#ifdef TRACKING
-    check();
-#endif
+    check_tracking();
 #ifdef WIDE
     check_wide(in);
 #endif
@@ -473,9 +416,7 @@ float_interval_to_long_long(float_interval_t in)
 uint8_t 
 float_interval_to_uchar(float_interval_t in)
 {
-#ifdef TRACKING
-    check();
-#endif
+    check_tracking();
 #ifdef WIDE
     check_wide(in);
 #endif
@@ -487,9 +428,7 @@ float_interval_to_uchar(float_interval_t in)
 uint16_t 
 float_interval_to_ushort(float_interval_t in)
 {
-#ifdef TRACKING
-    check();
-#endif
+    check_tracking();
 #ifdef WIDE
     check_wide(in);
 #endif
@@ -501,9 +440,7 @@ float_interval_to_ushort(float_interval_t in)
 uint32_t 
 float_interval_to_uint(float_interval_t in)
 {
-#ifdef TRACKING
-    check();
-#endif
+    check_tracking();
 #ifdef WIDE
     check_wide(in);
 #endif
@@ -515,9 +452,7 @@ float_interval_to_uint(float_interval_t in)
 uint32_t 
 float_interval_to_ulong(float_interval_t in)
 {
-#ifdef TRACKING
-    check();
-#endif
+    check_tracking();
 #ifdef WIDE
     check_wide(in);
 #endif
@@ -529,9 +464,7 @@ float_interval_to_ulong(float_interval_t in)
 uint64_t 
 float_interval_to_ulong_long(float_interval_t in)
 {
-#ifdef TRACKING
-    check();
-#endif
+    check_tracking();
 #ifdef WIDE
     check_wide(in);
 #endif
