@@ -230,7 +230,7 @@ FunctionInvocationUnary::Output(std::ostream &out) const
 						out << ", " << id;
 					}
 
-					out << "/*unary wrapper*/)";
+					out << ")";
 					break;
 				}
 			}

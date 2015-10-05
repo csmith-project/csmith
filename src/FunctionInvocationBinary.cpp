@@ -196,7 +196,7 @@ FunctionInvocationBinary::is_return_type_float() const
 {
 	assert(op_flags);
 	//float_test
-	if(BinaryOpReturnsBoolean(eFunc)){
+	if(CGOptions::float_test() && BinaryOpReturnsBoolean(eFunc)){
 		return false;
 	}
 	return op_flags->get_op_size() == sFloat;
@@ -433,7 +433,7 @@ FunctionInvocationBinary::Output(std::ostream &out) const
 			}
 
 			out << " ";
-			if(should_use_float_macro){
+			if(CGOptions::float_test() && should_use_float_macro){
 				out << ",";
 			}else{
 				OutputStandardFuncName(eFunc, out);
@@ -460,7 +460,7 @@ FunctionInvocationBinary::Output(std::ostream &out) const
 				out<< ")";
 			}
 
-			if(should_use_float_macro){
+			if(CGOptions::float_test() && should_use_float_macro){
 				out << ")";
 			}
 

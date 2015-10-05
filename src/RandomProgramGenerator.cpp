@@ -296,6 +296,7 @@ static void print_advanced_help()
 	cout << "  --dangling-global-pointers | --no-dangling-global-pointers: enable | disable to reset all dangling global pointers to null at the end of main. (enabled by default)" << endl << endl;
 
 	cout << "  --check-global: print the values of all integer global variables." << endl << endl;
+	cout << "  --check-local: print the values of local variables declared in a block at the end of its execution" << endl << endl;
 
 	cout << "  --monitor-funcs <name1,name2...>: dump the checksums after each statement in the monitored functions." << endl << endl;
 
@@ -330,6 +331,10 @@ static void print_advanced_help()
 	cout << "  --no-hash-value-printf: do not emit printf on the index of an array" << endl << endl;
 	cout << "  --no-signed-char-index: do not allow a var of type char to be used as array index" << endl << endl;
 	cout << "  --strict-float: do not allow assignments between floats and integers" << endl << endl;
+
+	//float_test
+	cout << "  --float-test: generate programs with capability of representing float variables as intervals." << endl << endl;
+	cout << "                Read FLOAT_TEST_INSTRUCTIONS.txt for more information" << endl << endl;
 }
 
 void arg_check(int argc, int i)
@@ -351,7 +356,6 @@ main(int argc, char **argv)
 	for (int i=1; i<argc; i++) {
 
 		/// float_test
-
 		if (strcmp (argv[i], "--float-test") == 0) {
 			CGOptions::float_test(true);
 			CGOptions::enable_float(true);
@@ -359,10 +363,6 @@ main(int argc, char **argv)
 			CGOptions::blind_check_global(true);
 			continue;
 		}
-
-		///
-
-
 
 		if (strcmp (argv[i], "--help") == 0 ||
 			strcmp (argv[i], "-h") == 0) {

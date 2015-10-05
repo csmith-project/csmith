@@ -495,11 +495,6 @@ StatementAssign::Output(std::ostream &out, FactMgr* /*fm*/, int indent) const
 	outputln(out);
 }
 
-
-
-
-
-
 void
 StatementAssign::OutputSimple(std::ostream &out) const
 {
@@ -512,7 +507,6 @@ StatementAssign::OutputSimple(std::ostream &out) const
 		out << " ";
 		output_op(out);
 		out << " ";
-		//expr.Output(out);
 
 		//float_test
 
@@ -595,25 +589,6 @@ StatementAssign::OutputAsExpr(std::ostream &out) const
 					out << ")";
 				}
 
-				/*
-				out << "/*exp lhs:";
-				if (lhs.get_type().eType == ePointer){
-					out << "pointer";
-				}else if (lhs.get_type().eType == eStruct){
-					out << "struct";
-				}else if (lhs.get_type().eType == eUnion){
-					out << "union";
-				}
-				out <<": rhs:";
-				if (expr.get_type().eType == ePointer){
-					out << "pointer";
-				}else if (expr.get_type().eType == eStruct){
-					out << "struct";
-				}else if (expr.get_type().eType == eUnion){
-					out << "union";
-				}
-				*/
-				//out <<"*/";
 			}
 			break;
 		}

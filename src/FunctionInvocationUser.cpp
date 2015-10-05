@@ -451,7 +451,7 @@ OutputExpressionVector(const vector<const Expression*> &var, std::ostream &out)
 
 // float_test
 
-int
+static int
 OutputActualParamExpressionFloatTest(const Expression *expr,
 		Variable* par, std::ostream *pOut)
 {
@@ -479,7 +479,7 @@ OutputActualParamExpressionFloatTest(const Expression *expr,
     return 0;
 }
 
-void
+static void
 OutputExpressionVectorFloatTest(const vector<const Expression*> &var,
 		vector<Variable*> &param, std::ostream &out){
 

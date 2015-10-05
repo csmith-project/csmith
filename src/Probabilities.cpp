@@ -572,8 +572,16 @@ Probabilities::initialize_single_probs()
 
 	m[pStdUnaryFuncProb] = 5;
 	m[pShiftByNonConstantProb] = 50;
-	m[pStructAsLTypeProb] = 0;//30;
-	m[pUnionAsLTypeProb] = 0;//25;
+
+	m[pStructAsLTypeProb] = 30;
+	m[pUnionAsLTypeProb] = 25;
+
+	// float_test
+	if(CGOptions::float_test()){
+		m[pStructAsLTypeProb] = 0;
+		m[pUnionAsLTypeProb] = 0;
+	}
+
 	if (CGOptions::enable_float())
 		m[pFloatAsLTypeProb] = 40;
 	else

@@ -783,28 +783,6 @@ Variable::OutputDef(std::ostream &out, int indent) const
 	}
 	output_qualified_type(out);
 
-
-	//out << "/*type is :";
-	/*
-	if (type->eType == ePointer){
-		out << "pointer,";
-	}
-	if (type->eType == eStruct){
-		out << "struct,";
-	}
-	if (type->eType == eUnion){
-		out << "union,";
-	}
-	if (type->eType == eSimple && type->is_int()){
-	    out << "int,";
-	}
-	if (type->is_float()){
-		out << "float,";
-	}
-	*/
-	//out << "*/";
-
-
 	out << get_actual_name() << " = ";
 	assert(init);
 
