@@ -23,7 +23,8 @@ my $NICE = "nice -5";
 my $EXPENSIVE = "";
 
 #my $LLVM_CHECKS = "$EXPENSIVE --enable-debug-runtime --disable-optimized";
-my $LLVM_CHECKS = "-DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_ASSERTIONS=true";
+#my $LLVM_CHECKS = "-DCMAKE_BUILD_TYPE=Release DLLVM_TARGETS_TO_BUILD=host -DLLVM_ENABLE_ASSERTIONS=true";
+my $LLVM_CHECKS = "--enable-targets=host --enable-optimized --disable-bindings --disable-docs --disable-doxygen --disable-jit --enable-assertions";
 
 my $CLEANUP = 1;
 
@@ -98,7 +99,7 @@ sub build_gcc() {
     mkdir $BUILD_DIR or die;
     chdir $BUILD_DIR or die;
 
-    abort_if_fail ("${SRC_DIR}/configure --prefix=$INSTALL_DIR --enable-languages=c,c++");
+    abort_if_fail ("${SRC_DIR}/configure --prefix=$INSTALL_DIR --disable-bootstrap --disable-multilib --enable-languages=c,c++");
     abort_if_fail ("make -j${CPUS}");
     abort_if_fail ("make install");
 
@@ -116,19 +117,26 @@ sub build_llvm() {
     abort_if_fail ("svn update -r $REV");
     chdir "$SRC_DIR/tools/clang" or die;
     abort_if_fail ("svn update -r $REV");
-    chdir "$SRC_DIR/projects/compiler-rt" or die;
-    abort_if_fail ("svn update -r $REV");
-    chdir "$SRC_DIR/tools/clang/tools/extra" or die;
-    abort_if_fail ("svn update -r $REV");
+    if (0) {
+	chdir "$SRC_DIR/projects/compiler-rt" or die;
+	abort_if_fail ("svn update -r $REV");
+	chdir "$SRC_DIR/tools/clang/tools/extra" or die;
+	abort_if_fail ("svn update -r $REV");
+    }
 
     abort_if_fail ("rm -rf $BUILD_DIR");
     mkdir $BUILD_DIR or die;
     chdir $BUILD_DIR or die;
 
-    abort_if_fail ("cmake -G Ninja $LLVM_CHECKS -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR ${SRC_DIR}");
-    abort_if_fail ("ninja check-all");
-    abort_if_fail ("ninja install");
-
+    if (0) {
+	abort_if_fail ("cmake -G Ninja $LLVM_CHECKS -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR ${SRC_DIR}");
+	abort_if_fail ("ninja install");
+    } else {
+	abort_if_fail ("${SRC_DIR}/configure $LLVM_CHECKS --prefix=$INSTALL_DIR");
+	abort_if_fail ("make -j${CPUS}");
+	abort_if_fail ("make install");
+    }
+	
     if ($CLEANUP) {
 	print "cleaning up...";
 	system ("$NICE rm -rf $BUILD_DIR");
@@ -226,7 +234,7 @@ END
     }
 }
 
-if ($worked) {
+if ($worked && !$FORCE) {
     print "build_compiler SUCCESS -- runnable ${C_EXE} already exists\n";
     exit 0;
 }
