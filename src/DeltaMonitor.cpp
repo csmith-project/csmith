@@ -187,9 +187,8 @@ DeltaMonitor::Output(ostream &out)
 	std::string s;
 
 	get_sequence(s);
-	ofstream *ofile = new ofstream(output_file_.c_str());
-	*ofile << s;
-	ofile->close();
+	ofstream ofile(output_file_.c_str());
+	ofile << s;
 }
 
 const std::string &
