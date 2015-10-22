@@ -1064,27 +1064,27 @@ void
 Probabilities::dump_default_probabilities(const string &fname)
 {
 	assert(!fname.empty());
-	ofstream *out = new ofstream(fname.c_str());
-	std::map<ProbName, ProbElem*>::iterator i;
+	ofstream out(fname.c_str());
+
+	std::map<ProbName, ProbElem*>::iterator i; 
 	for (i = probabilities_.begin(); i != probabilities_.end(); ++i) {
-		(*i).second->dump_default(*out);
-		*out << std::endl << std::endl;
+		(*i).second->dump_default(out);
+		out << std::endl << std::endl;
 	}
-	out->close();
 }
 
 void
 Probabilities::dump_actual_probabilities(const string &fname, unsigned long seed)
 {
 	assert(!fname.empty());
-	ofstream *out = new ofstream(fname.c_str());
-	*out << "# Seed: " << seed << std::endl << std::endl;
+	ofstream out(fname.c_str());
+	out << "# Seed: " << seed << std::endl << std::endl;
+
 	std::map<ProbName, ProbElem*>::iterator i;
 	for (i = probabilities_.begin(); i != probabilities_.end(); ++i) {
-		(*i).second->dump_val(*out);
-		*out << std::endl << std::endl;
+		(*i).second->dump_val(out);
+		out << std::endl << std::endl;
 	}
-	out->close();
 }
 
 //////////////////////////////////////////////////////////////////////
