@@ -223,8 +223,7 @@ template <class Name>
 int
 Enumerator<Name>::get_elem(Name name)
 {
-	typename map<Name, EnumObject*>::iterator i = objs_.find(name);
-	assert(i != objs_.end());
+	assert(objs_.find(name) != objs_.end());
 
 	EnumObject *obj = objs_[name];
 	assert(obj);
