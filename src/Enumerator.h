@@ -291,8 +291,7 @@ template <class Name>
 bool
 Enumerator<Name>::is_changed(Name name)
 {
-	typename map<Name, EnumObject*>::iterator i = objs_.find(name);
-	assert(i != objs_.end());
+	assert(objs_.find(name) != objs_.end());
 
 	EnumObject *obj = objs_[name];
 	assert(obj);
