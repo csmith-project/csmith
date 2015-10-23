@@ -189,13 +189,11 @@ template <class Name>
 void
 Enumerator<Name>::add_bool_elem_of_bool(Name name, bool value)
 {
-	typename map<Name, EnumObject*>::iterator i = objs_.find(name);
-	assert(i == objs_.end());
+	assert(objs_.find(name) == objs_.end());
 
 	int bound = value ? 2 : 1;
 
-	EnumObject *obj = new EnumObject(bound, true, false);
-	objs_[name] = obj;
+	objs_[name] = new EnumObject(bound, true, false);
 }
 
 template<class Name>
