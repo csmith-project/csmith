@@ -180,11 +180,9 @@ template <class Name>
 void
 Enumerator<Name>::add_elem(Name name, int bound)
 {
-	typename map<Name, EnumObject*>::iterator i = objs_.find(name);
-	assert(i == objs_.end());
+	assert(objs_.find(name) == objs_.end());
 
-	EnumObject *obj = new EnumObject(bound, false, false);
-	objs_[name] = obj;
+	objs_[name] = new EnumObject(bound, false, false);
 }
 
 template <class Name>
