@@ -35,7 +35,8 @@
 #include <string>
 #include <vector>
 #include <ostream>
-#define intvec std::vector<int>
+
+typedef std::vector<int> intvec;
 
 std::string gensym(const char *basename);
 std::string gensym(const std::string &basename);
