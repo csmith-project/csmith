@@ -304,10 +304,7 @@ Effect::add_external_effect(const Effect &e, std::vector<const Block*> call_chai
 bool
 Effect::is_read(const Variable *v) const
 {
-	vector<Variable *>::size_type len = read_vars.size();
-	vector<Variable *>::size_type i;
-
-	for (i = 0; i < len; ++i) {
+	for (size_t i = 0; i < read_vars.size(); ++i) {
 		if (read_vars[i] == v) {
 			return true;
 		}
