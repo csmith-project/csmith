@@ -35,7 +35,7 @@
 #include <stdlib.h>
 #include <fstream>
 #include <iostream>
-#include <assert.h>
+#include <cassert>
 #include "StringUtils.h"
 #include "Function.h"
 #include "FunctionInvocationUser.h"
