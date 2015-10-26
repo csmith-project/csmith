@@ -31,7 +31,7 @@
 
 #include "CGOptions.h"
 #include <iostream>
-#include <assert.h>
+#include <cassert>
 #include <string.h>
 #include <map>
 #include "Fact.h"

@@ -49,7 +49,7 @@
 #include "Lhs.h"
 #include "random.h"
 
-#include <assert.h>
+#include <cassert>
 
 using namespace std;
 

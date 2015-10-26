@@ -38,7 +38,7 @@
 
 #include "Type.h"
 #include <sstream>
-#include <assert.h>
+#include <cassert>
 #include <math.h>
 #include "Common.h"
 #include "CGOptions.h"

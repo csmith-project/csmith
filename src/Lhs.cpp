@@ -29,7 +29,6 @@
 
 #include "Lhs.h"
 #include <cassert>
-#include <assert.h>
 #include <iostream>
 #include "CGContext.h"
 #include "CGOptions.h"
