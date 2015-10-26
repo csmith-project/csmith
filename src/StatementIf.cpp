@@ -31,7 +31,7 @@
 #pragma warning(disable : 4786)   /* Disable annoying warning messages */
 #endif
 
-#include <assert.h>
+#include <cassert>
 #include "StatementIf.h"
 #include <iostream>
 #include "CGOptions.h"

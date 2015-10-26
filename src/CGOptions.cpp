@@ -31,8 +31,8 @@
 
 #include "CGOptions.h"
 #include <iostream>
-#include <assert.h>
-#include <string.h>
+#include <cassert>
+#include <cstring>
 #include <map>
 #include "Fact.h"
 #include "DefaultOutputMgr.h"

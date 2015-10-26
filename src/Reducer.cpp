@@ -32,10 +32,10 @@
 #endif
 
 #include "Reducer.h"
-#include <stdlib.h>
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
-#include <assert.h>
+#include <cassert>
 #include "StringUtils.h"
 #include "Function.h"
 #include "FunctionInvocationUser.h"

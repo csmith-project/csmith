@@ -33,7 +33,7 @@
 #include <vector>
 #include <algorithm>
 #include <functional>
-#include <assert.h>
+#include <cassert>
 #include "Probabilities.h"
 #include "VectorFilter.h"
 #include "CGOptions.h"

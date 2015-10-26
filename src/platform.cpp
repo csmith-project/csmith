@@ -90,10 +90,10 @@ unsigned long platform_gen_seed()
 #ifndef WIN32
 #include <sys/stat.h>
 #include <unistd.h>
-#include <errno.h>
+#include <cerrno>
 #else
 #include <direct.h>
-#include <errno.h>
+#include <cerrno>
 #endif
 
 bool create_dir(const char *dir)
