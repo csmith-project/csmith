@@ -32,7 +32,7 @@
 #include "CGOptions.h"
 #include <iostream>
 #include <cassert>
-#include <string.h>
+#include <cstring>
 #include <map>
 #include "Fact.h"
 #include "DefaultOutputMgr.h"
