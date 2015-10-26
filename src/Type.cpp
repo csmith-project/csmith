@@ -39,7 +39,7 @@
 #include "Type.h"
 #include <sstream>
 #include <cassert>
-#include <math.h>
+#include <cmath>
 #include "Common.h"
 #include "CGOptions.h"
 #include "random.h"
