@@ -32,7 +32,6 @@
 
 #include <cassert>
 #include <cstdlib>
-#include <stdlib.h>
 
 #include "random.h"
 #include "RandomNumber.h"
