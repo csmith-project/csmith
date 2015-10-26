@@ -32,7 +32,7 @@
 #endif
 
 #include "Reducer.h"
-#include <stdlib.h>
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <cassert>
