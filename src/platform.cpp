@@ -93,7 +93,7 @@ unsigned long platform_gen_seed()
 #include <cerrno>
 #else
 #include <direct.h>
-#include <errno.h>
+#include <cerrno>
 #endif
 
 bool create_dir(const char *dir)
