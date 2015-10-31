@@ -307,16 +307,16 @@ Effect::is_read(const Variable *v) const
 	if (std::find(read_vars.begin(), read_vars.end(), v) != read_vars.end()) {
 		return true;
 	}
-	else {
-		// if we read a struct, presumingly all the fields are read too
-		// however we can not say the same thing for unions: reading a particular
-		// unions field can cause unspecified behaviors, while reading the whole
-		// union won't
-		if (v->field_var_of && v->field_var_of->type->eType == eStruct) {
-			return is_read(v->field_var_of);
-		}
-		return false;
+
+	// if we read a struct, presumingly all the fields are read too
+	// however we can not say the same thing for unions: reading a particular
+	// unions field can cause unspecified behaviors, while reading the whole
+	// union won't
+	if (v->field_var_of && v->field_var_of->type->eType == eStruct) {
+		return is_read(v->field_var_of);
 	}
+
+	return false;
 }
 
 /*
