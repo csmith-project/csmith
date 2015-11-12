@@ -33,7 +33,7 @@
 
 #include "StatementContinue.h"
 #include <iostream>
-#include <assert.h>
+#include <cassert>
 #include "CGOptions.h"
 #include "CGContext.h"
 #include "Block.h"

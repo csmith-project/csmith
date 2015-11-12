@@ -38,8 +38,8 @@
 
 #include "Type.h"
 #include <sstream>
-#include <assert.h>
-#include <math.h>
+#include <cassert>
+#include <cmath>
 #include "Common.h"
 #include "CGOptions.h"
 #include "random.h"

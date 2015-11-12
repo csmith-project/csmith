@@ -41,7 +41,7 @@
 #include "FunctionInvocationUser.h"
 #include "ExpressionAssign.h"
 #include "ExpressionComma.h"
-#include <assert.h>
+#include <cassert>
 
 const int  FactUnion::TOP = -2;
 const int  FactUnion::BOTTOM = -1;
