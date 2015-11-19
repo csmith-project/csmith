@@ -200,13 +200,7 @@ EXTRA_DIST = \
 GIT_HASH := $(shell "$(top_srcdir)/git-hash.sh" "$(top_srcdir)" || echo error)
 GIT_FLAG = -DGIT_VERSION=\"$(GIT_HASH)\"
 
-## ENE: The idea of stuffing the target CPU name (a string) into a CPP symbol
-## is kind of awful.  What we should do instead is use the name to modify the
-## include path, e.g., -I"$(target_cpu)".  But that refactoring is for a later
-## day...
-
 csmith_CPPFLAGS = \
-	-DTARGET_CPU_$(target_cpu)=1 \
 	$(GIT_FLAG) \
 	$(BOOST_CPPFLAGS)
 

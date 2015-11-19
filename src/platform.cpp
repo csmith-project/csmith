@@ -44,7 +44,7 @@
 
 #include "platform.h"
 
-#if (TARGET_CPU_powerpc == 1 || TARGET_CPU_powerpc64 == 1)
+#if defined(__powerpc__) || defined(__powerpc64__)
 static inline unsigned long read_time(void)
 {
 	unsigned long a;
