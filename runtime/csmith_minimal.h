@@ -52,7 +52,15 @@ extern int printf (const char *, ...);
 // FIXME
 #define assert(x)
 
+#if defined (USE_MATH_MACROS_NOTMP)
+#include "safe_math_macros_notmp.h"
+#elif defined (USE_MATH_MACROS)
+#include "safe_math_macros.h"
+#else
+#define FUNC_NAME(x) (safe_##x)
 #include "safe_math.h"
+#undef FUNC_NAME
+#endif
 
 static inline void platform_main_begin(void)
 {
