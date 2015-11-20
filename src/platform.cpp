@@ -45,20 +45,13 @@
 #include "platform.h"
 
 #if (TARGET_CPU_powerpc == 1 || TARGET_CPU_powerpc64 == 1)
-/*For PPC, got from:
-http://lists.ozlabs.org/pipermail/linuxppc-dev/1999-October/003889.html
-*/
-static unsigned long long read_time(void) {
-	unsigned long long retval;
-	unsigned long junk;
-	__asm__ __volatile__ ("\n\
-1:	mftbu %1\n\
-	mftb %L0\n\
-	mftbu %0\n\
-	cmpw %0,%1\n\
-	bne 1b"
-	: "=r" (retval), "=r" (junk));
-	return retval;
+static inline unsigned long read_time(void)
+{
+	unsigned long a;
+
+	asm volatile("mftb %0" : "=r" (a));
+
+	return a;
 }
 #else
 #ifdef WIN32
