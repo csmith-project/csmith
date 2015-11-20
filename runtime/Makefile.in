@@ -361,7 +361,6 @@ libcsmith_la_SOURCES = \
 GIT_HASH := $(shell "$(top_srcdir)/git-hash.sh" "$(top_srcdir)" || echo error)
 GIT_FLAG = -DGIT_VERSION=\"$(GIT_HASH)\"
 libcsmith_a_CPPFLAGS = \
-	-DTARGET_CPU_$(target_cpu)=1 \
 	$(GIT_FLAG)
 
 libcsmith_la_CPPFLAGS = \

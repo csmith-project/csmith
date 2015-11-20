@@ -541,7 +541,6 @@ EXTRA_DIST = \
 GIT_HASH := $(shell "$(top_srcdir)/git-hash.sh" "$(top_srcdir)" || echo error)
 GIT_FLAG = -DGIT_VERSION=\"$(GIT_HASH)\"
 csmith_CPPFLAGS = \
-	-DTARGET_CPU_$(target_cpu)=1 \
 	$(GIT_FLAG) \
 	$(BOOST_CPPFLAGS)
 
