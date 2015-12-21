@@ -1,6 +1,6 @@
 #!/bin/sh
 ##
-## Copyright (c) 2012 The University of Utah
+## Copyright (c) 2012, 2015 The University of Utah
 ## All rights reserved.
 ##
 ## This file is part of `csmith', a random generator of C programs.
@@ -34,6 +34,6 @@ while [ true ]
 do
   echo .
   csmith > test.c;
-  clang -I${CSMITH_PATH}/runtime -O3 -w test.c -o /dev/null;
-  gcc -I${CSMITH_PATH}/runtime -O3 -w test.c -o /dev/null;
+  clang -I${CSMITH_HOME}/runtime -O3 -w test.c -o /dev/null;
+  gcc -I${CSMITH_HOME}/runtime -O3 -w test.c -o /dev/null;
 done
