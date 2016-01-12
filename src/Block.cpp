@@ -426,7 +426,8 @@ Block::append_return_stmt(CGContext& cg_context)
 	ERROR_GUARD(NULL);
 	stms.push_back(sr);
 	fm->makeup_new_var_facts(pre_facts, fm->global_facts);
-	assert(sr->visit_facts(fm->global_facts, cg_context));
+	bool visited = sr->visit_facts(fm->global_facts, cg_context);
+	assert(visited);
 
 	fm->set_fact_in(sr, pre_facts);
 	fm->set_fact_out(sr, fm->global_facts);

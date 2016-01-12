@@ -160,7 +160,8 @@ StatementFor::make_iteration(CGContext& cg_context, StatementAssign*& init, Expr
 		}
 	} while (true);
 
-	assert(cg_context.read_indices(var, fm->global_facts));
+	bool read = cg_context.read_indices(var, fm->global_facts);
+	assert(read);
 	cg_context.write_var(var);
 	cg_context.read_var(var);
 
@@ -207,7 +208,8 @@ StatementFor::make_iteration(CGContext& cg_context, StatementAssign*& init, Expr
 
 	init = new StatementAssign(cg_context.get_current_block(), *lhs, *c_init, eSimpleAssign, flags1);
 	ERROR_GUARD_AND_DEL3(NULL, c_init, lhs, flags1);
-	assert(init->visit_facts(fm->global_facts, cg_context));
+	bool visited = init->visit_facts(fm->global_facts, cg_context);
+	assert(visited);
 
 	assert(var);
 	ExpressionVariable *v = new ExpressionVariable(*var);
