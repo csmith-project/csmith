@@ -288,6 +288,8 @@ safe_unsigned_math(uint64_t,UINT64_MAX)
 #endif
 
 dnl safe floating point computation, based on Pascal's suggestion
+dnl Non-C99 compliant compilers (e.g. MS VC) may not have hexadecimal floats notation.
+dnl For those use ldexp and ldexpf calls instead.
 
 define(`safe_float_math',`
 
@@ -321,7 +323,11 @@ FUNC_NAME(mul_func_$1_f_f)($1 sf1, $1 sf2 LOG_INDEX)
   LOG_EXEC
   return
 #ifndef UNSAFE_FLOAT
+#ifdef __STDC__
     (fabs$2((0x1.0p-100$2 * sf1) * ($4 * sf2)) > (0x1.0p-100$2 * ($4 * $3))) ?
+#else
+    (fabs$2((ldexp$2(1.0, -100) * sf1) * ($4 * sf2)) > (ldexp$2(1.0, -100) * ($4 * $3))) ?
+#endif
     UNDEFINED(sf1) :
 #endif
     (sf1 * sf2);
@@ -333,7 +339,11 @@ FUNC_NAME(div_func_$1_f_f)($1 sf1, $1 sf2 LOG_INDEX)
   LOG_EXEC
   return
 #ifndef UNSAFE_FLOAT
+#ifdef __STDC__
     ((fabs$2(sf2) < 1.0$2) && (((sf2 == 0.0$2) || (fabs$2(($5 * sf1) / (0x1.0p100$2 * sf2))) > (0x1.0p-100$2 * ($5 * $3))))) ?
+#else
+    ((fabs$2(sf2) < 1.0$2) && (((sf2 == 0.0$2) || (fabs$2(($5 * sf1) / (ldexp$2(1.0, 100) * sf2))) > (ldexp$2(1.0, -100) * ($5 * $3))))) ?
+#endif
     UNDEFINED(sf1) :
 #endif
     (sf1 / sf2);
@@ -341,8 +351,13 @@ FUNC_NAME(div_func_$1_f_f)($1 sf1, $1 sf2 LOG_INDEX)
 
 ')
 
+#ifdef __STDC__
 safe_float_math(float,f,FLT_MAX,0x1.0p-28f,0x1.0p-49f)
 safe_float_math(double,,DBL_MAX,0x1.0p-924,0x1.0p-974)
+#else
+safe_float_math(float,f,FLT_MAX,ldexpf(1.0, -28),ldexpf(1.0, -49))
+safe_float_math(double,,DBL_MAX,ldexp(1.0, -924),ldexp(1.0, -974))
+#endif
 
 define(`safe_float_conversion',`
 STATIC $2
