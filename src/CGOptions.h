@@ -444,6 +444,9 @@ public:
 	static bool vol_struct_union_fields(void);
 	static bool vol_struct_union_fields(bool p);
 
+	static bool const_struct_union_fields(void);
+	static bool const_struct_union_fields(bool p);
+
 	static int int_size(void);
 	static void int_size(int p) { int_size_ = p;}
 
@@ -458,6 +461,8 @@ public:
 	static void enable_builtin_kinds(const string &kinds);
 	static void disable_builtin_kinds(const string &kinds);
 	static bool enabled_builtin(const string &ks);
+
+	static void fix_options_for_cpp(void);
 
 private:
 	static bool enabled_builtin_kind(const string &kind);
@@ -598,6 +603,7 @@ private:
 	static int  pointer_size_;
 	static bool take_union_field_addr_;
 	static bool vol_struct_union_fields_;
+	static bool const_struct_union_fields_;
 	static Reducer* reducer_;
 
 	// flag to indicate language

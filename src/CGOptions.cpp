@@ -191,6 +191,7 @@ DEFINE_GETTER_SETTER_BOOL(use_embedded_assigns);
 DEFINE_GETTER_SETTER_BOOL(use_comma_exprs);
 DEFINE_GETTER_SETTER_BOOL(take_union_field_addr);
 DEFINE_GETTER_SETTER_BOOL(vol_struct_union_fields);
+DEFINE_GETTER_SETTER_BOOL(const_struct_union_fields);
 DEFINE_GETTER_SETTER_BOOL(lang_cpp);
 
 void
@@ -299,10 +300,20 @@ CGOptions::set_default_settings(void)
 	use_comma_exprs(true);
 	take_union_field_addr(true);
 	vol_struct_union_fields(true);
+	const_struct_union_fields(true);
 	addr_taken_of_locals(true);
 	lang_cpp(false);
 
 	set_default_builtin_kinds();
+}
+
+// Add options necessary for cpp 
+void
+CGOptions::fix_options_for_cpp(void)
+{
+	match_exact_qualifiers(true);
+    vol_struct_union_fields(false);		// makes implementation of volatile structs easier
+    const_struct_union_fields(false);	// restriction of current implementation; TODO
 }
 
 /*

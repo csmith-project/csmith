@@ -260,6 +260,7 @@ static void print_advanced_help()
 	cout << "  --arg-unions | --no-arg-unions: enable | disable unions being used as args (enabled by default)." << endl << endl;
 	cout << "  --take-union-field-addr | --take-no-union-field-addr: allow | disallow addresses of union fields to be taken (allowed by default)." << endl << endl;
 	cout << "  --vol-struct-union-fields | --no-vol-struct-union-fields: enable | disable volatile struct/union fields (enabled by default)" << endl << endl;
+	cout << "  --const-struct-union-fields | --no-const-struct-union-fields: enable | disable const struct/union fields (enabled by default)" << endl << endl;
 
 	// delta related options
 	cout << "  --delta-monitor [simple]: specify the type of delta monitor. Only [simple] type is supported now." << endl << endl;
@@ -1361,6 +1362,16 @@ main(int argc, char **argv)
 			continue;
 		}
 
+		if (strcmp(argv[i], "--const-struct-union-fields") == 0) {
+			CGOptions::const_struct_union_fields(true);
+			continue;
+		}
+
+		if (strcmp(argv[i], "--no-const-struct-union-fields") == 0) {
+			CGOptions::const_struct_union_fields(false);
+			continue;
+		}
+
 		if (strcmp (argv[i], "--no-hash-value-printf") == 0) {
 			CGOptions::hash_value_printf(false);
 			continue;
@@ -1413,6 +1424,10 @@ main(int argc, char **argv)
 			 << i
 			 << endl;
 		exit(-1);
+	}
+
+	if (CGOptions::lang_cpp()) {
+		CGOptions::fix_options_for_cpp();
 	}
 
 	if (CGOptions::has_conflict()) {

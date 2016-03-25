@@ -284,6 +284,26 @@ CVQualifiers::random_qualifiers(const Type* t, Effect::Access access,
 	return random_qualifiers(t, access, cg_context, no_volatile, RegularConstProb, RegularVolatileProb);
 }
 
+static bool is_volatile_ok_on_one_level(const Type* t)
+{
+	if (!CGOptions::lang_cpp()) return true;
+	bool volatile_ok = (t->eType != eStruct && t->eType != eUnion) || (t->has_assign_ops());
+	// Union with a struct field: we can't make it volatile, or we won't be able to assign to/from that field
+	if (volatile_ok && (t->eType == eUnion)){
+		for (const auto& field : t->fields){
+			if (field->eType == eStruct){
+				volatile_ok = false;
+				break;
+			}
+			else if (field->eType == eUnion){
+				volatile_ok = is_volatile_ok_on_one_level(field);
+				if (!volatile_ok) break;
+			}
+		}
+	}
+	return volatile_ok;
+}
+
 CVQualifiers
 CVQualifiers::random_qualifiers(const Type* t, Effect::Access access, const CGContext &cg_context, bool no_volatile,
 					unsigned int const_prob, unsigned int volatile_prob)
@@ -298,22 +318,42 @@ CVQualifiers::random_qualifiers(const Type* t, Effect::Access access, const CGCo
 	const Effect &effect_context = cg_context.get_effect_context();
 
 	// set random volatile/const properties for each level of indirection for pointers
+	// First set up the vectors with correct number of qualifiers:
+	unsigned level = 0;
 	const Type* tmp = t->ptr_type;
 	while (tmp) {
-		DEPTH_GUARD_BY_DEPTH_RETURN(2, ret_qfer);
-		isVolatile = rnd_flipcoin(volatile_prob);
-		ERROR_GUARD(ret_qfer);
+		++level;
+		is_consts.push_back(false);
+		is_volatiles.push_back(false);
+		tmp = tmp->ptr_type;
+	}
+	// Then make the random properties (properties need to be in reverse order): 
+	tmp = t->ptr_type;
+	while (tmp) {   
+		bool volatile_ok = is_volatile_ok_on_one_level(tmp);
+		if (volatile_ok){
+			DEPTH_GUARD_BY_DEPTH_RETURN(2, ret_qfer);
+			isVolatile = rnd_flipcoin(volatile_prob);
+			ERROR_GUARD(ret_qfer);
+		}
+		else{
+			DEPTH_GUARD_BY_DEPTH_RETURN(1, ret_qfer);
+			isVolatile = false;
+		}
 		isConst = rnd_flipcoin(const_prob);
 		ERROR_GUARD(ret_qfer);
 		if (isVolatile && isConst && !CGOptions::allow_const_volatile()) {
 			isConst = false;
 		}
-		is_consts.push_back(isConst);
-		is_volatiles.push_back(isVolatile);
+		assert(level > 0);
+		is_consts[level-1] = isConst;
+		is_volatiles[level-1] = isVolatile;
+		--level;
 		tmp = tmp->ptr_type;
 	}
+
 	// set random volatile/const properties for variable itself
-	bool volatile_ok = effect_context.is_side_effect_free();
+	bool volatile_ok = effect_context.is_side_effect_free() && is_volatile_ok_on_one_level(t);
 	bool const_ok = (access != Effect::WRITE);
 
 	isVolatile = false;
@@ -688,8 +728,8 @@ CVQualifiers::get_all_qualifiers(vector<CVQualifiers> &quals, unsigned int const
 	qual_enumerator.add_bool_elem("volatile_prob", volatile_prob);
 	Enumerator<string> *i;
 	for (i = qual_enumerator.begin(); i != qual_enumerator.end(); i = i->next()) {
-		bool isConst = i->get_elem("const_prob");
-		bool isVolatile = i->get_elem("volatile_prob");
+		bool isConst = i->get_elem("const_prob") != 0;
+		bool isVolatile = i->get_elem("volatile_prob") != 0;
 
 		vector<bool> consts;
 		vector<bool> volatiles;
