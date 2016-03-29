@@ -261,8 +261,9 @@ ChooseRandomTypeFilter::get_type()
 static bool checkImplicitNontrivialAssignOps(vector<const Type*> fields)
 {
     if (!CGOptions::lang_cpp()) return false;
-    for (auto& field : fields){
-        if (field->has_implicit_nontrivial_assign_ops()){
+    for (size_t i = 0; i < fields.size(); ++i) {
+        const Type* field = fields[i];
+		if (field->has_implicit_nontrivial_assign_ops()){
             assert((field->eType == eStruct) || (field->eType == eUnion));
             return true;
         }

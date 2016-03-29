@@ -290,7 +290,9 @@ static bool is_volatile_ok_on_one_level(const Type* t)
 	bool volatile_ok = (t->eType != eStruct && t->eType != eUnion) || (t->has_assign_ops());
 	// Union with a struct field: we can't make it volatile, or we won't be able to assign to/from that field
 	if (volatile_ok && (t->eType == eUnion)){
-		for (const auto& field : t->fields){
+		for (size_t i = 0; i < t->fields.size(); ++i) {
+			const Type* field = t->fields[i];
+
 			if (field->eType == eStruct){
 				volatile_ok = false;
 				break;
@@ -331,17 +333,8 @@ CVQualifiers::random_qualifiers(const Type* t, Effect::Access access, const CGCo
 	tmp = t->ptr_type;
 	while (tmp) {   
 		bool volatile_ok = is_volatile_ok_on_one_level(tmp);
-		if (volatile_ok){
-			DEPTH_GUARD_BY_DEPTH_RETURN(2, ret_qfer);
-			isVolatile = rnd_flipcoin(volatile_prob);
-			ERROR_GUARD(ret_qfer);
-		}
-		else{
-			DEPTH_GUARD_BY_DEPTH_RETURN(1, ret_qfer);
-			isVolatile = false;
-		}
+		isVolatile = volatile_ok? rnd_flipcoin(volatile_prob): false;
 		isConst = rnd_flipcoin(const_prob);
-		ERROR_GUARD(ret_qfer);
 		if (isVolatile && isConst && !CGOptions::allow_const_volatile()) {
 			isConst = false;
 		}
@@ -356,27 +349,8 @@ CVQualifiers::random_qualifiers(const Type* t, Effect::Access access, const CGCo
 	bool volatile_ok = effect_context.is_side_effect_free() && is_volatile_ok_on_one_level(t);
 	bool const_ok = (access != Effect::WRITE);
 
-	isVolatile = false;
-	isConst = false;
-
-	if (volatile_ok && const_ok) {
-		DEPTH_GUARD_BY_DEPTH_RETURN(2, ret_qfer);
-		isVolatile = rnd_flipcoin(volatile_prob);
-		ERROR_GUARD(ret_qfer);
-		isConst = rnd_flipcoin(const_prob);
-		ERROR_GUARD(ret_qfer);
-	}
-	else if (volatile_ok) {
-		DEPTH_GUARD_BY_DEPTH_RETURN(1, ret_qfer);
-		isVolatile = rnd_flipcoin(volatile_prob);
-		ERROR_GUARD(ret_qfer);
-	}
-	else if (const_ok) {
-		DEPTH_GUARD_BY_DEPTH_RETURN(1, ret_qfer);
-		isConst = rnd_flipcoin(const_prob);
-		ERROR_GUARD(ret_qfer);
-	}
-
+	isVolatile = volatile_ok ? rnd_flipcoin(volatile_prob) : false;
+	isConst = const_ok ? rnd_flipcoin(const_prob) : false;
 	if (isVolatile && isConst && !CGOptions::allow_const_volatile()) {
 		isConst = false;
 	}
