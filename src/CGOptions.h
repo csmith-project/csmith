@@ -458,6 +458,9 @@ public:
 	static bool lang_cpp(void);
 	static bool lang_cpp(bool p);
 
+	static bool cpp11(void);
+	static bool cpp11(bool p);
+
 	static void enable_builtin_kinds(const string &kinds);
 	static void disable_builtin_kinds(const string &kinds);
 	static bool enabled_builtin(const string &ks);
@@ -608,6 +611,7 @@ private:
 
 	// flag to indicate language
 	static bool lang_cpp_;
+	static bool cpp11_;
 private:
 	CGOptions(void);
 	CGOptions(CGOptions &cgo);

@@ -201,6 +201,7 @@ static void print_help()
 
         // language options
 	cout << "  --lang-cpp : generate C++ code (C by default)." << endl << endl;
+	cout << "  --cpp11 : generate C++11 code (C++03 by default). Works if lang-cpp is enabled." << endl << endl;
 
 }
 
@@ -1384,6 +1385,11 @@ main(int argc, char **argv)
 
 		if (strcmp (argv[i], "--lang-cpp") == 0) {
 			CGOptions::lang_cpp(true);
+			continue;
+		}
+
+		if (strcmp(argv[i], "--cpp11") == 0) {
+			CGOptions::cpp11(true);
 			continue;
 		}
 

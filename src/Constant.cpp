@@ -534,9 +534,12 @@ Constant::Output(std::ostream &out) const
 	} else if (type->eType == ePointer && equals(0)){
         // don't output cast for NULL:
 		if (CGOptions::lang_cpp()) {
-			out << "NULL";
+			if (CGOptions::cpp11())
+				out << "nullptr";
+			else
+				out << "NULL";
 		} else {
-		out << "(void*)" << value;
+			out << "(void*)" << value;
 		}
 	} else {
         output_cast(out);
