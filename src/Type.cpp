@@ -194,7 +194,7 @@ NonVoidNonVolatileTypeFilter::get_type()
 class ChooseRandomTypeFilter : public Filter
 {
 public:
-	ChooseRandomTypeFilter(bool for_field_var = false, bool struct_has_assign_ops = false);
+	ChooseRandomTypeFilter(bool for_field_var, bool struct_has_assign_ops = false);
 
 	virtual ~ChooseRandomTypeFilter();
 
@@ -237,6 +237,7 @@ ChooseRandomTypeFilter::filter(int v) const
 	// Struct without assignment ops can not be made a field of a struct with assign ops 
 	// with current implementation of these ops
     if (for_field_var_ && struct_has_assign_ops_ && !typ_->has_assign_ops()) {
+		assert(CGOptions::lang_cpp());
 		return true;
 	}
 	if (for_field_var_ && typ_->get_struct_depth() >= CGOptions::max_nested_struct_level()) {
@@ -260,15 +261,15 @@ ChooseRandomTypeFilter::get_type()
 
 static bool checkImplicitNontrivialAssignOps(vector<const Type*> fields)
 {
-    if (!CGOptions::lang_cpp()) return false;
-    for (size_t i = 0; i < fields.size(); ++i) {
-        const Type* field = fields[i];
-		if (field->has_implicit_nontrivial_assign_ops()){
-            assert((field->eType == eStruct) || (field->eType == eUnion));
-            return true;
-        }
-    }
-    return false;
+	if (!CGOptions::lang_cpp()) return false;
+	for (size_t i = 0; i < fields.size(); ++i) {
+		const Type* field = fields[i];
+		if (field->has_implicit_nontrivial_assign_ops()) {
+			assert((field->eType == eStruct) || (field->eType == eUnion));
+			return true;
+		}
+	}
+	return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -296,15 +297,15 @@ Type::Type(eSimpleType simple_type) :
 Type::Type(vector<const Type*>& struct_fields, bool isStruct, bool packed,
     vector<CVQualifiers> &qfers, vector<int> &fields_length, bool hasAssignOps, bool hasImplicitNontrivialAssignOps) :
     ptr_type(0),
+    simple_type(MAX_SIMPLE_TYPES), // not a valid simple type
     fields(struct_fields),
     used(false),
     printed(false),
     packed_(packed),
+    has_assign_ops_(hasAssignOps),
+    has_implicit_nontrivial_assign_ops_(hasImplicitNontrivialAssignOps),
     qfers_(qfers),
-    bitfields_length_(fields_length),
-	simple_type(MAX_SIMPLE_TYPES),               // not a valid simple type
-	has_assign_ops_(hasAssignOps),
-    has_implicit_nontrivial_assign_ops_(hasImplicitNontrivialAssignOps)
+    bitfields_length_(fields_length)
 {
     static unsigned int sequence = 0;
 	if (isStruct)
@@ -318,13 +319,13 @@ Type::Type(vector<const Type*>& struct_fields, bool isStruct, bool packed,
  /* constructor for pointers
   *******************************************************/
 Type::Type(const Type* t) :
-	eType(ePointer),
+    eType(ePointer),
     ptr_type(t),
+    simple_type(MAX_SIMPLE_TYPES), // not a valid simple type
     used(false),
     printed(false),
     packed_(false),
-	simple_type(MAX_SIMPLE_TYPES),               // not a valid simple type
-	has_assign_ops_(false),
+    has_assign_ops_(false),
     has_implicit_nontrivial_assign_ops_(false)
 {
 	// Nothing else to do.
@@ -542,12 +543,10 @@ Type::get_all_ok_struct_union_types(vector<Type *> &ok_types, bool no_const, boo
 bool 
 Type::if_struct_will_have_assign_ops()
 {
-	bool hasAssignOps = false;
 	// randomly choose if the struct will have assign operators (for C++):
-	if (CGOptions::lang_cpp()){
-		hasAssignOps = rnd_flipcoin(RegularVolatileProb);
-	}
-	return hasAssignOps;
+	if (!CGOptions::lang_cpp())
+		return false;
+	return rnd_flipcoin(RegularVolatileProb);
 }
 
 // To have volatile unions in C++. I am not sure if we need those
@@ -555,12 +554,10 @@ Type::if_struct_will_have_assign_ops()
 bool
 Type::if_union_will_have_assign_ops()
 {
-	bool hasAssignOps = false;
 	// randomly choose if the union will have assign operators (for C++):
-	if (CGOptions::lang_cpp()){
-		hasAssignOps = rnd_flipcoin(RegularVolatileProb);
-	}
-	return hasAssignOps;
+	if (!CGOptions::lang_cpp())
+		return false;
+	return rnd_flipcoin(RegularVolatileProb);
 }
 
 const Type*
@@ -738,26 +735,25 @@ Type::make_one_union_field(vector<const Type*> &fields, vector<CVQualifiers> &qf
 		size_t i;
 			vector<Type*> ok_nonstruct_types;
 			vector<Type*> struct_types;
-			// vector<Type*> union_types;
 			for (i = 0; i < AllTypes.size(); i++) {
-                if ((AllTypes[i]->eType == eStruct) || (AllTypes[i]->eType == eUnion)){
-					// filter out structs and unions containing bit-fields. Their layout is implementation 
-					// defined, we don't want to mess with them in unions for now
-					if (!AllTypes[i]->has_bitfields()) {
-						// filter out structs/unions with assign operators (C++ only) 
-                        if (!(AllTypes[i]->has_implicit_nontrivial_assign_ops())) {
-							if (AllTypes[i]->eType == eStruct){
-								struct_types.push_back(AllTypes[i]);
-							}
-							else{ // union
-								// no union in union currently
-								// union_types.push_back(AllTypes[i]);
-							}
-						}
-					}
-				}
-				else{
+				if ((AllTypes[i]->eType != eStruct) && (AllTypes[i]->eType != eUnion)) {
 					ok_nonstruct_types.push_back(AllTypes[i]);
+					continue;
+				}
+				// filter out structs and unions containing bit-fields. Their layout is implementation 
+				// defined, we don't want to mess with them in unions for now
+				if (AllTypes[i]->has_bitfields())
+					continue;
+
+				// filter out structs/unions with assign operators (C++ only) 
+				if (AllTypes[i]->has_implicit_nontrivial_assign_ops()) 
+					continue;
+
+				if (AllTypes[i]->eType == eStruct){
+					struct_types.push_back(AllTypes[i]);
+				}
+				else{	// union
+						// no union in union currently
 				}
 			}
 		const Type* type = NULL;
@@ -984,7 +980,6 @@ Type::make_all_struct_types_with_bitfields(Enumerator<string> &enumerator,
 
 	int bitfields_cnt = 0;
 	int normal_fields_cnt = 0;
-	bool hasAssignOps = if_struct_will_have_assign_ops();
 	for (int i = 0; i < field_cnt; ++i) {
 		std::ostringstream ss;
 		ss << "bitfield" << i;
@@ -1007,7 +1002,8 @@ Type::make_all_struct_types_with_bitfields(Enumerator<string> &enumerator,
 		return;
 
 	bool packed = enumerator.get_elem("packed") != 0;
-    bool hasImplicitNontrivialAssignOps = hasAssignOps || checkImplicitNontrivialAssignOps(fields);
+	bool hasAssignOps = if_struct_will_have_assign_ops();
+	bool hasImplicitNontrivialAssignOps = hasAssignOps || checkImplicitNontrivialAssignOps(fields);
     Type* new_type = new Type(fields, true, packed, quals, fields_length, hasAssignOps, hasImplicitNontrivialAssignOps);
 	new_type->used = true;
 	accum_types.push_back(new_type);
@@ -1153,22 +1149,22 @@ Type::make_random_struct_type(void)
 Type*
 Type::make_random_union_type(void)
 {
-    size_t max_cnt = CGOptions::max_union_fields();
-    size_t field_cnt = rnd_upto(max_cnt) + 1;
-    ERROR_GUARD(NULL);
-	bool hasAssignOps = if_union_will_have_assign_ops();
+	size_t max_cnt = CGOptions::max_union_fields();
+	size_t field_cnt = rnd_upto(max_cnt) + 1;
+	ERROR_GUARD(NULL);
 
-    vector<const Type*> fields;
-    vector<CVQualifiers> qfers;
-    vector<int> lens;
+	vector<const Type*> fields;
+	vector<CVQualifiers> qfers;
+	vector<int> lens;
 
-	for (size_t i=0; i<field_cnt; i++) {
+	for (size_t i = 0; i < field_cnt; i++) {
 		make_one_union_field(fields, qfers, lens);
 		assert(!fields.back()->has_bitfields());
 	}
-    bool hasImplicitNontrivialAssignOps = hasAssignOps || checkImplicitNontrivialAssignOps(fields);
-    Type* new_type = new Type(fields, false, false, qfers, lens, hasAssignOps, hasImplicitNontrivialAssignOps);
-    return new_type;
+	bool hasAssignOps = if_union_will_have_assign_ops();
+	bool hasImplicitNontrivialAssignOps = hasAssignOps || checkImplicitNontrivialAssignOps(fields);
+	Type* new_type = new Type(fields, false, false, qfers, lens, hasAssignOps, hasImplicitNontrivialAssignOps);
+	return new_type;
 }
 
 // ---------------------------------------------------------------------
@@ -1754,7 +1750,7 @@ Type::get_type_sizeof_string(std::string &s) const
 void OutputStructAssignOp(Type* type, std::ostream &out, bool vol)
 {
 	if (CGOptions::lang_cpp()){
-		if (type->has_assign_ops() && (type->eType == eTypeDesc::eStruct)){
+		if (type->has_assign_ops() && (type->eType == eStruct)){
 			out << "    "; 
 			if (vol){
 				out << "volatile ";
@@ -1807,7 +1803,7 @@ void OutputStructAssignOp(Type* type, std::ostream &out, bool vol)
 void OutputUnionAssignOps(Type* type, std::ostream &out, bool vol)
 {
 	if (CGOptions::lang_cpp()){
-		if (type->has_assign_ops() && (type->eType == eTypeDesc::eUnion)){
+		if (type->has_assign_ops() && (type->eType == eUnion)){
 
 			out << "    ";
 			if (vol){
@@ -1948,7 +1944,7 @@ OutputStructUnionDeclarations(std::ostream &out)
 std::string
 Type::printf_directive(void) const
 {
-	string ret = "";
+	string ret;
 	size_t i;
 	switch (eType) {
 	case eSimple:

@@ -287,23 +287,23 @@ CVQualifiers::random_qualifiers(const Type* t, Effect::Access access,
 static bool is_volatile_ok_on_one_level(const Type* t)
 {
 	if (!CGOptions::lang_cpp()) return true;
-	bool volatile_ok = (t->eType != eStruct && t->eType != eUnion) || (t->has_assign_ops());
-	// Union with a struct field: we can't make it volatile, or we won't be able to assign to/from that field
-	if (volatile_ok && (t->eType == eUnion)){
-		for (size_t i = 0; i < t->fields.size(); ++i) {
-			const Type* field = t->fields[i];
+	if (t->eType != eStruct && t->eType != eUnion) return true;
 
-			if (field->eType == eStruct){
-				volatile_ok = false;
-				break;
-			}
-			else if (field->eType == eUnion){
-				volatile_ok = is_volatile_ok_on_one_level(field);
-				if (!volatile_ok) break;
-			}
+	if (!t->has_assign_ops()) return false;
+	if (t->eType == eStruct) return true;
+
+	// Union with a struct field: we can't make it volatile, or we won't be able to assign to/from that field
+	for (size_t i = 0; i < t->fields.size(); ++i) {
+		const Type* field = t->fields[i];
+
+		if (field->eType == eStruct)
+			return false;
+		if (field->eType == eUnion){
+			if (!is_volatile_ok_on_one_level(field))
+				return false;
 		}
 	}
-	return volatile_ok;
+	return true;
 }
 
 CVQualifiers
