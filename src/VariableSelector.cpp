@@ -1230,11 +1230,14 @@ VariableSelector::select_deref_pointer(Effect::Access access, const CGContext &c
 	vars.insert(vars.end(), f->param.begin(), f->param.end());
 
 	Variable* var = choose_var(vars, access, cg_context, type, qfer, eDereference, invalid_vars);
-	ERROR_GUARD(NULL);
 	if (var == 0) {
-		Type* ptr_type = Type::find_pointer_type(type, true);
-		ERROR_GUARD(NULL);
-		assert(ptr_type);
+		Type* ptr_type = 0;
+		if (type->get_indirect_level() < CGOptions::max_indirect_level()) {
+			ptr_type = Type::find_pointer_type(type, true);
+		}
+		if (!ptr_type) {
+			return 0;
+		}
 		CVQualifiers ptr_qfer = (!qfer || qfer->wildcard)
 								? CVQualifiers::random_qualifiers(ptr_type, access, cg_context, true)
 			                    //: qfer->indirect_qualifiers(-1);

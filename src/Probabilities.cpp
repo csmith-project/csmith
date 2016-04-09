@@ -565,7 +565,7 @@ Probabilities::initialize_single_probs()
 	else
 		m[pFieldVolatileProb] = 0;
 
-	if (CGOptions::consts())
+	if (CGOptions::consts() && CGOptions::const_struct_union_fields())
 		m[pFieldConstProb] = 20;
 	else
 		m[pFieldConstProb] = 0;
@@ -873,7 +873,7 @@ Probabilities::check_extra_filter(ProbName pname, int v)
 {
 	assert(v >= 0);
 	std::map<ProbName, Filter*>::iterator i = extra_filters_.find(pname);
-	if (i != extra_filters_.end())
+	if (i != extra_filters_.end() && ((*i).second != NULL))
 		return (*i).second->filter(v);
 	else
 		return false;

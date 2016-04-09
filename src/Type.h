@@ -117,6 +117,9 @@ public:
 
 	static void get_all_ok_struct_union_types(vector<Type *> &ok_types, bool no_const, bool no_volatile, bool need_int_field, bool bStruct);
 
+	static bool if_struct_will_have_assign_ops();
+	static bool if_union_will_have_assign_ops();
+
 	bool has_int_field() const;
 
 	bool signed_overflow_possible() const;
@@ -177,17 +180,19 @@ public:
 
 	static void make_one_struct_field(vector<const Type*> &random_fields,
 					vector<CVQualifiers> &qualifiers,
-					vector<int> &fields_length);
-
+					vector<int> &fields_length, 
+					bool structHasAssignOps);
 	static void make_one_union_field(vector<const Type*> &fields, vector<CVQualifiers> &qfers, vector<int> &lens);
 
 	static void make_full_bitfields_struct_fields(size_t field_cnt, vector<const Type*> &random_fields,
 					vector<CVQualifiers> &qualifiers,
-					vector<int> &fields_length);
+					vector<int> &fields_length, 
+					bool structHasAssignOps);
 
 	static void make_normal_struct_fields(size_t field_cnt, vector<const Type*> &random_fields,
 					vector<CVQualifiers> &qualifiers,
-					vector<int> &fields_length);
+					vector<int> &fields_length, 
+					bool structHasAssignOps);
 
 	// make a random pointer type
 	static Type* make_random_pointer_type(void);
@@ -211,7 +216,7 @@ public:
 
 	explicit Type(eSimpleType simple_type);
 	Type(vector<const Type*>& fields, bool isStruct, bool packed,
-			vector<CVQualifiers> &qfers, vector<int> &fields_length);
+			vector<CVQualifiers> &qfers, vector<int> &fields_length, bool hasAssignOps, bool hasImplicitNontrivialAssignOps);
 	Type(vector<unsigned int>& array_dims, eSimpleType st);
 	explicit Type(const Type* t);
 	~Type(void);
@@ -250,6 +255,10 @@ public:
 	bool contain_pointer_field(void) const;
 	bool is_const_struct_union() const;
 	bool is_volatile_struct_union() const;
+	bool has_assign_ops() const  { return has_assign_ops_; }
+    bool has_implicit_nontrivial_assign_ops() const {
+        return has_implicit_nontrivial_assign_ops_;
+    }
 	bool is_int(void) const { return eType == eSimple && simple_type != eVoid;}
 	bool is_aggregate(void) const { return eType == eStruct || eType == eUnion;}
 	bool match(const Type* t, enum eMatchType mt) const;
@@ -270,6 +279,11 @@ public:
 	bool used;                          // whether any variable declared with this type
 	bool printed;                       // whether this struct/union has been printed in the random program
 	const bool packed_;					// whether this struct/union should be packed
+	bool has_assign_ops_;				// assign ops are needed if we have:
+										// struct S0 foo; volatile struct S0 bar; ... foo=bar;
+    bool has_implicit_nontrivial_assign_ops_;   // if a struct has a struct with assign ops as a field,
+                                        // than the former struct also has assign ops;
+                                        // also true if struct itself has assign ops
 	vector<CVQualifiers> qfers_;		// conresponds to each element of fields
 					// It's a tradeoff between the current implementation and the
 					// need of struct's level type qualifiers.
@@ -288,6 +302,7 @@ private:
 void GenerateAllTypes(void);
 const Type * get_int_type(void);
 void OutputStructUnionDeclarations(std::ostream &);
+void OutputStructAssignOps(Type* type, std::ostream &out, bool vol);
 void OutputStructUnion(Type* type, std::ostream &out);
 
 ///////////////////////////////////////////////////////////////////////////////

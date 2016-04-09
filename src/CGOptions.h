@@ -53,7 +53,7 @@ using namespace std;
 #define CGOPTIONS_DEFAULT_MAX_STRUCT_FIELDS	(10)
 #define CGOPTIONS_DEFAULT_MAX_UNION_FIELDS	(5)
 #define CGOPTIONS_DEFAULT_MAX_NESTED_STRUCT_LEVEL	(3)
-#define CGOPTIONS_DEFAULT_MAX_INDIRECT_LEVEL (2)
+#define CGOPTIONS_DEFAULT_MAX_INDIRECT_LEVEL (5)
 #define CGOPTIONS_DEFAULT_MAX_ARRAY_DIMENSIONS	(3)
 #define CGOPTIONS_DEFAULT_MAX_ARRAY_LENGTH_PER_DIMENSION (10)
 #define CGOPTIONS_DEFAULT_MAX_ARRAY_LENGTH	(256)
@@ -444,6 +444,9 @@ public:
 	static bool vol_struct_union_fields(void);
 	static bool vol_struct_union_fields(bool p);
 
+	static bool const_struct_union_fields(void);
+	static bool const_struct_union_fields(bool p);
+
 	static int int_size(void);
 	static void int_size(int p) { int_size_ = p;}
 
@@ -455,9 +458,14 @@ public:
 	static bool lang_cpp(void);
 	static bool lang_cpp(bool p);
 
+	static bool cpp11(void);
+	static bool cpp11(bool p);
+
 	static void enable_builtin_kinds(const string &kinds);
 	static void disable_builtin_kinds(const string &kinds);
 	static bool enabled_builtin(const string &ks);
+
+	static void fix_options_for_cpp(void);
 
 private:
 	static bool enabled_builtin_kind(const string &kind);
@@ -598,10 +606,12 @@ private:
 	static int  pointer_size_;
 	static bool take_union_field_addr_;
 	static bool vol_struct_union_fields_;
+	static bool const_struct_union_fields_;
 	static Reducer* reducer_;
 
 	// flag to indicate language
 	static bool lang_cpp_;
+	static bool cpp11_;
 private:
 	CGOptions(void);
 	CGOptions(CGOptions &cgo);
