@@ -28,7 +28,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#define int8_t char
+#define int8_t signed char
 #define uint8_t unsigned char
 
 #define int16_t short
