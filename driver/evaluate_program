@@ -27,7 +27,7 @@ my $COMPILER_TIMEOUT = 300;
 
 my $COMPILER_TIMEOUT_RES = 137;
 
-my $RUN_PROGRAM = 0;
+my $RUN_PROGRAM = 1;
 
 my $DO_REDUCE_CRASH = 1;
 my $DO_REDUCE_WRONG = 1;
@@ -51,11 +51,12 @@ my @gcc_opts = (
     );
 
 my @clang_opts = (
-    "-O0 -w -march=native -mtune=native",
-    "-O1 -w -march=native -mtune=native",
-    "-O2 -w -march=native -mtune=native",
-    "-O3 -w -march=native -mtune=native",
-    "-Os -w -march=native -mtune=native",
+    "-O0 -w",
+    "-O1 -w",
+    "-O2 -w",
+    "-Os -w",
+    "-O3 -w",
+    #"-O3 -w -Xclang -load -Xclang /home/regehr/llvm-test-lvi/build/LLVMTestLVI.so",
     );
 
 my @o0only = (
@@ -212,7 +213,7 @@ my @clang33 = ("clang33",
 my @compilers_to_test = (
 
     \@clang,
-    \@gcc,
+    #\@gcc,
 
     #\@gcc47,
     #\@gcc46,
@@ -387,7 +388,7 @@ sub reduce_program ($$$$$$$) {
             ) {
             $err = $1;
 	} else {
-	    print "FAILURE to reduce: no ICE message\n";
+	    print "reduction didn't work: no ICE message\n";
 	    return;
 	}
 	if ($err =~ /killed/i) {
