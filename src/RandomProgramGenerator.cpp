@@ -194,6 +194,7 @@ static void print_help()
 	cout << "  --volatiles | --no-volatiles: enable | disable volatiles (enabled by default)." << endl << endl;
 	cout << "  --volatile-pointers | --no-volatile-pointers: enable | disable volatile pointers (enabled by default)." << endl << endl;
 	cout << "  --const-pointers | --no-const-pointers: enable | disable const pointers (enabled by default)." << endl << endl;
+	cout << "  --global-variables | --no-global-variables: enable | disable global variables (enabled by default)." << endl << endl;
 
 	cout << "  --builtins | --no-builtins: enable | disable to generate builtin functions (disabled by default)." << endl << endl;
 	cout << "  --enable-builtin-kinds k1,k2 | --disable-builtin-kinds k1,k2: enable | disable certain kinds of builtin functions." << endl << endl;
@@ -917,6 +918,16 @@ main(int argc, char **argv)
 
 		if (strcmp (argv[i], "--no-const-pointers") == 0) {
 			CGOptions::const_pointers(false);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--global-variabless") == 0) {
+			CGOptions::global_variables(true);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--no-global-variables") == 0) {
+			CGOptions::global_variables(false);
 			continue;
 		}
 

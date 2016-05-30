@@ -335,7 +335,9 @@ Block*
 Block::random_parent_block(void)
 {
 	vector<Block*> blks;
-	blks.push_back(NULL);
+	if (CGOptions::global_variables()) {
+		blks.push_back(NULL);
+	}
 	Block* tmp = this;
 	while (tmp) {
 		blks.push_back(tmp);

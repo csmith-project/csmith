@@ -187,7 +187,7 @@ CVQualifiers::match_indirect(const CVQualifiers& qfer) const
 void
 CVQualifiers::make_scalar_volatiles(std::vector<bool> &volatiles)
 {
-	if (!CGOptions::volatile_pointers()) {
+	if (!CGOptions::volatile_pointers() || !CGOptions::global_variables()) {
 		for (size_t i=1; i<volatiles.size(); i++)
 			volatiles[i] = false;
 	}
