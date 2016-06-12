@@ -1420,6 +1420,15 @@ main(int argc, char **argv)
 			CGOptions::init_reducer(filename);
 			continue;
 		}
+
+    if (strcmp(argv[i], "--fast-execution") == 0) {
+      CGOptions::lang_cpp(true);
+      // jumps can easily cause infinite loops. Just disable them
+      CGOptions::jumps(false);
+      // large arrays are also reported to cause slow execution
+      CGOptions::max_array_length_per_dimension(5);
+      continue;
+    }
 		// OMIT help
 
 		// OMIT compute-hash

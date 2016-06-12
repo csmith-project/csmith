@@ -79,6 +79,12 @@ make_random_loop_control(int &init, int &limit, int &incr,
 	test_op = t_ops[pure_rnd_upto(sizeof(t_ops)/sizeof(*t_ops))];
 	ERROR_RETURN();
 
+  // A rare case that could cause wrap around: init=limit and the incr goes 
+  // to wrong direction
+  if (CGOptions::fast_execution() && init == limit && (test_op == eCmpLe || test_op == eCmpLe)) {
+    limit = pure_rnd_flipcoin(50) ? init + 1 : init - 1;
+  }
+
 	if (pure_rnd_flipcoin(50)) {
 		ERROR_RETURN();
 		// Do `+=' or `-=' by an increment between 0 and 9 inclusive.

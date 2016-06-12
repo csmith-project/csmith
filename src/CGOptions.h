@@ -470,6 +470,9 @@ public:
 
 	static void fix_options_for_cpp(void);
 
+  static bool fast_execution(void);
+  static bool fast_execution(bool p);
+
 private:
 	static bool enabled_builtin_kind(const string &kind);
 
@@ -612,6 +615,7 @@ private:
 	static bool vol_struct_union_fields_;
 	static bool const_struct_union_fields_;
 	static Reducer* reducer_;
+  static bool fast_execution_;
 
 	// flag to indicate language
 	static bool lang_cpp_;
