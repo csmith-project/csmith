@@ -83,9 +83,13 @@ make_random_loop_control(int &init, int &limit, int &incr,
 		ERROR_RETURN();
 		// Do `+=' or `-=' by an increment between 0 and 9 inclusive.
 		// make sure the limit can be reached without wrap-around
-		incr_op = (limit >= init) ? eAddAssign : eSubAssign;
 		incr = pure_rnd_upto(10);
-		if (incr == 0) incr = 1;
+    // avoid an infinite loop due to inexact division, e.g,
+    // init = 0, limit = 3, step = 2, test_op = eCmpNe
+    if (test_op == eCmpNe && incr > 1)
+      limit = (limit - init) / incr * incr + init;
+    incr_op = (limit >= init) ? eAddAssign : eSubAssign;
+    if (incr == 0) incr = 1;
 	} else {
 		ERROR_RETURN();
 		// Do `++' or `--', pre- or post-.
