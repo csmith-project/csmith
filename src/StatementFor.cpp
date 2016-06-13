@@ -81,7 +81,7 @@ make_random_loop_control(int &init, int &limit, int &incr,
 
   // A rare case that could cause wrap around: init=limit and the incr goes 
   // to wrong direction
-  if (CGOptions::fast_execution() && init == limit && (test_op == eCmpLe || test_op == eCmpLe)) {
+  if (CGOptions::fast_execution() && init == limit && (test_op == eCmpGe || test_op == eCmpLe)) {
     limit = pure_rnd_flipcoin(50) ? init + 1 : init - 1;
   }
 
