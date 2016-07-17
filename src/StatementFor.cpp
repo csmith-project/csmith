@@ -79,12 +79,6 @@ make_random_loop_control(int &init, int &limit, int &incr,
 	test_op = t_ops[pure_rnd_upto(sizeof(t_ops)/sizeof(*t_ops))];
 	ERROR_RETURN();
 
-  // A rare case that could cause wrap around: init=limit and the incr goes 
-  // to wrong direction
-  if (CGOptions::fast_execution() && init == limit && (test_op == eCmpGe || test_op == eCmpLe)) {
-    limit = pure_rnd_flipcoin(50) ? init + 1 : init - 1;
-  }
-
 	if (pure_rnd_flipcoin(50)) {
 		ERROR_RETURN();
 		// Do `+=' or `-=' by an increment between 0 and 9 inclusive.
@@ -96,6 +90,14 @@ make_random_loop_control(int &init, int &limit, int &incr,
       limit = (limit - init) / incr * incr + init;
     incr_op = (limit >= init) ? eAddAssign : eSubAssign;
     if (incr == 0) incr = 1;
+
+    // A rare case that could cause wrap around: distance between init
+    // and limit is multiple of incr, and the incr goes to wrong direction.
+    // For example: init = 8, limit = 1, incr = -7. test_op is >=
+    if (CGOptions::fast_execution() && (limit - init) % incr == 0 && 
+      (test_op == eCmpGe || test_op == eCmpLe)) {
+      limit = (incr_op == eAddAssign) ? limit + 1 : limit - 1;
+    }
 	} else {
 		ERROR_RETURN();
 		// Do `++' or `--', pre- or post-.
