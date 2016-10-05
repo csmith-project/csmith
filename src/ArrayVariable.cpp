@@ -782,6 +782,8 @@ ArrayVariable::hash(std::ostream& out) const
 {
 	if (collective != 0) return;
 	vector<string> field_names;
+	vector<const Type *> field_types;
+	vector<int> included_fields;
 	// for unions, find the fields that we don't want to hash due to union field read rules. So FactUnion.cpp
 	vector<int> excluded_fields;
 	if (type->eType == eUnion) {
@@ -793,7 +795,8 @@ ArrayVariable::hash(std::ostream& out) const
 			}
 		}
 	}
- 	type->get_int_subfield_names("", field_names, excluded_fields);
+ 	type->get_int_subfield_names("", field_names, field_types, excluded_fields);
+	assert(field_names.size() == field_types.size());
 	// if not a suitable type for hashing, give up
 	if (field_names.size() == 0) return;
 
@@ -825,16 +828,16 @@ ArrayVariable::hash(std::ostream& out) const
 	vname = oss.str();
 	if (CGOptions::compute_hash()) {
 		for (j=0; j<field_names.size(); j++) {
-            if (type->eType == eSimple && type->simple_type == eFloat) {
-                output_tab(out, indent);
-                out << "transparent_crc_bytes(&" << vname << field_names[j] << ", ";
-                out << "sizeof(" << vname << field_names[j] << "), ";
-                out << "\"" << vname << field_names[j] << "\", print_hash_value);" << endl;
-            } else {
-                output_tab(out, indent);
-                out << "transparent_crc(" << vname << field_names[j] << ", \"";
-                out << vname << field_names[j] << "\", print_hash_value);" << endl;
-            }
+			if (field_types[j]->eType == eSimple && field_types[j]->simple_type == eFloat) {
+				output_tab(out, indent);
+				out << "transparent_crc_bytes(&" << vname << field_names[j] << ", ";
+				out << "sizeof(" << vname << field_names[j] << "), ";
+				out << "\"" << vname << field_names[j] << "\", print_hash_value);" << endl;
+			} else {
+				output_tab(out, indent);
+				out << "transparent_crc(" << vname << field_names[j] << ", \"";
+				out << vname << field_names[j] << "\", print_hash_value);" << endl;
+			}
 		}
 		// print the index value
 		if (CGOptions::hash_value_printf()) {
