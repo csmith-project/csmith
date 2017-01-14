@@ -260,6 +260,9 @@ SafeOpFlags::OutputSize(std::ostream &out) const
 	case sInt64:
 		out << "int64_t";
 		break;
+	case sFloat:
+		out << "float";
+		break;
 	default:
 		assert(!"invalid size!");
 		break;
