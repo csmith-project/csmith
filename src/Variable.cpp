@@ -98,6 +98,21 @@ int find_variable_in_set(const vector<Variable*>& set, const Variable* v)
     return -1;
 }
 
+bool find_variable_in_set(const set<Variable*>& vars, const Variable* v)
+{
+    const Variable *target = v;
+    while (target != NULL) {
+        // Cast away const while searching because the container's elements
+        // are non-const :-(
+        const set<Variable*>::iterator pos = vars.find((Variable *) target);
+        if (pos != vars.end()) {
+            return true;
+        }
+        target = target->field_var_of;
+    }
+    return false;
+}
+
 int find_field_variable_in_set(const vector<const Variable*>& set, const Variable* v)
 {
     size_t i;

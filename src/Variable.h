@@ -45,6 +45,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <set>
 using namespace std;
 
 #include "Effect.h"
@@ -185,6 +186,7 @@ int HashVariable(Variable *var, std::ostream *pOut);
 
 int find_variable_in_set(const vector<const Variable*>& set, const Variable* v);
 int find_variable_in_set(const vector<Variable*>& set, const Variable* v);
+bool find_variable_in_set(const set<Variable*>& set, const Variable* v);
 int find_field_variable_in_set(const vector<const Variable*>& set, const Variable* v);
 bool is_variable_in_set(const vector<const Variable*>& set, const Variable* v);
 bool add_variable_to_set(vector<const Variable*>& set, const Variable* v);

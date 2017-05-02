@@ -238,6 +238,7 @@ Block::~Block(void)
 	deleted_stms.clear();
 
 	local_vars.clear();
+	local_var_set.clear();
 	macro_tmp_vars.clear();
 }
 
@@ -491,6 +492,19 @@ Block::append_nested_loop(CGContext& cg_context)
 	return sf;
 }
 
+/* Make sure the vector and the set contain the same elements, under the
+ * assumption that the vector can only ever grow. If the sizes of the
+ * containers are equal, this function assumes that they do contain the same
+ * elements. Otherwise, the elements of the vector are added to the set.
+ */
+static void
+ensure_vector_and_set_match(const vector<Variable *>& vec, set<Variable *>& set)
+{
+	if (vec.size() != set.size()) {
+		copy(vec.begin(), vec.end(), inserter(set, set.end()));
+	}
+}
+
 /* return true is var is local variable of this block or parent block,
  * or var is parameter of function
  */
@@ -505,7 +519,8 @@ Block::is_var_on_stack(const Variable* var) const
     }
 	const Block* b = this;
 	while (b) {
-		if (find_variable_in_set(b->local_vars, var) != -1) {
+		ensure_vector_and_set_match(b->local_vars, b->local_var_set);
+		if (find_variable_in_set(b->local_var_set, var)) {
 			return true;
 		}
 		b = b->parent;

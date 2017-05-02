@@ -152,12 +152,9 @@ Function::is_var_on_stack(const Variable* var, const Statement* stm) const
         }
     }
 	const Block* b = stm->parent;
-	while (b) {
-		if (find_variable_in_set(b->local_vars, var) != -1) {
-			return true;
-		}
-		b = b->parent;
-	}
+    if (b && b->is_var_on_stack(var)) {
+        return true;
+    }
     return false;
 }
 
