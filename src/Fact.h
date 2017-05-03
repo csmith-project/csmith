@@ -34,6 +34,7 @@
 
 #include <ostream>
 #include <vector>
+#include <map>
 using namespace std;
 
 enum eFactCategory {
@@ -116,6 +117,9 @@ int find_fact(const FactVec& facts, const Fact* fact);
 /* find a specific type of fact (same variable most likely) from facts env */
 const Fact* find_related_fact(const FactVec& facts, const Fact* new_fact);
 const Fact* find_related_fact(const vector<Fact*>& facts, const Fact* new_fact);
+
+typedef std::map<std::pair<eFactCategory, const Variable *>, const Fact *> FactMap;
+const Fact* find_related_fact(const FactMap& facts, const Fact* new_fact);
 
 /* merge a fact into env */
 bool merge_fact(FactVec& facts, const Fact* new_fact);

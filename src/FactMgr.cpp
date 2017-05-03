@@ -513,6 +513,13 @@ void
 FactMgr::makeup_new_var_facts(vector<const Fact*>& old_facts, const vector<const Fact*>& new_facts)
 {
     size_t i;
+    // We will search the old facts repeatedly. Copy the entries to a map
+    // for faster lookup.
+    FactMap old_fact_map;
+    for (i=0; i<old_facts.size(); i++) {
+        const Fact* f = old_facts[i];
+        old_fact_map[std::make_pair(f->eCat, f->get_var())] = f;
+    }
     for (i=0; i<new_facts.size(); i++) {
 		const Fact* f = new_facts[i];
 		const Variable* v = f->get_var();
@@ -520,8 +527,9 @@ FactMgr::makeup_new_var_facts(vector<const Fact*>& old_facts, const vector<const
 			// if there are variable facts not present in old facts,
 			// mean they are variables created after old_facts,
 			// manually add them
-			if (find_related_fact(old_facts, f) == 0) {
+			if (find_related_fact(old_fact_map, f) == 0) {
 				FactMgr::add_new_var_fact(v, old_facts);
+				old_fact_map[std::make_pair(f->eCat, f->get_var())] = f;
 			}
 		}
 	}

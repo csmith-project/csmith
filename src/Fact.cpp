@@ -150,6 +150,17 @@ find_related_fact(const vector<Fact*>& facts, const Fact* new_fact)
     return 0;
 }
 
+const Fact*
+find_related_fact(const FactMap& facts, const Fact* new_fact)
+{
+    FactMap::key_type key = std::make_pair(new_fact->eCat, new_fact->get_var());
+    FactMap::const_iterator pos = facts.find(key);
+    if (pos != facts.end()) {
+        return pos->second;
+    }
+    return 0;
+}
+
 // TODO: we really need to free the memory properly while maintain the memory in compact
 // way, i.e., don't allocate a Fact object unless it's absolutely necessary
 bool
