@@ -520,7 +520,7 @@ Block::is_var_on_stack(const Variable* var) const
 	const Block* b = this;
 	while (b) {
 		ensure_vector_and_set_match(b->local_vars, b->local_var_set);
-		if (find_variable_in_set(b->local_var_set, var)) {
+		if (find_variable_in_set(b->local_var_set, var) != b->local_var_set.end()) {
 			return true;
 		}
 		b = b->parent;

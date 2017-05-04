@@ -34,6 +34,8 @@
 
 #include <ostream>
 #include <vector>
+#include <set>
+#include <map>
 #include "Fact.h"
 
 class Variable;
@@ -53,8 +55,10 @@ class FactPointTo : public Fact
 public:
  	static FactPointTo *make_fact(const Variable* v);
 	static FactPointTo *make_fact(const Variable* v, const vector<const Variable*>& set);
+	static FactPointTo *make_fact(const Variable* v, const set<const Variable*>& set);
 	static FactPointTo *make_fact(const Variable* v, const Variable* point_to);
 	static vector<const Fact*> make_facts(vector<const Variable*> vars, const vector<const Variable*>& set);
+	static vector<const Fact*> make_facts(vector<const Variable*> vars, const set<const Variable*>& set);
 	static vector<const Fact*> make_facts(vector<const Variable*> vars, const Variable* point_to);
 	static void doFinalization();
 
@@ -62,7 +66,7 @@ public:
 	virtual ~FactPointTo(void);
 
 	virtual const Variable* get_var(void) const { return var;};
-	const vector<const Variable*>& get_point_to_vars(void) const { return point_to_vars; };
+	const set<const Variable*>& get_point_to_vars(void) const { return point_to_vars; };
 
 	bool is_null(void) const;
 	bool is_tbd_only(void) const;
@@ -110,16 +114,17 @@ public:
 	static const Variable* garbage_ptr;
 	static const Variable* tbd_ptr;
 
-	static vector<const Variable*> all_ptrs;
-	static vector<vector<const Variable*> > all_aliases;
+	static set<const Variable*> all_ptrs;
+	static map<const Variable*, set<const Variable*> > all_aliases;
 private:
 	FactPointTo(const Variable* v, const vector<const Variable*>& set);
+	FactPointTo(const Variable* v, const set<const Variable*>& set);
 	FactPointTo(const Variable* v, const Variable* point_to);
 
 	const Variable* var;
-	vector<const Variable*> point_to_vars;
+	set<const Variable*> point_to_vars;
 
-	static void update_ptr_aliases(const vector<Fact*>& facts, vector<const Variable*>& ptrs, vector<vector<const Variable*> >& aliases);
+	static void update_ptr_aliases(const vector<Fact*>& facts, set<const Variable*>& ptrs, map<const Variable*, set<const Variable*> >& aliases);
 
 	// unimplement
 	FactPointTo(const FactPointTo& f);

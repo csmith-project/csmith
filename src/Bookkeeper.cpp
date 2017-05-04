@@ -268,14 +268,16 @@ Bookkeeper::output_pointer_statistics(std::ostream &out)
 	int point_to_scalar = 0;
 	int point_to_struct = 0;
 	int point_to_pointer = 0;
-	const vector<const Variable*>& ptrs = FactPointTo::all_ptrs;
-	const vector<vector<const Variable*> >& aliases = FactPointTo::all_aliases;
-	for (i=0; i<ptrs.size(); i++) {
-		total_alias_cnt += aliases[i].size();
-		if (find_variable_in_set(aliases[i], FactPointTo::null_ptr) >= 0) {
+	const set<const Variable*>& ptrs = FactPointTo::all_ptrs;
+	const map<const Variable*, set<const Variable*> >& aliases = FactPointTo::all_aliases;
+	assert(ptrs.size() == aliases.size());
+	map<const Variable*, set<const Variable*> >::const_iterator j, end = aliases.end();
+	for (j = aliases.begin(); j != end; ++j) {
+		const Variable* var = j->first;
+		total_alias_cnt += j->second.size();
+		if (find_variable_in_set(j->second, FactPointTo::null_ptr) != j->second.end()) {
 			total_has_null_ptr++;
 		}
-		const Variable* var = ptrs[i];
 		const Type* t = var->type;
 		assert(t->eType == ePointer);
 		if (t->get_indirect_level() > 1) {

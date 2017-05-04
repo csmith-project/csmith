@@ -98,19 +98,36 @@ int find_variable_in_set(const vector<Variable*>& set, const Variable* v)
     return -1;
 }
 
-bool find_variable_in_set(const set<Variable*>& vars, const Variable* v)
+set<const Variable*>::const_iterator
+find_variable_in_set(const set<const Variable*>& vars, const Variable* v)
 {
+    set<const Variable*>::const_iterator pos = vars.end();
+    const Variable *target = v;
+    while (target != NULL) {
+        pos = vars.find(target);
+        if (pos != vars.end()) {
+            return pos;
+        }
+        target = target->field_var_of;
+    }
+    return pos;
+}
+
+set<Variable*>::const_iterator
+find_variable_in_set(const set<Variable*>& vars, const Variable* v)
+{
+    set<Variable*>::const_iterator pos = vars.end();
     const Variable *target = v;
     while (target != NULL) {
         // Cast away const while searching because the container's elements
         // are non-const :-(
-        const set<Variable*>::iterator pos = vars.find((Variable *) target);
+        pos = vars.find(const_cast<Variable*>(target));
         if (pos != vars.end()) {
-            return true;
+            return pos;
         }
         target = target->field_var_of;
     }
-    return false;
+    return pos;
 }
 
 int find_field_variable_in_set(const vector<const Variable*>& set, const Variable* v)
@@ -128,6 +145,23 @@ int find_field_variable_in_set(const vector<const Variable*>& set, const Variabl
     return -1;
 }
 
+set<const Variable*>::const_iterator
+find_field_variable_in_set(const set<const Variable*>& vars, const Variable* v)
+{
+    size_t i;
+    set<const Variable*>::const_iterator pos;
+	if (v->is_aggregate()) {
+		for (i=0; i<v->field_vars.size(); i++) {
+			const Variable* field = v->field_vars[i];
+			pos = find_variable_in_set(vars, field);
+			if (pos != vars.end()) return pos;
+			pos = find_field_variable_in_set(vars, field);
+			if (pos != vars.end()) return pos;
+		}
+	}
+    return vars.end();
+}
+
 bool is_variable_in_set(const vector<const Variable*>& set, const Variable* v)
 {
     size_t i;
@@ -137,6 +171,12 @@ bool is_variable_in_set(const vector<const Variable*>& set, const Variable* v)
         }
     }
     return false;
+}
+
+bool is_variable_in_set(const set<const Variable*>& vars, const Variable* v)
+{
+    set<const Variable*>::const_iterator pos = vars.find(v);
+    return (pos != vars.end());
 }
 
 bool add_variable_to_set(vector<const Variable*>& set, const Variable* v)
@@ -161,27 +201,18 @@ bool add_variables_to_set(vector<const Variable*>& set, const vector<const Varia
 }
 
 // return true if two sets contains same variables
-bool equal_variable_sets(const vector<const Variable*>& set1, const vector<const Variable*>& set2)
+bool equal_variable_sets(const set<const Variable*>& set1, const set<const Variable*>& set2)
 {
-    size_t i;
-    if (set1.size() == set2.size()) {
-        for (i=0; i<set1.size(); i++) {
-            if (!is_variable_in_set(set2, set1[i])) {
-                return false;
-            }
-        }
-        return true;
-    }
-    return false;
+    return set1 == set2;
 }
 
 // return true if set1 is subset of set2, or equal
-bool sub_variable_sets(const vector<const Variable*>& set1, const vector<const Variable*>& set2)
+bool sub_variable_sets(const set<const Variable*>& set1, const set<const Variable*>& set2)
 {
-    size_t i;
+    set<const Variable*>::const_iterator i, end = set1.end();
     if (set1.size() <= set2.size()) {
-        for (i=0; i<set1.size(); i++) {
-            if (!is_variable_in_set(set2, set1[i])) {
+        for (i = set1.begin(); i != end; ++i) {
+            if (!is_variable_in_set(set2, *i)) {
                 return false;
             }
         }
@@ -616,7 +647,7 @@ vector<string>
 Variable::deputy_annotation(void) const
 {
 	size_t len;
-        int pos, i, j;
+	int i;
 	vector<string> annotations;
 	const Variable* tmp = this;
 	bool has_null = false;
@@ -624,35 +655,31 @@ Variable::deputy_annotation(void) const
 	if (name == "p_24")
 		i = 0;
 	while (tmp && tmp->type->eType == ePointer) {
-		pos = -1;
 		string anno;
-		for (i=0; i<static_cast<int>(FactPointTo::all_ptrs.size()); i++) {
-			if (FactPointTo::all_ptrs[i] == tmp) {
-				pos = i;
+		map<const Variable*, set<const Variable*> >::iterator pos;
+		pos = FactPointTo::all_aliases.find(tmp);
+		if (pos == FactPointTo::all_aliases.end()) break;
+		set<const Variable*> vars = pos->second;
+		// take out tbd in point-to-set for parameters
+		set<const Variable*>::iterator j = find_variable_in_set(vars, FactPointTo::tbd_ptr);
+		if (vars.size() > 1 && j != vars.end()) {
+			vars.erase(j);
+		}
+		bool has_array = false;
+		set<const Variable*>::iterator null_pos = find_variable_in_set(vars, FactPointTo::null_ptr);
+		if (null_pos != vars.end()) {
+			// remove null pointer from set
+			has_null = true;
+			vars.erase(null_pos);
+		}
+		set<const Variable*>::const_iterator v, end = vars.end();
+		for (v = vars.begin(); v != end; ++v) {
+			if ((*v)->isArray || (*v)->is_array_field()) {
+				has_array = true;
 				break;
 			}
 		}
-		if (pos == -1) break;
-		vector<const Variable*> set = FactPointTo::all_aliases[pos];
-		// take out tbd in point-to-set for parameters
-		j = find_variable_in_set(set, FactPointTo::tbd_ptr);
-		if (set.size() > 1 && j != -1) {
-			set.erase(set.begin() + j);
-		}
-		bool has_array = false;
-		len = set.size();
-		for (j=0; j<static_cast<int>(len); j++) {
-			if (set[j] == FactPointTo::null_ptr) {
-				// remove null pointer from set
-				has_null = true;
-				set.erase(set.begin() + j);
-				j--;
-				len--;
-			}
-			else if (set[j]->isArray || set[j]->is_array_field()) {
-				has_array = true;
-			}
-		}
+		len = vars.size();
 		/* if "int *** p = 0", we can annotate it as "int * SAFE * SAFE * SAFE p" */
 		if (len == 0 && has_null) {
 			null_based = true;
@@ -667,7 +694,7 @@ Variable::deputy_annotation(void) const
 		tmp = 0;
 
 		if (len == 1) {
-			const Variable* pointee = set[0];
+			const Variable* pointee = *vars.begin();
 			if (pointee->isArray || pointee->is_array_field()) {
 				ostringstream oss;
 				oss << "BOUND(&";

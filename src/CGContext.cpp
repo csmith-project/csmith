@@ -631,14 +631,14 @@ CGContext::in_conflict(const Effect& eff) const
 void
 CGContext::find_reachable_frame_vars(vector<const Fact*>& facts, VariableSet& frame_vars) const
 {
-	size_t i, j;
+	size_t i;
 	for (i=0; i<facts.size(); i++) {
 		if (facts[i]->eCat == ePointTo) {
 			const FactPointTo* fp = (const FactPointTo*)(facts[i]);
-			for (j=0; j<fp->get_point_to_vars().size(); j++) {
-				const Variable* v = fp->get_point_to_vars()[j];
-				if (is_frame_var(v)) {
-					frame_vars.push_back(v);
+			set<const Variable*>::const_iterator j, end = fp->get_point_to_vars().end();
+			for (j = fp->get_point_to_vars().begin(); j != end; ++j) {
+				if (is_frame_var(*j)) {
+					frame_vars.push_back(*j);
 				}
 			}
 		}

@@ -432,7 +432,7 @@ FactMgr::update_fact_for_return(const StatementReturn* sr, FactVec& inputs)
 void
 FactMgr::update_facts_for_dest(const FactVec& facts_in, FactVec& facts_out, const Statement* dest)
 {
-	size_t i, j;
+	size_t i;
 	vector<const Variable*> oos_vars;
 	const Function* func = dest->func;
 	assert(func);
@@ -450,8 +450,9 @@ FactMgr::update_facts_for_dest(const FactVec& facts_in, FactVec& facts_out, cons
 		}
 		if (f->eCat == ePointTo) {
 			const FactPointTo* fp = dynamic_cast<const FactPointTo*>(f);
-			for (j=0; j<fp->get_point_to_vars().size(); j++) {
-				const Variable* v = fp->get_point_to_vars()[j];
+			set<const Variable*>::iterator j, end = fp->get_point_to_vars().end();
+			for (j = fp->get_point_to_vars().begin(); j != end; ++j) {
+				const Variable* v = *j;
 				if (!FactPointTo::is_special_ptr(v) && func->is_var_oos(v, dest)) {
 					if (find_variable_in_set(oos_vars, v) == -1) {
 						oos_vars.push_back(v);

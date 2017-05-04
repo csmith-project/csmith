@@ -186,13 +186,16 @@ int HashVariable(Variable *var, std::ostream *pOut);
 
 int find_variable_in_set(const vector<const Variable*>& set, const Variable* v);
 int find_variable_in_set(const vector<Variable*>& set, const Variable* v);
-bool find_variable_in_set(const set<Variable*>& set, const Variable* v);
+set<const Variable*>::const_iterator find_variable_in_set(const set<const Variable*>& set, const Variable* v);
+set<Variable*>::const_iterator find_variable_in_set(const set<Variable*>& set, const Variable* v);
 int find_field_variable_in_set(const vector<const Variable*>& set, const Variable* v);
+set<const Variable*>::const_iterator find_field_variable_in_set(const set<const Variable*>& set, const Variable* v);
 bool is_variable_in_set(const vector<const Variable*>& set, const Variable* v);
+bool is_variable_in_set(const set<const Variable*>& set, const Variable* v);
 bool add_variable_to_set(vector<const Variable*>& set, const Variable* v);
 bool add_variables_to_set(vector<const Variable*>& set, const vector<const Variable*>& new_set);
-bool equal_variable_sets(const vector<const Variable*>& set1, const vector<const Variable*>& set2);
-bool sub_variable_sets(const vector<const Variable*>& set1, const vector<const Variable*>& set2);
+bool equal_variable_sets(const set<const Variable*>& set1, const set<const Variable*>& set2);
+bool sub_variable_sets(const set<const Variable*>& set1, const set<const Variable*>& set2);
 void combine_variable_sets(const vector<const Variable*>& set1, const vector<const Variable*>& set2, vector<const Variable*>& set_all);
 void remove_field_vars(vector<const Variable*>& set);
 

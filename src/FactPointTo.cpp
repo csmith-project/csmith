@@ -59,47 +59,41 @@ using namespace std;
 const Variable* FactPointTo::null_ptr = VariableSelector::make_dummy_static_variable("null");
 const Variable* FactPointTo::garbage_ptr = VariableSelector::make_dummy_static_variable("garbage");
 const Variable* FactPointTo::tbd_ptr = VariableSelector::make_dummy_static_variable("tbd");
-vector<const Variable*> FactPointTo::all_ptrs;
-vector<vector<const Variable*> > FactPointTo::all_aliases;
+set<const Variable*> FactPointTo::all_ptrs;
+map<const Variable*, set<const Variable*> > FactPointTo::all_aliases;
 
 bool
 FactPointTo::is_null() const
 {
-    size_t i;
-    for (i=0; i<point_to_vars.size(); i++) {
-        if (point_to_vars[i] == null_ptr) {
-            return true;
-        }
-    }
-    return false;
+    return find_variable_in_set(point_to_vars, null_ptr) != point_to_vars.end();
 }
 
 bool
 FactPointTo::is_tbd_only() const
 {
-    return point_to_vars.size()==1 && point_to_vars[0] == tbd_ptr;
+    return point_to_vars.size()==1 && *point_to_vars.begin() == tbd_ptr;
 }
 
 bool
 FactPointTo::is_dead() const
 {
-    return (find_variable_in_set(point_to_vars, garbage_ptr) != -1);
+    return find_variable_in_set(point_to_vars, garbage_ptr) != point_to_vars.end();
 }
 
 bool
 FactPointTo::has_invisible(const Statement* stm) const
 {
-    size_t i;
 	if (!var->is_visible(stm->parent)) {
 		return true;
 	}
-    for (i=0; i<point_to_vars.size(); i++) {
-		const Variable* v = point_to_vars[i];
+	set<const Variable*>::iterator i, end = point_to_vars.end();
+	for (i = point_to_vars.begin(); i != end; ++i) {
+		const Variable* v = *i;
 		if (v != null_ptr && v != garbage_ptr && v != tbd_ptr && !v->is_visible(stm->parent)) {
 			return true;
 		}
-    }
-    return false;
+	}
+	return false;
 }
 
 /* mark a variable in point_to_vars as dead, note
@@ -110,20 +104,16 @@ FactPointTo::has_invisible(const Statement* stm) const
 FactPointTo*
 FactPointTo::mark_dead_var(const Variable* v)
 {
-	vector<const Variable*> var_set = point_to_vars;
-	int pos = find_variable_in_set(var_set, v);
-	if (pos == -1) {
+	set<const Variable*> var_set = point_to_vars;
+	set<const Variable*>::iterator pos = find_variable_in_set(var_set, v);
+	if (pos == var_set.end()) {
 		pos = find_field_variable_in_set(var_set, v);
 	}
-	if (pos >= 0) {
-		if (find_variable_in_set(var_set, garbage_ptr) >= 0) {
-			// if there is already a garbage pointer, delete this variable
-			var_set.erase(var_set.begin() + pos);
-		}
-		else {
-			// otherwise, replace this var with a garbage pointer
-			var_set[pos] = garbage_ptr;
-		}
+	if (pos != var_set.end()) {
+		// erase this variable and make sure there is a garbage pointe in
+		// the set
+		var_set.erase(pos);
+		var_set.insert(garbage_ptr);
 		return FactPointTo::make_fact(var, var_set);
 	}
 	return 0;
@@ -136,28 +126,26 @@ FactPointTo::mark_dead_var(const Variable* v)
 FactPointTo*
 FactPointTo::mark_func_end(const Statement* stm)
 {
-	vector<const Variable*> var_set = point_to_vars;
-	size_t len = var_set.size();
+	set<const Variable*> var_set = point_to_vars;
+	set<const Variable*>::iterator i, end = var_set.end();
 	bool changed = false;
-	bool has_garbage_ptr = (find_variable_in_set(var_set, garbage_ptr) >= 0);
 	const Function* func = stm->func;
+	vector<const Variable*> to_delete;
 
-	for (size_t i=0; i<len; i++) {
-		const Variable* v = var_set[i];
+	for (i = var_set.begin(); i != end; ++i) {
+		const Variable* v = *i;
 		if (func->is_var_on_stack(v, stm)) {
-			if (has_garbage_ptr) {
-				var_set.erase(var_set.begin() + i);
-				i--;
-				len--;
-			}
-			else {
-				var_set[i] = garbage_ptr;
-				has_garbage_ptr = true;
-			}
+			to_delete.push_back(*i);
 			changed = true;
 		}
 	}
+	// We avoided modifying the set during the traversal; make the
+	// modifications now.
+	for (size_t i = 0; i < to_delete.size(); i++) {
+		var_set.erase(to_delete[i]);
+	}
 	if (changed) {
+		var_set.insert(garbage_ptr);
 		return FactPointTo::make_fact(var, var_set);
 	}
 	return 0;
@@ -314,7 +302,17 @@ FactPointTo::make_fact(const Variable *v)
 }
 
 FactPointTo *
-FactPointTo::make_fact(const Variable* v, const vector<const Variable*>& set)
+FactPointTo::make_fact(const Variable* v, const vector<const Variable*>& vars)
+{
+	set<const Variable*> set;
+	copy(vars.begin(), vars.end(), inserter(set, set.end()));
+	FactPointTo *fact = new FactPointTo(v, set);
+	facts_.push_back(fact);
+	return fact;
+}
+
+FactPointTo *
+FactPointTo::make_fact(const Variable* v, const set<const Variable*>& set)
 {
 	FactPointTo *fact = new FactPointTo(v, set);
 	facts_.push_back(fact);
@@ -331,6 +329,20 @@ FactPointTo::make_fact(const Variable* v, const Variable* point_to)
 
 vector<const Fact*>
 FactPointTo::make_facts(vector<const Variable*> vars, const vector<const Variable*>& set)
+{
+	size_t i;
+	vector<const Fact*> facts;
+	for (i=0; i<vars.size(); i++) {
+		// if type is null, means they are special variables (most likely tbd_ptr) we don't care
+		if (vars[i]->type != 0) {
+			facts.push_back(make_fact(vars[i], set));
+		}
+	}
+	return facts;
+}
+
+vector<const Fact*>
+FactPointTo::make_facts(vector<const Variable*> vars, const set<const Variable*>& set)
 {
 	size_t i;
 	vector<const Fact*> facts;
@@ -366,13 +378,13 @@ FactPointTo::FactPointTo(const Variable* v) :
     var(v)
 {
     // every pointer starts from un-initialized state
-    point_to_vars.push_back(garbage_ptr);
+    point_to_vars.insert(garbage_ptr);
 }
 
 /*
  *
  */
-FactPointTo::FactPointTo(const Variable* v, const vector<const Variable*>& set) :
+FactPointTo::FactPointTo(const Variable* v, const set<const Variable*>& set) :
     Fact(ePointTo),
     var(v),
     point_to_vars(set)
@@ -386,7 +398,7 @@ FactPointTo::FactPointTo(const Variable* v, const Variable* point_to) :
     Fact(ePointTo),
     var(v)
 {
-    point_to_vars.push_back(point_to);
+    point_to_vars.insert(point_to);
 }
 
 #if 0
@@ -415,8 +427,9 @@ FactPointTo::~FactPointTo(void)
 bool
 FactPointTo::point_to(const Variable* v) const
 {
-	for (size_t i=0; i<point_to_vars.size(); i++) {
-		if (v->loose_match(point_to_vars[i]) || point_to_vars[i]->loose_match(v)) {
+	set<const Variable*>::const_iterator i, end = point_to_vars.end();
+	for (i = point_to_vars.begin(); i != end; ++i) {
+		if (v->loose_match(*i) || (*i)->loose_match(v)) {
 			return true;
 		}
 	}
@@ -515,7 +528,8 @@ bool FactPointTo::is_pointing_to_locals(const Variable* v, const Block* b, int i
 		FactPointTo f(v);
 		const FactPointTo* ft = dynamic_cast<const FactPointTo*>(find_related_fact(facts, &f));
 		if (ft) {
-			pointees = ft->get_point_to_vars();
+			const set<const Variable*>& pointee_set = ft->get_point_to_vars();
+			copy(pointee_set.begin(), pointee_set.end(), back_inserter(pointees));
 		}
 	} else {
 		pointees = merge_pointees_of_pointer(v, indirection, facts);
@@ -578,14 +592,10 @@ FactPointTo::join(const Fact& f)
     int changed = 0;
     if (is_related(f)) {
         const FactPointTo& fact = (const FactPointTo&)f;
-        const vector<const Variable*>& vars = fact.get_point_to_vars();
-        for (size_t i=0; i<vars.size(); i++) {
-            const Variable* v = vars[i];
-            if (!is_variable_in_set(point_to_vars, v)) {
-                point_to_vars.push_back(v);
-                changed = 1;
-            }
-        }
+        const set<const Variable*>& vars = fact.get_point_to_vars();
+        size_t old_size = point_to_vars.size();
+        copy(vars.begin(), vars.end(), inserter(point_to_vars, point_to_vars.end()));
+        changed = (old_size != point_to_vars.size());
     }
     return changed;
 }
@@ -602,17 +612,13 @@ FactPointTo::join_visits(const Fact& f)
     if (is_related(f)) {
         const FactPointTo& fact = (const FactPointTo&)f;
 		if (!fact.is_tbd_only()) {
-			const vector<const Variable*>& vars = fact.get_point_to_vars();
+			const set<const Variable*>& vars = fact.get_point_to_vars();
 			if (is_tbd_only()) {
 				point_to_vars.clear();
 			}
-			for (size_t i=0; i<vars.size(); i++) {
-				const Variable* v = vars[i];
-				if (!is_variable_in_set(point_to_vars, v)) {
-					point_to_vars.push_back(v);
-					changed = 1;
-				}
-			}
+			size_t old_size = point_to_vars.size();
+			copy(vars.begin(), vars.end(), inserter(point_to_vars, point_to_vars.end()));
+			changed = (old_size != point_to_vars.size());
         }
     }
     return changed;
@@ -653,11 +659,12 @@ void output_var(const Variable* var, std::ostream &out)
 void
 FactPointTo::Output(std::ostream &out) const
 {
-	for (size_t i=0; i<point_to_vars.size(); i++) {
-		if (i > 0) {
+	set<const Variable*>::const_iterator i, end = point_to_vars.end();
+	for (i = point_to_vars.begin(); i != end; ++i) {
+		if (i != point_to_vars.begin()) {
             out << " || ";
         }
-		const Variable* pointee = point_to_vars[i];
+		const Variable* pointee = *i;
 		if (pointee->isArray || pointee->is_array_field()) {
 			//const ArrayVariable* av = (const ArrayVariable*)pointee;
 			out << "(";
@@ -714,7 +721,7 @@ FactPointTo::merge_pointees_of_pointer(const Variable* ptr, int indirect, const 
 std::vector<const Variable*>
 FactPointTo::merge_pointees_of_pointers(const std::vector<const Variable*>& ptrs, const std::vector<const Fact*>& facts)
 {
-	size_t i, j;
+	size_t i;
 	vector<const Variable*> pointee_vars;
 	for (i=0; i<ptrs.size(); i++) {
 		const Variable* p = ptrs[i];
@@ -725,9 +732,9 @@ FactPointTo::merge_pointees_of_pointers(const std::vector<const Variable*>& ptrs
 		// well...this actually happens when p is a parameter of function f, and we are in the middle of creating f
 		assert(exist_fact);
 		if (exist_fact) {
-			for (j=0; j<exist_fact->get_point_to_vars().size(); j++) {
-				const Variable* pointee = exist_fact->get_point_to_vars()[j];
-				add_variable_to_set(pointee_vars, pointee);
+			set<const Variable*>::const_iterator j, end = exist_fact->get_point_to_vars().end();
+			for (j = exist_fact->get_point_to_vars().begin(); j != end; ++j) {
+				add_variable_to_set(pointee_vars, *j);
 			}
 		}
 	}
@@ -744,11 +751,12 @@ FactPointTo::merge_pointees_of_pointers(const std::vector<const Variable*>& ptrs
 const FactPointTo*
 FactPointTo::update_with_modified_index(const Variable* index_var) const
 {
-	size_t j, k;
-	vector<const Variable*> pointees = point_to_vars;
+	set<const Variable*>::const_iterator j, end = point_to_vars.end();
+	size_t k;
+	set<const Variable*> pointees = point_to_vars;
 	bool changed = false;
-	for (j=0; j<point_to_vars.size(); j++) {
-		const Variable* v = point_to_vars[j];
+	for (j = point_to_vars.begin(); j != end; ++j) {
+		const Variable* v = *j;
 		while (v->field_var_of) {
 			v = v->field_var_of;
 		}
@@ -771,7 +779,8 @@ FactPointTo::update_with_modified_index(const Variable* index_var) const
 				}
 			}
 			if (new_av) {
-				pointees[j] = new_av;
+				pointees.erase(*j);
+				pointees.insert(new_av);
 				changed = true;
 			}
 		}
@@ -798,28 +807,26 @@ FactPointTo::update_facts_with_modified_index(std::vector<const Fact*>& facts, c
 }
 
 void
-FactPointTo::update_ptr_aliases(const vector<Fact*>& facts, vector<const Variable*>& ptrs, vector<vector<const Variable*> >& aliases)
+FactPointTo::update_ptr_aliases(const vector<Fact*>& facts, set<const Variable*>& ptrs, map<const Variable*, set<const Variable*> >& aliases)
 {
-	size_t i, j;
+	size_t j;
 	for (j=0; j<facts.size(); j++) {
 		if (facts[j]->eCat == ePointTo) {
 			const FactPointTo* f = (const FactPointTo*)(facts[j]);
 			// don't include rv facts
 			if (f->get_var()->type != 0) {
-				int pos = find_variable_in_set(ptrs, f->get_var());
-				if (pos == -1) {
-					ptrs.push_back(f->get_var());
-					vector<const Variable*> set = f->get_point_to_vars();
-					aliases.push_back(set);
+				set<const Variable*>::const_iterator pos = find_variable_in_set(ptrs, f->get_var());
+				if (pos == ptrs.end()) {
+					ptrs.insert(f->get_var());
+					aliases[f->get_var()] = (f->get_point_to_vars());
 					assert(ptrs.size() == aliases.size());
 				}
 				else {
 					// merge the old alias set with new alias set
-					for (i=0; i<f->get_point_to_vars().size() ; i++) {
-						const Variable* v = f->get_point_to_vars()[i];
-						if (find_variable_in_set(aliases[pos], v) == -1) {
-							aliases[pos].push_back(v);
-						}
+					set<const Variable*>::const_iterator i, end = f->get_point_to_vars().end();
+					for (i = f->get_point_to_vars().begin(); i != end; ++i) {
+						const Variable* v = *i;
+						aliases[*pos].insert(v);
 					}
 				}
 			}
