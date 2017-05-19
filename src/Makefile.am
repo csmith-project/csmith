@@ -213,6 +213,7 @@ nodist_csmith_SOURCES = \
 	git_version.cpp
 
 EXTRA_DIST = \
+	CMakeLists.txt \
 	csmith.vcproj \
 	csmith.vcxproj \
 	git_version.cpp.in

@@ -288,6 +288,9 @@ dist_bin_SCRIPTS = \
 	launchn.pl \
 	test_csmith.pl
 
+EXTRA_DIST = \
+	CMakeLists.txt
+
 all: all-am
 
 .SUFFIXES:

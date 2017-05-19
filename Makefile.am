@@ -1,6 +1,6 @@
 ## -*- mode: Makefile-Automake -*-
 ##
-## Copyright (c) 2008, 2010, 2011, 2012 The University of Utah
+## Copyright (c) 2008, 2010, 2011, 2012, 2017 The University of Utah
 ## All rights reserved.
 ##
 ## This file is part of `csmith', a random generator of C programs.
@@ -36,6 +36,9 @@ SUBDIRS = \
 	src
 
 EXTRA_DIST = \
+	CMakeLists.txt \
+	cmake \
+	cmake_config.h.in \
 	git-hash.sh
 
 ###############################################################################

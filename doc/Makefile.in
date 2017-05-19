@@ -285,6 +285,12 @@ top_srcdir = @top_srcdir@
 dist_doc_DATA = \
 	probabilities.txt
 
+
+# Not currently distributed:
+#	pa.txt
+EXTRA_DIST = \
+	CMakeLists.txt
+
 all: all-am
 
 .SUFFIXES:
@@ -501,9 +507,6 @@ uninstall-am: uninstall-dist_docDATA
 
 .PRECIOUS: Makefile
 
-
-# Not currently distributed:
-#	pa.txt
 
 ###############################################################################
 
