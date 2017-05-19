@@ -95,10 +95,24 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
 endif()
 
+# Locate M4, which is needed to create some of the runtime headers.
+#
+message(STATUS "Check for M4 macro processor")
+find_program(M4
+  NAMES "m4${CMAKE_EXECUTABLE_SUFFIX}" "m4${CMAKE_EXECUTABLE_SUFFIX}"
+  DOC "Location of the M4 macro processor"
+  )
+if(NOT M4)
+  message(FATAL_ERROR
+    "The `m4' macro processor was not found.  "
+    "You must install `m4' before you can to compile Csmith.")
+endif()
+message(STATUS "Check for M4 macro processor: found ${M4}")
+
 ###############################################################################
 
 add_subdirectory(doc)
-# add_subdirectory(runtime)
+add_subdirectory(runtime)
 add_subdirectory(scripts)
 add_subdirectory(src)
 
