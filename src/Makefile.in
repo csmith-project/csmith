@@ -159,7 +159,8 @@ am_csmith_OBJECTS = csmith-AbsExtension.$(OBJEXT) \
 	csmith-VariableSelector.$(OBJEXT) \
 	csmith-VectorFilter.$(OBJEXT) csmith-platform.$(OBJEXT) \
 	csmith-random.$(OBJEXT) csmith-util.$(OBJEXT)
-csmith_OBJECTS = $(am_csmith_OBJECTS)
+nodist_csmith_OBJECTS = csmith-git_version.$(OBJEXT)
+csmith_OBJECTS = $(am_csmith_OBJECTS) $(nodist_csmith_OBJECTS)
 csmith_DEPENDENCIES =
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -220,7 +221,7 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(csmith_SOURCES)
+SOURCES = $(csmith_SOURCES) $(nodist_csmith_SOURCES)
 DIST_SOURCES = $(csmith_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
@@ -374,6 +375,15 @@ target_vendor = @target_vendor@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+GIT_HASH := $(shell "$(top_srcdir)/git-hash.sh" "$(top_srcdir)" || echo error)
+DUMMY1 := $(shell echo "$(GIT_HASH)" > git_version.txt.tmp)
+DUMMY2 := $(shell cmp -s git_version.txt.tmp git_version.txt || \
+		  cp git_version.txt.tmp git_version.txt)
+
+DUMMY3 := $(shell rm -f git_version.txt.tmp)
+git_version_edit = sed \
+	-e 's|@GIT_HASH[@]|$(GIT_HASH)|g'
+
 
 # XXX --- yuck!
 csmith_SOURCES = \
@@ -529,6 +539,7 @@ csmith_SOURCES = \
 	VariableSelector.h \
 	VectorFilter.cpp \
 	VectorFilter.h \
+	git_version.h \
 	platform.cpp \
 	platform.h \
 	random.cpp \
@@ -536,20 +547,25 @@ csmith_SOURCES = \
 	util.cpp \
 	util.h
 
+nodist_csmith_SOURCES = \
+	git_version.cpp
 
-# Include VC project files in the distribution.
 EXTRA_DIST = \
 	csmith.vcproj \
-	csmith.vcxproj
+	csmith.vcxproj \
+	git_version.cpp.in
 
-GIT_HASH := $(shell "$(top_srcdir)/git-hash.sh" "$(top_srcdir)" || echo error)
-GIT_FLAG = -DGIT_VERSION=\"$(GIT_HASH)\"
 csmith_CPPFLAGS = \
-	$(GIT_FLAG) \
 	$(BOOST_CPPFLAGS)
 
 csmith_LDFLAGS = $(BOOST_LDFLAGS)
 csmith_LDADD = $(BOOST_PROGRAM_OPTIONS_LIB)
+CLEANFILES = \
+	git_version.txt \
+	git_version.txt.tmp \
+	git_version.cpp \
+	git_version.cpp.tmp
+
 all: all-am
 
 .SUFFIXES:
@@ -717,6 +733,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-Variable.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-VariableSelector.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-VectorFilter.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-git_version.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-platform.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-random.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csmith-util.Po@am__quote@
@@ -1820,6 +1837,20 @@ csmith-util.obj: util.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-util.obj `if test -f 'util.cpp'; then $(CYGPATH_W) 'util.cpp'; else $(CYGPATH_W) '$(srcdir)/util.cpp'; fi`
 
+csmith-git_version.o: git_version.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-git_version.o -MD -MP -MF $(DEPDIR)/csmith-git_version.Tpo -c -o csmith-git_version.o `test -f 'git_version.cpp' || echo '$(srcdir)/'`git_version.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/csmith-git_version.Tpo $(DEPDIR)/csmith-git_version.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='git_version.cpp' object='csmith-git_version.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-git_version.o `test -f 'git_version.cpp' || echo '$(srcdir)/'`git_version.cpp
+
+csmith-git_version.obj: git_version.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT csmith-git_version.obj -MD -MP -MF $(DEPDIR)/csmith-git_version.Tpo -c -o csmith-git_version.obj `if test -f 'git_version.cpp'; then $(CYGPATH_W) 'git_version.cpp'; else $(CYGPATH_W) '$(srcdir)/git_version.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/csmith-git_version.Tpo $(DEPDIR)/csmith-git_version.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='git_version.cpp' object='csmith-git_version.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(csmith_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o csmith-git_version.obj `if test -f 'git_version.cpp'; then $(CYGPATH_W) 'git_version.cpp'; else $(CYGPATH_W) '$(srcdir)/git_version.cpp'; fi`
+
 mostlyclean-libtool:
 	-rm -f *.lo
 
@@ -1937,6 +1968,7 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
@@ -2033,6 +2065,13 @@ uninstall-am: uninstall-binPROGRAMS
 
 .PRECIOUS: Makefile
 
+
+git_version.cpp: git_version.cpp.in git_version.txt
+	rm -f $@ $@.tmp
+	srcdir=''; \
+	  test -f ./$@.in || srcdir=$(srcdir)/; \
+	  $(git_version_edit) $${srcdir}$@.in > $@.tmp
+	mv $@.tmp $@
 
 ###############################################################################
 

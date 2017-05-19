@@ -93,6 +93,7 @@ FUTURE:
 #include "CGOptions.h"
 #include "AbsProgramGenerator.h"
 
+#include "git_version.h"
 #include "platform.h"
 #include "random.h"
 
@@ -113,9 +114,7 @@ static void
 print_version(void)
 {
 	cout << PACKAGE_STRING << endl;
-#ifdef GIT_VERSION
-	cout << "Git version: " << GIT_VERSION << endl;
-#endif
+	cout << "Git version: " << git_version << endl;
 	// XXX print copyright, contact info, etc.?
 }
 
