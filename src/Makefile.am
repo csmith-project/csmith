@@ -217,11 +217,9 @@ EXTRA_DIST = \
 	csmith.vcxproj \
 	git_version.cpp.in
 
-csmith_CPPFLAGS = \
-	$(BOOST_CPPFLAGS)
-
-csmith_LDFLAGS = $(BOOST_LDFLAGS)
-csmith_LDADD   = $(BOOST_PROGRAM_OPTIONS_LIB)
+# csmith_CPPFLAGS =
+# csmith_LDFLAGS  =
+# csmith_LDADD    =
 
 CLEANFILES = \
 	git_version.txt \

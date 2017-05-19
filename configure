@@ -15856,7 +15856,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-
 # If we're using g++, set the default `CXXFLAGS' to something more pedantic.
 #
 if test "$ac_test_CXXFLAGS" = set; then

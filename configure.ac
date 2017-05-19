@@ -56,15 +56,12 @@ AC_PROG_CXX
 AC_PROG_RANLIB
 AC_PROG_LIBTOOL
 
-dnl AX_BOOST_BASE()
-dnl AX_BOOST_PROGRAM_OPTIONS
-
 # If we're using g++, set the default `CXXFLAGS' to something more pedantic.
 #
 if test "$ac_test_CXXFLAGS" = set; then
   # The user specified `CXXFLAGS', so do nothing.
   CXXFLAGS="$CXXFLAGS"
-elif test "$GXX" = yes; then 
+elif test "$GXX" = yes; then
   CXXFLAGS="-g -O3 -Wall -Wextra -Wno-long-long"
 fi
 
