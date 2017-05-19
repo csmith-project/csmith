@@ -97,9 +97,9 @@ endif()
 
 ###############################################################################
 
-# add_subdirectory(doc)
+add_subdirectory(doc)
 # add_subdirectory(runtime)
-# add_subdirectory(scripts)
+add_subdirectory(scripts)
 add_subdirectory(src)
 
 ###############################################################################
