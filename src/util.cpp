@@ -1,6 +1,6 @@
 // -*- mode: C++ -*-
 //
-// Copyright (c) 2007, 2008, 2010, 2011 The University of Utah
+// Copyright (c) 2007, 2008, 2010, 2011, 2017 The University of Utah
 // All rights reserved.
 //
 // This file is part of `csmith', a random generator of C programs.
@@ -28,6 +28,10 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // util.cpp --- various utility functions
+
+#if HAVE_CONFIG_H
+#  include <config.h>
+#endif
 
 #include "util.h"
 
