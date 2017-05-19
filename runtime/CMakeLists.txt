@@ -65,9 +65,9 @@ add_library(libcsmith_so SHARED
   volatile_runtime.h
   )
 set_target_properties(libcsmith_so PROPERTIES OUTPUT_NAME "csmith")
-# Set library version to be 0, to mimic what the Automake-based path installs.
-# This is probably not very useful.
-set_target_properties(libcsmith_so PROPERTIES SOVERSION 0)
+# Set library build and API versions to mimic what the Automake-based path
+# installs (for Linux).  This is probably not very useful.
+set_target_properties(libcsmith_so PROPERTIES VERSION 0.0.0 SOVERSION 0)
 
 install(TARGETS libcsmith_so
   LIBRARY
