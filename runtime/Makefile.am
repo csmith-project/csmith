@@ -1,6 +1,6 @@
 ## -*- mode: Makefile-Automake -*-
 ##
-## Copyright (c) 2010, 2011, 2012, 2015 The University of Utah
+## Copyright (c) 2010, 2011, 2012, 2015, 2017 The University of Utah
 ## All rights reserved.
 ##
 ## This file is part of `csmith', a random generator of C programs.
@@ -44,11 +44,7 @@ lib_LTLIBRARIES = libcsmith.la
 libcsmith_la_SOURCES = \
 	$(libcsmith_a_SOURCES)
 
-GIT_HASH := $(shell "$(top_srcdir)/git-hash.sh" "$(top_srcdir)" || echo error)
-GIT_FLAG = -DGIT_VERSION=\"$(GIT_HASH)\"
-
-libcsmith_a_CPPFLAGS = \
-	$(GIT_FLAG)
+libcsmith_a_CPPFLAGS =
 libcsmith_la_CPPFLAGS = \
 	$(libcsmith_a_CPPFLAGS)
 

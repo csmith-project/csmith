@@ -362,11 +362,7 @@ lib_LTLIBRARIES = libcsmith.la
 libcsmith_la_SOURCES = \
 	$(libcsmith_a_SOURCES)
 
-GIT_HASH := $(shell "$(top_srcdir)/git-hash.sh" "$(top_srcdir)" || echo error)
-GIT_FLAG = -DGIT_VERSION=\"$(GIT_HASH)\"
-libcsmith_a_CPPFLAGS = \
-	$(GIT_FLAG)
-
+libcsmith_a_CPPFLAGS = 
 libcsmith_la_CPPFLAGS = \
 	$(libcsmith_a_CPPFLAGS)
 
