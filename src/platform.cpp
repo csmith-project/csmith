@@ -44,9 +44,6 @@
 #  include <config.h>
 #endif
 
-#include <sys/types.h>
-#include <sys/timeb.h>
-
 #include "platform.h"
 
 #if defined(__powerpc__) || defined(__powerpc64__)
