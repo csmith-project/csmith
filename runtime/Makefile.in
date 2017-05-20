@@ -95,7 +95,9 @@ host_triplet = @host@
 target_triplet = @target@
 subdir = runtime
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
+	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
+	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
 	$(top_srcdir)/version.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -103,6 +105,7 @@ DIST_COMMON = $(srcdir)/Makefile.am \
 	$(nobase_libcsmith_a_include_HEADERS) $(noinst_HEADERS) \
 	$(am__DIST_COMMON)
 mkinstalldirs = $(install_sh) -d
+CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
@@ -166,7 +169,7 @@ AM_V_at = $(am__v_at_@AM_V@)
 am__v_at_ = $(am__v_at_@AM_DEFAULT_V@)
 am__v_at_0 = @
 am__v_at_1 = 
-DEFAULT_INCLUDES = -I.@am__isrc@
+DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/autoconf/depcomp
 am__depfiles_maybe = depfiles
 am__mv = mv -f
@@ -358,11 +361,7 @@ lib_LTLIBRARIES = libcsmith.la
 libcsmith_la_SOURCES = \
 	$(libcsmith_a_SOURCES)
 
-GIT_HASH := $(shell "$(top_srcdir)/git-hash.sh" "$(top_srcdir)" || echo error)
-GIT_FLAG = -DGIT_VERSION=\"$(GIT_HASH)\"
-libcsmith_a_CPPFLAGS = \
-	$(GIT_FLAG)
-
+libcsmith_a_CPPFLAGS = 
 libcsmith_la_CPPFLAGS = \
 	$(libcsmith_a_CPPFLAGS)
 
@@ -406,8 +405,9 @@ CLEANFILES = \
 	$(BUILT_SOURCES)
 
 
-# We distribute, but do not build, the following Windows support files.
+# We distribute, but do not build, the Windows support files in EXTRA_DIST.
 EXTRA_DIST = \
+	CMakeLists.txt \
 	windows/_rand48.c \
 	windows/lrand48.c \
 	windows/rand48.h \

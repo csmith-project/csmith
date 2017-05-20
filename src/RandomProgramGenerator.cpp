@@ -1,6 +1,6 @@
 // -*- mode: C++ -*-
 //
-// Copyright (c) 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014 The University of Utah
+// Copyright (c) 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2017 The University of Utah
 // All rights reserved.
 //
 // This file is part of `csmith', a random generator of C programs.
@@ -74,6 +74,11 @@ FUTURE:
 	- Work from leaves to root
 	- If node uses pointer or array, it is potential heap store allocated.
 */
+
+#if HAVE_CONFIG_H
+#  include <config.h>
+#endif
+
 #ifdef WIN32
 #pragma warning(disable : 4786)   /* Disable annoying warning messages */
 #endif
@@ -88,6 +93,7 @@ FUTURE:
 #include "CGOptions.h"
 #include "AbsProgramGenerator.h"
 
+#include "git_version.h"
 #include "platform.h"
 #include "random.h"
 
@@ -108,9 +114,7 @@ static void
 print_version(void)
 {
 	cout << PACKAGE_STRING << endl;
-#ifdef GIT_VERSION
-	cout << "Git version: " << GIT_VERSION << endl;
-#endif
+	cout << "Git version: " << git_version << endl;
 	// XXX print copyright, contact info, etc.?
 }
 

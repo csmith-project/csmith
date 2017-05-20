@@ -1,6 +1,6 @@
 ## -*- mode: Makefile-Automake -*-
 ##
-## Copyright (c) 2008-2012 The University of Utah
+## Copyright (c) 2008-2017 The University of Utah
 ## All rights reserved.
 ##
 ## This file is part of `csmith', a random generator of C programs.
@@ -30,6 +30,22 @@
 ###############################################################################
 
 bin_PROGRAMS = csmith
+
+GIT_HASH := $(shell "$(top_srcdir)/git-hash.sh" "$(top_srcdir)" || echo error)
+DUMMY1 := $(shell echo "$(GIT_HASH)" > git_version.txt.tmp)
+DUMMY2 := $(shell cmp -s git_version.txt.tmp git_version.txt || \
+		  cp git_version.txt.tmp git_version.txt)
+DUMMY3 := $(shell rm -f git_version.txt.tmp)
+
+git_version_edit = sed \
+	-e 's|@GIT_HASH[@]|$(GIT_HASH)|g'
+
+git_version.cpp: git_version.cpp.in git_version.txt
+	rm -f $@ $@.tmp
+	srcdir=''; \
+	  test -f ./$@.in || srcdir=$(srcdir)/; \
+	  $(git_version_edit) $${srcdir}$@.in > $@.tmp
+	mv $@.tmp $@
 
 # XXX --- yuck!
 csmith_SOURCES = \
@@ -185,6 +201,7 @@ csmith_SOURCES = \
 	VariableSelector.h \
 	VectorFilter.cpp \
 	VectorFilter.h \
+	git_version.h \
 	platform.cpp \
 	platform.h \
 	random.cpp \
@@ -192,20 +209,24 @@ csmith_SOURCES = \
 	util.cpp \
 	util.h
 
-# Include VC project files in the distribution.
+nodist_csmith_SOURCES = \
+	git_version.cpp
+
 EXTRA_DIST = \
+	CMakeLists.txt \
 	csmith.vcproj \
-	csmith.vcxproj
+	csmith.vcxproj \
+	git_version.cpp.in
 
-GIT_HASH := $(shell "$(top_srcdir)/git-hash.sh" "$(top_srcdir)" || echo error)
-GIT_FLAG = -DGIT_VERSION=\"$(GIT_HASH)\"
+# csmith_CPPFLAGS =
+# csmith_LDFLAGS  =
+# csmith_LDADD    =
 
-csmith_CPPFLAGS = \
-	$(GIT_FLAG) \
-	$(BOOST_CPPFLAGS)
-
-csmith_LDFLAGS = $(BOOST_LDFLAGS)
-csmith_LDADD   = $(BOOST_PROGRAM_OPTIONS_LIB)
+CLEANFILES = \
+	git_version.txt \
+	git_version.txt.tmp \
+	git_version.cpp \
+	git_version.cpp.tmp
 
 ###############################################################################
 

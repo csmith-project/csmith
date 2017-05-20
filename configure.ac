@@ -1,6 +1,6 @@
 ## -*- mode: Autoconf -*-
 ##
-## Copyright (c) 2008, 2010, 2011 The University of Utah
+## Copyright (c) 2008, 2010, 2011, 2017 The University of Utah
 ## All rights reserved.
 ##
 ## This file is part of `csmith', a random generator of C programs.
@@ -34,7 +34,8 @@ AC_INIT(csmith, CSMITH_VERSION, CSMITH_BUGREPORT, csmith, CSMITH_URL)
 
 AC_CONFIG_SRCDIR(src/RandomProgramGenerator.cpp)
 AC_CONFIG_AUX_DIR(autoconf)
-dnl AM_CONFIG_HEADER(config.h)
+AC_CONFIG_MACRO_DIR(m4)
+AC_CONFIG_HEADERS(config.h)
 
 AC_CANONICAL_TARGET
 
@@ -55,15 +56,12 @@ AC_PROG_CXX
 AC_PROG_RANLIB
 AC_PROG_LIBTOOL
 
-dnl AX_BOOST_BASE()
-dnl AX_BOOST_PROGRAM_OPTIONS
-
 # If we're using g++, set the default `CXXFLAGS' to something more pedantic.
 #
 if test "$ac_test_CXXFLAGS" = set; then
   # The user specified `CXXFLAGS', so do nothing.
   CXXFLAGS="$CXXFLAGS"
-elif test "$GXX" = yes; then 
+elif test "$GXX" = yes; then
   CXXFLAGS="-g -O3 -Wall -Wextra -Wno-long-long"
 fi
 

@@ -1,6 +1,6 @@
 // -*- mode: C++ -*-
 //
-// Copyright (c) 2007, 2008, 2009, 2010, 2011, 2013, 2014 The University of Utah
+// Copyright (c) 2007, 2008, 2009, 2010, 2011, 2013, 2014, 2017 The University of Utah
 // All rights reserved.
 //
 // This file is part of `csmith', a random generator of C programs.
@@ -27,6 +27,10 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+#if HAVE_CONFIG_H
+#  include <config.h>
+#endif
+
 #include "OutputMgr.h"
 
 #include <cassert>
@@ -42,6 +46,7 @@
 #include "ExtensionMgr.h"
 #include "Constant.h"
 #include "ArrayVariable.h"
+#include "git_version.h"
 #include "random.h"
 #include "util.h"
 
@@ -264,9 +269,7 @@ OutputMgr::OutputHeader(int argc, char *argv[], unsigned long seed)
 		out << " * This is a RANDOMLY GENERATED PROGRAM." << endl;
 		out << " *" << endl;
 		out << " * Generator: " << PACKAGE_STRING << endl;
-#ifdef GIT_VERSION
-		out << " * Git version: " << GIT_VERSION << endl;
-#endif
+		out << " * Git version: " << git_version << endl;
 		out << " * Options:  ";
 		if (argc <= 1) {
 			out << " (none)";

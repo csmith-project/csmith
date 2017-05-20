@@ -1,6 +1,6 @@
 ## -*- mode: Makefile-Automake -*-
 ##
-## Copyright (c) 2010, 2011, 2012, 2015 The University of Utah
+## Copyright (c) 2010, 2011, 2012, 2015, 2017 The University of Utah
 ## All rights reserved.
 ##
 ## This file is part of `csmith', a random generator of C programs.
@@ -44,11 +44,7 @@ lib_LTLIBRARIES = libcsmith.la
 libcsmith_la_SOURCES = \
 	$(libcsmith_a_SOURCES)
 
-GIT_HASH := $(shell "$(top_srcdir)/git-hash.sh" "$(top_srcdir)" || echo error)
-GIT_FLAG = -DGIT_VERSION=\"$(GIT_HASH)\"
-
-libcsmith_a_CPPFLAGS = \
-	$(GIT_FLAG)
+libcsmith_a_CPPFLAGS =
 libcsmith_la_CPPFLAGS = \
 	$(libcsmith_a_CPPFLAGS)
 
@@ -98,8 +94,9 @@ safe_math_macros.h: safe_math_macros.m4
 safe_math_macros_notmp.h: safe_math_macros_notmp.m4
 	$(M4) < $< > $@
 
-# We distribute, but do not build, the following Windows support files.
+# We distribute, but do not build, the Windows support files in EXTRA_DIST.
 EXTRA_DIST = \
+	CMakeLists.txt \
 	windows/_rand48.c \
 	windows/lrand48.c \
 	windows/rand48.h \

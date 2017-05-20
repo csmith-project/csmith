@@ -1,6 +1,6 @@
 /* -*- mode: C -*-
  *
- * Copyright (c) 2008 The University of Utah
+ * Copyright (c) 2008, 2017 The University of Utah
  * All rights reserved.
  *
  * This file is part of `csmith', a random generator of C programs.
@@ -27,6 +27,10 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
+#if HAVE_CONFIG_H
+#  include <config.h>
+#endif
 
 /*****************************************************************************/
 
