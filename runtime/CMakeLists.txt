@@ -69,10 +69,17 @@ set_target_properties(libcsmith_so PROPERTIES OUTPUT_NAME "csmith")
 # installs (for Linux).  This is probably not very useful.
 set_target_properties(libcsmith_so PROPERTIES VERSION 0.0.0 SOVERSION 0)
 
+if(WIN32)
+install(TARGETS libcsmith_so
+  RUNTIME
+  DESTINATION "${LIB_DIR}"
+  )
+else()
 install(TARGETS libcsmith_so
   LIBRARY
   DESTINATION "${LIB_DIR}"
   )
+endif()
 
 ###############################################################################
 
