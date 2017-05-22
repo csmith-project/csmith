@@ -51,8 +51,7 @@ add_library(libcsmith_a STATIC
 set_target_properties(libcsmith_a PROPERTIES OUTPUT_NAME "csmith")
 
 install(TARGETS libcsmith_a
-  ARCHIVE
-  DESTINATION "${LIB_DIR}"
+  ARCHIVE DESTINATION "${LIB_DIR}"
   )
 
 #####
@@ -69,17 +68,13 @@ set_target_properties(libcsmith_so PROPERTIES OUTPUT_NAME "csmith")
 # installs (for Linux).  This is probably not very useful.
 set_target_properties(libcsmith_so PROPERTIES VERSION 0.0.0 SOVERSION 0)
 
-if(WIN32)
+# Linux, OS X, FreeBSD et al. look for the LIBRARY specification.
+# Windows ("DLL platforms") looks for the RUNTIME specification.
+# See, e.g., https://stackoverflow.com/questions/14990343/cmake-error-targets-given-no-library-destination-for-shared-library-target
 install(TARGETS libcsmith_so
-  RUNTIME
-  DESTINATION "${LIB_DIR}"
+  LIBRARY DESTINATION "${LIB_DIR}"
+  RUNTIME DESTINATION "${LIB_DIR}"
   )
-else()
-install(TARGETS libcsmith_so
-  LIBRARY
-  DESTINATION "${LIB_DIR}"
-  )
-endif()
 
 ###############################################################################
 
