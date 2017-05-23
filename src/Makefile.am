@@ -29,6 +29,9 @@
 
 ###############################################################################
 
+# For source files in `windows/'.
+AUTOMAKE_OPTIONS = subdir-objects
+
 bin_PROGRAMS = csmith
 
 GIT_HASH := $(shell "$(top_srcdir)/git-hash.sh" "$(top_srcdir)" || echo error)
@@ -211,6 +214,15 @@ csmith_SOURCES = \
 
 nodist_csmith_SOURCES = \
 	git_version.cpp
+
+# Windows lacks `lrand48', so we provide an implementation.
+if WINDOWS
+csmith_SOURCES += \
+	windows/_rand48.c \
+	windows/lrand48.c \
+	windows/rand48.h \
+	windows/srand48.c
+endif
 
 EXTRA_DIST = \
 	CMakeLists.txt \

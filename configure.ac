@@ -37,7 +37,7 @@ AC_CONFIG_AUX_DIR(autoconf)
 AC_CONFIG_MACRO_DIR(m4)
 AC_CONFIG_HEADERS(config.h)
 
-AC_CANONICAL_TARGET
+AC_CANONICAL_HOST
 
 # `-Wno-portability': avoid warnings about using `:=' in `Makefile.am' files.
 AM_INIT_AUTOMAKE([-Wall -Wno-portability])
@@ -55,6 +55,16 @@ AM_PROG_CC_C_O
 AC_PROG_CXX
 AC_PROG_RANLIB
 AC_PROG_LIBTOOL
+
+# Determine if we are compiling for Windows.
+#
+test_windows=no
+case "${host_os}" in
+  cygwin*|mingw*|windows*)
+    test_windows=yes
+    ;;
+esac
+AM_CONDITIONAL([WINDOWS], [test "$test_windows" = "yes"])
 
 # If we're using g++, set the default `CXXFLAGS' to something more pedantic.
 #
