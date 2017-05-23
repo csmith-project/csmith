@@ -43,7 +43,7 @@ configure_file("git_version.cpp.in" "git_version.cpp" @ONLY)
 include_directories(${CMAKE_BINARY_DIR})
 include_directories(${PROJECT_SOURCE_DIR}) # needed for gen'ed .cpp files
 
-add_executable(csmith
+set(csmith_SOURCES
   ${CMAKE_BINARY_DIR}/config.h
   AbsExtension.cpp
   AbsExtension.h
@@ -205,14 +205,27 @@ add_executable(csmith
   util.cpp
   util.h
   ${PROJECT_BINARY_DIR}/git_version.cpp
-)
+  )
+if(WIN32)
+  include_directories(${PROJECT_SOURCE_DIR}/windows)
+  list(APPEND csmith_SOURCES
+    windows/_rand48.c
+    windows/lrand48.c
+    windows/rand48.h
+    windows/srand48.c
+    )
+endif()
+
+add_executable(csmith
+  ${csmith_SOURCES}
+  )
 
 # target_link_libraries(csmith ...)
 
 install(PROGRAMS
   "${PROJECT_BINARY_DIR}/csmith"
   DESTINATION "${BIN_DIR}"
-)
+  )
 
 ###############################################################################
 
