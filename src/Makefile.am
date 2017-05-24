@@ -216,7 +216,8 @@ nodist_csmith_SOURCES = \
 	git_version.cpp
 
 # Windows lacks `lrand48', so we provide an implementation.
-if WINDOWS
+if HAVE_LRAND48
+else
 csmith_SOURCES += \
 	windows/_rand48.c \
 	windows/lrand48.c \

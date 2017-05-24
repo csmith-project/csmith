@@ -34,6 +34,7 @@ cmake_minimum_required(VERSION 2.8.12)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 include(CheckIncludeFile)
+include(CheckSymbolExists)
 include(GetGitRevisionDescription)
 
 project(csmith)
@@ -74,6 +75,8 @@ check_include_file("string.h"		HAVE_STRING_H)
 check_include_file("sys/stat.h"		HAVE_SYS_STAT_H)
 check_include_file("sys/types.h"	HAVE_SYS_TYPES_H)
 check_include_file("unistd.h"		HAVE_UNISTD_H)
+
+check_symbol_exists(lrand48 "stdlib.h"	HAVE_LRAND48)
 
 set(csmith_PACKAGE			"csmith")
 set(csmith_PACKAGE_BUGREPORT		"csmith-bugs@flux.utah.edu")

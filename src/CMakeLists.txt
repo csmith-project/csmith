@@ -206,7 +206,7 @@ set(csmith_SOURCES
   util.h
   ${PROJECT_BINARY_DIR}/git_version.cpp
   )
-if(WIN32)
+if(NOT HAVE_LRAND48)
   include_directories(${PROJECT_SOURCE_DIR}/windows)
   list(APPEND csmith_SOURCES
     windows/_rand48.c

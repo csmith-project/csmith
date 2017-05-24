@@ -637,8 +637,8 @@ am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
 M4
-WINDOWS_FALSE
-WINDOWS_TRUE
+HAVE_LRAND48_FALSE
+HAVE_LRAND48_TRUE
 CXXCPP
 CPP
 LT_SYS_LIBRARY_PATH
@@ -15814,20 +15814,29 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-# Determine if we are compiling for Windows.
+# Csmith uses `lrand48', and we provide an implementation for platforms that
+# do not have it (in particular, Windows).
 #
-test_windows=no
-case "${host_os}" in
-  cygwin*|mingw*|windows*)
-    test_windows=yes
-    ;;
-esac
- if test "$test_windows" = "yes"; then
-  WINDOWS_TRUE=
-  WINDOWS_FALSE='#'
+have_lrand48="no"
+for ac_func in lrand48
+do :
+  ac_fn_c_check_func "$LINENO" "lrand48" "ac_cv_func_lrand48"
+if test "x$ac_cv_func_lrand48" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LRAND48 1
+_ACEOF
+ have_lrand48="yes"
 else
-  WINDOWS_TRUE='#'
-  WINDOWS_FALSE=
+  have_lrand48="no"
+fi
+done
+
+ if test "$have_lrand48" = "yes"; then
+  HAVE_LRAND48_TRUE=
+  HAVE_LRAND48_FALSE='#'
+else
+  HAVE_LRAND48_TRUE='#'
+  HAVE_LRAND48_FALSE=
 fi
 
 
@@ -16028,8 +16037,8 @@ if test -z "${am__fastdepCXX_TRUE}" && test -z "${am__fastdepCXX_FALSE}"; then
   as_fn_error $? "conditional \"am__fastdepCXX\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
-if test -z "${WINDOWS_TRUE}" && test -z "${WINDOWS_FALSE}"; then
-  as_fn_error $? "conditional \"WINDOWS\" was never defined.
+if test -z "${HAVE_LRAND48_TRUE}" && test -z "${HAVE_LRAND48_FALSE}"; then
+  as_fn_error $? "conditional \"HAVE_LRAND48\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 

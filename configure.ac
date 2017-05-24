@@ -56,15 +56,12 @@ AC_PROG_CXX
 AC_PROG_RANLIB
 AC_PROG_LIBTOOL
 
-# Determine if we are compiling for Windows.
+# Csmith uses `lrand48', and we provide an implementation for platforms that
+# do not have it (in particular, Windows).
 #
-test_windows=no
-case "${host_os}" in
-  cygwin*|mingw*|windows*)
-    test_windows=yes
-    ;;
-esac
-AM_CONDITIONAL([WINDOWS], [test "$test_windows" = "yes"])
+have_lrand48="no"
+AC_CHECK_FUNCS([lrand48], [have_lrand48="yes"], [have_lrand48="no"])
+AM_CONDITIONAL([HAVE_LRAND48], [test "$have_lrand48" = "yes"])
 
 # If we're using g++, set the default `CXXFLAGS' to something more pedantic.
 #

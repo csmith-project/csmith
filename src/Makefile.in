@@ -93,11 +93,11 @@ host_triplet = @host@
 bin_PROGRAMS = csmith$(EXEEXT)
 
 # Windows lacks `lrand48', so we provide an implementation.
-@WINDOWS_TRUE@am__append_1 = \
-@WINDOWS_TRUE@	windows/_rand48.c \
-@WINDOWS_TRUE@	windows/lrand48.c \
-@WINDOWS_TRUE@	windows/rand48.h \
-@WINDOWS_TRUE@	windows/srand48.c
+@HAVE_LRAND48_FALSE@am__append_1 = \
+@HAVE_LRAND48_FALSE@	windows/_rand48.c \
+@HAVE_LRAND48_FALSE@	windows/lrand48.c \
+@HAVE_LRAND48_FALSE@	windows/rand48.h \
+@HAVE_LRAND48_FALSE@	windows/srand48.c
 
 subdir = src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -166,9 +166,9 @@ am__csmith_SOURCES_DIST = AbsExtension.cpp AbsExtension.h \
 	windows/_rand48.c windows/lrand48.c windows/rand48.h \
 	windows/srand48.c
 am__dirstamp = $(am__leading_dot)dirstamp
-@WINDOWS_TRUE@am__objects_1 = windows/_rand48.$(OBJEXT) \
-@WINDOWS_TRUE@	windows/lrand48.$(OBJEXT) \
-@WINDOWS_TRUE@	windows/srand48.$(OBJEXT)
+@HAVE_LRAND48_FALSE@am__objects_1 = windows/_rand48.$(OBJEXT) \
+@HAVE_LRAND48_FALSE@	windows/lrand48.$(OBJEXT) \
+@HAVE_LRAND48_FALSE@	windows/srand48.$(OBJEXT)
 am_csmith_OBJECTS = AbsExtension.$(OBJEXT) \
 	AbsProgramGenerator.$(OBJEXT) AbsRndNumGenerator.$(OBJEXT) \
 	ArrayVariable.$(OBJEXT) Block.$(OBJEXT) Bookkeeper.$(OBJEXT) \
