@@ -227,8 +227,6 @@ endif
 
 EXTRA_DIST = \
 	CMakeLists.txt \
-	csmith.vcproj \
-	csmith.vcxproj \
 	git_version.cpp.in
 
 # csmith_CPPFLAGS =
