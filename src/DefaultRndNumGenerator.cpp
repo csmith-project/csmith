@@ -45,13 +45,6 @@
 #include "CGOptions.h"
 #include "DeltaMonitor.h"
 
-#ifdef WIN32
-extern "C" {
-	extern void srand48(long seed);
-	extern long lrand48(void);
-}
-#endif
-
 DefaultRndNumGenerator *DefaultRndNumGenerator::impl_ = 0;
 
 /*
@@ -180,14 +173,6 @@ DefaultRndNumGenerator::rnd_flipcoin(const unsigned int p, const Filter *f, cons
 	}
 	return rv;
 }
-
-#if 0
-void
-DefaultRndNumGenerator::seedrand( unsigned long seed )
-{
-	srand48 (seed);
-}
-#endif
 
 std::string &
 DefaultRndNumGenerator::trace_depth()

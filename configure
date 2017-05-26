@@ -15840,6 +15840,21 @@ else
 fi
 
 
+# OpenBSD requires a special call to activate the standard, deterministic
+# behavior of `lrand48'.
+#
+for ac_func in srand48_deterministic
+do :
+  ac_fn_c_check_func "$LINENO" "srand48_deterministic" "ac_cv_func_srand48_deterministic"
+if test "x$ac_cv_func_srand48_deterministic" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_SRAND48_DETERMINISTIC 1
+_ACEOF
+
+fi
+done
+
+
 # If we're using g++, set the default `CXXFLAGS' to something more pedantic.
 #
 if test "$ac_test_CXXFLAGS" = set; then

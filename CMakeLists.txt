@@ -77,6 +77,8 @@ check_include_file("sys/types.h"	HAVE_SYS_TYPES_H)
 check_include_file("unistd.h"		HAVE_UNISTD_H)
 
 check_symbol_exists(lrand48 "stdlib.h"	HAVE_LRAND48)
+check_symbol_exists(srand48_deterministic
+			"stdlib.h"	HAVE_SRAND48_DETERMINISTIC)
 
 set(csmith_PACKAGE			"csmith")
 set(csmith_PACKAGE_BUGREPORT		"csmith-bugs@flux.utah.edu")

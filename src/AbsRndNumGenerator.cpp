@@ -43,7 +43,7 @@
 
 using namespace std;
 
-#ifdef WIN32
+#ifndef HAVE_LRAND48
 extern "C" {
 	extern void srand48(long seed);
 	extern long lrand48(void);
@@ -94,7 +94,13 @@ AbsRndNumGenerator::make_rndnum_generator(RNDNUM_GENERATOR impl, const unsigned 
 void
 AbsRndNumGenerator::seedrand(const unsigned long seed )
 {
-	srand48 (seed);
+#ifdef HAVE_SRAND48_DETERMINISTIC
+	// OpenBSD requires a special call to activate the standard,
+	// deterministic behavior of `lrand48'.
+	srand48_deterministic(seed);
+#else
+	srand48(seed);
+#endif
 }
 
 /*

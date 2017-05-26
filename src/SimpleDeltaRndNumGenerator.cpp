@@ -81,8 +81,6 @@ SimpleDeltaRndNumGenerator::make_rndnum_generator(const unsigned long /*seed*/)
 
 	impl_ = new SimpleDeltaRndNumGenerator(seq);
 
-	//srand48(seed);
-
 	impl_->random_point_ = SimpleDeltaRndNumGenerator::pure_rnd_upto(seq->sequence_length());
 
 	assert(impl_);

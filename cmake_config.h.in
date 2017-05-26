@@ -10,6 +10,9 @@
 /* Define to 1 if you have the <memory.h> header file. */
 #cmakedefine HAVE_MEMORY_H 1
 
+/* Define to 1 if you have the `srand48_deterministic' function. */
+#cmakedefine HAVE_SRAND48_DETERMINISTIC
+
 /* Define to 1 if you have the <stdint.h> header file. */
 #cmakedefine HAVE_STDINT_H 1
 

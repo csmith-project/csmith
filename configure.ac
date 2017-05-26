@@ -63,6 +63,11 @@ have_lrand48="no"
 AC_CHECK_FUNCS([lrand48], [have_lrand48="yes"], [have_lrand48="no"])
 AM_CONDITIONAL([HAVE_LRAND48], [test "$have_lrand48" = "yes"])
 
+# OpenBSD requires a special call to activate the standard, deterministic
+# behavior of `lrand48'.
+#
+AC_CHECK_FUNCS([srand48_deterministic])
+
 # If we're using g++, set the default `CXXFLAGS' to something more pedantic.
 #
 if test "$ac_test_CXXFLAGS" = set; then
