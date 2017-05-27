@@ -45,50 +45,71 @@
 #endif
 
 #include "platform.h"
+#include <stdlib.h>
+#if HAVE_BSD_STDLIB_H
+#  include <bsd/stdlib.h>
+#endif
 
-#if defined(__powerpc__) || defined(__powerpc64__)
+///////////////////////////////////////////////////////////////////////////////
+
+// If this platform does not have `arc4random_buf', define a static,
+// platform-specific function `read_time' so that we can set the random seed
+// from the current time.
+//
+#ifndef HAVE_ARC4RANDOM_BUF
+#  if defined(__powerpc__) || defined(__powerpc64__)
 static inline unsigned long read_time(void)
 {
 	unsigned long a;
-
 	asm volatile("mftb %0" : "=r" (a));
-
 	return a;
 }
-#else
-#ifdef WIN32
-static unsigned __int64 read_time(void) {
-        unsigned l, h;
-        _asm {rdtsc
-        mov l, eax
-        mov h, edx
-        }
-        return (h << 32) + l ;
+#  elif defined(WIN32)
+static unsigned __int64 read_time(void)
+{
+	unsigned l, h;
+	_asm {
+		rdtsc
+		mov l, eax
+		mov h, edx
+	}
+	return (h << 32) + l;
 }
-#else
-static long long read_time(void) {
-        long long l;
-        asm volatile(   "rdtsc\n\t"
-                : "=A" (l)
-        );
-        return l;
+#  else
+static long long read_time(void)
+{
+	long long l;
+	asm volatile("rdtsc\n\t"
+				 : "=A" (l)
+				 );
+	return l;
 }
-#endif
-#endif
+#  endif
+#endif // HAVE_ARC4RANDOM_BUF
 
+#if HAVE_ARC4RANDOM_BUF
+unsigned long platform_gen_seed()
+{
+	unsigned long seed;
+	arc4random_buf(&seed, sizeof seed);
+	return seed;
+}
+#else
 unsigned long platform_gen_seed()
 {
 	return (long) read_time();
 }
+#endif
 
 //////////// platform specific mkdir /////////////////
+
 #ifndef WIN32
-#include <sys/stat.h>
-#include <unistd.h>
-#include <cerrno>
+#  include <sys/stat.h>
+#  include <unistd.h>
+#  include <cerrno>
 #else
-#include <direct.h>
-#include <cerrno>
+#  include <direct.h>
+#  include <cerrno>
 #endif
 
 bool create_dir(const char *dir)

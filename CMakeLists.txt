@@ -61,10 +61,23 @@ if(GIT_HASH MATCHES "^\\$")
   endif()
 endif()
 
+# `arc4random' and friends are available on BSD in the standard C library, and
+# on Linux in `libbsd'.  We use `arc4random_buf' if it is available, but we do
+# not require it.
+#
+message(STATUS "Check for libbsd")
+find_library(BSD_LIBRARY NAMES bsd)
+if(BSD_LIBRARY)
+  message(STATUS "Check for libbsd: found ${BSD_LIBRARY}")
+else()
+  message(STATUS "Check for libbsd: not found")
+endif()
+
 ###############################################################################
 
 # Generate the "config.h" file.
 #
+check_include_file("bsd/stdlib.h"	HAVE_BSD_STDLIB_H)
 check_include_file("dlfcn.h"		HAVE_DLFCN_H)
 check_include_file("inttypes.h"		HAVE_INTTYPES_H)
 check_include_file("memory.h"		HAVE_MEMORY_H)
@@ -76,9 +89,21 @@ check_include_file("sys/stat.h"		HAVE_SYS_STAT_H)
 check_include_file("sys/types.h"	HAVE_SYS_TYPES_H)
 check_include_file("unistd.h"		HAVE_UNISTD_H)
 
-check_symbol_exists(lrand48 "stdlib.h"	HAVE_LRAND48)
+set(arc4random_hdrs "stdlib.h")
+if(HAVE_BSD_STDLIB_H)
+  list(APPEND arc4random_hdrs "bsd/stdlib.h")
+endif()
+if(BSD_LIBRARY)
+  set(CMAKE_REQUIRED_LIBRARIES "${BSD_LIBRARY}")
+endif()
+check_symbol_exists(arc4random_buf
+		    "${arc4random_hdrs}" HAVE_ARC4RANDOM_BUF)
+set(CMAKE_REQUIRED_LIBRARIES "")
+
+check_symbol_exists(lrand48
+		    "stdlib.h"		HAVE_LRAND48)
 check_symbol_exists(srand48_deterministic
-			"stdlib.h"	HAVE_SRAND48_DETERMINISTIC)
+		    "stdlib.h"		HAVE_SRAND48_DETERMINISTIC)
 
 set(csmith_PACKAGE			"csmith")
 set(csmith_PACKAGE_BUGREPORT		"csmith-bugs@flux.utah.edu")

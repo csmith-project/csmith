@@ -56,6 +56,14 @@ AC_PROG_CXX
 AC_PROG_RANLIB
 AC_PROG_LIBTOOL
 
+# `arc4random' and friends are available on BSD in the standard C library, and
+# on Linux in `libbsd'.  We use `arc4random_buf' if it is available, but we do
+# not require it.
+#
+AC_SEARCH_LIBS([arc4random_buf], [bsd])
+AC_CHECK_HEADERS([bsd/stdlib.h])
+AC_CHECK_FUNCS([arc4random_buf])
+
 # Csmith uses `lrand48', and we provide an implementation for platforms that
 # do not have it (in particular, Windows).
 #

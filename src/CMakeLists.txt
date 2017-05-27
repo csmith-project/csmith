@@ -220,7 +220,9 @@ add_executable(csmith
   ${csmith_SOURCES}
   )
 
-# target_link_libraries(csmith ...)
+if(BSD_LIBRARY)
+  target_link_libraries(csmith "${BSD_LIBRARY}")
+endif()
 
 install(PROGRAMS
   "${PROJECT_BINARY_DIR}/csmith"
