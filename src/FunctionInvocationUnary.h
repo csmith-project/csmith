@@ -1,6 +1,6 @@
 // -*- mode: C++ -*-
 //
-// Copyright (c) 2009, 2010, 2011 The University of Utah
+// Copyright (c) 2009, 2010, 2011, 2015 The University of Utah
 // All rights reserved.
 //
 // This file is part of `csmith', a random generator of C programs.
