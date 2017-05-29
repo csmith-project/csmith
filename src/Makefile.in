@@ -94,10 +94,10 @@ bin_PROGRAMS = csmith$(EXEEXT)
 
 # Windows lacks `lrand48', so we provide an implementation.
 @HAVE_LRAND48_FALSE@am__append_1 = \
-@HAVE_LRAND48_FALSE@	windows/_rand48.c \
-@HAVE_LRAND48_FALSE@	windows/lrand48.c \
-@HAVE_LRAND48_FALSE@	windows/rand48.h \
-@HAVE_LRAND48_FALSE@	windows/srand48.c
+@HAVE_LRAND48_FALSE@	rand48/_rand48.c \
+@HAVE_LRAND48_FALSE@	rand48/lrand48.c \
+@HAVE_LRAND48_FALSE@	rand48/rand48.h \
+@HAVE_LRAND48_FALSE@	rand48/srand48.c
 
 subdir = src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -163,12 +163,12 @@ am__csmith_SOURCES_DIST = AbsExtension.cpp AbsExtension.h \
 	Variable.h VariableSelector.cpp VariableSelector.h \
 	VectorFilter.cpp VectorFilter.h git_version.h platform.cpp \
 	platform.h random.cpp random.h util.cpp util.h \
-	windows/_rand48.c windows/lrand48.c windows/rand48.h \
-	windows/srand48.c
+	rand48/_rand48.c rand48/lrand48.c rand48/rand48.h \
+	rand48/srand48.c
 am__dirstamp = $(am__leading_dot)dirstamp
-@HAVE_LRAND48_FALSE@am__objects_1 = windows/_rand48.$(OBJEXT) \
-@HAVE_LRAND48_FALSE@	windows/lrand48.$(OBJEXT) \
-@HAVE_LRAND48_FALSE@	windows/srand48.$(OBJEXT)
+@HAVE_LRAND48_FALSE@am__objects_1 = rand48/_rand48.$(OBJEXT) \
+@HAVE_LRAND48_FALSE@	rand48/lrand48.$(OBJEXT) \
+@HAVE_LRAND48_FALSE@	rand48/srand48.$(OBJEXT)
 am_csmith_OBJECTS = AbsExtension.$(OBJEXT) \
 	AbsProgramGenerator.$(OBJEXT) AbsRndNumGenerator.$(OBJEXT) \
 	ArrayVariable.$(OBJEXT) Block.$(OBJEXT) Bookkeeper.$(OBJEXT) \
@@ -417,7 +417,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 
-# For source files in `windows/'.
+# For source files in `rand48/'.
 AUTOMAKE_OPTIONS = subdir-objects
 GIT_HASH := $(shell "$(top_srcdir)/git-hash.sh" "$(top_srcdir)" || echo error)
 DUMMY1 := $(shell echo "$(GIT_HASH)" > git_version.txt.tmp)
@@ -578,18 +578,18 @@ clean-binPROGRAMS:
 	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 	echo " rm -f" $$list; \
 	rm -f $$list
-windows/$(am__dirstamp):
-	@$(MKDIR_P) windows
-	@: > windows/$(am__dirstamp)
-windows/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) windows/$(DEPDIR)
-	@: > windows/$(DEPDIR)/$(am__dirstamp)
-windows/_rand48.$(OBJEXT): windows/$(am__dirstamp) \
-	windows/$(DEPDIR)/$(am__dirstamp)
-windows/lrand48.$(OBJEXT): windows/$(am__dirstamp) \
-	windows/$(DEPDIR)/$(am__dirstamp)
-windows/srand48.$(OBJEXT): windows/$(am__dirstamp) \
-	windows/$(DEPDIR)/$(am__dirstamp)
+rand48/$(am__dirstamp):
+	@$(MKDIR_P) rand48
+	@: > rand48/$(am__dirstamp)
+rand48/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) rand48/$(DEPDIR)
+	@: > rand48/$(DEPDIR)/$(am__dirstamp)
+rand48/_rand48.$(OBJEXT): rand48/$(am__dirstamp) \
+	rand48/$(DEPDIR)/$(am__dirstamp)
+rand48/lrand48.$(OBJEXT): rand48/$(am__dirstamp) \
+	rand48/$(DEPDIR)/$(am__dirstamp)
+rand48/srand48.$(OBJEXT): rand48/$(am__dirstamp) \
+	rand48/$(DEPDIR)/$(am__dirstamp)
 
 csmith$(EXEEXT): $(csmith_OBJECTS) $(csmith_DEPENDENCIES) $(EXTRA_csmith_DEPENDENCIES) 
 	@rm -f csmith$(EXEEXT)
@@ -597,7 +597,7 @@ csmith$(EXEEXT): $(csmith_OBJECTS) $(csmith_DEPENDENCIES) $(EXTRA_csmith_DEPENDE
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
-	-rm -f windows/*.$(OBJEXT)
+	-rm -f rand48/*.$(OBJEXT)
 
 distclean-compile:
 	-rm -f *.tab.c
@@ -680,9 +680,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/platform.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/random.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/util.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@windows/$(DEPDIR)/_rand48.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@windows/$(DEPDIR)/lrand48.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@windows/$(DEPDIR)/srand48.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@rand48/$(DEPDIR)/_rand48.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@rand48/$(DEPDIR)/lrand48.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@rand48/$(DEPDIR)/srand48.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
@@ -854,8 +854,8 @@ clean-generic:
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
-	-rm -f windows/$(DEPDIR)/$(am__dirstamp)
-	-rm -f windows/$(am__dirstamp)
+	-rm -f rand48/$(DEPDIR)/$(am__dirstamp)
+	-rm -f rand48/$(am__dirstamp)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
@@ -865,7 +865,7 @@ clean: clean-am
 clean-am: clean-binPROGRAMS clean-generic clean-libtool mostlyclean-am
 
 distclean: distclean-am
-	-rm -rf ./$(DEPDIR) windows/$(DEPDIR)
+	-rm -rf ./$(DEPDIR) rand48/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -911,7 +911,7 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-	-rm -rf ./$(DEPDIR) windows/$(DEPDIR)
+	-rm -rf ./$(DEPDIR) rand48/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

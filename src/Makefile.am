@@ -29,7 +29,7 @@
 
 ###############################################################################
 
-# For source files in `windows/'.
+# For source files in `rand48/'.
 AUTOMAKE_OPTIONS = subdir-objects
 
 bin_PROGRAMS = csmith
@@ -219,10 +219,10 @@ nodist_csmith_SOURCES = \
 if HAVE_LRAND48
 else
 csmith_SOURCES += \
-	windows/_rand48.c \
-	windows/lrand48.c \
-	windows/rand48.h \
-	windows/srand48.c
+	rand48/_rand48.c \
+	rand48/lrand48.c \
+	rand48/rand48.h \
+	rand48/srand48.c
 endif
 
 EXTRA_DIST = \

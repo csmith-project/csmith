@@ -207,12 +207,12 @@ set(csmith_SOURCES
   ${PROJECT_BINARY_DIR}/git_version.cpp
   )
 if(NOT HAVE_LRAND48)
-  include_directories(${PROJECT_SOURCE_DIR}/windows)
+  include_directories(${PROJECT_SOURCE_DIR}/rand48)
   list(APPEND csmith_SOURCES
-    windows/_rand48.c
-    windows/lrand48.c
-    windows/rand48.h
-    windows/srand48.c
+    rand48/_rand48.c
+    rand48/lrand48.c
+    rand48/rand48.h
+    rand48/srand48.c
     )
 endif()
 
