@@ -75,6 +75,13 @@ static unsigned __int64 read_time(void)
 	}
 	return (h << 32) + l;
 }
+#  elif defined(__s390__)
+static unsigned long long read_time(void)
+{
+	unsigned long long clk;
+	asm volatile("stckf %0" : "=Q" (clk) : : "cc");
+	return clk;
+}
 #  else
 static long long read_time(void)
 {
