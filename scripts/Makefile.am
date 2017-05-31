@@ -32,8 +32,7 @@
 dist_bin_SCRIPTS = \
 	compiler_test.in \
 	compiler_test.pl \
-	launchn.pl \
-	test_csmith.pl
+	launchn.pl
 
 EXTRA_DIST = \
 	CMakeLists.txt

@@ -40,7 +40,6 @@ install(PROGRAMS
   "compiler_test.in"
   "compiler_test.pl"
   "launchn.pl"
-  "test_csmith.pl"
   DESTINATION "${BIN_DIR}"
   )
 
