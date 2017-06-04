@@ -34,34 +34,29 @@
 #ifdef WIN32
 #pragma warning(disable : 4786)   /* Disable annoying warning messages */
 #endif
+
 #include "ArrayVariable.h"
 #include <cassert>
 
 #include "Common.h"
-#include "Block.h"
 #include "CGContext.h"
 #include "CGOptions.h"
+
+#include "Block.h"
 #include "Constant.h"
 #include "Effect.h"
-#include "Function.h"
-#include "Type.h"
-#include "Fact.h"
+#include "Error.h"
+#include "Expression.h"
+#include "ExpressionFuncall.h"
+#include "ExpressionVariable.h"
 #include "FactMgr.h"
-#include "FactPointTo.h"
 #include "FactUnion.h"
+#include "Function.h"
+#include "FunctionInvocation.h"
+#include "Type.h"
+#include "VariableSelector.h"
 #include "random.h"
 #include "util.h"
-#include "Lhs.h"
-#include "ExpressionVariable.h"
-#include "ExpressionFuncall.h"
-#include "Bookkeeper.h"
-#include "Filter.h"
-#include "Error.h"
-#include "CVQualifiers.h"
-#include "VariableSelector.h"
-#include "SafeOpFlags.h"
-#include "OutputMgr.h"
-#include "StringUtils.h"
 
 using namespace std;
 
