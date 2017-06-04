@@ -83,6 +83,7 @@ static unsigned long long read_time(void)
 	return clk;
 }
 #  else
+#    if defined (__i386__) || defined (__x86_64__)
 static long long read_time(void)
 {
 	long long l;
@@ -91,6 +92,13 @@ static long long read_time(void)
 				 );
 	return l;
 }
+    #else
+#include <time.h>
+static long long read_time(void) {
+	time_t t = time(NULL);
+	return t;
+}
+    #endif
 #  endif
 #endif // HAVE_ARC4RANDOM_BUF
 
