@@ -32,14 +32,13 @@
 #endif
 
 #include "ExpressionComma.h"
-#include <cassert>
+
 #include "Common.h"
 #include "CGContext.h"
 #include "CGOptions.h"
-#include "FactMgr.h"
-#include "Bookkeeper.h"
-#include "StringUtils.h"
-#include "Block.h"
+#include "Reducer.h"
+#include "Type.h"
+#include "util.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 
