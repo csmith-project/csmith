@@ -108,7 +108,6 @@ public:
 
 	virtual std::string get_actual_name() const;
 	std::string to_string(void) const;
-	std::vector<std::string> deputy_annotation(void) const;
 
 	// ISSUE: we treat volatiles specially
 	bool compatible(const Variable *v) const;

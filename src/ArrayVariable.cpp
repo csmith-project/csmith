@@ -447,8 +447,6 @@ ArrayVariable::is_visible_local(const Block* blk) const
 bool
 ArrayVariable::no_loop_initializer(void) const
 {
-	// don't use loop initializer if we are outputing deputy annotations
-	if (CGOptions::deputy()) return true;
 	// don't use loop initializer if we are doing test case reduction
 	// if (CGOptions::get_reducer()) return true;
 	// can not use loop initializer if either array member are structs, or they are constants, or it has > 1 initial values

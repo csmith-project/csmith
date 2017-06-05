@@ -606,36 +606,6 @@ CVQualifiers::output_qualified_type(const Type* t, std::ostream &out) const
 	}
 }
 
-void
-CVQualifiers::output_qualified_type_with_deputy_annotation(const Type* t, std::ostream &out, const vector<string>& annotations) const
-{
-	assert(t);
-	assert(sanity_check(t));
-	assert(is_consts.size() == annotations.size()+1);
-	size_t i;
-	const Type* base = t->get_base_type();
-	for (i=0; i<is_consts.size(); i++) {
-		if (i>0) {
-			out << "* ";
-			out << annotations[i-1] << " ";
-		}
-		if (is_consts[i]) {
-			if (!CGOptions::consts())
-				assert(0);
-			out << "const ";
-		}
-		if (is_volatiles[i]) {
-			if (!CGOptions::volatiles())
-				assert(0);
-			out << "volatile ";
-		}
-		if (i==0) {
-			base->Output(out);
-			out << " ";
-		}
-	}
-}
-
 bool
 CVQualifiers::is_const_after_deref(int deref_level) const
 {

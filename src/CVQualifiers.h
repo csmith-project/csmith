@@ -87,7 +87,6 @@ public:
 
 	bool sanity_check(const Type* t) const;
 	void output_qualified_type(const Type* t, std::ostream &out) const;
-	void output_qualified_type_with_deputy_annotation(const Type* t, std::ostream &out, const vector<string>& annotations) const;
 	void output() const;
 	void OutputFirstQuals(std::ostream &out) const;
 

@@ -1057,11 +1057,6 @@ main(int argc, char **argv)
 			continue;
 		}
 
-		if (strcmp (argv[i], "--deputy") == 0) {
-			CGOptions::deputy(true);
-			continue;
-		}
-
 		if (strcmp (argv[i], "--delta-input") == 0) {
 			string filename;
 			i++;

@@ -597,113 +597,6 @@ Variable::is_volatile_after_deref(int deref_level) const
 	return false;
 }
 
-/*
- * return an array deputy annotation for each level of indirection of a pointer based on it's point-to set
- * for non-pointers, return an empty set
- */
-vector<string>
-Variable::deputy_annotation(void) const
-{
-	size_t len;
-        int pos, i, j;
-	vector<string> annotations;
-	const Variable* tmp = this;
-	bool has_null = false;
-	bool null_based = false;
-	if (name == "p_24")
-		i = 0;
-	while (tmp && tmp->type->eType == ePointer) {
-		pos = -1;
-		string anno;
-		for (i=0; i<static_cast<int>(FactPointTo::all_ptrs.size()); i++) {
-			if (FactPointTo::all_ptrs[i] == tmp) {
-				pos = i;
-				break;
-			}
-		}
-		if (pos == -1) break;
-		vector<const Variable*> set = FactPointTo::all_aliases[pos];
-		// take out tbd in point-to-set for parameters
-		j = find_variable_in_set(set, FactPointTo::tbd_ptr);
-		if (set.size() > 1 && j != -1) {
-			set.erase(set.begin() + j);
-		}
-		bool has_array = false;
-		len = set.size();
-		for (j=0; j<static_cast<int>(len); j++) {
-			if (set[j] == FactPointTo::null_ptr) {
-				// remove null pointer from set
-				has_null = true;
-				set.erase(set.begin() + j);
-				j--;
-				len--;
-			}
-			else if (set[j]->isArray || set[j]->is_array_field()) {
-				has_array = true;
-			}
-		}
-		/* if "int *** p = 0", we can annotate it as "int * SAFE * SAFE * SAFE p" */
-		if (len == 0 && has_null) {
-			null_based = true;
-		}
-		if (!has_array) {
-			anno = (has_null ? "SAFE" : "SAFE NONNULL");
-			// special handling to satisfy deputy, no "NONNULL" for array of pointers
-			if (tmp->isArray || tmp->is_array_field()) {
-				anno = "SAFE";
-			}
-		}
-		tmp = 0;
-
-		if (len == 1) {
-			const Variable* pointee = set[0];
-			if (pointee->isArray || pointee->is_array_field()) {
-				ostringstream oss;
-				oss << "BOUND(&";
-				pointee->OutputLowerBound(oss);
-				oss << ", &";
-				pointee->OutputUpperBound(oss);
-				oss <<  ")";
-				anno = oss.str();
-			}
-			//if (pointee->is_array_field()) {
-			//	while (pointee->field_var_of) {
-			//		pointee = pointee->field_var_of;
-			//	}
-			//	assert(pointee->isArray);
-			//}
-			//// pointing to an array
-			//if (pointee->isArray) {
-			//	const ArrayVariable* av = (const ArrayVariable*)pointee;
-			//	ostringstream oss;
-			//	oss << "COUNT(";
-			//	for (j=0; j<av->get_dimension(); j++) {
-			//		if (j > 0) oss << " * ";
-			//		oss << av->get_sizes()[j];
-			//	}
-			//	oss << ")";
-			//	anno = oss.str();
-			//}
-			if (pointee->type && pointee->type->eType == ePointer) {
-				tmp = pointee;
-			}
-		}
-		if (anno == "") {
-			anno = "BOUND(__auto, __auto)";
-		}
-		annotations.insert(annotations.begin(), anno);
-	}
-	int prepend = type->get_indirect_level() - annotations.size();
-	for (i=0; i<prepend; i++) {
-		if (null_based) {
-			annotations.insert(annotations.begin(), "SAFE");
-		} else {
-			annotations.insert(annotations.begin(), "BOUND(__auto, __auto)");
-		}
-	}
-	return annotations;
-}
-
 const Variable*
 Variable::get_collective(void) const
 {
@@ -855,13 +748,7 @@ Variable::OutputForComment(std::ostream &out) const
 void
 Variable::output_qualified_type(std::ostream &out) const
 {
-	if (type->eType == ePointer && CGOptions::deputy()) {
-		vector<string> annotations = deputy_annotation();
-		qfer.output_qualified_type_with_deputy_annotation(type, out, annotations);
-	}
-	else {
-		qfer.output_qualified_type(type, out);
-	}
+	qfer.output_qualified_type(type, out);
 }
 
 // --------------------------------------------------------------

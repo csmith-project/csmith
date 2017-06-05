@@ -165,7 +165,6 @@ DEFINE_GETTER_SETTER_BOOL(muls)
 DEFINE_GETTER_SETTER_BOOL(accept_argc)
 DEFINE_GETTER_SETTER_BOOL(random_random)
 DEFINE_GETTER_SETTER_INT(stop_by_stmt)
-DEFINE_GETTER_SETTER_BOOL(deputy)
 DEFINE_GETTER_SETTER_BOOL(step_hash_by_stmt)
 DEFINE_GETTER_SETTER_BOOL(compound_assignment)
 DEFINE_GETTER_SETTER_STRING_REF(dump_default_probabilities)
@@ -281,7 +280,6 @@ CGOptions::set_default_settings(void)
 	muls(true);
 	accept_argc(true);
 	stop_by_stmt(-1);
-	deputy(false);
 	step_hash_by_stmt(false);
 	const_as_condition(false);
 	match_exact_qualifiers(false);

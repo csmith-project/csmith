@@ -351,9 +351,6 @@ public:
 
 	static void monitored_funcs(string fnames);
 
-	static bool deputy(void);
-	static bool deputy(bool p);
-
 	static bool const_as_condition(void);
 	static bool const_as_condition(bool p);
 
@@ -519,7 +516,6 @@ private:
 	static bool nomain_;
 	static bool compound_assignment_;
 	static int stop_by_stmt_;
-	static bool deputy_;
 	static bool step_hash_by_stmt_;
 	static bool blind_check_global_;
 	static bool	random_based_;
