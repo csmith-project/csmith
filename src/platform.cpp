@@ -120,11 +120,10 @@ unsigned long platform_gen_seed()
 #ifndef WIN32
 #  include <sys/stat.h>
 #  include <unistd.h>
-#  include <cerrno>
 #else
 #  include <direct.h>
-#  include <cerrno>
 #endif
+#include <cerrno>
 
 bool create_dir(const char *dir)
 {
