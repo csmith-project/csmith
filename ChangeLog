@@ -1,3 +1,41 @@
+Changes since 2.2.0 release:
+
+	Added a CMake-based build system.  The Autoconf-based build system
+	still works and is still supported.
+
+	Improved ability to generate C++-compatible code.  First, the
+	command-line option --lang-cpp now sets other options automatically
+	(--match-exact-qualifiers, --no-vol-struct-union-fields, and
+	--no-const-struct-union-fields).  Second, the new command-line option
+	--cpp11 tells Csmith to generate C++11-compatible code.  The default is
+	to generate C++03-compatible code.  Thanks to Natalia Glagoleva for the
+	implementation of these features.
+
+	Added command-line options to control the presence of global variables
+	in generated programs.
+	--global-variables / --no-global-variables: allow or disallow global
+	variables (allowed by default)
+
+	Added command-line options to control the presence of const fields in
+	struct and union types.  Thanks to Natalia Glagoleva for the
+	implementation of these features.
+	--const-struct-union-fields / --no-const-struct-union-fields: allow or
+	disallow const fields in structs and unions (allowed by default)
+
+	Added a command-line option --strict-float to disallow assignments
+	between floats and integers.  Unless this option is specified, such
+	assignments are allowed.
+
+	Added a command-line option --fast-execution that biases Csmith toward
+	generating faster programs.
+
+	Incorporated various fixes for choosing the random seed on various
+	platforms.
+
+	Incorporated fixes for compiling Csmith under MS Windows.
+
+	Incorporated numerous bug fixes.
+
 Changes since 2.1.0 release:
 
 	Expanded documentation about configuring the probability values that
