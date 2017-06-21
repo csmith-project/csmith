@@ -29,6 +29,9 @@ Changes since 2.2.0 release:
 	Added a command-line option --fast-execution that biases Csmith toward
 	generating faster programs.
 
+	Removed --deputy command-line option, which previously caused Csmith to
+	output annotations for Deputy, a dependent type system for C.
+
 	Incorporated various fixes for choosing the random seed on various
 	platforms.
 
