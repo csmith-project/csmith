@@ -1,6 +1,6 @@
 ## -*- mode: m4 -*-
 ##
-## Copyright (c) 2008, 2010, 2011, 2014 The University of Utah
+## Copyright (c) 2008, 2010, 2011, 2014, 2017 The University of Utah
 ## All rights reserved.
 ##
 ## This file is part of `csmith', a random generator of C programs.
@@ -29,7 +29,7 @@
 
 ###############################################################################
 
-m4_define([CSMITH_VERSION],   [2.3.0])
+m4_define([CSMITH_VERSION],   [2.4.0])
 m4_define([CSMITH_BUGREPORT], [csmith-bugs@flux.utah.edu])
 m4_define([CSMITH_URL],       [http://embed.cs.utah.edu/csmith/])
 
