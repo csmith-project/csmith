@@ -32,7 +32,10 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(csmith_runtime)
 
-cmake_policy(SET CMP0042 NEW) # Quiet warning about shared libs on OS X.
+# CMP0042 was introduced in CMake 3.0.  Don't error in older CMakes.
+if(POLICY CMP0042)
+  cmake_policy(SET CMP0042 NEW) # Quiet warning about shared libs on OS X.
+endif()
 
 set(INCLUDE_DIR "${CMAKE_INSTALL_PREFIX}/include/csmith-${csmith_VERSION}")
 set(LIB_DIR     "${CMAKE_INSTALL_PREFIX}/lib")
