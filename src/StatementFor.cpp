@@ -185,9 +185,9 @@ StatementFor::make_iteration(CGContext& cg_context, StatementAssign*& init, Expr
 	cg_context.read_var(var);
 
 	// Select the loop parameters: init, limit, increment, etc.
-	int        init_n, limit_n, incr_n;
+	int        init_n=0, limit_n=0, incr_n=0;
 	eBinaryOps test_op;
-	eAssignOps incr_op;
+	eAssignOps incr_op = eAddAssign;
 	bound = INVALID_BOUND;
 
 	// choose a random array from must use variables, and find the dimension with shortest length
