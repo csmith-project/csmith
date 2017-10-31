@@ -64,7 +64,7 @@ static inline unsigned long read_time(void)
 	asm volatile("mftb %0" : "=r" (a));
 	return a;
 }
-#  elif defined(WIN32)
+#  elif defined(_MSC_VER) && defined(_M_IX86)
 static unsigned __int64 read_time(void)
 {
 	unsigned l, h;
