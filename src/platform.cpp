@@ -57,7 +57,7 @@
 // from the current time.
 //
 #ifndef HAVE_ARC4RANDOM_BUF
-#  if defined(__powerpc__) || defined(__powerpc64__)
+#  if defined(__powerpc__) || defined(__powerpc64__) || defined(__powerpc64le__)
 static inline unsigned long read_time(void)
 {
 	unsigned long a;
