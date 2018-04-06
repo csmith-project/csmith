@@ -151,7 +151,7 @@ static void print_help()
 	cout << "  --output <filename> or -o <filename>: specify the output file name." << endl << endl;
 
 	// enabling/disabling options
-	cout << "  --argc | --no-argc: genereate main function with/without argv and argc being passed (enabled by default)." << endl << endl;
+	cout << "  --argc | --no-argc: generate main function with/without argv and argc being passed (enabled by default)." << endl << endl;
 	cout << "  --arrays | --no-arrays: enable | disable arrays (enabled by default)." << endl << endl;
 	cout << "  --bitfields | --no-bitfields: enable | disable full-bitfields structs (enabled by default)." << endl << endl;
 	cout << "  --checksum | --no-checksum: enable | disable checksum calculation (enabled by default)." << endl << endl;
