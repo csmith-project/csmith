@@ -192,9 +192,7 @@ GroupProbElem::~GroupProbElem()
 {
 	std::map<ProbName, SingleProbElem*>::iterator i;
 	for (i = probs_.begin(); i != probs_.end(); ++i) {
-		SingleProbElem *elem = (*i).second;
-		assert(elem);
-		delete elem;
+		delete i->second;
 	}
 	probs_.clear();
 }
@@ -381,10 +379,8 @@ Probabilities::GetInstance()
 void
 Probabilities::DestroyInstance()
 {
-	if (Probabilities::instance_) {
-		delete Probabilities::instance_;
-		Probabilities::instance_ = NULL;
-	}
+	delete instance_;
+	instance_ = NULL;
 }
 
 void

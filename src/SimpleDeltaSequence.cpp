@@ -184,8 +184,7 @@ SimpleDeltaSequence::clear()
 {
 	std::map<int, SimpleDeltaSequence::ValuePair*>::iterator i;
 	for (i = seq_map_.begin(); i != seq_map_.end(); ++i) {
-		assert((*i).second);
-		delete ((*i).second);
+		delete i->second;
 	}
 	seq_map_.clear();
 }

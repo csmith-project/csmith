@@ -148,8 +148,7 @@ Enumerator<Name>::~Enumerator()
 {
 	typename map<Name, EnumObject*>::iterator i;
 	for (i = objs_.begin(); i != objs_.end(); ++i) {
-		if ((*i).second != NULL)
-			delete (*i).second;
+		delete i->second;
 	}
 	objs_.clear();
 }
