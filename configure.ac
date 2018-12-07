@@ -1,6 +1,6 @@
 ## -*- mode: Autoconf -*-
 ##
-## Copyright (c) 2008, 2010, 2011, 2017 The University of Utah
+## Copyright (c) 2008, 2010, 2011, 2017, 2018 The University of Utah
 ## All rights reserved.
 ##
 ## This file is part of `csmith', a random generator of C programs.
@@ -44,6 +44,8 @@ AM_INIT_AUTOMAKE([-Wall -Wno-portability])
 
 AM_MAINTAINER_MODE
 
+LT_INIT
+
 # Avoid configure-time warnings about `--datarootdir' being ignored.
 # This can perhaps be removed in a few years after Autoconf 2.60.
 # See <http://www.gnu.org/software/libtool/manual/autoconf/Changed-Directory-Variables.html>
@@ -53,8 +55,6 @@ AC_DEFUN([AC_DATAROOTDIR_CHECKED])
 dnl AC_PROG_CC # Automake 1.11 want us to use AM_PROG_CC_C_O instead...
 AM_PROG_CC_C_O
 AC_PROG_CXX
-AC_PROG_RANLIB
-AC_PROG_LIBTOOL
 
 # `arc4random' and friends are available on BSD in the standard C library, and
 # on Linux in `libbsd'.  We use `arc4random_buf' if it is available, but we do
