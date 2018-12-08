@@ -709,7 +709,7 @@ distdir-am: $(DISTFILES)
 check-am: all-am
 check: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) check-am
-all-am: Makefile $(LIBRARIES) $(LTLIBRARIES) $(HEADERS)
+all-am: Makefile $(LIBRARIES) $(LTLIBRARIES) $(HEADERS) all-local
 installdirs:
 	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(libdir)" "$(DESTDIR)$(libcsmith_a_includedir)" "$(DESTDIR)$(libcsmith_a_includedir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
@@ -750,7 +750,7 @@ maintainer-clean-generic:
 clean: clean-am
 
 clean-am: clean-generic clean-libLIBRARIES clean-libLTLIBRARIES \
-	clean-libtool mostlyclean-am
+	clean-libtool clean-local mostlyclean-am
 
 distclean: distclean-am
 		-rm -f ./$(DEPDIR)/libcsmith_a-volatile_runtime.Po
@@ -825,16 +825,16 @@ uninstall-am: uninstall-libLIBRARIES uninstall-libLTLIBRARIES \
 
 .MAKE: all check install install-am install-strip
 
-.PHONY: CTAGS GTAGS TAGS all all-am am--depfiles check check-am clean \
-	clean-generic clean-libLIBRARIES clean-libLTLIBRARIES \
-	clean-libtool cscopelist-am ctags ctags-am distclean \
-	distclean-compile distclean-generic distclean-libtool \
-	distclean-tags distdir dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am \
-	install-libLIBRARIES install-libLTLIBRARIES install-man \
-	install-nobase_libcsmith_a_includeHEADERS \
+.PHONY: CTAGS GTAGS TAGS all all-am all-local am--depfiles check \
+	check-am clean clean-generic clean-libLIBRARIES \
+	clean-libLTLIBRARIES clean-libtool clean-local cscopelist-am \
+	ctags ctags-am distclean distclean-compile distclean-generic \
+	distclean-libtool distclean-tags distdir dvi dvi-am html \
+	html-am info info-am install install-am install-data \
+	install-data-am install-dvi install-dvi-am install-exec \
+	install-exec-am install-html install-html-am install-info \
+	install-info-am install-libLIBRARIES install-libLTLIBRARIES \
+	install-man install-nobase_libcsmith_a_includeHEADERS \
 	install-nodist_libcsmith_a_includeHEADERS install-pdf \
 	install-pdf-am install-ps install-ps-am install-strip \
 	installcheck installcheck-am installdirs maintainer-clean \
@@ -858,6 +858,21 @@ safe_math_macros.h: safe_math_macros.m4
 
 safe_math_macros_notmp.h: safe_math_macros_notmp.m4
 	$(M4) < $< > $@
+
+# The `all-local' and `clean-local' rules are for the convenience of people who
+# want to compile Csmith-generated programs against a Csmith build tree.
+#
+all-local:
+	$(install_sh) -d windows
+	for f in $(nobase_libcsmith_a_include_HEADERS); do \
+	  test -e "$$f" || ln -s "$(srcdir)/$$f" "$$f"; \
+	done
+
+clean-local:
+	for f in $(nobase_libcsmith_a_include_HEADERS); do \
+	  test \! -L "$$f" || rm -f "$$f"; \
+	done
+	-rmdir windows
 
 ###############################################################################
 
