@@ -260,7 +260,11 @@ StatementGoto::Output(std::ostream &out, FactMgr* /*fm*/, int indent) const
 	out << ")";
 	outputln(out);
 	output_tab(out, indent+1);
-	out << "goto " << label << ";";
+
+	if(CGOptions::computed_goto())
+		out << "goto " << other_name_for_label << ";";
+	else
+		out << "goto " << label << ";";
 	outputln(out);
 }
 
@@ -416,6 +420,27 @@ StatementGoto::doFinalization(void)
 	stm_labels.clear();
 }
 
+void
+StatementGoto::change_label(std::vector<string> addr_labels) const{
+	string find_label="";
+	find_label+="&&";
+	find_label+=label;
+	auto it = std::find(addr_labels.begin(),addr_labels.end(),find_label);
+	int index;
+	if(it == addr_labels.end()){
+		assert ("LABEL NOT FOUND");
+	}
+	else{
+	index = std::distance (addr_labels.begin(),it);
+	}
+	std::stringstream ss;
+	ss.clear();
+	ss<< "*target[";
+	ss<<index;
+	ss<<"]";
+	other_name_for_label="";
+	other_name_for_label=ss.str();
+}
 ///////////////////////////////////////////////////////////////////////////////
 
 // Local Variables:

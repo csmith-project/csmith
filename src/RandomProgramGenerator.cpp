@@ -176,6 +176,9 @@ static void print_help()
 	cout << "  --inline-function | --no-inline-function: enable | disable inline attributes on generated functions." << endl << endl;
 	cout << "  --inline-function-prob <num>: set the probability of each function being marked as inline (default is 50)." << endl << endl;
 
+	//GCC C extensions
+	cout << "  --computed-goto | --no-computed-goto: enable | disable computed goto extension (disable by default)." << endl << endl;
+
 	// numbered controls
 	cout << "  --max-array-dim <num>: limit array dimensions to <num>. (default 3)" << endl << endl;
 	cout << "  --max-array-len-per-dim <num>: limit array length per dimension to <num> (default 10)." << endl << endl;
@@ -847,6 +850,16 @@ main(int argc, char **argv)
 
 		if (strcmp (argv[i], "--jumps") == 0) {
 			CGOptions::jumps(true);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--computed-goto") == 0) {
+			CGOptions::computed_goto(true);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--no-computed-goto") == 0) {
+			CGOptions::computed_goto(false);
 			continue;
 		}
 

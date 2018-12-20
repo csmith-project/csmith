@@ -199,6 +199,7 @@ DEFINE_GETTER_SETTER_BOOL(const_struct_union_fields);
 DEFINE_GETTER_SETTER_BOOL(lang_cpp);
 DEFINE_GETTER_SETTER_BOOL(cpp11);
 DEFINE_GETTER_SETTER_BOOL(fast_execution);
+DEFINE_GETTER_SETTER_BOOL(computed_goto);
 
 void
 CGOptions::set_default_builtin_kinds()
@@ -313,6 +314,7 @@ CGOptions::set_default_settings(void)
   fast_execution(false);
 
 	set_default_builtin_kinds();
+	computed_goto(false);
 }
 
 // Add options necessary for cpp 

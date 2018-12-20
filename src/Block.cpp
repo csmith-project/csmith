@@ -65,6 +65,8 @@
 #include "Expression.h"
 #include "VectorFilter.h"
 
+#include <string>
+#include <vector>
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -188,7 +190,7 @@ Block::make_random(CGContext &cg_context, bool looping)
 
 	curr_func->stack.pop_back();
 	if (Error::get_error() != SUCCESS) {
-		//curr_func->stack.pop_back();
+		curr_func->stack.pop_back();
 		delete b;
 		return NULL;
 	}
@@ -196,6 +198,32 @@ Block::make_random(CGContext &cg_context, bool looping)
 	// ISSUE: in the exhaustive mode, do we need a return statement here
 	// if the last statement is not?
 	Error::set_error(SUCCESS);
+
+
+	if(CGOptions::computed_goto()){
+		if(curr_func->blocks[0]->stm_id==b->stm_id){
+			std::vector<string> labels;
+			labels.clear();
+			curr_func->blocks[0]->find_contained_labels(labels);
+			string ss="";
+			for (std::vector<string>::iterator itr=labels.begin();itr!=labels.end();itr++) {
+				ss.clear();
+				ss += "&&";
+				ss += *itr;
+				curr_func->blocks[0]->addr_labels.push_back(ss);//only adds in the main array related to function.
+			}
+			//__________________________________________________________
+			for (size_t i=0; i<fm->cfg_edges.size();i++) {
+				const CFGEdge* e = fm->cfg_edges[i];
+				if(e->src->eType == eGoto) {
+					const StatementGoto* sg = dynamic_cast<const StatementGoto* >(e->src);
+					assert(sg);
+					sg->change_label(curr_func->blocks[0]->addr_labels);
+				}
+			}
+
+		}
+	}
 	return b;
 }
 
@@ -295,6 +323,10 @@ Block::Output(std::ostream &out, FactMgr* fm, int indent) const
 	ss << "block id: " << stm_id;
 	output_comment_line(out, ss.str());
 
+	if(CGOptions::computed_goto()){
+		if(!this->addr_labels.empty())
+		this->print_label_addr_array(out,indent);
+	}
 	if (CGOptions::depth_protect()) {
 		out << "DEPTH++;" << endl;
 	}
@@ -805,6 +837,19 @@ Block::post_creation_analysis(CGContext& cg_context, const Effect& pre_effect)
 	}
 }
 
+void
+Block::print_label_addr_array(std::ostream &out , int indent) const{
+	ostringstream ss;
+	output_tab (out,indent);
+	cout << "/*\nNUMBER OF GOTO'S IN ABOVEE BLOCK:" << addr_labels.size()  << "*\/";
+	cout << "\nvoid *target[] = { ";
+	for(unsigned int i=0; i < addr_labels.size();i++){
+		i!=0 ? cout << ", " : cout << "";
+		cout << addr_labels[i];
+	}
+
+	cout << "};\n";
+}
 ///////////////////////////////////////////////////////////////////////////////
 
 // Local Variables:

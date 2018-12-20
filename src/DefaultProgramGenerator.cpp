@@ -91,7 +91,6 @@ void
 DefaultProgramGenerator::goGenerator()
 {
 	output_mgr_->OutputHeader(argc_, argv_, seed_);
-
 	GenerateAllTypes();
 	GenerateFunctions();
 	output_mgr_->Output();
