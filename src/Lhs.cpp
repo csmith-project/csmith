@@ -132,8 +132,18 @@ Lhs::make_random(CGContext &cg_context, const Type* t, const CVQualifiers* qfer,
 	return 0;
 }
 
-/*
- *
+/*Function: constructor
+
+   Use : initializes var ,type, for_compound_assign variables from
+	the values in v.
+
+   Parameters:
+	&v = reference of variable 
+	eLhs  = an enum value(set by default)
+
+   Returns:
+        nothing
+
  */
 Lhs::Lhs(const Variable &v)
 	: Expression(eLhs),
@@ -146,6 +156,10 @@ Lhs::Lhs(const Variable &v)
 /*
  * copy constructor
  */
+
+/*
+ * same function as above but uses an Lhs object and extracts the values from the object
+ */
 Lhs::Lhs(const Lhs &lhs)
 	: Expression(eLhs),
 	  var(lhs.var),
@@ -154,8 +168,20 @@ Lhs::Lhs(const Lhs &lhs)
 {
 }
 
-/*
- *
+/*Function: constructor
+
+   Use : initializes var = v
+	type = t
+	for_compound_assign = compound_assign
+
+   Parameters:
+	&v = reference of variable
+	t = type of varible
+	compound_assign = will compound statement be assigned to that variable
+	eLhs  = an enum value(set by default)
+
+   Returns:
+        nothing
  */
 Lhs::Lhs(const Variable &v, const Type* t, bool compound_assign)
 	: Expression(eLhs),
@@ -174,15 +200,33 @@ Lhs::~Lhs(void)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/*Function: clone
 
+   Use : takes the reference of current object and clones the expression
+
+   Parameters:
+
+   Returns:
+       Lhs returns Expression class insted of Lhs class, as Lhs class inherits Expression class
+	and Lhs can also be a kind of Expression .
+*/
 Expression *
 Lhs::clone() const
 {
 	return new Lhs(*this);
 }
 
-/*
- *
+/*Function: get_type
+
+   Use : the type of current Lhs Expression
+
+   Parameters:
+        none
+
+   Returns:
+        the type of current Lhs Expression
+	remember Lhs is expression and not variable
+
  */
 const Type &
 Lhs::get_type(void) const
@@ -217,7 +261,23 @@ Lhs::get_qualifiers(void) const
 	return qfer;
 }
 
-/*
+/*Function: Output
+
+   Use : if volatile
+   output  VOL_LVAL((**x) , int)
+
+   else
+   output : the expression variable
+	can be one of
+	1. (**x) (can have any number of '*' bases on indirect level)
+	2. (&x)
+
+   Parameters:
+        ostream out
+
+   Returns:
+        none
+
  *
  */
 void
@@ -235,6 +295,20 @@ Lhs::Output(std::ostream &out) const
 	}
 }
 
+/*
+   Use : if volatile check
+
+   Parameters:
+   	none
+
+   Returns:
+        true  | false
+   note: 
+	why are we always taking get_indirect_level() ?
+-	it's a function written with with it's own logic differently in the Lhs.cpp 
+	it gives the indirect level of the Lhs expression by substracting the indirect_levels of var and type
+ *
+ */
 bool
 Lhs::is_volatile(void) const
 {
@@ -252,6 +326,23 @@ Lhs::get_dereferenced_ptrs(void) const
 	}
 	return refs;
 }
+/*
+   Use : it dumps the current class variable var into the data structure(a vector) ptrs
+   note = the name may feel misleading as if the function returns something, but it dosen't.It just dumps the values
+   Parameters:
+        vector of Variable* type
+		     ptrs
+	---------------------------
+	|Variable *   |   |   |   |
+	---------------------------
+   Returns:
+        none
+   note:
+        checks for current class variable var to be a pointer
+	if TRUE
+		add it in the vector ptrs
+ *
+ */
 
 void
 Lhs::get_referenced_ptrs(std::vector<const Variable*>& ptrs) const
@@ -379,7 +470,18 @@ Lhs::compatible(const Expression *exp) const
 	assert(exp);
 	return exp->compatible(&var);
 }
+ /*
+   Use : if the class variable and the input variable objects are compatible with each other
+	compatible  = 
+		1. if any one is volatile  RETURN FALSE
+		2. if both objects match each other RETUEN TRUE
+   Parameters:
+        variable v
 
+   Returns:
+        true  | false
+ *
+ */
 bool
 Lhs::compatible(const Variable *v) const
 {
