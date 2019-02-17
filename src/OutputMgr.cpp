@@ -74,12 +74,31 @@ using namespace std;
 vector<string> OutputMgr::monitored_funcs_;
 
 std::string OutputMgr::curr_func_ = "";
+/*
+   Use : sets the global variable curr_func_ to the passes name of function
+   Parameters:
+        function name is a string
+
+   Returns:
+        none
+ *
+ */
 
 void
 OutputMgr::set_curr_func(const std::string &fname)
 {
 	OutputMgr::curr_func_ = fname;
 }
+/*
+   Use : searches the curr_func_ in the list of monitored_funcs_ (this is given by user during command line )
+
+   Parameters:
+        none
+
+   Returns:
+        true  | false
+ *
+ */
 
 bool
 OutputMgr::is_monitored_func(void)
@@ -100,6 +119,19 @@ OutputMgr::~OutputMgr()
 {
 
 }
+/*
+   Use :
+	secquence of output of main ()
+ 	1.Does some initial stuff of initializations
+	2. calls func_1()
+	3.calls the function who calculates the hash values and outputs them
+   Parameters:
+        output object
+
+   Returns:
+        none
+ *
+ */
 
 void
 OutputMgr::OutputMain(std::ostream &out)
@@ -163,7 +195,15 @@ OutputMgr::OutputMain(std::ostream &out)
 	out << "}" << endl;
 	delete invoke;
 }
+/*
+   Use :
+	below functions containing "hash" as a string in them are called when the command line options related to hash are set
+	TODO - document these functions later when I will understand the usage
+   Parameters:
 
+   Returns:
+
+*/
 void
 OutputMgr::OutputHashFuncInvocation(std::ostream &out, int indent)
 {
@@ -237,7 +277,7 @@ OutputMgr::OutputHashFuncDef(std::ostream &out)
 	HashGlobalVariables(out);
 	out << "}" << std::endl;
 }
-
+//calls the bookkeeper() for all the stats of the generated code of csmith and outputs it @the bottom of program
 void
 OutputMgr::OutputTail(std::ostream &out)
 {
@@ -248,7 +288,13 @@ OutputMgr::OutputTail(std::ostream &out)
 		out << endl;
 	}
 }
-
+/* use : Outputs the sequence as :
+	1. csmith options and seed info
+	2. #includes 
+	3. And some #includes or miscellaneous statements based on command line enabled
+   Parameters : argc , argv , and the seed
+   return : outputs the above defined sequence
+ */
 void
 OutputMgr::OutputHeader(int argc, char *argv[], unsigned long seed)
 {
@@ -330,7 +376,7 @@ OutputMgr::OutputHeader(int argc, char *argv[], unsigned long seed)
 		OutputMgr::OutputStepHashFuncDecl(out);
 	}
 }
-
+//SPECIFY YOUR COMMENTS IN THE STRING AS 2nd parameter and get it outputted as a multi line comment
 void
 OutputMgr::output_comment_line(ostream &out, const std::string &comment)
 {
@@ -367,6 +413,7 @@ OutputMgr::OutputPtrResets(ostream &out, const vector<const Variable*>& ptrs)
 	}
 }
 
+//INTERNALLY SYSTEM USES THIS FUNCTION
 void
 OutputMgr::output_tab_(ostream &out, int indent)
 {
@@ -374,13 +421,13 @@ OutputMgr::output_tab_(ostream &out, int indent)
 		out << TAB;
 	}
 }
-
+//USERS USE THIS FUNCTION
 void
 OutputMgr::output_tab(ostream &out, int indent)
 {
 	OutputMgr::output_tab_(out, indent);
 }
-
+//new line
 void
 OutputMgr::really_outputln(ostream &out)
 {
