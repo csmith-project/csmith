@@ -152,12 +152,30 @@ RandomNumber::rnd_flipcoin(const unsigned int p, const Filter *f, const std::str
 {
 	return curr_generator_->rnd_flipcoin(p, f, where);
 }
+/*
+   Use : returns a random number formed from hexdigits(only 0 to 9 and A to F) of size num
+   Parameters:
+        num = size of the random number user wants
+
+   Returns:
+        a string , ex . "19AC830" for num = 7
+ *
+ */
 
 std::string
 RandomNumber::RandomHexDigits(int num)
 {
 	return curr_generator_->RandomHexDigits(num);
 }
+/*
+   Use : returns a random number formed from digit(only 0 to 9) of size num
+   Parameters:
+        num = size of the random number user wants
+
+   Returns:
+        a string , ex . "1924830" for num = 7
+ *
+ */
 
 std::string
 RandomNumber::RandomDigits(int num)

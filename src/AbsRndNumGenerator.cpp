@@ -134,6 +134,19 @@ AbsRndNumGenerator::genrand(void)
 {
 	return lrand48();
 }
+/*
+   Use :
+	 loop(from  0 to  num of times)
+		From hex1 array randomly chooses an element and appends to the str
+   Parameters:
+        num = size of the random number user wants
+	ex num = 5 ----> 39A92
+	ex num = 2 ----> 2D
+
+   Returns:
+        a newly created random number from hex1
+ *
+ */
 
 std::string
 AbsRndNumGenerator::RandomHexDigits( int num )
@@ -146,6 +159,19 @@ AbsRndNumGenerator::RandomHexDigits( int num )
 
 	return str;
 }
+/*
+   Use :
+	 loop(from  0 to  num of times)
+		From dec1 array randomly chooses an element and appends to the str
+   Parameters:
+        num = size of the random number user wants
+	ex num = 5 ----> 39492 
+	ex num = 2 ----> 25
+
+   Returns:
+        a newly created random number from dec1
+ *
+ */
 
 std::string
 AbsRndNumGenerator::RandomDigits( int num )
@@ -158,13 +184,13 @@ AbsRndNumGenerator::RandomDigits( int num )
 
 	return str;
 }
-
+//returns the hex1 string declared at top
 const char *
 AbsRndNumGenerator::get_hex1()
 {
 	return AbsRndNumGenerator::hex1;
 }
-
+//returns the dec1 string declared at top
 const char *
 AbsRndNumGenerator::get_dec1()
 {

@@ -42,7 +42,14 @@
 #include "Filter.h"
 #include "CGOptions.h"
 #include "AbsProgramGenerator.h"
+/*
+   Use :
+   Parameters:
 
+   Returns:
+
+ *
+ */
 std::string get_prefixed_name(const std::string &name)
 {
 	if (!CGOptions::prefix_name())
@@ -56,33 +63,69 @@ std::string get_prefixed_name(const std::string &name)
 	RandomNumber *rnd = RandomNumber::GetInstance();
 	return rnd->get_prefixed_name(name);
 }
+/*
+   Use :returns a random number formed from hexdigits(only 0 to 9 and A to F)
+	internally calls RandomNumber class object
+   Parameters:
+   Returns:
 
+ *
+ */
 std::string RandomHexDigits( int num )
 {
 	RandomNumber *rnd = RandomNumber::GetInstance();
 	return rnd->RandomHexDigits(num);
 }
+/*
+   Use :returns a random number formed from digit(only 0 to 9) of size num
+	internally calls the RandomNumber class object
+   Parameters:
 
+   Returns:
+
+ *
+ */
 std::string RandomDigits( int num )
 {
 	RandomNumber *rnd = RandomNumber::GetInstance();
 	return rnd->RandomDigits(num);
 }
+/*
+   Use :
+   Parameters:
 
+   Returns:
+
+ *
+ */
 unsigned int
 rnd_upto(const unsigned int n, const Filter *f, const std::string* where)
 {
 	RandomNumber *rnd = RandomNumber::GetInstance();
 	return rnd->rnd_upto(n, f, where);
 }
+/*
+   Use :
+   Parameters:
 
+   Returns:
+
+ *
+ */
 bool
 rnd_flipcoin(const unsigned int p, const Filter *f, const std::string* where)
 {
 	RandomNumber *rnd = RandomNumber::GetInstance();
 	return rnd->rnd_flipcoin(p, f, where);
 }
+/*
+   Use :
+   Parameters:
 
+   Returns:
+
+ *
+ */
 std::string PureRandomHexDigits( int num )
 {
 	if (!CGOptions::is_random()) {
@@ -96,7 +139,14 @@ std::string PureRandomHexDigits( int num )
 		return RandomHexDigits(num);
 	}
 }
+/*
+   Use :
+   Parameters:
 
+   Returns:
+
+ *
+ */
 std::string PureRandomDigits( int num )
 {
 
@@ -111,7 +161,14 @@ std::string PureRandomDigits( int num )
 		return RandomDigits(num);
 	}
 }
+/*
+   Use :
+   Parameters:
 
+   Returns:
+
+ *
+ */
 unsigned int
 pure_rnd_upto(const unsigned int n, const Filter *f, const std::string* where)
 {
@@ -127,7 +184,14 @@ pure_rnd_upto(const unsigned int n, const Filter *f, const std::string* where)
 		return rnd_upto(n, f, where);
 	}
 }
+/*
+   Use :
+   Parameters:
 
+   Returns:
+
+ *
+ */
 bool
 pure_rnd_flipcoin(const unsigned int n, const Filter *f, const std::string* where)
 {
@@ -142,14 +206,28 @@ pure_rnd_flipcoin(const unsigned int n, const Filter *f, const std::string* wher
 		return rnd_flipcoin(n, f, where);
 	}
 }
+/*
+   Use :
+   Parameters:
 
+   Returns:
+
+ *
+ */
 std::string &
 trace_depth()
 {
 	RandomNumber *rnd = RandomNumber::GetInstance();
 	return rnd->trace_depth();
 }
+/*
+   Use :
+   Parameters:
 
+   Returns:
+
+ *
+ */
 void
 get_sequence(std::string &sequence)
 {
