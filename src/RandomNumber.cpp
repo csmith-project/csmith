@@ -39,10 +39,16 @@
 #include "Filter.h"
 
 RandomNumber *RandomNumber::instance_ = NULL;
-
+/*
+	generator_  map <RNDNUM_GENERATOR, instance of AbsRndNumGenerator class>
+	use : current function adds element in generator_
+		and initializes each RNDNUM_GENERATOR with NULL
+ */
 RandomNumber::RandomNumber(const unsigned long seed)
 	: seed_(seed)
 {
+	//returns the count of the total number of random generators
+	// currently 3
 	unsigned int count = AbsRndNumGenerator::count();
 
 	for (unsigned int i = 0; i < count; ++i) {
@@ -64,6 +70,7 @@ RandomNumber::make_all_rndnum_generators(const unsigned long seed)
 
 	for (unsigned int i = 0; i < count; ++i) {
 		RNDNUM_GENERATOR rImpl = static_cast<RNDNUM_GENERATOR>(i);
+		//it returns one of the random number generators(from the list - RNDNUM_GENERATOR)
 		generator = AbsRndNumGenerator::make_rndnum_generator(rImpl, seed);
 		generators_[rImpl] = generator;
 	}
@@ -182,7 +189,12 @@ RandomNumber::RandomDigits(int num)
 {
 	return curr_generator_->RandomDigits(num);
 }
-
+/*
+	Deletes the values in the map
+	i.e the instances of AbsRndNumGenerator*
+	and @end deletes the generator_ data structure (a map)
+	by deleting the instance of the class
+ */
 void
 RandomNumber::doFinalization()
 {

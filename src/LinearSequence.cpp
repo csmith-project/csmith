@@ -42,7 +42,14 @@
 using namespace std;
 
 const char LinearSequence::default_sep_char = '_';
-
+/*
+	seq_map_ = map <int , int>
+	 _______________
+	|_int___|_int___|
+	|	|	|
+	|	|	|
+	|_______|_______|
+ */
 LinearSequence::LinearSequence(const char sep_char)
 	: sep_char_(sep_char)
 {
@@ -62,7 +69,9 @@ LinearSequence::init_sequence()
 {
 
 }
-
+//adds value in map
+// at key = k
+// and value = v
 void
 LinearSequence::add_number(int v, int /*bound*/, int k)
 {
@@ -74,7 +83,9 @@ LinearSequence::get_number(int /*bound*/)
 {
 	return -1;
 }
-
+//get the value at pos
+//key = pos
+//return  = value at key
 int
 LinearSequence::get_number_by_pos(int pos)
 {
@@ -88,7 +99,12 @@ LinearSequence::clear()
 {
 	seq_map_.clear();
 }
-
+/*
+	appends '_' for n-1 values of the map (seq_char_) and 
+	at end appends the last value
+	ex. step 1 --> 1_2_3_
+	    step 2 --> 1_2_3_4 where 1,2,3,4 are the values in map
+ */
 void
 LinearSequence::get_sequence(ostream &ss)
 {
@@ -100,7 +116,7 @@ LinearSequence::get_sequence(ostream &ss)
 	}
 	ss << seq_map_[i];
 }
-
+//retrurns the number of elements in map seq_map_
 unsigned INT64
 LinearSequence::sequence_length()
 {

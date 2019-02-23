@@ -87,9 +87,11 @@ FunctionInvocation::make_random(bool is_std_func,
 	// If we are looking for a program-defined function, try to find one.
 	if (!is_std_func) {
 		Function* callee = NULL;
+		//may be this function finds from the list of pre defined functions
 		if (pure_rnd_flipcoin(50)) {
 			callee = Function::choose_func(get_all_functions(), cg_context, type, qfer);
 		}
+		// this means the functions are defined well before
 		if (callee != NULL) {
 			FunctionInvocationUser *fiu = new FunctionInvocationUser(callee, true, NULL);
 			fiu->build_invocation(callee, cg_context);
@@ -98,6 +100,7 @@ FunctionInvocation::make_random(bool is_std_func,
 				cg_context.get_current_func()->fact_changed |= fiu->func->fact_changed;
 			}
 		}
+		//If new functions were defined ,then loop back to fill in its body.
 		else if (!Function::reach_max_functions_cnt()) {
 			fi = FunctionInvocationUser::build_invocation_and_function(cg_context, type, qfer);
 		} else {

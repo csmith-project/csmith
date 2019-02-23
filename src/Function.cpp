@@ -410,7 +410,9 @@ Function::Function(const string &name, const Type *return_type, bool builtin)
 {
 	FuncList.push_back(this);			// Add to global list of functions.
 }
-
+/*
+* nearly equivalent for make_first,but called internally for generating functions except first function
+*/
 Function *
 Function::make_random_signature(const CGContext& cg_context, const Type* type, const CVQualifiers* qfer)
 {

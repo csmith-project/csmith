@@ -39,11 +39,24 @@
 #include "LinearSequence.h"
 #include "SimpleDeltaSequence.h"
 #include "DeltaMonitor.h"
-
+// set data structure = no repetation of duplicate elements
+// seqs_ = [...|...|...|...]  <------- a set data structure
+//	     ^
+//	     |
+//	     |____(instance of Sequence class)
+//
 std::set<Sequence*> SequenceFactory::seqs_;
 
 char SequenceFactory::current_sep_char_ = '_';
-
+/*
+   Use :
+	generates current_sep_char_ and Sequence class object and inserts into the seqs_ set
+	Sequence class instance can be of-
+		1.DeltaMonitor class
+		2.LinearSequence class
+   Returns:
+        The generated sequence class instance
+ */
 Sequence*
 SequenceFactory::make_sequence()
 {
@@ -62,6 +75,10 @@ SequenceFactory::make_sequence()
 	seqs_.insert(seq);
 	return seq;
 }
+/*
+   Use :
+	deletes the dynamic memory allocated to the seqs_ set
+ */
 
 void
 SequenceFactory::destroy_sequences()

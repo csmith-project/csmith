@@ -42,7 +42,11 @@
 #include "SimpleDeltaRndNumGenerator.h"
 
 using namespace std;
-
+//     These are linux kernel functions:
+//     srand48() = function is initialization function(it initializes the initial value of seed)
+//      which  should  be  called  before  using lrand48()
+//     lrand48() = functions return nonnegative long integers
+//      uniformly distributed over the interval [0, 2^31).
 #ifndef HAVE_LRAND48
 extern "C" {
 	extern void srand48(long seed);
@@ -71,7 +75,7 @@ AbsRndNumGenerator*
 AbsRndNumGenerator::make_rndnum_generator(RNDNUM_GENERATOR impl, const unsigned long seed)
 {
 	AbsRndNumGenerator *rImpl = 0;
-
+	//calls srand48() before calling the drand48() as its an initialization function
 	AbsRndNumGenerator::seedrand(seed);
 	switch (impl) {
 		case rDefaultRndNumGenerator:
@@ -90,7 +94,15 @@ AbsRndNumGenerator::make_rndnum_generator(RNDNUM_GENERATOR impl, const unsigned 
 
 	return rImpl;
 }
+/*
+   Use :
+	calls srand48() before calling the lrand48()
+   Parameters:
+	seed value
 
+   Returns:
+ *
+ */
 void
 AbsRndNumGenerator::seedrand(const unsigned long seed )
 {
@@ -128,6 +140,17 @@ AbsRndNumGenerator::rnd_shuffle(unsigned int n)
 	return ary;
 }
 #endif
+
+/*
+   Use :
+	calls lrand48() and finally generates a random number
+   Parameters:
+	initially srand48() needs to be called
+
+   Returns:
+        random number
+ *
+ */
 
 unsigned long
 AbsRndNumGenerator::genrand(void)

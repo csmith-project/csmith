@@ -38,7 +38,9 @@
 
 // ---------------------------------------
 // Platform-Specific code to get a unique seed value (usually from the tick counter, etc)
-//
+// How is the read_time() generated?
+// check for each platform and if matches call some assembly routines according to the platform
+// if it dosen't call the time() function from time.h
 
 #if HAVE_CONFIG_H
 #  include <config.h>
