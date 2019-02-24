@@ -191,9 +191,16 @@ RandomNumber::RandomDigits(int num)
 }
 /*
 	Deletes the values in the map
-	i.e the instances of AbsRndNumGenerator*
+	generator_ = map <RNDNUM_GENERATOR, instance of AbsRndNumGenerator class>
+        ________________________________________
+       | RNDNUM_GENERATOR | AbsRndNumGenerator*  |
+       |__________________|______________________|
+       |__________________|______________________|
+       |__________________|______________________|
+       |__________________|______________________|
+
+short : deletes various instances of RandomNumber generation
 	and @end deletes the generator_ data structure (a map)
-	by deleting the instance of the class
  */
 void
 RandomNumber::doFinalization()

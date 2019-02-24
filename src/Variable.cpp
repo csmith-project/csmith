@@ -822,6 +822,23 @@ Variable::get_last_ctrl_vars()
 }
 
 // ------------------------------------------------------------
+/*
+	clears the data structure = ctrl_vars_vectors
+	ctrl_vars_vectors = a vector holding another vector of Variable type
+         ___ __ __ __
+      	[_|_|__|__|__]  ctrl_vars_vectors
+	  |
+	  |
+	  |
+	  v
+	_ _ _ _ _ _
+       [_i_|_j_|_k_]...
+		  ^
+       		  |________Variable*
+
+ctrl_vars_vectors = contains i,j,k,... loop control variables
+		    for seperate blocks
+ */
 void
 Variable::doFinalization(void)
 {

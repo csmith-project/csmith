@@ -885,6 +885,11 @@ Function::deleteFunction(Function* func)
 
 /*
  * Release all dynamic memory
+FuncList = List of all functions in the program
+FMList  =  list of fact managers for each function
+
+@end cleares all facts related data structures
+CURRENTLY IDK what fact is?
  */
 void
 Function::doFinalization(void)

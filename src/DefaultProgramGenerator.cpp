@@ -54,7 +54,8 @@ DefaultProgramGenerator::DefaultProgramGenerator(int argc, char *argv[], unsigne
 {
 
 }
-
+//use : this calls doFinalization which internally deletes all the created data structures
+// for variable,functions,....etc everything is destroyed
 DefaultProgramGenerator::~DefaultProgramGenerator()
 {
 	Finalization::doFinalization();
@@ -76,7 +77,11 @@ DefaultProgramGenerator::initialize()
 		output_mgr_ = DefaultOutputMgr::CreateInstance();
 	}
 	assert(output_mgr_);
-
+	//returns nothing when no command line set (this is by default) from below options
+	//1. Splat
+	//2. Klee
+	//3. coverageTest
+	//4. Crest
 	ExtensionMgr::CreateExtension();
 }
 

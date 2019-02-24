@@ -107,7 +107,7 @@ AbsExtension::default_output_definitions(ostream &out, std::vector<ExtensionValu
 	}
 	out << endl;
 }
-
+//use :
 void
 AbsExtension::OutputFirstFunInvocation(std::ostream &out, FunctionInvocation *invoke)
 {

@@ -42,7 +42,7 @@
 #include "Probabilities.h"
 #include "StatementGoto.h"
 #include "ExtensionMgr.h"
-
+//use : deletes all the data structures created while program generation
 void
 Finalization::doFinalization()
 {

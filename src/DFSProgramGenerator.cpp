@@ -57,7 +57,8 @@ DFSProgramGenerator::DFSProgramGenerator(int argc, char *argv[], unsigned long s
 {
 
 }
-
+//use : this calls doFinalization which internally deletes all the created data structures
+// for variable,functions,....etc everything is destroyed
 DFSProgramGenerator::~DFSProgramGenerator()
 {
 	Finalization::doFinalization();

@@ -210,7 +210,21 @@ StatementGoto::make_random(CGContext &cg_context)
 }
 
 /*
- *
+ *use : find the map for dest statement
+	if found
+		returns label associated with it
+	else
+		generates a label
+		and associates it with the statement
+		and adds into map
+	stm_labels = map <Statement* , string>
+	___________________
+       |_Statement*|_label_|
+       |           |       |
+       |___________|_______|
+       |___________|_lbl_22|
+       |___________|_______|
+       |___________|_______|
  */
 StatementGoto::StatementGoto(Block* b, const Expression &test, const Statement* dest, const std::vector<const Variable*>& vars)
 	: Statement(eGoto, b),
@@ -409,7 +423,18 @@ StatementGoto::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) c
 	fm->map_stm_effect[this] = cg_context.get_effect_stm();
 	return true;
 }
+/*
+  stm_labels = map <Statement* , string>
+        ___________________
+       |_Statement*|_label_|
+       |           |       |
+       |___________|_______|
+       |___________|_lbl_22|
+       |___________|_______|
+       |___________|_______|
+	clears above
 
+*/
 void
 StatementGoto::doFinalization(void)
 {

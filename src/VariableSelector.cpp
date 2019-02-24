@@ -1533,8 +1533,10 @@ VariableSelector::find_var_by_name(string name)
 	return NULL;
 }
 
-/*
- *
+/* Following Data structures are flushed
+ *	AllVars = All variables generated
+	GlobalList = All globals, including volatiles
+	GlobalNonvolatilesList = All the non-volatile globals
  */
 void
 VariableSelector::doFinalization(void)

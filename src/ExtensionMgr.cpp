@@ -47,7 +47,20 @@
 using namespace std;
 
 AbsExtension *ExtensionMgr::extension_ = NULL;
+/*dynamically assigns the object from below classes based on command line option provided
+	1. SplatExtension
+	2. KleeExtension
+	3. CrestExtension
+	4. CoverageTestExtension
+	to AbsExtensionMgr object
+1.Why can't we create objecet of AbsExtension?
+--> its abstract class
+2. Why are we calling in ExtensionMgr class?
+--> as above class is a friend class
 
+if none of the options is set return
+this is then default one when no command line given
+ */
 void
 ExtensionMgr::CreateExtension()
 {
@@ -71,14 +84,14 @@ ExtensionMgr::CreateExtension()
 	std::vector<ExtensionValue *> &values = ExtensionMgr::extension_->get_values();
 	ExtensionMgr::extension_->Initialize(params_size, values);
 }
-
+//deletes the object created of AbsExtension class
 void
 ExtensionMgr::DestroyExtension()
 {
 	delete ExtensionMgr::extension_;
 	ExtensionMgr::extension_ = NULL;
 }
-
+//returns the instance of AbsExtension class
 AbsExtension *
 ExtensionMgr::GetExtension()
 {

@@ -1,0 +1,14 @@
+
+1. The class AbsExtension is inherited by following classes
+			AbsExtension
+			^  ^  ^  ^
+			 INHERITED
+			|  |  |  |
+			|  |  |  |
+     KleeExtension _____|  |  |  |_____  CrestExtension
+                           |  |
+CoverageTestExtension _____|  |_____  SplatExtension
+			
+
+2.		       ExtensionMgr
+	is friend for all the above classes so it can acess all the private and protected members of above classes

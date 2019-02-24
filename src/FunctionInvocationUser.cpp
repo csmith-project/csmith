@@ -385,7 +385,9 @@ FunctionInvocationUser::save_return_fact(const vector<const Fact*>& facts) const
 }
 
 /*
- * Release all dynamic memory
+  Release all dynamic memory
+ //  return_facts = list of return facts
+//   invocations = list(vector) of function calls
  */
 void
 FunctionInvocationUser::doFinalization(void)
