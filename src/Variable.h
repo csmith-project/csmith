@@ -89,6 +89,7 @@ public:
 	bool is_volatile_after_deref(int deref_level) const;
 	bool is_packed_aggregate_field_var() const;
 	bool has_field_var(const Variable* v) const;
+	//compares with NULL (i.e 0 )if NULL return 0 else return 1
 	bool is_field_var(void) const { return field_var_of != 0; };
 	const Variable* get_top_container(void) const;
 	const Variable* get_container_union(void) const;
@@ -152,6 +153,7 @@ public:
 	const bool isBitfield_; // expanded from a full-bitfield struct var
 	bool isAddrTaken;
 	bool isAccessOnce;
+//MAY BE WRONG	//a struct/union instance inside a defination of struct/union is indicated
 	const Variable* field_var_of; //expanded from a struct/union
 	const bool isArray;
 	const CVQualifiers qfer;

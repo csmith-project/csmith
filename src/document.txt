@@ -12,3 +12,23 @@ CoverageTestExtension _____|  |_____  SplatExtension
 
 2.		       ExtensionMgr
 	is friend for all the above classes so it can acess all the private and protected members of above classes
+3.
+	courious about how the 
+		local variables
+		l1
+		l2
+		.
+		..
+		...
+
+		int i,j,k;
+		for () {
+			for (){
+			....
+			}
+		}
+	generated?
+-> class Variable -> OutputArrayInitializers() == basically the aim of function is to initialize 
+	the array variables which were not initialized at declaration.
+	so it chooses the unitialized array variables and fills using loop
+	

@@ -443,7 +443,11 @@ ArrayVariable::is_visible_local(const Block* blk) const
 	}
     return false;
 }
-
+/*
+DOUBT
+	here the comments are correct, but the code lies
+but reverse shouold have been true
+*/
 bool
 ArrayVariable::no_loop_initializer(void) const
 {
@@ -594,7 +598,9 @@ ArrayVariable::Output(std::ostream &out) const
 		}
 	}
 }
-
+/*for ex. for array of arr[2][2]
+	it prints arr[2][2] -> maximum index
+*/
 void
 ArrayVariable::OutputUpperBound(std::ostream &out) const
 {
@@ -606,6 +612,9 @@ ArrayVariable::OutputUpperBound(std::ostream &out) const
 }
 
 // --------------------------------------------------------------
+/*for ex. for array of arr[2][2]
+	it prints arr[0][0] -> minimum index
+*/
 void
 ArrayVariable::OutputLowerBound(std::ostream &out) const
 {

@@ -79,7 +79,8 @@ unsigned long Variable::ctrl_vars_count;
 const char Variable::sink_var_name[] = "csmith_sink_";
 
 //////////////////////////////////////////////////////////////////////////////
-
+//returns position of variable in set of variables(constant variables set only)
+//else -1
 int find_variable_in_set(const vector<const Variable*>& set, const Variable* v)
 {
     size_t i;
@@ -90,7 +91,8 @@ int find_variable_in_set(const vector<const Variable*>& set, const Variable* v)
     }
     return -1;
 }
-
+//returns position of variable in set of variables(nonconstant variables set)
+//else -1
 int find_variable_in_set(const vector<Variable*>& set, const Variable* v)
 {
     size_t i;
@@ -101,7 +103,14 @@ int find_variable_in_set(const vector<Variable*>& set, const Variable* v)
     }
     return -1;
 }
-
+/*
+	if v is aggregate(struct or union) then
+		for each field of aggregate
+			1. check is it in set
+			if the field is an aggregate object itself
+				then recursively traverse it
+	if not found return -1
+*/
 int find_field_variable_in_set(const vector<const Variable*>& set, const Variable* v)
 {
     size_t i;
@@ -116,7 +125,7 @@ int find_field_variable_in_set(const vector<const Variable*>& set, const Variabl
 	}
     return -1;
 }
-
+//this is simple search, not restricted to aggregate
 bool is_variable_in_set(const vector<const Variable*>& set, const Variable* v)
 {
     size_t i;
@@ -127,7 +136,7 @@ bool is_variable_in_set(const vector<const Variable*>& set, const Variable* v)
     }
     return false;
 }
-
+//adds the variable v in set by checking the set before hand
 bool add_variable_to_set(vector<const Variable*>& set, const Variable* v)
 {
 	if (!is_variable_in_set(set, v)) {
@@ -136,7 +145,7 @@ bool add_variable_to_set(vector<const Variable*>& set, const Variable* v)
 	}
     return false;
 }
-
+// adds a list of variables in set (the validation check is done in above function and not here else overhead)
 bool add_variables_to_set(vector<const Variable*>& set, const vector<const Variable*>& new_set)
 {
 	size_t i;
@@ -149,7 +158,7 @@ bool add_variables_to_set(vector<const Variable*>& set, const vector<const Varia
 	return changed;
 }
 
-// return true if two sets contains same variables
+// return true if two sets contain same variables
 bool equal_variable_sets(const vector<const Variable*>& set1, const vector<const Variable*>& set2)
 {
     size_t i;
@@ -180,6 +189,12 @@ bool sub_variable_sets(const vector<const Variable*>& set1, const vector<const V
 }
 
 // combine two variable sets into one, note struct field "s1.f1" and "s1" is combined into "s1"
+/*
+	copy set1 into set_all
+	for each element of set2
+		if  element != set1 then
+			set_all <--set2[i] (copy it)
+*/
 void combine_variable_sets(const vector<const Variable*>& set1, const vector<const Variable*>& set2, vector<const Variable*>& set_all)
 {
 	size_t i;
@@ -191,7 +206,9 @@ void combine_variable_sets(const vector<const Variable*>& set1, const vector<con
 		}
 	}
 }
-
+/*
+	first get proper understanding of field vars and patrent vars then return here
+*/
 /* replace all the field vars with their parent vars */
 void remove_field_vars(vector<const Variable*>& set)
 {
@@ -210,7 +227,11 @@ void remove_field_vars(vector<const Variable*>& set)
 		}
 	}
 }
-
+/*
+	if the this variable is union
+		return this
+	else traverse the list using field_var_of and repeat same
+*/
 const Variable*
 Variable::get_container_union(void) const
 {
@@ -291,8 +312,11 @@ Variable::is_virtual(void) const
   ************************************************************************/
 bool Variable::has_field_var(const Variable* v) const
 {
+	//is_aggregate() = return true if type is struct||union
 	if (type->is_aggregate()) {
 		const Variable* tmp = v;
+	//traverse through all the variables in aggregate(struct||union)
+	//and return true if v matches
 		while (tmp) {
 			if (tmp == this) {
 				return true;
@@ -323,7 +347,7 @@ Variable::get_top_container(void) const
 	}
 	return v;
 }
-
+//iterates over the field_vars list and check with current variable
 int
 Variable::get_field_id(void) const
 {
@@ -340,8 +364,24 @@ Variable::get_field_id(void) const
 ///////////////////////////////////////////////////////////////////////////////
  /* expand field variables of struct, assigned names, f0, f1, etc, to them
   ************************************************************************/
+/*
+field_vars[] = list of Variable* type
+	 _________________
+	[__|__|___|___|___]
+Following sample variable names can be there in field_vars
+
+ func_32_rv.f1
+ p_35.f0
+ l_105.f0
+ g_201.f0
+ g_201.f5.f0
+ g_203[2][2][1].f0
+
+*/
+//	type has to be surely struct/union
 void Variable::create_field_vars(const Type *type)
 {
+	//this checks is the type passed is struct/union else stop
 	assert(type->is_aggregate());
     size_t i, j;
     assert(type->fields.size() == type->qfers_.size());
@@ -371,7 +411,6 @@ void Variable::create_field_vars(const Type *type)
 		field_vars.push_back(var);
     }
 }
-
 Variable *
 Variable::CreateVariable(const std::string &name, const Type *type,
 			   bool isConst, bool isVolatile,
@@ -383,7 +422,16 @@ Variable::CreateVariable(const std::string &name, const Type *type,
 	isVolatiles.push_back(isVolatile);
 	return CreateVariable(name, type, isConsts, isVolatiles, isAuto, isStatic, isRegister, isBitfield, isFieldVarOf);
 }
+/*
+	1.allocates memory to variable
+	2.assign a value to variable
+	3.if variable is a struct/union create field_vars for it
 
+How is it different from the other ?
+1.initialization value need not be passes, it's internally created
+2.vectors of isConsts and isVolatiles passed
+
+*/
 Variable *
 Variable::CreateVariable(const std::string &name, const Type *type,
 				   const vector<bool>& isConsts, const vector<bool>& isVolatiles,
@@ -396,7 +444,9 @@ Variable::CreateVariable(const std::string &name, const Type *type,
 		assert(type->simple_type != eVoid);
 
 	const Variable* top = isFieldVarOf;
-	while (top->field_var_of) top = top->field_var_of;
+	while (top->field_var_of)
+		top = top->field_var_of;
+	//assign a value to it
 	var->init = (top->type->eType == eUnion) ? 0 : Constant::make_random(type);
 
 	ERROR_GUARD_AND_DEL1(NULL, var);
@@ -406,7 +456,20 @@ Variable::CreateVariable(const std::string &name, const Type *type,
 	ERROR_GUARD_AND_DEL1(NULL, var);
 	return var;
 }
+/*
+   Use :
+        1.creates the variable at very abstract level
+	2. Dosen't initialize it
+	3. create field_vars for variable
 
+   Parameters:
+	name of variable,type ,init value, qualifier
+   Returns:
+	a variable object
+	which is not void
+
+NOTE : calls internally constructor no.2
+*/
 Variable *
 Variable::CreateVariable(const std::string &name, const Type *type, const Expression* init, const CVQualifiers* qfer)
 {
@@ -423,7 +486,7 @@ Variable::CreateVariable(const std::string &name, const Type *type, const Expres
 }
 
 /*
- *
+ *constructor no. 1(9 parameters)
  */
 Variable::Variable(const std::string &name, const Type *type,
 				   const vector<bool>& isConsts, const vector<bool>& isVolatiles,
@@ -439,7 +502,7 @@ Variable::Variable(const std::string &name, const Type *type,
 }
 
 /*
- *
+ * *constructor no. 2(4 parameters)
  */
 Variable::Variable(const std::string &name, const Type *type, const Expression* init, const CVQualifiers* qfer)
 	: name(name), type(type),
@@ -451,7 +514,7 @@ Variable::Variable(const std::string &name, const Type *type, const Expression* 
 {
 	// nothing else to do
 }
-
+// *constructor no. 3 (6 parameters)
 Variable::Variable(const std::string &name, const Type *type, const Expression* init, const CVQualifiers* qfer, const Variable* isFieldVarOf, bool isArray)
 	: name(name), type(type),
 	  init(init),
@@ -465,7 +528,7 @@ Variable::Variable(const std::string &name, const Type *type, const Expression* 
 }
 
 /*
- *
+ *Deletes field_vars list
  */
 Variable::~Variable(void)
 {
@@ -481,6 +544,10 @@ Variable::~Variable(void)
 }
 
 // --------------------------------------------------------------
+/*
+	for now consider it returns true if variable name starts with 'g_'
+	for field_vars deffer LATER
+*/
 bool
 Variable::is_global(void) const
 {
@@ -497,6 +564,14 @@ Variable::is_local(void) const
 }
 
 // -------------------------------------------------------------
+/*
+	A variable calls this function with block id passed to it(each block has unique id)
+	use :return TRUE if variable is accessable at a given block
+TLDR version:
+	1.if it's block 0, for optimization only global variables accessable and func_1 has no parameters as well
+	2.Check all func para. for given block
+	3.check all local variables fot that block as well as for parent blocks of given block
+*/
 bool
 Variable::is_visible_local(const Block* blk) const
 {
@@ -506,6 +581,7 @@ Variable::is_visible_local(const Block* blk) const
 	if (is_field_var()) {
 		return field_var_of->is_visible_local(blk);
 	}
+//------LOOP ON PARAMETERS AND CHECK DO THEY MATCH
 	size_t i;
 	const Function* func = blk->func;
 	for (i=0; i<func->param.size(); i++) {
@@ -513,6 +589,7 @@ Variable::is_visible_local(const Block* blk) const
 			return true;
  		}
 	}
+//--------check for local vars. for given block and blocks parent to it
 	const Block* b = blk;
 	while (b) {
 		if (find_variable_in_set(b->local_vars, this) != -1) {
@@ -524,6 +601,7 @@ Variable::is_visible_local(const Block* blk) const
 }
 
 // --------------------------------------------------------------
+//is paramenter of function
 bool
 Variable::is_argument(void) const
 {
@@ -538,7 +616,7 @@ Variable::is_tmp_var(void) const
 	// JYTODO: need stronger criteria?
 	return (name.find("t") == 0);
 }
-
+//0 is dereference level
 bool
 Variable::is_const(void) const
 {
@@ -550,7 +628,7 @@ Variable::is_volatile(void) const
 {
 	return is_volatile_after_deref(0);
 }
-
+//SKIP FOR NOW
 bool
 Variable::is_const_after_deref(int deref_level) const
 {
@@ -667,11 +745,15 @@ Variable::get_array(string& field) const
 }
 
 // --------------------------------------------------------------
+/*
+	static(optional) datatype name extension(optional) = initializn value ;
+*/
 void
 Variable::OutputDef(std::ostream &out, int indent) const
 {
 	output_tab(out, indent);
 	// force global variables to be static if necessary
+	//force_globals_static is by default true
 	if (CGOptions::force_globals_static() && is_global()) {
 		out << "static ";
 	}
@@ -687,7 +769,10 @@ Variable::OutputDef(std::ostream &out, int indent) const
 		outputln(out);
 	}
 }
-
+//static(optional) datatype name
+//can be used in case of Arrays,ex. STATIC INT X
+//and further dimensions can be specified
+//like STATIC INT X[1][2]
 void Variable::OutputDecl(std::ostream &out) const
 {
 	// force global variables to be static if necessary
@@ -697,7 +782,11 @@ void Variable::OutputDecl(std::ostream &out) const
 	output_qualified_type(out);
 	out << get_actual_name();
 }
-
+/*
+	get_prefixed_name() = ? don't know SKIP FOR NOW
+	else 
+		returns name
+*/
 std::string
 Variable::get_actual_name() const
 {
@@ -710,6 +799,12 @@ Variable::get_actual_name() const
 }
 
 // --------------------------------------------------------------
+/*1.VOL_RVAL(g_232)
+	or
+  2.ACCESS_ONCE(g_232)
+	or
+  3. g_232
+*/
 void
 Variable::Output(std::ostream &out) const
 {
@@ -738,6 +833,7 @@ Variable::OutputAddrOf(std::ostream &out) const
 }
 
 // --------------------------------------------------------------
+//just returns name
 void
 Variable::OutputForComment(std::ostream &out) const
 {
@@ -783,7 +879,21 @@ Variable::OutputLowerBound(std::ostream &out) const
 	}
 }
 
-// --------------------------------------------------------------
+/*// --------------------------------------------------------------
+	ctrl_vars_vectors = a vector holding another vector of Variable type
+         ___ __ __ __
+      	[_|_|__|__|__]  ctrl_vars_vectors
+	  |
+	  |
+	  |
+	  v
+	_ _ _ _ _ _
+       [_i_|_j_|_k_]... ctrl_vars
+		  ^
+       		  |________Variable
+
+use : variables i,j,k are created and ctrl_vars vector is pushed into ctrl_vars_vector only once
+*/
 std::vector<const Variable*>&
 Variable::new_ctrl_vars()
 {
@@ -793,7 +903,7 @@ Variable::new_ctrl_vars()
 	char name = 'i';
 	vector<const Variable *> *ctrl_vars = new vector<const Variable *>();
 	assert(ctrl_vars);
-
+	//the max_array_dimensions() is always 3 , why?
 	for (int i=0; i<CGOptions::max_array_dimensions(); i++) {
 		stringstream name_stream;
 		name_stream << name;
@@ -808,13 +918,14 @@ Variable::new_ctrl_vars()
 	ctrl_vars_vectors.push_back(ctrl_vars);
 	return *ctrl_vars;
 }
-
+//use : creates i,j,k ctrl_vars
 std::vector<const Variable*>&
 Variable::get_new_ctrl_vars()
 {
 	return Variable::new_ctrl_vars();
 }
-
+//retrives the last ctrl_vars, which are always i,j,k
+//whats the use then?
 std::vector<const Variable*>&
 Variable::get_last_ctrl_vars()
 {
@@ -863,6 +974,13 @@ MapVariableList(const vector<Variable*> &var, std::ostream &out,
 }
 
 // --------------------------------------------------------------
+/*
+	outputs the line:
+	int i,j;
+	The number of variables to output is decided on passed parameter dimen
+	ex. dimen = 1 ; int i;
+	dimen = 3 ; int i,j,k;
+*/
 void
 OutputArrayCtrlVars(const vector <const Variable*> &ctrl_vars, std::ostream &out, size_t dimen, int indent)
 {
@@ -876,7 +994,11 @@ OutputArrayCtrlVars(const vector <const Variable*> &ctrl_vars, std::ostream &out
 	out << ";";
 	outputln(out);
 }
-
+/*
+	from the variable set passed to function
+		1. it selects chooses array variables
+		2. and finds the max dimension from them
+*/
 size_t
 Variable::GetMaxArrayDimension(const vector<Variable*>& vars)
 {
@@ -894,14 +1016,34 @@ Variable::GetMaxArrayDimension(const vector<Variable*>& vars)
 	}
 	return dimen;
 }
-
+/*
+	output:
+ local variables
+                l1
+                l2
+                .
+                ..
+	  int i,j,k;
+                for () {
+                        for (){
+                        ....array[i][j] =some value
+                        }
+                }
+	the aim of function is to initialize
+        the local array variables which were not initialized at declaration.
+        so it chooses the unitialized array variables and fills using loop
+*/
 void
 OutputArrayInitializers(const vector<Variable*>& vars, std::ostream &out, int indent)
 {
 	size_t i, dimen;
 	dimen = Variable::GetMaxArrayDimension(vars);
 	if (dimen) {
+		// here you get i,j,k
 		vector <const Variable*> &ctrl_vars = Variable::get_new_ctrl_vars();
+		//here based on dimen you print, them
+		// how is dimen choosen?
+		//it searches the local variables, chooses the arrayvariable with highest dimensions
 		OutputArrayCtrlVars(ctrl_vars, out, dimen, indent);
 		for (i=0; i<vars.size(); i++) {
 			if (vars[i]->isArray) {
@@ -913,7 +1055,7 @@ OutputArrayInitializers(const vector<Variable*>& vars, std::ostream &out, int in
 		}
 	}
 }
-
+ 
 void OutputVolatileAddress(const vector<Variable*> &vars, std::ostream &out, int indent, const string &fp_string)
 {
 	std::vector<Variable*>::const_iterator i;
@@ -925,6 +1067,21 @@ void OutputVolatileAddress(const vector<Variable*> &vars, std::ostream &out, int
 }
 
 // --------------------------------------------------------------
+/*
+	prints :
+if global variables provided as input
+	static(optional) datatype name extension(optional) = initializn value ;
+if local variables provided as input
+	static(optional) datatype name extension(optional) = initializn value ;
+	int i,j,k;
+	for (){
+		for (){
+			..
+		}
+	}
+DOUBT?
+Does this work for function parameters
+*/
 void
 OutputVariableList(const vector<Variable*> &vars, std::ostream &out, int indent)
 {
@@ -933,11 +1090,22 @@ OutputVariableList(const vector<Variable*> &vars, std::ostream &out, int indent)
 	for (i=0; i<vars.size(); i++) {
 		vars[i]->OutputDef(out, indent);
 	}
+	//this is strictly for local variables
+	/*printing |
+		   |
+		   v
+		int i,j,k;
+		for(){
+		}
+	*/
 	if (!vars.empty() && !vars[0]->is_global()) {
 		OutputArrayInitializers(vars, out, indent);
 	}
 }
-
+/*
+can't find this to be printing anything?
+SKIP NOW = is this called anyWhere
+*/
 void
 OutputVariableDeclList(const vector<Variable*> &var, std::ostream &out, std::string prefix, int indent)
 {
