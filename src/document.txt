@@ -32,3 +32,19 @@ CoverageTestExtension _____|  |_____  SplatExtension
 	the array variables which were not initialized at declaration.
 	so it chooses the unitialized array variables and fills using loop
 	
+
+4. many a times encountered with field_vars?Here's what it is!!
+->
+	field_vars[] = list of Variable* type
+         _________________
+        [__|__|___|___|___]
+Following sample variable names can be there in field_vars
+
+ func_32_rv.f1
+ p_35.f0
+ l_105.f0
+ g_201.f0
+ g_201.f5.f0
+ g_203[2][2][1].f0
+
+	its created for each struct/ union variable

@@ -62,7 +62,17 @@ using namespace std;
 
 /*
  * count the "key" variable of an binary/unary operation.
- * return 0 for constants, 2 for function calls
+ * return 0 for constants,1 for variable, 2 for function calls
+	eConstant,	|
+        eVariable,	|---> only for these
+        eFunction,	|
+
+        // eUnaryExpr,	|
+        // eBinaryExpr, |
+        eAssignment,	|---> not implemented for these,Unary/binary implemented but no use for now
+        eCommaExpr,	|
+        eLhs
+
  */
 static int count_expr_key_var(const Expression* e)
 {
@@ -223,19 +233,29 @@ ArrayVariable::~ArrayVariable(void)
 		init = NULL;   // set to NULL to avoid being deleted twice
 	}
 }
-
+/*
+	indices[] = list of Expression*
+INCOMPLETE
+*/
 void
 ArrayVariable::add_index(const Expression* e)
 {
 	indices.push_back(e);
 }
-
+/*
+	use:adds the expression into the passed index in
+		indices[] = list of Expression*
+	parameters: Expression and respective index
+*/
 void
 ArrayVariable::set_index(size_t index, const Expression* e)
 {
 	indices[index] = e;
 }
-
+/*
+	I assume :if sizes[] =1,2 in arr[1][2]
+	then output = 1*2 , multiply all indices
+*/
 unsigned long
 ArrayVariable::get_size(void) const
 {
@@ -246,7 +266,11 @@ ArrayVariable::get_size(void) const
 	}
 	return len;
 }
-
+/*
+	returns the size in bytes of memory representation of array
+	ex. int arr[2][3] = int (4) * 6 = 24
+	get_size() * size of datatypes predefined before
+*/
 unsigned long
 ArrayVariable::size_in_bytes(void) const
 {
@@ -424,6 +448,9 @@ ArrayVariable::is_variant(const Variable* v) const
 }
 
 // --------------------------------------------------------------
+/*	each ArrayVariable has a Block* associated with it but for local and parameter value only
+	if it's a global then Block* is NULL
+*/
 bool
 ArrayVariable::is_global(void) const
 {
@@ -431,6 +458,9 @@ ArrayVariable::is_global(void) const
 }
 
 // -------------------------------------------------------------
+/*
+	check if blockid(arrayvariable) = blockid(provided as parameter)
+*/
 bool
 ArrayVariable::is_visible_local(const Block* blk) const
 {
@@ -446,7 +476,7 @@ ArrayVariable::is_visible_local(const Block* blk) const
 /*
 DOUBT
 	here the comments are correct, but the code lies
-but reverse shouold have been true
+but reverse should have been true
 */
 bool
 ArrayVariable::no_loop_initializer(void) const
@@ -481,23 +511,44 @@ ArrayVariable::build_init_recursive(size_t dimen, const vector<string>& init_str
 }
 
 // build the string initializer in form of "{...}"
+//initializes the array variables,i.e the RHS part
+/*
+	BY DEFAULT IF is executed
+	ELSE when --no-force_non_uniform_array_init
+
+	1.tries to fill the last row of array from randomly picking elements from init_string
+	init_string ---> is described in OutputDef()
+	2.now replicates the last row to all rows in array
+	ex. arr[3][3]
+	[ | | ]
+	[ | | ]
+	[ | | ]<----filled first, then values copied to above rows
+	 ^
+	 |
+	 |____value randomly choosen from init_string[]
+*/
 string
 ArrayVariable::build_initializer_str(const vector<string>& init_strings) const
 {
 	string str, str_dimen;
+//IF executes by default(if no command line is set)
 	if (CGOptions::force_non_uniform_array_init()) {
 		return build_init_recursive(0, init_strings);
 	}
-
+	//iterates through last dimen towards first dimension (filling rows)
 	for (int i=sizes.size()-1; i>=0; i--) {
 		size_t len = sizes[i];
 		str_dimen = "{";
+		//filling columns
 		for (size_t j=0; j<len; j++) {
 			// for last dimension, use magic number to choose an initial value
 			if (i == ((int)sizes.size()) - 1) {
 				unsigned int rnd_index = ((i + (j+7) * (j+13)) * 52369) % (init_strings.size());
 				str_dimen += init_strings[rnd_index];
-			} else {
+			}
+			//just appends out the last row values to remianing rows
+			//so repetation observed
+			 else {
 				str_dimen += str;
 			}
 			str_dimen += ((j<len-1) ? ", " : "");
@@ -509,6 +560,27 @@ ArrayVariable::build_initializer_str(const vector<string>& init_strings) const
 }
 
 // --------------------------------------------------------------
+/*
+IF part
+	output:	int32_t l_15[4]; only declaration
+ELSE part
+	output:int32_t l_2144[3] = {(-10L),(-10L),(-10L)};
+
+for initialization : build_initializer_str() called it needs some random values to choose from
+
+Q.How are the random values generated?
+->	init_string[] = vector of strings
+	can contain following values:
+		IF *arr[][] then
+			&g_425
+		        &g_426[0][0][2]
+			...
+		IF arr[][] then
+			 7L
+	        	0x090ED2D2L
+	        	(-1L)
+			...
+*/
 void
 ArrayVariable::OutputDef(std::ostream &out, int indent) const
 {
@@ -563,6 +635,9 @@ void ArrayVariable::OutputDecl(std::ostream &out) const
 }
 
 // --------------------------------------------------------------
+/*
+	output : array[][] and no data type or initial values
+*/
 void
 ArrayVariable::Output(std::ostream &out) const
 {
@@ -580,6 +655,7 @@ ArrayVariable::Output(std::ostream &out) const
 				indices[i]->Output(out);
 				out << "]";
 			}
+//DEAD CODE? SHOULD I REMOVE IT?
 			else {
 				out << "[";
 				const Type* t = &(indices[i]->get_type());
@@ -599,7 +675,7 @@ ArrayVariable::Output(std::ostream &out) const
 	}
 }
 /*for ex. for array of arr[2][2]
-	it prints arr[2][2] -> maximum index
+	it prints arr[2][2] -> maximum index (2,2)
 */
 void
 ArrayVariable::OutputUpperBound(std::ostream &out) const
@@ -626,6 +702,11 @@ ArrayVariable::OutputLowerBound(std::ostream &out) const
 }
 
 // --------------------------------------------------------------
+/*
+	prints :
+		arr[i] or arr[i][j] or arr[i][j][k] or .....
+	used when inside a loop array variable is initialized
+*/
 void
 ArrayVariable::output_with_indices(std::ostream &out, const std::vector<const Variable*>& cvs) const
 {
@@ -662,12 +743,24 @@ ArrayVariable::output_checksum_with_indices(std::ostream &out,
 }
 
 // --------------------------------------------------------------
+/*OUTPUT
+//--------PART A
+	for (i=0; i< 3; i++){
+		for (j=0;j<2;j++){
+//-----
+//--------PART B
+			arr[i][j]=some val;
+//
+//--------PART C
+		}
+	}
+*/
 void
 ArrayVariable::output_init(std::ostream &out, const Expression* init, const vector<const Variable*>& cvs, int indent) const
 {
 	if (collective != 0) return;
 	size_t i;
-
+	//prints the 'for part'
 	for (i=0; i<get_dimension(); i++) {
 		if (i > 0) {
 			output_tab(out, indent);
@@ -691,8 +784,10 @@ ArrayVariable::output_init(std::ostream &out, const Expression* init, const vect
 		outputln(out);
 	}
 	output_tab(out, indent+1);
+	//prints arr[i][j]
 	output_with_indices(out, cvs);
 	out << " = ";
+	//prints the rhs initializn value
 	init->Output(out);
 	out << ";";
 	outputln(out);
@@ -706,6 +801,7 @@ ArrayVariable::output_init(std::ostream &out, const Expression* init, const vect
 }
 
 // --------------------------------------------------------------
+//I THINK ITS UNUSED, REMOVE IT?
 void
 ArrayVariable::output_addr_checks(std::ostream &out, const Variable* var, string field_name, int indent) const
 {
@@ -760,7 +856,12 @@ ArrayVariable::output_addr_checks(std::ostream &out, const Variable* var, string
 		output_close_encloser("}", out, indent);
 	}
 }
-
+/*
+output:
+	printf("index = [%d][%d][%d]\n", i, j, k);
+location :
+	in main function
+*/
 string
 ArrayVariable::make_print_index_str(const vector<const Variable *> &cvs) const
 {
@@ -783,6 +884,18 @@ ArrayVariable::make_print_index_str(const vector<const Variable *> &cvs) const
 /* -------------------------------------------------------------
  *  hash all array items
  ***************************************************************/
+/*
+output:
+for (i = 0; i < 2; i++)
+    {
+        transparent_crc(g_203[i].f0, "g_203[i].f0", print_hash_value);
+        if (print_hash_value)
+		printf("index = [%d]\n", i);
+
+    }
+location to insert : in main
+uses:make_print_index_str()
+*/
 void
 ArrayVariable::hash(std::ostream& out) const
 {

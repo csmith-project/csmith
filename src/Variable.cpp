@@ -1017,12 +1017,13 @@ Variable::GetMaxArrayDimension(const vector<Variable*>& vars)
 	return dimen;
 }
 /*
-	output:
+
  local variables
                 l1
                 l2
                 .
                 ..
+output:
 	  int i,j,k;
                 for () {
                         for (){
@@ -1104,7 +1105,7 @@ OutputVariableList(const vector<Variable*> &vars, std::ostream &out, int indent)
 }
 /*
 can't find this to be printing anything?
-SKIP NOW = is this called anyWhere
+SKIP NOW = is this called anyWhere?
 */
 void
 OutputVariableDeclList(const vector<Variable*> &var, std::ostream &out, std::string prefix, int indent)
@@ -1131,7 +1132,20 @@ Variable::compatible(const Variable *v) const
 	else
 		return false;
 }
-
+/*
+short:
+	prints the transparent_crc() part for checksum calculations
+TLDR:
+	//IF variable is struct/union then compute for each field_vars of that variable
+		//ex. struct S0 g_111;
+		//then transparent_crc(g_111.f0)
+		//     transparent_crc(g_111.f1) and so on ...
+	ELSE
+		if simple type
+		  transparent_crc(g_111)
+		if float type
+		  transparent_crc_bytes(g_111)
+*/
 void
 Variable::hash(std::ostream& out) const
 {
@@ -1145,33 +1159,37 @@ Variable::hash(std::ostream& out) const
 			}
 			field_vars[i]->hash(out);
 		}
-    }
+    	}
 	else if (type->eType == eSimple) {
+		//by default TRUE
 		if (CGOptions::compute_hash()) {
-            // FIXME handle double here too, once we generate those
-            if (type->simple_type == eFloat) {
-                out << "    transparent_crc_bytes (&";
-                Output(out);
-                out << ", sizeof(";
-                Output(out);
-                out << "), \"" << name << "\", print_hash_value);" << endl;
-            } else {
-                out << "    transparent_crc(";
-                Output(out);
-                out << ", \"" << name << "\", print_hash_value);" << endl;
-            }
+	            // FIXME handle double here too, once we generate those
+        	    if (type->simple_type == eFloat) {
+                	out << "    transparent_crc_bytes (&";
+	                Output(out);
+        	        out << ", sizeof(";
+	                Output(out);
+        	        out << "), \"" << name << "\", print_hash_value);" << endl;
+	            } else {
+        	        out << "    transparent_crc(";
+                	Output(out);
+	                out << ", \"" << name << "\", print_hash_value);" << endl;
+            		}
 		}
 		else {
 			out << "    " << Variable::sink_var_name << " = ";
 			Output(out);
 			out << ";" << endl;
 		}
-    }
+    	}
 	else if (type->eType == ePointer) {
 	}
 }
 
 // --------------------------------------------------------------
+/*
+	printd hash for a simgle variable passed to it
+*/
 int
 HashVariable(Variable *var, std::ostream *pOut)
 {
@@ -1179,7 +1197,7 @@ HashVariable(Variable *var, std::ostream *pOut)
 	var->hash(out);
     return 0;
 }
-
+//can't figure where is it called from?
 std::string
 Variable::to_string(void) const
 {
@@ -1217,7 +1235,14 @@ Variable::to_string(void) const
 	}
 	return ret;
 }
-
+//called by : ReducerOutputMgr.cpp,
+/*	3 KINDS OF OUTPUT MANAGER:
+	1.DefaultOutputMgr
+	2.DFSOutputMgr
+	3.ReducerOutputMgr
+	for now only concerned with Default
+*/
+//SKIP NOW
 int
 Variable::output_runtime_value(ostream &out, string prefix, string suffix, int indent, bool multi_lines) const
 {
@@ -1264,7 +1289,7 @@ Variable::output_runtime_value(ostream &out, string prefix, string suffix, int i
 	}
 	return 0;
 }
-
+//grep dosen't show any calls to this function,deprecated?
 int
 Variable::output_volatile_fprintf(ostream &out, int indent, const string &name,
 		const string &sizeof_string, const string &fp_string) const
@@ -1396,7 +1421,7 @@ Variable::output_volatile_address(ostream &out, int indent, const string &fp_str
 	}
 	return 0;
 }
-
+//called by ReducerOutputMgr.cppp, SKIP NOW
 int
 Variable::output_addressable_name(ostream &out, int indent) const
 {
@@ -1467,7 +1492,12 @@ Variable::output_value_dump(ostream &out, string prefix, int indent) const
 	}
 	return 0;
 }
-
+/*
+	matches passed parameter = vname with,
+	1.simple variables
+	2. array variables
+	3. field_vars of struct
+*/
 const Variable*
 Variable::match_var_name(const string& vname) const
 {
@@ -1493,14 +1523,31 @@ Variable::match_var_name(const string& vname) const
 	}
 	return NULL;
 }
+/*
+field_vars[] = list of Variable* type
+       _________________
+      [__|__|___|___|___]
+Following sample variable names can be there in field_vars
 
+ func_32_rv.f1
+ p_35.f0
+ l_105.f0
+ g_201.f0
+ g_201.f5.f0
+ g_203[2][2][1].f0
+
+	check if any one is a pointer among them and adds it into
+		ptr_fields = a list of variables which are pointers
+       _________________
+      [__|__|___|___|___]
+*/
 void
 Variable::find_pointer_fields(vector<const Variable*>& ptr_fields) const
 {
 	for (size_t i=0; i<field_vars.size(); i++) {
 		if (field_vars[i]->is_pointer()) {
 			ptr_fields.push_back(field_vars[i]);
-		}
+		}//recursion
 		else if (field_vars[i]->is_aggregate()) {
 			field_vars[i]->find_pointer_fields(ptr_fields);
 		}
