@@ -178,7 +178,6 @@ StatementFor::make_iteration(CGContext& cg_context, StatementAssign*& init, Expr
 			break;
 		}
 	} while (true);
-
 	bool read = cg_context.read_indices(var, fm->global_facts);
 	assert(read);
 	cg_context.write_var(var);

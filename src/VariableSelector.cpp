@@ -73,6 +73,7 @@ using namespace std;
 // --------------------------------------------------------------
 // static variables
 vector<Variable*> VariableSelector::AllVars;
+//contains volatiles as well
 vector<Variable*> VariableSelector::GlobalList;
 vector<Variable*> VariableSelector::GlobalNonvolatilesList;
 bool VariableSelector::var_created = false;
@@ -114,7 +115,20 @@ VariableSelectFilter::filter(int v) const
 }
 
 ProbabilityTable<unsigned int, eVariableScope> *VariableSelector::scopeTable_ = NULL;
+/*			
+function initializes the scope_Table pointer and fills the probability table with
+	probabilities of local,global,parameter and new scoped variables
+	scope_Table_ ----
+			|
+			|	new ProbabilityTable<probability value, eVariableScope>()
+			|	 _____ _____
+			----->  |_____|_____|
+			        |_____|_____|
+			        |_____|_____|
+			        |_____|_____|
+			        |_____|_____|
 
+*/
 void
 VariableSelector::InitScopeTable()
 {
@@ -136,6 +150,9 @@ VariableSelector::InitScopeTable()
 
 //////////////////////////////////////////////////////////////////////////////
 // --------------------------------------------------------------
+/*
+	generates a name for global variable
+*/
 static string
 RandomGlobalName(void)
 {
@@ -172,6 +189,35 @@ VariableSelector::new_variable(const std::string &name, const Type *type, const 
 
 /*
  *expand each struct/union field to a single variable
+works for only struct/union type AND
+'vars[i]' = Struct then 'type' MUST BE  Union then it works
+
+vars: Variable* vector
+type : struct
+
+INITIAL:
+		    |
+INTERATION 1:	    |
+	____________v___________________________
+	[int	|Struct |union	|char	|int	]	type=struct hence continue
+
+		    	   |
+INTERATION 2:	    	   |
+	___________________V____________________
+	[int	|Struct |union	|char	|int	]	type=struct and vars[i]= union MISMATCH
+		    
+INTERATION 2.1:
+	________________________________
+	[int	|Struct |char	|int	]	remove it
+
+INTERATION 2.2:
+			   |
+			   |
+	 __________________v_______________________________________
+	[int	|Struct |char	|int	|union.f0|union.f1|union.f2]
+expand the field_vars and insert at end
+update the length
+
  */
 void
 VariableSelector::expand_struct_union_vars(vector<Variable *>& vars, const Type* type)
@@ -180,10 +226,10 @@ VariableSelector::expand_struct_union_vars(vector<Variable *>& vars, const Type*
     size_t len = vars.size();
     for (i=0; i<len; i++) {
         Variable* tmpvar = vars[i];
-		// don't expand virtual variables
-		if (tmpvar->is_virtual()) continue;
+	// don't expand virtual variables
+	if (tmpvar->is_virtual()) continue;
         // don't break up a struct if it matches the given type
-		if (tmpvar->is_aggregate() && (tmpvar->type != type)) {
+	if (tmpvar->is_aggregate() && (tmpvar->type != type)) {
             vars.erase(vars.begin() + i);
             vars.insert(vars.end(), tmpvar->field_vars.begin(), tmpvar->field_vars.end());
             i--;
@@ -194,6 +240,7 @@ VariableSelector::expand_struct_union_vars(vector<Variable *>& vars, const Type*
 
 /*
  *expand each struct field to a single variable
+	difference : Vars is vector of const
  */
 void
 VariableSelector::expand_struct_union_vars(vector<const Variable *>& vars, const Type* type)
@@ -214,7 +261,14 @@ VariableSelector::expand_struct_union_vars(vector<const Variable *>& vars, const
     }
 }
 
-/* return true if a variable in the list is a pointer to type "type" */
+/* return true if a variable in the list is a pointer to type "type" 
+	..
+	static uint32_t **g_1044 = &g_1045;
+	..list of variables
+
+	it checks if typeof(g_1044) EQUALS typeof(g_1045)
+	by dereferencing
+*/
 bool
 VariableSelector::has_dereferenceable_var(const vector<Variable *>& vars, const Type* type, const CGContext& cg_context)
 {
@@ -298,14 +352,17 @@ VariableSelector::is_eligible_var(const Variable* var, int deref_level, Effect::
 	return true;
 }
 
-/* return true if a variable in the list is volatile */
+/* return true if a variable in the list is volatile 
+how to check?
+	1.variable should be eligible and type should be volatile
+*/
 bool
 VariableSelector::has_eligible_volatile_var(const vector<Variable *>& vars, const Type* type, const CVQualifiers* qfer, Effect::Access access, const CGContext& cg_context)
 {
 	for (size_t i=0; i<vars.size(); i++) {
 		Variable* var = vars[i];
 		if (type && !type->match(var->type, eFlexible)) {
-            continue;
+	        	continue;
 		}
 		if (qfer && !qfer->match_indirect(var->qfer)) {
 			continue;
@@ -318,7 +375,14 @@ VariableSelector::has_eligible_volatile_var(const vector<Variable *>& vars, cons
 	}
 	return false;
 }
+/*
+     		  ______________________________________
+	from vars[	|	|	|	|	]
+		return random index
 
+		return vars[@random index]
+SKIP collective and itemized for now, didn't get
+*/
 Variable *
 VariableSelector::choose_ok_var(const vector<Variable *> &vars)
 {
@@ -329,6 +393,7 @@ VariableSelector::choose_ok_var(const vector<Variable *> &vars)
 	}
 	else if (len > 1) {
 		DEPTH_GUARD_BY_DEPTH_RETURN(1, NULL);
+
 		unsigned int index = rnd_upto(len);
 		ERROR_GUARD(NULL);
 		v = vars[index];
@@ -342,7 +407,7 @@ VariableSelector::choose_ok_var(const vector<Variable *> &vars)
 	}
 	return v;
 }
-
+//difference: list of const variables passed
 const Variable *
 VariableSelector::choose_ok_var(const vector<const Variable *> &vars)
 {
@@ -366,7 +431,30 @@ VariableSelector::choose_ok_var(const vector<const Variable *> &vars)
 	}
 	return v;
 }
-
+/*
+	read_vars initially contains:a list of variables
+		p_32
+		l_376
+		g_249
+		g_165 .....
+	after struct_union_expansion
+		p_32
+		l_376
+		g_249.f0
+		g_165.f1 .....
+from above list select ones which are :
+	1. (global || parameter values|| locally visible at that point)
+		AND
+	2. it's not volatile
+		AND
+	3.it's not virtual
+		AND
+	4.Type should be eConvert (don't know what it is?)
+		AND 
+	some more conditions (SKIP FOR NOW)
+	add them to ok_vars
+	return a random index from ok_vars
+*/
 const Variable *
 VariableSelector::choose_visible_read_var(const Block* b, vector<const Variable*> read_vars, const Type* type, const FactVec& facts)
 {
@@ -374,7 +462,6 @@ VariableSelector::choose_visible_read_var(const Block* b, vector<const Variable*
 	vector<const Variable*> ok_vars;
 	// include the fields of struct/unions
 	expand_struct_union_vars(read_vars, type);
-
 	for (i=0; i<read_vars.size(); i++) {
 		const Variable* v = read_vars[i];
 		if (type->match(v->type, eConvert) &&
@@ -390,17 +477,18 @@ VariableSelector::choose_visible_read_var(const Block* b, vector<const Variable*
 
 // --------------------------------------------------------------
 /*
- * Choose a variable from `vars' to read or write.
- * Return null if no suitable variable can be found.
- *
  * Parameter "type"
  * 0 --- To match any type
  * any simple type --- To match any type of integers
  * any struct type --- To match the specific structs
- *
- * Parameter "qfer"
- * to match the const/volatile qualifier(s)
- * see CVQualifier::match
+
+	1.expand struct/union in vars if any
+	2.From list of expanded vars check,
+		2.1. if not bitfields 
+		2.2 type and qualifier matches
+		2.3 not in the invalid_vars list
+	then add in ok_vars
+	return ok_vars[@random_index]
  */
 Variable *
 VariableSelector::choose_var(vector<Variable *> vars,
@@ -427,12 +515,14 @@ VariableSelector::choose_var(vector<Variable *> vars,
 	has_eligible_volatile_var(vars, type, qfer, access, cg_context);
 
 	for (i = vars.begin(); i != vars.end(); ++i) {
-        // skip any type mismatched var
-        if (no_bitfield && (*i)->isBitfield_)
+		//skip bitfields
+	        if (no_bitfield && (*i)->isBitfield_)
 			continue;
-        if (type && !type->match((*i)->type, mt)) {
-            continue;
+        	// skip any type mismatched var
+	        if (type && !type->match((*i)->type, mt)) {
+        	    continue;
 		}
+		//skip qualifier mismatch
 		if (qfer && !qfer->match_indirect((*i)->qfer)) {
 			continue;
 		}
@@ -446,7 +536,7 @@ VariableSelector::choose_var(vector<Variable *> vars,
 			ok_vars.push_back(*i);
 		}
 	}
-
+//DEAD CODE?
     // artificially increase the odds of using volatile variable
 	// JY: unncessary now
 	if (0) {//ok_vars.size() > 1) {
@@ -462,7 +552,7 @@ VariableSelector::choose_var(vector<Variable *> vars,
 		if (var != NULL)
 			return var;
     }
-
+//DEAD CODE?
 	// artificially increase the odds of dereferencing a pointer
 	if (type && ok_vars.size() > 1) {
 		vector<Variable *> ptrs;
@@ -476,7 +566,7 @@ VariableSelector::choose_var(vector<Variable *> vars,
 		if (var != NULL)
 			return var;
 	}
-
+//DEAD CODE?
 	// artificially increase the odds of taking address of another variable
 	if (type && type->eType == ePointer && ok_vars.size() > 1) {
 		vector<Variable *> addressable_vars;
@@ -496,7 +586,12 @@ VariableSelector::choose_var(vector<Variable *> vars,
 	}
 	return choose_ok_var(ok_vars);
 }
-
+/*
+	creates 1.variable and initializes it
+		OR
+		2.Array variable and initializes it
+	based on Probability (NewArrayVariableProb)
+*/
 Variable *
 VariableSelector::create_and_initialize(Effect::Access access, const CGContext &cg_context, const Type* t,
 					const CVQualifiers* qfer, Block *blk, std::string name)
@@ -519,13 +614,28 @@ VariableSelector::create_and_initialize(Effect::Access access, const CGContext &
 	assert(var);
 	return var;
 }
-
 static int tmp_count = 0;
 // --------------------------------------------------------------
  /* Parameter "type"
  * 0 --- To generate any type
  * any simple type --- To generate any type of integers
  * any struct type --- To generate the specific struct typed variable
+use: creates new global variable with values initialized to it and adds in GlobalList
+
+	1.select a qualifier for variable
+	2.choose a name
+	3.create variable and initialize it
+	4.Add in GlobalList vector
+
+NEED TO REVIEW AGAIN
+		DFA analysis aid
+	|------------------------------------------------|
+	|5.FactMgr updation						 |
+	|						 |
+	|6.Update the 'new_globals'  list = containing 	 |
+	|the global variables created in that particular |
+	| function					 |
+	|------------------------------------------------|
  */
 Variable *
 VariableSelector::GenerateNewGlobal(Effect::Access access, const CGContext &cg_context, const Type* t, const CVQualifiers* qfer)
@@ -554,7 +664,11 @@ VariableSelector::GenerateNewGlobal(Effect::Access access, const CGContext &cg_c
 	var_created = true;
 	return var;
 }
-
+/*
+use: generates non Array global variables
+used : ccomp() = compcert(compiler) compatible code
+can't figure where(line) is it different from above, but the initialization value is generated separately and passed
+*/
 Variable *
 VariableSelector::GenerateNewNonArrayGlobal(Effect::Access access, const CGContext &cg_context, const Type* t, const CVQualifiers* qfer)
 {
@@ -582,7 +696,9 @@ VariableSelector::GenerateNewNonArrayGlobal(Effect::Access access, const CGConte
 	var_created = true;
 	return var;
 }
-
+/*
+	generates a global variable with struct type
+*/
 Variable*
 VariableSelector::eager_create_global_struct(Effect::Access access, const CGContext &cg_context,
 					const Type* type, const CVQualifiers* qfer,
@@ -613,7 +729,9 @@ VariableSelector::eager_create_global_struct(Effect::Access access, const CGCont
 	ERROR_GUARD(NULL);
 	return choose_var(GlobalList, access, cg_context, type, qfer, mt, invalid_vars);
 }
-
+/*
+	generates a local variable with struct type
+*/
 Variable*
 VariableSelector::eager_create_local_struct(Block &block, Effect::Access access, const CGContext &cg_context,
 					const Type* type, const CVQualifiers* qfer,
@@ -650,7 +768,7 @@ VariableSelector::eager_create_local_struct(Block &block, Effect::Access access,
 
 
 // --------------------------------------------------------------
-// Select a random global variable.
+// Select a random global variable from GlobalList.IF not present create one
 Variable *
 VariableSelector::SelectGlobal(Effect::Access access, const CGContext &cg_context, const Type* type, const CVQualifiers* qfer, eMatchType mt, const vector<const Variable*>& invalid_vars)
 {
@@ -675,16 +793,24 @@ VariableSelector::SelectGlobal(Effect::Access access, const CGContext &cg_contex
 	}
 	return var;
 }
-
+/*
+	fills the passed parameter 'vars' with non bitfield variables from
+	1.global variables
+	2.locally visible variables
+DOUBT:
+	why didn't check for parameters?
+*/
 void
 VariableSelector::find_all_non_bitfield_visible_vars(const Block *b, vector<Variable*> &vars)
 {
 	vector<Variable *>::iterator i;
+//searches in GlobalList
 	for (i = GlobalList.begin(); i != GlobalList.end(); ++i) {
-		if (!((*i)->isBitfield_))
+		if (!((*i)->isBitfield_)){
 			vars.push_back(*i);
+		}
 	}
-
+//searches in local_vars
 	while (b) {
 		for (size_t j = 0; j < b->local_vars.size(); ++j) {
 			if (!((b->local_vars[j])->isBitfield_))
@@ -693,7 +819,13 @@ VariableSelector::find_all_non_bitfield_visible_vars(const Block *b, vector<Vari
 		b = b->parent;
 	}
 }
-
+/*
+DOUBT:	why aren't parameters checked?
+	adds non array variables into 'vars' from
+		global
+		local
+		and parameter variables
+*/
 void
 VariableSelector::find_all_non_array_visible_vars(const Block *b, vector<Variable*> &vars)
 {
@@ -715,7 +847,9 @@ VariableSelector::find_all_non_array_visible_vars(const Block *b, vector<Variabl
 		}
 	}
 }
-
+/*
+	adds only array variables into array_vars
+*/
 void
 VariableSelector::get_all_array_vars(vector<const Variable*> &array_vars)
 {
@@ -726,7 +860,9 @@ VariableSelector::get_all_array_vars(vector<const Variable*> &array_vars)
 		}
 	}
 }
-
+/*
+	adds only visible local variables  to block 'b' into 'vars'
+*/
 void
 VariableSelector::get_all_local_vars(const Block *b, vector<const Variable*> &vars)
 {
@@ -737,6 +873,7 @@ VariableSelector::get_all_local_vars(const Block *b, vector<const Variable*> &va
 }
 
 /* find all visible variables at block b */
+//DOUBT: WHY parameters not considered ?
 vector<Variable*>
 VariableSelector::find_all_visible_vars(const Block* b)
 {
@@ -780,6 +917,32 @@ VariableSelector::expand_block_for_goto(Block* b, const CGContext& cg_context)
 /*
  * enlarge the block to contains all variables in the list. This is used to create
  * itemized array variable
+short: if whole vars list found in a block return it
+	else return 0
+LONG:
+	{//block 1
+		l1
+		l2
+		..
+	}				vars
+					 _______________________
+	{//block 2			[____|_____|_____|______]
+
+							    |---------DELETES THIS IF FOUND
+					 ___________________v___
+					[____|_____|_____|______]
+		l3
+		l4			searches in local variable list each var
+		..			if (FOUND)
+	}					removes that block from vars
+	{//block n			
+		l5			IF(the whole vars is found in a particular block)
+		l6			 return the block
+		l7
+		..(n local variables)
+	}
+
+
  */
 Block*
 VariableSelector::lower_block_for_vars(const vector<Block*>& blks, vector<const Variable*>& vars)
@@ -810,8 +973,8 @@ VariableSelector::lower_block_for_vars(const vector<Block*>& blks, vector<const 
 /*************************************************************************************
  * find an initializing value for a new variable
  * for non-pointers, we just use constants
- * for pointers we need to find another variable to take address with a random chance.
- *    If no much variable is available, we have to create a suitable variable (which
+ * for pointers we need to find another visible variable to take address with a random chance.
+ *    If no such variable is available, we have to create a suitable variable (which
  *    might call this function again)
  *************************************************************************************/
 Expression*
@@ -821,7 +984,7 @@ VariableSelector::make_init_value(Effect::Access access, const CGContext &cg_con
 	CVQualifiers qfer(*qf);
 	// the initialzer should always be less restricting than the variable to be initialized
 	qfer.accept_stricter = false;
-
+	//simply creating random type for non pointer variables
 	if (t->eType != ePointer || rnd_flipcoin(20)) {
 		ERROR_GUARD(NULL);
 		if (t->eType == eSimple)
@@ -936,6 +1099,11 @@ VariableSelector::GenerateParameterVariable(const Type *type, const CVQualifiers
 
 // --------------------------------------------------------------
 // choose a random type for parameter
+//chooses type for parameter
+//chooses qualifier for it
+//chooses name for it
+//generates variable with qualifier,type,name
+//updates structure holding parameters for a function
 // --------------------------------------------------------------
 void
 VariableSelector::GenerateParameterVariable(Function &curFunc)
@@ -1023,6 +1191,19 @@ VariableSelector::SelectParentLocal(Effect::Access access,
 }
 
 // --------------------------------------------------------------
+/*
+	we have a scopeTable_
+                        |
+                        |       new ProbabilityTable<probability value, eVariableScope>()
+                        |        _____ _____
+                        ----->  |_____|_____|
+                                |_____|_____|
+                                |_____|_____|
+we initilize with and randomly choose any one from them
+	     |
+	     |-------->( eGlobal, eParentLocal, eParentParam, eNewValue)
+
+*/
 static eVariableScope
 VariableSelectionProbability(eVariableScope upper = MAX_VAR_SCOPE, Filter *filter = NULL)
 {
@@ -1043,6 +1224,7 @@ VariableSelectionProbability(eVariableScope upper = MAX_VAR_SCOPE, Filter *filte
 }
 
 // --------------------------------------------------------------
+//local or global 
 static eVariableScope
 VariableCreationProbability(void)
 {
@@ -1072,6 +1254,9 @@ VariableSelector::SelectParentParam(Effect::Access access,
 }
 
 // --------------------------------------------------------------
+/*
+decides to generate a new local or global variable and returns it
+*/
 Variable *
 VariableSelector::GenerateNewVariable(Effect::Access access,
 					const CGContext &cg_context,
@@ -1081,6 +1266,7 @@ VariableSelector::GenerateNewVariable(Effect::Access access,
 	DEPTH_GUARD_BY_TYPE_RETURN(dtGenerateNewVariable, NULL);
 	Variable *var = 0;
 	Function &func = *cg_context.get_current_func();
+	//decides based on probability whether to choose local/ global variable
 	eVariableScope scope = VariableCreationProbability();
 	ERROR_GUARD(NULL);
 	const Type* t = 0;
@@ -1127,7 +1313,14 @@ VariableSelector::GenerateNewVariable(Effect::Access access,
 // --------------------------------------------------------------
  /* select a loop control variable, which is restricted to integers
   * only
-  *
+  * 1. for (g_120 =0 ;)    <--------CASE 1
+    2. for (g_120=0;;){
+			______________CASE 2
+			|
+			V
+		arr[g_120] = some value;
+	}
+CAN BE LOCAL/GLOBAL
   * JYTODO: make pointers control variables?
   ************************************************************/
 Variable *
@@ -1230,6 +1423,10 @@ VariableSelector::select(Effect::Access access,
 
 // --------------------------------------------------------------
 // specifically select a pointer to be dereferenced
+/*
+	from the local,global and parameter variables visible at that particular block
+	selects only the ones which are pointers
+*/
 Variable *
 VariableSelector::select_deref_pointer(Effect::Access access, const CGContext &cg_context, const Type* type, const CVQualifiers* qfer, const vector<const Variable*>& invalid_vars)
 {
@@ -1301,6 +1498,7 @@ VariableSelector::select_deref_pointer(Effect::Access access, const CGContext &c
 
 /*
  * create an array, and return an itemized member
+ITEMIZE meaning ?
  */
 ArrayVariable*
 VariableSelector::create_array_and_itemize(Block* blk, string name, const CGContext& cg_context,
@@ -1358,7 +1556,7 @@ VariableSelector::create_random_array(const CGContext& cg_context)
 }
 
 /*
- * select a random array variable, or generate a new one if none available
+ * select a random array variable(from variables visible at that block), or generate a new one if none available
  */
 ArrayVariable*
 VariableSelector::select_array(const CGContext &cg_context)
@@ -1519,7 +1717,7 @@ VariableSelector::make_dummy_static_variable(const string &name)
 	return var;
 }
 
-
+//searches in AllVars
 const Variable*
 VariableSelector::find_var_by_name(string name)
 {
@@ -1573,7 +1771,8 @@ OutputGlobalVariablesDecls(std::ostream &out, std::string prefix)
 	OutputVariableDeclList(*VariableSelector::GetGlobalVariables(), out, prefix);
 	CGOptions::access_once(access_once);
 }
-
+//prints hash values for global variables except pointers ,,and many more confitions 
+//see : hash() function for more
 void
 HashGlobalVariables(std::ostream &out)
 {

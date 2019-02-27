@@ -1547,6 +1547,7 @@ Type::is_dereferenced_from(const Type* t) const
 {
     if (t->eType == ePointer) {
         const Type* pt = t->ptr_type;
+	//this is basically dereferencing. we traverse the dereferences one by one
         while (pt) {
             if (pt == this) {
                 return true;

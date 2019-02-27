@@ -58,6 +58,7 @@ enum eVariableScope
 
 class VariableSelector
 {
+	//ArrayVariables can access private and protected members
 	friend class ArrayVariable;
 public:
 	VariableSelector(void) {};
