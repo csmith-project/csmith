@@ -50,6 +50,7 @@
 #include "random.h"
 
 ////////////////////////////////////////////////////////////////////////////////////
+//must be in range of [-1, 100] included
 #define VAL_ASSERT(val) assert(((val) <= 100) && ((val) >= -1))
 
 using namespace std;
@@ -101,8 +102,23 @@ ProbElem::~ProbElem()
 
 /////////////////////////////////////////////////////////////////
 //
-const char SingleProbElem::single_elem_sep_char = '=';
+/*
+	single prob elements @start
+	ex. more_struct_union_type_prob=10
 
+	bitfields_creation_prob=50
+
+	....
+
+*/
+const char SingleProbElem::single_elem_sep_char = '=';
+//initializes SingleProbElem
+//sname = first name in dumped file(ex.prob.txt)
+//	--dump-default-probabilities prob.txt
+
+//pname = can have any value from enum ProbName
+//default_val = its a constant value, can't change (need to specify in program)
+//val = actual probability
 SingleProbElem::SingleProbElem(const std::string &sname, ProbName pname, int default_val, int val)
 	: sname_(sname),
 	  pname_(pname),
@@ -116,13 +132,13 @@ SingleProbElem::~SingleProbElem()
 {
 
 }
-
+//no pname check
 int
 SingleProbElem::get_prob_direct()
 {
 	return val_;
 }
-
+//checks does pname match
 int
 SingleProbElem::get_prob(ProbName pname)
 {
@@ -130,7 +146,10 @@ SingleProbElem::get_prob(ProbName pname)
 	assert(pname == pname_);
 	return val_;
 }
-
+//sets val to pname ex.
+//	pname =  pMoreStructUnionProb
+//      val =10
+//	pMoreStructUnionProb =10
 void
 SingleProbElem::set_prob(ProbName pname, int val)
 {
@@ -148,13 +167,13 @@ SingleProbElem::set_prob_table(ProbabilityTable<unsigned int, ProbName> * const)
 {
 	assert(0);
 }
-
+//output : more_struct_union_type_prob=10
 void
 SingleProbElem::dump_default(std::ostream &out)
 {
 	out << sname_ << single_elem_sep_char << default_val_;
 }
-
+//output:  more_struct_union_type_prob=some value set by user
 void
 SingleProbElem::dump_val(std::ostream &out)
 {
@@ -169,7 +188,21 @@ const char GroupProbElem::group_sep_char = ',';
 
 const char GroupProbElem::equal_open_delim = '(';
 const char GroupProbElem::equal_close_delim = ')';
+/*		       +-----------------------
+		      /	sname_ , pname_		\
+	elem1 -------/	default_val_,val_	 \
+		     \				 /
+		      +-------------------------+
 
+		       +-----------------------
+		      /	sname_ , pname_		\
+	elem2 -------/	default_val_,val_	 \
+		     \				 /
+		      +-------------------------+
+
+	if (elem1(val_) < elem2(val_)) return true
+
+*/
 bool
 single_elem_less(SingleProbElem *elem1, SingleProbElem *elem2)
 {
@@ -187,7 +220,24 @@ GroupProbElem::GroupProbElem(bool is_equal, const std::string &sname)
 {
 
 }
+/*
+	       probs_ =a map <ProbName , pointer to SingleProbElem>
+         _________________
+	|         |       |
+        +ProbName_|_______+
+        |         |       |
+        +-----------------+
+        |         |   -------+
+        +-----------------+  |pointer to SingleProbElem class
+	|		  |  |
+	+-----------------+  |	       +-----------------------+
+			     |	      /	sname_ , pname_		\
+			     +---->>>/	default_val_,val_	 \
+				     \				 /
+				      +-------------------------+
+Below we are deleting the pointees and the map as well
 
+*/
 GroupProbElem::~GroupProbElem()
 {
 	std::map<ProbName, SingleProbElem*>::iterator i;
@@ -215,7 +265,35 @@ GroupProbElem::get_random_single_prob(int orig_val, std::vector<unsigned int> &i
 		return rnd_upto(101, &f);
 	}
 }
+/*
+AIM: it fills the probs_ table
+         _________________
+	|         |       |
+        +ProbName_|_______+
+        |         |       |
+        +-----------------+
+        |         |   -------+
+        +-----------------+  |pointer to SingleProbElem class
+ 			     |
+			     |	       +-----------------------+
+			     |	      /	sname_ , pname_		\
+			     +---->>>/	default_val_,val_	 \
+				     \				 /
+				      +-------------------------+
 
+BUT GIVEN DATA DOSEN'T HELP SO
+		:	it finds sname from pname, val and default_val = as value and then initializes
+			pairs_	= map<ProbName,int>		 |
+			 _______________			 |
+                        |       |       |			 |
+                         __PName|value__+			 |
+                        |       |  30   |<-----------------------+
+                        +---------------+
+                        |       |  29   |
+                        +---------------+
+			|       |  ..   |
+                        +---------------+
+*/
 void
 GroupProbElem::initialize(Probabilities *impl, const std::map<ProbName, int> pairs)
 {
@@ -269,14 +347,30 @@ GroupProbElem::initialize(Probabilities *impl, const std::map<ProbName, int> pai
 		}
 	}
 }
-
+//searches for pname in probs_ true if found
 bool
 GroupProbElem::elem_exist(ProbName pname)
 {
 	std::map<ProbName, SingleProbElem*>::iterator i = probs_.find(pname);
 	return (!(i == probs_.end()));
 }
-
+/*
+	probs_=map<>
+         _________________
+	|         |       |
+        +ProbName_|_______+
+        |         |       |
+        +-----------------+
+        |         |   -------+
+        +-----------------+  |pointer to SingleProbElem class
+ 			     |
+			     |	       +-----------------------+
+			     |	      /	sname_ , pname_		\
+			     +---->>>/	default_val_,val_	 \
+				     \				 /
+				      +-------------------------+
+	searches for pname from probs_ and sets val_
+*/
 void
 GroupProbElem::set_prob(ProbName pname, int val)
 {
@@ -286,7 +380,9 @@ GroupProbElem::set_prob(ProbName pname, int val)
 	assert(elem);
 	elem->set_prob(pname, val);
 }
-
+/*
+	returns the integer value of probability for given pname
+*/
 int
 GroupProbElem::get_prob(ProbName pname)
 {
@@ -295,7 +391,36 @@ GroupProbElem::get_prob(ProbName pname)
 	assert(elem);
 	return elem->get_prob(pname);
 }
-
+/*
+*
+	probs_=map<>
+         _________________
+	|         |       |
+        +ProbName_|_______+
+        |         |       |
+        +-----------------+
+        |         |   -------+
+        +-----------------+  |pointer to SingleProbElem class
+        |         |       |  |
+        +-----------------+  |
+			     |	       +-----------------------+
+			     |	      /	sname_ , pname_		\
+			     +---->>>/	default_val_,val_	 \
+				     \				 /
+				      +-------------------------+
+	chooses val_ and ProbName from above and creates a new table for each row:
+	BUT (VAL_ > 0)
+table:
+	 _________|_______
+	|         |       |
+        +__val____|ProbName+
+        |         |       |
+        +---------|-------+
+        |         | 	  |
+        +---------|-------+  
+        |         |       |  
+        +---------|-------+  
+*/
 void
 GroupProbElem::set_prob_table(ProbabilityTable<unsigned int, ProbName> * const table)
 {
@@ -311,7 +436,19 @@ GroupProbElem::set_prob_table(ProbabilityTable<unsigned int, ProbName> * const t
 			table->add_elem(static_cast<unsigned int>(val), pname);
 	}
 }
-
+/*
+	probs_=map<>
+       	 ________________________			_________________
+	|         |       	 |	only		|SingleProbElem	|
+        +ProbName_|SingleProbElem+	values		+---------------+
+        |         |       	 |	    \		|		|
+        +------------------------+	-----\		+---------------+
+        |         |	  	 |	-----/		|		|
+        +------------------------+  	    /		+---------------+
+        |         |       	 |  
+        +------------------------+  
+		
+*/
 void
 GroupProbElem::get_all_values(vector<SingleProbElem*> &values)
 {
@@ -319,15 +456,17 @@ GroupProbElem::get_all_values(vector<SingleProbElem*> &values)
 	for (i = probs_.begin(); i != probs_.end(); ++i)
 		values.push_back((*i).second);
 }
-
+//dumps the group but default probabilities
+//[statement_prob,statement_assign_prob=100,statement_block_prob=0 ............]
+//and subsequent lines
+//note : first dosen't have value
 void
 GroupProbElem::dump_default(std::ostream &out)
 {
 	char open_delim = is_equal_ ? equal_open_delim : group_open_delim;
 	char close_delim = is_equal_ ? equal_close_delim : group_close_delim;
-
+//print first one with no value
 	out << open_delim << sname_ << group_sep_char;
-
 	vector<SingleProbElem*> values;
 	get_all_values(values);
 	assert(values.size() >= 1);
@@ -335,6 +474,7 @@ GroupProbElem::dump_default(std::ostream &out)
 	sort(values.begin(), values.end(), single_elem_less);
 #endif
 	size_t count = 0;
+//print the remainning ones
 	for (count = 0; count < values.size() - 1; count++) {
 		values[count]->dump_default(out);
 		out << group_sep_char;
@@ -343,7 +483,8 @@ GroupProbElem::dump_default(std::ostream &out)
 	values[count]->dump_default(out);
 	out << close_delim;
 }
-
+//how different from above?
+//AFAIU : it dosen't check if size(values) <=1
 void
 GroupProbElem::dump_val(std::ostream &out)
 {
@@ -366,6 +507,11 @@ GroupProbElem::dump_val(std::ostream &out)
 
 Probabilities* Probabilities::instance_ = NULL;
 
+/*
+	creates and initializes the instance and returns it
+	initializing  = fill single element probability
+			fill group element probability
+*/
 Probabilities *
 Probabilities::GetInstance()
 {
@@ -386,6 +532,7 @@ Probabilities::DestroyInstance()
 		Probabilities::instance_ = NULL;
 	}
 }
+
 
 void
 Probabilities::set_single_name(const char *sname, ProbName pname)
@@ -512,7 +659,7 @@ Probabilities::set_prob_table(ProbabilityTable<unsigned int, ProbName> *const ta
 	ProbElem *elem = probabilities_[pname];
 	elem->set_prob_table(table);
 }
-
+//searches for pname in the data structure pname_to_type_ and returns type
 unsigned int
 Probabilities::pname_to_type(ProbName pname)
 {
@@ -520,7 +667,8 @@ Probabilities::pname_to_type(ProbName pname)
 
 	return instance_->pname_to_type_[pname];
 }
-
+//returns any random number upto 101
+//this assigns the probability value
 int
 Probabilities::get_random_single_prob(int orig_val)
 {
@@ -531,7 +679,26 @@ Probabilities::get_random_single_prob(int orig_val)
 	else
 		return rnd_upto(101);
 }
+/*
+	creates a data structure like
+	the val_ are set by programmer
 
+	probabilities__=map<ProbName , SingleProbElem*>
+         _________________
+	|         |       |
+        +ProbName_|_______+
+        |         |       |
+        +-----------------+
+        |         |   -------+
+        +-----------------+  |pointer to SingleProbElem class
+        |         |       |  |
+        +-----------------+  |
+			     |	       +-----------------------+
+			     |	      /	sname_ , pname_		\
+			     +---->>>/	default_val_,val_	 \
+				     \				 /
+				      +-------------------------+
+*/
 void
 Probabilities::initialize_single_probs()
 {
@@ -893,7 +1060,26 @@ Probabilities::initialize()
 	initialize_single_probs();
 	initialize_group_probs();
 }
+/*
+a ProbElem can be = GroupProbElem or SingleProbElem
+	       probabilities_ =a map <ProbName , SingleProbElem or GroupProbElem>
 
+it searches for pname into table
+returns: val_ associated with pname
+         _________________
+	|         |       |
+        +ProbName_|_______+
+        |         |       |
+        +-----------------+
+        |         |   -------+
+        +-----------------+  |pointer to SingleProbElem| GroupProbElem
+	|		  |  |
+	+-----------------+  |	       +-----------------------+
+			     |	      /	sname_ , pname_		\
+			     +---->>>/	default_val_,val_	 \
+				     \				 /
+				      +-------------------------+
+*/
 unsigned int
 Probabilities::get_prob(ProbName pname)
 {
@@ -906,7 +1092,9 @@ Probabilities::get_prob(ProbName pname)
 	assert(val >= 0 && val <= 100);
 	return static_cast<unsigned int>(val);
 }
-
+//searchs in' sname_to_pname_'
+//input: sname
+//return: pname
 ProbName
 Probabilities::get_pname(const string &sname)
 {
@@ -915,7 +1103,9 @@ Probabilities::get_pname(const string &sname)
 		assert("invalid string in the configuration file:" && sname.c_str() && 0);
 	return (*i).second;
 }
-
+//searchs in' pname_to_sname_'
+//input: pname
+//return: sname
 std::string
 Probabilities::get_sname(ProbName pname)
 {
@@ -1110,7 +1300,7 @@ Probabilities::clear_filter(std::map<ProbName, Filter*> &filters)
 	}
 	filters.clear();
 }
-
+//deletes the probabilities_ map
 Probabilities::~Probabilities()
 {
 	std::map<ProbName, ProbElem*>::iterator i;
@@ -1123,14 +1313,14 @@ Probabilities::~Probabilities()
 	clear_filter(prob_filters_);
 	clear_filter(extra_filters_);
 }
-
+//max_prob_ = adding the prob values
 void DistributionTable::add_entry(int key, int prob)
 {
 	keys_.push_back(key);
 	probs_.push_back(prob);
 	max_prob_ += prob;
 }
-
+//return probs_ for key match
 int DistributionTable::key_to_prob(int key) const
 {
 	for (size_t i=0; i<keys_.size(); i++) {
@@ -1141,7 +1331,9 @@ int DistributionTable::key_to_prob(int key) const
 	// 0 probablility for keys not found
 	return 0;
 }
-
+//	if input:(rnd) is smaller then probs_ return keys at that location
+//	else 
+//		rnd= rnd-prob[i] (decrease rnd value)
 int DistributionTable::rnd_num_to_key(int rnd) const
 {
 	assert(rnd < max_prob_ && rnd >= 0);

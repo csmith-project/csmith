@@ -40,7 +40,21 @@
 #include "random.h"
 
 using namespace std;
+/*
+	this class is the leaf node of construction of all tables used in this class
+	typeof(key) = class
+	typeof(value) = class
+	 _______________
+	|	|	|
+	|   key	|value	|
+	+_______|_______+  <------Each Individual entry is provided by this class
+				the key and value can be of any class type,hence template used
+			operations:
+					1.get key
+					2.get value
+					3. constructor - for insertion key,val
 
+*/
 template <class Key, class Value>
 class TableEntry {
 public:
@@ -54,7 +68,21 @@ private:
 	Key key_;
 	Value value_;
 };
+/*
+	      Table_    is a vector of  TableEntry class
+			 _______________
+			|	|	|
+			+__key__|value__+
+			|	|	|<--|
+			+---------------+   |
+			|	|	|<-----TableEntry
+			+---------------+   |
+curr_max_key_--------->	|	|	|<---
+			+---------------+
+points to last entry
+which is a maximum key anyways
 
+*/
 template <class Key, class Value>
 class ProbabilityTable {
 	typedef TableEntry<Key, Value> Entry;
@@ -73,6 +101,7 @@ public:
 	Value get_value(Key k);
 
 private:
+	//POINTS TO LAST ENTRY OF table_
 	Key curr_max_key_;
 	std::vector<Entry *> table_;
 };
@@ -90,6 +119,19 @@ ProbabilityTable<Key, Value>::ProbabilityTable()
 {
 	table_.clear();
 }
+/*
+	clears this:
+	Table_
+	 _______________
+	|	|	|
+	+__key__|value__+
+	|	|	|<--|
+	+---------------+   |
+	|	|	|<-----TableEntry
+	+---------------+   |
+	|	|	|<---
+	+---------------+
+*/
 
 template <class Key, class Value>
 ProbabilityTable<Key, Value>::~ProbabilityTable()
@@ -106,21 +148,44 @@ void ProbabilityTable<Key, Value>::initialize(ProbName pname)
 	Probabilities *impl_ = Probabilities::GetInstance();
 	impl_->set_prob_table(this, pname);
 }
-
+//DEAD CODE? ISN'T USED ANYWHERE!!
+//IF FIRST KEY IS LESS THAN SECOND -> RETURN true
 template <class Key, class Value>
 bool my_less(TableEntry<Key, Value> *t, Key k2)
 {
 	Key k1 = t->get_key();
 	return (k1 < k2);
 }
-
+/*
+	if (key(t)> K2)
+		RETURN 1
+	ELSE
+		RETURN 0
+*/
 template <class Key, class Value>
 bool my_greater(TableEntry<Key, Value> *t, Key k2)
 {
 	Key k1 = t->get_key();
 	return (k1 > k2);
 }
+/*
+short: inserts entry in @sorted location of key
+Long:
+     t(the TableEntry to be inserted)
+     |			Table_ = sorted in ascending order of key
+     V			 _______________
++------------+		|	|	|
+| key |	value|		+__key__|value__+
++------------+		|	|	|<--|
+			+---------------+   |
+			|	|	|<-----TableEntry
+			+---------------+   |
+curr_max_key_--------->	|	|	|<---
+			+---------------+
 
+'t' is inserted into Table_ based on appropriate location
+
+*/
 template <class Key, class Value>
 void
 ProbabilityTable<Key, Value>::sorted_insert(Entry *t)
@@ -151,7 +216,13 @@ ProbabilityTable<Key, Value>::sorted_insert(Entry *t)
 		curr_max_key_ = k;
 	}
 }
-
+/*
+use: adds into Table_ new entry
+	creates a TableEntry first
++------------+
+| key |	value|	and inserts into Table_
++------------+
+*/
 template <class Key, class Value>
 void
 ProbabilityTable<Key, Value>::add_elem(Key k, Value v)
@@ -159,7 +230,9 @@ ProbabilityTable<Key, Value>::add_elem(Key k, Value v)
 	Entry *t = new Entry(k, v);
 	sorted_insert(t);
 }
-
+/*
+	locates the key and returns the value[@key]
+*/
 template <class Key, class Value>
 Value
 ProbabilityTable<Key, Value>::get_value(Key k)

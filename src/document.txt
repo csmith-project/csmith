@@ -48,3 +48,33 @@ Following sample variable names can be there in field_vars
  g_203[2][2][1].f0
 
 	its created for each struct/ union variable
+
+5. The source code can be divided accordingly by what I feel:
+PART A: The types of generators and types of extensions
+	ex. DFS, Default,Abs,Klee,splat, crest, coverageTestExtn
+PART B: probabilitie and the way to generate random nnumbers
+
+PART C: The analysis and Fact* related files
+
+PART D: main generation files
+	1.Block generation
+	2.Expression Generation
+	3.Function
+	4.FunctionInvocation
+	5.Statement
+	6. Type
+	7.Variable generation
+
+6. Probabilites.cpp file consists of various classes as:
+	ProbabilityFilter
+
+			ProbElem				
+			/	\
+		       /         \	inherited
+		      /		  \
+	SingleProbElem		GroupProbElem
+
+			
+	Probabilities
+	DistributionTable
+   above all take help of ProbabilityTable.h file which has some basic data structures created
