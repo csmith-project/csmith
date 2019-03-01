@@ -48,6 +48,7 @@
 
 using namespace std;
 
+//each generator has its own set of variables
 DFSProgramGenerator::DFSProgramGenerator(int argc, char *argv[], unsigned long seed)
 	: argc_(argc),
 	  argv_(argv),
@@ -64,7 +65,8 @@ DFSProgramGenerator::~DFSProgramGenerator()
 	Finalization::doFinalization();
 	delete output_mgr_;
 }
-
+//creates & initializes instance of DFSRndNumGenerator
+//creates & initializes instance of DFSOutputMgr
 void
 DFSProgramGenerator::initialize()
 {
@@ -97,16 +99,17 @@ DFSProgramGenerator::goGenerator()
 			//if (count >= 47376)
 				//cout << "here" << std::endl;
 			output_mgr_->OutputHeader(argc_, argv_, seed_);
-			output_mgr_->Output();
+			output_mgr_->Output();//this actually outputs the program generated from above
 			OutputMgr::really_outputln(cout);
 			good_count_++;
 		}
 		impl->reset_state();
-		Function::doFinalization();
+		Function::doFinalization(); //deletes memory allocated to functions
 		VariableSelector::doFinalization();
 		reset_gensym();
 		PartialExpander::restore_init_values();
 		//cout << "count = " << count << std::endl;
 	}
+
 }
 

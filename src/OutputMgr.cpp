@@ -70,12 +70,13 @@ static const char access_once_macro[] = "\
 ";
 
 using namespace std;
-
+//list of functions provided by user through command line,for 
 vector<string> OutputMgr::monitored_funcs_;
-
+//holds the ongoing function name
 std::string OutputMgr::curr_func_ = "";
+
 /*
-   Use : sets the global variable curr_func_ to the passes name of function
+   Use : sets the global variable curr_func_ to the passed name of function
    Parameters:
         function name is a string
 
@@ -210,7 +211,7 @@ OutputMgr::OutputHashFuncInvocation(std::ostream &out, int indent)
 	OutputMgr::output_tab_(out, indent);
 	out << OutputMgr::hash_func_name << "();" << std::endl;
 }
-
+//dumps checksum after each statement when --step-hash-by-stmt is set,  so function step_hash() is created
 void
 OutputMgr::OutputStepHashFuncInvocation(std::ostream &out, int indent, int stmt_id)
 {
@@ -219,7 +220,7 @@ OutputMgr::OutputStepHashFuncInvocation(std::ostream &out, int indent, int stmt_
 		out << OutputMgr::step_hash_func_name << "(" << stmt_id << ");" << std::endl;
 	}
 }
-
+//dumps checksum after each statement when --step-hash-by-stmt is set,  so function step_hash() is created
 void
 OutputMgr::OutputStepHashFuncDef(std::ostream &out)
 {
@@ -255,7 +256,7 @@ OutputMgr::OutputHashFuncDecl(std::ostream &out)
 	out << "void " << OutputMgr::hash_func_name << "(void);";
 	out << std::endl << std::endl;
 }
-
+//--step-hash-by-stmt when set
 void
 OutputMgr::OutputStepHashFuncDecl(std::ostream &out)
 {

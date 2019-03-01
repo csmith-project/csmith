@@ -56,6 +56,7 @@ protected:
 	virtual void initialize() = 0;
 
 private:
+	//this holds the DFS/Default program generator
 	static AbsProgramGenerator *current_generator_;
 
 	static OutputMgr *getmgr(AbsProgramGenerator *gen);

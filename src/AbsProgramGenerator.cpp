@@ -43,14 +43,33 @@
 using namespace std;
 
 AbsProgramGenerator *AbsProgramGenerator::current_generator_ = NULL;
+/*
+use: returns the outputMgr of current generator	
 
+	we know the any generator has it's own
+	1.RndNumGenerator instance
+	2.OutputMgr instance
+
+*/
 OutputMgr *
 AbsProgramGenerator::GetOutputMgr()
 {
 	assert(current_generator_);
 	return current_generator_->getOutputMgr();
 }
+/*
+	selects an instance from
+a>	DefaultProgramGenerator
+		or
+	DFSProgramGenerator
 
+b>Initializes it:	
+		i.e chooses a random number generator
+		and OutputMgr
+c> creates an instance of Probabilities and initializes them
+d> return current_generator_
+
+*/
 AbsProgramGenerator *
 AbsProgramGenerator::CreateInstance(int argc, char *argv[], unsigned long seed)
 {
@@ -88,7 +107,7 @@ AbsProgramGenerator::CreateInstance(int argc, char *argv[], unsigned long seed)
 
 	return AbsProgramGenerator::current_generator_;
 }
-
+//returs current generator
 AbsProgramGenerator *
 AbsProgramGenerator::GetInstance()
 {

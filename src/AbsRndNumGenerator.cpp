@@ -70,6 +70,11 @@ AbsRndNumGenerator::~AbsRndNumGenerator()
 
 /*
  * Factory method to create random number generators.
+	SELECTS THE TYPE OF GENERATOR BASED ON PARAMTER PASSED TO IT
+	GENERATOR TYPES CAN BE:
+	1.Default
+	2. DFS
+	3.SimpleDelta
  */
 AbsRndNumGenerator*
 AbsRndNumGenerator::make_rndnum_generator(RNDNUM_GENERATOR impl, const unsigned long seed)

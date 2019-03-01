@@ -45,7 +45,10 @@
 #include "CGOptions.h"
 #include "SafeOpFlags.h"
 #include "ExtensionMgr.h"
+/*
+	each generator has it's own set of variables
 
+*/
 DefaultProgramGenerator::DefaultProgramGenerator(int argc, char *argv[], unsigned long seed)
 	: argc_(argc),
 	  argv_(argv),
@@ -61,7 +64,25 @@ DefaultProgramGenerator::~DefaultProgramGenerator()
 	Finalization::doFinalization();
 	delete output_mgr_;
 }
+/*
+I am considering no command line set, for simplicity
+	Does 2 things:
+	1. selection of 1 randoM number generator :
+		ex 1.DefaultRandomNumGenerator
 
+	2. Selection of 1 OutputMgr :
+		ex 1.DefaultOutputMgr
+
+
+//PLEASE MAKE LIFE SIMPLE FOR NOW:	
+IF SOME COMMAND LINES ARE SET LIKE:
+  --splat:
+  --klee:
+  --crest:
+  --coverage-test:
+	THEN THE EXTENSIONS RELATED TO THEM ARE INVOKED
+
+*/
 void
 DefaultProgramGenerator::initialize()
 {
@@ -91,7 +112,18 @@ DefaultProgramGenerator::get_count_prefix(const std::string &)
 	assert(0);
 	return "";
 }
-
+/*
+	EACH GENERATOR HAS IT'S OWN goGenerator()
+use: 
+	1. Generates the AST 
+	2. outputs the AST
+LONG:
+	A) In generation:
+			1.generate types
+			2.generate functions
+	B) IN outputing AST:
+			1.refer DefaultOutputMgr.cpp for more info. how the output works
+*/
 void
 DefaultProgramGenerator::goGenerator()
 {

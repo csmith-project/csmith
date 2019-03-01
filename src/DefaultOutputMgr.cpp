@@ -53,15 +53,19 @@ static std::string filename_prefix = "rnd_output";
 static std::string global_header = "rnd_globals";
 
 #ifndef WIN32
-static std::string dir_sep = "/";
+static std::string dir_sep = "/"; //(for linux kernel)
 #else
-static std::string dir_sep = "\\";
+static std::string dir_sep = "\\"; //(for windows)
 #endif
 
 using namespace std;
 
 DefaultOutputMgr *DefaultOutputMgr::instance_ = NULL;
-
+/*
+	creates an instance of DefaultOutputMgr class 
+		and
+	initializes it
+*/
 DefaultOutputMgr *
 DefaultOutputMgr::CreateInstance()
 {
@@ -69,6 +73,7 @@ DefaultOutputMgr::CreateInstance()
 		return DefaultOutputMgr::instance_;
 
 	std::string ofile_str = CGOptions::output_file();
+	//if --output option specified
 	if (!ofile_str.empty()) {
 		ofstream *ofile = new ofstream(ofile_str.c_str());
 		DefaultOutputMgr::instance_ = new DefaultOutputMgr(ofile);
@@ -81,7 +86,14 @@ DefaultOutputMgr::CreateInstance()
 	DefaultOutputMgr::instance_->init();
 	return DefaultOutputMgr::instance_;
 }
-
+/*
+	opens a file with given num
+DOUBT: split_files_dir() ? returns what? 
+is it the directory location
+open file:
+	output/rnd_output3.c 
+	--max-split-files specified
+*/
 ofstream *
 DefaultOutputMgr::open_one_output_file(int num)
 {
@@ -104,7 +116,7 @@ DefaultOutputMgr::init()
 		outs.push_back(out);
 	}
 }
-
+//creates output directory for --max-split-files
 bool
 DefaultOutputMgr::create_output_dir(std::string dir)
 {
@@ -183,7 +195,7 @@ DefaultOutputMgr::RandomOutputFuncDefs()
 		(*i)->Output(*outs[index]);
 	}
 }
-
+//variales and functions outputted
 void
 DefaultOutputMgr::RandomOutputDefs()
 {
@@ -204,6 +216,7 @@ DefaultOutputMgr::Output()
 	if (DeltaMonitor::is_running() && (Error::get_error() != SUCCESS)) {
 		out << "Delta reduction error!\n";
 	}
+	//--max-split-files specified
 	if (is_split()) {
 		OutputGlobals();
 		OutputAllHeaders();
@@ -225,7 +238,6 @@ DefaultOutputMgr::Output()
 	OutputTail(out);
 	DeltaMonitor::Output(out);
 }
-
 std::ostream &
 DefaultOutputMgr::get_main_out()
 {
@@ -275,7 +287,19 @@ DefaultOutputMgr::DefaultOutputMgr()
 {
 
 }
+//outs = vector of *ofstream which holds the files specified for
+//	--max-split-files  option
+/*
+	outs<>
 
+	[	|	|	|	]
+	    |			    |
+	    |			    |
+	    V			    V
+	rnd_output1.c		rnd_output4.c
+
+closes the filepointers,clears above
+*/
 DefaultOutputMgr::~DefaultOutputMgr()
 {
 	std::vector<std::ofstream *>::iterator out;
