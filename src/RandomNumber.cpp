@@ -40,15 +40,15 @@
 
 RandomNumber *RandomNumber::instance_ = NULL;
 /*
-	generator_  map <RNDNUM_GENERATOR, instance of AbsRndNumGenerator class>
-	use : current function adds element in generator_
+	generators_  map <RNDNUM_GENERATOR, instance of AbsRndNumGenerator class>
+	use : current function adds element in generators_
 		and initializes each RNDNUM_GENERATOR with NULL
  */
 RandomNumber::RandomNumber(const unsigned long seed)
 	: seed_(seed)
 {
 	//returns the count of the total number of random generators
-	// currently 3
+	// currently 3 types of random generator - default, dfs and simple delta
 	unsigned int count = AbsRndNumGenerator::count();
 
 	for (unsigned int i = 0; i < count; ++i) {
@@ -57,11 +57,28 @@ RandomNumber::RandomNumber(const unsigned long seed)
 	}
 }
 
+/*
+	Use - It destroys generators_ map < RND_NUM_GENERATOR, instance of abs >
+*/
 RandomNumber::~RandomNumber()
 {
 	generators_.clear();
 }
 
+/*
+	Use - It creates different random generators based on count value and store in the vector generators_
+
+	How it does - It calls make_rndnum_generator of abs class.
+		      which further have 3 choice of selecting generators
+					1. Default
+					2. DFS
+					3. Simple Delta
+		     After selecting generator, make_rndnum_generator of respective class is called.
+			e.g. for default generator,
+					default::make_rndnum_generator
+
+	DS used - generators_ = map <RNDNUM_GENERATOR, instance of AbsRndNumGenerator class>
+*/
 void
 RandomNumber::make_all_rndnum_generators(const unsigned long seed)
 {
@@ -130,11 +147,19 @@ RandomNumber::SwitchRndNumGenerator(RNDNUM_GENERATOR rImpl)
 	return old;
 }
 
+/*
+	Use - Returns string "name" as it is in case of Default generator.
+	      Does some complexation on string and then return in case of DFS generator
+*/
 std::string
 RandomNumber::get_prefixed_name(const std::string &name)
 {
 	return curr_generator_->get_prefixed_name(name);
 }
+
+/*
+        Use - It calls curr generator which returns string "" appending "->" to it  from rnd_upto(). Check later, not sure about it
+*/
 
 std::string &
 RandomNumber::trace_depth()
@@ -142,12 +167,29 @@ RandomNumber::trace_depth()
 	return curr_generator_->trace_depth();
 }
 
+/*
+ * It calls curr generator (it may be default, dfs or simple delta)
+   Use - generator appends '_' for n-1 values of the map (seq_map_) and
+        at end appends the last value
+        ex. step 1 --> 1_2_3_
+            step 2 --> 1_2_3_4 where 1,2,3,4 are the values in map
+
+        and return "1_2_3_4"
+
+   Data structure used - seq_map <int,int>      (in LinearSequence class)
+
+ */
 void
 RandomNumber::get_sequence(std::string &sequence)
 {
 	curr_generator_->get_sequence(sequence);
 }
 
+/*
+   calls curr generator and return a value from  0..(n-1) with help of genrand() i.e. lrand48() - selects val from [0, 2^31)
+        and implicilty assigns value to  trace_string_
+        What is significane of *where string?
+*/
 unsigned int
 RandomNumber::rnd_upto(const unsigned int n, const Filter *f, const std::string *where)
 {
@@ -191,7 +233,7 @@ RandomNumber::RandomDigits(int num)
 }
 /*
 	Deletes the values in the map
-	generator_ = map <RNDNUM_GENERATOR, instance of AbsRndNumGenerator class>
+	generators_ = map <RNDNUM_GENERATOR, instance of AbsRndNumGenerator class>
         ________________________________________
        | RNDNUM_GENERATOR | AbsRndNumGenerator*  |
        |__________________|______________________|
@@ -200,7 +242,7 @@ RandomNumber::RandomDigits(int num)
        |__________________|______________________|
 
 short : deletes various instances of RandomNumber generation
-	and @end deletes the generator_ data structure (a map)
+	and @end deletes the generators_ data structure (a map)
  */
 void
 RandomNumber::doFinalization()

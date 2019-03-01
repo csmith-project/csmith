@@ -42,14 +42,7 @@
 #include "Filter.h"
 #include "CGOptions.h"
 #include "AbsProgramGenerator.h"
-/*
-   Use :
-   Parameters:
 
-   Returns:
-
- *
- */
 std::string get_prefixed_name(const std::string &name)
 {
 	if (!CGOptions::prefix_name())
@@ -66,8 +59,12 @@ std::string get_prefixed_name(const std::string &name)
 /*
    Use :returns a random number formed from hexdigits(only 0 to 9 and A to F)
 	internally calls RandomNumber class object
+
    Parameters:
+        num = size of the random number user wants
+
    Returns:
+        a string , ex . "19AC830" for num = 7
 
  *
  */
@@ -77,11 +74,13 @@ std::string RandomHexDigits( int num )
 	return rnd->RandomHexDigits(num);
 }
 /*
-   Use :returns a random number formed from digit(only 0 to 9) of size num
-	internally calls the RandomNumber class object
+   Use : returns a random number formed from digit(only 0 to 9) of size num
+	  internally calls the RandomNumber class object
    Parameters:
+        num = size of the random number user wants
 
    Returns:
+        a string , ex . "1924830" for num = 7
 
  *
  */
@@ -91,7 +90,8 @@ std::string RandomDigits( int num )
 	return rnd->RandomDigits(num);
 }
 /*
-   Use :
+   Use : returns a random number in the range 0..(n-1)
+        internally calls the RandomNumber class object rnd -> rnd_upto()
    Parameters:
 
    Returns:
@@ -105,10 +105,10 @@ rnd_upto(const unsigned int n, const Filter *f, const std::string* where)
 	return rnd->rnd_upto(n, f, where);
 }
 /*
-   Use :
+   Use : It returns boolean value T or F and it implicitly calls rnd_flipcoin of RandomNumber class
    Parameters:
 
-   Returns:
+   Returns: Boolean value T or F
 
  *
  */
@@ -118,14 +118,11 @@ rnd_flipcoin(const unsigned int p, const Filter *f, const std::string* where)
 	RandomNumber *rnd = RandomNumber::GetInstance();
 	return rnd->rnd_flipcoin(p, f, where);
 }
+
 /*
-   Use :
-   Parameters:
-
-   Returns:
-
- *
- */
+   Use : Calls RandomHexDigits() if command line set is not random.
+         If cmd line is set, switch generator and calls RandomHexDigits()
+*/
 std::string PureRandomHexDigits( int num )
 {
 	if (!CGOptions::is_random()) {
@@ -140,13 +137,9 @@ std::string PureRandomHexDigits( int num )
 	}
 }
 /*
-   Use :
-   Parameters:
-
-   Returns:
-
- *
- */
+   Use : Calls RandomDigits() if command line set is not random.
+         If cmd line is set, switch generator and calls RandomDigits()
+*/
 std::string PureRandomDigits( int num )
 {
 
@@ -162,12 +155,8 @@ std::string PureRandomDigits( int num )
 	}
 }
 /*
-   Use :
-   Parameters:
-
-   Returns:
-
- *
+   Use : Calls rnd_upto() if command line set is not random.
+	 If cmd line is set, switch generator and calls rnd_upto()
  */
 unsigned int
 pure_rnd_upto(const unsigned int n, const Filter *f, const std::string* where)
@@ -185,12 +174,14 @@ pure_rnd_upto(const unsigned int n, const Filter *f, const std::string* where)
 	}
 }
 /*
-   Use :
-   Parameters:
+   Use : If command line set is not random, then it switches to another generator and then calls
+         rnd_flipcoin to return boolean value T or F
+	 else calls rnd_flipcoin
 
-   Returns:
+   Parameters: Integer of size n
 
- *
+   Returns: Either T or F
+
  */
 bool
 pure_rnd_flipcoin(const unsigned int n, const Filter *f, const std::string* where)
@@ -208,9 +199,8 @@ pure_rnd_flipcoin(const unsigned int n, const Filter *f, const std::string* wher
 }
 /*
    Use :
-   Parameters:
-
-   Returns:
+   Parameters: None
+   Returns: string from rnd -> rnd_upto()
 
  *
  */
@@ -221,10 +211,17 @@ trace_depth()
 	return rnd->trace_depth();
 }
 /*
-   Use :
-   Parameters:
+   Use - It appends '_' for n-1 values of the map (seq_map_) and
+        at end appends the last value
+        ex. step 1 --> 1_2_3_
+            step 2 --> 1_2_3_4 where 1,2,3,4 are the values in map
+   and returns pointer pointing to it. (i.e. return string)
 
-   Returns:
+   Parameters: Input string - sequence
+
+   Returns: None
+
+   DS used - seq_map <int, int>			(in LinearSequence class)
 
  *
  */

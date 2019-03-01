@@ -48,7 +48,11 @@
 DefaultRndNumGenerator *DefaultRndNumGenerator::impl_ = 0;
 
 /*
- *
+ *	It is constructor which is used to create new generator.
+
+	rand_depth_ = 0
+	trace_string_ = ""
+	Sequence pointer to seq_ = for ex. it can be LinearSequence 
  */
 DefaultRndNumGenerator::DefaultRndNumGenerator(const unsigned long, Sequence *concrete_seq)
 	: rand_depth_(0),
@@ -59,7 +63,7 @@ DefaultRndNumGenerator::DefaultRndNumGenerator(const unsigned long, Sequence *co
 }
 
 /*
- *
+ *	It destroys seqs_ = [...|...|...|...] which is set that stores instances of Sequence
  */
 DefaultRndNumGenerator::~DefaultRndNumGenerator()
 {
@@ -68,6 +72,7 @@ DefaultRndNumGenerator::~DefaultRndNumGenerator()
 
 /*
  * Create singleton instance.
+	impl_ is pointer holding generator
  */
 DefaultRndNumGenerator*
 DefaultRndNumGenerator::make_rndnum_generator(const unsigned long seed)
@@ -86,6 +91,15 @@ DefaultRndNumGenerator::make_rndnum_generator(const unsigned long seed)
 
 /*
  * Return the sequence of random choices
+   Use - It appends '_' for n-1 values of the map (seq_map_) and
+        at end appends the last value
+        ex. step 1 --> 1_2_3_
+            step 2 --> 1_2_3_4 where 1,2,3,4 are the values in map
+
+	and return "1_2_3_4"
+
+   Data structure used - seq_map <int,int>	(in LinearSequence class)
+
  */
 void
 DefaultRndNumGenerator::get_sequence(std::string &sequence)
@@ -95,12 +109,15 @@ DefaultRndNumGenerator::get_sequence(std::string &sequence)
 	sequence = ss.str();
 }
 
+/*
+	In Default Program Generator, it returns same string.
+	In DFS Program Generator, it processes the string and then return
+*/
 std::string
 DefaultRndNumGenerator::get_prefixed_name(const std::string &name)
 {
 	return name;
 }
-
 void
 DefaultRndNumGenerator::add_number(int v, int bound, int k)
 {
@@ -109,7 +126,9 @@ DefaultRndNumGenerator::add_number(int v, int bound, int k)
 }
 
 /*
- * Return a random number in the range 0..(n-1).
+ * Return a random number from  0..(n-1) with help of genrand() i.e. lrand48() - selects val from [0, 2^31)
+        and implicilty assigns value to  trace_string_
+DOUBT:	What is significane of *where string?
  */
 unsigned int
 DefaultRndNumGenerator::rnd_upto(const unsigned int n, const Filter *f, const std::string *where)
@@ -174,18 +193,41 @@ DefaultRndNumGenerator::rnd_flipcoin(const unsigned int p, const Filter *f, cons
 	return rv;
 }
 
+/*
+	Use - It returns string "" appending "->" to it  from rnd_upto(). Check later, not sure about it
+*/
 std::string &
 DefaultRndNumGenerator::trace_depth()
 {
 	return trace_string_;
 }
 
+/*
+	Use - It calls lrand48() function which select a number from [0, 2^31) based on initial value.
+
+	Note - srand48() does some complexation and assigns initial value to lrand48().
+
+	Return - long between [0,2^31)
+*/
 unsigned long
 DefaultRndNumGenerator::genrand(void)
 {
 	return AbsRndNumGenerator::genrand();
 }
 
+/*
+        Use - It generates string of random digits in 2 ways using hex1 = "0123456789ABCDEF" as follows - 
+
+              1. command line set is random - does computation on hex1 to generate random digit
+
+              2. command line set is not random - calls abs to generate random digit of size num
+
+        Input - Size of random digit.
+                e.g. 2 = 1B
+                     5 = 23ABC
+
+        Return - string (e.g. 1B)
+*/
 std::string
 DefaultRndNumGenerator::RandomHexDigits( int num )
 {
@@ -203,6 +245,19 @@ DefaultRndNumGenerator::RandomHexDigits( int num )
 	return str;
 }
 
+/*
+	Use - It generates string of random digits in 2 ways using dec1 = "0123456789" as follows - 
+
+	      1. command line set is random - does computation on dec1 to generate random digit
+
+	      2. command line set is not random - calls abs to generate random digit of size num
+
+	Input - Size of random digit.
+		e.g. 2 = 23
+		     5 = 32874
+
+	Return - string (e.g. 23)
+*/
 std::string
 DefaultRndNumGenerator::RandomDigits( int num )
 {
@@ -210,7 +265,7 @@ DefaultRndNumGenerator::RandomDigits( int num )
 		return AbsRndNumGenerator::RandomDigits(num);
 
 	std::string str;
-	const char* dec1 = AbsRndNumGenerator::get_dec1();
+	const char* dec1 = AbsRndNumGenerator:: get_dec1();
 	while (num--) {
 		int x = genrand() % 10;
 		str += dec1[x];

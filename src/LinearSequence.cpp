@@ -100,7 +100,7 @@ LinearSequence::clear()
 	seq_map_.clear();
 }
 /*
-	appends '_' for n-1 values of the map (seq_char_) and 
+	appends '_' for n-1 values of the map (seq_map_) and
 	at end appends the last value
 	ex. step 1 --> 1_2_3_
 	    step 2 --> 1_2_3_4 where 1,2,3,4 are the values in map
