@@ -61,7 +61,7 @@ enum eTypeDesc
 	eSimple,
 	ePointer,
 	eUnion,
-    eStruct,
+    	eStruct,
 };
 #define MAX_TYPE_DESC ((eTypeDesc) (eStruct+1))
 
@@ -276,7 +276,7 @@ public:
 	vector<unsigned int> dimensions;    // for array types
 	vector<const Type*> fields;         // for struct/union types
 	unsigned int sid;                   // sequence id, for struct/union types
-
+					   //ex.Struct S0   ; sid=0 in this case
 	bool used;                          // whether any variable declared with this type
 	bool printed;                       // whether this struct/union has been printed in the random program
 	const bool packed_;					// whether this struct/union should be packed
@@ -285,7 +285,7 @@ public:
     bool has_implicit_nontrivial_assign_ops_;   // if a struct has a struct with assign ops as a field,
                                         // than the former struct also has assign ops;
                                         // also true if struct itself has assign ops
-	vector<CVQualifiers> qfers_;		// conresponds to each element of fields
+	vector<CVQualifiers> qfers_;		// conresponds to each element of fields( struct members)
 					// It's a tradeoff between the current implementation and the
 					// need of struct's level type qualifiers.
 	vector<int> bitfields_length_;		// -1 means it's a regular field

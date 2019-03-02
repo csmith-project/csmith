@@ -60,7 +60,14 @@ using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- *
+ *It's an array of pointers of data type as Type
+	simple_types 
+					     ---------------------->Type
+	+------------------------------------|--+
+	[	|	|	|	|   -| 	]
+	+---------------------------------------+
+	size = total elements in eSimpleType
+
  */
 const Type *Type::simple_types[MAX_SIMPLE_TYPES];
 
@@ -69,7 +76,7 @@ Type *Type::void_type = NULL;
 // ---------------------------------------------------------------------
 // List of all types used in the program
 static vector<Type *> AllTypes;
-static vector<Type *> derived_types;
+static vector<Type *> derived_types;//contains pointer types
 
 //////////////////////////////////////////////////////////////////////
 class NonVoidTypeFilter : public Filter
@@ -285,9 +292,9 @@ Type::Type(eSimpleType simple_type) :
 	eType(eSimple),
 	ptr_type(0),
 	simple_type(simple_type),
-	sid(0), // not used for simple types
-	used(false),
-	printed(false),
+	sid(0), // not used for simple types, only for struct fields
+	used(false),//is there any variable with this type?
+	printed(false),//only for struct/union,is this printed in program?
 	packed_(false),
 	has_assign_ops_(false),
 	has_implicit_nontrivial_assign_ops_(false)
@@ -360,13 +367,23 @@ Type::operator=(const Type& t)
 #endif
 
 // ---------------------------------------------------------------------
+/*Whatever the type given as parameter it searches it in AllTypes and if found returns a pointer to it
+	only for simple types
+*/
 const Type &
 Type::get_simple_type(eSimpleType st)
 {
 	static bool inited = false;
 
 	assert(st != MAX_SIMPLE_TYPES);
+/*initializing the 
+	  simple_types 
+                                             ---------------------->Type
+        +------------------------------------|--+
+        [NULL   |NULL       |NULL       |NULL    ]
+        +---------------------------------------+
 
+*/
 	if (!inited) {
 		for (int i = 0; i < MAX_SIMPLE_TYPES; ++i) {
 			Type::simple_types[i] = 0;
@@ -382,6 +399,7 @@ Type::get_simple_type(eSimpleType st)
 				Type::simple_types[st] = tt;
 			}
 		}
+		//if type not in AllType then create and add in AllTypes
 		if (Type::simple_types[st] == 0) {
 			Type *t = new Type(st);
 			Type::simple_types[st] = t;
@@ -390,7 +408,8 @@ Type::get_simple_type(eSimpleType st)
 	}
 	return *Type::simple_types[st];
 }
-
+//input: 'type' in string format
+//output: a pointer to Type class created
 const Type *
 Type::get_type_from_string(const string &type_string)
 {
@@ -443,7 +462,7 @@ get_int_type()
 {
     return &Type::get_simple_type(eInt);
 }
-
+//searches in AllTypes and returns the pointer if found
 Type*
 Type::find_type(const Type* t)
 {
@@ -458,6 +477,10 @@ Type::find_type(const Type* t)
 // ---------------------------------------------------------------------
 /* find the pointer type to the given type in existing types,
  * return 0 if not found
+DOUBT: may be derived_types contain only pointer types
+	searches in derived_types for given type
+	FOUND:return it
+	NOT FOUND and add =1 : adds in derived types
  *************************************************************/
 Type*
 Type::find_pointer_type(const Type* t, bool add)
@@ -474,7 +497,15 @@ Type::find_pointer_type(const Type* t, bool add)
 	}
     return 0;
 }
-
+/*
+	searches in fields inside a given struct/union.
+	tries to find if any field is constant
+	struct s {
+		int s;		/
+		float y;	+-----------searches fields and finds if any constant present
+		const int c;	\
+	}
+*/
 bool
 Type::is_const_struct_union() const
 {
@@ -491,7 +522,15 @@ Type::is_const_struct_union() const
 	}
 	return false;
 }
-
+/*
+	searches in fields inside a given struct/union.
+	tries to find if any field is volatile
+	struct s {
+		int s;		/
+		float y;	+-----------searches fields and finds if any volatile present
+		const int c;	\
+	}
+*/
 bool
 Type::is_volatile_struct_union() const
 {
@@ -509,7 +548,8 @@ Type::is_volatile_struct_union() const
 	}
 	return false;
 }
-
+//does this type contain int field
+//if not a normal variable it may be struct/union,heance search fields
 bool
 Type::has_int_field() const
 {
@@ -520,13 +560,25 @@ Type::has_int_field() const
 	}
 	return false;
 }
-
+//ex. if current type is 'long long int' so it checks with 'int' so it clearly overflows
+// 	then RETURNS TRUE
+//workS for only eSimpleTypes
 bool
 Type::signed_overflow_possible() const
 {
 	return eType == eSimple && is_signed() && ((int)SizeInBytes()) >= CGOptions::int_size();
 }
+/*
+	chooses
+	1.struct or union types from AllTypes add in ok_types
+		or
+	2.if variable is not const add in ok_types
+		or
+	3.if variable is not volatile add from AllTypes add in ok_types
+		or
+	4.if an int variable add in ok_types
 
+*/
 void
 Type::get_all_ok_struct_union_types(vector<Type *> &ok_types, bool no_const, bool no_volatile, bool need_int_field, bool bStruct)
 {
@@ -563,7 +615,12 @@ Type::if_union_will_have_assign_ops()
 		return false;
 	return rnd_flipcoin(RegularVolatileProb);
 }
-
+/*
+	ok_types will have struct/union types(refer: get_all_ok_struct_union_type())
+	it randomly chooses one from them and check if it's not used before
+	if not used
+		return
+*/
 const Type*
 Type::choose_random_struct_union_type(vector<Type *> &ok_types)
 {
@@ -580,7 +637,7 @@ Type::choose_random_struct_union_type(vector<Type *> &ok_types)
 	}
 	return rv_type;
 }
-
+//derived type has pointer types only, choose randomly one
 const Type*
 Type::choose_random_pointer_type(void)
 {
@@ -588,13 +645,15 @@ Type::choose_random_pointer_type(void)
 	ERROR_GUARD(NULL);
 	return derived_types[index];
 }
-
+/*
+	checks if derived_list != empty
+*/
 bool
 Type::has_pointer_type(void)
 {
 	return derived_types.size() > 0;
 }
-
+//DOUBT :is this DFS MODE WE ARE SPEAKING ABOUT?
 /* for exhaustive mode only */
 const Type*
 Type::choose_random_struct_from_type(const Type* type, bool no_volatile)
@@ -614,7 +673,7 @@ Type::choose_random_struct_from_type(const Type* type, bool no_volatile)
 	}
 	return t;
 }
-
+//SKIP NOW
 const Type*
 Type::random_type_from_type(const Type* type, bool no_volatile, bool strict_simple_type)
 {
@@ -635,6 +694,10 @@ Type::random_type_from_type(const Type* type, bool no_volatile, bool strict_simp
 }
 
 // ---------------------------------------------------------------------
+//if sizeof(AllTypes ) < 10
+//	we need more Types RETURN TRUE
+//if more than 10 elements, then struct/union has 50% changes of generation
+//so try fliping a coin, in that case
 static bool
 MoreTypesProbability(void)
 {
@@ -646,6 +709,9 @@ MoreTypesProbability(void)
 }
 
 // ---------------------------------------------------------------------
+/*
+	returns a random Type from eSimpleType, except evoid
+*/
 eSimpleType
 Type::choose_random_nonvoid_simple(void)
 {
@@ -666,7 +732,21 @@ Type::choose_random_nonvoid_simple(void)
 
 	return simple_type;
 }
-
+/*
+	struct S {
+	       +--------------+
+	       |int x : 10;   |------------->does creation of a single bitfield from whole struct
+	       +--------------+
+	};
+	1.choose a random type :(signed or unsigned int only, integer bitfields)
+		random_fields.push_back()
+	2.choose random qualifier based on type
+		qualifiers.push_back()
+	3.choose a random length of bitfield (sizeof(int) * 8) where 1BYTE=8 bits
+		ex.(on 64 bit machine)4*8 = 32bit
+Q.Why taking a vector,can't a variable be used ?
+-> we r passing the address of vectors, hence we are pushing to a global vector, containing other array bitfields too
+*/
 void
 Type::make_one_bitfield(vector<const Type*> &random_fields, vector<CVQualifiers> &qualifiers,
 			vector<int> &fields_length)
@@ -694,6 +774,18 @@ Type::make_one_bitfield(vector<const Type*> &random_fields, vector<CVQualifiers>
 }
 
 // ---------------------------------------------------------------------
+/*
+creates a struct field with mix of bitfields and normal variables
+
+
+struct S0 {
+   int16_t  f0;				
+   volatile signed f2 : 11;		 }
+   uint32_t  f3 : 12;			  }-----------------for each field it randomly chooses it to be a bitfield or simple variable
+   uint64_t  f4;			 }
+};
+
+*/
 void
 Type::make_full_bitfields_struct_fields(size_t field_cnt, vector<const Type*> &random_fields,
 					vector<CVQualifiers> &qualifiers,
@@ -710,7 +802,15 @@ Type::make_full_bitfields_struct_fields(size_t field_cnt, vector<const Type*> &r
 		}
 	}
 }
-
+//if fields_length has -1, means no bitfields
+/*
+	1.choose a random type from AllTypes
+		random_fields.push_back()
+	2.choose random qualifier based on type
+		qualifiers.push_back()
+	3. no bitfields
+DOUBT:what does Filter do?
+*/
 void
 Type::make_one_struct_field(vector<const Type*> &random_fields,
 					vector<CVQualifiers> &qualifiers,
@@ -725,7 +825,7 @@ Type::make_one_struct_field(vector<const Type*> &random_fields,
 	CVQualifiers qual = CVQualifiers::random_qualifiers(type, FieldConstProb, FieldVolatileProb);
 	ERROR_RETURN();
 	qualifiers.push_back(qual);
-	fields_length.push_back(-1);
+	fields_length.push_back(-1);//no bitfields
 }
 
 void
@@ -788,7 +888,7 @@ Type::make_one_union_field(vector<const Type*> &fields, vector<CVQualifiers> &qf
 		lens.push_back(-1);
 	}
 }
-
+//DOUBT:difference between make_full_bitfields_struct_fields() ?the internal logic goes same though names are different
 void
 Type::make_normal_struct_fields(size_t field_cnt, vector<const Type*> &random_fields,
 					vector<CVQualifiers> &qualifiers,
@@ -859,7 +959,10 @@ Type::init_fields_enumerator(Enumerator<string> &enumerator,
 	}
 	enumerator.add_bool_elem_of_bool("packed", CGOptions::packed_struct());
 }
-
+/*
+returns a random length for a bitfield
+	i.e the size of bitfield
+*/
 int
 Type::get_bitfield_length(int length_flag)
 {
@@ -884,7 +987,11 @@ Type::get_bitfield_length(int length_flag)
 	}
 	return length;
 }
-
+/*
+	creates a bitfield,inside a struct
+	same as :make_one_bitfield ()
+	but takes help of Enumerator class
+*/
 bool
 Type::make_one_bitfield_by_enum(Enumerator<string> &enumerator,
 				vector<CVQualifiers> &all_bitfield_quals,
@@ -1015,6 +1122,7 @@ Type::make_all_struct_types_with_bitfields(Enumerator<string> &enumerator,
 
 /*
  * level control's the nested level of struct
+	copies all src_types into dest_types
  */
 void
 Type::copy_all_fields_types(vector<const Type*> &dest_types, vector<const Type*> &src_types)
@@ -1023,7 +1131,7 @@ Type::copy_all_fields_types(vector<const Type*> &dest_types, vector<const Type*>
 	for (i = src_types.begin(); i != src_types.end(); ++i)
 		dest_types.push_back(*i);
 }
-
+//copies AllTypes into accum_types
 void
 Type::reset_accum_types(vector<const Type*> &accum_types)
 {
@@ -1032,7 +1140,7 @@ Type::reset_accum_types(vector<const Type*> &accum_types)
 	for (i = AllTypes.begin(); i != AllTypes.end(); ++i)
 		accum_types.push_back(*i);
 }
-
+//didn't understand,why to do?
 void
 Type::delete_useless_structs(vector<const Type*> &all_types, vector<const Type*> &accum_types)
 {
@@ -1087,7 +1195,7 @@ Type::make_all_struct_union_types(void)
 			AllTypes.push_back(const_cast<Type*>(accum_types[i]));
 	}
 }
-
+//checks if fields has any aggregate fiels, if so RETURN TRUE
 bool
 Type::has_aggregate_field(const vector<const Type *> &fields)
 {
@@ -1099,6 +1207,7 @@ Type::has_aggregate_field(const vector<const Type *> &fields)
   return false;
 }
 
+//checks if fields has any longlong fiels, if so RETURN TRUE
 bool
 Type::has_longlong_field(const vector<const Type *> &fields)
 {
@@ -1167,11 +1276,15 @@ Type::make_random_union_type(void)
 	}
 	bool hasAssignOps = if_union_will_have_assign_ops();
 	bool hasImplicitNontrivialAssignOps = hasAssignOps || checkImplicitNontrivialAssignOps(fields);
+	//calling the constructor for struct/union type
 	Type* new_type = new Type(fields, false, false, qfers, lens, hasAssignOps, hasImplicitNontrivialAssignOps);
 	return new_type;
 }
 
 // ---------------------------------------------------------------------
+/*
+use: 	returns a random pointer type, from derived types 
+*/
 Type*
 Type::make_random_pointer_type(void)
 {
@@ -1203,6 +1316,9 @@ Type::make_random_pointer_type(void)
 }
 
 // ---------------------------------------------------------------------
+//note: no void type is present in AllTypes
+//creates a new type for each eSimpleType and pushes in AllTypes
+//void_type = class variable containg only void type
 void
 Type::GenerateSimpleTypes(void)
 {
@@ -1215,6 +1331,11 @@ Type::GenerateSimpleTypes(void)
 }
 
 // ---------------------------------------------------------------------
+//filles AllTypes first with simpleTypes except void
+//fills AllTypes with struct types if specified through command line
+//fills AllTypes with union types if specified through command line
+
+//AllType -----> simpletypes(except void), (may/maynot) Struct types, , (may/maynot) union types
 void
 GenerateAllTypes(void)
 {
@@ -1243,6 +1364,11 @@ GenerateAllTypes(void)
 }
 
 // ---------------------------------------------------------------------
+/*
+	randomly choose a type from AllTypes (it also chooses a random filter)
+	try maintaing a record in  Bookkeeper
+	and return that type
+*/
 const Type *
 Type::choose_random()
 {
@@ -1256,12 +1382,13 @@ Type::choose_random()
 	}
 	return rv_type;
 }
-
+//from AllTypes nonvoid types are returned
 const Type *
 Type::choose_random_nonvoid(void)
 {
 	DEPTH_GUARD_BY_DEPTH_RETURN(1, NULL);
 	NonVoidTypeFilter f;
+	//filter aids in filtering the results ,ex. NonVoidTypes will be filtered
 	rnd_upto(AllTypes.size(), &f);
 
 	ERROR_GUARD(NULL);
@@ -1269,7 +1396,7 @@ Type::choose_random_nonvoid(void)
 	assert(typ);
 	return typ;
 }
-
+//from AllTypes nonvoid and nonvolatile types are returned
 const Type *
 Type::choose_random_nonvoid_nonvolatile(void)
 {
@@ -1284,6 +1411,7 @@ Type::choose_random_nonvoid_nonvolatile(void)
 }
 
 // ---------------------------------------------------------------------
+//from AllTypes simple types, but not void is returned
 const Type *
 Type::choose_random_simple(void)
 {
@@ -1295,6 +1423,13 @@ Type::choose_random_simple(void)
 }
 
 // ---------------------------------------------------------------------
+/*
+	returns the count of number of dereferences to the variable
+	ex.int ***g_12;
+	returns 3
+	int g_3
+	returns 0
+*/
 int
 Type::get_indirect_level() const
 {
@@ -1308,6 +1443,23 @@ Type::get_indirect_level() const
 }
 
 // ---------------------------------------------------------------------
+/*
+in short: we find the maximum number of nesting of structs 
+
+
+	types other than struct have depth = 0
+	ex.int x;
+
+	struct s {
+		int x;		depth=0	}
+		struct p0 p;	depth=a	 }+--------------------for each field it goes recursively into the field and returns depth
+		struct p1 q;	depth=b	}
+	};
+	so from 0,a,b finds the maximum
+	returns (1+max from above)
+why 1?
+	parent struct itself
+*/
 int
 Type::get_struct_depth() const
 {
@@ -1321,11 +1473,20 @@ Type::get_struct_depth() const
 				max_depth = field_depth;
 			}
 		}
-		depth += max_depth;
+		depth += max_depth;//adding 1 (depth = 1)
 	}
 	return depth;
 }
+/*
+	struct s{
+		int x :10;
+		char  : 0;<---------------------this is unamed bitfield
+	};
+	it function checks for such bitfields of length = 0,if length=-1(it's a normal field)
 
+SEARCH WHERE?
+	bitfields_length_ = a vector holding the length of bitfields
+*/
 bool
 Type::is_unamed_padding(size_t index) const
 {
@@ -1336,14 +1497,19 @@ Type::is_unamed_padding(size_t index) const
 	assert(index < sz);
 	return (bitfields_length_[index] == 0);
 }
-
+//if length (bitfield )> 0 -> a bitfield
+//if length (bitfield )< 0 -> a normal field
+//if length (bitfield )= 0 -> a unnamed bitfield
 bool
 Type::is_bitfield(size_t index) const
 {
 	assert(index < bitfields_length_.size());
 	return (bitfields_length_[index] >= 0);
 }
-
+/*
+	searches for bitfields inside fields of struct,
+	if there is nesting it traverses recursively
+*/
 bool
 Type::has_bitfields() const
 {
@@ -1371,7 +1537,8 @@ Type::has_padding(void) const
 	}
 	return false;
 }
-
+//if not struct FAIL
+//checks are all fields bitfields(zero field bitfield works too)
 bool
 Type::is_full_bitfields_struct() const
 {
@@ -1383,7 +1550,9 @@ Type::is_full_bitfields_struct() const
 	}
 	return true;
 }
-
+/*
+	if the current type is signed return TRUE
+*/
 bool
 Type::is_signed(void) const
 {
@@ -1407,18 +1576,26 @@ Type::is_signed(void) const
 	}
 	return true;
 }
+/*
+	if not simple type:
+		NULL
 
+	if the current type is unsigned return this
+	else cnovert and return
+*/
 const Type*
 Type::to_unsigned(void) const
 {
 	if (eType == eSimple) {
 		switch (simple_type) {
+			//if unsigned thats ok to return as it is
 			case eUChar:
 			case eUInt:
 			case eUShort:
 			case eULong:
 			case eULongLong:
 				return this;
+			//if signed convert and return
 			case eChar: return &get_simple_type(eUChar);
 			case eInt: return &get_simple_type(eUInt);
 			case eShort: return &get_simple_type(eUShort);
@@ -1430,7 +1607,13 @@ Type::to_unsigned(void) const
 	}
 	return NULL;
 }
+/*
+int x;
+int *g_1 = &x
+int **p = &g_1;
 
+	we are traversing the dereferences and returning the type of x(i.e the end node of link)
+*/
 const Type*
 Type::get_base_type(void) const
 {
@@ -1440,7 +1623,17 @@ Type::get_base_type(void) const
 	}
 	return tmp;
 }
+/*
+	we are checking the current type with the type 't' passed as follows:
+	it helps in type casting
 
+
+CHAR can be converted to any type except void type
+SHORT can be converted to any type except void|char types
+INT can be converted to any type except void type|short|char types
+LONG can be converted to only long|longlong types
+DOUBLE|FLOAT can be converted to any type except void type
+*/
 bool
 Type::is_promotable(const Type* t) const
 {
@@ -1465,9 +1658,9 @@ Type::is_promotable(const Type* t) const
 }
 
 // ---------------------------------------------------------------------
-/* generally integer types can be converted to any other interger types
- * void / struct / union / array types are not. Pointers depend on the
- * type they point to. (unsigned int*) is convertable to (int*), etc
+/* generally integer types can be converted to any other integer types
+ * void / struct / union / array types are not convertable
+ * Pointers depend on the type they point to. (unsigned int*) is convertable to (int*), etc
  *************************************************************/
 bool
 Type::is_convertable(const Type* t) const
@@ -1505,6 +1698,7 @@ Type::is_convertable(const Type* t) const
 }
 
 // eLong & eInt, eULong & eUInt are equivalent
+//  (both the sizes match) AND (either both are signed or unsigned)
 bool
 Type::is_equivalent(const Type* t) const
 {
@@ -1517,7 +1711,7 @@ Type::is_equivalent(const Type* t) const
 
 	return false;
 }
-
+//only for pointers, casting possible and both types must be equal
 bool
 Type::needs_cast(const Type* t) const
 {
@@ -1541,6 +1735,7 @@ Type::match(const Type* t, enum eMatchType mt) const
 // ---------------------------------------------------------------------
 /* return true if this type can be derived from the given type
  * by dereferencing
+
  *************************************************************/
 bool
 Type::is_dereferenced_from(const Type* t) const
@@ -1571,7 +1766,22 @@ Type::is_derivable(const Type* t) const
     }
 	return is_convertable(t) || is_dereferenced_from(t) || (ptr_type==t);
 }
+/*
+	simpletype :	predefined values
 
+	Union:find the maximum size of field in union
+
+	struct:
+		if packed struct:
+			giveup
+		if bitfields in struct:
+			giveup
+		else
+			sum up the sizes of fields
+
+	pointer :
+			return fixed size
+*/
 unsigned long
 Type::SizeInBytes(void) const
 {
@@ -1595,7 +1805,7 @@ Type::SizeInBytes(void) const
 //		case eDouble:	return 8;
 		}
 		break;
-	case eUnion: {
+	case eUnion: {				//convert bitfields to bytes (ceil value)
         unsigned int max_size = 0;
         for (i=0; i<fields.size(); i++) {
 			unsigned int sz = 0;
@@ -1633,6 +1843,12 @@ Type::SizeInBytes(void) const
 
 // --------------------------------------------------------------
  /* Select a left hand type for assignments
+can be:
+	1. pointer=operand is simple and probability of PointerAsLType
+	2.struct/union = if pointer not selected and operand is simple
+	3.float= if given operand works for float and based on Probability of FloatAsLType
+	4.double = same as float
+	5.integer = if nothing works
   ************************************************************/
 const Type *
 Type::SelectLType(bool no_volatile, eAssignOps op)
@@ -1648,7 +1864,7 @@ Type::SelectLType(bool no_volatile, eAssignOps op)
 	}
 	ERROR_GUARD(NULL);
 
-	// choose a struct type as LHS type
+	// choose a struct/union type as LHS type
 	if (!type && (op == eSimpleAssign)) {
 		vector<Type *> ok_struct_types;
 		get_all_ok_struct_union_types(ok_struct_types, true, no_volatile, false, true);
@@ -1670,11 +1886,25 @@ Type::SelectLType(bool no_volatile, eAssignOps op)
 	}
 	return type;
 }
+/*
+simple type:
+	no subfields hence,just dump names,types
+aggregate:
+	struct S {
+		int f0;		<-----------------------save the data type and name of variable
+		struct s1 f1;	<-----------------------recursive go into this
+		int f2 :10 ;	<-----------------------skip this
+	};
 
+@end of function:
+	names[] = [f0	|f1.f0	|f1.f1	|f2	]
+	types[] = [int	|char	|int	|int	]
+*/
 void
 Type::get_int_subfield_names(string prefix, vector<string>& names,
 		vector<const Type *>& types, const vector<int>& excluded_fields) const
 {
+
 	if (eType == eSimple) {
 		names.push_back(prefix);
 		types.push_back(this);
@@ -1690,7 +1920,7 @@ Type::get_int_subfield_names(string prefix, vector<string>& names,
 				continue;
 			}
 			ostringstream oss;
-			oss << prefix << ".f" << j++;
+			oss << prefix << ".f" << j++;;
 			vector<int> empty;
 			fields[i]->get_int_subfield_names(oss.str(), names, types, empty);
 		}
@@ -1732,7 +1962,7 @@ Type::Output(std::ostream &out) const
 	case eStruct:    out << "struct S" << sid; break;
 	}
 }
-
+//output : sizeof(int) | sizeof(Struct S0 s)
 void
 Type::get_type_sizeof_string(std::string &s) const
 {
@@ -1846,6 +2076,13 @@ void OutputUnionAssignOps(Type* type, std::ostream &out, bool vol)
 
 // ---------------------------------------------------------------------
 /* print struct definition (fields etc)
+1. prints any dependent struct/unions
+	struct S0 {
+					<-------+
+	};					|
+	ex struct s1{				|
+		struct S0 x;--------------------+s0 is DEPENDENT STRUCT FOR S1
+	};
  *************************************************************/
 void OutputStructUnion(Type* type, std::ostream &out)
 {
@@ -1869,7 +2106,13 @@ void OutputStructUnion(Type* type, std::ostream &out)
             out << "#pragma pack(1)";
             really_outputln(out);
         }
+//output:struct S0
         type->Output(out);
+/*output : 	{
+			..internal fields printed
+			..
+		}
+*/
         out << " {";
 		really_outputln(out);
 
@@ -1947,6 +2190,9 @@ OutputStructUnionDeclarations(std::ostream &out)
 
 /*
  * return the printf directive string for the type. for example, int -> "%d"
+	simple : %lld|%llu|%d|%u
+	pointer:`?
+	struct/union : {csv for respective types of fields}
  */
 std::string
 Type::printf_directive(void) const
@@ -1979,7 +2225,7 @@ Type::printf_directive(void) const
 
 /*cleares following data structures holding types
    AllTypes = List of all types used in the program
- * derived_types = ? (can't figure out )(may be same as above)
+ * derived_types = containing pointer data types
  */
 void
 Type::doFinalization(void)
