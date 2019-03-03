@@ -52,7 +52,16 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- *
+ *1.loop until you get a perfect variable for the job:
+	prefect variable: 
+			1.types passed must match
+			plus some more conditions:I didn't get now SKIP NOW.
+  2.validate using FactPointTo
+  3. create expression from that variable
+  3.update statistics
+
+return expression
+
  */
 ExpressionVariable *
 ExpressionVariable::make_random(CGContext &cg_context, const Type* type, const CVQualifiers* qfer, bool as_param, bool as_return)
@@ -154,7 +163,7 @@ ExpressionVariable::ExpressionVariable(const ExpressionVariable &expr)
 {
 	// Nothing to do
 }
-
+//create a copy and return it
 Expression *
 ExpressionVariable::clone() const
 {
@@ -172,7 +181,7 @@ ExpressionVariable::~ExpressionVariable(void)
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- *
+ *return the type of ExpressionVariable, stored in 'type' variable in class
  */
 const Type &
 ExpressionVariable::get_type(void) const
@@ -181,7 +190,7 @@ ExpressionVariable::get_type(void) const
 }
 
 /*
- *
+ *SKIP NOW?
  */
 int
 ExpressionVariable::get_indirect_level(void) const
@@ -190,7 +199,8 @@ ExpressionVariable::get_indirect_level(void) const
 }
 
 /*
- *
+ *returns the qualifier for the given ExpressionVariable
+	ex volatile and consts
  */
 CVQualifiers
 ExpressionVariable::get_qualifiers(void) const
@@ -200,7 +210,19 @@ ExpressionVariable::get_qualifiers(void) const
 }
 
 /*
- *
+ *	This is almost used anywhere where a variable is used
+	can be in RHS as well as in LHS
+output:
+	ex.when you get ( *g_2 )
+	2.(& g_2)
+	3.g_2 - only name used
+
+use:
+	A.in global,local variable assignments
+	B.in loop variables
+	..
+	..
+
  */
 void
 ExpressionVariable::Output(std::ostream &out) const
@@ -238,7 +260,7 @@ ExpressionVariable::get_dereferenced_ptrs(void) const
 	}
 	return refs;
 }
-
+//if expressionVariable is a pointer push it
 void
 ExpressionVariable::get_referenced_ptrs(std::vector<const Variable*>& ptrs) const
 {
@@ -274,7 +296,8 @@ ExpressionVariable::visit_facts(vector<const Fact*>& inputs, CGContext& cg_conte
 }
 
 /*
- *
+ *	passes the variable to check compatibility
+	if varible compatible, expressions are compatible
  */
 bool
 ExpressionVariable::compatible(const Expression *exp) const
@@ -288,7 +311,15 @@ ExpressionVariable::compatible(const Expression *exp) const
 }
 
 /*
- *
+ *   if current object variable is in : this
+        passed variable  = v
+
+variables are compatible if :
+        1.none of them is volatile
+        2.if both at same address
+else 
+        false
+
  */
 bool
 ExpressionVariable::compatible(const Variable *v) const

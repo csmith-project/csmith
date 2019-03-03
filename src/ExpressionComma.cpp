@@ -45,7 +45,7 @@
 /*
  *
  */
-
+// (void*)0 is set for expression
 // Needs cast only if it is NULL
 void
 cast_if_needed(Expression* exp)
@@ -55,7 +55,11 @@ cast_if_needed(Expression* exp)
 		exp->cast_type = &exp_type;
 	}
 }
-
+/*
+	create left expression
+	create right expression
+	bind both together to create ExpressionComma
+*/
 ExpressionComma*
 ExpressionComma::make_random(CGContext &cg_context, const Type* type, const CVQualifiers* qfer)
 {
@@ -84,13 +88,13 @@ ExpressionComma::~ExpressionComma(void)
 	delete &lhs;
 	delete &rhs;
 }
-
+//copy of comma expression
 Expression*
 ExpressionComma::clone(void) const
 {
 	return new ExpressionComma(*lhs.clone(), *rhs.clone());
 }
-
+//check visit facts for both lhs,rhs
 bool
 ExpressionComma::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const
 {
@@ -99,12 +103,30 @@ ExpressionComma::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context)
 	}
 	return rhs.visit_facts(inputs, cg_context);
 }
+/*
+ptrs1 = pointers from expr1
++---------------+				
+|   |	|   |	|				
++---------------+				
 
+ptrs2 =  pointers from expr2
++---------------+				
+|   |	|   |	|				
++---------------+				
+
+ptrs1 = pointers from ptr2 appended in ptr1
++---------------+---------------+
+|   |	|   |	|   |	|   |	|
++---------------+---------------+
+	ptr1    |       ptr2
+
+*/
 vector<const ExpressionVariable*>
 ExpressionComma::get_dereferenced_ptrs(void) const
 {
 	vector<const ExpressionVariable*> ptrs1 = lhs.get_dereferenced_ptrs();
 	vector<const ExpressionVariable*> ptrs2 = rhs.get_dereferenced_ptrs();
+	//point iterator head to ptrs1, insert from ptrs2.begin() to ptrs2.end()
 	ptrs1.insert(ptrs1.end(), ptrs2.begin(), ptrs2.end());
 	return ptrs1;
 }
@@ -116,7 +138,8 @@ ExpressionComma::get_eval_to_subexps(vector<const Expression*>& subs) const
 	get_rhs()->get_eval_to_subexps(exps);
 	subs.insert(subs.end(), exps.begin(), exps.end());
 }
-
+//(expr1 , expr2)
+//expr1 = can't be a constant
 void
 ExpressionComma::Output(std::ostream &out) const
 {

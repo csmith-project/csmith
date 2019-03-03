@@ -42,11 +42,16 @@
 #include "Variable.h"
 #include "StringUtils.h"
 #include "Block.h"
-
+/*
+ExpressionAssign is of form:
+	expr1 = expr2
+*/
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- *
+ *create a StatementAssign first
+ *create ExpressionAssign from StatementAssign object
+update the facts as well
  */
 Expression *
 ExpressionAssign::make_random(CGContext &cg_context, const Type* type, const CVQualifiers* qfer)
@@ -85,7 +90,7 @@ ExpressionAssign::clone() const
 {
 	return new ExpressionAssign(assign);
 }
-
+//return type of left side expression
 CVQualifiers
 ExpressionAssign::get_qualifiers(void) const
 {
@@ -93,7 +98,7 @@ ExpressionAssign::get_qualifiers(void) const
 }
 
 /*
- * return if a variable is referenced in this expression
+ * return if a variable is referenced in this expression(either in lhs|in rhs expression)
  */
 bool
 ExpressionAssign::use_var(const Variable* v) const
@@ -103,19 +108,19 @@ ExpressionAssign::use_var(const Variable* v) const
 	}
 	return false;
 }
-
+//find in 'expr' and not in 'rhs'
 bool
 ExpressionAssign::equals(int num) const
 {
 	return assign->is_simple_assign() && assign->get_expr()->equals(num);
 }
-
+//find in 'expr' and not in 'rhs'
 bool
 ExpressionAssign::is_0_or_1(void) const
 {
 	return assign->is_simple_assign() && assign->get_expr()->is_0_or_1();
 }
-
+//collect all the expressions in lhs
 void
 ExpressionAssign::get_eval_to_subexps(vector<const Expression*>& subs) const
 {

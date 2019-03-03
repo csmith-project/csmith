@@ -63,7 +63,21 @@
 #include "DepthSpec.h"
 
 int eid = 0;
-
+/*
+	distribution table:
+	exprTable_:
+	________________
+	|key	|value	|
+	|_______|_______|
+	|eFunc	|70	|
+	|_______|_______|
+	|eVar	|20	|
+	|_______|_______|
+	|eConst	|10	|max_prob = 100
+	|_______|_______|
+	|	|	|
+	|_______|_______|
+*/
 DistributionTable Expression::exprTable_;
 DistributionTable Expression::paramTable_;
 
@@ -80,7 +94,21 @@ Expression::InitExprProbabilityTable()
 		exprTable_.add_entry((int)eCommaExpr, 10);
 	}
 }
-
+/*
+	distribution table:may be the probability of expression to be a prameter
+	paramTable_:
+	________________
+	|key	|value	|
+	|_______|_______|
+	|eFunc	|40	|
+	|_______|_______|
+	|eVar	|40	|
+	|_______|_______|
+	|eConst	|0	|max_prob = 100
+	|_______|_______|
+	|	|	|
+	|_______|_______|
+*/
 void
 Expression::InitParamProbabilityTable()
 {
@@ -95,7 +123,7 @@ Expression::InitParamProbabilityTable()
 		paramTable_.add_entry((int)eCommaExpr, 10);
 	}
 }
-
+//fills both tables given above
 void
 Expression::InitProbabilityTables()
 {
@@ -120,7 +148,12 @@ ExpressionTypeProbability(const VectorFilter *filter)
 	ERROR_GUARD(MAX_TERM_TYPES);
 	return (eTermType)(filter->lookup(i));
 }
-
+/*
+	get_called_funcs is a virtual function: hence it's implementation is dependent on the subclasses
+	calling this dynamically calls the subclasses implementation
+use:
+	finds the functions in the given expression and returns count
+*/
 unsigned int
 Expression::func_count(void) const
 {
@@ -128,7 +161,10 @@ Expression::func_count(void) const
 	get_called_funcs(funcs);
 	return funcs.size();
 }
-
+/*
+	again, the output is virtual in Expression,hence output is called of respective subclass
+	ex.
+*/
 std::string
 Expression::to_string(void) const
 {
@@ -136,7 +172,7 @@ Expression::to_string(void) const
 	Output(oss);
 	return oss.str();
 }
-
+//why?
 std::vector<const ExpressionVariable*>
 Expression::get_dereferenced_ptrs(void) const
 {

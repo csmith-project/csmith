@@ -56,9 +56,9 @@ public:
 	virtual CVQualifiers get_qualifiers(void) const;
 
 	virtual void get_eval_to_subexps(vector<const Expression*>& subs) const;
-
+	//get type of lhs
 	virtual const Type &get_type(void) const { return assign->get_lhs()->get_type();}
-
+	//get called func from StatementAssign
 	virtual void get_called_funcs(std::vector<const FunctionInvocationUser*>& funcs) const { assign->get_called_funcs(funcs);}
 
 	virtual bool visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const;
@@ -72,6 +72,7 @@ public:
 
 	virtual std::vector<const ExpressionVariable*> get_dereferenced_ptrs(void) const { return assign->get_dereferenced_ptrs();}
 	virtual void get_referenced_ptrs(std::vector<const Variable*>& ptrs) const { assign->get_referenced_ptrs(ptrs);}
+	//add complexities from lhs and rhs
 	virtual unsigned int get_complexity(void) const { return get_lhs()->get_complexity() + get_rhs()->get_complexity();}
 
 	const Expression* get_rhs(void) const { return assign->get_expr();}

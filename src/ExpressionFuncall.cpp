@@ -50,7 +50,11 @@
 #include "Reducer.h"
 #include "Block.h"
 #include "random.h"
-
+/*
+	this class takes help of FunctionInvocation
+member :
+	FunctionInvocation* invoke;
+*/
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -66,7 +70,9 @@ ExpressionFunctionProbability(const CGContext &/*cg_context*/)
 }
 
 /*
- *
+ *create an invocation object first:
+		Unary,Binary,User
+	then creates an Expression
  */
 Expression *
 ExpressionFuncall::make_random(CGContext &cg_context, const Type* type, const CVQualifiers* qfer)
@@ -101,7 +107,7 @@ ExpressionFuncall::make_random(CGContext &cg_context, const Type* type, const CV
 }
 
 /*
- *
+ *clone functionInvocation first then the Expression
  */
 Expression *
 ExpressionFuncall::clone() const
@@ -130,20 +136,33 @@ ExpressionFuncall::~ExpressionFuncall(void)
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- *
+ *invoke can be of :
+		1.InvocationUnary
+		2.InvocationBinary
+		3.InvocationUser
+returns the type of the functions
  */
 const Type &
 ExpressionFuncall::get_type(void) const
 {
 	return invoke.get_type();
 }
-
+//dumps the functions used into 'funcs'
 void
 ExpressionFuncall::get_called_funcs(std::vector<const FunctionInvocationUser*>& funcs) const
 {
 	invoke.get_called_funcs(funcs);
 }
+/*
+	invoke type can be:
+	g_2=  func_25 (g_1, func_3(l_2, func_5()) , l_3);
+	complexity: func_5 = 1 (as function itself is 1)
+		    func_3 = 2 (1 + parameter complexity)
+		   func_25 = 1+ parameter complexity
+			   = 1+ 2 = 3
 
+note : function has to be a user function for counting as 1
+*/
 unsigned int
 ExpressionFuncall::get_complexity(void) const
 {
@@ -163,6 +182,30 @@ ExpressionFuncall::visit_facts(vector<const Fact*>& inputs, CGContext& cg_contex
 {
 	return invoke.visit_facts(inputs, cg_context);
 }
+/*
+		func_2 (expr1 , expr2 , .......)
+			or
+		x != expr1
+			or
+		~expr1
+consider func_2()
+refs: NULL for now
+
+	after evaluating expr1:
+refs : added ppointers from expr1
++---------------+
+|   |   |   |   |
++---------------+
+
+	after evaluating expr2:
+refs : added ppointers from expr2
++---------------+---------------+
+|   |   |   |   |   |   |   |   |
++---------------+---------------+
+    pointers    |       pointers from expr2
+from expr1
+
+*/
 
 std::vector<const ExpressionVariable*>
 ExpressionFuncall::get_dereferenced_ptrs(void) const
@@ -212,6 +255,8 @@ ExpressionFuncall::get_qualifiers(void) const
 
 /*
  * return if a variable is referenced in this expression
+	ex. func_2 (expr1, expr2, .....)
+		check recursively for variable in expressions
  */
 bool
 ExpressionFuncall::use_var(const Variable* v) const
@@ -239,8 +284,13 @@ bool ExpressionFuncall::compatible(const Expression * /*exp*/) const
 	return false;
 }
 
-/*
- *
+/*outputs of :
+ *	FunctionInvocationUnary
+		or
+ *	FunctionInvocationBinary
+		or
+ *	FunctionInvocationUser
+	based on what invoke contains
  */
 void
 ExpressionFuncall::Output(std::ostream &out) const

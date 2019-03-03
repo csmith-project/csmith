@@ -1119,7 +1119,16 @@ OutputVariableDeclList(const vector<Variable*> &var, std::ostream &out, std::str
 		outputln(out);
 	}
 }
+/*
+	if current object variable = this
+	passed variable  = v
 
+variables are compatible if :
+	1.none of them is volatile
+	2.if both at same address
+else 
+	false
+*/
 bool
 Variable::compatible(const Variable *v) const
 {

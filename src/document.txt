@@ -78,3 +78,26 @@ PART D: main generation files
 	Probabilities
 	DistributionTable
    above all take help of ProbabilityTable.h file which has some basic data structures created
+
+7.			Expression
+			/ |    |\
+		       /  |    | \	 
+		      /	  |    |  \ 
+		     /    |    |   \ 
+		    /     |    |    \ 
+		   /      |    |     \
+ExpressionAssign  /       |    |      \------>ExpressionVariable
+			  |    |
+			  |    |							Following is the inheritance 
+			  |    |
+ExpressionComma <---------+    +--------------->ExpressionFunCall
+	
+-an Expression can be
+	1.constant
+	2.variable
+	3.function
+	4.assignment
+	5.commaexpr
+	6.lhs
+
+- The expression probabilities are initialized in Expression class but not in Probabilities class
