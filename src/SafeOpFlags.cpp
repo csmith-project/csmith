@@ -48,11 +48,14 @@ using namespace std;
 
 vector<string> SafeOpFlags::wrapper_names;
 
+//Default Constructor
 SafeOpFlags::SafeOpFlags()
 {
 	//Nothing to do
 }
 
+//Constructor with 4 parameters
+// op1_, op2_, is_func_ and op_size_ are class variables
 SafeOpFlags::SafeOpFlags(bool o1, bool o2, bool is_func, SafeOpSize osize)
 	: op1_(o1),
 	  op2_(o2),
@@ -77,6 +80,11 @@ SafeOpFlags::make_dummy_flags()
 	return new SafeOpFlags(false, false, false, sInt8);
 }
 
+/*
+	Input - based on size of SafeOpSize and whether a signed/unsigned value
+	Output - returns enum value for that type
+
+*/
 eSimpleType
 SafeOpFlags::flags_to_type(bool sign, enum SafeOpSize size)
 {
@@ -103,6 +111,14 @@ SafeOpFlags::flags_to_type(bool sign, enum SafeOpSize size)
 	return eInt;
 }
 
+/*
+safe_add_int8_t_u_u (lhs , rhs)
+returns type of lhs expressioon
+	return data type for enum.
+	It works in 2 steps -
+		1. flags_to_type return enum for that type
+		2. get_simple_type return data type
+*/
 const Type*
 SafeOpFlags::get_lhs_type(void)
 {
@@ -118,7 +134,9 @@ SafeOpFlags::get_rhs_type(void)
 	const Type& t = Type::get_simple_type(st);
 	return &t;
 }
-
+//if operand works for float
+//if any one expression (expr1 or expr2 ) is a float
+//if return value is float
 bool
 SafeOpFlags::return_float_type(const Type *rv_type, const Type *op1_type, const Type *op2_type,
 				eBinaryOps bop)
@@ -245,6 +263,15 @@ SafeOpFlags::clone() const
 	return new SafeOpFlags(*this);
 }
 
+/*
+	Outputs data types defined in csmith.h
+	input : based on op_size_
+	output: int8_t
+		int16_t
+		int32_t
+		..
+		..
+*/
 void
 SafeOpFlags::OutputSize(std::ostream &out) const
 {
@@ -273,6 +300,7 @@ SafeOpFlags::OutputSize(std::ostream &out) const
 	}
 }
 
+// outputs "func_" if it is function, else "macro_"
 void
 SafeOpFlags::OutputFuncOrMacro(std::ostream &out) const
 {
@@ -280,6 +308,8 @@ SafeOpFlags::OutputFuncOrMacro(std::ostream &out) const
 		: (out << "macro_");
 }
 
+//outputs "_s" if  - signed
+//"_u" if unsigned 
 void
 SafeOpFlags::OutputSign(std::ostream &out, bool is_signed) const
 {
@@ -287,12 +317,14 @@ SafeOpFlags::OutputSign(std::ostream &out, bool is_signed) const
 		: (out << "_u");
 }
 
+//internally calls OutputSign
 void
 SafeOpFlags::OutputOp1(std::ostream &out) const
 {
 	OutputSign(out, op1_);
 }
 
+//internally calls OutputSign
 void
 SafeOpFlags::OutputOp2(std::ostream &out) const
 {
@@ -304,6 +336,12 @@ SafeOpFlags::~SafeOpFlags()
 	// Nothing to do
 }
 
+/*
+	Input - binary operand
+	Output - binary float func name
+		e.g. safe_add_func_float_f_f
+			or derivatives
+*/
 std::string
 SafeOpFlags::safe_float_func_string(enum eBinaryOps op) const
 {
@@ -319,8 +357,19 @@ SafeOpFlags::safe_float_func_string(enum eBinaryOps op) const
 	return s;
 
 }
-
+//changehere
+// safe_add_func_int8_t_u_u
 /* find the safe math function/macro name */
+/*
+	Input - enum value
+        Use - returns name of binary function
+                e.g. safe_lshift_func_int8_t_s_s
+
+	Note - to_string function name is same for unary and binary
+		It is identified based on parameter - binary or unary
+		(FuncInvocationUnary and FuncInvocationBinary are child classes of FuncInvocation)
+		Whichever object is created, calls its respective function
+*/
 std::string
 SafeOpFlags::to_string(enum eBinaryOps op) const
 {
@@ -347,6 +396,15 @@ SafeOpFlags::to_string(enum eBinaryOps op) const
 }
 
 /* find the safe math function/macro name */
+/*
+	enum -  unary = 0
+		binary = 1
+		assign = 2
+
+	Input - enum value
+	Use - returns name of unary function
+		e.g. safe_unary_minus_func_int8_t_s
+*/
 std::string
 SafeOpFlags::to_string(enum eUnaryOps op) const
 {
@@ -365,6 +423,24 @@ SafeOpFlags::to_string(enum eUnaryOps op) const
 }
 
 /* assign id to safe math function */
+
+/*
+	Input - String
+
+	Use - Searches input string in vector wrapper_names
+
+	Return - returns index + 1 from wrapper_names if string matches
+
+	DS used - wrapper_names = vector which store safe* function names
+
+			|
+			|
+			|
+		       \ /
+	---------------------------------------------------------------------------------
+	| safe_rshift_func_int16_t_s_s | safe_unary_minus_func_int8_t_s	|	|	|
+	---------------------------------------------------------------------------------
+*/
 int
 SafeOpFlags::to_id(std::string fname)
 {
