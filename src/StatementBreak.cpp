@@ -104,7 +104,7 @@ StatementBreak::StatementBreak(const StatementBreak &sc)
 }
 
 /*
- *
+ 	test is constant expression
  */
 StatementBreak::~StatementBreak(void)
 {
@@ -121,7 +121,9 @@ StatementBreak::must_jump(void) const
 }
 
 /*
- *
+ 	Use - outputs "break" statement
+		if()
+			break;
  */
 void
 StatementBreak::Output(std::ostream &out, FactMgr* /*fm*/, int indent) const

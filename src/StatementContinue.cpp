@@ -121,7 +121,11 @@ StatementContinue::must_jump(void) const
 }
 
 /*
- *
+	Use - outputs continue statement
+		if()
+			continue;
+
+	Note - continue statement can never be 1st statement
  */
 void
 StatementContinue::Output(std::ostream &out, FactMgr* /*fm*/, int indent) const

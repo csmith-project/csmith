@@ -149,7 +149,7 @@ public:
 	std::map<const Statement*, Effect> map_accum_effect;
 	std::map<const Statement*, bool> map_visited;
 
-	std::vector<const CFGEdge*> cfg_edges;
+	std::vector<const CFGEdge*> cfg_edges; //stores block, goto, continue, break statement
 	FactVec global_facts;
 
 	const Function* func;

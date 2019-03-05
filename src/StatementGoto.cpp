@@ -263,7 +263,16 @@ StatementGoto::~StatementGoto(void)
 }
 
 /*
- *
+	Input - out -> object of ostream for printing
+		indent -> indentation
+
+	Output - 1. if cmd line is set for computed goto
+			if()
+				goto *target[];
+
+		2. else print
+			if()
+				goto lbl_234;
  */
 void
 StatementGoto::Output(std::ostream &out, FactMgr* /*fm*/, int indent) const
@@ -440,7 +449,6 @@ StatementGoto::doFinalization(void)
 {
 	stm_labels.clear();
 }
-
 ///////////////////////////////////////////////////////////////////////////////
 
 // Local Variables:
