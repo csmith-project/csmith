@@ -73,7 +73,24 @@ static vector<bool> needcomma;  // Flag to track output of commas
 
 static vector<const FunctionInvocationUser*> invocations;   // list of function calls
 static vector<const Fact*> return_facts;              // list of return facts
+/*
+invocation[]:
+	+---------------+
+	|  |  |  |  |   |
+	+---------------+
+		^
+		|i=2
+return_facts[]:
 
+		|i=2
+		v
+	+---------------+
+	|  |  |  |  |   |
+	+---------------+
+searches 'fiu' in invocation
+return return_facts[found index]
+
+*/
 const Fact*
 get_return_fact_for_invocation(const FunctionInvocationUser* fiu, const Variable* var, enum eFactCategory cat)
 {
@@ -88,7 +105,12 @@ get_return_fact_for_invocation(const FunctionInvocationUser* fiu, const Variable
 	}
 	return 0;
 }
-
+/*
+	if no invocation matches the  'fiu'
+		add passed invocation parameter and fact parameter into 'invocations' and 'return_facts'
+	else if invocation matches
+		add related fact
+*/
 void
 add_return_fact_for_invocation(const FunctionInvocationUser* fiu, const Fact* f)
 {
@@ -181,6 +203,14 @@ FunctionInvocationUser::clone() const
 
 /* build parameters first, then the function body. this way the generation order is in sync
    with execution order, and the dataflow analyzer doesn't need to visit the function twice
+
+1.generate a function signature(declaration)
+2.for each parameters of declaration :
+	create an expression of same type and qualifier
+	(this expression is passed as parameter when calling function)
+3.build user invocation
+4.now create body
+5.update the new_globals(holding the globals created by this function)
  */
 FunctionInvocationUser*
 FunctionInvocationUser::build_invocation_and_function(CGContext &cg_context, const Type* type, const CVQualifiers* qfer)
@@ -188,6 +218,8 @@ FunctionInvocationUser::build_invocation_and_function(CGContext &cg_context, con
 	assert(type);		// return type must be provided
 	FactMgr* caller_fm = get_fact_mgr(&cg_context);
 	Effect running_eff_context(cg_context.get_effect_context());
+	//creates functions except func_1(),with parameters,return value, and name created
+	//equivalent to function declaration,no body created
 	Function* func = Function::make_random_signature(cg_context, type, qfer);
 
 	if (func->name == "func_51")
@@ -253,6 +285,8 @@ FunctionInvocationUser::build_invocation_and_function(CGContext &cg_context, con
 
 /*
  * Internal helper function.
+DOUBT:can't find the param_value used anywhere after expressions are pushed into it
+why to use?SKIP NOW
  */
 bool
 FunctionInvocationUser::build_invocation(Function *target, CGContext &cg_context)
@@ -386,8 +420,8 @@ FunctionInvocationUser::save_return_fact(const vector<const Fact*>& facts) const
 
 /*
   Release all dynamic memory
- //  return_facts = list of return facts
-//   invocations = list(vector) of function calls
+   return_facts = list of return facts
+   invocations = list(vector) of function calls
  */
 void
 FunctionInvocationUser::doFinalization(void)
@@ -399,7 +433,7 @@ FunctionInvocationUser::doFinalization(void)
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- *
+ *get the return type of function
  */
 const Type &
 FunctionInvocationUser::get_type(void) const
@@ -410,7 +444,7 @@ FunctionInvocationUser::get_type(void) const
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- *
+ *outputs the actual parameter of function
  */
 static int
 OutputActualParamExpression(const Expression *expr, std::ostream *pOut)
@@ -426,7 +460,7 @@ OutputActualParamExpression(const Expression *expr, std::ostream *pOut)
 }
 
 /*
- *
+ *output elements in 'var' as functions actual parameters
  */
 static void
 OutputExpressionVector(const vector<const Expression*> &var, std::ostream &out)
@@ -438,7 +472,7 @@ OutputExpressionVector(const vector<const Expression*> &var, std::ostream &out)
 }
 
 /*
- *
+ *output : func_2 (para1, para2, ......);
  */
 void
 FunctionInvocationUser::Output(std::ostream &out) const
@@ -449,7 +483,6 @@ FunctionInvocationUser::Output(std::ostream &out) const
 }
 
 /*
- *
  */
 void
 FunctionInvocationUser::indented_output(std::ostream &out, int indent) const
@@ -471,6 +504,7 @@ FunctionInvocationUser::indented_output(std::ostream &out, int indent) const
 	}
 	output_close_encloser(")", out, indent);
 }
+
 ///////////////////////////////////////////////////////////////////////////////
 
 // Local Variables:

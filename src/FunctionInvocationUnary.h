@@ -69,9 +69,9 @@ public:
 	virtual bool is_0_or_1(void) const { return eFunc == eNot;}
 
 private:
-	eUnaryOps eFunc;
+	eUnaryOps eFunc;//contains the unary operator
 
-	std::string tmp_var;
+	std::string tmp_var; //creates temp var 't_' for SafeOpFlag=true
 
 private:
 	FunctionInvocationUnary(eUnaryOps op, SafeOpFlags *flags, std::string &name);

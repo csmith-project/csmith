@@ -87,8 +87,8 @@ public:
 	FunctionInvocationUser(Function *target, bool isBackLink, const SafeOpFlags *flags);
 
 private:
-	Function *func;
-	bool isBackLink;
+	Function *func;//holds the user defined function to invoke
+	bool isBackLink;//can't figure out why used?
 
 private:
 	explicit FunctionInvocationUser(const FunctionInvocationUser &fiu);

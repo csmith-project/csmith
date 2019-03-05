@@ -139,8 +139,10 @@ FunctionInvocation::make_random(Function *target,
 	return fi;
 }
 
-/*
- *
+/*1.choose random operators,from set of all unary operators
+ *2. create unary function invocation
+  3.create operand (only one in case of unary), which is an expression
+	push that operand into param_value
  */
 FunctionInvocation *
 FunctionInvocation::make_random_unary(CGContext &cg_context, const Type* type)
@@ -169,6 +171,10 @@ FunctionInvocation::make_random_unary(CGContext &cg_context, const Type* type)
 
 /*
  *
+ *1.choose random operators,from set of all binary operators
+ *2.create binary function invocation
+  3.create operands (two in case of binary), which are expression
+	push them into param_value
  */
 FunctionInvocation *
 FunctionInvocation::make_random_binary(CGContext &cg_context, const Type* type)
@@ -281,7 +287,9 @@ FunctionInvocation::make_random_binary(CGContext &cg_context, const Type* type)
 }
 
 /*
- *
+ *I think this may be output:
+	expr = exp1 op (*g_552) == (*g_552)) != (*g_2107)) expr2 ........;
+pointer comparison for binary operand
  */
 FunctionInvocation *
 FunctionInvocation::make_random_binary_ptr_comparison(CGContext &cg_context)
@@ -349,14 +357,17 @@ FunctionInvocation::make_random_binary_ptr_comparison(CGContext &cg_context)
 }
 
 /*
- *
+ *adds expression into the 'param_value'
  */
 void
 FunctionInvocation::add_operand(const Expression* e)
 {
     param_value.push_back(e);
 }
-
+/*
+	1.adds called funcs from each expressions at end 
+	2.if current invoke is 'FuncInvocationUser' add the function itself
+*/
 void
 FunctionInvocation::get_called_funcs(std::vector<const FunctionInvocationUser*>& funcs) const
 {
@@ -402,7 +413,9 @@ FunctionInvocation::has_uncertain_call_recursive(void) const
 	}
 	return has_uncertain_call();
 }
-
+//simple params : the expressions for function Invocaction should not be a function
+//ex exp1 + exp2
+//if no one is a function,its a simple param
 bool
 FunctionInvocation::has_simple_params(void) const
 {
@@ -486,7 +499,12 @@ FunctionInvocation::visit_unordered_params(vector<const Fact*>& inputs, CGContex
 	inputs = tmp;
 	return true;
 }
-
+/*
+	if FunctionInvocationUser: 
+		get qualifiers of return values
+	if invocation= unary/binary
+		they yeild non-const and non-volatile int
+*/
 CVQualifiers
 FunctionInvocation::get_qualifiers(void) const
 {
@@ -605,7 +623,7 @@ FunctionInvocation::FunctionInvocation(const FunctionInvocation &fi)
 }
 
 /*
- *
+ *frees the memory of 'param_value'
  */
 FunctionInvocation::~FunctionInvocation(void)
 {
@@ -633,6 +651,7 @@ FunctionInvocation::IsOrderedStandardFunc(eBinaryOps eFunc)
 
 /*
  * Return true if `op' is suitable as a floating point binary operator
+	operands: +,-,*,/,>,<,>=,<=,=,!= are suitable
  */
 bool
 FunctionInvocation::BinaryOpWorksForFloat(eBinaryOps op)
@@ -653,7 +672,7 @@ FunctionInvocation::BinaryOpWorksForFloat(eBinaryOps op)
 			return false;
 	}
 }
-
+//operands: +,-,! are suitable
 bool
 FunctionInvocation::UnaryOpWorksForFloat(eUnaryOps op)
 {

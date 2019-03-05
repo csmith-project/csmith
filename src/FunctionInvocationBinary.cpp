@@ -119,7 +119,10 @@ FunctionInvocationBinary::FunctionInvocationBinary(const FunctionInvocationBinar
 {
 	// Nothing to do
 }
-
+/*
+add_operand = param_value.add(expr)
+adds the expressions in param_value
+*/
 FunctionInvocationBinary::FunctionInvocationBinary(eBinaryOps op , const Expression* exp1, const Expression* exp2, const SafeOpFlags *flags)
 	: FunctionInvocation(eBinaryPrim, flags),
 	  eFunc(op)
@@ -146,7 +149,12 @@ FunctionInvocationBinary::clone() const
 	return new FunctionInvocationBinary(*this);
 }
 ///////////////////////////////////////////////////////////////////////////////
-
+/*
+	if operand is:
+	+,-,*,/,%,<<,>>		IT'S SAFE OPERAND
+	else
+				NOT SAFE
+*/
 bool
 FunctionInvocationBinary::safe_ops(eBinaryOps op)
 {
@@ -164,7 +172,38 @@ FunctionInvocationBinary::safe_ops(eBinaryOps op)
 	}
 }
 
-/* do some constant folding */
+/* do some constant folding
+checks input num with expr1 and expr2 based on operand
+
+param_value[0] = expr1
+param_value[1] = expr2
+
+EXP = EXPR1 OP EXPR2
+if num=0{
+	case 1:
+		expr1 = 0
+			operand = *,/,%,<< ,>>,&&,&
+		exp = 0 ( 0 * any value is 0)
+		return TRUE
+	case 2:
+		expr2 = 0 (any value && 0 is 0)
+			operand = *,&&,&
+		exp = 0
+		return TRUE
+	case 3:
+		expr2 = expr1 (expr1- expr2 is 0)
+			operand = -,>,<,!=
+		exp = 0
+		return TRUE
+	case 4:
+		expr2 = 1 or -1
+			operand = %
+		exp = 0 (ex. 10%1 is 0)
+		return TRUE
+	}
+else
+FALSE
+*/
 bool
 FunctionInvocationBinary::equals(int num) const
 {
@@ -186,7 +225,9 @@ FunctionInvocationBinary::equals(int num) const
 	}
 	return false;
 }
-
+//it tells does this function return bool as return value
+/*in following case:when operand is  <, > ,<= ,>=,=,!= function returns bool
+*/
 bool
 FunctionInvocationBinary::is_0_or_1(void) const
 {
@@ -202,6 +243,23 @@ FunctionInvocationBinary::is_return_type_float() const
 
 /*
  * XXX --- we should memoize the types of "standard functions."
+	case1:
+		operand: << , >>
+		ex. expr1 << 10
+		if expr1 = signed 
+			type= int
+		if expr1 = unsigned
+			type = uint
+	case2:
+		operand: +,-,*,/,%,^,&,|
+		ex. expr1 + expr2
+		if expr1 = signed and expr2 = signed
+			type= int
+		else
+			type = uint
+	case 3:
+		operand: > , < ,>= , <= ,!=,==,&&,||
+		type =int
  */
 const Type &
 FunctionInvocationBinary::get_type(void) const
@@ -264,7 +322,7 @@ FunctionInvocationBinary::get_type(void) const
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- *
+ *output the operator
  */
 static void
 OutputStandardFuncName(eBinaryOps eFunc, std::ostream &out)
@@ -295,7 +353,7 @@ OutputStandardFuncName(eBinaryOps eFunc, std::ostream &out)
 	case eRShift:	out << ">>";    break;
 	}
 }
-
+//get only binary operands from the whole list of operands
 std::string
 FunctionInvocationBinary::get_binop_string(eBinaryOps bop)
 {
@@ -316,7 +374,16 @@ FunctionInvocationBinary::get_binop_string(eBinaryOps bop)
 }
 
 /*
- *
+ *      case1:
+                operand: +,-,*,%,/,<<,>>
+                and if we are avoiding the overflows use safe functions
+		output:
+			safe_add_int8_t_s_s(expr1, expr2)
+			or similar derivatives 
+	case2:
+		operands: all remaining
+		output:
+			( (cast if needed)expr1 op (cast if needed)expr2 )
  */
 void
 FunctionInvocationBinary::Output(std::ostream &out) const
@@ -342,7 +409,12 @@ FunctionInvocationBinary::Output(std::ostream &out) const
 		case eLShift:
 		case eRShift:
 			if (CGOptions::avoid_signed_overflow()) {
+				//to_string(eFunc) - takes operator
+				//returns- "safe_add_func_int8_t_s_s"
+				//or any similar derivaties of it, can contain unary as well
 				string fname = op_flags->to_string(eFunc);
+				//returns the 'index+1' from the wrapper_names
+				//wrapper_names[]= vector containing safe_* functions
 				int id = SafeOpFlags::to_id(fname);
 				// don't use safe math wrapper if this function is specified in "--safe-math-wrapper"
 				if (CGOptions::safe_math_wrapper(id)) {
@@ -369,8 +441,10 @@ FunctionInvocationBinary::Output(std::ostream &out) const
 
 		default:
 			// explicit type casting for op1
+			//casting can be: (int8_t)expr1 > expr2
 			if (need_cast) {
 				out << "(";
+				//returns "int8_t"
 				op_flags->OutputSize(out);
 				out << ")";
 			}

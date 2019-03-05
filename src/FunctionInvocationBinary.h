@@ -70,8 +70,9 @@ public:
 	virtual bool safe_invocation() const { return false; }
 
 	virtual bool visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const;
-
+	//returns the binary operation to be performed stored in enum 'eBinaryOps' save in 'eFunc'
 	eBinaryOps get_operation(void) const {return eFunc;}
+	//sets the current operation
 	void set_operation(eBinaryOps op) { eFunc = op;}
 
 	std::string get_tmp_var1() { return tmp_var1; }
@@ -84,11 +85,11 @@ public:
 	virtual bool is_0_or_1(void) const;
 
 private:
-	eBinaryOps eFunc;
+	eBinaryOps eFunc;//contains one operand from 'eBinaryOps'
 
-	std::string tmp_var1;
+	std::string tmp_var1;//creates 't_' variable when  '--math-notmp' is set
 
-	std::string tmp_var2;
+	std::string tmp_var2;//creates 't_' variable when  '--math-notmp' is set
 
 private:
 

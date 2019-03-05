@@ -171,9 +171,9 @@ public:
 
 	virtual bool safe_invocation() const = 0;
 
-	eInvocationType invoke_type;
+	eInvocationType invoke_type;//is the invocation unary,binary,user?
 
-	std::vector<const Expression*> param_value;
+	std::vector<const Expression*> param_value;//contains the expressions,ex. for binaryinvocation , param_value[0]= expr1, param_value[1] = expr2
 
 	bool failed;	// indicates whether this invocation has failed to pass pointer/effect analysis
 	bool ptr_cmp;	// indicates whether this is a pointer comparison

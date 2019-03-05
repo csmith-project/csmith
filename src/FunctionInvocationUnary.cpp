@@ -121,6 +121,13 @@ FunctionInvocationUnary::clone() const
 
 /*
  * XXX --- we should memoize the types of "standard functions."
+	param_values[] = contains expressions or combination of them
+	(expressions can be:ExpressionAssign,ExpressionFuncCall, ExpressionComma, ExpressionVariable)
+	+(param_value[0])
+	-(param_value[0])
+	!(param_value[0])
+	
+	~(strictly int type)
  */
 const Type &
 FunctionInvocationUnary::get_type(void) const
@@ -145,7 +152,7 @@ FunctionInvocationUnary::get_type(void) const
 }
 
 /*
- *
+	it calls internally for the expression to check compatibility
  */
 bool
 FunctionInvocationUnary::compatible(const Variable *v) const
@@ -155,7 +162,27 @@ FunctionInvocationUnary::compatible(const Variable *v) const
 	return false;
 }
 
-/* do some constant folding */
+/* do some constant folding 
+	ex.
+CASE 1:
+	 expr!=0
+	eFunc = !
+	!(expr) is 0
+	num = 0
+	return true
+
+CASE 2:
+	expr=0
+	eFunc = !
+	!(expr) = !(0) = 1
+	num = 1
+	return true
+CASE 3:
+	 expr = (-num)
+	eFunc = -
+	-(expr) =(-(- num)) = num
+	return TRUE
+*/
 bool
 FunctionInvocationUnary::equals(int num) const
 {
@@ -175,7 +202,8 @@ FunctionInvocationUnary::equals(int num) const
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- *
+ *outputs the unary operand
+	+,-,!,~
  */
 static void
 OutputStandardFuncName(eUnaryOps eFunc, std::ostream &out)
@@ -192,7 +220,7 @@ OutputStandardFuncName(eUnaryOps eFunc, std::ostream &out)
 	case eBitNot:	out << "~";	break;
 	}
 }
-
+//if unary operand isn't -(minus) it's safe
 bool
 FunctionInvocationUnary::safe_invocation() const
 {
@@ -200,7 +228,12 @@ FunctionInvocationUnary::safe_invocation() const
 }
 
 /*
- *
+	if operation is +,!,~
+ *output: ( operand (cast if needed) expr )
+	ex. ( ! expr)
+
+	if operation is - (minus)
+output:	(- expr) //we don't cast
  */
 void
 FunctionInvocationUnary::Output(std::ostream &out) const
@@ -215,6 +248,7 @@ FunctionInvocationUnary::Output(std::ostream &out) const
 	case eMinus:
 		if (CGOptions::avoid_signed_overflow()) {
 			assert(op_flags);
+			//for safeopflags
 			if (op_flags->get_op_size() != sFloat) {
 				string fname = op_flags->to_string(eFunc);
 				int id = SafeOpFlags::to_id(fname);
