@@ -128,6 +128,9 @@ make_random_loop_control(int &init, int &limit, int &incr,
 
 /*
  * Randomly determine the parameters for an array-travering loop
+whether to start from 0 and increment=how much to? , limit to stop=?
+or
+to decrement the loop traversing till 0 from a random value
  */
 static unsigned int
 make_random_array_control(unsigned int bound, int &init, int &limit, int &incr, eBinaryOps &test_op, eAssignOps &incr_op, bool is_signed)
@@ -389,7 +392,8 @@ StatementFor::~StatementFor(void)
 	delete &incr;
 	delete &body;
 }
-
+//output : eg.
+//		for (i =0 ; i< 10; i++)
 void
 StatementFor::output_header(std::ostream& out, int indent) const
 {
@@ -405,7 +409,10 @@ StatementFor::output_header(std::ostream& out, int indent) const
 }
 
 /*
- *
+ *for (i=0;i<10;i++){
+	..
+	...
+   }
  */
 void
 StatementFor::Output(std::ostream &out, FactMgr* fm, int indent) const

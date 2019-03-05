@@ -49,7 +49,7 @@ using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- *
+ *internally creating an expression but restricted to FunctionInvocation
  */
 StatementExpr *
 StatementExpr::make_random(CGContext &cg_context)
@@ -62,6 +62,7 @@ StatementExpr::make_random(CGContext &cg_context)
 	vector<const Fact*> facts_copy = fm->global_facts;
 	invoke = FunctionInvocation::make_random(false, cg_context, 0, 0);
 	ERROR_GUARD(NULL);
+	//if invocation fails, this case may discard the StatementExpr and again call Statement::make_random() to create a random statement
 	if (invoke->failed) {
 		cg_context.reset_effect_accum(pre_effect);
 		fm->restore_facts(facts_copy);
@@ -100,7 +101,7 @@ StatementExpr::~StatementExpr(void)
 }
 
 /*
- *
+ *output of FunctionInvocation (can be randomly of any type from the 3 types)
  */
 void
 StatementExpr::Output(std::ostream &out, FactMgr* /*fm*/, int indent) const
@@ -121,7 +122,10 @@ StatementExpr::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) c
 	fm->map_stm_effect[this] = cg_context.get_effect_stm();
 	return ok;
 }
-
+//DOUBT ? what if the invoke type is other than eFuncCall? Does it return empty vector?
+/*eFuncCall:
+      from each parameter of function get dereferenced ptrs and store in a global vector
+*/
 std::vector<const ExpressionVariable*>
 StatementExpr::get_dereferenced_ptrs(void) const
 {

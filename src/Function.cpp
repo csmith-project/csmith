@@ -412,6 +412,8 @@ Function::Function(const string &name, const Type *return_type, bool builtin)
 }
 /*
 * nearly equivalent for make_first,but called internally for generating functions except first function
+	no body created only signature(name,parameters, and return value) created
+	equivalent to declaration of function
 */
 Function *
 Function::make_random_signature(const CGContext& cg_context, const Type* type, const CVQualifiers* qfer)

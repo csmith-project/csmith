@@ -179,7 +179,7 @@ bool StatementFilter::filter(int value) const
 
 	return false;
 }
-
+//self understandable
 int find_stm_in_set(const vector<const Statement*>& set, const Statement* s)
 {
     size_t i;
@@ -229,8 +229,8 @@ StatementProbability(const StatementFilter *filter)
 }
 
 int Statement::sid = 0;
-/*
- *
+/*1.initialize probability tables for statement
+ *2.select any 1 statement randomly
  */
 Statement *
 Statement::make_random(CGContext &cg_context,
@@ -342,7 +342,20 @@ Statement::get_referenced_ptrs(std::vector<const Variable*>& ptrs) const
 		}
 	}
 }
+/*
 
+func()
+{//blk1
+	{//blk2
+		{//blk3
+					<<------depth =3
+		}
+	}
+	{//blk4
+					<<-----depth = 2
+	}
+}
+*/
 int
 Statement::get_blk_depth(void) const
 {
@@ -383,6 +396,16 @@ Statement::~Statement(void)
 
 /*
  * return true if statement is contained in block b
+if b =blk2
+so need to find is the calling statement in block2 and subsequent block3
+{blk1
+	{blk2
+		{blk3
+		}
+	}
+	{blk4
+	}
+}
  */
 bool
 Statement::in_block(const Block* b) const

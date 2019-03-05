@@ -66,7 +66,30 @@ using namespace std;
 // use a table to define probabilities of different kinds of statements
 // Must initialize it before use
 DistributionTable StatementAssign::assignOpsTable_;
+/*
+   distribution table:
+        assignOpsTable_:
+        _________________________
+        |key    	|value  |
+        |_______________|_______|
+        |eSimpleAssign  |70     |
+        |_______________|_______|
+        |eBitAndAssign  |10     |
+	|_______________|_______|
+        |eBitOrAssign   |10	| 
+        |_______________|_______|
+        |eBitXorAssign  |10     |
+        |_______________|_______|
+        |ePreDecr	|5      |<--+
+        |_______________|_______|   |
+        |ePreIncr	|5      |   |
+        |_______________|_______|   |-----these are based on command lines
+        |ePostDecr	|5      |   |
+        |_______________|_______|   |
+        |ePostIncr	|5      |   |
+        |_______________|_______|<--+
 
+*/
 void
 StatementAssign::InitProbabilityTable()
 {
@@ -84,7 +107,7 @@ StatementAssign::InitProbabilityTable()
 		assignOpsTable_.add_entry((int)ePostDecr, 5);
 	}
 }
-
+//passed on the type it returns the assignment operator to be used
 eAssignOps
 StatementAssign::AssignOpsProbability(const Type* type)
 {
@@ -108,8 +131,12 @@ StatementAssign::AssignOpsProbability(const Type* type)
 	return (eAssignOps)(filter.lookup(value));
 }
 
-/*
- *
+/*1.choose the assignment operator
+ *2.choose type,qualifier of LHS(but don't generate LHS)
+  3.generate RHS based on type,qualifiers of LHS
+  4.now generate LHS,based on types and qualifiers of RHS
+  5.type cast if needed
+  6.using type,qualifiers,lhs and rhs generate the Assignmentstatements
  */
 StatementAssign *
 StatementAssign::make_random(CGContext &cg_context, const Type* type, const CVQualifiers* qf)
@@ -135,7 +162,7 @@ StatementAssign::make_random(CGContext &cg_context, const Type* type, const CVQu
 	CGContext rhs_cg_context(cg_context, running_eff_context, &rhs_accum);
 	CVQualifiers qfer;
 	if (qf) qfer = *qf;
-
+	//if 'op' is x++,x--,++x, --x (pre and post incr and decr)
 	if (need_no_rhs(op)) {
 		e = Constant::make_int(1);
 		// if we are creating standalone statements like x++, any qualifers fit
@@ -209,7 +236,7 @@ StatementAssign::make_random(CGContext &cg_context, const Type* type, const CVQu
 	    && !StatementAssign::AssignOpWorksForFloat(op)) {
 		op = eSimpleAssign;
 	}
-
+	//if bith aren't compatible, bah!!! everything wasted delete 'e' and 'lhs'
 	if (CompatibleChecker::compatible_check(e, lhs)) {
 		Error::set_error(COMPATIBLE_CHECK_ERROR);
 		delete e;
@@ -300,7 +327,13 @@ StatementAssign::make_possible_compound_assign(CGContext &cg_context,
 	StatementAssign *sa = new StatementAssign(cg_context.get_current_block(), l, op, e, rhs, fs, tmp1, tmp2);
 	return sa;
 }
-
+/*
+converting 
+     compoundops   binaryOperand
+	x+= ------> +
+	--x ------> -
+and so on..
+*/
 eBinaryOps
 StatementAssign::compound_to_binary_ops(eAssignOps op)
 {
@@ -361,13 +394,18 @@ StatementAssign::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context)
 	fm->map_stm_effect[this] = cg_context.get_effect_stm();
 	return true;
 }
-
+/*
+	lhs op expr
+	find the dereference pointers from expr
+*/
 std::vector<const ExpressionVariable*>
 StatementAssign::get_dereferenced_ptrs(void) const
 {
 	return expr.get_dereferenced_ptrs();
 }
-
+//uncertain call : foo (boo () , boo1() )
+//	the order of evaluation is not specified
+//use: tries to find uncertain calls in	`expr' of `lhs op expr'
 bool
 StatementAssign::has_uncertain_call_recursive(void) const
 {
@@ -375,7 +413,8 @@ StatementAssign::has_uncertain_call_recursive(void) const
 }
 
 /*
- *
+ *statementAssign can have information like:
+	block in which it resides,lhs,expr,operand,rhs
  */
 StatementAssign::StatementAssign(Block* b, const Lhs &l,
 				 const Expression &e,
@@ -478,7 +517,14 @@ StatementAssign::Output(std::ostream &out, FactMgr* /*fm*/, int indent) const
 	out << ";";
 	outputln(out);
 }
-
+/*
+	if operand isn't pre/post incr/decr:
+		output : lhs op expr
+	if pre
+		output: op lhs
+	if post
+		output : lhs op
+*/
 void
 StatementAssign::OutputSimple(std::ostream &out) const
 {
@@ -506,7 +552,10 @@ StatementAssign::OutputSimple(std::ostream &out) const
 }
 
 /*
- *
+	outputs 
+	safe_add_func_int8_t_u_u() for '+=' and '-=' operands, based on op_flags
+	else
+		output same as 'OutputSimple'
  */
 void
 StatementAssign::OutputAsExpr(std::ostream &out) const
@@ -594,7 +643,7 @@ StatementAssign::OutputAsExpr(std::ostream &out) const
 		OutputSimple(out);
 	}
 }
-
+//'=,*=,/=,+=,-=' only work
 bool
 StatementAssign::AssignOpWorksForFloat(eAssignOps op)
 {

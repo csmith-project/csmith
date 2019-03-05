@@ -1844,7 +1844,7 @@ Type::SizeInBytes(void) const
 // --------------------------------------------------------------
  /* Select a left hand type for assignments
 can be:
-	1. pointer=operand is simple and probability of PointerAsLType
+	1. pointer =if operand is simple and probability of PointerAsLType
 	2.struct/union = if pointer not selected and operand is simple
 	3.float= if given operand works for float and based on Probability of FloatAsLType
 	4.double = same as float

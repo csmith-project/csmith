@@ -31,7 +31,7 @@
 #define CGCONTEXT_H
 
 ///////////////////////////////////////////////////////////////////////////////
-
+//following file maintains the environment for the program
 #include <vector>
 #include <map>
 #include "Effect.h"

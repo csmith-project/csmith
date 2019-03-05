@@ -87,7 +87,15 @@ StatementArrayOp::make_random(CGContext &cg_context)
 	StatementFor* sf = StatementFor::make_random_array_loop(cg_context);
 	return sf;
 }
-
+/*
+1.select a random array variable
+2.for each dimension of array variable:
+		1.select control vars
+		2.select initialization value
+		3.select increment value
+3.create init value for the array variable 
+4. now create StatementArrayOp
+*/
 StatementArrayOp *
 StatementArrayOp::make_random_array_init(CGContext &cg_context)
 {
@@ -206,7 +214,20 @@ StatementArrayOp::~StatementArrayOp(void)
 	delete init_value;
 	delete body;
 }
+/*
+	prints the for loop before the array, which has ctrl var as global
+---------------------------------------------
+ctrl_vars[]---|	inits[] maxsize          incrs[]
+	      |     |	of array          /
+	      |	    |	      |		 /
+              |     |	      |		 |
+	      V     V         V		 V
+output:	for (g_63 = 0; g_63 < 4; g_63 += 1){
+---------------------------------------------
 
+		g_209[g_63] = &g_197;
+	}
+*/
 void
 StatementArrayOp::output_header(std::ostream& out, int& indent) const
 {
@@ -241,6 +262,13 @@ StatementArrayOp::output_header(std::ostream& out, int& indent) const
 
 /*
  *
+	prints
+	for (g_63 = 0; g_63 < 4; g_63 += 1){	<-----OutputHeader
+	  +-------------+  +-----------+
+Array_var | g_209[g_63] | =|  &g_197;  |  init_value
+	  +-------------+  +-----------+
+        }
+though variable g_209[] was initialized before, we are again initializing the new values
  */
 void
 StatementArrayOp::Output(std::ostream &out, FactMgr* fm, int indent) const
@@ -273,7 +301,6 @@ StatementArrayOp::Output(std::ostream &out, FactMgr* fm, int indent) const
 			array_var->output_with_indices(out, ctrl_vars);
 			out << " = ";
 			init_value->Output(out);
-			out << ";";
 			outputln(out);
 		}
 		output_tab(out, indent);

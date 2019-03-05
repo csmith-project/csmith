@@ -101,3 +101,9 @@ ExpressionComma <---------+    +--------------->ExpressionFunCall
 	6.lhs
 
 - The expression probabilities are initialized in Expression class but not in Probabilities class
+
+8.FunctionInvocation can call
+		1.unary
+		2.binary
+		3.user
+		4.can be from SafeOpFlag

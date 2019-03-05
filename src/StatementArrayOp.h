@@ -70,12 +70,12 @@ public:
 	virtual bool visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const;
 	virtual void Output(std::ostream &out, FactMgr* fm, int indent = 0) const;
 
-	const ArrayVariable* array_var;
+	const ArrayVariable* array_var;//the choosen lhs array variable, for assigning
 	const std::vector<const Variable*> ctrl_vars;
 	const std::vector<int> inits;
 	const std::vector<int> incrs;
 	const Block *body;
-	const Expression *init_value;
+	const Expression *init_value;//contains the rhs value for initializaation of arrayvariable
 private:
 	static void make_random_iter_ctrl(int size, int &init, int &incr);
 };

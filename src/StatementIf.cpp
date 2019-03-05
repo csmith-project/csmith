@@ -54,7 +54,8 @@ using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- *
+ *1.create an expression - for test condition in loop
+ 2.create true and false blocks and create a StatementIf
  */
 StatementIf *
 StatementIf::make_random(CGContext &cg_context)
@@ -149,7 +150,7 @@ StatementIf::Output(std::ostream &out, FactMgr* fm, int indent) const
 	output_condition(out, fm, indent);
 	output_branches(out, fm, indent);
 }
-
+//output: if (test)
 void
 StatementIf::output_condition(std::ostream &out, FactMgr* /*fm*/, int indent) const
 {
@@ -159,7 +160,16 @@ StatementIf::output_condition(std::ostream &out, FactMgr* /*fm*/, int indent) co
 	out << ")";
 	outputln(out);
 }
+/*output:
 
+	{
+		block for true
+	}
+	else
+	{
+		false block
+	}
+*/
 void
 StatementIf::output_branches(std::ostream &out, FactMgr* fm, int indent) const
 {
@@ -211,13 +221,13 @@ StatementIf::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) con
 	}
 	return true;
 }
-
+//refer : Block::must_return()
 bool
 StatementIf::must_return(void) const
 {
 	return if_true.must_return() && if_false.must_return();
 }
-
+//refer : Block::must_jump()
 bool
 StatementIf::must_jump(void) const
 {
