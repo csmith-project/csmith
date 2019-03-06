@@ -92,7 +92,7 @@ get_fact_mgr_for_func(const Function* func)
 }
 
 /*
- *
+	Use - Calls get_fact_mgr_for_func to return fact_mgr for respective function
  */
 FactMgr*
 get_fact_mgr(const CGContext* cg)
@@ -100,6 +100,10 @@ get_fact_mgr(const CGContext* cg)
 	return get_fact_mgr_for_func(cg->get_current_func());
 }
 
+/*
+	Use - Iterates on funclist which stores function names
+		 Return function name matching input string
+*/
 const Function*
 find_function_by_name(const string& name)
 {
@@ -124,6 +128,20 @@ find_function_in_set(const vector<const Function*>& set, const Function* f)
 	return -1;
 }
 
+/*
+	Input - variable
+	Output - Returns block containing variable
+	Description -
+			1. returns null if it is global variable
+			2. returns 1st block if var is func parameter
+
+		DS - local_vars - which stores local var of function
+
+		It iterates on every block of each function in FuncList
+
+		if input var is found in that block (takes help of find_variable_in_set)
+				returns block
+*/
 const Block*
 find_blk_for_var(const Variable* v)
 {
@@ -139,6 +157,7 @@ find_blk_for_var(const Variable* v)
 		}
 		for (j=0; j<func->blocks.size(); j++) {
 			const Block* blk = func->blocks[j];
+			//checks whether v is present in local_vars of current block
 			if (find_variable_in_set(blk->local_vars, v) != -1) {
 				return blk;
 			}
@@ -147,6 +166,25 @@ find_blk_for_var(const Variable* v)
 	return NULL;
 }
 
+/*
+	Input - variable and statment
+	Use - checks whether var is accessible for that particular statement
+
+	DS used -
+		   1. local_vars - stores variables present in current block
+		   2. param - stores variables which are parameters of functions
+
+	How this function works?
+	->
+		1. It checks whether var is present in param
+			if Y returns true
+
+		2. Then it checks if var present in current blocks local var
+			if Y returns true
+		        else checks parent block recursively
+
+	Note - var is matched with only local var not global var
+*/
 bool
 Function::is_var_on_stack(const Variable* var, const Statement* stm) const
 {
@@ -228,7 +266,9 @@ GetFirstFunction(void)
 }
 
 /*
- *
+	Use - It generates unique values for function name
+		e.g. func_1
+		     func_89
  */
 static string
 RandomFunctionName(void)
@@ -248,6 +288,10 @@ RandomReturnType(void)
 	return t;
 }
 
+/*
+	Input - ok_funcs - vector which stores list of functions (do all funcs?)
+	Use - Returns random function using rnd_upto
+*/
 Function *
 Function::get_one_function(const vector<Function *> &ok_funcs)
 {
@@ -259,6 +303,8 @@ Function::get_one_function(const vector<Function *> &ok_funcs)
 	if (ok_size == 1) {
 		return ok_funcs[0];
 	}
+
+	//rnd_upto returns number from 0 to ok_size - 1
 	int index = rnd_upto(ok_size);
 	return ok_funcs[index];
 }
@@ -414,6 +460,8 @@ Function::Function(const string &name, const Type *return_type, bool builtin)
 * nearly equivalent for make_first,but called internally for generating functions except first function
 	no body created only signature(name,parameters, and return value) created
 	equivalent to declaration of function
+
+	Called to create all other functions except func_1(), make_first is for 1st func
 */
 Function *
 Function::make_random_signature(const CGContext& cg_context, const Type* type, const CVQualifiers* qfer)
@@ -453,6 +501,13 @@ Function::make_random(const CGContext& cg_context, const Type* type, const CVQua
 
 /*
  *
+ *we are not generating typeof for first function
+
+	Use - to generate func_1
+		1. new function is created and pushed in funclist
+		2. calls generatefirstparameterlist to create parameters
+		3. fact mgr is created and pushed in FMlist
+		4. calls generatebody to create body
  */
 Function *
 Function::make_first(void)
@@ -489,7 +544,8 @@ Function::make_first(void)
 }
 
 /*
- *
+	Use - prints var for func declaration and defination parameters
+	      internally calls output_qualified_type which return qualifier
  */
 static int
 OutputFormalParam(Variable *var, std::ostream *pOut)
@@ -526,7 +582,11 @@ Function::OutputFormalParamList(std::ostream &out)
 }
 
 /*
- *
+	Use - It prints header part of function declaration
+		e.g. It prints	   "static int64t func_89(int8_t, int16_t)"
+				      |	      |                  |
+				     \ /     \ /                \ /
+				    qfer    get_prefixed_name  output formal parameters
  */
 void
 Function::OutputHeader(std::ostream &out)
@@ -548,7 +608,8 @@ Function::OutputHeader(std::ostream &out)
 }
 
 /*
- *
+	Use - It prints single function declaration
+		e.g. It prints "static int64_t func_84(int16_t, int8_t);"
  */
 void
 Function::OutputForwardDecl(std::ostream &out)
@@ -561,7 +622,14 @@ Function::OutputForwardDecl(std::ostream &out)
 }
 
 /*
- *
+	Use - It prints entire function
+		1. comment line ------------------
+		2. calls effect for printing reads : g_6
+					     writes : g_11
+		3. prints whole function
+			void func_1(//){
+			      //
+			}
  */
 void
 Function::Output(std::ostream &out)
@@ -627,7 +695,7 @@ bool Function::need_return_stmt()
 }
 
 /*
- *
+	Use - this function is used to create body of function
  */
 void
 Function::GenerateBody(const CGContext &prev_context)
@@ -827,7 +895,7 @@ GenerateFunctions(void)
 }
 
 /*
- *
+	Use - It calls OutputForwardDecl which prints single function declaration
  */
 static int
 OutputForwardDecl(Function *func, std::ostream *pOut)
@@ -837,7 +905,7 @@ OutputForwardDecl(Function *func, std::ostream *pOut)
 }
 
 /*
- *
+Use - It calls Output using current function "func"
  */
 static int
 OutputFunction(Function *func, std::ostream *pOut)
@@ -847,7 +915,16 @@ OutputFunction(Function *func, std::ostream *pOut)
 }
 
 /*
- *
+	Use - It prints all the function declaration as follows -
+
+		---- FORWARD DECLARATIONS ----
+		void func1();
+		void func2();
+		.....
+		void func3();
+
+	How it prints - It use for_each loop which traverses on func_list which contains all the functions.
+			For printing each function, it calls outputforwarddecl - 1 or 2 parameter?
  */
 void
 OutputForwardDeclarations(std::ostream &out)
@@ -860,7 +937,12 @@ OutputForwardDeclarations(std::ostream &out)
 }
 
 /*
- *
+	Use - it prints --- FUNCTIONS ---
+		and calls outputfunction which prints each function
+		It takes help of ptr_func which binds function ptr to function outputfunction
+
+	Process - 1. It calls OutputFunction which further calls output
+			to print all functions
  */
 void
 OutputFunctions(std::ostream &out)

@@ -301,6 +301,7 @@ StatementArrayOp::Output(std::ostream &out, FactMgr* fm, int indent) const
 			array_var->output_with_indices(out, ctrl_vars);
 			out << " = ";
 			init_value->Output(out);
+			out << ";";
 			outputln(out);
 		}
 		output_tab(out, indent);
