@@ -138,7 +138,7 @@ public:
 	const Statement* find_container_stm(void) const;
 
 	static bool is_compound(eStatementType t) {return t==eBlock || t==eFor || t==eIfElse || t==eArrayOp;}
-	
+
 	bool is_ctrl_stmt(void) const {return eType == eContinue || eType == eBreak || eType == eGoto;}
 
 	bool is_1st_stm(void) const;

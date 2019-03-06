@@ -115,7 +115,21 @@ StatementFilter::~StatementFilter(void)
 // use a table to define probabilities of different kinds of statements
 // Must initialize it before use
 ProbabilityTable<unsigned int, ProbName> *Statement::stmtTable_ = NULL;
-
+/*
+stmtTable_:
+         _________|_____________________
+        |         |       		|
+        +__val____|ProbName+____________|
+        |   30    |pForProb             |
+        +---------|-------+-------------+
+        |   15    |pIfElseProb  	|
+        +---------|-------+-------------+
+        | 50      |pGotoProb	        |
+        +---------|-------+-------------+
+	..
+	...
+initializes the probability values to probability statements
+*/
 void
 Statement::InitProbabilityTable()
 {
@@ -125,7 +139,33 @@ Statement::InitProbabilityTable()
 	Statement::stmtTable_ = new ProbabilityTable<unsigned int, ProbName>();
 	Statement::stmtTable_->initialize(pStatementProb);
 }
+/*
+stmtTable_:
+  +---value= 30
+  |
+  |	 _________|_____________________
+  |     |         |       		|
+  |     +__val____|ProbName+____________|
+  +---->|   30    |pForProb             | ------|
+        +---------|-------+-------------+	|
+        |   15    |pIfElseProb  	|	|
+        +---------|-------+-------------+	|
+        | 50      |pGotoProb	        |	|
+        +---------|-------+-------------+	|
+		finds in pname_to_type		|
+	----------------------------------------+
+	|	______________________
+	|	|      	    |	      |
+	|	|ProbName+__|_________|returns
+	|------>|pForProb   |eFor     |---------eFor
+		|-------+-------------+
+		|pIfElseProb|eIfElse  |
+		|-------+-------------+
+		|pGotoProb  |eGoto    |
+		+-------+-------------+
+		
 
+*/
 eStatementType
 Statement::number_to_type(unsigned int value)
 {
@@ -217,7 +257,7 @@ probability probStatement
 	probabilityStatement // Pluggable Function (custom probability table, in this case)
 }
 */
-
+//create the table as mentioned above(1st table)
 static eStatementType
 StatementProbability(const StatementFilter *filter)
 {
@@ -323,14 +363,27 @@ Statement::get_dereferenced_ptrs(void) const
 	std::vector<const ExpressionVariable*> empty;
 	return empty;
 }
+/*
+	ex. if (expr1){	
+	//block1
+	}
+	else{
+	//block2
+	}
+get_exprs() --->returns expr1
+get_blocks() --->returns block1 and block2
 
+we find in both blocks and expressions, the referenced pointers
+*/
 void
 Statement::get_referenced_ptrs(std::vector<const Variable*>& ptrs) const
 {
 	size_t i;
 	vector<const Expression*> exprs;
 	vector<const Block*> blks;
+	//returns the expresssions associated with the statement
 	get_exprs(exprs);
+	//returns the blocks associated with the statement
 	get_blocks(blks);
 	for (i=0; i<exprs.size(); i++) {
 		exprs[i]->get_referenced_ptrs(ptrs);
@@ -365,7 +418,7 @@ Statement::get_blk_depth(void) const
 	}
 	return depth;
 }
-
+//are pointers used in the statement(searches in both expression and blocks associated with statement)
 bool
 Statement::is_ptr_used(void) const
 {
@@ -375,7 +428,7 @@ Statement::is_ptr_used(void) const
 }
 
 /*
- *
+ *incremets the sid for each newly created statement
  */
 Statement::Statement(eStatementType st, Block* b)
 	: eType(st),
@@ -397,7 +450,7 @@ Statement::~Statement(void)
 /*
  * return true if statement is contained in block b
 if b =blk2
-so need to find is the calling statement in block2 and subsequent block3
+so you need to find, is the calling statement in block2 and subsequent block3?
 {blk1
 	{blk2
 		{blk3
@@ -441,8 +494,27 @@ Statement::dominate(const Statement* s) const
 }
 
 /*
- * find the parent for-statement or while-statement (to be implemented)
+ * find the parent for-statement
  * that contains this statement or block
+ex. if (){
+	stmt1;<--------container statement = ifelse statement
+    }
+    else{
+    }
+
+ex2.
+{//blk1
+-----------------stmt1----------------
+	if(){
+	}
+	else{
+	}
+----------------stmt2-----------------
+	for (){
+		stm <<----container stmt =for
+	}
+}
+
  */
 const Statement*
 Statement::find_container_stm(void) const
@@ -505,6 +577,14 @@ Statement::find_edges_in(vector<const CFGEdge*>& edges, bool post_dest, bool bac
 
 /*
  * return the label if this statement is the destination of a "goto" statement
+	{
+	stmt	<<----if this statement has a label('lbl') associated with it
+		{
+			goto lbl;
+		}
+	}
+	then the function searches for the statement in CFGEdges
+	and returns the label
  */
 std::string
 Statement::find_jump_label(void) const
@@ -527,6 +607,7 @@ Statement::find_jump_label(void) const
 
 /*
  * find all "goto" statements that jumps to this statement
+   and return count of those statements
  */
 int
 Statement::find_jump_sources(std::vector<const StatementGoto*>& gotos) const
@@ -673,6 +754,18 @@ Statement::stm_visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) c
 /*
  * find all the control flow manipulate statements, i.e. break/continue/goto
  * (maybe return?) contained in this statement recursively
+
+---------
+note:return is not taken into consideration
+stmt_types[] = [6  |7  |8  ]
+	it contains the eType for the statements to find
+	(6=eContinue,7=eBreak,8=eGoto)
+
+let's say if this statement is itself a break/continue/goto:
+      so first need to check for the this statement itself
+
+now search in blocks associated with this statement
+
  */
 int
 Statement::find_typed_stmts(vector<const Statement*>& stms, const vector<int>& stmt_types) const
@@ -690,17 +783,19 @@ Statement::find_typed_stmts(vector<const Statement*>& stms, const vector<int>& s
 	}
 	return stms.size();
 }
-
+//returns true if this statement is 1st statement in the this statement's block
 bool
 Statement::is_1st_stm(void) const
 {
 	return parent && parent->stms.size() && parent->stms[0] == this;
 }
-
+//returns true if the current statement has a associated goto with it and referenced from another block
+//note: checks for all goto's referenced to this statement
 bool
 Statement::is_jump_target_from_other_blocks(void) const
 {
 	vector<const StatementGoto*> gotos;
+	//checks are there 'goto's' to this statement,if yes adds them in gotos
 	if (find_jump_sources(gotos)) {
 		size_t i;
 		for (i=0; i<gotos.size(); i++) {
@@ -711,7 +806,7 @@ Statement::is_jump_target_from_other_blocks(void) const
 	}
 	return false;
 }
-
+//gets the UserFunctions from the statement and checks if it's reading any union field
 bool
 Statement::read_union_field(void) const
 {
@@ -756,7 +851,7 @@ Statement::contains_stmt(const Statement* s) const
 	}
 	return false;
 }
-
+//returns the list of labels in block of 'this' statement
 int
 Statement::find_contained_labels(vector<string>& labels) const
 {
@@ -804,6 +899,9 @@ Statement::get_direct_invocation(void) const
 
 /*
  * find all the function calls in this statement
+
+1.get all expressions from the statement - find in them
+2.get all blocks related to statement - find in them
  */
 void
 Statement::get_called_funcs(std::vector<const FunctionInvocationUser*>& funcs) const
@@ -966,6 +1064,8 @@ Statement::post_creation_analysis(vector<const Fact*>& pre_facts, const Effect& 
 
 /*
  * return: 1 means this is a goto target, 0 otherwise
+outputs :
+	lbl_23:
  */
 int
 Statement::pre_output(std::ostream &out, FactMgr* /* fm */, int indent) const
@@ -981,6 +1081,10 @@ Statement::pre_output(std::ostream &out, FactMgr* /* fm */, int indent) const
 		//}
 	}
 	// compute checksum and output, for Yang's delta
+	//ex.step_hash(g_22)  <-----prints the following line before each
+	//if(){		      statement,when --step-hash-by-stmt is set
+	//}
+	//
 	output_hash(out, indent);
 	return 0;
 }

@@ -254,7 +254,20 @@ Block::create_new_tmp_var(enum eSimpleType type) const
 	macro_tmp_vars[var_name] = type;
 	return var_name;
 }
+/*
+	temp vars are always initialized to '0'
+	output: int8_t t_33 = 0;
 
+macro_tmp_vars <name of temp var, type of temp var>
+	________________
+	|t_2	|eInt	|
+	+-------|-------+
+	|t_23   |eDouble|
+	+-------+-------+
+	....
+	..
+	.
+*/
 void
 Block::OutputTmpVariableList(std::ostream &out, int indent) const
 {
@@ -268,7 +281,13 @@ Block::OutputTmpVariableList(std::ostream &out, int indent) const
 	}
 }
 
-/*
+/*preoutput: prints any labels associated with statement
+	ex. lbl_33:
+	(step_hash())  <----optional
+ statement output:
+	output of actual statement
+post:
+	DOUBT?
  *
  */
 static void
@@ -283,7 +302,11 @@ OutputStatementList(const vector<Statement*> &stms, std::ostream &out, FactMgr* 
 	}
 }
 
-/*
+/*output: {
+	   // block id
+		local variables
+		statements
+	}
  *
  */
 void
@@ -302,8 +325,9 @@ Block::Output(std::ostream &out, FactMgr* fm, int indent) const
 	indent++;
 	if (CGOptions::math_notmp())
 		OutputTmpVariableList(out, indent);
-
+	//print the local variables
 	OutputVariableList(local_vars, out, indent);
+	//prints all statements
 	OutputStatementList(stms, out, fm, indent);
 
 	if (CGOptions::depth_protect()) {
@@ -359,10 +383,11 @@ Block::random_parent_block(void)
 bool
 Block::must_return(void) const
 {
+	//block dosen't have a break in it and last statement is return
 	if (stms.size() > 0 && break_stms.size() == 0 && get_last_stm()->must_return()) {
 		vector<const CFGEdge*> edges;
 		if (find_edges_in(edges, false, true)) {
-			// if there is a statement goes back to block (most likely "continue")
+			// if there is a statement which goes back to block (most likely "continue")
 			// then this block has a chance to escape the return statement at the end
 			for (size_t i=0; i<edges.size(); i++) {
 				if (edges[i]->src != this) {
@@ -498,6 +523,7 @@ Block::append_nested_loop(CGContext& cg_context)
 
 /* return true is var is local variable of this block or parent block,
  * or var is parameter of function
+globals aren't considered
  */
 bool
 Block::is_var_on_stack(const Variable* var) const
