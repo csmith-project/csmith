@@ -15,6 +15,65 @@ There is a mailing list, <csmith-dev@flux.utah.edu>, for discussing Csmith.
 Visit <http://www.flux.utah.edu/mailman/listinfo/csmith-dev> to subscribe.
 To post messages to the list, you must first subscribe to the list.
 
-Most Csmith info can be found here:
 
+--variable-attribute-aligned | --no-variable-attribute-aligned: enable | disable generate variable attribute aligned (disabled by default).
+
+--variable-attribute-unused | --no-variable-attribute-unused: enable | disable generate variable attribute unused (disabled by default).
+
+--variable-attribute-packed | --no-variable-attribute-packed: enable | disable __attribute__((packed)) (disabled by default).
+
+--variable-attribute-section | --no-variable-attribute-section: enable | disable variable attribute section extension. (disable by default)
+
+//label attributes 
+
+--label-attribute-hot-cold | --label-attribute-hot-cold: enable | disable generate label attribute __attribute__((hot)) | __attribute__((cold)) (disabled by default).
+
+----------------------------------------------------------------------------------------------------------------------
+  
+Note - Above extensions can be used using different combinations.
+
+  
+**-----------------------------------------BUGS FOUND SO FAR----------------------------------------------------**
+https://gcc.gnu.org/bugzilla/show_bug.cgi?id=89737
+https://gcc.gnu.org/bugzilla/show_bug.cgi?id=87118
+https://gcc.gnu.org/bugzilla/show_bug.cgi?id=89135
+https://gcc.gnu.org/bugzilla/show_bug.cgi?id=89153
+https://gcc.gnu.org/bugzilla/show_bug.cgi?id=89223
+  
+------------------------------------------**GCC CODE COVERAGE REPORTS-------------------------------------------**
+  
+[WITHOUT GCC EXTENSIONS ]
+  line - 35.2
+  function - 43.2
+  branch - 25.7
+[WITH GCC EXTENSIONS IMPLEMENTED IN CSMITH]
+  line - 35.7
+  function - 43.9
+  branch - 26.1  
+[% GAIN]
+  line - 0.5%
+  function - 0.7%
+  branch - 0.4%
+  
+------------------------------------**NUMBER OF TEST CASES TAKEN SO FAR--------------------------------------------**
+  Total test cases taken = 22,400,00
+  
+------------------------------------**CONFIGURING AND BUILDING CSMITH---------------------------------------------**
+Extended Csmith can be built using the same way as of csmith.
+
+$ mkdir extended_csmith
+$ cd extended_csmith
+
+$ git clone https://github.com/Sameeranjoshi/csmith.git
+$ cd csmith
+$ git checkout -b gcc-extensions
+
+$ cmake .
+$ make -j{number of processors on your machine} 
+e.g. make -j4 if you have 4 processors on your machine
+
+
+You can find more information about the implemented extensions in Csmith using below commands -  (after configuring and building Csmith from http://embed.cs.utah.edu/csmith/)
+
+Most Csmith info can be found here:
   http://embed.cs.utah.edu/csmith/
