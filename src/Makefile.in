@@ -128,7 +128,7 @@ am__csmith_SOURCES_DIST = AbsExtension.cpp AbsExtension.h \
 	DFSRndNumGenerator.h DefaultOutputMgr.cpp DefaultOutputMgr.h \
 	DefaultProgramGenerator.cpp DefaultProgramGenerator.h \
 	DefaultRndNumGenerator.cpp DefaultRndNumGenerator.h \
-	DeltaMonitor.cpp DeltaMonitor.h DepthSpec.cpp DepthSpec.h \
+	DepthSpec.cpp DepthSpec.h \
 	Effect.cpp Effect.h Enumerator.h Error.cpp Error.h \
 	Expression.cpp Expression.h ExpressionAssign.cpp \
 	ExpressionAssign.h ExpressionComma.cpp ExpressionComma.h \
@@ -143,16 +143,13 @@ am__csmith_SOURCES_DIST = AbsExtension.cpp AbsExtension.h \
 	FunctionInvocationUnary.h FunctionInvocationUser.cpp \
 	FunctionInvocationUser.h KleeExtension.cpp KleeExtension.h \
 	Lhs.cpp Lhs.h LinearSequence.cpp LinearSequence.h \
-	MspFilters.cpp MspFilters.h OutputMgr.cpp OutputMgr.h \
+	OutputMgr.cpp OutputMgr.h \
 	PartialExpander.cpp PartialExpander.h Probabilities.cpp \
 	Probabilities.h ProbabilityTable.h RandomNumber.cpp \
-	RandomNumber.h RandomProgramGenerator.cpp Reducer.cpp \
-	Reducer.h ReducerOutputMgr.cpp ReducerOutputMgr.h \
+	RandomNumber.h RandomProgramGenerator.cpp \
 	SafeOpFlags.cpp SafeOpFlags.h Sequence.cpp Sequence.h \
 	SequenceFactory.cpp SequenceFactory.h SequenceLineParser.h \
-	SimpleDeltaRndNumGenerator.cpp SimpleDeltaRndNumGenerator.h \
-	SimpleDeltaSequence.cpp SimpleDeltaSequence.h \
-	SplatExtension.cpp SplatExtension.h Statement.cpp Statement.h \
+	Statement.cpp Statement.h \
 	StatementArrayOp.cpp StatementArrayOp.h StatementAssign.cpp \
 	StatementAssign.h StatementBreak.cpp StatementBreak.h \
 	StatementContinue.cpp StatementContinue.h StatementExpr.cpp \
