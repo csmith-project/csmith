@@ -448,7 +448,6 @@ bool
 ArrayVariable::no_loop_initializer(void) const
 {
 	// don't use loop initializer if we are doing test case reduction
-	// if (CGOptions::get_reducer()) return true;
 	// can not use loop initializer if either array member are structs, or they are constants, or it has > 1 initial values
 	return type->eType==eStruct || type->eType==eUnion || is_const() || is_global() || (init_values.size() > 0);
 }

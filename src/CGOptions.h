@@ -33,7 +33,6 @@
 #include <string>
 #include <vector>
 #include <map>
-#include "Reducer.h"
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -178,14 +177,8 @@ public:
 	static bool compact_output(void);
 	static bool compact_output(bool p);
 
-	static bool msp(void);
-	static bool msp(bool p);
-
 	static int func1_max_params(void);
 	static int func1_max_params(int p);
-
-	static bool splat(void);
-	static bool splat(bool p);
 
 	static bool klee(void);
 	static bool klee(bool p);
@@ -382,9 +375,6 @@ public:
 	static int max_array_num_in_loop();
 	static int max_array_num_in_loop(int p);
 
-	static void init_reducer(std::string fname) { reducer_ = new Reducer(fname);}
-	static Reducer* get_reducer(void) { return reducer_; }
-
 	static bool x86_64();
 
 	static bool identify_wrappers(void);
@@ -523,9 +513,7 @@ private:
 	static std::string dfs_debug_sequence_;
 	static int	max_exhaustive_depth_;
 	static bool	compact_output_;
-	static bool	msp_;
 	static int	func1_max_params_;
-	static bool	splat_;
 	static bool	klee_;
 	static bool	crest_;
 	static bool	ccomp_;
@@ -610,7 +598,6 @@ private:
 	static bool take_union_field_addr_;
 	static bool vol_struct_union_fields_;
 	static bool const_struct_union_fields_;
-	static Reducer* reducer_;
   static bool fast_execution_;
 
 	// flag to indicate language

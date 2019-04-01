@@ -35,7 +35,6 @@
 #include <vector>
 #include <cassert>
 #include "CGOptions.h"
-#include "SplatExtension.h"
 #include "KleeExtension.h"
 #include "CrestExtension.h"
 #include "CoverageTestExtension.h"
@@ -52,10 +51,7 @@ void
 ExtensionMgr::CreateExtension()
 {
 	int params_size = CGOptions::func1_max_params();
-	if (CGOptions::splat()) {
-		extension_ = dynamic_cast<AbsExtension*>(new SplatExtension());
-	}
-	else if (CGOptions::klee()) {
+	if (CGOptions::klee()) {
 		extension_ = dynamic_cast<AbsExtension*>(new KleeExtension());
 	}
 	else if (CGOptions::crest()) {

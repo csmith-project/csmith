@@ -47,7 +47,6 @@
 #include "Error.h"
 #include "Bookkeeper.h"
 #include "StringUtils.h"
-#include "Reducer.h"
 #include "Block.h"
 #include "random.h"
 
@@ -246,10 +245,6 @@ void
 ExpressionFuncall::Output(std::ostream &out) const
 {
 	output_cast(out);
-	Reducer* reducer = CGOptions::get_reducer();
-	if (reducer && reducer->output_expr(this, out)) {
-		return;
-	}
 	invoke.Output(out);
 }
 

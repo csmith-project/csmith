@@ -206,10 +206,6 @@ void
 ExpressionVariable::Output(std::ostream &out) const
 {
 	output_cast(out);
-	Reducer* reducer = CGOptions::get_reducer();
-	if (reducer && reducer->output_expr(this, out)) {
-		return;
-	}
 	int i;
     int indirect_level = get_indirect_level();
     if (indirect_level > 0) {

@@ -72,7 +72,6 @@
 
 
 using namespace std;
-// Yang: I changed the definition of ctrl_vars, and ReducerMgr might be affected
 std::vector< std::vector<const Variable*>* > Variable::ctrl_vars_vectors;
 unsigned long Variable::ctrl_vars_count;
 

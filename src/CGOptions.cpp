@@ -43,13 +43,11 @@
 #include "Bookkeeper.h"
 #include "CompatibleChecker.h"
 #include "PartialExpander.h"
-#include "DeltaMonitor.h"
 #include "Probabilities.h"
 #include "OutputMgr.h"
 #include "StringUtils.h"
 
 using namespace std;
-Reducer* CGOptions::reducer_ = NULL;
 vector<int> CGOptions::safe_math_wrapper_ids_;
 map<string, bool> CGOptions::enabled_builtin_kinds_;
 int CGOptions::int_size_ = 0;
@@ -114,9 +112,7 @@ DEFINE_GETTER_SETTER_BOOL(dfs_exhaustive)
 DEFINE_GETTER_SETTER_STRING_REF(dfs_debug_sequence)
 DEFINE_GETTER_SETTER_INT (max_exhaustive_depth)
 DEFINE_GETTER_SETTER_BOOL(compact_output)
-DEFINE_GETTER_SETTER_BOOL(msp)
 DEFINE_GETTER_SETTER_INT(func1_max_params)
-DEFINE_GETTER_SETTER_BOOL(splat)
 DEFINE_GETTER_SETTER_BOOL(klee)
 DEFINE_GETTER_SETTER_BOOL(crest)
 DEFINE_GETTER_SETTER_BOOL(ccomp)
@@ -240,9 +236,7 @@ CGOptions::set_default_settings(void)
 	use_struct(true);
 	use_union(true);
 	compact_output(false);
-	msp(false);
 	func1_max_params(CGOPTIONS_DEFAULT_FUNC1_MAX_PARAMS);
-	splat(false);
 	klee(false);
 	crest(false);
 	ccomp(false);
@@ -451,7 +445,7 @@ bool CGOptions::resolve_exhaustive_options()
 	}
 
 	if (CGOptions::has_extension_support()) {
-		conflict_msg_ = "exhaustive mode doesn't support splat|klee|crest|coverage-test extension";
+		conflict_msg_ = "exhaustive mode doesn't support klee|crest|coverage-test extension";
 		return true;
 	}
 	// For effeciency reason, we fix the size of struct fields
@@ -476,9 +470,6 @@ bool
 CGOptions::has_extension_conflict()
 {
 	int count = 0;
-
-	if (CGOptions::splat())
-		count++;
 	if (CGOptions::klee())
 		count++;
 	if (CGOptions::crest())
@@ -487,7 +478,7 @@ CGOptions::has_extension_conflict()
 		count++;
 
 	if (count > 1) {
-		conflict_msg_ = "You could only specify --splat or --klee or --crest or --coverage-test";
+		conflict_msg_ = "You could only specify --klee or --crest or --coverage-test";
 		return true;
 	}
 	return false;
@@ -496,7 +487,7 @@ CGOptions::has_extension_conflict()
 bool
 CGOptions::has_extension_support()
 {
-	return (CGOptions::splat() || CGOptions::klee()
+	return (CGOptions::klee()
 		|| CGOptions::crest() || CGOptions::coverage_test());
 }
 
@@ -555,23 +546,6 @@ CGOptions::has_conflict(void)
 	if (CGOptions::max_split_files() > 0) {
 		if (!DefaultOutputMgr::create_output_dir(CGOptions::split_files_dir())) {
 			conflict_msg_ = "cannot create dir for split files!";
-			return true;
-		}
-	}
-
-	if (!CGOptions::delta_monitor().empty()) {
-		string msg;
-		if (!DeltaMonitor::init(msg, CGOptions::delta_monitor(), CGOptions::delta_output())) {
-			conflict_msg_ = msg;
-			return true;
-		}
-	}
-
-	if (!CGOptions::go_delta().empty()) {
-		string msg;
-		if (!DeltaMonitor::init_for_running(msg, CGOptions::go_delta(), CGOptions::delta_output(),
-				CGOptions::delta_input(), CGOptions::no_delta_reduction())) {
-			conflict_msg_ = msg;
 			return true;
 		}
 	}

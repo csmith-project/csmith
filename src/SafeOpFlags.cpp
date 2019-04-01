@@ -41,7 +41,6 @@
 #include "Error.h"
 #include "Probabilities.h"
 #include "DepthSpec.h"
-#include "MspFilters.h"
 #include "CGOptions.h"
 
 using namespace std;
@@ -169,9 +168,6 @@ SafeOpFlags::make_random_unary(const Type *rv_type, const Type *op1_type, eUnary
 	// ISSUE: in the old code, is_func is always true
 	// Probably need to be fixed later.
 	flags->is_func_ = true;
-
-	MspSafeOpSizeFilter *filter = new MspSafeOpSizeFilter(MAX_BINARY_OP);
-	Probabilities::register_extra_filter(pSafeOpsSizeProb, filter);
 	if (rv_is_float) {
 		assert(CGOptions::enable_float());
 		flags->op_size_ = sFloat;
@@ -179,9 +175,6 @@ SafeOpFlags::make_random_unary(const Type *rv_type, const Type *op1_type, eUnary
 	else {
 		flags->op_size_ = (SafeOpSize)rnd_upto(MAX_SAFE_OP_SIZE-1, SAFE_OPS_SIZE_PROB_FILTER);
 	}
-	Probabilities::unregister_extra_filter(pSafeOpsSizeProb, filter);
-
-	delete filter;
 	return flags;
 }
 
@@ -221,9 +214,6 @@ SafeOpFlags::make_random_binary(const Type *rv_type, const Type *op1_type, const
 	// Probably need to be fixed later.
 	flags->is_func_ = true;
 
-	MspSafeOpSizeFilter *filter = new MspSafeOpSizeFilter(bop);
-	Probabilities::register_extra_filter(pSafeOpsSizeProb, filter);
-
 	if (rv_is_float) {
 		assert(CGOptions::enable_float());
 		flags->op_size_ = sFloat;
@@ -231,11 +221,6 @@ SafeOpFlags::make_random_binary(const Type *rv_type, const Type *op1_type, const
 	else {
 		flags->op_size_ = (SafeOpSize)rnd_upto(MAX_SAFE_OP_SIZE-1, SAFE_OPS_SIZE_PROB_FILTER);
 	}
-	Probabilities::unregister_extra_filter(pSafeOpsSizeProb, filter);
-	ERROR_GUARD_AND_DEL2(NULL, flags, filter);
-
-	//Probabilities::unregister_extra_filter(pSafeOpsSizeProb, filter);
-	delete filter;
 	return flags;
 }
 
