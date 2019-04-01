@@ -175,7 +175,7 @@ am_csmith_OBJECTS = AbsExtension.$(OBJEXT) \
 	CrestExtension.$(OBJEXT) DFSOutputMgr.$(OBJEXT) \
 	DFSProgramGenerator.$(OBJEXT) DFSRndNumGenerator.$(OBJEXT) \
 	DefaultOutputMgr.$(OBJEXT) DefaultProgramGenerator.$(OBJEXT) \
-	DefaultRndNumGenerator.$(OBJEXT) DeltaMonitor.$(OBJEXT) \
+	DefaultRndNumGenerator.$(OBJEXT) \
 	DepthSpec.$(OBJEXT) Effect.$(OBJEXT) Error.$(OBJEXT) \
 	Expression.$(OBJEXT) ExpressionAssign.$(OBJEXT) \
 	ExpressionComma.$(OBJEXT) ExpressionFuncall.$(OBJEXT) \
@@ -187,14 +187,11 @@ am_csmith_OBJECTS = AbsExtension.$(OBJEXT) \
 	FunctionInvocationBinary.$(OBJEXT) \
 	FunctionInvocationUnary.$(OBJEXT) \
 	FunctionInvocationUser.$(OBJEXT) KleeExtension.$(OBJEXT) \
-	Lhs.$(OBJEXT) LinearSequence.$(OBJEXT) MspFilters.$(OBJEXT) \
+	Lhs.$(OBJEXT) LinearSequence.$(OBJEXT) \
 	OutputMgr.$(OBJEXT) PartialExpander.$(OBJEXT) \
 	Probabilities.$(OBJEXT) RandomNumber.$(OBJEXT) \
-	RandomProgramGenerator.$(OBJEXT) Reducer.$(OBJEXT) \
-	ReducerOutputMgr.$(OBJEXT) SafeOpFlags.$(OBJEXT) \
+	RandomProgramGenerator.$(OBJEXT) SafeOpFlags.$(OBJEXT) \
 	Sequence.$(OBJEXT) SequenceFactory.$(OBJEXT) \
-	SimpleDeltaRndNumGenerator.$(OBJEXT) \
-	SimpleDeltaSequence.$(OBJEXT) SplatExtension.$(OBJEXT) \
 	Statement.$(OBJEXT) StatementArrayOp.$(OBJEXT) \
 	StatementAssign.$(OBJEXT) StatementBreak.$(OBJEXT) \
 	StatementContinue.$(OBJEXT) StatementExpr.$(OBJEXT) \
@@ -240,7 +237,7 @@ am__depfiles_remade = ./$(DEPDIR)/AbsExtension.Po \
 	./$(DEPDIR)/DefaultOutputMgr.Po \
 	./$(DEPDIR)/DefaultProgramGenerator.Po \
 	./$(DEPDIR)/DefaultRndNumGenerator.Po \
-	./$(DEPDIR)/DeltaMonitor.Po ./$(DEPDIR)/DepthSpec.Po \
+	./$(DEPDIR)/DepthSpec.Po \
 	./$(DEPDIR)/Effect.Po ./$(DEPDIR)/Error.Po \
 	./$(DEPDIR)/Expression.Po ./$(DEPDIR)/ExpressionAssign.Po \
 	./$(DEPDIR)/ExpressionComma.Po \
@@ -255,15 +252,12 @@ am__depfiles_remade = ./$(DEPDIR)/AbsExtension.Po \
 	./$(DEPDIR)/FunctionInvocationUnary.Po \
 	./$(DEPDIR)/FunctionInvocationUser.Po \
 	./$(DEPDIR)/KleeExtension.Po ./$(DEPDIR)/Lhs.Po \
-	./$(DEPDIR)/LinearSequence.Po ./$(DEPDIR)/MspFilters.Po \
+	./$(DEPDIR)/LinearSequence.Po \
 	./$(DEPDIR)/OutputMgr.Po ./$(DEPDIR)/PartialExpander.Po \
 	./$(DEPDIR)/Probabilities.Po ./$(DEPDIR)/RandomNumber.Po \
-	./$(DEPDIR)/RandomProgramGenerator.Po ./$(DEPDIR)/Reducer.Po \
-	./$(DEPDIR)/ReducerOutputMgr.Po ./$(DEPDIR)/SafeOpFlags.Po \
+	./$(DEPDIR)/RandomProgramGenerator.Po ./$(DEPDIR)/SafeOpFlags.Po \
 	./$(DEPDIR)/Sequence.Po ./$(DEPDIR)/SequenceFactory.Po \
-	./$(DEPDIR)/SimpleDeltaRndNumGenerator.Po \
-	./$(DEPDIR)/SimpleDeltaSequence.Po \
-	./$(DEPDIR)/SplatExtension.Po ./$(DEPDIR)/Statement.Po \
+	./$(DEPDIR)/Statement.Po \
 	./$(DEPDIR)/StatementArrayOp.Po ./$(DEPDIR)/StatementAssign.Po \
 	./$(DEPDIR)/StatementBreak.Po ./$(DEPDIR)/StatementContinue.Po \
 	./$(DEPDIR)/StatementExpr.Po ./$(DEPDIR)/StatementFor.Po \
@@ -490,7 +484,7 @@ csmith_SOURCES = AbsExtension.cpp AbsExtension.h \
 	DFSRndNumGenerator.h DefaultOutputMgr.cpp DefaultOutputMgr.h \
 	DefaultProgramGenerator.cpp DefaultProgramGenerator.h \
 	DefaultRndNumGenerator.cpp DefaultRndNumGenerator.h \
-	DeltaMonitor.cpp DeltaMonitor.h DepthSpec.cpp DepthSpec.h \
+	DepthSpec.cpp DepthSpec.h \
 	Effect.cpp Effect.h Enumerator.h Error.cpp Error.h \
 	Expression.cpp Expression.h ExpressionAssign.cpp \
 	ExpressionAssign.h ExpressionComma.cpp ExpressionComma.h \
@@ -505,16 +499,13 @@ csmith_SOURCES = AbsExtension.cpp AbsExtension.h \
 	FunctionInvocationUnary.h FunctionInvocationUser.cpp \
 	FunctionInvocationUser.h KleeExtension.cpp KleeExtension.h \
 	Lhs.cpp Lhs.h LinearSequence.cpp LinearSequence.h \
-	MspFilters.cpp MspFilters.h OutputMgr.cpp OutputMgr.h \
+	OutputMgr.cpp OutputMgr.h \
 	PartialExpander.cpp PartialExpander.h Probabilities.cpp \
 	Probabilities.h ProbabilityTable.h RandomNumber.cpp \
-	RandomNumber.h RandomProgramGenerator.cpp Reducer.cpp \
-	Reducer.h ReducerOutputMgr.cpp ReducerOutputMgr.h \
+	RandomNumber.h RandomProgramGenerator.cpp \
 	SafeOpFlags.cpp SafeOpFlags.h Sequence.cpp Sequence.h \
 	SequenceFactory.cpp SequenceFactory.h SequenceLineParser.h \
-	SimpleDeltaRndNumGenerator.cpp SimpleDeltaRndNumGenerator.h \
-	SimpleDeltaSequence.cpp SimpleDeltaSequence.h \
-	SplatExtension.cpp SplatExtension.h Statement.cpp Statement.h \
+	Statement.cpp Statement.h \
 	StatementArrayOp.cpp StatementArrayOp.h StatementAssign.cpp \
 	StatementAssign.h StatementBreak.cpp StatementBreak.h \
 	StatementContinue.cpp StatementContinue.h StatementExpr.cpp \
@@ -668,7 +659,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DefaultOutputMgr.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DefaultProgramGenerator.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DefaultRndNumGenerator.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DeltaMonitor.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DepthSpec.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Effect.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Error.Po@am__quote@ # am--include-marker
@@ -693,20 +683,14 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/KleeExtension.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Lhs.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/LinearSequence.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MspFilters.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/OutputMgr.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PartialExpander.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Probabilities.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/RandomNumber.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/RandomProgramGenerator.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Reducer.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ReducerOutputMgr.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SafeOpFlags.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Sequence.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SequenceFactory.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SimpleDeltaRndNumGenerator.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SimpleDeltaSequence.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SplatExtension.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Statement.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/StatementArrayOp.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/StatementAssign.Po@am__quote@ # am--include-marker
@@ -940,7 +924,6 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/DefaultOutputMgr.Po
 	-rm -f ./$(DEPDIR)/DefaultProgramGenerator.Po
 	-rm -f ./$(DEPDIR)/DefaultRndNumGenerator.Po
-	-rm -f ./$(DEPDIR)/DeltaMonitor.Po
 	-rm -f ./$(DEPDIR)/DepthSpec.Po
 	-rm -f ./$(DEPDIR)/Effect.Po
 	-rm -f ./$(DEPDIR)/Error.Po
@@ -965,20 +948,14 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/KleeExtension.Po
 	-rm -f ./$(DEPDIR)/Lhs.Po
 	-rm -f ./$(DEPDIR)/LinearSequence.Po
-	-rm -f ./$(DEPDIR)/MspFilters.Po
 	-rm -f ./$(DEPDIR)/OutputMgr.Po
 	-rm -f ./$(DEPDIR)/PartialExpander.Po
 	-rm -f ./$(DEPDIR)/Probabilities.Po
 	-rm -f ./$(DEPDIR)/RandomNumber.Po
 	-rm -f ./$(DEPDIR)/RandomProgramGenerator.Po
-	-rm -f ./$(DEPDIR)/Reducer.Po
-	-rm -f ./$(DEPDIR)/ReducerOutputMgr.Po
 	-rm -f ./$(DEPDIR)/SafeOpFlags.Po
 	-rm -f ./$(DEPDIR)/Sequence.Po
 	-rm -f ./$(DEPDIR)/SequenceFactory.Po
-	-rm -f ./$(DEPDIR)/SimpleDeltaRndNumGenerator.Po
-	-rm -f ./$(DEPDIR)/SimpleDeltaSequence.Po
-	-rm -f ./$(DEPDIR)/SplatExtension.Po
 	-rm -f ./$(DEPDIR)/Statement.Po
 	-rm -f ./$(DEPDIR)/StatementArrayOp.Po
 	-rm -f ./$(DEPDIR)/StatementAssign.Po
@@ -1066,7 +1043,6 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/DefaultOutputMgr.Po
 	-rm -f ./$(DEPDIR)/DefaultProgramGenerator.Po
 	-rm -f ./$(DEPDIR)/DefaultRndNumGenerator.Po
-	-rm -f ./$(DEPDIR)/DeltaMonitor.Po
 	-rm -f ./$(DEPDIR)/DepthSpec.Po
 	-rm -f ./$(DEPDIR)/Effect.Po
 	-rm -f ./$(DEPDIR)/Error.Po
@@ -1091,20 +1067,14 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/KleeExtension.Po
 	-rm -f ./$(DEPDIR)/Lhs.Po
 	-rm -f ./$(DEPDIR)/LinearSequence.Po
-	-rm -f ./$(DEPDIR)/MspFilters.Po
 	-rm -f ./$(DEPDIR)/OutputMgr.Po
 	-rm -f ./$(DEPDIR)/PartialExpander.Po
 	-rm -f ./$(DEPDIR)/Probabilities.Po
 	-rm -f ./$(DEPDIR)/RandomNumber.Po
 	-rm -f ./$(DEPDIR)/RandomProgramGenerator.Po
-	-rm -f ./$(DEPDIR)/Reducer.Po
-	-rm -f ./$(DEPDIR)/ReducerOutputMgr.Po
 	-rm -f ./$(DEPDIR)/SafeOpFlags.Po
 	-rm -f ./$(DEPDIR)/Sequence.Po
 	-rm -f ./$(DEPDIR)/SequenceFactory.Po
-	-rm -f ./$(DEPDIR)/SimpleDeltaRndNumGenerator.Po
-	-rm -f ./$(DEPDIR)/SimpleDeltaSequence.Po
-	-rm -f ./$(DEPDIR)/SplatExtension.Po
 	-rm -f ./$(DEPDIR)/Statement.Po
 	-rm -f ./$(DEPDIR)/StatementArrayOp.Po
 	-rm -f ./$(DEPDIR)/StatementAssign.Po
