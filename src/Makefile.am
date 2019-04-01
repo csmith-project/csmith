@@ -94,8 +94,6 @@ csmith_SOURCES = \
 	DefaultProgramGenerator.h \
 	DefaultRndNumGenerator.cpp \
 	DefaultRndNumGenerator.h \
-	DeltaMonitor.cpp \
-	DeltaMonitor.h \
 	DepthSpec.cpp \
 	DepthSpec.h \
 	Effect.cpp \
@@ -145,8 +143,6 @@ csmith_SOURCES = \
 	Lhs.h \
 	LinearSequence.cpp \
 	LinearSequence.h \
-	MspFilters.cpp \
-	MspFilters.h \
 	OutputMgr.cpp \
 	OutputMgr.h \
 	PartialExpander.cpp \
@@ -157,10 +153,6 @@ csmith_SOURCES = \
 	RandomNumber.cpp \
 	RandomNumber.h \
 	RandomProgramGenerator.cpp \
-	Reducer.cpp \
-	Reducer.h \
-	ReducerOutputMgr.cpp \
-	ReducerOutputMgr.h \
 	SafeOpFlags.cpp \
 	SafeOpFlags.h \
 	Sequence.cpp \
@@ -168,12 +160,6 @@ csmith_SOURCES = \
 	SequenceFactory.cpp \
 	SequenceFactory.h \
 	SequenceLineParser.h \
-	SimpleDeltaRndNumGenerator.cpp \
-	SimpleDeltaRndNumGenerator.h \
-	SimpleDeltaSequence.cpp \
-	SimpleDeltaSequence.h \
-	SplatExtension.cpp \
-	SplatExtension.h \
 	Statement.cpp \
 	Statement.h \
 	StatementArrayOp.cpp \
