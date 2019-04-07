@@ -242,11 +242,9 @@ static void print_advanced_help()
 	cout << "Only works in the exhaustive mode." << endl << endl;
 
 	// target platforms
-	cout << "  --msp: enable certain msp related features " << endl << endl;
 	cout << "  --ccomp: generate compcert-compatible code" << endl << endl;
 
 	// symblic excutions
-	cout << "  --splat: enable splat extension" << endl << endl;
 	cout << "  --klee: enable klee extension" << endl << endl;
 	cout << "  --crest: enable crest extension" << endl << endl;
 
@@ -256,7 +254,7 @@ static void print_advanced_help()
 	cout << "Can only be used with --coverage-test." << endl << endl;
 
 	cout << "  --func1_max_params <num>: specify the number of symbolic variables passed to func_1 (default 3). ";
-	cout << "Only used when --splat | --crest | --klee | --coverage-test is enabled." << endl << endl;
+	cout << "Only used when --crest | --klee | --coverage-test is enabled." << endl << endl;
 
 	// struct/union related options
 	cout << "  --fixed-struct-fields: fix the size of struct fields to max-struct-fields (default 10)." << endl << endl;
@@ -414,11 +412,6 @@ main(int argc, char **argv)
 			continue;
 		}
 
-		if (strcmp (argv[i], "--splat") == 0) {
-			CGOptions::splat(true);
-			continue;
-		}
-
 		if (strcmp (argv[i], "--klee") == 0) {
 			CGOptions::klee(true);
 			continue;
@@ -479,11 +472,6 @@ main(int argc, char **argv)
 
 		if (strcmp (argv[i], "--compact-output") == 0) {
 			CGOptions::compact_output(true);
-			continue;
-		}
-
-		if (strcmp (argv[i], "--msp") == 0) {
-			CGOptions::msp(true);
 			continue;
 		}
 
@@ -1400,23 +1388,6 @@ main(int argc, char **argv)
 
 		if (strcmp(argv[i], "--cpp11") == 0) {
 			CGOptions::cpp11(true);
-			continue;
-		}
-
-		if (strcmp (argv[i], "--reduce") == 0) {
-			string filename;
-			i++;
-			arg_check(argc, i);
-			if (!parse_string_arg(argv[i], filename)) {
-				cout<< "please specify reduction directive file!" << std::endl;
-				exit(-1);
-			}
-			ifstream conf(filename.c_str());
-			if (conf.fail()) {
-				cout<< "can't read reduction directive file " << filename << "!" << std::endl;
-				exit(-1);
-			}
-			CGOptions::init_reducer(filename);
 			continue;
 		}
 

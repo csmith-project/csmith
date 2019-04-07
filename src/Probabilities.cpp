@@ -45,7 +45,6 @@
 #include "Type.h"
 #include "SafeOpFlags.h"
 #include "CGOptions.h"
-#include "MspFilters.h"
 #include "VectorFilter.h"
 #include "random.h"
 
@@ -863,15 +862,6 @@ Probabilities::unregister_extra_filter(ProbName pname, Filter *filter)
 void
 Probabilities::set_extra_filters(ProbName pname)
 {
-	if (CGOptions::msp()) {
-		switch(pname) {
-		case pBinaryOpsProb:
-			extra_filters_[pname] = new MspBinaryFilter();
-			break;
-		default:
-			break;
-		}
-	}
 }
 
 bool

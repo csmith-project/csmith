@@ -37,11 +37,9 @@
 #include "RandomNumber.h"
 #include "AbsRndNumGenerator.h"
 #include "DefaultOutputMgr.h"
-#include "ReducerOutputMgr.h"
 #include "Finalization.h"
 #include "Function.h"
 #include "Type.h"
-#include "DeltaMonitor.h"
 #include "CGOptions.h"
 #include "SafeOpFlags.h"
 #include "ExtensionMgr.h"
@@ -64,17 +62,8 @@ DefaultProgramGenerator::~DefaultProgramGenerator()
 void
 DefaultProgramGenerator::initialize()
 {
-	if (DeltaMonitor::is_delta()) {
-		DeltaMonitor::CreateRndNumInstance(seed_);
-	}
-	else {
-		RandomNumber::CreateInstance(rDefaultRndNumGenerator, seed_);
-	}
-	if (CGOptions::get_reducer()) {
-		output_mgr_ = new ReducerOutputMgr();
-	} else {
-		output_mgr_ = DefaultOutputMgr::CreateInstance();
-	}
+	RandomNumber::CreateInstance(rDefaultRndNumGenerator, seed_);
+	output_mgr_ = DefaultOutputMgr::CreateInstance();
 	assert(output_mgr_);
 
 	ExtensionMgr::CreateExtension();

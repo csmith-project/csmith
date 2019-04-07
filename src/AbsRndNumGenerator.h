@@ -38,10 +38,9 @@ class Filter;
 enum RNDNUM_GENERATOR {
 	rDefaultRndNumGenerator = 0,
 	rDFSRndNumGenerator,
-	rSimpleDeltaRndNumGenerator,
 };
 
-#define MAX_RNDNUM_GENERATOR (rSimpleDeltaRndNumGenerator+1)
+#define MAX_RNDNUM_GENERATOR (rDFSRndNumGenerator+1)
 
 // I could make AbsRndNumGenerator not pure, but want to force each subclass implement
 // it's own member functions, in case of forgetting something.
