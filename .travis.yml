@@ -38,9 +38,9 @@ language: cpp
 script: >
   CXX=clang++
   CC=clang
-  ./configure &&
+  cmake . &&
   make -j2 &&
-  make check
+  python gen100.py
 
 ###############################################################################
 
