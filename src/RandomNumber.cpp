@@ -174,9 +174,7 @@ RandomNumber::doFinalization()
 	for (unsigned int i = 0; i < count; ++i) {
 		RNDNUM_GENERATOR rImpl = static_cast<RNDNUM_GENERATOR>(i);
 		generator = instance_->generators_[rImpl];
-		if (generator != NULL) {
-			delete generator;
-		}
+		delete generator;
 	}
 	delete instance_;
 }
