@@ -208,6 +208,10 @@ static void print_help()
 	cout << "  --lang-cpp : generate C++ code (C by default)." << endl << endl;
 	cout << "  --cpp11 : generate C++11 code (C++03 by default). Works if lang-cpp is enabled." << endl << endl;
 
+	//--------------------------GCC C Extensions--------------------------
+	cout<< "------------------------------GCC C Extensions------------------------------" << endl << endl;
+	cout << " --function-attributes | --no-func-attributes: enable | disable generate common function attributes (disabled by default)." << endl << endl;
+
 }
 
 static void print_advanced_help()
@@ -792,6 +796,16 @@ main(int argc, char **argv)
 
 		if (strcmp (argv[i], "--no-pointers") == 0) {
 			CGOptions::pointers(false);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--function-attributes") == 0) {
+			CGOptions::func_attr_flag(true);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--no-function_attributes") == 0) {
+			CGOptions::func_attr_flag(false);
 			continue;
 		}
 
