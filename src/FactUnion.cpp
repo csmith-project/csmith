@@ -279,12 +279,6 @@ FactUnion::imply(const Fact& f) const
 			if (t->SizeInBytes() == SIZE_UNKNOWN || other_t->SizeInBytes() == SIZE_UNKNOWN) {
 				return false;
 			}
-			if (t->SizeInBytes() <= other_t->SizeInBytes()) {
-				// only safe is the other field is not bitfield
-				if (!var->type->is_bitfield(fu.get_last_written_fid())) {
-					return true;
-				}
-			}
 		}
 	}
 	return false;
