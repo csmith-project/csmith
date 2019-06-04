@@ -404,9 +404,6 @@ public:
 	static int dead_pointer_dereference_prob(void);
 	static int dead_pointer_dereference_prob(int p);
 
-	static bool union_read_type_sensitive(void);
-	static bool union_read_type_sensitive(bool p);
-
 	static bool pre_incr_operator(void);
 	static bool pre_incr_operator(bool p);
 
@@ -584,8 +581,6 @@ private:
 	static int builtin_function_prob_;
 	static int null_pointer_dereference_prob_;
 	static int dead_pointer_dereference_prob_;
-	// flag that indicate the comformance level to C99. true means relaxed
-	static bool union_read_type_sensitive_;
 	static bool pre_incr_operator_;
 	static bool pre_decr_operator_;
 	static bool post_incr_operator_;

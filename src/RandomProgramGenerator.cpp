@@ -328,9 +328,6 @@ static void print_advanced_help()
 
 	cout << "  --dangling-ptr-deref-prob <N>: allow dangling pointers to be dereferenced with probability N% (0 by default)." << endl << endl;
 
-	cout << "  --union-read-type-sensitive | --no-union-read-type-sensitive: allow | disallow reading an union field when there is no risk of "
-		 << "reading padding bits (enabled by default)." << endl << endl;
-
 	cout << "  --max-struct-nested-level: controls the max depth of nested structs (default is 3)." << endl << endl;
 	cout << "  --no-hash-value-printf: do not emit printf on the index of an array" << endl << endl;
 	cout << "  --no-signed-char-index: do not allow a var of type char to be used as array index" << endl << endl;
@@ -1248,16 +1245,6 @@ main(int argc, char **argv)
 			if (!parse_int_arg(argv[i], &depth))
 				exit(-1);
 			CGOptions::max_nested_struct_level(depth);
-			continue;
-		}
-
-		if (strcmp (argv[i], "--union-read-type-sensitive") == 0) {
-			CGOptions::union_read_type_sensitive(true);
-			continue;
-		}
-
-		if (strcmp (argv[i], "--no-union-read-type-sensitive") == 0) {
-			CGOptions::union_read_type_sensitive(false);
 			continue;
 		}
 

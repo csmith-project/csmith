@@ -181,7 +181,6 @@ DEFINE_GETTER_SETTER_INT(inline_function_prob)
 DEFINE_GETTER_SETTER_INT(builtin_function_prob)
 DEFINE_GETTER_SETTER_INT(null_pointer_dereference_prob)
 DEFINE_GETTER_SETTER_INT(dead_pointer_dereference_prob)
-DEFINE_GETTER_SETTER_BOOL(union_read_type_sensitive);
 DEFINE_GETTER_SETTER_BOOL(pre_incr_operator);
 DEFINE_GETTER_SETTER_BOOL(pre_decr_operator);
 DEFINE_GETTER_SETTER_BOOL(post_incr_operator);
@@ -290,7 +289,6 @@ CGOptions::set_default_settings(void)
 	builtin_function_prob(50);
 	null_pointer_dereference_prob(0);
 	dead_pointer_dereference_prob(0);
-	union_read_type_sensitive(true);
 	pre_incr_operator(true);
 	pre_decr_operator(true);
 	post_incr_operator(true);
