@@ -413,8 +413,6 @@ private:
 
 	void set_prob_filter(ProbName pname);
 
-	void set_extra_filters(ProbName pname);
-
 	bool check_extra_filter(ProbName pname, int v);
 
 	void initialize_single_probs();

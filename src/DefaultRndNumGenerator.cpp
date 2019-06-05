@@ -101,7 +101,7 @@ DefaultRndNumGenerator::get_prefixed_name(const std::string &name)
 }
 
 void
-DefaultRndNumGenerator::add_number(int v, int bound, int k)
+DefaultRndNumGenerator::add_number(int, int, int)
 {
 }
 

@@ -833,7 +833,6 @@ void
 Probabilities::set_prob_filter(ProbName pname)
 {
 	prob_filters_[pname] = new ProbabilityFilter(pname);
-	set_extra_filters(pname);
 }
 
 void
@@ -853,11 +852,6 @@ Probabilities::unregister_extra_filter(ProbName pname, Filter *filter)
 	assert(impl);
 	assert(impl->extra_filters_[pname] == filter);
 	impl->extra_filters_[pname] = NULL;
-}
-
-void
-Probabilities::set_extra_filters(ProbName pname)
-{
 }
 
 bool
