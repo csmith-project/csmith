@@ -175,7 +175,6 @@ private:
 	// TODO: move `Function::...' to here?
 
 private:
-	CGContext &operator=(const CGContext &cgc);	// unimplementable
 	void sanity_check(void);
 	static const CGContext empty_context;
 };
