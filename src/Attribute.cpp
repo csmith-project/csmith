@@ -63,3 +63,20 @@ MultiChoiceAttribute::make_random()
 	else
 		return "";
 }
+
+AlignedAttribute::AlignedAttribute(string name, int prob, int alignment_factor)
+	: Attribute(name, prob), alignment(alignment_factor)
+{
+}
+
+string
+AlignedAttribute::make_random()
+{
+	if(rnd_flipcoin(prob)){
+		ostringstream oss;
+		oss << (1 << rnd_upto(alignment));
+		return name + "(" + oss.str() + ")";
+	}
+	else
+		return "";
+}
