@@ -80,3 +80,20 @@ AlignedAttribute::make_random()
 	else
 		return "";
 }
+
+SectionAttribute::SectionAttribute(string name, int prob)
+	: Attribute(name, prob)
+{
+}
+
+string
+SectionAttribute::make_random()
+{
+	if(rnd_flipcoin(prob)){
+		ostringstream oss;
+		oss << rnd_upto(10);
+		return name + "(\"usersection" + oss.str() + "\")";
+	}
+	else
+		return "";
+}
