@@ -441,7 +441,10 @@ OutputExpressionVector(const vector<const Expression*> &var, std::ostream &out)
 void
 FunctionInvocationUser::Output(std::ostream &out) const
 {
-	out << func->name << "(";
+	if(CGOptions::func_attr_flag() && rnd_flipcoin(FuncAttrProb))
+		out << func->alias_name << "(";
+	else
+		out << func->name << "(";
 	OutputExpressionVector(param_value, out);
 	out << ")";
 }

@@ -123,12 +123,20 @@ public:
 	int  visited_cnt;
 	Effect accum_eff_context;
 	void InitializeAttributes();
+
+	//GCC C Extensions
+	bool func_attr_inline;
+	void GenerateAttributes();
+	std::string alias_name;
+	void OutputForwardDeclAlias(std::ostream &);
+
 private:
 	static int deleteFunction(Function* func);
 
 	Function(const std::string &name, const Type *return_type);
 	Function(const std::string &name, const Type *return_type, bool is_builtin);
 	void OutputHeader(std::ostream &);
+	void OutputHeaderAlias(std::ostream &);
 	void OutputFormalParamList(std::ostream &);
 	void GenerateBody(const CGContext& prev_context);
 	void make_return_const();
