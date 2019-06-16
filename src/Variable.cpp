@@ -571,6 +571,29 @@ Variable::is_const_after_deref(int deref_level) const
 }
 
 bool
+Variable::is_partial_volatile_after_deref(int deref_level) const
+{
+	if (deref_level < 0) {
+		return false;
+	}
+	// check if the whole struct/union type is volatile
+	if (qfer.is_volatile_after_deref(deref_level)) {
+		return false;
+	}
+	if (type) {
+		// check individual fields
+		int i;
+		const Type* t = type;
+		for (i = 0; i < deref_level; i++) {
+			t = t->ptr_type;
+		}
+		assert(t);
+		return t->is_volatile_struct_union();
+	}
+	return false;
+}
+
+bool
 Variable::is_volatile_after_deref(int deref_level) const
 {
 	if (deref_level < 0) {
