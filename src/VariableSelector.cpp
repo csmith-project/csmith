@@ -244,6 +244,14 @@ VariableSelector::is_eligible_var(const Variable* var, int deref_level, Effect::
 		}
 		var = coll;
 	}
+
+	// Partial volatile variables are struct/union containing a
+	// volatile field. Reading/writing them through pointers is
+	// problematic. See issue #74 for details.
+	if (deref_level > 0 && var->is_partial_volatile_after_deref(deref_level)) {
+		return false;
+	}
+
 	const Effect &effect_context = cg_context.get_effect_context();
 	bool is_const = var->is_const_after_deref(deref_level);
 	bool is_volatile = var->is_volatile_after_deref(deref_level) || var->is_volatile();

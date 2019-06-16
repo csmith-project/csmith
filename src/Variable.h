@@ -86,6 +86,7 @@ public:
 	bool is_volatile(void) const;
 	bool is_access_once(void) const { return isAccessOnce; }
 	bool is_const_after_deref(int deref_level) const;
+	bool is_partial_volatile_after_deref(int deref_level) const;
 	bool is_volatile_after_deref(int deref_level) const;
 	bool is_packed_aggregate_field_var() const;
 	bool has_field_var(const Variable* v) const;
