@@ -82,6 +82,7 @@ static int builtin_functions_cnt;
 static std::vector<string> common_func_attributes;
 static std::vector<string> visibility_choices;
 static std::vector<string> sanitize_choices;
+static std::vector<string> optimize_options;
 
 void
 InitializeAttributesChoices()
@@ -107,6 +108,7 @@ InitializeAttributesChoices()
 	common_func_attributes.push_back("noinline");
 	common_func_attributes.push_back("noplt");
 	common_func_attributes.push_back("stack_protect");
+	common_func_attributes.push_back("noclone");
 
 	//Pushing visibility choices
 	visibility_choices.push_back("default");
@@ -122,6 +124,15 @@ InitializeAttributesChoices()
 	sanitize_choices.push_back("pointer-compare");
 	sanitize_choices.push_back("pointer-subtract");
 	sanitize_choices.push_back("leak");
+
+	//pushing optimization options
+	optimize_options.push_back("-O0");
+	optimize_options.push_back("-O1");
+	optimize_options.push_back("-O2");
+	optimize_options.push_back("-O3");
+	optimize_options.push_back("-Os");
+	optimize_options.push_back("-Ofast");
+	optimize_options.push_back("-Og");
 }
 
 void
@@ -135,6 +146,7 @@ Function::InitializeAttributes()
 
 		func_attr_generator.attributes.push_back(new MultiChoiceAttribute("visibility", FuncAttrProb, visibility_choices));
 		func_attr_generator.attributes.push_back(new MultiChoiceAttribute("no_sanitize", FuncAttrProb, sanitize_choices));
+		func_attr_generator.attributes.push_back(new MultiChoiceAttribute("optimize", FuncAttrProb, optimize_options));
 		func_attr_generator.attributes.push_back(new AlignedAttribute("aligned", FuncAttrProb, 16));
 		func_attr_generator.attributes.push_back(new SectionAttribute("section", FuncAttrProb));
 	}
