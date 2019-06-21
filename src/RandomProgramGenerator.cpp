@@ -211,6 +211,7 @@ static void print_help()
 	//--------------------------GCC C Extensions--------------------------
 	cout<< "------------------------------GCC C Extensions------------------------------" << endl << endl;
 	cout << " --function-attributes | --no-func-attributes: enable | disable generate common function attributes (disabled by default)." << endl << endl;
+	cout << " --type-attributes | --no-type-attributes: enable | disable generate common type attributes (disabled by default)." << endl << endl;
 
 }
 
@@ -806,6 +807,16 @@ main(int argc, char **argv)
 
 		if (strcmp (argv[i], "--no-function_attributes") == 0) {
 			CGOptions::func_attr_flag(false);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--type-attributes") == 0) {
+			CGOptions::type_attr_flag(true);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--no-type-attributes") == 0) {
+			CGOptions::type_attr_flag(false);
 			continue;
 		}
 

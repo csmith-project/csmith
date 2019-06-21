@@ -149,6 +149,7 @@ enum ProbName {
 
 	//for function attributes
 	pFuncAttrProb,
+	pTypeAttrProb,
 };
 
 #define MAX_PROB_NAME ((ProbName)(pStatementProb+1))
@@ -227,6 +228,9 @@ enum ProbName {
 
 #define FuncAttrProb \
 	Probabilities::get_prob(pFuncAttrProb)
+
+#define TypeAttrProb \
+	Probabilities::get_prob(pTypeAttrProb)
 
 //////////////////////////////////////////////////
 #define UNARY_OPS_PROB_FILTER \

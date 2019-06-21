@@ -54,6 +54,7 @@
 #include "Probabilities.h"
 #include "DepthSpec.h"
 #include "Enumerator.h"
+#include "Attribute.h"
 
 using namespace std;
 
@@ -71,7 +72,22 @@ Type *Type::void_type = NULL;
 static vector<Type *> AllTypes;
 static vector<Type *> derived_types;
 
+AttributeGenerator type_attr_generator;
+
 //////////////////////////////////////////////////////////////////////
+
+void
+InitializeTypeAttributes()
+{
+	if(CGOptions::type_attr_flag()){
+		type_attr_generator.attributes.push_back(new AlignedAttribute("aligned", TypeAttrProb, 8));
+		type_attr_generator.attributes.push_back(new AlignedAttribute("warn_if_not_aligned", TypeAttrProb, 8));
+		type_attr_generator.attributes.push_back(new BooleanAttribute("deprecated", TypeAttrProb));
+		type_attr_generator.attributes.push_back(new BooleanAttribute("unused", TypeAttrProb));
+		type_attr_generator.attributes.push_back(new BooleanAttribute("transparent_union", TypeAttrProb));
+	}
+}
+
 class NonVoidTypeFilter : public Filter
 {
 public:
@@ -1218,6 +1234,7 @@ Type::GenerateSimpleTypes(void)
 void
 GenerateAllTypes(void)
 {
+	InitializeTypeAttributes();
 	// In the exhaustive mode, we want to generate all type first.
 	// We don't support struct for now
 	if (CGOptions::dfs_exhaustive()) {
@@ -1911,7 +1928,11 @@ void OutputStructUnion(Type* type, std::ostream &out)
 			OutputUnionAssignOps(type, out, true);
 		}
 
-        out << "};";
+        out << "}";
+	if(type->eType == eStruct || type->eType == eUnion){
+		type_attr_generator.Output(out);
+	}
+	out << ";";
 		really_outputln(out);
         if (type->packed_) {
 		if (CGOptions::ccomp()) {

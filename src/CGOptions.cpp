@@ -197,6 +197,7 @@ DEFINE_GETTER_SETTER_BOOL(fast_execution);
 
 //GCC C Extensions
 DEFINE_GETTER_SETTER_BOOL(func_attr_flag);
+DEFINE_GETTER_SETTER_BOOL(type_attr_flag);
 
 void
 CGOptions::set_default_builtin_kinds()
