@@ -212,6 +212,7 @@ static void print_help()
 	cout<< "------------------------------GCC C Extensions------------------------------" << endl << endl;
 	cout << " --function-attributes | --no-func-attributes: enable | disable generate common function attributes (disabled by default)." << endl << endl;
 	cout << " --type-attributes | --no-type-attributes: enable | disable generate common type attributes (disabled by default)." << endl << endl;
+	cout << " --label-attributes | --no-label-attributes: enable | disable generate common label attributes (disabled by default)." << endl << endl;
 
 }
 
@@ -817,6 +818,16 @@ main(int argc, char **argv)
 
 		if (strcmp (argv[i], "--no-type-attributes") == 0) {
 			CGOptions::type_attr_flag(false);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--label-attributes") == 0) {
+			CGOptions::label_attr_flag(true);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--no-label-attributes") == 0) {
+			CGOptions::label_attr_flag(false);
 			continue;
 		}
 

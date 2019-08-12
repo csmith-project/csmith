@@ -84,11 +84,24 @@
 #include "util.h"
 #include "StringUtils.h"
 #include "VariableSelector.h"
+#include "Attribute.h"
 
 using namespace std;
 const Statement* Statement::failed_stm;
 
+AttributeGenerator Statement::label_attr_generator;
+
 ///////////////////////////////////////////////////////////////////////////////
+
+void
+InitializeLabelAttributes()
+{
+	if(CGOptions::label_attr_flag()){
+		Statement::label_attr_generator.attributes.push_back(new BooleanAttribute("hot", TypeAttrProb));
+		Statement::label_attr_generator.attributes.push_back(new BooleanAttribute("cold", TypeAttrProb));
+	}
+}
+
 class StatementFilter : public Filter
 {
 public:
@@ -97,6 +110,8 @@ public:
 	virtual ~StatementFilter(void);
 
 	virtual bool filter(int v) const;
+
+	static bool label_attr_generate;
 private:
 	const CGContext &cg_context_;
 };
@@ -104,13 +119,18 @@ private:
 StatementFilter::StatementFilter(const CGContext &cg_context)
 	: cg_context_(cg_context)
 {
-
+	if(!label_attr_generate){
+		InitializeLabelAttributes();
+		label_attr_generate = true;
+	}
 }
 
 StatementFilter::~StatementFilter(void)
 {
 
 }
+
+bool StatementFilter::label_attr_generate = false;
 
 // use a table to define probabilities of different kinds of statements
 // Must initialize it before use
@@ -951,7 +971,9 @@ Statement::pre_output(std::ostream &out, FactMgr* /* fm */, int indent) const
 	vector<const StatementGoto*> gotos;
 	if (find_jump_sources(gotos)) {
 		assert(gotos.size() > 0);
-		out << gotos[0]->label << ":" << endl;
+		out << gotos[0]->label << ":";
+		label_attr_generator.Output(out);
+		out << endl;
 		return 1;
 		//for (j=0; j<gotos.size(); j++) {
 		//	gotos[j]->output_skipped_var_inits(out, indent);
