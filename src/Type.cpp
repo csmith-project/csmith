@@ -72,7 +72,8 @@ Type *Type::void_type = NULL;
 static vector<Type *> AllTypes;
 static vector<Type *> derived_types;
 
-AttributeGenerator type_attr_generator;
+AttributeGenerator struct_type_attr_generator;
+AttributeGenerator union_type_attr_generator;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -80,11 +81,15 @@ void
 InitializeTypeAttributes()
 {
 	if(CGOptions::type_attr_flag()){
-		type_attr_generator.attributes.push_back(new AlignedAttribute("aligned", TypeAttrProb, 8));
-		type_attr_generator.attributes.push_back(new AlignedAttribute("warn_if_not_aligned", TypeAttrProb, 8));
-		type_attr_generator.attributes.push_back(new BooleanAttribute("deprecated", TypeAttrProb));
-		type_attr_generator.attributes.push_back(new BooleanAttribute("unused", TypeAttrProb));
-		type_attr_generator.attributes.push_back(new BooleanAttribute("transparent_union", TypeAttrProb));
+		struct_type_attr_generator.attributes.push_back(new AlignedAttribute("aligned", TypeAttrProb, 8));
+		struct_type_attr_generator.attributes.push_back(new AlignedAttribute("warn_if_not_aligned", TypeAttrProb, 8));
+		struct_type_attr_generator.attributes.push_back(new BooleanAttribute("deprecated", TypeAttrProb));
+		struct_type_attr_generator.attributes.push_back(new BooleanAttribute("unused", TypeAttrProb));
+		union_type_attr_generator.attributes.push_back(new AlignedAttribute("aligned", TypeAttrProb, 8));
+                union_type_attr_generator.attributes.push_back(new AlignedAttribute("warn_if_not_aligned", TypeAttrProb, 8));
+                union_type_attr_generator.attributes.push_back(new BooleanAttribute("deprecated", TypeAttrProb));
+                union_type_attr_generator.attributes.push_back(new BooleanAttribute("unused", TypeAttrProb));
+                union_type_attr_generator.attributes.push_back(new BooleanAttribute("transparent_union", TypeAttrProb));
 	}
 }
 
@@ -1930,7 +1935,8 @@ void OutputStructUnion(Type* type, std::ostream &out)
 
         out << "}";
 	if(type->eType == eStruct || type->eType == eUnion){
-		type_attr_generator.Output(out);
+		struct_type_attr_generator.Output(out);
+		union_type_attr_generator.Output(out);
 	}
 	out << ";";
 		really_outputln(out);

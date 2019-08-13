@@ -58,6 +58,7 @@ class Function;
 class Block;
 class Lhs;
 class ArrayVariable;
+class AttributeGenerator;
 
 class Variable
 {
@@ -159,6 +160,9 @@ public:
 	static std::vector<const Variable*> &get_last_ctrl_vars();
 
 	static const char sink_var_name[];
+
+	static bool var_attr_generate;
+	static AttributeGenerator var_attr_generator;
 
 private:
 	Variable(const std::string &name, const Type *type, const Expression* init, const CVQualifiers* qfer);
