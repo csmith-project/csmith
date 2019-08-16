@@ -193,8 +193,8 @@ static void print_help()
 	cout << "  --paranoid | --no-paranoid: enable | disable pointer-related assertions (disabled by default)." << endl << endl;
 	cout << "  --pointers | --no-pointers: enable | disable pointers (enabled by default)." << endl << endl;
 	cout << "  --quiet: generate programs with less comments (disabled by default)." << endl << endl;
-	cout << "  --structs | --no-structs: enable | disable to generate structs (enable by default)." << endl << endl;
-	cout << "  --unions | --no-unions: enable | disable to generate unions (enable by default)." << endl << endl;
+	cout << "  --structs | --no-structs: enable | disable to generate structs (disabled by default)." << endl << endl;
+	cout << "  --unions | --no-unions: enable | disable to generate unions (disabled by default)." << endl << endl;
 	cout << "  --volatiles | --no-volatiles: enable | disable volatiles (enabled by default)." << endl << endl;
 	cout << "  --volatile-pointers | --no-volatile-pointers: enable | disable volatile pointers (enabled by default)." << endl << endl;
 	cout << "  --const-pointers | --no-const-pointers: enable | disable const pointers (enabled by default)." << endl << endl;
