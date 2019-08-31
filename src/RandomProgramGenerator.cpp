@@ -910,7 +910,7 @@ main(int argc, char **argv)
 			continue;
 		}
 
-		if (strcmp (argv[i], "--global-variabless") == 0) {
+		if (strcmp (argv[i], "--global-variables") == 0) {
 			CGOptions::global_variables(true);
 			continue;
 		}
