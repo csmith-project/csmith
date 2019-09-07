@@ -499,6 +499,11 @@ Probabilities::set_single_name_maps()
 
 	// group for simple types which equal probability
 	set_single_name("safe_ops_size_prob", pSafeOpsSizeProb);
+
+	/*------------GCC C Extensions---------------*/
+
+	//for choosing function attributes
+	set_single_name("func_attr_flag", pFuncAttrProb);
 }
 
 void
@@ -538,6 +543,9 @@ Probabilities::initialize_single_probs()
 	m[pExhaustiveBitFieldsProb] = 10;
 	m[pBitFieldsSignedProb] = 50;
 	m[pSafeOpsSignedProb] = 50;
+
+	//GCC C Extensions
+	m[pFuncAttrProb] = 30;
 
 	if (CGOptions::volatiles())
 		m[pRegularVolatileProb] = 50;

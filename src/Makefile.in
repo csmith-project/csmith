@@ -117,22 +117,22 @@ PROGRAMS = $(bin_PROGRAMS)
 am__csmith_SOURCES_DIST = AbsExtension.cpp AbsExtension.h \
 	AbsProgramGenerator.cpp AbsProgramGenerator.h \
 	AbsRndNumGenerator.cpp AbsRndNumGenerator.h ArrayVariable.cpp \
-	ArrayVariable.h Block.cpp Block.h Bookkeeper.cpp Bookkeeper.h \
-	CFGEdge.cpp CFGEdge.h CGContext.cpp CGContext.h CGOptions.cpp \
-	CGOptions.h CVQualifiers.cpp CVQualifiers.h Common.h \
-	CommonMacros.h CompatibleChecker.cpp CompatibleChecker.h \
-	Constant.cpp Constant.h CoverageTestExtension.cpp \
-	CoverageTestExtension.h CrestExtension.cpp CrestExtension.h \
-	DFSOutputMgr.cpp DFSOutputMgr.h DFSProgramGenerator.cpp \
-	DFSProgramGenerator.h DFSRndNumGenerator.cpp \
-	DFSRndNumGenerator.h DefaultOutputMgr.cpp DefaultOutputMgr.h \
+	ArrayVariable.h Attribute.cpp Attribute.h Block.cpp Block.h \
+	Bookkeeper.cpp Bookkeeper.h CFGEdge.cpp CFGEdge.h \
+	CGContext.cpp CGContext.h CGOptions.cpp CGOptions.h \
+	CVQualifiers.cpp CVQualifiers.h Common.h CommonMacros.h \
+	CompatibleChecker.cpp CompatibleChecker.h Constant.cpp \
+	Constant.h CoverageTestExtension.cpp CoverageTestExtension.h \
+	CrestExtension.cpp CrestExtension.h DFSOutputMgr.cpp \
+	DFSOutputMgr.h DFSProgramGenerator.cpp DFSProgramGenerator.h \
+	DFSRndNumGenerator.cpp DFSRndNumGenerator.h \
+	DefaultOutputMgr.cpp DefaultOutputMgr.h \
 	DefaultProgramGenerator.cpp DefaultProgramGenerator.h \
 	DefaultRndNumGenerator.cpp DefaultRndNumGenerator.h \
-	DepthSpec.cpp DepthSpec.h \
-	Effect.cpp Effect.h Enumerator.h Error.cpp Error.h \
-	Expression.cpp Expression.h ExpressionAssign.cpp \
-	ExpressionAssign.h ExpressionComma.cpp ExpressionComma.h \
-	ExpressionFuncall.cpp ExpressionFuncall.h \
+	DepthSpec.cpp DepthSpec.h Effect.cpp Effect.h Enumerator.h \
+	Error.cpp Error.h Expression.cpp Expression.h \
+	ExpressionAssign.cpp ExpressionAssign.h ExpressionComma.cpp \
+	ExpressionComma.h ExpressionFuncall.cpp ExpressionFuncall.h \
 	ExpressionVariable.cpp ExpressionVariable.h ExtensionMgr.cpp \
 	ExtensionMgr.h ExtensionValue.cpp ExtensionValue.h Fact.cpp \
 	Fact.h FactMgr.cpp FactMgr.h FactPointTo.cpp FactPointTo.h \
@@ -143,13 +143,12 @@ am__csmith_SOURCES_DIST = AbsExtension.cpp AbsExtension.h \
 	FunctionInvocationUnary.h FunctionInvocationUser.cpp \
 	FunctionInvocationUser.h KleeExtension.cpp KleeExtension.h \
 	Lhs.cpp Lhs.h LinearSequence.cpp LinearSequence.h \
-	OutputMgr.cpp OutputMgr.h \
-	PartialExpander.cpp PartialExpander.h Probabilities.cpp \
-	Probabilities.h ProbabilityTable.h RandomNumber.cpp \
-	RandomNumber.h RandomProgramGenerator.cpp \
-	SafeOpFlags.cpp SafeOpFlags.h Sequence.cpp Sequence.h \
-	SequenceFactory.cpp SequenceFactory.h SequenceLineParser.h \
-	Statement.cpp Statement.h \
+	OutputMgr.cpp OutputMgr.h PartialExpander.cpp \
+	PartialExpander.h Probabilities.cpp Probabilities.h \
+	ProbabilityTable.h RandomNumber.cpp RandomNumber.h \
+	RandomProgramGenerator.cpp SafeOpFlags.cpp SafeOpFlags.h \
+	Sequence.cpp Sequence.h SequenceFactory.cpp SequenceFactory.h \
+	SequenceLineParser.h Statement.cpp Statement.h \
 	StatementArrayOp.cpp StatementArrayOp.h StatementAssign.cpp \
 	StatementAssign.h StatementBreak.cpp StatementBreak.h \
 	StatementContinue.cpp StatementContinue.h StatementExpr.cpp \
@@ -168,39 +167,38 @@ am__dirstamp = $(am__leading_dot)dirstamp
 @HAVE_LRAND48_FALSE@	rand48/srand48.$(OBJEXT)
 am_csmith_OBJECTS = AbsExtension.$(OBJEXT) \
 	AbsProgramGenerator.$(OBJEXT) AbsRndNumGenerator.$(OBJEXT) \
-	ArrayVariable.$(OBJEXT) Block.$(OBJEXT) Bookkeeper.$(OBJEXT) \
-	CFGEdge.$(OBJEXT) CGContext.$(OBJEXT) CGOptions.$(OBJEXT) \
-	CVQualifiers.$(OBJEXT) CompatibleChecker.$(OBJEXT) \
-	Constant.$(OBJEXT) CoverageTestExtension.$(OBJEXT) \
-	CrestExtension.$(OBJEXT) DFSOutputMgr.$(OBJEXT) \
-	DFSProgramGenerator.$(OBJEXT) DFSRndNumGenerator.$(OBJEXT) \
-	DefaultOutputMgr.$(OBJEXT) DefaultProgramGenerator.$(OBJEXT) \
-	DefaultRndNumGenerator.$(OBJEXT) \
-	DepthSpec.$(OBJEXT) Effect.$(OBJEXT) Error.$(OBJEXT) \
-	Expression.$(OBJEXT) ExpressionAssign.$(OBJEXT) \
-	ExpressionComma.$(OBJEXT) ExpressionFuncall.$(OBJEXT) \
-	ExpressionVariable.$(OBJEXT) ExtensionMgr.$(OBJEXT) \
-	ExtensionValue.$(OBJEXT) Fact.$(OBJEXT) FactMgr.$(OBJEXT) \
-	FactPointTo.$(OBJEXT) FactUnion.$(OBJEXT) Filter.$(OBJEXT) \
-	Finalization.$(OBJEXT) Function.$(OBJEXT) \
+	ArrayVariable.$(OBJEXT) Attribute.$(OBJEXT) Block.$(OBJEXT) \
+	Bookkeeper.$(OBJEXT) CFGEdge.$(OBJEXT) CGContext.$(OBJEXT) \
+	CGOptions.$(OBJEXT) CVQualifiers.$(OBJEXT) \
+	CompatibleChecker.$(OBJEXT) Constant.$(OBJEXT) \
+	CoverageTestExtension.$(OBJEXT) CrestExtension.$(OBJEXT) \
+	DFSOutputMgr.$(OBJEXT) DFSProgramGenerator.$(OBJEXT) \
+	DFSRndNumGenerator.$(OBJEXT) DefaultOutputMgr.$(OBJEXT) \
+	DefaultProgramGenerator.$(OBJEXT) \
+	DefaultRndNumGenerator.$(OBJEXT) DepthSpec.$(OBJEXT) \
+	Effect.$(OBJEXT) Error.$(OBJEXT) Expression.$(OBJEXT) \
+	ExpressionAssign.$(OBJEXT) ExpressionComma.$(OBJEXT) \
+	ExpressionFuncall.$(OBJEXT) ExpressionVariable.$(OBJEXT) \
+	ExtensionMgr.$(OBJEXT) ExtensionValue.$(OBJEXT) Fact.$(OBJEXT) \
+	FactMgr.$(OBJEXT) FactPointTo.$(OBJEXT) FactUnion.$(OBJEXT) \
+	Filter.$(OBJEXT) Finalization.$(OBJEXT) Function.$(OBJEXT) \
 	FunctionInvocation.$(OBJEXT) \
 	FunctionInvocationBinary.$(OBJEXT) \
 	FunctionInvocationUnary.$(OBJEXT) \
 	FunctionInvocationUser.$(OBJEXT) KleeExtension.$(OBJEXT) \
-	Lhs.$(OBJEXT) LinearSequence.$(OBJEXT) \
-	OutputMgr.$(OBJEXT) PartialExpander.$(OBJEXT) \
-	Probabilities.$(OBJEXT) RandomNumber.$(OBJEXT) \
-	RandomProgramGenerator.$(OBJEXT) SafeOpFlags.$(OBJEXT) \
-	Sequence.$(OBJEXT) SequenceFactory.$(OBJEXT) \
-	Statement.$(OBJEXT) StatementArrayOp.$(OBJEXT) \
-	StatementAssign.$(OBJEXT) StatementBreak.$(OBJEXT) \
-	StatementContinue.$(OBJEXT) StatementExpr.$(OBJEXT) \
-	StatementFor.$(OBJEXT) StatementGoto.$(OBJEXT) \
-	StatementIf.$(OBJEXT) StatementReturn.$(OBJEXT) \
-	StringUtils.$(OBJEXT) Type.$(OBJEXT) Variable.$(OBJEXT) \
-	VariableSelector.$(OBJEXT) VectorFilter.$(OBJEXT) \
-	platform.$(OBJEXT) random.$(OBJEXT) util.$(OBJEXT) \
-	$(am__objects_1)
+	Lhs.$(OBJEXT) LinearSequence.$(OBJEXT) OutputMgr.$(OBJEXT) \
+	PartialExpander.$(OBJEXT) Probabilities.$(OBJEXT) \
+	RandomNumber.$(OBJEXT) RandomProgramGenerator.$(OBJEXT) \
+	SafeOpFlags.$(OBJEXT) Sequence.$(OBJEXT) \
+	SequenceFactory.$(OBJEXT) Statement.$(OBJEXT) \
+	StatementArrayOp.$(OBJEXT) StatementAssign.$(OBJEXT) \
+	StatementBreak.$(OBJEXT) StatementContinue.$(OBJEXT) \
+	StatementExpr.$(OBJEXT) StatementFor.$(OBJEXT) \
+	StatementGoto.$(OBJEXT) StatementIf.$(OBJEXT) \
+	StatementReturn.$(OBJEXT) StringUtils.$(OBJEXT) Type.$(OBJEXT) \
+	Variable.$(OBJEXT) VariableSelector.$(OBJEXT) \
+	VectorFilter.$(OBJEXT) platform.$(OBJEXT) random.$(OBJEXT) \
+	util.$(OBJEXT) $(am__objects_1)
 nodist_csmith_OBJECTS = git_version.$(OBJEXT)
 csmith_OBJECTS = $(am_csmith_OBJECTS) $(nodist_csmith_OBJECTS)
 csmith_LDADD = $(LDADD)
@@ -226,18 +224,17 @@ am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/AbsExtension.Po \
 	./$(DEPDIR)/AbsProgramGenerator.Po \
 	./$(DEPDIR)/AbsRndNumGenerator.Po ./$(DEPDIR)/ArrayVariable.Po \
-	./$(DEPDIR)/Block.Po ./$(DEPDIR)/Bookkeeper.Po \
-	./$(DEPDIR)/CFGEdge.Po ./$(DEPDIR)/CGContext.Po \
-	./$(DEPDIR)/CGOptions.Po ./$(DEPDIR)/CVQualifiers.Po \
-	./$(DEPDIR)/CompatibleChecker.Po ./$(DEPDIR)/Constant.Po \
-	./$(DEPDIR)/CoverageTestExtension.Po \
+	./$(DEPDIR)/Attribute.Po ./$(DEPDIR)/Block.Po \
+	./$(DEPDIR)/Bookkeeper.Po ./$(DEPDIR)/CFGEdge.Po \
+	./$(DEPDIR)/CGContext.Po ./$(DEPDIR)/CGOptions.Po \
+	./$(DEPDIR)/CVQualifiers.Po ./$(DEPDIR)/CompatibleChecker.Po \
+	./$(DEPDIR)/Constant.Po ./$(DEPDIR)/CoverageTestExtension.Po \
 	./$(DEPDIR)/CrestExtension.Po ./$(DEPDIR)/DFSOutputMgr.Po \
 	./$(DEPDIR)/DFSProgramGenerator.Po \
 	./$(DEPDIR)/DFSRndNumGenerator.Po \
 	./$(DEPDIR)/DefaultOutputMgr.Po \
 	./$(DEPDIR)/DefaultProgramGenerator.Po \
-	./$(DEPDIR)/DefaultRndNumGenerator.Po \
-	./$(DEPDIR)/DepthSpec.Po \
+	./$(DEPDIR)/DefaultRndNumGenerator.Po ./$(DEPDIR)/DepthSpec.Po \
 	./$(DEPDIR)/Effect.Po ./$(DEPDIR)/Error.Po \
 	./$(DEPDIR)/Expression.Po ./$(DEPDIR)/ExpressionAssign.Po \
 	./$(DEPDIR)/ExpressionComma.Po \
@@ -252,12 +249,12 @@ am__depfiles_remade = ./$(DEPDIR)/AbsExtension.Po \
 	./$(DEPDIR)/FunctionInvocationUnary.Po \
 	./$(DEPDIR)/FunctionInvocationUser.Po \
 	./$(DEPDIR)/KleeExtension.Po ./$(DEPDIR)/Lhs.Po \
-	./$(DEPDIR)/LinearSequence.Po \
-	./$(DEPDIR)/OutputMgr.Po ./$(DEPDIR)/PartialExpander.Po \
-	./$(DEPDIR)/Probabilities.Po ./$(DEPDIR)/RandomNumber.Po \
-	./$(DEPDIR)/RandomProgramGenerator.Po ./$(DEPDIR)/SafeOpFlags.Po \
-	./$(DEPDIR)/Sequence.Po ./$(DEPDIR)/SequenceFactory.Po \
-	./$(DEPDIR)/Statement.Po \
+	./$(DEPDIR)/LinearSequence.Po ./$(DEPDIR)/OutputMgr.Po \
+	./$(DEPDIR)/PartialExpander.Po ./$(DEPDIR)/Probabilities.Po \
+	./$(DEPDIR)/RandomNumber.Po \
+	./$(DEPDIR)/RandomProgramGenerator.Po \
+	./$(DEPDIR)/SafeOpFlags.Po ./$(DEPDIR)/Sequence.Po \
+	./$(DEPDIR)/SequenceFactory.Po ./$(DEPDIR)/Statement.Po \
 	./$(DEPDIR)/StatementArrayOp.Po ./$(DEPDIR)/StatementAssign.Po \
 	./$(DEPDIR)/StatementBreak.Po ./$(DEPDIR)/StatementContinue.Po \
 	./$(DEPDIR)/StatementExpr.Po ./$(DEPDIR)/StatementFor.Po \
@@ -473,22 +470,22 @@ git_version_edit = sed \
 csmith_SOURCES = AbsExtension.cpp AbsExtension.h \
 	AbsProgramGenerator.cpp AbsProgramGenerator.h \
 	AbsRndNumGenerator.cpp AbsRndNumGenerator.h ArrayVariable.cpp \
-	ArrayVariable.h Block.cpp Block.h Bookkeeper.cpp Bookkeeper.h \
-	CFGEdge.cpp CFGEdge.h CGContext.cpp CGContext.h CGOptions.cpp \
-	CGOptions.h CVQualifiers.cpp CVQualifiers.h Common.h \
-	CommonMacros.h CompatibleChecker.cpp CompatibleChecker.h \
-	Constant.cpp Constant.h CoverageTestExtension.cpp \
-	CoverageTestExtension.h CrestExtension.cpp CrestExtension.h \
-	DFSOutputMgr.cpp DFSOutputMgr.h DFSProgramGenerator.cpp \
-	DFSProgramGenerator.h DFSRndNumGenerator.cpp \
-	DFSRndNumGenerator.h DefaultOutputMgr.cpp DefaultOutputMgr.h \
+	ArrayVariable.h Attribute.cpp Attribute.h Block.cpp Block.h \
+	Bookkeeper.cpp Bookkeeper.h CFGEdge.cpp CFGEdge.h \
+	CGContext.cpp CGContext.h CGOptions.cpp CGOptions.h \
+	CVQualifiers.cpp CVQualifiers.h Common.h CommonMacros.h \
+	CompatibleChecker.cpp CompatibleChecker.h Constant.cpp \
+	Constant.h CoverageTestExtension.cpp CoverageTestExtension.h \
+	CrestExtension.cpp CrestExtension.h DFSOutputMgr.cpp \
+	DFSOutputMgr.h DFSProgramGenerator.cpp DFSProgramGenerator.h \
+	DFSRndNumGenerator.cpp DFSRndNumGenerator.h \
+	DefaultOutputMgr.cpp DefaultOutputMgr.h \
 	DefaultProgramGenerator.cpp DefaultProgramGenerator.h \
 	DefaultRndNumGenerator.cpp DefaultRndNumGenerator.h \
-	DepthSpec.cpp DepthSpec.h \
-	Effect.cpp Effect.h Enumerator.h Error.cpp Error.h \
-	Expression.cpp Expression.h ExpressionAssign.cpp \
-	ExpressionAssign.h ExpressionComma.cpp ExpressionComma.h \
-	ExpressionFuncall.cpp ExpressionFuncall.h \
+	DepthSpec.cpp DepthSpec.h Effect.cpp Effect.h Enumerator.h \
+	Error.cpp Error.h Expression.cpp Expression.h \
+	ExpressionAssign.cpp ExpressionAssign.h ExpressionComma.cpp \
+	ExpressionComma.h ExpressionFuncall.cpp ExpressionFuncall.h \
 	ExpressionVariable.cpp ExpressionVariable.h ExtensionMgr.cpp \
 	ExtensionMgr.h ExtensionValue.cpp ExtensionValue.h Fact.cpp \
 	Fact.h FactMgr.cpp FactMgr.h FactPointTo.cpp FactPointTo.h \
@@ -499,13 +496,12 @@ csmith_SOURCES = AbsExtension.cpp AbsExtension.h \
 	FunctionInvocationUnary.h FunctionInvocationUser.cpp \
 	FunctionInvocationUser.h KleeExtension.cpp KleeExtension.h \
 	Lhs.cpp Lhs.h LinearSequence.cpp LinearSequence.h \
-	OutputMgr.cpp OutputMgr.h \
-	PartialExpander.cpp PartialExpander.h Probabilities.cpp \
-	Probabilities.h ProbabilityTable.h RandomNumber.cpp \
-	RandomNumber.h RandomProgramGenerator.cpp \
-	SafeOpFlags.cpp SafeOpFlags.h Sequence.cpp Sequence.h \
-	SequenceFactory.cpp SequenceFactory.h SequenceLineParser.h \
-	Statement.cpp Statement.h \
+	OutputMgr.cpp OutputMgr.h PartialExpander.cpp \
+	PartialExpander.h Probabilities.cpp Probabilities.h \
+	ProbabilityTable.h RandomNumber.cpp RandomNumber.h \
+	RandomProgramGenerator.cpp SafeOpFlags.cpp SafeOpFlags.h \
+	Sequence.cpp Sequence.h SequenceFactory.cpp SequenceFactory.h \
+	SequenceLineParser.h Statement.cpp Statement.h \
 	StatementArrayOp.cpp StatementArrayOp.h StatementAssign.cpp \
 	StatementAssign.h StatementBreak.cpp StatementBreak.h \
 	StatementContinue.cpp StatementContinue.h StatementExpr.cpp \
@@ -643,6 +639,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/AbsProgramGenerator.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/AbsRndNumGenerator.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ArrayVariable.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Attribute.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Block.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Bookkeeper.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CFGEdge.Po@am__quote@ # am--include-marker
@@ -908,6 +905,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/AbsProgramGenerator.Po
 	-rm -f ./$(DEPDIR)/AbsRndNumGenerator.Po
 	-rm -f ./$(DEPDIR)/ArrayVariable.Po
+	-rm -f ./$(DEPDIR)/Attribute.Po
 	-rm -f ./$(DEPDIR)/Block.Po
 	-rm -f ./$(DEPDIR)/Bookkeeper.Po
 	-rm -f ./$(DEPDIR)/CFGEdge.Po
@@ -1027,6 +1025,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/AbsProgramGenerator.Po
 	-rm -f ./$(DEPDIR)/AbsRndNumGenerator.Po
 	-rm -f ./$(DEPDIR)/ArrayVariable.Po
+	-rm -f ./$(DEPDIR)/Attribute.Po
 	-rm -f ./$(DEPDIR)/Block.Po
 	-rm -f ./$(DEPDIR)/Bookkeeper.Po
 	-rm -f ./$(DEPDIR)/CFGEdge.Po

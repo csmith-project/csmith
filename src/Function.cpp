@@ -66,16 +66,77 @@
 #include "DepthSpec.h"
 #include "ExtensionMgr.h"
 #include "OutputMgr.h"
+#include "Attribute.h"
 
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////////
 
+AttributeGenerator func_attr_generator;
 static vector<Function*> FuncList;		// List of all functions in the program
 static vector<FactMgr*>  FMList;        // list of fact managers for each function
 static long cur_func_idx;				// Index into FuncList that we are currently working on
 static bool param_first=true;			// Flag to track output of commas
 static int builtin_functions_cnt;
+
+static std::vector<string> common_func_attributes;
+static std::vector<string> visibility_choices;
+static std::vector<string> sanitize_choices;
+
+void
+InitializeAttributesChoices()
+{
+	//Pushing common function attributes
+	common_func_attributes.push_back("artificial");
+	common_func_attributes.push_back("flatten");
+	common_func_attributes.push_back("no_reorder");
+	common_func_attributes.push_back("hot");
+	common_func_attributes.push_back("cold");
+	common_func_attributes.push_back("noipa");
+	common_func_attributes.push_back("used");
+	common_func_attributes.push_back("unused");
+	common_func_attributes.push_back("nothrow");
+	common_func_attributes.push_back("deprecated");
+	common_func_attributes.push_back("no_icf");
+	common_func_attributes.push_back("no_profile_instrument_function");
+	common_func_attributes.push_back("no_instrument_function");
+	common_func_attributes.push_back("no_sanitize_address");
+	common_func_attributes.push_back("no_sanitize_thread");
+	common_func_attributes.push_back("no_sanitize_undefined");
+	common_func_attributes.push_back("no_split_stack");
+	common_func_attributes.push_back("noinline");
+	common_func_attributes.push_back("noplt");
+	common_func_attributes.push_back("stack_protect");
+
+	//Pushing visibility choices
+	visibility_choices.push_back("default");
+	visibility_choices.push_back("hidden");
+	visibility_choices.push_back("protected");
+	visibility_choices.push_back("internal");
+
+	//Pushing sanitize choices
+	sanitize_choices.push_back("address");
+	sanitize_choices.push_back("thread");
+	sanitize_choices.push_back("undefined");
+	sanitize_choices.push_back("kernel-address");
+	sanitize_choices.push_back("pointer-compare");
+	sanitize_choices.push_back("pointer-subtract");
+	sanitize_choices.push_back("leak");
+}
+
+void
+Function::InitializeAttributes()
+{
+	if(CGOptions::func_attr_flag()){
+		InitializeAttributesChoices();
+		vector<string>::iterator itr;
+		for(itr = common_func_attributes.begin(); itr < common_func_attributes.end(); itr++)
+			func_attr_generator.attributes.push_back(new BooleanAttribute(*itr, FuncAttrProb));
+
+		func_attr_generator.attributes.push_back(new MultiChoiceAttribute("visibility", FuncAttrProb, visibility_choices));
+		func_attr_generator.attributes.push_back(new MultiChoiceAttribute("no_sanitize", FuncAttrProb, sanitize_choices));
+	}
+}
 
 /*
  * find FactMgr for a function
@@ -481,6 +542,8 @@ Function::make_first(void)
 
 	// collect info about global dangling pointers
 	fm->find_dangling_global_ptrs(f);
+
+	f->InitializeAttributes();
 	return f;
 }
 
@@ -552,6 +615,7 @@ Function::OutputForwardDecl(std::ostream &out)
 	if (is_builtin)
 		return;
 	OutputHeader(out);
+	func_attr_generator.Output(out);
 	out << ";";
 	outputln(out);
 }

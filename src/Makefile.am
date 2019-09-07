@@ -60,6 +60,8 @@ csmith_SOURCES = \
 	AbsRndNumGenerator.h \
 	ArrayVariable.cpp \
 	ArrayVariable.h \
+	Attribute.cpp \
+	Attribute.h \
 	Block.cpp \
 	Block.h \
 	Bookkeeper.cpp \

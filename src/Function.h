@@ -122,7 +122,7 @@ public:
 	bool is_builtin;
 	int  visited_cnt;
 	Effect accum_eff_context;
-
+	void InitializeAttributes();
 private:
 	static int deleteFunction(Function* func);
 

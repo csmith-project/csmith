@@ -457,6 +457,9 @@ public:
   static bool fast_execution(void);
   static bool fast_execution(bool p);
 
+	//GCC C Extensions
+	static bool func_attr_flag(void);
+	static bool func_attr_flag(bool p);
 private:
 	static bool enabled_builtin_kind(const string &kind);
 
@@ -598,6 +601,9 @@ private:
 	// flag to indicate language
 	static bool lang_cpp_;
 	static bool cpp11_;
+
+	//GCC C Extensions
+	static bool	func_attr_flag_;
 private:
 	CGOptions(void);
 	CGOptions(CGOptions &cgo);
