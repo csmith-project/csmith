@@ -135,6 +135,7 @@ Function::InitializeAttributes()
 
 		func_attr_generator.attributes.push_back(new MultiChoiceAttribute("visibility", FuncAttrProb, visibility_choices));
 		func_attr_generator.attributes.push_back(new MultiChoiceAttribute("no_sanitize", FuncAttrProb, sanitize_choices));
+		func_attr_generator.attributes.push_back(new AlignedAttribute("aligned", FuncAttrProb, 16));
 	}
 }
 
