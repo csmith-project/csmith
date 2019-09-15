@@ -1,5 +1,5 @@
 ##
-## Copyright (c) 2017 The University of Utah
+## Copyright (c) 2017, 2019 The University of Utah
 ## All rights reserved.
 ##
 ## This file is part of `csmith', a random generator of C programs.
@@ -29,7 +29,7 @@
 ###############################################################################
 
 sudo: required
-dist: trusty
+dist: bionic
 language: cpp
 
 # before_install:
