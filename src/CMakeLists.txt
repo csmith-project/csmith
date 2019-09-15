@@ -1,6 +1,6 @@
 ## -*- mode: CMake -*-
 ##
-## Copyright (c) 2017 The University of Utah
+## Copyright (c) 2017, 2019 The University of Utah
 ## All rights reserved.
 ##
 ## This file is part of `csmith', a random generator of C programs.
@@ -207,6 +207,13 @@ endif()
 add_executable(csmith
   ${csmith_SOURCES}
   )
+
+# Use C++14.
+set_target_properties(csmith PROPERTIES
+  CXX_STANDARD 14
+  CXX_EXTENSIONS NO
+  )
+# CXX_STANDARD_REQUIRED YES
 
 if(BSD_LIBRARY)
   target_link_libraries(csmith "${BSD_LIBRARY}")
