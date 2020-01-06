@@ -80,73 +80,22 @@ static bool param_first=true;			// Flag to track output of commas
 static int builtin_functions_cnt;
 
 static std::vector<string> common_func_attributes;
-static std::vector<string> visibility_choices;
-static std::vector<string> sanitize_choices;
-static std::vector<string> optimize_options;
-
-void
-InitializeAttributesChoices()
-{
-	//Pushing common function attributes
-	common_func_attributes.push_back("artificial");
-	common_func_attributes.push_back("flatten");
-	common_func_attributes.push_back("no_reorder");
-	common_func_attributes.push_back("hot");
-	common_func_attributes.push_back("cold");
-	common_func_attributes.push_back("noipa");
-	common_func_attributes.push_back("used");
-	common_func_attributes.push_back("unused");
-	common_func_attributes.push_back("nothrow");
-	common_func_attributes.push_back("deprecated");
-	common_func_attributes.push_back("no_icf");
-	common_func_attributes.push_back("no_profile_instrument_function");
-	common_func_attributes.push_back("no_instrument_function");
-	common_func_attributes.push_back("no_sanitize_address");
-	common_func_attributes.push_back("no_sanitize_thread");
-	common_func_attributes.push_back("no_sanitize_undefined");
-	common_func_attributes.push_back("no_split_stack");
-	common_func_attributes.push_back("noinline");
-	common_func_attributes.push_back("noplt");
-	common_func_attributes.push_back("stack_protect");
-	common_func_attributes.push_back("noclone");
-
-	//Pushing visibility choices
-	visibility_choices.push_back("default");
-	visibility_choices.push_back("hidden");
-	visibility_choices.push_back("protected");
-	visibility_choices.push_back("internal");
-
-	//Pushing sanitize choices
-	sanitize_choices.push_back("address");
-	sanitize_choices.push_back("thread");
-	sanitize_choices.push_back("undefined");
-	sanitize_choices.push_back("kernel-address");
-	sanitize_choices.push_back("pointer-compare");
-	sanitize_choices.push_back("pointer-subtract");
-	sanitize_choices.push_back("leak");
-
-	//pushing optimization options
-	optimize_options.push_back("-O0");
-	optimize_options.push_back("-O1");
-	optimize_options.push_back("-O2");
-	optimize_options.push_back("-O3");
-	optimize_options.push_back("-Os");
-	optimize_options.push_back("-Ofast");
-	optimize_options.push_back("-Og");
-}
 
 void
 Function::InitializeAttributes()
 {
 	if(CGOptions::func_attr_flag()){
-		InitializeAttributesChoices();
+		vector<string> common_func_attributes = {"artificial", "flatten", "no_reorder", "hot", "cold", "noipa", "used", "unused", \
+							"nothrow", "deprecated", "no_icf", "no_profile_instrument_function", "noclone", \
+							"no_instrument_function", "no_sanitize_address", "no_sanitize_thread", \
+							"no_sanitize_undefined", "no_split_stack", "noinline", "noplt", "stack_protect"};
 		vector<string>::iterator itr;
 		for(itr = common_func_attributes.begin(); itr < common_func_attributes.end(); itr++)
 			func_attr_generator.attributes.push_back(new BooleanAttribute(*itr, FuncAttrProb));
 
-		func_attr_generator.attributes.push_back(new MultiChoiceAttribute("visibility", FuncAttrProb, visibility_choices));
-		func_attr_generator.attributes.push_back(new MultiChoiceAttribute("no_sanitize", FuncAttrProb, sanitize_choices));
-		func_attr_generator.attributes.push_back(new MultiChoiceAttribute("optimize", FuncAttrProb, optimize_options));
+		func_attr_generator.attributes.push_back(new MultiChoiceAttribute("visibility", FuncAttrProb, {"default", "hidden", "protected", "internal"}));
+		func_attr_generator.attributes.push_back(new MultiChoiceAttribute("no_sanitize", FuncAttrProb, {"address", "thread", "undefined", "kernel-address", "pointer-compare", "pointer-subtract", "leak"}));
+		func_attr_generator.attributes.push_back(new MultiChoiceAttribute("optimize", FuncAttrProb, {"-O0", "-O1", "-O2", "-O3", "-Os", "-Ofast", "-Og"}));
 		func_attr_generator.attributes.push_back(new AlignedAttribute("aligned", FuncAttrProb, 16));
 		func_attr_generator.attributes.push_back(new SectionAttribute("section", FuncAttrProb));
 	}
