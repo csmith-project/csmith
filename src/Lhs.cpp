@@ -109,6 +109,9 @@ Lhs::make_random(CGContext &cg_context, const Type* t, const CVQualifiers* qfer,
 		if (!t->is_float() && var->type->is_float()) {
 			valid = false;
 		}
+		if (CGOptions::strict_float() && t->is_float() && !var->type->is_float()) {
+			valid = false;
+		}
 		if (valid) {
 			assert(var);
 			Lhs tmp(*var, t, compound_assign);
