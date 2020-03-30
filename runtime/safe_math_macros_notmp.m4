@@ -37,7 +37,7 @@ define(`safe_signed_math',`
 
 #define safe_unary_minus_func_$1_s(si,_si) \
   (($1)( si = (_si), \
-   ((($1)(si))==($2))? \
+   ((($1)(si))==($2)) && ($3>=INT_MAX)? \
     (($1)(si)): \
     (-(($1)(si))) \
   ))
@@ -45,7 +45,8 @@ define(`safe_signed_math',`
 #define safe_add_func_$1_s_s(si1,_si1,si2,_si2) \
 		(($1)( si1 = (_si1), si2 = (_si2) , \
                  ((((($1)(si1))>(($1)0)) && ((($1)(si2))>(($1)0)) && ((($1)(si1)) > (($3)-(($1)(si2))))) \
-		  || (((($1)(si1))<(($1)0)) && ((($1)(si2))<(($1)0)) && ((($1)(si1)) < (($2)-(($1)(si2)))))) ? \
+		  || (((($1)(si1))<(($1)0)) && ((($1)(si2))<(($1)0)) && ((($1)(si1)) < (($2)-(($1)(si2)))))) \
+		 && ($3>=INT_MAX)? \
 		 (($1)(si1)) :						\
 		 ((($1)(si1)) + (($1)(si2)))				\
 		)) 
@@ -55,6 +56,7 @@ define(`safe_signed_math',`
                 ((((($1)(si1))^(($1)(si2))) \
 		& ((((($1)(si1)) ^ (((($1)(si1))^(($1)(si2))) \
 		& ((($1)1) << (sizeof($1)*CHAR_BIT-1))))-(($1)(si2)))^(($1)(si2)))) < (($1)0)) \
+		&& ($3>=INT_MAX) \
 		? (($1)(si1)) \
 		: ((($1)(si1)) - (($1)(si2))) \
 		))
@@ -64,7 +66,7 @@ define(`safe_signed_math',`
   ((((($1)(si1)) > (($1)0)) && ((($1)(si2)) > (($1)0)) && ((($1)(si1)) > (($3) / (($1)(si2))))) || \
   (((($1)(si1)) > (($1)0)) && ((($1)(si2)) <= (($1)0)) && ((($1)(si2)) < (($2) / (($1)(si1))))) || \
   (((($1)(si1)) <= (($1)0)) && ((($1)(si2)) > (($1)0)) && ((($1)(si1)) < (($2) / (($1)(si2))))) || \
-  (((($1)(si1)) <= (($1)0)) && ((($1)(si2)) <= (($1)0)) && ((($1)(si1)) != (($1)0)) && ((($1)(si2)) < (($3) / (($1)(si1)))))) \
+  (((($1)(si1)) <= (($1)0)) && ((($1)(si2)) <= (($1)0)) && ((($1)(si1)) != (($1)0)) && ((($1)(si2)) < (($3) / (($1)(si1)))))) && ($3>=INT_MAX) \
   ? (($1)(si1)) \
   : (($1)(si1)) * (($1)(si2))))
 
@@ -86,9 +88,9 @@ define(`safe_signed_math',`
    ((($1)(left)) < (($1)0)) \
   || (((int)(right)) < (($1)0)) \
   || (((int)(right)) >= sizeof($1)*CHAR_BIT) \
-  || ((($1)(left)) > (($3) >> ((int)(right))))) \
+  || ((($1)(left)) > (($3) >> ((int)($1)(right))))) \
   ? (($1)(left)) \
-  : ((($1)(left)) << ((int)(right)))))
+  : ((($1)(left)) << ((int)($1)(right)))))
 
 #define safe_lshift_func_$1_s_s(left,_left,right,_right) \
   (($1)( left = (_left), right = (_right) , \
@@ -97,15 +99,15 @@ define(`safe_signed_math',`
   || (((int)(right)) >= sizeof($1)*CHAR_BIT) \
    ) \
   ? (($1)(left)) \
-  : ((($1)(left)) << ((int)(right)))))
+  : ((($1)(left)) << ((int)($1)(right)))))
 
 #define c99_strict_safe_lshift_func_$1_s_u(left,_left,right,_right) \
   (($1)( left = (_left), right = (_right) , \
    (((($1)(left)) < (($1)0)) \
   || (((unsigned int)(right)) >= sizeof($1)*CHAR_BIT) \
-  || ((($1)(left)) > (($3) >> ((unsigned int)(right))))) \
+  || ((($1)(left)) > (($3) >> ((unsigned int)($1)(right))))) \
   ? (($1)(left)) \
-  : ((($1)(left)) << ((unsigned int)(right)))))
+  : ((($1)(left)) << ((unsigned int)($1)(right)))))
 
 #define safe_lshift_func_$1_s_u(left,_left,right,_right) \
   (($1)( left = (_left), right = (_right) , \
@@ -113,7 +115,7 @@ define(`safe_signed_math',`
    (((unsigned int)(right)) >= sizeof($1)*CHAR_BIT) \
    ) \
   ? (($1)(left)) \
-  : ((($1)(left)) << ((unsigned int)(right)))))
+  : ((($1)(left)) << ((unsigned int)($1)(right)))))
 
 #define c99_strict_safe_rshift_func_$1_s_s(left,_left,right,_right) \
 	(($1)( left = (_left), right = (_right) , \
@@ -121,14 +123,14 @@ define(`safe_signed_math',`
 			 || (((int)(right)) < (($1)0)) \
 			 || (((int)(right)) >= sizeof($1)*CHAR_BIT)) \
 			? (($1)(left)) \
-			: ((($1)(left)) >> ((int)(right)))))
+			: ((($1)(left)) >> ((int)($1)(right)))))
 
 #define c99_strict_safe_rshift_func_$1_s_u(left,_left,right,_right) \
   (($1)( left = (_left), right = (_right) , \
    (((($1)(left)) < (($1)0)) \
 			 || (((unsigned int)(right)) >= sizeof($1)*CHAR_BIT)) \
 			? (($1)(left)) \
-			: ((($1)(left)) >> ((unsigned int)(right)))))
+			: ((($1)(left)) >> ((unsigned int)($1)(right)))))
 
 #define safe_rshift_func_$1_s_s(left,_left,right,_right) \
 	(($1)( left = (_left), right = (_right) , \
@@ -136,14 +138,14 @@ define(`safe_signed_math',`
 			  (((int)(right)) < (($1)0)) \
 			 || (((int)(right)) >= sizeof($1)*CHAR_BIT)) \
 			? (($1)(left)) \
-			: ((($1)(left)) >> ((int)(right)))))
+			: ((($1)(left)) >> ((int)($1)(right)))))
 
 #define safe_rshift_func_$1_s_u(left,_left,right,_right) \
   (($1)( left = (_left), right = (_right) , \
    ( \
 	(((unsigned int)(right)) >= sizeof($1)*CHAR_BIT)) \
 	? (($1)(left)) \
-	: ((($1)(left)) >> ((unsigned int)(right)))))
+	: ((($1)(left)) >> ((unsigned int)($1)(right)))))
 ')
 
 safe_signed_math(int8_t,INT8_MIN,INT8_MAX)
@@ -184,29 +186,29 @@ define(`safe_unsigned_math',`
 	(($1)( left = (_left), right = (_right) , \
           ((((int)(right)) < (($1)0)) \
 			 || (((int)(right)) >= sizeof($1)*CHAR_BIT) \
-			 || ((($1)(left)) > (($2) >> ((int)(right))))) \
+			 || ((($1)(left)) > (($2) >> ((int)($1)(right))))) \
 			? (($1)(left)) \
-			: ((($1)(left)) << ((int)(right)))))
+			: ((($1)(left)) << ((int)($1)(right)))))
 
 #define c99_strict_safe_lshift_func_$1_u_u(left,_left,right,_right) \
 	 (($1)( left = (_left), right = (_right) , \
            ((((unsigned int)(right)) >= sizeof($1)*CHAR_BIT) \
-			 || ((($1)(left)) > (($2) >> ((unsigned int)(right))))) \
+			 || ((($1)(left)) > (($2) >> ((unsigned int)($1)(right))))) \
 			? (($1)(left)) \
-			: ((($1)(left)) << ((unsigned int)(right)))))
+			: ((($1)(left)) << ((unsigned int)($1)(right)))))
 
 #define c99_strict_safe_rshift_func_$1_u_s(left,_left,right,_right) \
 	(($1)( left = (_left), right = (_right) , \
           ((((int)(right)) < (($1)0)) \
 			 || (((int)(right)) >= sizeof($1)*CHAR_BIT)) \
 			? (($1)(left)) \
-			: ((($1)(left)) >> ((int)(right)))))
+			: ((($1)(left)) >> ((int)($1)(right)))))
 
 #define c99_strict_safe_rshift_func_$1_u_u(left,_left,right,_right) \
 	(($1)( left = (_left), right = (_right) , \
                  (((unsigned int)(right)) >= sizeof($1)*CHAR_BIT) \
 			 ? (($1)(left)) \
-			 : ((($1)(left)) >> ((unsigned int)(right)))))
+			 : ((($1)(left)) >> ((unsigned int)($1)(right)))))
 
 #define safe_lshift_func_$1_u_s(left,_left,right,_right) \
 	(($1)( left = (_left), right = (_right) , \
@@ -214,26 +216,26 @@ define(`safe_unsigned_math',`
 			 || (((int)(right)) >= sizeof($1)*CHAR_BIT) \
 			) \
 			? (($1)(left)) \
-			: ((($1)(left)) << ((int)(right)))))
+			: ((($1)(left)) << ((int)($1)(right)))))
 
 #define safe_lshift_func_$1_u_u(left,_left,right,_right) \
 	 (($1)( left = (_left), right = (_right) , \
            ((((unsigned int)(right)) >= sizeof($1)*CHAR_BIT)) \
 			? (($1)(left)) \
-			: ((($1)(left)) << ((unsigned int)(right)))))
+			: ((($1)(left)) << ((unsigned int)($1)(right)))))
 
 #define safe_rshift_func_$1_u_s(left,_left,right,_right) \
 	(($1)( left = (_left), right = (_right) , \
           ((((int)(right)) < (($1)0)) \
 			 || (((int)(right)) >= sizeof($1)*CHAR_BIT)) \
 			? (($1)(left)) \
-			: ((($1)(left)) >> ((int)(right)))))
+			: ((($1)(left)) >> ((int)($1)(right)))))
 
 #define safe_rshift_func_$1_u_u(left,_left,right,_right) \
 	(($1)( left = (_left), right = (_right) , \
                  (((unsigned int)(right)) >= sizeof($1)*CHAR_BIT) \
 			 ? (($1)(left)) \
-			 : ((($1)(left)) >> ((unsigned int)(right)))))
+			 : ((($1)(left)) >> ((unsigned int)($1)(right)))))
 
 ')
 
