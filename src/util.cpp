@@ -40,6 +40,7 @@
 #include <sstream>
 #include <cassert>
 #include <vector>
+#include <algorithm>
 #include "OutputMgr.h"
 #include "AbsProgramGenerator.h"
 #include "CGOptions.h"
@@ -85,28 +86,22 @@ gensym(const string& basename)
  */
 vector<intvec> permute(intvec in)
 {
-	vector<intvec> out;
 	/* basic cases */
-	if (in.size()==0) return out;
+	std::vector<intvec> out;
+	if (in.size() == 0) {
+		return out;
+        }
+
+	out.push_back(in);
 	if (in.size() == 1) {
-		out.push_back(in);
 		return out;
 	}
-	/* extended cases: divide the array into head and tail, permute
-	   tail, then insert head into all possible positions in tail */
-	int head = in[0];
-	intvec tail = in;
-	tail.erase(tail.begin());
-	vector<intvec> tails = permute(tail);
-	size_t i, j;
-	for (i=0; i<tails.size(); i++) {
-		intvec one_tail = tails[i];
-		for (j=0; j<=one_tail.size(); j++) {
-			intvec tmp = one_tail;
-			tmp.insert(tmp.begin()+j, head);
-			out.push_back(tmp);
-		}
-	}
+
+        // generate all permutations from 'in'
+        while(std::next_permutation(in.begin(), in.end())) {
+		out.push_back(in);
+        }
+
 	return out;
 }
 
