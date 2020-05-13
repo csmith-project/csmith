@@ -504,6 +504,15 @@ Probabilities::set_single_name_maps()
 
 	//for choosing function attributes
 	set_single_name("func_attr_flag", pFuncAttrProb);
+
+	//for choosing type attributes
+	set_single_name("type_attr_flag", pTypeAttrProb);
+
+	//for choosing label attributes
+	set_single_name("label_attr_flag", pLabelAttrProb);
+
+	//for choosing variable attributes
+	set_single_name("var_attr_flag", pVarAttrProb);
 }
 
 void
@@ -546,6 +555,9 @@ Probabilities::initialize_single_probs()
 
 	//GCC C Extensions
 	m[pFuncAttrProb] = 30;
+	m[pTypeAttrProb] = 50;
+	m[pLabelAttrProb] = 30;
+	m[pVarAttrProb] = 30;
 
 	if (CGOptions::volatiles())
 		m[pRegularVolatileProb] = 50;

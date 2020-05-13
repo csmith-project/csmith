@@ -211,6 +211,10 @@ static void print_help()
 	//--------------------------GCC C Extensions--------------------------
 	cout<< "------------------------------GCC C Extensions------------------------------" << endl << endl;
 	cout << " --function-attributes | --no-func-attributes: enable | disable generate common function attributes (disabled by default)." << endl << endl;
+	cout << " --type-attributes | --no-type-attributes: enable | disable generate common type attributes (disabled by default)." << endl << endl;
+	cout << " --label-attributes | --no-label-attributes: enable | disable generate common label attributes (disabled by default)." << endl << endl;
+	cout << " --variable-attributes | --no-variable-attributes: enable | disable generate common variable attributes (disabled by default)." << endl << endl;
+	cout << " --compiler-attributes | --no-compiler-attributes: enable | disable generate function, type, label and variable attributes (disabled by default)." << endl << endl;
 
 }
 
@@ -808,6 +812,52 @@ main(int argc, char **argv)
 			CGOptions::func_attr_flag(false);
 			continue;
 		}
+
+		if (strcmp (argv[i], "--type-attributes") == 0) {
+			CGOptions::type_attr_flag(true);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--no-type-attributes") == 0) {
+			CGOptions::type_attr_flag(false);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--label-attributes") == 0) {
+			CGOptions::label_attr_flag(true);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--no-label-attributes") == 0) {
+			CGOptions::label_attr_flag(false);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--variable-attributes") == 0) {
+			CGOptions::var_attr_flag(true);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--no-variable-attributes") == 0) {
+			CGOptions::var_attr_flag(false);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--compiler-attributes") == 0) {
+			CGOptions::func_attr_flag(true);
+                        CGOptions::type_attr_flag(true);
+                        CGOptions::label_attr_flag(true);
+                        CGOptions::var_attr_flag(true);
+                        continue;
+                }
+
+                if (strcmp (argv[i], "--no-compiler-attributes") == 0) {
+			CGOptions::func_attr_flag(false);
+			CGOptions::type_attr_flag(false);
+			CGOptions::label_attr_flag(false);
+                        CGOptions::var_attr_flag(false);
+                        continue;
+                }
 
 		if (strcmp (argv[i], "--max-array-dim") ==0 ) {
 			unsigned long dim;

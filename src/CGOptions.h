@@ -460,6 +460,15 @@ public:
 	//GCC C Extensions
 	static bool func_attr_flag(void);
 	static bool func_attr_flag(bool p);
+
+	static bool type_attr_flag(void);
+	static bool type_attr_flag(bool p);
+
+	static bool label_attr_flag(void);
+	static bool label_attr_flag(bool p);
+
+	static bool var_attr_flag(void);
+	static bool var_attr_flag(bool p);
 private:
 	static bool enabled_builtin_kind(const string &kind);
 
@@ -604,6 +613,9 @@ private:
 
 	//GCC C Extensions
 	static bool	func_attr_flag_;
+	static bool	type_attr_flag_;
+	static bool	label_attr_flag_;
+	static bool	var_attr_flag_;
 private:
 	CGOptions(void);
 	CGOptions(CGOptions &cgo);

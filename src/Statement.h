@@ -66,6 +66,7 @@ class ProbabilityTable;
 class StatementGoto;
 class Variable;
 class Expression;
+class AttributeGenerator;
 
 enum eStatementType
 {
@@ -177,6 +178,8 @@ public:
 	static int get_current_sid(void) { return sid; }
 
 	int get_blk_depth(void) const;
+
+	static AttributeGenerator label_attr_generator;
 
 	// unique id for each statement
 	int stm_id;
