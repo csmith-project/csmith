@@ -699,6 +699,20 @@ Probabilities::set_default_simple_types_prob()
 		SET_SINGLE_NAME("char_prob", Char, 0);
 	}
 
+	if (CGOptions::Int128()) {
+		SET_SINGLE_NAME("Int128_prob", Int128, 1);
+	}
+	else {
+		SET_SINGLE_NAME("Int128_prob", Int128, 0);
+	}
+
+	if (CGOptions::UInt128()) {
+		SET_SINGLE_NAME("UInt128_prob", UInt128, 1);
+	}
+	else {
+		SET_SINGLE_NAME("UInt128_prob", UInt128, 0);
+	}
+
 	SET_SINGLE_NAME("int_prob", Int, 1);
 	SET_SINGLE_NAME("short_prob", Short, 1);
 

@@ -469,6 +469,12 @@ public:
 
 	static bool var_attr_flag(void);
 	static bool var_attr_flag(bool p);
+
+	static bool Int128(void);
+	static bool Int128(bool p);
+
+	static bool UInt128(void);
+	static bool UInt128(bool p);
 private:
 	static bool enabled_builtin_kind(const string &kind);
 
@@ -616,6 +622,8 @@ private:
 	static bool	type_attr_flag_;
 	static bool	label_attr_flag_;
 	static bool	var_attr_flag_;
+	static bool     Int128_;
+	static bool     UInt128_;
 private:
 	CGOptions(void);
 	CGOptions(CGOptions &cgo);

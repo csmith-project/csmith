@@ -215,6 +215,8 @@ static void print_help()
 	cout << " --label-attributes | --no-label-attributes: enable | disable generate common label attributes (disabled by default)." << endl << endl;
 	cout << " --variable-attributes | --no-variable-attributes: enable | disable generate common variable attributes (disabled by default)." << endl << endl;
 	cout << " --compiler-attributes | --no-compiler-attributes: enable | disable generate function, type, label and variable attributes (disabled by default)." << endl << endl;
+	cout << "  --int128 | --no-int128: enable | disable generate __int128 as datatype extension (disabled by default)." << endl << endl;
+	cout << "  --uint128 | --no-uint128: enable | disable generate unsigned __int128 as datatype extension (disabled by default)." << endl << endl;
 
 }
 
@@ -858,6 +860,26 @@ main(int argc, char **argv)
                         CGOptions::var_attr_flag(false);
                         continue;
                 }
+
+		if (strcmp (argv[i], "--int128") == 0) {
+			CGOptions::Int128(true);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--no-int128") == 0) {
+			CGOptions::Int128(false);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--uint128") == 0) {
+			CGOptions::UInt128(true);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--no-uint128") == 0) {
+			CGOptions::UInt128(false);
+			continue;
+		}
 
 		if (strcmp (argv[i], "--max-array-dim") ==0 ) {
 			unsigned long dim;

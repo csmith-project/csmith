@@ -139,6 +139,8 @@ enum ProbName {
 	pULongProb,
 	pULongLongProb,
 	pFloatProb,
+	pInt128Prob,
+	pUInt128Prob,
 
 	// for safe math ops
 	pSafeOpsSizeProb,
@@ -240,6 +242,12 @@ enum ProbName {
 
 #define VarAttrProb \
 	Probabilities::get_prob(pVarAttrProb)
+
+#define Int128Prob \
+	Probabilities::get_prob(pInt128Prob)
+
+#define UInt128Prob \
+	Probabilities::get_prob(pUInt128Prob)
 
 //////////////////////////////////////////////////
 #define UNARY_OPS_PROB_FILTER \
