@@ -202,6 +202,7 @@ DEFINE_GETTER_SETTER_BOOL(label_attr_flag);
 DEFINE_GETTER_SETTER_BOOL(var_attr_flag);
 DEFINE_GETTER_SETTER_BOOL(Int128);
 DEFINE_GETTER_SETTER_BOOL(UInt128);
+DEFINE_GETTER_SETTER_BOOL(binary_constant);
 
 void
 CGOptions::set_default_builtin_kinds()
@@ -315,6 +316,7 @@ CGOptions::set_default_settings(void)
 	set_default_builtin_kinds();
 	Int128(false);
 	UInt128(false);
+	binary_constant(false);
 }
 
 // Add options necessary for cpp 

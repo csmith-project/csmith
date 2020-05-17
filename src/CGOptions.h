@@ -475,6 +475,9 @@ public:
 
 	static bool UInt128(void);
 	static bool UInt128(bool p);
+
+	static bool binary_constant(void);
+	static bool binary_constant(bool p);
 private:
 	static bool enabled_builtin_kind(const string &kind);
 
@@ -624,6 +627,7 @@ private:
 	static bool	var_attr_flag_;
 	static bool     Int128_;
 	static bool     UInt128_;
+	static bool	binary_constant_;
 private:
 	CGOptions(void);
 	CGOptions(CGOptions &cgo);

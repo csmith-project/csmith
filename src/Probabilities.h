@@ -154,6 +154,7 @@ enum ProbName {
 	pTypeAttrProb,
 	pLabelAttrProb,
 	pVarAttrProb,
+	pBinaryConstProb,
 
 };
 
@@ -248,6 +249,9 @@ enum ProbName {
 
 #define UInt128Prob \
 	Probabilities::get_prob(pUInt128Prob)
+
+#define BinaryConstProb \
+        Probabilities::get_prob(pBinaryConstProb)
 
 //////////////////////////////////////////////////
 #define UNARY_OPS_PROB_FILTER \

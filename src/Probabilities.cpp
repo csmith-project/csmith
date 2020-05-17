@@ -513,6 +513,9 @@ Probabilities::set_single_name_maps()
 
 	//for choosing variable attributes
 	set_single_name("var_attr_flag", pVarAttrProb);
+
+	//for choosing binary constants
+        set_single_name("binary_constant", pBinaryConstProb);
 }
 
 void
@@ -558,6 +561,7 @@ Probabilities::initialize_single_probs()
 	m[pTypeAttrProb] = 50;
 	m[pLabelAttrProb] = 30;
 	m[pVarAttrProb] = 30;
+	m[pBinaryConstProb] = 3;
 
 	if (CGOptions::volatiles())
 		m[pRegularVolatileProb] = 50;

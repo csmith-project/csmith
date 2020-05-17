@@ -217,6 +217,7 @@ static void print_help()
 	cout << " --compiler-attributes | --no-compiler-attributes: enable | disable generate function, type, label and variable attributes (disabled by default)." << endl << endl;
 	cout << "  --int128 | --no-int128: enable | disable generate __int128 as datatype extension (disabled by default)." << endl << endl;
 	cout << "  --uint128 | --no-uint128: enable | disable generate unsigned __int128 as datatype extension (disabled by default)." << endl << endl;
+	cout << "  --binary-constant | --no-binary-constant: enable | disable generate binary constant (disabled by default)." << endl << endl;
 
 }
 
@@ -878,6 +879,16 @@ main(int argc, char **argv)
 
 		if (strcmp (argv[i], "--no-uint128") == 0) {
 			CGOptions::UInt128(false);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--binary-constant") == 0) {
+			CGOptions::binary_constant(true);
+			continue;
+		}
+
+		if (strcmp (argv[i], "--no-binary-constant") == 0) {
+			CGOptions::binary_constant(false);
 			continue;
 		}
 
