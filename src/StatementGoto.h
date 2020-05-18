@@ -72,6 +72,9 @@ public:
 	std::string label;
 	std::vector<const Variable*> init_skipped_vars;
 	static std::map<const Statement*, std::string> stm_labels;
+
+	mutable std::string other_name_for_label;
+	void change_label(std::vector<string> addr_labels) const;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
