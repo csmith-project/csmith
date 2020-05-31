@@ -96,12 +96,28 @@ Constant::clone() const
 	return new Constant(*this);
 }
 
+//--------------------------------------------------------------
+string HexToBinary(string val)
+{
+	std::ostringstream oss;
+	string ToBinary[] = {"0000", "0001", "0010", "0011", "0100", "0101", "0110", "0111", "1000", "1001", "1010", "1011", "1100", "1101", "1110", "1111"};
+	for (unsigned int i = 0; i < val.size(); i++) {
+		if ((val[i] - '0') < 16)
+			oss << ToBinary[val[i] - '0'];
+		else
+			oss << ToBinary[val[i] - '7'];
+	}
+	return oss.str();
+}
+
 // --------------------------------------------------------------
 static string
 GenerateRandomCharConstant(void)
 {
 	string ch;
-	if (CGOptions::ccomp() || !CGOptions::longlong())
+	if (CGOptions::binary_constant() && rnd_flipcoin(pBinaryConstProb)) {
+		ch = string("0b") + HexToBinary(RandomHexDigits(2));
+	} else if (CGOptions::ccomp() || !CGOptions::longlong())
 		ch = string("0x") + RandomHexDigits(2);
 	else
 		ch = string("0x") + RandomHexDigits(2) + "L";
@@ -114,7 +130,9 @@ GenerateRandomIntConstant(void)
 {
 	string val;
 	// Int constant - Max 8 Hex digits on 32-bit platforms
-	if (CGOptions::ccomp() || !CGOptions::longlong())
+	if (CGOptions::binary_constant() && rnd_flipcoin(pBinaryConstProb)) {
+		val = string("0b") + HexToBinary(RandomHexDigits( 8 ));
+	} else if (CGOptions::ccomp() || !CGOptions::longlong())
 		val = "0x" + RandomHexDigits( 8 );
 	else
 		val = "0x" + RandomHexDigits( 8 ) + "L";
@@ -124,11 +142,25 @@ GenerateRandomIntConstant(void)
 
 // --------------------------------------------------------------
 static string
+GenerateRandomInt128Constant(void)
+{
+	string val;
+	if (CGOptions::binary_constant() && rnd_flipcoin(pBinaryConstProb)) {
+		val = string("0b") + HexToBinary(RandomHexDigits( 16 ));
+	} else
+		val = "0x" + RandomHexDigits( 16 ) ;
+	return val;
+}
+
+// --------------------------------------------------------------
+static string
 GenerateRandomShortConstant(void)
 {
 	string val;
 	// Short constant - Max 4 Hex digits on 32-bit platforms
-	if (CGOptions::ccomp() || !CGOptions::longlong())
+	if (CGOptions::binary_constant() && rnd_flipcoin(pBinaryConstProb)) {
+                val = string("0b") + HexToBinary(RandomHexDigits( 4 ));
+	} else if (CGOptions::ccomp() || !CGOptions::longlong())
 		val = "0x" + RandomHexDigits( 4 );
 	else
 		val = "0x" + RandomHexDigits( 4 ) + "L";
@@ -142,7 +174,9 @@ GenerateRandomLongConstant(void)
 {
 	string val;
 	// Long constant - Max 8 Hex digits on 32-bit platforms
-	if (!CGOptions::longlong())
+	if (CGOptions::binary_constant() && rnd_flipcoin(pBinaryConstProb)) {
+                val = string("0b") + HexToBinary(RandomHexDigits( 8 ));
+	} else if (!CGOptions::longlong())
 		val = "0x" + RandomHexDigits( 8 );
 	else
 		val = "0x" + RandomHexDigits( 8 ) + "L";
@@ -153,8 +187,12 @@ GenerateRandomLongConstant(void)
 static string
 GenerateRandomLongLongConstant(void)
 {
+	string val;
 	// Long constant - Max 8 Hex digits on 32-bit platforms
-	string val = "0x" + RandomHexDigits( 16 ) + "LL";
+	if (CGOptions::binary_constant() && rnd_flipcoin(pBinaryConstProb)) {
+		val = string("0b") + HexToBinary(RandomHexDigits( 16 )) + "LL";
+	} else
+		val = "0x" + RandomHexDigits( 16 ) + "LL";
 	return val;
 }
 
@@ -380,6 +418,8 @@ GenerateRandomConstant(const Type* type)
 			case eULong:     v = GenerateRandomLongConstant();		break;
 			case eULongLong: v = GenerateRandomLongLongConstant();		break;
 			case eFloat:     v = GenerateRandomFloatHexConstant();		break;
+			case eInt128:    v = GenerateRandomInt128Constant();		break;
+			case eUInt128:   v = GenerateRandomInt128Constant();		break;
 			// case eDouble:    v = GenerateRandomFloatConstant();		break;
 			default:
 				assert(0 && "Unsupported type!");

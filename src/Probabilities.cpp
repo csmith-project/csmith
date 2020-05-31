@@ -513,6 +513,9 @@ Probabilities::set_single_name_maps()
 
 	//for choosing variable attributes
 	set_single_name("var_attr_flag", pVarAttrProb);
+
+	//for choosing binary constants
+        set_single_name("binary_constant", pBinaryConstProb);
 }
 
 void
@@ -558,6 +561,7 @@ Probabilities::initialize_single_probs()
 	m[pTypeAttrProb] = 50;
 	m[pLabelAttrProb] = 30;
 	m[pVarAttrProb] = 30;
+	m[pBinaryConstProb] = 3;
 
 	if (CGOptions::volatiles())
 		m[pRegularVolatileProb] = 50;
@@ -697,6 +701,20 @@ Probabilities::set_default_simple_types_prob()
 	}
 	else {
 		SET_SINGLE_NAME("char_prob", Char, 0);
+	}
+
+	if (CGOptions::Int128()) {
+		SET_SINGLE_NAME("Int128_prob", Int128, 1);
+	}
+	else {
+		SET_SINGLE_NAME("Int128_prob", Int128, 0);
+	}
+
+	if (CGOptions::UInt128()) {
+		SET_SINGLE_NAME("UInt128_prob", UInt128, 1);
+	}
+	else {
+		SET_SINGLE_NAME("UInt128_prob", UInt128, 0);
 	}
 
 	SET_SINGLE_NAME("int_prob", Int, 1);
