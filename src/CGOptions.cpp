@@ -329,10 +329,9 @@ CGOptions::fix_options_for_cpp(void)
 }
 
 /*
-   looking for the platform info file in the working directory
-   and load platform specific information. If not found, use
-   info from the platform that Csmith is running, and output them
-   to the file
+   looks for a platform info file in the working directory
+   and loads platform specific information. If not found, use
+   info from the platform that Csmith is running.
 */
 void
 CGOptions::set_platform_specific_options(void)
@@ -341,9 +340,6 @@ CGOptions::set_platform_specific_options(void)
 	const char* ptr_str = "pointer size = ";
 	ifstream conf(PLATFORM_CONFIG_FILE);
 	if (conf.fail()) {
-		ofstream conf(PLATFORM_CONFIG_FILE);
-		conf << int_str << sizeof(int) << endl;
-		conf << ptr_str << sizeof(int*) << endl;
 		int_size(sizeof(int));
 		pointer_size(sizeof(int*));
 		conf.close();
