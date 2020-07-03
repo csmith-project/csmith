@@ -343,6 +343,10 @@ static void print_advanced_help()
 	cout << "  --no-hash-value-printf: do not emit printf on the index of an array" << endl << endl;
 	cout << "  --no-signed-char-index: do not allow a var of type char to be used as array index" << endl << endl;
 	cout << "  --strict-float: do not allow assignments between floats and integers" << endl << endl;
+
+    // type size options
+    cout << "  --int-size <size>: specify integer size of target (default taken from platform.info if it exists otherwise from host)"  << endl << endl;
+    cout << "  --ptr-size <size>: specify pointer size of target (default taken from platform.info if it exists otherwise from host)"  << endl << endl;
 }
 
 void arg_check(int argc, int i)
@@ -1474,6 +1478,26 @@ main(int argc, char **argv)
 			CGOptions::cpp11(true);
 			continue;
 		}
+
+        if (strcmp (argv[i], "--int-size") == 0) {
+			unsigned long size;
+			i++;
+			arg_check(argc, i);
+			if (!parse_int_arg(argv[i], &size))
+				exit(-1);
+            CGOptions::int_size(size);
+            continue;
+        }
+
+        if (strcmp (argv[i], "--ptr-size") == 0) {
+			unsigned long size;
+			i++;
+			arg_check(argc, i);
+			if (!parse_int_arg(argv[i], &size))
+				exit(-1);
+            CGOptions::pointer_size(size);
+            continue;
+        }
 
     if (strcmp(argv[i], "--fast-execution") == 0) {
       CGOptions::lang_cpp(true);
