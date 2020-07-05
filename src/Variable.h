@@ -45,6 +45,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <unordered_set>
 using namespace std;
 
 #include "Effect.h"
@@ -106,7 +107,7 @@ public:
 	bool is_pointer(void) const { return type && type->eType == ePointer;}
 	bool is_rv(void) const { return name.find("_rv") != string::npos; }
 	int get_seq_num(void) const;
-	void find_pointer_fields(vector<const Variable*>& ptr_fields) const;
+	void find_pointer_fields(VariableArray& ptr_fields) const;
 
 	virtual std::string get_actual_name() const;
 	std::string to_string(void) const;
@@ -118,7 +119,7 @@ public:
 	virtual void hash(std::ostream& out) const;
 	virtual const Variable* get_collective(void) const;
 	virtual const ArrayVariable* get_array(string& field) const;
-	virtual int get_index_vars(vector<const Variable*>& /* vars */) const { return 0;}
+	virtual int get_index_vars(VariableSet& /* vars */) const { return 0;}
 
 	///////////////////////////////////////////////////////////////////////
 
@@ -141,7 +142,7 @@ public:
 
 	static size_t GetMaxArrayDimension(const vector<Variable*>& vars);
 
-	vector<Variable *> field_vars;    // field variables for struct/unions
+	MutableVariableArray field_vars;    // field variables for struct/unions
 	const std::string name;
 	const Type *type;
 	const Expression *init;
@@ -157,8 +158,8 @@ public:
 	const Variable* field_var_of; //expanded from a struct/union
 	const bool isArray;
 	const CVQualifiers qfer;
-	static std::vector<const Variable*> &get_new_ctrl_vars();
-	static std::vector<const Variable*> &get_last_ctrl_vars();
+	static VariableArray &get_new_ctrl_vars();
+	static VariableArray &get_last_ctrl_vars();
 
 	static const char sink_var_name[];
 
@@ -172,31 +173,34 @@ private:
 			 const vector<bool>& isConsts, const vector<bool>& isVolatiles,
 			 bool isAuto, bool isStatic, bool isRegister, bool isBitfield, const Variable* isFieldVarOf);
 
-	static std::vector<const Variable*>& new_ctrl_vars(void);
-	static std::vector< std::vector<const Variable*>* > ctrl_vars_vectors;
+	static VariableArray& new_ctrl_vars(void);
+	static std::vector<VariableArray*> ctrl_vars_vectors;
 	static unsigned long ctrl_vars_count;
 
 	void create_field_vars(const Type* type);
 };
 
-void OutputVariableList(const std::vector<Variable*> &var, std::ostream &out, int indent = 0);
+void OutputLocalVariableList(const MutableVariableSet &var, std::ostream &out, int indent = 0);
 void OutputVariableDeclList(const std::vector<Variable*> &var, std::ostream &out, std::string prefix = "", int indent = 0);
 void OutputArrayInitializers(const vector<Variable*>& vars, std::ostream &out, int indent);
-void OutputArrayCtrlVars(const vector<const Variable*>& ctrl_vars, std::ostream &out, size_t dimen, int indent);
+void OutputArrayCtrlVars(const VariableArray& ctrl_vars, std::ostream &out, size_t dimen, int indent);
 void OutputVolatileAddress(const vector<Variable*> &vars, std::ostream &out, int indent, const string &fp_string);
 void MapVariableList(const vector<Variable*> &var, std::ostream &out, int (*func)(Variable *var, std::ostream *pOut));
 int HashVariable(Variable *var, std::ostream *pOut);
 
-int find_variable_in_set(const vector<const Variable*>& set, const Variable* v);
-int find_variable_in_set(const vector<Variable*>& set, const Variable* v);
-int find_field_variable_in_set(const vector<const Variable*>& set, const Variable* v);
-bool is_variable_in_set(const vector<const Variable*>& set, const Variable* v);
-bool add_variable_to_set(vector<const Variable*>& set, const Variable* v);
-bool add_variables_to_set(vector<const Variable*>& set, const vector<const Variable*>& new_set);
-bool equal_variable_sets(const vector<const Variable*>& set1, const vector<const Variable*>& set2);
-bool sub_variable_sets(const vector<const Variable*>& set1, const vector<const Variable*>& set2);
-void combine_variable_sets(const vector<const Variable*>& set1, const vector<const Variable*>& set2, vector<const Variable*>& set_all);
-void remove_field_vars(vector<const Variable*>& set);
+const Variable* find_variable_in_set(const VariableSet& set, const Variable* v);
+Variable* find_variable_in_set(const MutableVariableSet& set, const Variable* v);
+const Variable* find_variable_in_array(const VariableArray& array, const Variable* v);
+Variable* find_variable_in_array(const MutableVariableArray& array, const Variable* v);
+bool is_variable_in_array(const VariableArray& array, const Variable* v);
+VariableSet find_fields_in_set(const VariableSet& set, const Variable* v);
+bool is_variable_in_set(const VariableSet& set, const Variable* v);
+bool add_variable_to_set(VariableSet& set, const Variable* v);
+bool add_variables_to_set(VariableSet& set, const VariableSet& new_set);
+bool equal_variable_sets(const VariableSet& set1, const VariableSet& set2);
+bool sub_variable_sets(const VariableSet& set1, const VariableSet& set2);
+void combine_variable_sets(const VariableSet& set1, const VariableSet& set2, VariableSet& set_all);
+void combine_variable_arrays(const VariableArray& array1, const VariableArray& array2, VariableArray& array_all);
 
 ///////////////////////////////////////////////////////////////////////////////
 

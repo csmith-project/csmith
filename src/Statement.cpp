@@ -345,7 +345,7 @@ Statement::get_dereferenced_ptrs(void) const
 }
 
 void
-Statement::get_referenced_ptrs(std::vector<const Variable*>& ptrs) const
+Statement::get_referenced_ptrs(VariableSet& ptrs) const
 {
 	size_t i;
 	vector<const Expression*> exprs;
@@ -376,7 +376,7 @@ Statement::get_blk_depth(void) const
 bool
 Statement::is_ptr_used(void) const
 {
-	vector<const Variable*> ptrs;
+	VariableSet ptrs;
 	get_referenced_ptrs(ptrs);
 	return !ptrs.empty();
 }

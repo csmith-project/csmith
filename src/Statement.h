@@ -43,6 +43,7 @@
 #include <ostream>
 #include <string>
 #include "Probabilities.h"
+#include "VariableList.h"
 using namespace std;
 
 #ifndef STATEMENT_H
@@ -164,7 +165,7 @@ public:
 
 	virtual std::vector<const ExpressionVariable*> get_dereferenced_ptrs(void) const;
 
-	void get_referenced_ptrs(std::vector<const Variable*>& ptrs) const;
+	void get_referenced_ptrs(VariableSet& ptrs) const;
 	bool is_ptr_used(void) const;
 
 	virtual void Output(std::ostream &out, FactMgr* fm=0, int indent = 0) const = 0;

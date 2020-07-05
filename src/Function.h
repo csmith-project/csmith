@@ -97,11 +97,11 @@ public:
 	bool is_var_on_stack(const Variable* var, const Statement* stm) const;
 	bool is_var_oos(const Variable* var, const Statement* stm) const;
 
-	const std::vector<const Variable*>& get_referenced_ptrs(void) const { return referenced_ptrs;}
+	const VariableSet& get_referenced_ptrs(void) const { return referenced_ptrs;}
 	bool is_pointer_referenced(void) { return !referenced_ptrs.empty();} const
 
 	std::string name;
-	std::vector<Variable*> param;
+	MutableVariableArray param;
 //	vector<Expression*> param_value;
 	const Type* return_type;
 //	bool isBackLink;
@@ -114,8 +114,8 @@ public:
 	Constant *ret_c;
 
 	Variable* rv;    // a dummy variable representing the return value
-	std::vector<const Variable*> new_globals;  // collection of global variables created in this function
-	std::vector<const Variable*> dead_globals; // collection of global variables that is dangling at the end of this function
+	VariableArray new_globals;  // collection of global variables created in this function
+	VariableArray dead_globals; // collection of global variables that is dangling at the end of this function
 	bool fact_changed;
 	bool union_field_read;
 	bool is_inlined;
@@ -146,7 +146,7 @@ private:
 
 private:
 	enum { UNBUILT, BUILDING, BUILT } build_state;
-	std::vector<const Variable*> referenced_ptrs;
+	VariableSet referenced_ptrs;
 };
 
 void GenerateFunctions(void);
@@ -161,7 +161,6 @@ FactMgr* get_fact_mgr_for_func(const Function* func);
 FactMgr* get_fact_mgr(const CGContext* cg);
 const Function* find_function_by_name(const string& name);
 int find_function_in_set(const vector<const Function*>& set, const Function* f);
-const Block* find_blk_for_var(const Variable* v);
 
 ///////////////////////////////////////////////////////////////////////////////
 

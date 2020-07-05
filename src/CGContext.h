@@ -58,12 +58,12 @@ class Statement;
 class ExpressionVariable;
 class ArrayVariable;
 
-typedef std::vector<const Variable *> VariableSet;
+typedef std::vector<const Variable *> VariableArray;
 
 class RWDirective
 {
 public:
-	RWDirective(const VariableSet& no_reads, const VariableSet& no_writes, VariableSet& reads, VariableSet& writes)
+	RWDirective(const VariableArray& no_reads, const VariableArray& no_writes, VariableArray& reads, VariableArray& writes)
 		: no_read_vars(no_reads),
 		  no_write_vars(no_writes),
 		  must_read_vars(reads),
@@ -74,14 +74,14 @@ public:
 
 	// The set of variables that should not be read/written. Currently not used
 	// could be useful for generating multi-thread functions with no data racing
-	const VariableSet &no_read_vars;
-	const VariableSet &no_write_vars;
+	const VariableArray &no_read_vars;
+	const VariableArray &no_write_vars;
 	// The set of variables that must be read/written.  Again, this is not
 	// about generating conforming code; it is simply about directing the
 	// code generator.
 	//
-	VariableSet& must_read_vars;
-	VariableSet& must_write_vars;
+	VariableArray& must_read_vars;
+	VariableArray& must_write_vars;
 };
 
 /*
@@ -90,8 +90,6 @@ public:
 class CGContext
 {
 public:
-	static const VariableSet empty_variable_set;
-
 	// original constructor, created at the beginning of generating a function
 	CGContext(Function *current_func, const Effect &eff_context, Effect *eff_accum);
 	// create a CGContext for parameters from an existing CGContext
@@ -122,8 +120,8 @@ public:
 	Effect get_accum_effect(void) const				{ Effect e; return effect_accum ? *effect_accum : e; }
 	Effect& get_effect_stm(void) 					{ return effect_stm; }
 
-	void find_reachable_frame_vars(vector<const Fact*>& facts, VariableSet& frame_vars) const;
-	void get_external_no_reads_writes(VariableSet& no_reads, VariableSet& no_writes, const VariableSet& frame_vars) const;
+	void find_reachable_frame_vars(vector<const Fact*>& facts, VariableArray& frame_vars) const;
+	void get_external_no_reads_writes(VariableArray& no_reads, VariableArray& no_writes, const VariableArray& frame_vars) const;
 
 	bool is_nonreadable(const Variable *v) const;
 	bool is_nonwritable(const Variable *v) const;

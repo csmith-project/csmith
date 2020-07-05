@@ -83,7 +83,7 @@ public:
 	// These are currently accessed directly.
 	std::vector<Statement *> stms;
 	std::vector<Statement *> deleted_stms;
-	std::vector<Variable *> local_vars;
+	MutableVariableSet local_vars;
 	mutable std::map<std::string, enum eSimpleType> macro_tmp_vars;
 
 	std::string create_new_tmp_var(enum eSimpleType type) const;

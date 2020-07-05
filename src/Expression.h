@@ -121,7 +121,7 @@ public:
 	virtual bool visit_facts(vector<const Fact*>& /*inputs*/, CGContext& /*cg_context*/) const {return true;};
 
 	virtual std::vector<const ExpressionVariable*> get_dereferenced_ptrs(void) const;
-	virtual void get_referenced_ptrs(std::vector<const Variable*>& ptrs) const = 0;
+	virtual void get_referenced_ptrs(VariableSet& ptrs) const = 0;
 
 	virtual bool has_uncertain_call_recursive(void) const {return false;}
 

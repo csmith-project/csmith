@@ -71,8 +71,11 @@ public:
 			 eVariableScope scope=MAX_VAR_SCOPE);
 	static Variable* choose_ok_var(const vector<Variable *> &vars);
 	static const Variable* choose_ok_var(const vector<const Variable *> &vars);
-	static const Variable* choose_visible_read_var(const Block* b, vector<const Variable*> written_vars, const Type* type, const vector<const Fact*>& facts);
+	static const Variable* choose_visible_read_var(const Block* b, VariableSet written_vars, const Type* type, const vector<const Fact*>& facts);
 	static Variable* choose_var(vector<Variable *> vars, Effect::Access access,
+		   const CGContext &cg_context, const Type* type, const CVQualifiers* qfer,
+		   eMatchType mt, const vector<const Variable*>& invalid_vars, bool no_bitfield = false, bool no_expand_struct = false);
+	static Variable* choose_var(MutableVariableSet vars, Effect::Access access,
 		   const CGContext &cg_context, const Type* type, const CVQualifiers* qfer,
 		   eMatchType mt, const vector<const Variable*>& invalid_vars, bool no_bitfield = false, bool no_expand_struct = false);
 	static Variable *select_deref_pointer(Effect::Access access, const CGContext &cg_context, const Type* type,
@@ -96,7 +99,7 @@ public:
 	static Variable* GenerateParameterVariable(const Type *type, const CVQualifiers *qfer);
 	static std::vector<Variable *>* GetGlobalVariables(void) {return &GlobalList;}
 	static void doFinalization(void);
-	static void expand_struct_union_vars(vector<const Variable *>& vars, const Type* type);
+	static void expand_struct_union_vars(VariableSet& vars, const Type* type);
 
 	static ProbabilityTable<unsigned int, eVariableScope> * scopeTable_;
 	static void InitScopeTable();

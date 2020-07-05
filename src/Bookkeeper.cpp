@@ -269,18 +269,20 @@ Bookkeeper::output_pointer_statistics(std::ostream &out)
 {
 	size_t i;
 	int total_alias_cnt = 0;
+	int total_ptr_cnt = 0;
 	int total_has_null_ptr = 0;
 	int point_to_scalar = 0;
 	int point_to_struct = 0;
 	int point_to_pointer = 0;
-	const vector<const Variable*>& ptrs = FactPointTo::all_ptrs;
-	const vector<vector<const Variable*> >& aliases = FactPointTo::all_aliases;
-	for (i=0; i<ptrs.size(); i++) {
-		total_alias_cnt += aliases[i].size();
-		if (find_variable_in_set(aliases[i], FactPointTo::null_ptr) >= 0) {
+
+	auto& global_map = FactPointTo::global_point_to_map;
+	total_ptr_cnt = global_map.size();
+	for (auto iter = global_map.begin(); iter != global_map.end(); iter++) {
+		total_alias_cnt += iter->second.size();
+		if (find_variable_in_set(iter->second, FactPointTo::null_ptr) != NULL) {
 			total_has_null_ptr++;
 		}
-		const Variable* var = ptrs[i];
+		const Variable* var = iter->first;
 		const Type* t = var->type;
 		assert(t->eType == ePointer);
 		if (t->get_indirect_level() > 1) {
@@ -294,8 +296,8 @@ Bookkeeper::output_pointer_statistics(std::ostream &out)
 		}
 	}
 
-	formated_output(out, "total number of pointers: ", ptrs.size());
-	if (ptrs.size() > 0) {
+	formated_output(out, "total number of pointers: ", total_ptr_cnt);
+	if (total_ptr_cnt > 0) {
 		out << endl;
 		formated_output(out, "times a variable address is taken: ", address_taken_cnt);
 		formated_output(out, "times a pointer is dereferenced on RHS: ", calc_total(read_dereference_cnts));
@@ -326,8 +328,8 @@ Bookkeeper::output_pointer_statistics(std::ostream &out)
 		formated_output(out, "number of pointers point to scalars: ", point_to_scalar);
 		formated_output(out, "number of pointers point to structs: ", point_to_struct);
 		out.precision(3);
-		formated_outputf(out, "percent of pointers has null in alias set: ", total_has_null_ptr*100.0/ptrs.size());
-		formated_outputf(out, "average alias set size: ", total_alias_cnt*1.0 / ptrs.size());
+		formated_outputf(out, "percent of pointers has null in alias set: ", total_has_null_ptr*100.0/total_ptr_cnt);
+		formated_outputf(out, "average alias set size: ", total_alias_cnt*1.0 / total_ptr_cnt);
 	}
 }
 

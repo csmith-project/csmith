@@ -257,10 +257,10 @@ Lhs::get_dereferenced_ptrs(void) const
 }
 
 void
-Lhs::get_referenced_ptrs(std::vector<const Variable*>& ptrs) const
+Lhs::get_referenced_ptrs(VariableSet& ptrs) const
 {
 	if (var.is_pointer()) {
-		ptrs.push_back(&var);
+		ptrs.insert(&var);
 	}
 }
 
@@ -272,8 +272,7 @@ Lhs::ptr_modified_in_rhs(vector<const Fact*>& inputs, CGContext& cg_context) con
 	if (cg_context.get_effect_stm().is_written(&var)) {
 		return true;
 	}
-	vector<const Variable*> tmp;
-	tmp.push_back(get_var()->get_collective());
+	VariableArray tmp{ get_var()->get_collective() };
 	// recursively trace the pointer(s) to find real variables they point to
 	// only dereferenced pointers (not including the target variables) need to
 	// be checked with context derived from RHS
@@ -313,11 +312,11 @@ Lhs::visit_indices(vector<const Fact*>& inputs, CGContext& cg_context) const
 bool
 have_overlapping_fields(const Expression* e1, const Expression* e2, const vector<const Fact*>& facts)
 {
-	vector<const Variable*> vars1, vars2;
+	VariableSet vars1, vars2;
 	if (FactPointTo::find_union_pointees(facts, e1, vars1)) {
 		FactPointTo::find_union_pointees(facts, e2, vars2);
-		for (size_t i=0; i<vars2.size(); i++) {
-			if (is_variable_in_set(vars1, vars2[i])) {
+		for (auto i=vars2.begin(); i!=vars2.end(); i++) {
+			if (is_variable_in_set(vars1, *i)) {
 				return true;
 			}
 		}

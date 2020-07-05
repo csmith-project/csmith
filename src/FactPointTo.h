@@ -34,7 +34,10 @@
 
 #include <ostream>
 #include <vector>
+#include <unordered_set>
+#include <unordered_map>
 #include "Fact.h"
+#include "VariableList.h"
 
 class Variable;
 class Function;
@@ -46,30 +49,33 @@ class StatementReturn;
 
 using namespace std;
 
+typedef unordered_map<const Variable*, unordered_set<const Variable*>> PointToMap;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 class FactPointTo : public Fact
 {
 public:
  	static FactPointTo *make_fact(const Variable* v);
-	static FactPointTo *make_fact(const Variable* v, const vector<const Variable*>& set);
+	static FactPointTo *make_fact(const Variable* v, const VariableSet& set);
+	static FactPointTo *make_fact(const Variable* v, const VariableArray& array);
 	static FactPointTo *make_fact(const Variable* v, const Variable* point_to);
-	static vector<const Fact*> make_facts(vector<const Variable*> vars, const vector<const Variable*>& set);
-	static vector<const Fact*> make_facts(vector<const Variable*> vars, const Variable* point_to);
+	static vector<const Fact*> make_facts(VariableArray vars, const VariableSet& set);
+	static vector<const Fact*> make_facts(VariableArray vars, const Variable* point_to);
 	static void doFinalization();
 
 	explicit FactPointTo(const Variable* v);
 	virtual ~FactPointTo(void);
 
 	virtual const Variable* get_var(void) const { return var;};
-	const vector<const Variable*>& get_point_to_vars(void) const { return point_to_vars; };
+	const unordered_set<const Variable*>& get_point_to_vars(void) const { return point_to_vars; };
 
 	bool is_null(void) const;
 	bool is_tbd_only(void) const;
 	bool is_dead(void) const;
 	bool has_invisible(const Statement* stm) const;
 	int  size() const;
-	std::vector<const Fact*> rhs_to_lhs_transfer(const std::vector<const Fact*>& facts, const vector<const Variable*>& lvars, const Expression* rhs);
+	std::vector<const Fact*> rhs_to_lhs_transfer(const std::vector<const Fact*>& facts, const VariableArray& lvars, const Expression* rhs);
 	virtual vector<const Fact*> abstract_fact_for_assign(const std::vector<const Fact*>& facts, const Lhs* lhs, const Expression* rhs);
 
 	FactPointTo* mark_dead_var(const Variable* v);
@@ -91,8 +97,8 @@ public:
 	virtual void Output(std::ostream &out) const;
 	virtual bool is_assertable(const Statement* s) const;
 
-	static std::vector<const Variable*> merge_pointees_of_pointer(const Variable* ptr, int indirect, const std::vector<const Fact*>& facts);
-	static std::vector<const Variable*> merge_pointees_of_pointers(const std::vector<const Variable*>& ptrs, const std::vector<const Fact*>& facts);
+	static VariableArray merge_pointees_of_pointer(const Variable* ptr, int indirect, const std::vector<const Fact*>& facts);
+	static VariableArray merge_pointees_of_pointers(const VariableArray& ptrs, const std::vector<const Fact*>& facts);
 	static void update_facts_with_modified_index(std::vector<const Fact*>& facts, const Variable* var);
 	static void aggregate_all_pointto_sets(void);
 
@@ -102,7 +108,7 @@ public:
 	static bool is_dangling_ptr(const Variable* p, const std::vector<const Fact*>& facts);
 	static bool is_special_ptr(const Variable* p) { return p==null_ptr || p==garbage_ptr || p==tbd_ptr;}
 	static bool is_pointing_to_locals(const Variable* v, const Block* b, int indirection, const vector<const Fact*>& facts);
-	static int  find_union_pointees(const vector<const Fact*>& facts, const Expression* e, vector<const Variable*>& unions);
+	static int  find_union_pointees(const vector<const Fact*>& facts, const Expression* e, VariableSet& unions);
 
 	static std::string point_to_str(const Variable* v);
 
@@ -110,16 +116,18 @@ public:
 	static const Variable* garbage_ptr;
 	static const Variable* tbd_ptr;
 
-	static vector<const Variable*> all_ptrs;
-	static vector<vector<const Variable*> > all_aliases;
+	static PointToMap global_point_to_map;
 private:
-	FactPointTo(const Variable* v, const vector<const Variable*>& set);
+	FactPointTo(const Variable* v, const unordered_set<const Variable*>& set);
 	FactPointTo(const Variable* v, const Variable* point_to);
 
 	const Variable* var;
-	vector<const Variable*> point_to_vars;
+	VariableSet point_to_vars;
 
-	static void update_ptr_aliases(const vector<Fact*>& facts, vector<const Variable*>& ptrs, vector<vector<const Variable*> >& aliases);
+	/// Aggregate the point-to facts to the global point-to map.
+	/// E.g., if pointer A points to object B in function 1, and object C
+	/// and D in function 2, the global map would have A -> {B, C, D}
+	static void aggregate_point_to_map(const vector<Fact*>& facts, PointToMap& point_to_map);
 
 	// unimplement
 	FactPointTo(const FactPointTo& f);

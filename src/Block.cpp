@@ -303,7 +303,7 @@ Block::Output(std::ostream &out, FactMgr* fm, int indent) const
 	if (CGOptions::math_notmp())
 		OutputTmpVariableList(out, indent);
 
-	OutputVariableList(local_vars, out, indent);
+	OutputLocalVariableList(local_vars, out, indent);
 	OutputStatementList(stms, out, fm, indent);
 
 	if (CGOptions::depth_protect()) {
@@ -510,7 +510,7 @@ Block::is_var_on_stack(const Variable* var) const
     }
 	const Block* b = this;
 	while (b) {
-		if (find_variable_in_set(b->local_vars, var) != -1) {
+		if (find_variable_in_set(b->local_vars, var) != NULL) {
 			return true;
 		}
 		b = b->parent;
@@ -607,8 +607,8 @@ Block::find_fixed_point(vector<const Fact*> inputs, vector<const Fact*>& post_fa
 
 		FactVec outputs = inputs;
 		// add facts for locals
-		for (i=0; i<local_vars.size(); i++) {
-			const Variable* v = local_vars[i];
+		for (auto it=local_vars.begin(); it!=local_vars.end(); it++) {
+			const Variable* v = *it;
 			FactMgr::add_new_var_fact(v, outputs);
 		}
 

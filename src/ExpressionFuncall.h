@@ -82,7 +82,7 @@ public:
 	virtual bool is_0_or_1(void) const { return invoke.is_0_or_1();}
 
 	virtual std::vector<const ExpressionVariable*> get_dereferenced_ptrs(void) const;
-	virtual void get_referenced_ptrs(std::vector<const Variable*>& ptrs) const;
+	virtual void get_referenced_ptrs(VariableSet& ptrs) const;
 
 	void Output(std::ostream &) const;
 	virtual void indented_output(std::ostream &out, int indent) const;

@@ -122,6 +122,7 @@ public:
 	static const vector<const Fact*>& get_program_end_facts(void);
 
 	/* remove facts related to certain variables from env */
+	static void update_facts_for_oos_vars(const MutableVariableSet& vars, FactVec& facts);
 	static void update_facts_for_oos_vars(const vector<Variable*>& vars, FactVec& facts);
 	static void update_facts_for_oos_vars(const vector<const Variable*>& vars, FactVec& facts);
 

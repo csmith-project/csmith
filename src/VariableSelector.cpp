@@ -196,22 +196,25 @@ VariableSelector::expand_struct_union_vars(vector<Variable *>& vars, const Type*
  *expand each struct field to a single variable
  */
 void
-VariableSelector::expand_struct_union_vars(vector<const Variable *>& vars, const Type* type)
+VariableSelector::expand_struct_union_vars(VariableSet& vars, const Type* type)
 {
-    size_t i;
-    size_t len = vars.size();
-    for (i=0; i<len; i++) {
-        const Variable* tmpvar = vars[i];
+	VariableSet new_vars;
+	bool expanded = false;
+    for (auto i = vars.begin(); i != vars.end(); i++) {
+        const Variable* tmpvar = *i;
 		// don't expand virtual variables
 		if (tmpvar->is_virtual()) continue;
         // don't break up a struct if it matches the given type
 		if (tmpvar->is_aggregate() && (tmpvar->type != type)) {
-            vars.erase(vars.begin() + i);
-            vars.insert(vars.end(), tmpvar->field_vars.begin(), tmpvar->field_vars.end());
-            i--;
-            len = vars.size();
+			new_vars.insert(tmpvar->field_vars.begin(), tmpvar->field_vars.end());
+			expanded = true;
         }
+		else {
+			new_vars.insert(tmpvar);
+		}
     }
+	if (expanded)
+		vars = new_vars;
 }
 
 /* return true if a variable in the list is a pointer to type "type" */
@@ -376,15 +379,14 @@ VariableSelector::choose_ok_var(const vector<const Variable *> &vars)
 }
 
 const Variable *
-VariableSelector::choose_visible_read_var(const Block* b, vector<const Variable*> read_vars, const Type* type, const FactVec& facts)
+VariableSelector::choose_visible_read_var(const Block* b, VariableSet read_vars, const Type* type, const FactVec& facts)
 {
-	size_t i;
 	vector<const Variable*> ok_vars;
 	// include the fields of struct/unions
 	expand_struct_union_vars(read_vars, type);
 
-	for (i=0; i<read_vars.size(); i++) {
-		const Variable* v = read_vars[i];
+	for (auto i=read_vars.begin(); i!=read_vars.end(); i++) {
+		const Variable* v = *i;
 		if (type->match(v->type, eConvert) &&
 			(b->is_var_on_stack(v) || v->is_global()) &&
 			!v->is_virtual() &&
@@ -445,7 +447,7 @@ VariableSelector::choose_var(vector<Variable *> vars,
 			continue;
 		}
 		// skip any variable in the invalid_vars list
-		if (is_variable_in_set(invalid_vars, *i)) {
+		if (is_variable_in_array(invalid_vars, *i)) {
 			continue;
 		}
 		int deref_level = (*i)->type->get_indirect_level() - type->get_indirect_level();
@@ -503,6 +505,16 @@ VariableSelector::choose_var(vector<Variable *> vars,
 			return var;
 	}
 	return choose_ok_var(ok_vars);
+}
+
+Variable*
+VariableSelector::choose_var(MutableVariableSet vars, Effect::Access access,
+		   const CGContext &cg_context, const Type* type, const CVQualifiers* qfer,
+		   eMatchType mt, const vector<const Variable*>& invalid_vars, bool no_bitfield, bool no_expand_struct)
+{
+	vector<Variable*> varArray;
+	varArray.insert(varArray.end(), vars.begin(), vars.end());
+	return choose_var(varArray, access, cg_context, type, qfer, mt, invalid_vars, no_bitfield, no_expand_struct);
 }
 
 Variable *
@@ -653,6 +665,7 @@ VariableSelector::eager_create_local_struct(Block &block, Effect::Access access,
 		return NULL;
 
 	ERROR_GUARD(NULL);
+
 	return choose_var(block.local_vars, access, cg_context, type, qfer, mt, invalid_vars);
 }
 
@@ -694,9 +707,10 @@ VariableSelector::find_all_non_bitfield_visible_vars(const Block *b, vector<Vari
 	}
 
 	while (b) {
-		for (size_t j = 0; j < b->local_vars.size(); ++j) {
-			if (!((b->local_vars[j])->isBitfield_))
-				vars.push_back(b->local_vars[j]);
+		for (auto j = b->local_vars.begin(); j != b->local_vars.end(); ++j) {
+			Variable* v = *j;
+			if (!v->isBitfield_)
+				vars.push_back(v);
 		}
 		b = b->parent;
 	}
@@ -715,9 +729,10 @@ VariableSelector::find_all_non_array_visible_vars(const Block *b, vector<Variabl
 			vars.push_back(b->func->param[i]);
 		}
 		while (b) {
-			for (i = 0; i < b->local_vars.size(); i++) {
-				if (!((b->local_vars[i])->isArray))
-					vars.push_back(b->local_vars[i]);
+			for (auto j = b->local_vars.begin(); j != b->local_vars.end(); ++j) {
+				Variable* v = *j;
+				if (!v->isArray)
+					vars.push_back(v);
 			}
 			b = b->parent;
 		}
@@ -798,7 +813,7 @@ VariableSelector::lower_block_for_vars(const vector<Block*>& blks, vector<const 
 		b = blks[j];
 		len = vars.size();
 		for (i=0; i<len; i++) {
-			if (find_variable_in_set(b->local_vars, vars[i]) != -1) {
+			if (find_variable_in_set(b->local_vars, vars[i]) != NULL) {
 				vars.erase(vars.begin() + i);
 				i--;
 				len--;
@@ -926,7 +941,7 @@ VariableSelector::GenerateNewParentLocal(Block &block,
 	string name = RandomLocalName();
 
 	Variable* var = create_and_initialize(access, cg_context, t, &var_qfer, blk, name);
-	blk->local_vars.push_back(var);
+	blk->local_vars.insert(var);
 	FactMgr* fm = get_fact_mgr(&cg_context);
 	fm->add_new_var_fact_and_update_inout_maps(blk, var->get_collective());
 	var_created = true;
@@ -1469,7 +1484,7 @@ VariableSelector::select_must_use_var(Effect::Access access, CGContext &cg_conte
 	if (cg_context.rw_directive == NULL) return NULL;
 
 	const Variable* var = 0;
-	VariableSet& vars = (access == Effect::READ) ? cg_context.rw_directive->must_read_vars : cg_context.rw_directive->must_write_vars;
+	VariableArray& vars = (access == Effect::READ) ? cg_context.rw_directive->must_read_vars : cg_context.rw_directive->must_write_vars;
 	eMatchType mt = (access == Effect::READ) ? eFlexible : eDerefExact;
 	for (size_t i=0; i<vars.size(); i++) {
 		const Variable* v = vars[i];
@@ -1515,7 +1530,7 @@ VariableSelector::create_mutated_array_var(const ArrayVariable* av, const vector
 	}
 	// add new variable to local list and all-variable list
 	AllVars.push_back(new_av);
-	av->parent->local_vars.push_back(new_av);
+	av->parent->local_vars.insert(new_av);
 	return new_av;
 }
 
@@ -1565,7 +1580,9 @@ OutputGlobalVariables(std::ostream &out)
 	bool access_once = CGOptions::access_once();
 
 	CGOptions::access_once(false);
-	OutputVariableList(vars, out);
+	for (size_t i=0; i<vars.size(); i++) {
+		vars[i]->OutputDef(out, 0);
+	}
 	CGOptions::access_once(access_once);
 }
 

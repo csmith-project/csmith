@@ -66,8 +66,6 @@ public:
 	static void output_counters(std::ostream &out, const char* prefix_msg,
 		const char* breakdown_msg, const std::vector<int> &counters, int starting_pos = 0);
 
-	static void update_ptr_aliases(const vector<Fact*>& facts, vector<const Variable*>& ptrs, vector<vector<const Variable*> >& aliases);
-
 	static void record_address_taken(const Variable *var);
 
 	static void record_pointer_comparisons(const Expression* lhs, const Expression* rhs);

@@ -136,11 +136,18 @@ FactMgr::add_new_var_fact(const Variable* v, FactVec& facts)
 
 /* update facts env for out-of-scope variables */
 void
-FactMgr::update_facts_for_oos_vars(const vector<Variable*>& vs, FactVec& facts)
+FactMgr::update_facts_for_oos_vars(const MutableVariableSet& vs, FactVec& facts)
 {
 	vector<const Variable*> vars;
 	vars.insert(vars.end(), vs.begin(), vs.end());
 	return update_facts_for_oos_vars(vars, facts);
+}
+
+void
+FactMgr::update_facts_for_oos_vars(const vector<Variable*>& vars, FactVec& facts)
+{
+	vector<const Variable*> const_vars { vars.begin(), vars.end()};
+	return update_facts_for_oos_vars(const_vars, facts);
 }
 
 void
@@ -334,7 +341,7 @@ FactMgr::caller_to_callee_handover(const FunctionInvocationUser* fiu, std::vecto
 	// move global facts and parameter facts to a separate "keep" list
 	for (i=0; i<len; i++) {
 		const Variable* v = inputs[i]->get_var();
-		if (v->is_global() || find_variable_in_set(func->param, v) >=0) {
+		if (v->is_global() || find_variable_in_array(func->param, v) != NULL) {
 			keep_facts.push_back(inputs[i]);
 			inputs.erase(inputs.begin() + i);
 			i--;
@@ -437,7 +444,7 @@ FactMgr::update_fact_for_return(const StatementReturn* sr, FactVec& inputs)
 void
 FactMgr::update_facts_for_dest(const FactVec& facts_in, FactVec& facts_out, const Statement* dest)
 {
-	size_t i, j;
+	size_t i;
 	vector<const Variable*> oos_vars;
 	const Function* func = dest->func;
 	assert(func);
@@ -449,16 +456,16 @@ FactMgr::update_facts_for_dest(const FactVec& facts_in, FactVec& facts_out, cons
 		// return variable, target site don't need them
 		if (!var || var->is_rv()) continue;
 		if (func->is_var_oos(var, dest)) {
-			if (find_variable_in_set(oos_vars, var) == -1) {
+			if (find_variable_in_array(oos_vars, var) == NULL) {
 				oos_vars.push_back(var);
 			}
 		}
 		if (f->eCat == ePointTo) {
 			const FactPointTo* fp = dynamic_cast<const FactPointTo*>(f);
-			for (j=0; j<fp->get_point_to_vars().size(); j++) {
-				const Variable* v = fp->get_point_to_vars()[j];
+			for (auto j=fp->get_point_to_vars().begin(); j!=fp->get_point_to_vars().end(); j++) {
+				const Variable* v = *j;
 				if (!FactPointTo::is_special_ptr(v) && func->is_var_oos(v, dest)) {
-					if (find_variable_in_set(oos_vars, v) == -1) {
+					if (find_variable_in_array(oos_vars, v) == NULL) {
 						oos_vars.push_back(v);
 					}
 				}
@@ -637,10 +644,10 @@ FactMgr::remove_loop_local_facts(const Statement* s, FactVec& facts)
 {
 	// filter out out-of-scope facts
 	const Block* b = (s->eType==eBlock) ? (const Block*)s : s->parent;
-	vector<Variable*> local_vars = b->local_vars;
+	MutableVariableSet local_vars = b->local_vars;
 	while (b && !b->looping) {
 		b = b->parent;
-		local_vars.insert(local_vars.end(), b->local_vars.begin(), b->local_vars.end());
+		local_vars.insert(b->local_vars.begin(), b->local_vars.end());
 	}
 	FactMgr::update_facts_for_oos_vars(local_vars, facts);
 }
@@ -748,7 +755,7 @@ FactMgr::sanity_check_map() const
 			const Variable* v = facts[i]->get_var();
 			if (!v->is_visible(stm->parent)) {
 				// exception: the input facts to a function body could include the parameter facts
-				if (stm->parent == 0 && find_variable_in_set(func->param, v) != -1) {
+				if (stm->parent == 0 && find_variable_in_array(func->param, v) != NULL) {
 					continue;
 				}
 				//assert(0);

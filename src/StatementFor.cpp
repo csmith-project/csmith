@@ -298,23 +298,25 @@ StatementFor::make_random_array_loop(const CGContext &cg_context)
 	// select the number of arrays to manipulate, default maximum = 4;
 	unsigned int aryno = rnd_upto(CGOptions::max_array_num_in_loop());
 	// choose arrays to manipulate, create new ones if necessary
-	VariableSet must_reads, must_writes;
+	VariableArray must_reads, must_writes;
 	for (size_t i=0; i<aryno; i++) {
 		const ArrayVariable* av = VariableSelector::select_array(cg_context);
 		// random access choice: 0 = must read, 1 = must write, 2 = both
 		int access = rnd_upto(3);
 		if (access == 0 || access == 2) {
-			add_variable_to_set(must_reads, (const Variable*)av);
+			if (!is_variable_in_array(must_reads, av))
+				must_reads.push_back(av);
 		}
 		if (access == 1 || access == 2) {
-			add_variable_to_set(must_writes, (const Variable*)av);
+			if (!is_variable_in_array(must_writes, av))
+				must_writes.push_back(av);
 		}
 	}
 	// create read/write directive from existing context and incoming directives
-	VariableSet all_must_reads, all_must_writes, no_reads, no_writes;
+	VariableArray all_must_reads, all_must_writes, no_reads, no_writes;
 	if (cg_context.rw_directive) {
-		combine_variable_sets(cg_context.rw_directive->must_read_vars, must_reads, all_must_reads);
-		combine_variable_sets(cg_context.rw_directive->must_write_vars, must_writes, all_must_writes);
+		combine_variable_arrays(cg_context.rw_directive->must_read_vars, must_reads, all_must_reads);
+		combine_variable_arrays(cg_context.rw_directive->must_write_vars, must_writes, all_must_writes);
 		no_reads = cg_context.rw_directive->no_read_vars;
 		no_writes = cg_context.rw_directive->no_write_vars;
 	} else {

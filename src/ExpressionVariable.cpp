@@ -236,10 +236,10 @@ ExpressionVariable::get_dereferenced_ptrs(void) const
 }
 
 void
-ExpressionVariable::get_referenced_ptrs(std::vector<const Variable*>& ptrs) const
+ExpressionVariable::get_referenced_ptrs(VariableSet& ptrs) const
 {
 	if (var.is_pointer()) {
-		ptrs.push_back(&var);
+		ptrs.insert(&var);
 	}
 }
 

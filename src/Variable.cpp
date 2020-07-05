@@ -73,7 +73,7 @@
 
 
 using namespace std;
-std::vector< std::vector<const Variable*>* > Variable::ctrl_vars_vectors;
+std::vector< VariableArray* > Variable::ctrl_vars_vectors;
 unsigned long Variable::ctrl_vars_count;
 
 const char Variable::sink_var_name[] = "csmith_sink_";
@@ -97,69 +97,90 @@ InitializeVariableAttributes()
 	}
 }
 
-int find_variable_in_set(const vector<const Variable*>& set, const Variable* v)
+// Return the variable equals to or contains v in the array.
+// Return NULL if no such variable in the array.
+const Variable* find_variable_in_array(const VariableArray& array, const Variable* v)
 {
-    size_t i;
-    for (i=0; i<set.size(); i++) {
-        if (set[i]->match(v)) {
-            return i;
-        }
-    }
-    return -1;
+	if (v == NULL) return NULL;
+	auto iter = std::find(array.begin(), array.end(), v);
+	if (iter != array.end()) return *iter;
+	// find whether the variable "containing" v is in the set.
+	return find_variable_in_array(array, v->field_var_of);
 }
 
-int find_variable_in_set(const vector<Variable*>& set, const Variable* v)
+// Return the variable equals to or contains v in the array.
+// Return NULL if no such variable in the array.
+Variable* find_variable_in_array(const MutableVariableArray& array, const Variable* v)
 {
-    size_t i;
-    for (i=0; i<set.size(); i++) {
-        if (set[i]->match(v)) {
-            return i;
-        }
-    }
-    return -1;
+	if (v == NULL) return NULL;
+	auto iter = std::find(array.begin(), array.end(), v);
+	if (iter != array.end()) return *iter;
+	// find whether the variable "containing" v is in the set.
+	return find_variable_in_array(array, v->field_var_of);
 }
 
-int find_field_variable_in_set(const vector<const Variable*>& set, const Variable* v)
+// Return the variable equals to or contains v in the set.
+// Return NULL if no such variable in the set.
+const Variable* find_variable_in_set(const VariableSet& set, const Variable* v)
 {
-    size_t i;
-	if (v->is_aggregate()) {
-		for (i=0; i<v->field_vars.size(); i++) {
-			const Variable* field = v->field_vars[i];
-			int pos = find_variable_in_set(set, field);
-			if (pos != -1) return pos;
-			pos = find_field_variable_in_set(set, field);
-			if (pos != -1) return pos;
-		}
+	if (v == NULL) return NULL;
+	auto iter = set.find(v);
+	if (iter != set.end()) return *iter;
+	// find whether the variable "containing" v is in the set.
+	return find_variable_in_set(set, v->field_var_of);
+}
+
+// Return the variable equals to or contains v in the set.
+// Return NULL if no such variable in the set.
+Variable* find_variable_in_set(const MutableVariableSet& set, const Variable* v)
+{
+	if (v == NULL) return NULL;
+	auto iter = set.find((Variable*)v);
+	if (iter != set.end()) return *iter;
+	// find whether the variable "containing" v is in the set.
+	return find_variable_in_set(set, v->field_var_of);
+}
+
+// If v is a struct/union, return its fields in the set
+VariableSet find_fields_in_set(const VariableSet& set, const Variable* v)
+{
+	VariableSet matched_set;
+	if (!v->is_aggregate()) return matched_set;
+
+	for (size_t i=0; i<v->field_vars.size(); i++) {
+		const Variable* field = v->field_vars[i];
+		auto iter = set.find(field);
+		if (iter != set.end()) matched_set.insert(*iter);
+		auto field_set = find_fields_in_set(set, field);
+		matched_set.insert(field_set.begin(), field_set.end());
 	}
-    return -1;
+    return matched_set;
 }
 
-bool is_variable_in_set(const vector<const Variable*>& set, const Variable* v)
+bool is_variable_in_set(const VariableSet& set, const Variable* v)
 {
-    size_t i;
-    for (i=0; i<set.size(); i++) {
-        if (set[i] == v) {
-            return true;
-        }
-    }
-    return false;
+	return set.find(v) != set.end();
 }
 
-bool add_variable_to_set(vector<const Variable*>& set, const Variable* v)
+bool is_variable_in_array(const VariableArray& array, const Variable* v)
+{
+	return std::find(array.begin(), array.end(), v) != array.end();
+}
+
+bool add_variable_to_set(VariableSet& set, const Variable* v)
 {
 	if (!is_variable_in_set(set, v)) {
-		set.push_back(v);
+		set.insert(v);
 		return true;
 	}
     return false;
 }
 
-bool add_variables_to_set(vector<const Variable*>& set, const vector<const Variable*>& new_set)
+bool add_variables_to_set(VariableSet& set, const VariableSet& new_set)
 {
-	size_t i;
 	bool changed = false;
-	for (i=0; i<new_set.size(); i++) {
-		if (add_variable_to_set(set, new_set[i])) {
+	for (auto i = new_set.begin(); i != new_set.end(); i++) {
+		if (add_variable_to_set(set, *i)) {
 			changed = true;
 		}
 	}
@@ -167,27 +188,17 @@ bool add_variables_to_set(vector<const Variable*>& set, const vector<const Varia
 }
 
 // return true if two sets contains same variables
-bool equal_variable_sets(const vector<const Variable*>& set1, const vector<const Variable*>& set2)
+bool equal_variable_sets(const VariableSet& set1, const VariableSet& set2)
 {
-    size_t i;
-    if (set1.size() == set2.size()) {
-        for (i=0; i<set1.size(); i++) {
-            if (!is_variable_in_set(set2, set1[i])) {
-                return false;
-            }
-        }
-        return true;
-    }
-    return false;
+	return set1 == set2;
 }
 
 // return true if set1 is subset of set2, or equal
-bool sub_variable_sets(const vector<const Variable*>& set1, const vector<const Variable*>& set2)
+bool sub_variable_sets(const VariableSet& set1, const VariableSet& set2)
 {
-    size_t i;
     if (set1.size() <= set2.size()) {
-        for (i=0; i<set1.size(); i++) {
-            if (!is_variable_in_set(set2, set1[i])) {
+        for (auto i=set1.begin(); i!=set1.end(); i++) {
+            if (!is_variable_in_set(set2, *i)) {
                 return false;
             }
         }
@@ -197,33 +208,24 @@ bool sub_variable_sets(const vector<const Variable*>& set1, const vector<const V
 }
 
 // combine two variable sets into one, note struct field "s1.f1" and "s1" is combined into "s1"
-void combine_variable_sets(const vector<const Variable*>& set1, const vector<const Variable*>& set2, vector<const Variable*>& set_all)
+void combine_variable_sets(const VariableSet& set1, const VariableSet& set2, VariableSet& set_all)
 {
-	size_t i;
 	set_all = set1;
-	for (i=0; i<set2.size(); i++) {
-		const Variable* v = set2[i];
-		if (find_variable_in_set(set1, v) == -1) {
-			set_all.push_back(v);
+	for (auto i=set2.begin(); i!=set2.end(); i++) {
+		const Variable* v = *i;
+		if (find_variable_in_set(set1, v) != NULL) {
+			set_all.insert(v);
 		}
 	}
 }
 
-/* replace all the field vars with their parent vars */
-void remove_field_vars(vector<const Variable*>& set)
+void combine_variable_arrays(const VariableArray& array1, const VariableArray& array2, VariableArray& array_all)
 {
-	size_t i;
-	size_t len = set.size();
-	for (i=0; i<len; i++) {
-		const Variable* v = set[i];
-		if (v->is_field_var()) {
-			while (v->field_var_of) {
-				v = v->field_var_of;
-			}
-			set.erase(set.begin() + i);
-			add_variable_to_set(set, v);
-			i--;
-			len = set.size();
+	array_all = array1;
+	for (auto i=array2.begin(); i!=array2.end(); i++) {
+		const Variable* v = *i;
+		if (find_variable_in_array(array1, v) != NULL) {
+			array_all.push_back(v);
 		}
 	}
 }
@@ -518,7 +520,7 @@ Variable::is_local(void) const
 bool
 Variable::is_visible_local(const Block* blk) const
 {
-	if (blk == 0) {
+	if (blk == NULL) {
 		return is_global();
 	}
 	if (is_field_var()) {
@@ -533,7 +535,7 @@ Variable::is_visible_local(const Block* blk) const
 	}
 	const Block* b = blk;
 	while (b) {
-		if (find_variable_in_set(b->local_vars, this) != -1) {
+		if (find_variable_in_set(b->local_vars, this) != NULL) {
 			return true;
 		}
 		b = b->parent;
@@ -827,14 +829,14 @@ Variable::OutputLowerBound(std::ostream &out) const
 }
 
 // --------------------------------------------------------------
-std::vector<const Variable*>&
+VariableArray&
 Variable::new_ctrl_vars()
 {
 	unsigned long ctrl_var_suffix = Variable::ctrl_vars_count;
 	CVQualifiers dummy;
 	dummy.add_qualifiers(false, false);
 	char name = 'i';
-	vector<const Variable *> *ctrl_vars = new vector<const Variable *>();
+	VariableArray *ctrl_vars = new VariableArray();
 	assert(ctrl_vars);
 
 	for (int i=0; i<CGOptions::max_array_dimensions(); i++) {
@@ -852,13 +854,13 @@ Variable::new_ctrl_vars()
 	return *ctrl_vars;
 }
 
-std::vector<const Variable*>&
+VariableArray&
 Variable::get_new_ctrl_vars()
 {
 	return Variable::new_ctrl_vars();
 }
 
-std::vector<const Variable*>&
+VariableArray&
 Variable::get_last_ctrl_vars()
 {
 	return *Variable::ctrl_vars_vectors.back();
@@ -868,14 +870,12 @@ Variable::get_last_ctrl_vars()
 void
 Variable::doFinalization(void)
 {
-	for (vector< vector<const Variable *>* >::iterator vi = ctrl_vars_vectors.begin(),
-	     ve = ctrl_vars_vectors.end(); vi != ve; ++vi) {
-		vector<const Variable *> *v = (*vi);
-		for (vector<const Variable *>::iterator i = v->begin(),
-		     e = v->end(); i != e; ++i) {
+	for (auto vi = ctrl_vars_vectors.begin(); vi != ctrl_vars_vectors.end(); ++vi) {
+		VariableArray *ary = (*vi);
+		for (auto i = ary->begin(); i != ary->end(); ++i) {
 			delete (*i);
 		}
-		delete v;
+		delete ary;
 	}
 	ctrl_vars_vectors.clear();
 }
@@ -890,7 +890,7 @@ MapVariableList(const vector<Variable*> &var, std::ostream &out,
 
 // --------------------------------------------------------------
 void
-OutputArrayCtrlVars(const vector <const Variable*> &ctrl_vars, std::ostream &out, size_t dimen, int indent)
+OutputArrayCtrlVars(const VariableArray &ctrl_vars, std::ostream &out, size_t dimen, int indent)
 {
 	assert(dimen <= ctrl_vars.size());
 	output_tab(out, indent);
@@ -927,7 +927,7 @@ OutputArrayInitializers(const vector<Variable*>& vars, std::ostream &out, int in
 	size_t i, dimen;
 	dimen = Variable::GetMaxArrayDimension(vars);
 	if (dimen) {
-		vector <const Variable*> &ctrl_vars = Variable::get_new_ctrl_vars();
+		VariableArray &ctrl_vars = Variable::get_new_ctrl_vars();
 		OutputArrayCtrlVars(ctrl_vars, out, dimen, indent);
 		for (i=0; i<vars.size(); i++) {
 			if (vars[i]->isArray) {
@@ -951,17 +951,19 @@ void OutputVolatileAddress(const vector<Variable*> &vars, std::ostream &out, int
 }
 
 // --------------------------------------------------------------
+
 void
-OutputVariableList(const vector<Variable*> &vars, std::ostream &out, int indent)
+OutputLocalVariableList(const MutableVariableSet &vars, std::ostream &out, int indent)
 {
-	size_t i;
 	// have to use iterator instead of map because we need indent as paramter
-	for (i=0; i<vars.size(); i++) {
-		vars[i]->OutputDef(out, indent);
+	for (auto i=vars.begin(); i!=vars.end(); i++) {
+		(*i)->OutputDef(out, indent);
 	}
-	if (!vars.empty() && !vars[0]->is_global()) {
-		OutputArrayInitializers(vars, out, indent);
-	}
+
+	// convert to vector for outputting
+	vector<Variable*> varArray;
+	varArray.insert(varArray.end(), vars.begin(), vars.end());
+	OutputArrayInitializers(varArray, out, indent);
 }
 
 void
@@ -1353,7 +1355,7 @@ Variable::match_var_name(const string& vname) const
 }
 
 void
-Variable::find_pointer_fields(vector<const Variable*>& ptr_fields) const
+Variable::find_pointer_fields(VariableArray& ptr_fields) const
 {
 	for (size_t i=0; i<field_vars.size(); i++) {
 		if (field_vars[i]->is_pointer()) {

@@ -179,7 +179,7 @@ ExpressionFuncall::get_dereferenced_ptrs(void) const
 
 // find pointers used in the expression, recursively go into callee if this is a call
 void
-ExpressionFuncall::get_referenced_ptrs(std::vector<const Variable*>& ptrs) const
+ExpressionFuncall::get_referenced_ptrs(VariableSet& ptrs) const
 {
 	for (size_t i=0; i<invoke.param_value.size(); i++) {
 		// the parameters might has pointer references

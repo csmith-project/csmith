@@ -183,7 +183,10 @@ ArrayVariable::CreateArrayVariable(const CGContext& cg_context, Block* blk, cons
 	}
 
 	// add it to global list or local variable list
-	blk? blk->local_vars.push_back(var) : VariableSelector::GetGlobalVariables()->push_back(var);
+	if (blk)
+		blk->local_vars.insert(var);
+	else
+		VariableSelector::GetGlobalVariables()->push_back(var);
 	return var;
 }
 
@@ -315,7 +318,7 @@ ArrayVariable::itemize(const std::vector<const Variable*>& indices, Block* blk) 
 	if (type->is_aggregate()) {
 		av->create_field_vars(type);
 	}
-	blk->local_vars.push_back(av);
+	blk->local_vars.insert(av);
 	return av;
 }
 
@@ -335,7 +338,7 @@ ArrayVariable::itemize(const std::vector<const Expression*>& indices, Block* blk
 	if (type->is_aggregate()) {
 		av->create_field_vars(type);
 	}
-	blk->local_vars.push_back(av);
+	blk->local_vars.insert(av);
 	return av;
 }
 
@@ -348,9 +351,9 @@ ArrayVariable::rnd_mutate(void)
 	size_t i;
 	if (use_existing) {
 		vector<Variable*> ok_vars;
-		for (i=0; i<parent->local_vars.size(); i++) {
-			if (is_variant(parent->local_vars[i])) {
-				ok_vars.push_back(parent->local_vars[i]);
+		for (auto it = parent->local_vars.begin(); it != parent->local_vars.end(); it++) {
+			if (is_variant(*it)) {
+				ok_vars.push_back(*it);
 			}
 		}
 		Variable* v = VariableSelector::choose_ok_var(ok_vars);

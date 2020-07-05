@@ -66,7 +66,7 @@ public:
 	const Variable* get_var(void) const {return &var;};
 	//
 	virtual std::vector<const ExpressionVariable*> get_dereferenced_ptrs(void) const;
-	virtual void get_referenced_ptrs(std::vector<const Variable*>& ptrs) const;
+	virtual void get_referenced_ptrs(VariableSet& ptrs) const;
 
 	virtual unsigned int get_complexity(void) const { return 1;}
 

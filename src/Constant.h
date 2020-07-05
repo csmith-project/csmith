@@ -82,7 +82,7 @@ public:
 	virtual bool not_equals(int num) const;
 	virtual bool equals(int num) const;
 
-	virtual void get_referenced_ptrs(std::vector<const Variable*>& /*ptrs*/) const {};
+	virtual void get_referenced_ptrs(VariableSet& /*ptrs*/) const {};
 	virtual unsigned int get_complexity(void) const { return 1;}
 	// unsigned long SizeInBytes(void) const;
 	virtual void Output(std::ostream &) const;

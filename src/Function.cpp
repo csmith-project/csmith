@@ -148,41 +148,14 @@ find_function_in_set(const vector<const Function*>& set, const Function* f)
 	return -1;
 }
 
-const Block*
-find_blk_for_var(const Variable* v)
-{
-	if (v->is_global()) {
-		return NULL;
-	}
-	size_t i, j;
-	for (i=0; i<FuncList.size(); i++) {
-		const Function* func = FuncList[i];
-		// for a parameter of a function, pretend it's a variable belongs to the top block
-		if (v->is_argument() && find_variable_in_set(func->param, v) != -1) {
-			return func->body;
-		}
-		for (j=0; j<func->blocks.size(); j++) {
-			const Block* blk = func->blocks[j];
-			if (find_variable_in_set(blk->local_vars, v) != -1) {
-				return blk;
-			}
-		}
-	}
-	return NULL;
-}
-
 bool
 Function::is_var_on_stack(const Variable* var, const Statement* stm) const
 {
-    size_t i;
-    for (i=0; i<param.size(); i++) {
-        if (param[i]->match(var)) {
-            return true;
-        }
-    }
-	const Block* b = stm->parent;
+	if (find_variable_in_array(param, var) != NULL) return true;
+
+	const Block* b = (stm->eType == eBlock) ? (const Block*)stm : stm->parent;
 	while (b) {
-		if (find_variable_in_set(b->local_vars, var) != -1) {
+		if (find_variable_in_set(b->local_vars, var) != NULL) {
 			return true;
 		}
 		b = b->parent;
@@ -211,7 +184,7 @@ Function::is_var_oos(const Variable* var, const Statement* stm) const
 		//return true;
 		size_t i;
 		for (i=0; i<blocks.size(); i++) {
-			if (find_variable_in_set(blocks[i]->local_vars, var) != -1) {
+			if (find_variable_in_set(blocks[i]->local_vars, var) != NULL) {
 				return true;
 			}
 		}
@@ -730,7 +703,7 @@ Function::generate_body_with_known_params(const CGContext &prev_context, Effect&
 	cg_context.extend_call_chain(prev_context);
 
 	// inherit proper no-read/write directives from caller
-	VariableSet no_reads, no_writes, must_reads, must_writes, frame_vars;
+	VariableArray no_reads, no_writes, must_reads, must_writes, frame_vars;
 	prev_context.find_reachable_frame_vars(fm->global_facts, frame_vars);
 	prev_context.get_external_no_reads_writes(no_reads, no_writes, frame_vars);
 	RWDirective rwd(no_reads, no_writes, must_reads, must_writes);

@@ -57,7 +57,6 @@ using namespace std;
 /*
  * Declare "the" empty set of variables.
  */
-const VariableSet CGContext::empty_variable_set(0);
 const CGContext CGContext::empty_context(0, Effect::get_empty_effect(), 0);
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -149,13 +148,7 @@ bool
 CGContext::is_nonreadable(const Variable *v) const
 {
 	if (rw_directive) {
-		VariableSet::size_type len = rw_directive->no_read_vars.size();
-		VariableSet::size_type i;
-		for (i = 0; i < len; ++i) {
-			if (rw_directive->no_read_vars[i]->match(v)) {
-				return true;
-			}
-		}
+		return find_variable_in_array(rw_directive->no_read_vars, v) != NULL;
 	}
 	return false;
 }
@@ -167,9 +160,8 @@ bool
 CGContext::is_nonwritable(const Variable *v) const
 {
 	if (rw_directive) {
-		VariableSet::size_type len = rw_directive->no_write_vars.size();
-		for (size_t i = 0; i < len; ++i) {
-			const Variable* no_write_var = rw_directive->no_write_vars[i];
+		for (auto i=rw_directive->no_write_vars.begin(); i!=rw_directive->no_write_vars.end(); ++i) {
+			const Variable* no_write_var = *i;
 			if (no_write_var->loose_match(v) || v->loose_match(no_write_var)) {
 				return true;
 			}
@@ -255,7 +247,6 @@ CGContext::check_read_var(const Variable *v, const std::vector<const Fact*>& fac
 
 bool CGContext::read_pointed(const ExpressionVariable* v, const std::vector<const Fact*>& facts)
 {
-	size_t i;
 	Effect effect_accum_copy = *effect_accum;
 	int indirect = v->get_indirect_level();
 	assert(indirect > 0);
@@ -266,21 +257,22 @@ bool CGContext::read_pointed(const ExpressionVariable* v, const std::vector<cons
 	if (!read_indices(v->get_var(), facts)) {
 		return false;
 	}
-	vector<const Variable*> tmp;
+
+	VariableArray tmp;
 	tmp.push_back(v->get_var()->get_collective());
 	// recursively trace the pointer(s) to find real variables they point to
 	while (indirect-- > 0) {
 		tmp = FactPointTo::merge_pointees_of_pointers(tmp, facts);
 		// make sure there is no null/dead pointers
 		if (tmp.size()==0 ||
-			(!allow_null_ptr && is_variable_in_set(tmp, FactPointTo::null_ptr)) ||
-			(!allow_dead_ptr && is_variable_in_set(tmp, FactPointTo::garbage_ptr))) {
+			(!allow_null_ptr && is_variable_in_array(tmp, FactPointTo::null_ptr)) ||
+			(!allow_dead_ptr && is_variable_in_array(tmp, FactPointTo::garbage_ptr))) {
 			*effect_accum = effect_accum_copy;
 			return false;
 		}
 		// make sure the remaining pointee are readable in context
-		for (i=0; i<tmp.size(); i++) {
-			const Variable* pointee = tmp[i];
+		for (auto i=tmp.begin(); i!=tmp.end(); i++) {
+			const Variable* pointee = *i;
 			if (!FactPointTo::is_special_ptr(pointee)) {
 				if (!check_read_var(pointee, facts)) {
 					*effect_accum = effect_accum_copy;
@@ -294,7 +286,6 @@ bool CGContext::read_pointed(const ExpressionVariable* v, const std::vector<cons
 
 bool CGContext::write_pointed(const Lhs* v, const std::vector<const Fact*>& facts)
 {
-	size_t i;
 	Effect effect_accum_copy = *effect_accum;
 	int indirect = v->get_indirect_level();
 	assert(indirect > 0);
@@ -304,8 +295,7 @@ bool CGContext::write_pointed(const Lhs* v, const std::vector<const Fact*>& fact
 		return false;
 	}
 
-	vector<const Variable*> tmp;
-	tmp.push_back(v->get_var()->get_collective());
+	VariableArray tmp{v->get_var()->get_collective()};
 
 	bool allow_null_ptr = CGOptions::null_pointer_dereference_prob() > 0;
 	bool allow_dead_ptr = CGOptions::dead_pointer_dereference_prob() > 0;
@@ -314,14 +304,14 @@ bool CGContext::write_pointed(const Lhs* v, const std::vector<const Fact*>& fact
 		tmp = FactPointTo::merge_pointees_of_pointers(tmp, facts);
 		// make sure there is no null/dead pointers
 		if (tmp.size()==0 ||
-			(!allow_null_ptr && is_variable_in_set(tmp, FactPointTo::null_ptr)) ||
-			(!allow_dead_ptr && is_variable_in_set(tmp, FactPointTo::garbage_ptr))) {
+			(!allow_null_ptr && is_variable_in_array(tmp, FactPointTo::null_ptr)) ||
+			(!allow_dead_ptr && is_variable_in_array(tmp, FactPointTo::garbage_ptr))) {
 			*effect_accum = effect_accum_copy;
 			return false;
 		}
 		// make sure the remaining pointee are readable or writable(if it is the ultimate pointee) in context
-		for (i=0; i<tmp.size(); i++) {
-			const Variable* pointee = tmp[i];
+		for (auto i=tmp.begin(); i!=tmp.end(); i++) {
+			const Variable* pointee = *i;
 			if (!FactPointTo::is_special_ptr(pointee)) {
 				bool succ = false;
 				if (indirect==0) {
@@ -499,7 +489,7 @@ CGContext::find_variable_scope(const Variable* var) const
 	const Block* b = get_current_block();
 	i = 1;
 	do {
-		if (find_variable_in_set(b->local_vars, var) != -1) {
+		if (find_variable_in_set(b->local_vars, var) != NULL) {
 			return i;
 		}
 		b = b->parent;
@@ -510,7 +500,7 @@ CGContext::find_variable_scope(const Variable* var) const
 	for (i=call_chain.size()-1; i>=0; i--) {
 		b = call_chain[i];
 		do {
-			if (find_variable_in_set(b->local_vars, var) != -1) {
+			if (find_variable_in_set(b->local_vars, var) != NULL) {
 				return INVISIBLE;
 			}
 			b = b->parent;
@@ -597,11 +587,10 @@ CGContext::accept_type(const Type* t) const
 bool
 CGContext::in_conflict(const Effect& eff) const
 {
-	size_t i;
-	const std::vector<const Variable *>& rvars = eff.get_read_vars();
-	const std::vector<const Variable *>& wvars = eff.get_write_vars();
-	for (i=0; i<rvars.size(); i++) {
-		const Variable* v = rvars[i];
+	const VariableSet& rvars = eff.get_read_vars();
+	const VariableSet& wvars = eff.get_write_vars();
+	for (auto i=rvars.begin(); i!=rvars.end(); i++) {
+		const Variable* v = *i;
 		if (is_nonreadable(v)) {
 			return true;
 		}
@@ -614,8 +603,8 @@ CGContext::in_conflict(const Effect& eff) const
 		}
 	}
 
-	for (i=0; i<wvars.size(); i++) {
-		const Variable* v = wvars[i];
+	for (auto i=wvars.begin(); i!=wvars.end(); i++) {
+		const Variable* v = *i;
 		if (is_nonwritable(v) || v->is_const()) {
 			return true;
 		}
@@ -633,14 +622,14 @@ CGContext::in_conflict(const Effect& eff) const
 }
 
 void
-CGContext::find_reachable_frame_vars(vector<const Fact*>& facts, VariableSet& frame_vars) const
+CGContext::find_reachable_frame_vars(vector<const Fact*>& facts, VariableArray& frame_vars) const
 {
-	size_t i, j;
+	size_t i;
 	for (i=0; i<facts.size(); i++) {
 		if (facts[i]->eCat == ePointTo) {
 			const FactPointTo* fp = (const FactPointTo*)(facts[i]);
-			for (j=0; j<fp->get_point_to_vars().size(); j++) {
-				const Variable* v = fp->get_point_to_vars()[j];
+			for (auto j=fp->get_point_to_vars().begin(); j!=fp->get_point_to_vars().end(); j++) {
+				const Variable* v = *j;
 				if (is_frame_var(v)) {
 					frame_vars.push_back(v);
 				}
@@ -650,7 +639,7 @@ CGContext::find_reachable_frame_vars(vector<const Fact*>& facts, VariableSet& fr
 }
 
 void
-CGContext::get_external_no_reads_writes(VariableSet& no_reads, VariableSet& no_writes, const VariableSet& frame_vars) const
+CGContext::get_external_no_reads_writes(VariableArray& no_reads, VariableArray& no_writes, const VariableArray& frame_vars) const
 {
 	no_reads.clear();
 	no_writes.clear();
@@ -659,13 +648,13 @@ CGContext::get_external_no_reads_writes(VariableSet& no_reads, VariableSet& no_w
 	if (rw_directive) {
 		for (i=0; i<rw_directive->no_read_vars.size(); i++) {
 			const Variable* v = rw_directive->no_read_vars[i];
-			if (v->is_global() || find_variable_in_set(frame_vars, v) != -1) {
+			if (v->is_global() || find_variable_in_array(frame_vars, v) != NULL) {
 				no_reads.push_back(v);
 			}
 		}
 		for (i=0; i<rw_directive->no_write_vars.size(); i++) {
 			const Variable* v = rw_directive->no_write_vars[i];
-			if (v->is_global() || find_variable_in_set(frame_vars, v) != -1) {
+			if (v->is_global() || find_variable_in_array(frame_vars, v) != NULL) {
 				no_writes.push_back(v);
 			}
 		}
@@ -673,7 +662,7 @@ CGContext::get_external_no_reads_writes(VariableSet& no_reads, VariableSet& no_w
 	// convert global IVs into non-writables
 	map<const Variable*, unsigned int>::const_iterator iter;
 	for (iter = iv_bounds.begin(); iter != iv_bounds.end(); ++iter) {
-		if (iter->first->is_global() || find_variable_in_set(frame_vars, iter->first) != -1) {
+		if (iter->first->is_global() || find_variable_in_array(frame_vars, iter->first) != NULL) {
 			no_writes.push_back(iter->first);
 		}
 	}
@@ -686,13 +675,13 @@ RWDirective::find_must_use_arrays(vector<const Variable*>& avs) const
 	size_t i;
 	for (i=0; i<must_read_vars.size(); i++) {
 		const Variable* v = must_read_vars[i];
-		if (v->isArray && !is_variable_in_set(avs, v)) {
+		if (v->isArray && !is_variable_in_array(avs, v)) {
 			avs.push_back(v);
 		}
 	}
 	for (i=0; i<must_write_vars.size(); i++) {
 		const Variable* v = must_write_vars[i];
-		if (v->isArray && !is_variable_in_set(avs, v)) {
+		if (v->isArray && !is_variable_in_array(avs, v)) {
 			avs.push_back(v);
 		}
 	}
