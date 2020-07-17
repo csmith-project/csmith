@@ -352,6 +352,8 @@ FUNC_NAME(div_func_$1_f_f)($1 sf1, $1 sf2 LOG_INDEX)
 ')
 
 #ifdef __STDC__
+float fabsf(float);
+double fabs(double);
 safe_float_math(float,f,FLT_MAX,0x1.0p-28f,0x1.0p-49f)
 safe_float_math(double,,DBL_MAX,0x1.0p-924,0x1.0p-974)
 #else
