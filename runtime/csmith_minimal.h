@@ -102,9 +102,11 @@ transparent_crc_bytes (char *ptr, int nbytes, char* vname, int flag)
   for (i=0; i<nbytes; i++) {
     crc32_context += ptr[i];
   }
+#ifndef NO_PRINTF
   if (flag) {
     printf("...checksum after hashing %s : %lX\n", vname, crc32_context ^ 0xFFFFFFFFUL);
   }
+#endif
 }
 
 #ifdef NO_PRINTF
