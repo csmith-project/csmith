@@ -651,8 +651,6 @@ Statement::stm_visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) c
 	cg_context.get_effect_stm().clear();
 	cg_context.curr_blk = parent;
 	FactMgr* fm = get_fact_mgr(&cg_context);
-	//static int g = 0;
-	//int h = g++;
 	bool ok = visit_facts(inputs, cg_context);
 
 
@@ -925,13 +923,6 @@ Statement::post_creation_analysis(vector<const Fact*>& pre_facts, const Effect& 
 		if (has_uncertain_call_recursive()) {
 			FactVec outputs = pre_facts;
 			cg_context.reset_effect_accum(pre_effect);
-			//if (stm_id == 573)
-				/*if (this->eType == eAssign) {
-					((const StatementAssign*)this)->get_rhs()->indented_output(cout, 0);
-				}
-				cout << endl;
-				Output(cout, fm);*/
-			//}
 			if (!validate_and_update_facts(outputs, cg_context)) {
 				assert(0);
 			}

@@ -196,6 +196,7 @@ StatementAssign::make_random(CGContext &cg_context, const Type* type, const CVQu
 	else {
 		lhs = Lhs::make_random(lhs_cg_context, type, &qfer, op != eSimpleAssign, need_no_rhs(op));
 	}
+
 	if (qf) CGOptions::match_exact_qualifiers(prev_flag); // restore flag
 	ERROR_GUARD_AND_DEL2(NULL, e, lhs);
 
@@ -335,7 +336,7 @@ StatementAssign::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context)
 	Effect rhs_accum, lhs_accum;
 	CGContext rhs_cg_context(cg_context, running_eff_context, &rhs_accum);
 	if (!expr.visit_facts(inputs, rhs_cg_context)) {
-		return false;
+		return log_analysis_fail("StatementAssign rhs");
 	}
 
 	// for compound assignment, LHS needs to be evaluated in the effect context of RHS
@@ -351,7 +352,7 @@ StatementAssign::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context)
 	lhs_cg_context.get_effect_stm() = rhs_cg_context.get_effect_stm();
 	lhs_cg_context.curr_rhs = &expr;
 	if (!lhs.visit_facts(inputs, lhs_cg_context)) {
-		return false;
+		return log_analysis_fail("StatementAssign lhs");
 	}
 	cg_context.merge_param_context(lhs_cg_context, true);
 	//cg_context.get_effect_stm() = lhs_cg_context.get_effect_stm();

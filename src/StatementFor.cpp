@@ -420,7 +420,7 @@ StatementFor::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) co
 {
 	// walk the initializing statement
 	if (!init.visit_facts(inputs, cg_context)) {
-		return false;
+		return log_analysis_fail("StatementFor init");
 	}
 	//print_facts(inputs);
 	FactVec facts_copy = inputs;
@@ -436,7 +436,7 @@ StatementFor::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) co
 	if (!body.visit_facts(inputs, cg_context)) {
 		// remove IV from context
 		cg_context.iv_bounds.erase(iv);
-		return false;
+		return log_analysis_fail("StatementFor loop body");
 	}
 	FactMgr* fm = get_fact_mgr(&cg_context);
 	// if body must return, means the control reached end of for-loop with pre-loop env

@@ -476,7 +476,7 @@ FunctionInvocationBinary::visit_facts(vector<const Fact*>& inputs, CGContext& cg
 				return true;
 			}
 		}
-		return false;
+		return log_analysis_fail("FunctionInvocationBinary");
 	}
 	// for other binary invocations, use the standard visitor
 	return FunctionInvocation::visit_facts(inputs, cg_context);

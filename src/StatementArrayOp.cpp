@@ -297,7 +297,7 @@ StatementArrayOp::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context
 	for (i=0; i<array_var->get_dimension(); i++) {
 		const Variable *cv = ctrl_vars[i];
 		if (!cg_context.check_write_var(cv, inputs)) {
-			return false;
+			return log_analysis_fail("StatementArrayOp cv");
 		}
 	}
 	FactMgr* fm = get_fact_mgr(&cg_context);
@@ -306,7 +306,7 @@ StatementArrayOp::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context
 		FactVec facts_copy = inputs;
 		Effect eff = cg_context.get_effect_stm();
 		if (!body->visit_facts(inputs, cg_context)) {
-			return false;
+			return log_analysis_fail("StatementArrayOp body");
 		}
 		// if body must return, means the control reached end of for-loop with pre-loop env
 		if (body->must_return()) {
@@ -329,10 +329,10 @@ StatementArrayOp::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context
 	else if (init_value) {
 		Lhs lhs(*array_var);
 		if (!init_value->visit_facts(inputs, cg_context)) {
-			return false;
+			return log_analysis_fail("StatementArrayOp init value");
 		}
 		if (!lhs.visit_facts(inputs, cg_context)) {
-			return false;
+			return log_analysis_fail("StatementArrayOp lhs");
 		}
 		FactMgr::update_fact_for_assign(&lhs, init_value, inputs);
 		fm->map_stm_effect[this] = cg_context.get_effect_stm();

@@ -83,7 +83,9 @@ std::vector<const Fact*>
 Fact::abstract_fact_for_return(const std::vector<const Fact*>& facts, const ExpressionVariable* expr, const Function* func)
 {
 	Lhs lhs(*func->rv);
-	return abstract_fact_for_assign(facts, &lhs, expr);
+    vector<const Fact*> facts_out;
+	abstract_fact_for_assign(facts, &lhs, expr, facts_out);
+	return facts_out;
 }
 
 vector<const Fact*>
@@ -94,13 +96,17 @@ Fact::abstract_fact_for_var_init(const Variable* v)
 	if (v->type == NULL || (v->type->eType != ePointer && v->type->eType != eUnion)) return empty;
 
 	Lhs lhs(*v);
-	vector<const Fact*> facts = abstract_fact_for_assign(empty, &lhs, v->init);
+	vector<const Fact*> facts;
+	int lvar_cnt = abstract_fact_for_assign(empty, &lhs, v->init, facts);
+	assert(lvar_cnt == 1);
+
 	if (v->isArray) {
 		const ArrayVariable* av = dynamic_cast<const ArrayVariable*>(v);
 		assert(av);
 		for (size_t i=0; i<av->get_more_init_values().size(); i++) {
 			const Expression* init = av->get_more_init_values()[i];
-			vector<const Fact*> more_facts = abstract_fact_for_assign(empty, &lhs, init);
+			vector<const Fact*> more_facts;
+			abstract_fact_for_assign(empty, &lhs, init, more_facts);
 			merge_facts(facts, more_facts);
 		}
 	}

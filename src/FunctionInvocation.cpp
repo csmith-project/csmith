@@ -518,10 +518,10 @@ FunctionInvocation::visit_facts(vector<const Fact*>& inputs, CGContext& cg_conte
 			CGContext param_cg_context(cg_context, running_eff_context, &param_eff_accum);
 			// the parameters might be function calls
 			const Expression* value = param_value[i];
-			if (h == 236)
+			if (h == 2684)
 				BREAK_NOP;	// for debugging
 			if (!value->visit_facts(inputs, param_cg_context)) {
-				return false;
+				return log_analysis_fail(std::string("Parameter ") + std::to_string(i) + " with FunctionInvocation");
 			}
 			// Update the "running effect context": the context that we must use
 			// when we generate subsequent parameters within this invocation.
@@ -550,6 +550,9 @@ FunctionInvocation::visit_facts(vector<const Fact*>& inputs, CGContext& cg_conte
 			func_effect.add_external_effect(*new_context.get_effect_accum(), cg_context.call_chain);
 		}
 	}
+
+	if (!ok)
+		log_analysis_fail("FunctionInvocation");
 	return ok;
 }
 

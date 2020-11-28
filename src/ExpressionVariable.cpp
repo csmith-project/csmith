@@ -250,22 +250,28 @@ ExpressionVariable::visit_facts(vector<const Fact*>& inputs, CGContext& cg_conte
 	const Variable* v = get_var();
 	if (deref_level > 0) {
 		if (!FactPointTo::is_valid_ptr(v, inputs)) {
-			return false;
+			return log_analysis_fail(v->name + " with ExpressionVariable. reason invalid pointer");
 		}
 		// Yang: do we need to consider the deref_level?
 		bool valid = cg_context.check_read_var(v, inputs) && cg_context.read_pointed(this, inputs) &&
 			cg_context.check_deref_volatile(v, deref_level);
+
+		if (!valid)
+			return log_analysis_fail(v->name + " with ExpressionVariable. reason invalid read through pointer");
 		return valid;
 	}
 	// we filter out bitfield
 	if (deref_level < 0) {
 		if (v->isBitfield_)
-			return false;
+			return log_analysis_fail(v->name + " with ExpressionVariable. reason bitfield");
 		// it's actually valid to take address of a null/dead pointer
 		return true;
 	}
 	else {
-		return cg_context.check_read_var(v, inputs);
+		bool valid = cg_context.check_read_var(v, inputs);
+		if (!valid)
+			return log_analysis_fail(v->name + " with ExpressionVariable. reason invalid read");
+		return valid;
 	}
 }
 

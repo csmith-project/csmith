@@ -34,7 +34,7 @@
 
 #include <string>
 #include <vector>
-#include <ostream>
+#include <iostream>
 
 typedef std::vector<int> intvec;
 
@@ -50,6 +50,7 @@ void output_tab(std::ostream &out, int indent);
 void output_print_str(std::ostream& out, std::string str, std::string str_value, int indent);
 void output_open_encloser(const char* symbol, std::ostream &out, int& indent);
 void output_close_encloser(const char* symbol, std::ostream &out, int& indent, bool no_newline = false);
+bool log_analysis_fail(std::string msg);
 
 ///////////////////////////////////////////////////////////////////////////////
 

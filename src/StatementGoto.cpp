@@ -371,12 +371,12 @@ StatementGoto::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) c
 {
 	// evaludate condition first
 	if (!test.visit_facts(inputs, cg_context)) {
-		return false;
+		return log_analysis_fail("StatementGoto condition");
 	}
 	size_t i;
 	for (i=0; i<init_skipped_vars.size(); i++) {
 		if (!cg_context.check_write_var(init_skipped_vars[i], inputs)) {
-			return false;
+			return log_analysis_fail("StatementGoto skipped vars");
 		}
 	}
 	FactMgr* fm = get_fact_mgr(&cg_context);

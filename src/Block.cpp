@@ -535,7 +535,7 @@ Block::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const
 	Effect pre_effect = cg_context.get_accum_effect();
 	if (!find_fixed_point(inputs, dummy_facts, cg_context, dummy, false)) {
 		cg_context.reset_effect_accum(pre_effect);
-		return false;
+		return log_analysis_fail("Block. reason can't converge to fixed point");
 	}
 	inputs = fm->map_facts_out[this];
 	fm->map_visited[this] = true;
@@ -615,7 +615,7 @@ Block::find_fixed_point(vector<const Fact*> inputs, vector<const Fact*>& post_fa
 		// revisit statements with new inputs
 		for (i=0; i<stms.size(); i++) {
 			int h = g++;
-			if (h == 2585)
+			if (h == 558)
 				BREAK_NOP;		// for debugging
 			if (!stms[i]->analyze_with_edges_in(outputs, cg_context)) {
 				fail_index = i;

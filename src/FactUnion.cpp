@@ -123,37 +123,37 @@ FactUnion::rhs_to_lhs_transfer(const std::vector<const Fact*>& facts, const vect
 }
 
 /* draw facts from an assignment */
-std::vector<const Fact*>
-FactUnion::abstract_fact_for_assign(const std::vector<const Fact*>& facts, const Lhs* lhs, const Expression* rhs)
+int
+FactUnion::abstract_fact_for_assign(const std::vector<const Fact*>& facts, const Lhs* lhs, const Expression* rhs, std::vector<const Fact*>& facts_out)
 {
-	std::vector<const Fact*> ret_facts;
-	if (rhs == NULL) return ret_facts;
+	facts_out.clear();
+
 	// find all the pointed variables on LHS
 	std::vector<const Variable*> lvars = FactPointTo::merge_pointees_of_pointer(lhs->get_var()->get_collective(), lhs->get_indirect_level(), facts);
 	if (lhs->get_type().eType == eUnion) {
-		return rhs_to_lhs_transfer(facts, lvars, rhs);
+		facts_out = rhs_to_lhs_transfer(facts, lvars, rhs);
+		return lvars.size();
 	}
+
+	if (rhs == NULL)
+		return lvars.size();
 
 	for (size_t i=0; i<lvars.size(); i++) {
 		const Variable* v = lvars[i];
 		const FactUnion* fu = 0;
 		if (v->is_union_field()) {
-			if (lvars.size() > 1) {
-				// if writing to an union field is uncertain (due to dereference of a pointer which may points to an
-				// union field or something else), We mark the union as unreadable
-				fu = make_fact(v->field_var_of, BOTTOM);
-			} else {
-				fu = make_fact(v->field_var_of, v->get_field_id());
-			}
-		} else if (v->is_inside_union_field() && (v->type->has_padding() || v->is_packed_after_bitfield())) {
+			// If one of the lvars is a union field, we report the fact and let FactMgr decides what to do.
+			fu = make_fact(v->field_var_of, v->get_field_id());
+		}
+		else if (v->is_inside_union_field() && (v->type->has_padding() || v->is_packed_after_bitfield())) {
 			fu = make_fact(v->get_container_union(), BOTTOM);
 		}
 
 		if (fu) {
-			ret_facts.push_back(fu);
+			facts_out.push_back(fu);
 		}
 	}
-    return ret_facts;
+    return lvars.size();
 }
 
 Fact*

@@ -90,7 +90,11 @@ public:
 
 	virtual const Variable* get_var(void) const { return 0;};
 
-	virtual std::vector<const Fact*> abstract_fact_for_assign(const std::vector<const Fact*>& /*facts*/, const Lhs* /*lhs*/, const Expression* /*rhs*/) = 0;
+	/// Given existing facts, LHS and RHS of the assignment, derive the new facts,
+	/// and return the number of possible assignees. In most cases that's 1. But
+	/// if LHS is a pointer dereference, the number of assignees could > 1 depending
+	/// on the points-to analysis.
+	virtual int abstract_fact_for_assign(const std::vector<const Fact*>& /*facts*/, const Lhs* /*lhs*/, const Expression* /*rhs*/, std::vector<const Fact*>&) = 0;
 
 	virtual vector<const Fact*> abstract_fact_for_return(const std::vector<const Fact*>& facts, const ExpressionVariable* expr, const Function* func);
 

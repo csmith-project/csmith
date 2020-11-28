@@ -334,11 +334,11 @@ Lhs::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const
 	if (for_compound_assign) {
 		ExpressionVariable ev(*v, type);
 		if (!ev.visit_facts(inputs, cg_context)) {
-			return false;
+			return log_analysis_fail(v->name + " with Lhs. reason rhs");
 		}
 	}
 	if (!visit_indices(inputs, cg_context)) {
-		return false;
+		return log_analysis_fail(v->name + " with Lhs. reason indices");
 	}
 	// avoid a.x = a.y (or any RHS that evaluates to a.y) where x and y are partially overlapping fields
 	if (cg_context.curr_rhs) {
@@ -347,7 +347,7 @@ Lhs::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const
 		for (size_t i=0; i<subs.size(); i++) {
 			if (subs[i]->term_type == eVariable || subs[i]->term_type == eLhs) {
 				if (have_overlapping_fields(subs[i], this, inputs)) {
-					return false;
+					return log_analysis_fail(v->name + " with Lhs. reason lhs and rhs overlap");
 				}
 			}
 		}
@@ -356,10 +356,10 @@ Lhs::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const
 	int deref_level = get_indirect_level();
 	if (deref_level > 0) {
 		if (!FactPointTo::is_valid_ptr(v, inputs)) {
-			return false;
+			return log_analysis_fail(v->name + " with Lhs. reason invalid lhs pointer");
 		}
 		if (ptr_modified_in_rhs(inputs, cg_context)) {
-			return false;
+			return log_analysis_fail(v->name + " with Lhs. reason lhs modified in rhs");
 		}
 		valid = cg_context.check_read_var(v, inputs) && cg_context.write_pointed(this, inputs) &&
 			cg_context.check_deref_volatile(v, deref_level);
@@ -373,6 +373,9 @@ Lhs::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const
 			eff->set_lhs_write_vars(eff->get_write_vars());
 		}
 	}
+
+	if (!valid)
+		return log_analysis_fail(v->name + " with Lhs.");
 	return valid;
 }
 
