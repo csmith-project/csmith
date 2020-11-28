@@ -41,6 +41,7 @@
 #endif
 #include <vector>
 #include <ostream>
+#include <sstream>
 #include <string>
 #include "Probabilities.h"
 using namespace std;
@@ -99,6 +100,13 @@ public:
 	virtual ~Statement(void);
 
 	eStatementType get_type(void) const { return eType; }
+
+	std::string to_string(void) const
+	{
+		ostringstream oss;
+		Output(oss);
+		return oss.str();
+	}
 
 	void get_called_funcs(std::vector<const FunctionInvocationUser*>& funcs) const;
 

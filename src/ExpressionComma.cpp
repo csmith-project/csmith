@@ -94,7 +94,7 @@ bool
 ExpressionComma::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const
 {
 	if (!lhs.visit_facts(inputs, cg_context)) {
-		return false;
+		return log_analysis_fail("ExpressionComma");
 	}
 	return rhs.visit_facts(inputs, cg_context);
 }

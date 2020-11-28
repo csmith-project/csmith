@@ -176,16 +176,16 @@ StatementIf::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) con
 	vector<const Fact*> inputs_copy = inputs;
 	// evaludate condition first
 	if (!test.visit_facts(inputs, cg_context)) {
-		return false;
+		return log_analysis_fail("StatementIf condition");
 	}
 	Effect eff = cg_context.get_effect_stm();
 	FactVec inputs_true = inputs;
 	if (!if_true.visit_facts(inputs_true, cg_context)) {
-		return false;
+		return log_analysis_fail("StatementIf true-branch");
 	}
 	FactVec inputs_false = inputs;
 	if (!if_false.visit_facts(inputs_false, cg_context)) {
-		return false;
+		return log_analysis_fail("StatementIf false-branch");
 	}
 	// compute accumulated effect for this statement
 	set_accumulated_effect_after_block(eff, &if_true, cg_context);

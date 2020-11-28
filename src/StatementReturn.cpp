@@ -87,12 +87,12 @@ StatementReturn::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context)
 		const Block* b = cg_context.curr_blk;
 		assert(b);
 		if (FactPointTo::is_pointing_to_locals(v, b, indirection, inputs)) {
-			return false;
+			return log_analysis_fail("StatementReturn 1");
 		}
 	}
 
 	if (!var.visit_facts(inputs, cg_context)) {
-		return false;
+		return log_analysis_fail("StatementReturn 2");
 	}
 	FactMgr::update_fact_for_return(this, inputs);
 	FactMgr* fm = get_fact_mgr(&cg_context);

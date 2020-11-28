@@ -273,17 +273,21 @@ FactPointTo::rhs_to_lhs_transfer(const vector<const Fact*>& facts, const vector<
 	return empty;
 }
 
-std::vector<const Fact*>
-FactPointTo::abstract_fact_for_assign(const std::vector<const Fact*>& facts, const Lhs* lhs, const Expression* rhs)
+int
+FactPointTo::abstract_fact_for_assign(const std::vector<const Fact*>& facts_in, const Lhs* lhs, const Expression* rhs, std::vector<const Fact*>& facts_out)
 {
-	std::vector<const Fact*> ret_facts;
+	facts_out.clear();
 
 	// find all the pointed variables on LHS
-	vector<const Variable*> lvars = merge_pointees_of_pointer(lhs->get_var()->get_collective(), lhs->get_indirect_level(), facts);
-	// return empty set if lhs is not pointer
+	vector<const Variable*> lvars = merge_pointees_of_pointer(lhs->get_var()->get_collective(), lhs->get_indirect_level(), facts_in);
+
+	// Handle points-to facts
 	if (lhs->get_type().eType == ePointer) {
-		return rhs_to_lhs_transfer(facts, lvars, rhs);
+		facts_out = rhs_to_lhs_transfer(facts_in, lvars, rhs);
+		return lvars.size();
 	}
+
+	// Handle union field facts
 	for (size_t i=0; i<lvars.size(); i++) {
 		const Variable* v = lvars[i];
 		if (v->is_inside_union_field()) {
@@ -295,10 +299,10 @@ FactPointTo::abstract_fact_for_assign(const std::vector<const Fact*>& facts, con
 		vector<const Variable*> pointers;
 		v->find_pointer_fields(pointers);
 		// transfer facts for pointer fields
-		FactVec new_facts = rhs_to_lhs_transfer(facts, pointers, rhs);
-		ret_facts.insert(ret_facts.end(), new_facts.begin(), new_facts.end());
+		FactVec new_facts = rhs_to_lhs_transfer(facts_in, pointers, rhs);
+		facts_out.insert(facts_out.end(), new_facts.begin(), new_facts.end());
 	}
-    return ret_facts;
+	return lvars.size();
 }
 
 Fact*

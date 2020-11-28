@@ -80,6 +80,14 @@ gensym(const string& basename)
 	return ss.str();
 }
 
+static std::string errlog;
+
+bool log_analysis_fail(std::string msg)
+{
+	errlog += "Analysis failed at " + msg  + "\n";
+	return false;
+}
+
 /*
  * permute an integer array
  * return: all possible permutations of input integer array

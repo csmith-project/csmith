@@ -119,6 +119,9 @@ StatementExpr::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) c
 	// save effect
 	FactMgr* fm = get_fact_mgr(&cg_context);
 	fm->map_stm_effect[this] = cg_context.get_effect_stm();
+
+    if (!ok)
+		return log_analysis_fail("StatementExpr");
 	return ok;
 }
 

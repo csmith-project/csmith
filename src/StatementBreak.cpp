@@ -141,7 +141,7 @@ StatementBreak::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) 
 {
 	// evaludate condition first
 	if (!test.visit_facts(inputs, cg_context)) {
-		return false;
+		return log_analysis_fail("StatementBreak");
 	}
 	FactMgr* fm = get_fact_mgr(&cg_context);
 	fm->map_stm_effect[this] = cg_context.get_effect_stm();

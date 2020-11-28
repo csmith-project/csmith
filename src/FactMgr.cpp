@@ -387,19 +387,22 @@ FactMgr::update_fact_for_assign(const Lhs* lhs, const Expression* rhs, FactVec& 
 {
 	bool changed = false;
     for (size_t i=0; i<FactMgr::meta_facts.size(); i++) {
-        vector<const Fact*> facts = FactMgr::meta_facts[i]->abstract_fact_for_assign(inputs, lhs, rhs);
-		if (facts.size() == 1 && !facts[0]->get_var()->isArray) {
-			// for must-point-to fact concerning no-array variable, just renew the old fact
-			renew_fact(inputs, facts[0]);
-		}
-		else {
-			// for may-point-to facts (which means pointer on LHS is uncertain), merge them with old facts
-			for (size_t j=0; j<facts.size(); j++) {
-				const Fact* f = facts[j];
-				merge_fact(inputs, f);
+		vector<const Fact*> facts;
+		int lvar_cnt = FactMgr::meta_facts[i]->abstract_fact_for_assign(inputs, lhs, rhs, facts);
+		if (facts.size() > 0)
+		{
+			if (lvar_cnt == 1 && !facts[0]->get_var()->isArray) {
+				// for definitive assignment to a no-array variable, just renew the old fact.
+				renew_fact(inputs, facts[0]);
 			}
-		}
-		if (facts.size() > 0) {
+			else {
+				// for may-point-to facts (which means pointer on LHS is uncertain), merge them with old facts
+				for (size_t j=0; j<facts.size(); j++) {
+					const Fact* f = facts[j];
+					merge_fact(inputs, f);
+				}
+			}
+
 			changed = true;
 		}
     }
