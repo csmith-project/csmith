@@ -5,15 +5,13 @@ on: [push, pull_request]
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
     - uses: actions/checkout@v2
     - name: configure
       run: ./configure
     - name: make
-      run: make
+      run: make -j $(nproc)
     - name: make check
-      run: make check
-    - name: make distcheck
-      run: make distcheck
+      run: make check -j $(nproc)
