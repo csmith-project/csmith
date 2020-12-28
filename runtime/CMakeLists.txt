@@ -37,7 +37,7 @@ if(POLICY CMP0042)
   cmake_policy(SET CMP0042 NEW) # Quiet warning about shared libs on OS X.
 endif()
 
-set(INCLUDE_DIR "${CMAKE_INSTALL_PREFIX}/include/csmith-${csmith_VERSION}")
+set(INCLUDE_DIR "${CMAKE_INSTALL_PREFIX}/include/")
 set(LIB_DIR     "${CMAKE_INSTALL_PREFIX}/lib")
 
 ###############################################################################

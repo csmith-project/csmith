@@ -219,8 +219,8 @@ if(BSD_LIBRARY)
   target_link_libraries(csmith "${BSD_LIBRARY}")
 endif()
 
-install(PROGRAMS
-  "${PROJECT_BINARY_DIR}/csmith"
+install(TARGETS
+  csmith
   DESTINATION "${BIN_DIR}"
   )
 
