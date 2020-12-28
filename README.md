@@ -73,10 +73,10 @@ Here is a slightly outdated but still relevant document about
 
 Csmith was originally developed at the University of Utah by:
 
-* [Xuejun Yang](nitsnow@gmail.com)
-* [Yang Chen](chenyang78@gmail.com )
-* [Eric Eide](eeide@cs.utah.edu)
-* [John Regehr](regehr@cs.utah.edu)
+* [Xuejun Yang](https://github.com/jxyang)
+* [Yang Chen](https://github.com/chenyang78)
+* [Eric Eide](https://github.com/eeide)
+* [John Regehr](https://github.com/regehr)
 
 as part of a research project on compiler testing. The research is best
 summarized by our paper
