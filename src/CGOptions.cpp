@@ -194,6 +194,7 @@ DEFINE_GETTER_SETTER_BOOL(const_struct_union_fields);
 DEFINE_GETTER_SETTER_BOOL(lang_cpp);
 DEFINE_GETTER_SETTER_BOOL(cpp11);
 DEFINE_GETTER_SETTER_BOOL(fast_execution);
+DEFINE_GETTER_SETTER_INT(add_oob_prob);
 
 //GCC C Extensions
 DEFINE_GETTER_SETTER_BOOL(func_attr_flag);
@@ -312,6 +313,7 @@ CGOptions::set_default_settings(void)
 	lang_cpp(false);
 	cpp11(false);
   fast_execution(false);
+    add_oob_prob(0);
 
 	set_default_builtin_kinds();
 	Int128(false);
@@ -532,6 +534,11 @@ CGOptions::has_conflict(void)
 		return true;
 	}
 
+	if ((CGOptions::add_oob_prob() < 0) ||
+	    (CGOptions::add_oob_prob() > 100)) {
+		conflict_msg_ = "add-oob-prob value must between [0,100]";
+		return true;
+	}
 
 	if (CGOptions::max_funcs() < 1) {
 		conflict_msg_ = "max-funcs must be at least 1";

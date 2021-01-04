@@ -398,6 +398,9 @@ public:
 	static int builtin_function_prob(void);
 	static int builtin_function_prob(int p);
 
+    static int add_oob_prob(void);
+    static int add_oob_prob(int);
+
 	static int null_pointer_dereference_prob(void);
 	static int null_pointer_dereference_prob(int p);
 
@@ -600,6 +603,7 @@ private:
 	static bool force_non_uniform_array_init_;
 	static int inline_function_prob_;
 	static int builtin_function_prob_;
+    static int add_oob_prob_;
 	static int null_pointer_dereference_prob_;
 	static int dead_pointer_dereference_prob_;
 	static bool pre_incr_operator_;
