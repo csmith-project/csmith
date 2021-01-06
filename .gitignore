@@ -1,10 +1,20 @@
-# Files made by `configure' and friends.
+# CMake-related files
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
 Makefile
-autom4te.cache
-config.log
-config.status
-libtool
-stamp-h.in
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+CMakeUserPresets.json
+# Ninja
+.ninja_deps
+.ninja_log
+build.ninja
 
 # Files made by compilation.
 .deps/
@@ -14,11 +24,17 @@ stamp-h.in
 *.lo
 *.o
 *.obj
+*.so
+*.so[0-9.]*
 
 # Files made by Eclipse CDT.
 .autotools
 .cproject
 .project
+
+# Generated files
+src/git_version.cpp
+config.h
 
 # Files made by Csmith.
 output/
