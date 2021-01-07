@@ -175,7 +175,7 @@ static void print_help()
 	cout << "  --math64 | --no-math64: enable | disable 64-bit math ops (enabled by default)." << endl << endl;
 	cout << "  --inline-function | --no-inline-function: enable | disable inline attributes on generated functions." << endl << endl;
 	cout << "  --inline-function-prob <num>: set the probability of each function being marked as inline (default is 50)." << endl << endl;
-    cout << " --add-oob-prob <num>: set the probability for limit of an array accessing loop to be out of bounds (default is 0)." << endl << endl;
+	cout << "  --array-oob-prob <num>: set the probability for limit of an array accessing loop to be out of bounds (default is 0)." << endl << endl;
 
 	// numbered controls
 	cout << "  --max-array-dim <num>: limit array dimensions to <num>. (default 3)" << endl << endl;
@@ -1276,13 +1276,13 @@ main(int argc, char **argv)
 			continue;
 		}
 
-		if (strcmp (argv[i], "--add-oob-prob") == 0 ) {
+		if (strcmp (argv[i], "--array-oob-prob") == 0 ) {
 			unsigned long prob;
 			i++;
 			arg_check(argc, i);
 			if (!parse_int_arg(argv[i], &prob))
 				exit(-1);
-			CGOptions::add_oob_prob(prob);
+			CGOptions::array_oob_prob(prob);
 			continue;
 		}
 

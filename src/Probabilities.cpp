@@ -481,8 +481,8 @@ Probabilities::set_single_name_maps()
 	// for choosing a builtin function
 	set_single_name("builtin_function_prob", pBuiltinFunctionProb);
 
-    // for choosing OOB limit
-    set_single_name("add_oob_prob", pAddOOBProb);
+	// for choosing OOB limit
+    set_single_name("array_oob_prob", pArrayOOBProb);
 
         //////////////////////////////////////////////////////////////////
 	// group for statement
@@ -622,7 +622,7 @@ Probabilities::initialize_single_probs()
 	m[pAccessOnceVariableProb] = 20;
 	m[pInlineFunctionProb] = CGOptions::inline_function_prob();
 	m[pBuiltinFunctionProb] = CGOptions::builtin_function_prob();
-    m[pAddOOBProb] = CGOptions::add_oob_prob();
+    m[pArrayOOBProb] = CGOptions::array_oob_prob();
 
 	std::map<ProbName, int>::iterator i;
 	for (i = m.begin(); i != m.end(); ++i) {

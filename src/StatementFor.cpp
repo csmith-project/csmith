@@ -133,13 +133,11 @@ static unsigned int
 make_random_array_control(unsigned int bound, int &init, int &limit, int &incr, eBinaryOps &test_op, eAssignOps &incr_op, bool is_signed)
 {
 	// choose either increment or decrement
-    int oob_flipcoin = pure_rnd_flipcoin(CGOptions::add_oob_prob());
+    int oob_flipcoin = pure_rnd_flipcoin(CGOptions::array_oob_prob());
 	test_op = is_signed ? (rnd_flipcoin(50) ? eCmpLe : eCmpGe) : eCmpLe;
 	if (test_op == eCmpLe) {
+        init = oob_flipcoin ? -1000 : pure_rnd_flipcoin(50) ? 0 : pure_rnd_upto(bound/2);
 		// increment, start near index 0
-		//init  = pure_rnd_flipcoin(50) ? 0 : pure_rnd_upto(bound/2);
-        init = oob_flipcoin ? -100000000 : pure_rnd_flipcoin(50) ? 0 : pure_rnd_upto(bound/2);
- //       init = -100000000;
 		limit = bound;
 		incr_op = eAddAssign;
 		incr = pure_rnd_flipcoin(50) ? 1 : pure_rnd_upto(bound/4);
@@ -148,9 +146,7 @@ make_random_array_control(unsigned int bound, int &init, int &limit, int &incr, 
 	} else {
 		// decrement, start near last index
 		init = pure_rnd_flipcoin(50) ? (bound) : (bound - pure_rnd_upto(bound/2));
-		limit = pure_rnd_flipcoin(50) ? 0 : pure_rnd_upto(bound/2);
- //       limit =-100000000;
-        limit = oob_flipcoin ? -100000000 : pure_rnd_flipcoin(50) ? 0 : pure_rnd_upto(bound/2);
+        limit = oob_flipcoin ? -1000 : pure_rnd_flipcoin(50) ? 0 : pure_rnd_upto(bound/2);
 		incr_op = eSubAssign;
 		incr = pure_rnd_flipcoin(50) ? 1 : pure_rnd_upto(bound/4);
 		if (incr == 0) incr = 1;
