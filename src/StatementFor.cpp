@@ -152,6 +152,7 @@ make_random_array_control(unsigned int bound, int &init, int &limit, int &incr, 
 		if (incr == 0) incr = 1;
 		bound = init;
 	}
+	Bookkeeper::oob_cnt = oob_flipcoin ? Bookkeeper::oob_cnt +1 : Bookkeeper::oob_cnt;
 	return bound;
 }
 

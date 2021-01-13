@@ -91,6 +91,7 @@ int Bookkeeper::forward_jump_cnt = 0;
 int Bookkeeper::backward_jump_cnt = 0;
 int Bookkeeper::use_new_var_cnt = 0;
 int Bookkeeper::use_old_var_cnt = 0;
+int Bookkeeper::oob_cnt = 0;
 bool Bookkeeper::rely_on_int_size = false;
 bool Bookkeeper::rely_on_ptr_size = false;
 
@@ -207,6 +208,7 @@ Bookkeeper::output_statistics(std::ostream &out)
 		out << "FYI: the random generator makes assumptions about the pointer size. See ";
 		out << PLATFORM_CONFIG_FILE << " for more details." << endl;
 	}
+	output_oob_statistics(out);
 }
 
 void
@@ -219,6 +221,12 @@ Bookkeeper::output_struct_union_statistics(std::ostream &out)
 	}
 	formated_output(out, "total union variables: ", union_var_cnt);
 	Bookkeeper::output_bitfields(out);
+}
+
+void
+Bookkeeper::output_oob_statistics(std::ostream &out)
+{
+    formated_output(out, "total OOB instances added: ", oob_cnt);
 }
 
 void
