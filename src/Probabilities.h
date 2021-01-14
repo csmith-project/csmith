@@ -65,6 +65,7 @@ enum ProbName {
 	pAccessOnceVariableProb,
 	pInlineFunctionProb,
 	pBuiltinFunctionProb,
+    pArrayOOBProb,
 
 	// group for statement
 	pStatementProb,
