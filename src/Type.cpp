@@ -802,13 +802,9 @@ Type::make_one_union_field(vector<const Type*> &fields, vector<CVQualifiers> &qf
 				type = struct_types[pure_rnd_upto(struct_types.size())];
 				assert(type->eType == eStruct);
 			}
-			// 10% chance to be char* if pointer is allowed
-			else if (CGOptions::pointers() && CGOptions::int8() && pure_rnd_flipcoin(10)) {
-				type = find_pointer_type(&get_simple_type(eChar), true);
-			}
 			else {
-					unsigned int i = pure_rnd_upto(ok_nonstruct_types.size());
-					const Type* t = ok_nonstruct_types[i];
+				unsigned int i = pure_rnd_upto(ok_nonstruct_types.size());
+				const Type* t = ok_nonstruct_types[i];
 				if (t->eType == eSimple && SIMPLE_TYPES_PROB_FILTER->filter(t->simple_type)) {
 					continue;
 				}
