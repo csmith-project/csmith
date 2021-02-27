@@ -1430,6 +1430,7 @@ Type::is_signed(void) const
 		case eUShort:
 		case eULong:
 		case eULongLong:
+		case eUInt128:
 			return false;
 			break;
 		default:
