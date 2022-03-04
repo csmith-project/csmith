@@ -119,6 +119,7 @@ public:
 	bool fact_changed;
 	bool union_field_read;
 	bool is_inlined;
+    bool is_component;
 	bool is_builtin;
 	int  visited_cnt;
 	Effect accum_eff_context;

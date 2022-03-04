@@ -55,7 +55,7 @@ const char *OutputMgr::hash_func_name = "csmith_compute_hash";
 const char *OutputMgr::step_hash_func_name = "step_hash";
 
 static const char runtime_include[] = "\
-#include \"csmith.h\"\n\
+#include \"csmith.h\"\n#include \"HLS/hls.h\"\n\
 ";
 
 static const char volatile_include[] = "\

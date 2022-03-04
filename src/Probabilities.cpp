@@ -478,6 +478,9 @@ Probabilities::set_single_name_maps()
 	// for marking each function as inline
 	set_single_name("inline_function_prob", pInlineFunctionProb);
 
+    // for marking each function as inline
+	set_single_name("component_function_prob", pComponentFunctionProb);
+
 	// for choosing a builtin function
 	set_single_name("builtin_function_prob", pBuiltinFunctionProb);
 
@@ -621,6 +624,7 @@ Probabilities::initialize_single_probs()
 
 	m[pAccessOnceVariableProb] = 20;
 	m[pInlineFunctionProb] = CGOptions::inline_function_prob();
+	m[pComponentFunctionProb] = CGOptions::inline_function_prob();
 	m[pBuiltinFunctionProb] = CGOptions::builtin_function_prob();
     m[pArrayOOBProb] = CGOptions::array_oob_prob();
 

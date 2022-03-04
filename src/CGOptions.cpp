@@ -131,6 +131,7 @@ DEFINE_GETTER_SETTER_STRING_REF(delta_input)
 DEFINE_GETTER_SETTER_BOOL(no_delta_reduction)
 DEFINE_GETTER_SETTER_BOOL(math64)
 DEFINE_GETTER_SETTER_BOOL(inline_function)
+DEFINE_GETTER_SETTER_BOOL(component_function)
 DEFINE_GETTER_SETTER_BOOL(math_notmp)
 DEFINE_GETTER_SETTER_BOOL(longlong)
 DEFINE_GETTER_SETTER_BOOL(int8)
@@ -178,6 +179,7 @@ DEFINE_GETTER_SETTER_BOOL(mark_mutable_const)
 DEFINE_GETTER_SETTER_BOOL(force_globals_static)
 DEFINE_GETTER_SETTER_BOOL(force_non_uniform_array_init)
 DEFINE_GETTER_SETTER_INT(inline_function_prob)
+DEFINE_GETTER_SETTER_INT(component_function_prob)
 DEFINE_GETTER_SETTER_INT(builtin_function_prob)
 DEFINE_GETTER_SETTER_INT(null_pointer_dereference_prob)
 DEFINE_GETTER_SETTER_INT(dead_pointer_dereference_prob)
@@ -259,6 +261,7 @@ CGOptions::set_default_settings(void)
 	compound_assignment(true);
 	math64(true);
 	inline_function(false);
+	component_function(false);
 	math_notmp(false);
 	longlong(true);
 	int8(true);
@@ -296,6 +299,7 @@ CGOptions::set_default_settings(void)
 	force_non_uniform_array_init(true);
 	max_array_num_in_loop(CGOPTIONS_DEFAULT_MAX_ARRAY_NUM_IN_LOOP);
 	inline_function_prob(50);
+	component_function_prob(50);
 	builtin_function_prob(50);
 	null_pointer_dereference_prob(0);
 	dead_pointer_dereference_prob(0);
@@ -528,6 +532,12 @@ CGOptions::has_conflict(void)
 		return true;
 	}
 
+	if ((CGOptions::component_function_prob() < 0) ||
+	    (CGOptions::component_function_prob() > 100)) {
+		conflict_msg_ = "component-function-prob value must between [0,100]";
+		return true;
+	}
+    
 	if ((CGOptions::builtin_function_prob() < 0) ||
 	    (CGOptions::builtin_function_prob() > 100)) {
 		conflict_msg_ = "builtin-function-prob value must between [0,100]";

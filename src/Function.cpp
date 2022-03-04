@@ -414,6 +414,7 @@ Function::Function(const string &name, const Type *return_type)
 	  fact_changed(false),
 	  union_field_read(false),
 	  is_inlined(false),
+      is_component(false),
 	  is_builtin(false),
 	  visited_cnt(0),
 	  build_state(UNBUILT)
@@ -428,6 +429,7 @@ Function::Function(const string &name, const Type *return_type, bool builtin)
 	  fact_changed(false),
 	  union_field_read(false),
 	  is_inlined(false),
+      is_component(false),
 	  is_builtin(builtin),
 	  visited_cnt(0),
 	  build_state(UNBUILT)
@@ -454,8 +456,12 @@ Function::make_random_signature(const CGContext& cg_context, const Type* type, c
 	f->rv = Variable::CreateVariable(rvname, type, NULL, &ret_qfer);
 	GenerateParameterList(*f);
 	FMList.push_back(new FactMgr(f));
-	if (CGOptions::inline_function() && rnd_flipcoin(InlineFunctionProb))
+	if (CGOptions::inline_function() && rnd_flipcoin(InlineFunctionProb)) {
 		f->is_inlined = true;
+    }
+    if (!f->is_inlined && CGOptions::component_function() && rnd_flipcoin(ComponentFunctionProb)) {
+        f->is_component = true;
+    }
 	return f;
 }
 
@@ -561,6 +567,8 @@ Function::OutputHeader(std::ostream &out)
 		assert(return_type->eType != eUnion);
 	if (is_inlined)
 		out << "inline ";
+    if (is_component)
+		out << "component ";
 	// force functions to be static if necessary
 	if (CGOptions::force_globals_static()) {
 		out << "static ";

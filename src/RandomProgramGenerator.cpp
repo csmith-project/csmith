@@ -755,7 +755,17 @@ main(int argc, char **argv)
 			CGOptions::inline_function(false);
 			continue;
 		}
+        
+		if (strcmp (argv[i], "--component-function") == 0) {
+			CGOptions::component_function(true);
+			continue;
+		}
 
+		if (strcmp (argv[i], "--no-component-function") == 0) {
+			CGOptions::component_function(false);
+			continue;
+		}
+        
 		if (strcmp (argv[i], "--longlong") == 0) {
 			CGOptions::longlong(true);
 			continue;
@@ -1263,6 +1273,16 @@ main(int argc, char **argv)
 			if (!parse_int_arg(argv[i], &prob))
 				exit(-1);
 			CGOptions::inline_function_prob(prob);
+			continue;
+		}
+        
+		if (strcmp (argv[i], "--component-function-prob") == 0 ) {
+			unsigned long prob;
+			i++;
+			arg_check(argc, i);
+			if (!parse_int_arg(argv[i], &prob))
+				exit(-1);
+			CGOptions::component_function_prob(prob);
 			continue;
 		}
 
