@@ -41,7 +41,7 @@ public:
 
 	static bool is_space(const char c);
 
-	static bool end_with(string s, string tail);
+	static bool end_with(const string &s, string tail);
 
 	static void ignore_spaces(const std::string &str, size_t &pos);
 
@@ -61,11 +61,11 @@ public:
 
 	static size_t find_any_char(const string &s, size_t pos, const string& to_match);
 
-	static void split_string(const string str, vector<string> &v, const char sep_char);
+	static void split_string(const string &str, vector<string> &v, const char sep_char);
 
-	static void split_string(const string str, vector<string> &v, string sep_chars);
+	static void split_string(const string &str, vector<string> &v, string sep_chars);
 
-	static void split_int_string(const string str, vector<int> &values, string sep_chars);
+	static void split_int_string(const string &str, vector<int> &values, string sep_chars);
 
 	static void chop(string& str);
 
