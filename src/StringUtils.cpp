@@ -112,7 +112,7 @@ StringUtils::find_any_char(const string &s, size_t pos, const string& to_match)
 }
 
 void
-StringUtils::split_string(const string str, vector<string> &v, const char sep_char)
+StringUtils::split_string(const string &str, vector<string> &v, const char sep_char)
 {
 	size_t pos = 0;
 	size_t start_pos = 0;
@@ -131,7 +131,7 @@ StringUtils::split_string(const string str, vector<string> &v, const char sep_ch
 }
 
 void
-StringUtils::split_string(const string str, vector<string> &v, string sep_chars)
+StringUtils::split_string(const string &str, vector<string> &v, string sep_chars)
 {
 	size_t pos = 0;
 	size_t start_pos = 0;
@@ -150,7 +150,7 @@ StringUtils::split_string(const string str, vector<string> &v, string sep_chars)
 }
 
 void
-StringUtils::split_int_string(const string str, vector<int> &values, string sep_chars)
+StringUtils::split_int_string(const string &str, vector<int> &values, string sep_chars)
 {
 	size_t pos = 0;
 	size_t start_pos = 0;
@@ -264,7 +264,7 @@ StringUtils::breakup_assigns(const string& assigns, vector<string>& vars, vector
 }
 
 bool
-StringUtils::end_with(string s, string tail)
+StringUtils::end_with(string s, const string &tail)
 {
 	if (tail.length() < s.length()) {
 		s = s.substr(s.length() - tail.length());
