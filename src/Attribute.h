@@ -16,7 +16,7 @@ public:
 	string name;
 	//Attribute generation probability
 	int prob;
-	Attribute(string, int);
+	Attribute( const string &, int);
 	//Checks attribute probability and generate is accordingly
 	virtual string make_random() = 0;
 };
@@ -25,7 +25,7 @@ public:
 class BooleanAttribute : public Attribute
 {
 public:
-	BooleanAttribute(string, int);
+	BooleanAttribute(const string&, int);
 	string make_random();
 };
 
@@ -35,7 +35,7 @@ class MultiChoiceAttribute : public Attribute
 public:
 	//stores various options of attributes e.g. visibility options - default, hidden, internal and protected
 	vector<string> choices;
-	MultiChoiceAttribute(string, int, vector<string>);
+	MultiChoiceAttribute(const string &, int, vector<string>);
 	string make_random();
 };
 
@@ -45,7 +45,7 @@ class AlignedAttribute : public Attribute
 public:
 	//alignment factor - [functions] = 16 and [types] = 8 i.e. functions can take alignment upto 2^16 where as type can take upto 2^8
 	int alignment;
-	AlignedAttribute(string, int, int);
+	AlignedAttribute(const string &, int, int);
 	string make_random();
 };
 
@@ -53,7 +53,7 @@ public:
 class SectionAttribute : public Attribute
 {
 public:
-	SectionAttribute(string, int);
+	SectionAttribute( const string &, int);
 	string make_random();
 };
 
