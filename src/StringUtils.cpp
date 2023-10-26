@@ -231,15 +231,13 @@ StringUtils::longlong2str(INT64 i)
 void
 StringUtils::chop(string& str)
 {
-	string s;
-	size_t last;
-	while (str[0] == '\t' || str[0] == ' ') {
-		str = str.substr(1);
-	}
-	last = str.length() - 1;
-	while (str[last] == '\t' || str[last] == ' ') {
-		str = str.substr(0, last);
-		last--;
+	size_t p = s.find_first_not_of( " \t");
+	s.erase( 0, p); 
+ 
+	p = s.find_last_not_of( " \t");
+	if (string::npos != p)
+	{
+		s.erase(p + 1);
 	}
 }
 
