@@ -41,7 +41,7 @@ public:
 
 	static bool is_space(const char c);
 
-	static bool end_with(const string &s, string tail);
+	static bool end_with(string s, const string &tail);
 
 	static void ignore_spaces(const std::string &str, size_t &pos);
 
