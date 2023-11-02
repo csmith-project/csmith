@@ -231,13 +231,13 @@ StringUtils::longlong2str(INT64 i)
 void
 StringUtils::chop(string& str)
 {
-	size_t p = s.find_first_not_of( " \t");
-	s.erase( 0, p); 
+	size_t p = str.find_first_not_of( " \t");
+	str.erase( 0, p); 
  
-	p = s.find_last_not_of( " \t");
+	p = str.find_last_not_of( " \t");
 	if (string::npos != p)
 	{
-		s.erase(p + 1);
+		str.erase(p + 1);
 	}
 }
 
