@@ -91,6 +91,13 @@ static long long read_time(void)
 				 );
 	return l;
 }
+#elif defined(__aarch64__)
+unsigned long read_time()
+{
+	unsigned long long val;
+	asm volatile ("mrs %0, cntvct_el0" : "=r" (val));
+	return (unsigned long)(val&0x00000000FFFFFFFFLL);
+}
 #  else
 #    include <time.h>
 static long long read_time(void)
