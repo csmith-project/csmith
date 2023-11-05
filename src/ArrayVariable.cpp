@@ -631,7 +631,7 @@ ArrayVariable::output_with_indices(std::ostream &out, const std::vector<const Va
 void
 ArrayVariable::output_checksum_with_indices(std::ostream &out,
 					const std::vector<const Variable*>& cvs,
-					string field_name) const
+					const string &field_name) const
 {
 	out << "printf(\"...checksum after hashing ";
 
@@ -697,7 +697,7 @@ ArrayVariable::output_init(std::ostream &out, const Expression* init, const vect
 
 // --------------------------------------------------------------
 void
-ArrayVariable::output_addr_checks(std::ostream &out, const Variable* var, string field_name, int indent) const
+ArrayVariable::output_addr_checks(std::ostream &out, const Variable* var, const string &field_name, int indent) const
 {
 	size_t i;
 	vector<const Variable *> &ctrl_vars = Variable::get_new_ctrl_vars();
