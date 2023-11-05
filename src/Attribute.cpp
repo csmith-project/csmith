@@ -31,12 +31,12 @@ AttributeGenerator::Output(std::ostream &out)
 		out << "))";
 }
 
-Attribute::Attribute(string name, int prob)
+Attribute::Attribute(const string &name, int prob)
 	:  name(name), prob(prob)
 {
 }
 
-BooleanAttribute::BooleanAttribute(string name, int prob)
+BooleanAttribute::BooleanAttribute(const string &name, int prob)
 	: Attribute(name, prob)
 {
 }
@@ -50,7 +50,7 @@ BooleanAttribute::make_random()
 		return "";
 }
 
-MultiChoiceAttribute::MultiChoiceAttribute(string name, int prob, vector<string> arguments)
+MultiChoiceAttribute::MultiChoiceAttribute(const string &name, int prob, vector<string> arguments)
 	: Attribute(name, prob), choices(arguments)
 {
 }
@@ -64,7 +64,7 @@ MultiChoiceAttribute::make_random()
 		return "";
 }
 
-AlignedAttribute::AlignedAttribute(string name, int prob, int alignment_factor)
+AlignedAttribute::AlignedAttribute(const string &name, int prob, int alignment_factor)
 	: Attribute(name, prob), alignment(alignment_factor)
 {
 }
@@ -81,7 +81,7 @@ AlignedAttribute::make_random()
 		return "";
 }
 
-SectionAttribute::SectionAttribute(string name, int prob)
+SectionAttribute::SectionAttribute(const string &name, int prob)
 	: Attribute(name, prob)
 {
 }
