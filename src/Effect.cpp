@@ -343,7 +343,7 @@ Effect::is_read(string vname) const
 			string tmp = vname;
 			do {
 				pos = tmp.find_last_of(".");
-				tmp = tmp.substr(0, pos);
+				tmp.resize(pos);
 				if (tmp == rname) {
 					return true;
 				}
@@ -354,7 +354,7 @@ Effect::is_read(string vname) const
 			string tmp = rname;
 			do {
 				pos = tmp.find_last_of(".");
-				tmp = tmp.substr(0, pos);
+				tmp.resize(pos);
 				if (tmp == vname) {
 					return true;
 				}
@@ -405,7 +405,7 @@ Effect::is_written(string vname) const
 			string tmp = vname;
 			do {
 				pos = tmp.find_last_of(".");
-				tmp = tmp.substr(0, pos);
+				tmp.resize(pos);
 				if (tmp == wname) {
 					return true;
 				}
@@ -416,7 +416,7 @@ Effect::is_written(string vname) const
 			string tmp = wname;
 			do {
 				pos = tmp.find_last_of(".");
-				tmp = tmp.substr(0, pos);
+				tmp.resize(pos);
 				if (tmp == vname) {
 					return true;
 				}
