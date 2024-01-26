@@ -112,7 +112,7 @@ StringUtils::find_any_char(const string &s, size_t pos, const string& to_match)
 }
 
 void
-StringUtils::split_string(const string str, vector<string> &v, const char sep_char)
+StringUtils::split_string(const string &str, vector<string> &v, const char sep_char)
 {
 	size_t pos = 0;
 	size_t start_pos = 0;
@@ -131,7 +131,7 @@ StringUtils::split_string(const string str, vector<string> &v, const char sep_ch
 }
 
 void
-StringUtils::split_string(const string str, vector<string> &v, string sep_chars)
+StringUtils::split_string(const string &str, vector<string> &v, string sep_chars)
 {
 	size_t pos = 0;
 	size_t start_pos = 0;
@@ -150,7 +150,7 @@ StringUtils::split_string(const string str, vector<string> &v, string sep_chars)
 }
 
 void
-StringUtils::split_int_string(const string str, vector<int> &values, string sep_chars)
+StringUtils::split_int_string(const string &str, vector<int> &values, string sep_chars)
 {
 	size_t pos = 0;
 	size_t start_pos = 0;
@@ -231,15 +231,13 @@ StringUtils::longlong2str(INT64 i)
 void
 StringUtils::chop(string& str)
 {
-	string s;
-	size_t last;
-	while (str[0] == '\t' || str[0] == ' ') {
-		str = str.substr(1);
-	}
-	last = str.length() - 1;
-	while (str[last] == '\t' || str[last] == ' ') {
-		str = str.substr(0, last);
-		last--;
+	size_t p = str.find_first_not_of( " \t");
+	str.erase( 0, p); 
+ 
+	p = str.find_last_not_of( " \t");
+	if (string::npos != p)
+	{
+		str.erase(p + 1);
 	}
 }
 
@@ -266,7 +264,7 @@ StringUtils::breakup_assigns(const string& assigns, vector<string>& vars, vector
 }
 
 bool
-StringUtils::end_with(string s, string tail)
+StringUtils::end_with(string s, const string &tail)
 {
 	if (tail.length() < s.length()) {
 		s = s.substr(s.length() - tail.length());
