@@ -419,7 +419,8 @@ VariableSelector::choose_var(vector<Variable *> vars,
 		   eMatchType mt,
 		   const vector<const Variable*>& invalid_vars,
 		   bool no_bitfield,
-		   bool no_expand_struct_union)
+		   bool no_expand_struct_union,
+		   bool no_union)
 {
 	vector<Variable *> ok_vars;
 	vector<Variable *>::iterator i;
@@ -437,6 +438,8 @@ VariableSelector::choose_var(vector<Variable *> vars,
 	for (i = vars.begin(); i != vars.end(); ++i) {
         // skip any type mismatched var
         if (no_bitfield && (*i)->isBitfield_)
+			continue;
+        if (no_union && (*i)->is_inside_union_field())
 			continue;
         if (type && !type->match((*i)->type, mt)) {
             continue;
@@ -844,16 +847,18 @@ VariableSelector::make_init_value(Effect::Access access, const CGContext &cg_con
 	vector<Variable*> vars = find_all_visible_vars(b);
 	vector<const Variable*> dummy;
 
+	const bool no_union = !CGOptions::take_union_field_addr();
+
 	Variable *var = NULL;
 	// b == NULL means we are generating init for globals
 	if (!b && CGOptions::ccomp()) {
 		get_all_array_vars(dummy);
-		var = choose_var(vars, access, cg_context, type, &qfer, eExact, dummy, true, true);
+		var = choose_var(vars, access, cg_context, type, &qfer, eExact, dummy, true, true, no_union);
 	}
 	else {
 		if (!CGOptions::addr_taken_of_locals())
 			get_all_local_vars(b, dummy);
-		var = choose_var(vars, access, cg_context, type, &qfer, eExact, dummy, true);
+		var = choose_var(vars, access, cg_context, type, &qfer, eExact, dummy, true, false, no_union);
 	}
 	ERROR_GUARD(NULL);
 
