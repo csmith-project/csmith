@@ -60,7 +60,7 @@ unlikely case, a bug in Csmith itself.
 You could write scripts in your favorite language to repeat
 the above process to amplify the power of random differential testing.
 
-The generate programs might contain infinite loops. The best practice is
+The generated programs might contain infinite loops. The best practice is
 to apply timeout to their executions.
 
 Use `csmith -h` or `csmith -hh` to see lists of command line options that you
@@ -85,7 +85,7 @@ More research info can be found
 [here](http://embed.cs.utah.edu/csmith/).
 
 Csmith was open sourced in 2009. We try to keep maintaining it as an open source
-project using discretionary times. As much, the response to bug reports or
+project using our discretionary time. As much, the response to bug reports or
 feature requests might be delayed.
 
 ## Community
