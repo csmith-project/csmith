@@ -29,7 +29,7 @@
 
 ###############################################################################
 
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.16)
 project(csmith_runtime)
 
 # CMP0042 was introduced in CMake 3.0.  Don't error in older CMakes.

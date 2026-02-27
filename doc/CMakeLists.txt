@@ -29,7 +29,7 @@
 
 ###############################################################################
 
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.16)
 project(csmith_doc)
 
 set(DOC_DIR "${CMAKE_INSTALL_PREFIX}/share/doc/csmith")
