@@ -129,7 +129,7 @@ endif()
 #
 message(STATUS "Check for M4 macro processor")
 find_program(M4
-  NAMES "m4${CMAKE_EXECUTABLE_SUFFIX}" "m4${CMAKE_EXECUTABLE_SUFFIX}"
+  NAMES "m4${CMAKE_EXECUTABLE_SUFFIX}"
   DOC "Location of the M4 macro processor"
   )
 if(NOT M4)
