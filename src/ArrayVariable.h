@@ -76,9 +76,9 @@ public:
 	virtual void OutputLowerBound(std::ostream &) const;
 	virtual void OutputUpperBound(std::ostream &) const;
 	void output_with_indices(std::ostream &out, const std::vector<const Variable*>& cvs) const;
-	void output_checksum_with_indices(std::ostream &out, const std::vector<const Variable*>& cvs, const string &field_name) const;
+	void output_checksum_with_indices(std::ostream &out, const std::vector<const Variable*>& cvs, string field_name) const;
 	void output_init(std::ostream &out, const Expression* init, const vector<const Variable*>& cvs, int indent) const;
-	void output_addr_checks(std::ostream &out, const Variable* var, const string &field_name, int indent) const;
+	void output_addr_checks(std::ostream &out, const Variable* var, string field_name, int indent) const;
 	void add_init_value(const Expression* e) { init_values.push_back(e);}
 	const vector<const Expression*>& get_init_values(void) const { return init_values;}
 	string build_initializer_str(const vector<string>& init_strings) const;
