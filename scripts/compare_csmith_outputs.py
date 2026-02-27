@@ -71,6 +71,12 @@ def run_once(exe: str, seed: int, extra_args: List[str], timeout_s: float) -> Ru
         )
 
 
+def normalize_stdout(data: bytes) -> bytes:
+    return b"".join(
+        line for line in data.splitlines(keepends=True) if b"Git version:" not in line
+    )
+
+
 def compare_seed(
     seed: int, new_exe: str, old_exe: str, extra_args: List[str], timeout_s: float
 ) -> Optional[Divergence]:
@@ -81,7 +87,7 @@ def compare_seed(
         return Divergence(seed, "timeout", new_res, old_res)
     if new_res.returncode != old_res.returncode:
         return Divergence(seed, "return code differs", new_res, old_res)
-    if new_res.stdout != old_res.stdout:
+    if normalize_stdout(new_res.stdout) != normalize_stdout(old_res.stdout):
         return Divergence(seed, "stdout differs", new_res, old_res)
     if new_res.stderr != old_res.stderr:
         return Divergence(seed, "stderr differs", new_res, old_res)
