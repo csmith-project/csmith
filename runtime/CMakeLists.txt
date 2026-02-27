@@ -32,7 +32,7 @@
 cmake_minimum_required(VERSION 3.16)
 project(csmith_runtime)
 
-set(INCLUDE_DIR "${CMAKE_INSTALL_PREFIX}/include/")
+set(INCLUDE_DIR "${CMAKE_INSTALL_PREFIX}/include")
 set(LIB_DIR     "${CMAKE_INSTALL_PREFIX}/lib")
 
 ###############################################################################
