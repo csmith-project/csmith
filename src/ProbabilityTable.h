@@ -32,7 +32,6 @@
 
 #include <vector>
 #include <algorithm>
-#include <functional>
 #include <cassert>
 #include "Probabilities.h"
 #include "VectorFilter.h"
@@ -108,20 +107,6 @@ void ProbabilityTable<Key, Value>::initialize(ProbName pname)
 }
 
 template <class Key, class Value>
-bool my_less(TableEntry<Key, Value> *t, Key k2)
-{
-	Key k1 = t->get_key();
-	return (k1 < k2);
-}
-
-template <class Key, class Value>
-bool my_greater(TableEntry<Key, Value> *t, Key k2)
-{
-	Key k1 = t->get_key();
-	return (k1 > k2);
-}
-
-template <class Key, class Value>
 void
 ProbabilityTable<Key, Value>::sorted_insert(Entry *t)
 {
@@ -137,11 +122,10 @@ ProbabilityTable<Key, Value>::sorted_insert(Entry *t)
 
 	typename vector<Entry *>::iterator i;
 	for (i=table_.begin(); i!=table_.end(); i++) {
-		if (my_greater<Key, Value>(*i, k)) {
+		if ((*i)->get_key() > k) {
 			break;
 		}
 	}
-	//i = find_if(table_.begin(), table_.end(), std::bind2nd(std::ptr_fun(my_greater<Key, Value>), k));
 
 	if (i != table_.end()) {
 		table_.insert(i, t);
@@ -167,7 +151,8 @@ ProbabilityTable<Key, Value>::get_value(Key k)
 	assert(k < curr_max_key_);
 
 	typename vector<Entry *>::iterator i;
-	i = find_if(table_.begin(), table_.end(), std::bind2nd(std::ptr_fun(my_greater<Key, Value>), k));
+	i = find_if(table_.begin(), table_.end(),
+				[k](Entry *e) { return e->get_key() > k; });
 
 	assert(i != table_.end());
 	return (*i)->get_value();
