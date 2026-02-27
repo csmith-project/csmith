@@ -410,7 +410,7 @@ FunctionInvocationUser::get_type(void) const
 /*
  *
  */
-static int
+static void
 OutputActualParamExpression(const Expression *expr, std::ostream *pOut)
 {
 	std::ostream &out = *pOut;
@@ -419,8 +419,6 @@ OutputActualParamExpression(const Expression *expr, std::ostream *pOut)
 	}
 	needcomma.back() = true;
 	expr->Output(out);
-    // for MSVC: must return something to be able to pass to a "map" function
-    return 0;
 }
 
 /*
@@ -430,8 +428,9 @@ static void
 OutputExpressionVector(const vector<const Expression*> &var, std::ostream &out)
 {
 	needcomma.push_back(false);
-	for_each(var.begin(), var.end(),
-			 std::bind2nd(std::ptr_fun(OutputActualParamExpression), &out));
+	for (vector<const Expression*>::const_iterator i = var.begin(); i != var.end(); ++i) {
+		OutputActualParamExpression(*i, &out);
+	}
 	needcomma.pop_back();
 }
 
