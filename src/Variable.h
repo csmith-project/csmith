@@ -184,8 +184,8 @@ void OutputVariableDeclList(const std::vector<Variable*> &var, std::ostream &out
 void OutputArrayInitializers(const vector<Variable*>& vars, std::ostream &out, int indent);
 void OutputArrayCtrlVars(const vector<const Variable*>& ctrl_vars, std::ostream &out, size_t dimen, int indent);
 void OutputVolatileAddress(const vector<Variable*> &vars, std::ostream &out, int indent, const string &fp_string);
-void MapVariableList(const vector<Variable*> &var, std::ostream &out, int (*func)(Variable *var, std::ostream *pOut));
-int HashVariable(Variable *var, std::ostream *pOut);
+void MapVariableList(const vector<Variable*> &var, std::ostream &out, void (*func)(Variable *var, std::ostream *pOut));
+void HashVariable(Variable *var, std::ostream *pOut);
 
 int find_variable_in_set(const vector<const Variable*>& set, const Variable* v);
 int find_variable_in_set(const vector<Variable*>& set, const Variable* v);

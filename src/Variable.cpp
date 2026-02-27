@@ -883,9 +883,11 @@ Variable::doFinalization(void)
 // --------------------------------------------------------------
 void
 MapVariableList(const vector<Variable*> &var, std::ostream &out,
-				int (*func)(Variable *var, std::ostream *pOut))
+				void (*func)(Variable *var, std::ostream *pOut))
 {
-	for_each(var.begin(), var.end(), std::bind2nd(std::ptr_fun(func), &out));
+	for (vector<Variable*>::const_iterator i = var.begin(); i != var.end(); ++i) {
+		func(*i, &out);
+	}
 }
 
 // --------------------------------------------------------------
@@ -1030,12 +1032,11 @@ Variable::hash(std::ostream& out) const
 }
 
 // --------------------------------------------------------------
-int
+void
 HashVariable(Variable *var, std::ostream *pOut)
 {
 	std::ostream &out = *pOut;
 	var->hash(out);
-    return 0;
 }
 
 std::string
