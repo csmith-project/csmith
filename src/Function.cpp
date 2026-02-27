@@ -543,9 +543,9 @@ Function::OutputFormalParamList(std::ostream &out)
 		Type::void_type->Output(out);
 	} else {
 		param_first = true;
-		for_each(param.begin(),
-				 param.end(),
-				 std::bind2nd(std::ptr_fun(OutputFormalParam), &out));
+		for (vector<Variable*>::iterator i = param.begin(); i != param.end(); ++i) {
+			OutputFormalParam(*i, &out);
+		}
 	}
 }
 
@@ -871,51 +871,23 @@ GenerateFunctions(void)
 	ExtensionMgr::GenerateValues();
 }
 
-/*
- *
- */
-static int
-OutputForwardDecl(Function *func, std::ostream *pOut)
-{
-	func->OutputForwardDecl(*pOut);
-	return 0;
-}
-
-static int
-OutputForwardDeclAlias(Function *func, std::ostream *pOut)
-{
-	func->OutputForwardDeclAlias(*pOut);
-	return 0;
-}
-
-/*
- *
- */
-static int
-OutputFunction(Function *func, std::ostream *pOut)
-{
-	func->Output(*pOut);
-	return 0;
-}
-
-/*
- *
- */
 void
 OutputForwardDeclarations(std::ostream &out)
 {
 	outputln(out);
 	outputln(out);
 	output_comment_line(out, "--- FORWARD DECLARATIONS ---");
-	for_each(FuncList.begin(), FuncList.end(),
-			 std::bind2nd(std::ptr_fun(OutputForwardDecl), &out));
+	for (vector<Function*>::iterator i = FuncList.begin(); i != FuncList.end(); ++i) {
+		(*i)->OutputForwardDecl(out);
+	}
 
 	if(CGOptions::func_attr_flag()){
 		outputln(out);
 		outputln(out);
 		output_comment_line(out, "--- FORWARD ALIAS DECLARATIONS ---");
-		for_each(FuncList.begin(), FuncList.end(),
-				 std::bind2nd(std::ptr_fun(OutputForwardDeclAlias), &out));
+		for (vector<Function*>::iterator i = FuncList.begin(); i != FuncList.end(); ++i) {
+			(*i)->OutputForwardDeclAlias(out);
+		}
 	}
 }
 
@@ -928,18 +900,9 @@ OutputFunctions(std::ostream &out)
 	outputln(out);
 	outputln(out);
 	output_comment_line(out, "--- FUNCTIONS ---");
-	for_each(FuncList.begin(), FuncList.end(),
-			 std::bind2nd(std::ptr_fun(OutputFunction), &out));
-}
-
-/*
- * Delete a single function
- */
-int
-Function::deleteFunction(Function* func)
-{
-	delete func;
-	return 0;
+	for (vector<Function*>::iterator i = FuncList.begin(); i != FuncList.end(); ++i) {
+		(*i)->Output(out);
+	}
 }
 
 /*
@@ -948,7 +911,9 @@ Function::deleteFunction(Function* func)
 void
 Function::doFinalization(void)
 {
-	for_each(FuncList.begin(), FuncList.end(), std::ptr_fun(deleteFunction));
+	for (vector<Function*>::iterator i = FuncList.begin(); i != FuncList.end(); ++i) {
+		delete (*i);
+	}
 
 	FuncList.clear();
 

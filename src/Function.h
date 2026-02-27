@@ -131,8 +131,6 @@ public:
 	void OutputForwardDeclAlias(std::ostream &);
 
 private:
-	static int deleteFunction(Function* func);
-
 	Function(const std::string &name, const Type *return_type);
 	Function(const std::string &name, const Type *return_type, bool is_builtin);
 	void OutputHeader(std::ostream &);
