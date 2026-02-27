@@ -74,7 +74,7 @@ public:
 	static const Variable* choose_visible_read_var(const Block* b, vector<const Variable*> written_vars, const Type* type, const vector<const Fact*>& facts);
 	static Variable* choose_var(vector<Variable *> vars, Effect::Access access,
 		   const CGContext &cg_context, const Type* type, const CVQualifiers* qfer,
-		   eMatchType mt, const vector<const Variable*>& invalid_vars, bool no_bitfield = false, bool no_expand_struct = false);
+		   eMatchType mt, const vector<const Variable*>& invalid_vars, bool no_bitfield = false, bool no_expand_struct = false, bool no_union = false);
 	static Variable *select_deref_pointer(Effect::Access access, const CGContext &cg_context, const Type* type,
 		   const CVQualifiers* qfer, const vector<const Variable*>& invalid_vars);
 	static Variable *SelectLoopCtrlVar(const CGContext &cg_context, const vector<const Variable*>& invalid_vars);
