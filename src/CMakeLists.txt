@@ -208,9 +208,9 @@ add_executable(csmith
   ${csmith_SOURCES}
   )
 
-# Use C++17.
+# Use C++20.
 set_target_properties(csmith PROPERTIES
-  CXX_STANDARD 17
+  CXX_STANDARD 20
   CXX_EXTENSIONS NO
   )
 # CXX_STANDARD_REQUIRED YES
