@@ -444,7 +444,7 @@ Statement::dominate(const Statement* s) const
 const Statement*
 Statement::find_container_stm(void) const
 {
-	const Block* b = (eType == eBlock) ? (const Block*)this : parent;
+	const Block* b = (eType == eBlock) ? static_cast<const Block*>(this) : parent;
 	if (b != 0 && b->parent != 0) {
 		for (size_t i=0; i<b->parent->stms.size(); i++) {
 			const Statement* s = b->parent->stms[i];
@@ -736,7 +736,7 @@ Statement::contains_stmt(const Statement* s) const
 	}
 	if (eType == eBlock) {
 		for (const Block* tmp = s->parent; tmp; tmp = tmp->parent) {
-			if (tmp == (const Block*)this) {
+			if (tmp == static_cast<const Block*>(this)) {
 				return true;
 			}
 		}
@@ -779,19 +779,19 @@ const FunctionInvocation*
 Statement::get_direct_invocation(void) const
 {
 	if (eType == eAssign) {
-		const Expression* e = ((const StatementAssign*)this)->get_expr();
+		const Expression* e = static_cast<const StatementAssign*>(this)->get_expr();
 		if (e->term_type == eFunction) {
-			return ((const ExpressionFuncall*)e)->get_invoke();
+			return static_cast<const ExpressionFuncall*>(e)->get_invoke();
 		}
 	}
 	else if (eType == eInvoke) {
-		return ((const StatementExpr*)this)->get_invoke();
+		return static_cast<const StatementExpr*>(this)->get_invoke();
 	}
 	else if (eType == eIfElse) {
-		const StatementIf* si = (const StatementIf*)this;
+		const StatementIf* si = static_cast<const StatementIf*>(this);
 		const Expression* e = si->get_test();
 		if (e->term_type == eFunction) {
-			return ((const ExpressionFuncall*)e)->get_invoke();
+			return static_cast<const ExpressionFuncall*>(e)->get_invoke();
 		}
 	}
 	return nullptr;
@@ -905,7 +905,7 @@ Statement::post_creation_analysis(vector<const Fact*>& pre_facts, const Effect& 
 {
 	FactMgr* fm = get_fact_mgr_for_func(func);
 	if (eType == eIfElse) {
-		((const StatementIf*)this)->combine_branch_facts(pre_facts);
+		(static_cast<const StatementIf*>(this))->combine_branch_facts(pre_facts);
 	} else {
 		fm->makeup_new_var_facts(pre_facts, fm->global_facts);
 	}
@@ -935,13 +935,13 @@ Statement::post_creation_analysis(vector<const Fact*>& pre_facts, const Effect& 
 		// for if...else..., we don't want to walk through the true branch and false branch again
 		// compute the output with consideration of return statement(s) in both branches
 		if (eType == eAssign) {
-			const StatementAssign* sa = (const StatementAssign*)this;
+			const StatementAssign* sa = static_cast<const StatementAssign*>(this);
 			// abstract fact for assignment itself. No analysis on function calls
 			// on RHS since they are already handled during statement generation
 			FactMgr::update_fact_for_assign(sa, fm->global_facts);
 		}
 		else if (eType == eReturn) {
-			const StatementReturn* sr = (const StatementReturn*)this;
+			const StatementReturn* sr = static_cast<const StatementReturn*>(this);
 			FactMgr::update_fact_for_return(sr, fm->global_facts);
 		}
 	}

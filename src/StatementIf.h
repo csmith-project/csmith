@@ -80,7 +80,7 @@ private:
 
 	//
 
-	StatementIf &operator=(const StatementIf &si); // unimplementable
+	StatementIf &operator=(const StatementIf &si) = delete;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

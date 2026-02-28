@@ -353,7 +353,7 @@ OutputMgr::OutputPtrResets(ostream &out, const vector<const Variable*>& ptrs)
 	for (i=0; i<ptrs.size(); i++) {
 		const Variable* v = ptrs[i];
 		if (v->isArray) {
-			const ArrayVariable* av = (const ArrayVariable*)v;
+			const ArrayVariable* av = static_cast<const ArrayVariable*>(v);
 			Constant zero(get_int_type(), "0");
 			vector<const Variable *> &ctrl_vars = Variable::get_last_ctrl_vars();
 			av->output_init(out, &zero, ctrl_vars, 1);

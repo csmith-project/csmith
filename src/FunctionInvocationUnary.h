@@ -81,7 +81,7 @@ private:
 	explicit FunctionInvocationUnary(const FunctionInvocationUnary &funary);
 
 	// unimplemented
-	FunctionInvocationUnary &operator=(const FunctionInvocationUnary &fi);
+	FunctionInvocationUnary &operator=(const FunctionInvocationUnary &fi) = delete;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

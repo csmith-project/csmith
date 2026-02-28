@@ -92,7 +92,8 @@ private:
 	~Error();
 	static int r_error_;
 
-	DISALLOW_COPY_AND_ASSIGN(Error);
+	Error(const Error&) = delete;
+	Error& operator=(const Error&) = delete;
 };
 
 #endif // ERROR_H

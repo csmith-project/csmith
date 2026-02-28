@@ -88,7 +88,7 @@ private:
 	//
 
 	StatementFor(const StatementFor &sf);
-	StatementFor &operator=(const StatementFor &sf); // unimplementable
+	StatementFor &operator=(const StatementFor &sf) = delete;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

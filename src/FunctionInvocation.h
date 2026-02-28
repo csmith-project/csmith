@@ -183,7 +183,7 @@ protected:
 
 private:
 	// unimplemented
-	FunctionInvocation &operator=(const FunctionInvocation &fi);
+	FunctionInvocation &operator=(const FunctionInvocation &fi) = delete;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -91,7 +91,7 @@ FactUnion::rhs_to_lhs_transfer(const std::vector<const Fact*>& facts, const vect
 		return make_facts(lvars, 0);
 	}
     else if (rhs->term_type == eVariable) {
-        const ExpressionVariable* expvar = (const ExpressionVariable*)rhs;
+        const ExpressionVariable* expvar = static_cast<const ExpressionVariable*>(rhs);
 		int indirect = expvar->get_indirect_level();
         assert (indirect >= 0);
 

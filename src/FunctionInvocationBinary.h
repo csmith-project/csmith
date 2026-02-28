@@ -97,7 +97,7 @@ private:
 	static bool safe_ops(eBinaryOps op);
 
 	// unimplemented
-	FunctionInvocationBinary &operator=(const FunctionInvocationBinary &fi);
+	FunctionInvocationBinary &operator=(const FunctionInvocationBinary &fi) = delete;
 
 	explicit FunctionInvocationBinary(const FunctionInvocationBinary &fbinary);
 

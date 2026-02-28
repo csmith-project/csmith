@@ -293,7 +293,8 @@ public:
 
 	static Type *void_type;
 private:
-	DISALLOW_COPY_AND_ASSIGN(Type);
+	Type(const Type&) = delete;
+	Type& operator=(const Type&) = delete;
 
 	static const Type *simple_types[MAX_SIMPLE_TYPES];
 

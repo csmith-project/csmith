@@ -123,7 +123,8 @@ private:
 	std::vector<SearchState*> states_;
 
 	// disallow copy and assignment constructors
-	DISALLOW_COPY_AND_ASSIGN(DFSRndNumGenerator);
+	DFSRndNumGenerator(const DFSRndNumGenerator&) = delete;
+	DFSRndNumGenerator& operator=(const DFSRndNumGenerator&) = delete;
 };
 
 #endif //DFS_RNDNUM_GENERATOR_H

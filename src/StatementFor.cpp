@@ -306,10 +306,10 @@ StatementFor::make_random_array_loop(const CGContext &cg_context)
 		// random access choice: 0 = must read, 1 = must write, 2 = both
 		int access = rnd_upto(3);
 		if (access == 0 || access == 2) {
-			add_variable_to_set(must_reads, (const Variable*)av);
+			add_variable_to_set(must_reads, static_cast<const Variable*>(av));
 		}
 		if (access == 1 || access == 2) {
-			add_variable_to_set(must_writes, (const Variable*)av);
+			add_variable_to_set(must_writes, static_cast<const Variable*>(av));
 		}
 	}
 	// create read/write directive from existing context and incoming directives

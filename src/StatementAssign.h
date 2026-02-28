@@ -145,7 +145,7 @@ private:
 
 	StatementAssign(const StatementAssign &sa);  // unimplemented
 
-	StatementAssign &operator=(const StatementAssign &se); // unimplementable
+	StatementAssign &operator=(const StatementAssign &se) = delete;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

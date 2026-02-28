@@ -132,7 +132,7 @@ private:
 	//////////////////////////////////////////////////////////////
 	Block(const Block &b); // unimplemented
 
-	Block &operator=(const Block &b); // unimplemented
+	Block &operator=(const Block &b) = delete;
 };
 
 Block* find_block_by_id(int blk_id);

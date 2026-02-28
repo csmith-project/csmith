@@ -211,7 +211,7 @@ FactPointTo::rhs_to_lhs_transfer(const vector<const Fact*>& facts, const vector<
 		}
 	}
     else if (rhs->term_type == eVariable) {
-		const ExpressionVariable* expvar = (const ExpressionVariable*)rhs;
+		const ExpressionVariable* expvar = static_cast<const ExpressionVariable*>(rhs);
 		int indirect = expvar->get_indirect_level();
 		if (indirect < 0) {
 			// taking address of another variable. multi-level indirection is not allowed
@@ -439,7 +439,7 @@ bool
 FactPointTo::is_valid_ptr(const Variable* p, const std::vector<const Fact*>& facts)
 {
 	FactPointTo fp(p);
-	const FactPointTo* fact = (const FactPointTo*)find_related_fact(facts, &fp);
+	const FactPointTo* fact = static_cast<const FactPointTo*>(find_related_fact(facts, &fp));
 	return fact &&
 		(CGOptions::null_pointer_dereference_prob() > 0 || !fact->is_null()) &&
 		(CGOptions::dead_pointer_dereference_prob() > 0 || !fact->is_dead());
@@ -455,7 +455,7 @@ FactPointTo::is_valid_ptr(const char* name, const std::vector<const Fact*>& fact
 	for (i=0; i<facts.size(); i++) {
 		if (facts[i]->get_var()->name == name) {
 			if (facts[i]->eCat == ePointTo) {
-				const FactPointTo* fact = (const FactPointTo*)(facts[i]);
+				const FactPointTo* fact = static_cast<const FactPointTo*>(facts[i]);
 				return (!fact->is_null() && !fact->is_dead());
 			}
 		}
@@ -504,7 +504,7 @@ bool
 FactPointTo::is_dangling_ptr(const Variable* p, const std::vector<const Fact*>& facts)
 {
 	FactPointTo fp(p);
-	const FactPointTo* fact = (const FactPointTo*)find_related_fact(facts, &fp);
+	const FactPointTo* fact = static_cast<const FactPointTo*>(find_related_fact(facts, &fp));
 	return (fact && (fact->is_dead() && CGOptions::dead_pointer_dereference_prob() == 0));
 }
 
@@ -648,7 +648,7 @@ void output_var(const Variable* var, std::ostream &out)
 	if (var->isArray)
 	{
 		size_t i;
-		const ArrayVariable* av = (const ArrayVariable*)var;
+		const ArrayVariable* av = static_cast<const ArrayVariable*>(var);
 		for (i=0; i<av->get_dimension(); i++) {
 			out << "[0]";
 		}
@@ -728,7 +728,7 @@ FactPointTo::merge_pointees_of_pointers(const std::vector<const Variable*>& ptrs
 		const Variable* p = ptrs[i];
 		if (FactPointTo::is_special_ptr(p)) continue;
 		FactPointTo dummy(p);
-		const FactPointTo* exist_fact = (const FactPointTo*)find_related_fact(facts, &dummy);
+		const FactPointTo* exist_fact = static_cast<const FactPointTo*>(find_related_fact(facts, &dummy));
 		// I can not think of a reason this is null
 		// well...this actually happens when p is a parameter of function f, and we are in the middle of creating f
 		assert(exist_fact);
@@ -762,7 +762,7 @@ FactPointTo::update_with_modified_index(const Variable* index_var) const
 		}
 		// if v is an itemized array variable, check it's indices
 		if (v->isArray && v->get_collective() != v) {
-			const ArrayVariable* av = (const ArrayVariable*)v;
+			const ArrayVariable* av = static_cast<const ArrayVariable*>(v);
 			ArrayVariable* new_av = 0;
 			vector<size_t> modified;
 			for (k=0; k<av->get_indices().size(); k++) {
@@ -796,7 +796,7 @@ FactPointTo::update_facts_with_modified_index(std::vector<const Fact*>& facts, c
 	size_t i;
 	for (i=0; i<facts.size(); i++) {
 		if (facts[i]->eCat == ePointTo) {
-			const FactPointTo* fp = (const FactPointTo*)facts[i];
+			const FactPointTo* fp = static_cast<const FactPointTo*>(facts[i]);
 			const FactPointTo* new_fp = fp->update_with_modified_index(index_var);
 			if (new_fp != fp) {
 				facts[i] = new_fp;
@@ -811,7 +811,7 @@ FactPointTo::update_ptr_aliases(const vector<Fact*>& facts, vector<const Variabl
 	size_t i, j;
 	for (j=0; j<facts.size(); j++) {
 		if (facts[j]->eCat == ePointTo) {
-			const FactPointTo* f = (const FactPointTo*)(facts[j]);
+			const FactPointTo* f = static_cast<const FactPointTo*>(facts[j]);
 			// don't include rv facts
 			if (f->get_var()->type != 0) {
 				int pos = find_variable_in_set(ptrs, f->get_var());

@@ -201,7 +201,7 @@ protected:
 private:
 	static int sid;
 
-	Statement &operator=(const Statement &s); // unimplementable
+	Statement &operator=(const Statement &s) = delete;
 
 	static void InitProbabilityTable();
 };

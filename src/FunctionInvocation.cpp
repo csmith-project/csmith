@@ -209,7 +209,7 @@ FunctionInvocation::make_random_binary(CGContext &cg_context, const Type* type)
 
 #if 0
 	if (lhs->term_type == eVariable) {
-		lhs_eff_accum.read_deref_volatile((ExpressionVariable*)lhs);
+		lhs_eff_accum.read_deref_volatile(static_cast<ExpressionVariable*>(lhs));
 	}
 #endif
 
@@ -363,7 +363,7 @@ FunctionInvocation::get_called_funcs(std::vector<const FunctionInvocationUser*>&
 		value->get_called_funcs(funcs);
 	}
 	if (invoke_type == eFuncCall) {
-		const FunctionInvocationUser* func_call = (const FunctionInvocationUser*)this;
+		const FunctionInvocationUser* func_call = static_cast<const FunctionInvocationUser*>(this);
 		funcs.push_back(func_call);
 	}
 }
@@ -391,7 +391,7 @@ FunctionInvocation::has_uncertain_call_recursive(void) const
 	for (i=0; i<param_value.size(); i++) {
 		const Expression* e = param_value[i];
 		if (e->term_type == eFunction) {
-			const ExpressionFuncall* ef = (const ExpressionFuncall*)e;
+			const ExpressionFuncall* ef = static_cast<const ExpressionFuncall*>(e);
 			if (ef->has_uncertain_call_recursive()) {
 				return true;
 			}

@@ -1897,7 +1897,7 @@ void OutputStructUnion(Type* type, std::ostream &out)
         // output dependent structs, if any
         for (i=0; i<type->fields.size(); i++) {
 			if (type->fields[i]->is_aggregate()) {
-                OutputStructUnion((Type*)type->fields[i], out);
+                OutputStructUnion(const_cast<Type*>(type->fields[i]), out);
             }
         }
         // output myself

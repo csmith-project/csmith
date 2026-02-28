@@ -74,7 +74,7 @@ private:
 	const ExpressionVariable &var;
 	//
 
-	StatementReturn &operator=(const StatementReturn &sr); // unimplementable
+	StatementReturn &operator=(const StatementReturn &sr) = delete;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

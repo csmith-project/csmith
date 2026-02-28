@@ -168,7 +168,7 @@ FactMgr::update_facts_for_oos_vars(const vector<const Variable*>& vars, FactVec&
 		const Variable* var = vars[i];
 		for (j=0; j<facts.size(); j++) {
 			if (facts[j]->eCat == ePointTo) {
-				FactPointTo* f = (FactPointTo*)(facts[j]);
+				FactPointTo* f = const_cast<FactPointTo*>(static_cast<const FactPointTo*>(facts[j]));
 				FactPointTo* new_fact = f->mark_dead_var(var);
 				if (new_fact) {
 					facts[j] = new_fact;
@@ -204,7 +204,7 @@ FactMgr::remove_function_local_facts(std::vector<const Fact*>& inputs, const Sta
 	// function as "point to garbage"
 	for (i=0; i<inputs.size(); i++) {
 		if (inputs[i]->eCat == ePointTo) {
-			FactPointTo* f = (FactPointTo*)(inputs[i]);
+			FactPointTo* f = const_cast<FactPointTo*>(static_cast<const FactPointTo*>(inputs[i]));
 			FactPointTo* new_fact = f->mark_func_end(stm);
 			if (new_fact) {
 				inputs[i] = new_fact;
@@ -307,7 +307,7 @@ FactMgr::add_fact_out(const Statement* stm, const Fact* fact)
 			}
 		}
 		if (stm->eType == eGoto) {
-			const StatementGoto* sg = (const StatementGoto*)stm;
+			const StatementGoto* sg = static_cast<const StatementGoto*>(stm);
 			if (!func->is_var_visible(var, sg->dest)) {
 				return;
 			}
@@ -639,7 +639,7 @@ void
 FactMgr::remove_loop_local_facts(const Statement* s, FactVec& facts)
 {
 	// filter out out-of-scope facts
-	const Block* b = (s->eType==eBlock) ? (const Block*)s : s->parent;
+	const Block* b = (s->eType==eBlock) ? static_cast<const Block*>(s) : s->parent;
 	vector<Variable*> local_vars = b->local_vars;
 	while (b && !b->looping) {
 		b = b->parent;
@@ -729,7 +729,7 @@ FactMgr::find_dangling_global_ptrs(Function* f)
 {
 	for (size_t i=0; i<global_facts.size(); i++) {
 		if (global_facts[i]->eCat == ePointTo) {
-			FactPointTo* fp = (FactPointTo*)(global_facts[i]);
+			FactPointTo* fp = const_cast<FactPointTo*>(static_cast<const FactPointTo*>(global_facts[i]));
 			const Variable* v = fp->get_var();
 			// const pointers should never be dangling
 			if (v->is_const() || !v->is_global()) continue;

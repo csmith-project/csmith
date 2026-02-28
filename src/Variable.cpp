@@ -298,7 +298,7 @@ Variable::is_virtual(void) const
 		return field_var_of->is_virtual();
 	}
 	if (isArray) {
-		return ((const ArrayVariable*)this)->collective==0;
+		return static_cast<const ArrayVariable*>(this)->collective==0;
 	}
 	return false;
 }
@@ -702,7 +702,7 @@ Variable::get_array(string& field) const
 		size_t dot = name.find(".", bracket);
 		assert(dot != string::npos);
 		field = name.substr(dot);
-		return (const ArrayVariable*)parent;
+		return static_cast<const ArrayVariable*>(parent);
 	}
 	return nullptr;
 }
@@ -913,7 +913,7 @@ Variable::GetMaxArrayDimension(const vector<Variable*>& vars)
 
 	for (size_t i=0; i<vars.size(); i++) {
 		if (vars[i]->isArray) {
-			ArrayVariable* av = (ArrayVariable*)(vars[i]);
+			ArrayVariable* av = static_cast<ArrayVariable*>(vars[i]);
 			// const Array members were initialzed in ArrayVariable::OutputDef
 			if (av->get_dimension() > dimen) {
 				dimen = av->get_dimension();
@@ -933,7 +933,7 @@ OutputArrayInitializers(const vector<Variable*>& vars, std::ostream &out, int in
 		OutputArrayCtrlVars(ctrl_vars, out, dimen, indent);
 		for (i=0; i<vars.size(); i++) {
 			if (vars[i]->isArray) {
-				ArrayVariable* av = (ArrayVariable*)(vars[i]);
+				ArrayVariable* av = static_cast<ArrayVariable*>(vars[i]);
 				if (!av->no_loop_initializer()) {
 					av->output_init(out, av->init, ctrl_vars, indent);
 				}
@@ -1046,7 +1046,7 @@ Variable::to_string(void) const
 	size_t i;
 	if (is_virtual() && isArray) {
 		vector<intvec> all_indices;
-		const ArrayVariable* av = (const ArrayVariable*)this;
+		const ArrayVariable* av = static_cast<const ArrayVariable*>(this);
 		expand_within_ranges(av->get_sizes(), all_indices);
 		//ret = "(";
 		for (i=0; i<all_indices.size(); i++) {
@@ -1088,7 +1088,7 @@ Variable::output_runtime_value(ostream &out, const string &prefix, const string 
 		assert (!is_field_var());
 		// var must be a virtual array, duplicate the directive for all members
 		int j, k;
-		const ArrayVariable* av = (const ArrayVariable*)this;
+		const ArrayVariable* av = static_cast<const ArrayVariable*>(this);
 		for (k=av->get_sizes().size()-1; k>=0; k--) {
 			int len = av->get_sizes()[k];
 			oss.str("");
@@ -1199,7 +1199,7 @@ Variable::output_volatile_address(ostream &out, int indent, const string &fp_str
 
 	if (is_virtual()) {
 		assert(!is_field_var());
-		const ArrayVariable* av = (const ArrayVariable*)this;
+		const ArrayVariable* av = static_cast<const ArrayVariable*>(this);
 
 #if 0
 		if (is_vol && av->is_global()) {
@@ -1262,7 +1262,7 @@ Variable::output_addressable_name(ostream &out, int indent) const
 	size_t i;
 	if (is_virtual()) {
 		assert(!is_field_var());
-		const ArrayVariable* av = (const ArrayVariable*)this;
+		const ArrayVariable* av = static_cast<const ArrayVariable*>(this);
 		vector<intvec> all_indices;
 		expand_within_ranges(av->get_sizes(), all_indices);
 		for (i=0; i<all_indices.size(); i++) {
@@ -1298,7 +1298,7 @@ Variable::output_value_dump(ostream &out, const string &prefix, int indent) cons
 	size_t i;
 	if (is_virtual()) {
 		assert(!is_field_var());
-		const ArrayVariable* av = (const ArrayVariable*)this;
+		const ArrayVariable* av = static_cast<const ArrayVariable*>(this);
 		vector<intvec> all_indices;
 		expand_within_ranges(av->get_sizes(), all_indices);
 		for (i=0; i<all_indices.size(); i++) {

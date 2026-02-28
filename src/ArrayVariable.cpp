@@ -101,7 +101,7 @@ static int count_expr_key_var(const Expression* e)
 static const Variable* find_expr_key_var(const Expression* e)
 {
 	if (e->term_type == eVariable) {
-		return ((const ExpressionVariable*)e)->get_var();
+		return static_cast<const ExpressionVariable*>(e)->get_var();
 	}
 	else if (e->term_type == eFunction) {
 		const ExpressionFuncall* ef = dynamic_cast<const ExpressionFuncall*>(e);

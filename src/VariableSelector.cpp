@@ -343,7 +343,7 @@ VariableSelector::choose_ok_var(const vector<Variable *> &vars)
 	}
 	// if v is "collective" array variable, return a "itemized" array member
 	if (v && v->isArray) {
-		ArrayVariable* av = (ArrayVariable*)v;
+		ArrayVariable* av = static_cast<ArrayVariable*>(v);
 		if (av->collective == 0) {
 			v = av->itemize();
 		}
@@ -367,7 +367,7 @@ VariableSelector::choose_ok_var(const vector<const Variable *> &vars)
 	}
 	// if v is "collective" array variable, return a "itemized" array member
 	if (v && v->isArray) {
-		const ArrayVariable* av = (const ArrayVariable*)v;
+		const ArrayVariable* av = static_cast<const ArrayVariable*>(v);
 		if (av->collective == 0) {
 			v = av->itemize();
 		}

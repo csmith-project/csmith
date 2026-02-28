@@ -397,7 +397,7 @@ CGContext::read_indices(const Variable* v, const vector<const Fact*>& facts)
 	vector<const Variable*> vars;
 	if (v->isArray) {
 		vector<const Fact*> facts_copy = facts;
-		const ArrayVariable* av = (const ArrayVariable*)v;
+		const ArrayVariable* av = static_cast<const ArrayVariable*>(v);
 		for (i=0; i<av->get_indices().size(); i++) {
 			const Expression* e = av->get_indices()[i];
 			if (!e->visit_facts(facts_copy, *this)) {
@@ -638,7 +638,7 @@ CGContext::find_reachable_frame_vars(vector<const Fact*>& facts, VariableSet& fr
 	size_t i, j;
 	for (i=0; i<facts.size(); i++) {
 		if (facts[i]->eCat == ePointTo) {
-			const FactPointTo* fp = (const FactPointTo*)(facts[i]);
+			const FactPointTo* fp = static_cast<const FactPointTo*>(facts[i]);
 			for (j=0; j<fp->get_point_to_vars().size(); j++) {
 				const Variable* v = fp->get_point_to_vars()[j];
 				if (is_frame_var(v)) {

@@ -93,7 +93,8 @@ private:
 	static const char *dec1;
 
 	// Don't implement them
-	DISALLOW_COPY_AND_ASSIGN(AbsRndNumGenerator);
+	AbsRndNumGenerator(const AbsRndNumGenerator&) = delete;
+	AbsRndNumGenerator& operator=(const AbsRndNumGenerator&) = delete;
 };
 
 #endif //ABS_RNDNUM_GENERATOR

@@ -93,8 +93,7 @@ private:
 private:
 	explicit FunctionInvocationUser(const FunctionInvocationUser &fiu);
 
-	// unimplemented
-	//FunctionInvocationUser &operator=(const FunctionInvocationUser &fi);
+	FunctionInvocationUser &operator=(const FunctionInvocationUser &fi) = delete;
 
 	bool build_invocation(Function *target, CGContext &cg_context);
 };

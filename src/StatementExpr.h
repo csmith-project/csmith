@@ -76,7 +76,7 @@ private:
 
 	//
 
-	StatementExpr &operator=(const StatementExpr &se); // unimplementable
+	StatementExpr &operator=(const StatementExpr &se) = delete;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

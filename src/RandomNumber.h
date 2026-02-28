@@ -95,7 +95,8 @@ private:
 	explicit RandomNumber(AbsRndNumGenerator *rndnum_generator);
 
 	// Don't implement them
-	DISALLOW_COPY_AND_ASSIGN(RandomNumber);
+	RandomNumber(const RandomNumber&) = delete;
+	RandomNumber& operator=(const RandomNumber&) = delete;
 };
 
 #endif //RANDOM_NUMBER_H

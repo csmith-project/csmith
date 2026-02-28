@@ -83,7 +83,8 @@ private:
 	//void seedrand(unsigned long seed);
 
 	//Don't implement them
-	DISALLOW_COPY_AND_ASSIGN(DefaultRndNumGenerator);
+	DefaultRndNumGenerator(const DefaultRndNumGenerator&) = delete;
+	DefaultRndNumGenerator& operator=(const DefaultRndNumGenerator&) = delete;
 };
 
 #endif //DEFAULT_RNDNUM_GENERATOR_H
