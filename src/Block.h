@@ -71,7 +71,7 @@ public:
 
 	//
 	virtual bool set_depth_protect(bool b) { depth_protect = b; return b; }
-	virtual bool get_depth_protect(void) { return depth_protect; }
+	virtual bool get_depth_protect(void) const { return depth_protect; }
 
 	virtual void Output(std::ostream &out, FactMgr* fm, int indent=0) const;
 
@@ -79,7 +79,7 @@ public:
 
     Block* random_parent_block(void);
 
-	int block_size() { return block_size_; }
+	int block_size() const { return block_size_; }
 	// These are currently accessed directly.
 	std::vector<Statement *> stms;
 	std::vector<Statement *> deleted_stms;
@@ -106,7 +106,7 @@ public:
 
 	bool contains_back_edge(void) const;
 
-	bool find_fixed_point(vector<const Fact*> inputs, vector<const Fact*>& post_facts, CGContext& cg_context, int& fail_index, bool visit_once) const;
+	bool find_fixed_point(const vector<const Fact*> &inputs, vector<const Fact*>& post_facts, CGContext& cg_context, int& fail_index, bool visit_once) const;
 
 	void post_creation_analysis(CGContext& cg_context, const Effect& pre_effect);
 

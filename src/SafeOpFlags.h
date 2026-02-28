@@ -75,15 +75,15 @@ public:
 
 	void OutputOp2(std::ostream &out) const;
 
-	bool get_op1_sign() { return op1_; }
+	bool get_op1_sign() const { return op1_; }
 
-	bool get_op2_sign() { return op2_; }
+	bool get_op2_sign() const { return op2_; }
 
 	enum SafeOpSize get_op_size() const { return op_size_; }
 
 	std::string to_string(enum eBinaryOps op) const;
 	std::string to_string(enum eUnaryOps  op) const;
-	static int to_id(std::string fname);
+	static int to_id(const std::string &fname);
 
 	~SafeOpFlags();
 
@@ -114,4 +114,3 @@ private:
 };
 
 #endif //SAFEOPFLAGS_H
-

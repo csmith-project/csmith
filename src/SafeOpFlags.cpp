@@ -351,7 +351,7 @@ SafeOpFlags::to_string(enum eUnaryOps op) const
 
 /* assign id to safe math function */
 int
-SafeOpFlags::to_id(std::string fname)
+SafeOpFlags::to_id(const std::string &fname)
 {
 	for (size_t i=0; i<wrapper_names.size(); i++) {
 		if (wrapper_names[i] == fname) {

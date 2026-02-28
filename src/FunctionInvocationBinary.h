@@ -51,7 +51,7 @@ public:
 
 	FunctionInvocationBinary(eBinaryOps op, const SafeOpFlags *flags);
 
-	FunctionInvocationBinary(eBinaryOps op, const SafeOpFlags *flags, std::string &name1, std::string &name2);
+	FunctionInvocationBinary(eBinaryOps op, const SafeOpFlags *flags, const std::string &name1, const std::string &name2);
 
 	FunctionInvocationBinary(eBinaryOps op, const Expression* exp1, const Expression* exp2, const SafeOpFlags *flags);
 
@@ -74,9 +74,9 @@ public:
 	eBinaryOps get_operation(void) const {return eFunc;}
 	void set_operation(eBinaryOps op) { eFunc = op;}
 
-	std::string get_tmp_var1() { return tmp_var1; }
+	const std::string &get_tmp_var1() const { return tmp_var1; }
 
-	std::string get_tmp_var2() { return tmp_var2; }
+	const std::string &get_tmp_var2() const { return tmp_var2; }
 
 	static std::string get_binop_string(eBinaryOps bop);
 

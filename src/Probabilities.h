@@ -295,7 +295,7 @@ public:
 
 	virtual void set_prob_table(ProbabilityTable<unsigned int, ProbName> * const table) = 0;
 
-	virtual bool is_equal() = 0;
+	virtual bool is_equal() const = 0;
 };
 
 class SingleProbElem : public ProbElem {
@@ -320,7 +320,7 @@ public:
 
 	virtual void set_prob_table(ProbabilityTable<unsigned int, ProbName> * const table);
 
-	virtual bool is_equal() { return false; }
+	virtual bool is_equal() const { return false; }
 
 	static const char single_elem_sep_char;
 
@@ -356,9 +356,9 @@ public:
 
 	virtual void dump_val(std::ostream &out);
 
-	virtual bool is_equal() { return is_equal_; }
+	virtual bool is_equal() const { return is_equal_; }
 
-	void initialize(Probabilities *impl, const std::map<ProbName, int> pairs);
+	void initialize(Probabilities *impl, const std::map<ProbName, int> &pairs);
 
 	static const char group_open_delim;
 

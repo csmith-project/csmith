@@ -284,7 +284,7 @@ ChooseRandomTypeFilter::get_type()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static bool checkImplicitNontrivialAssignOps(vector<const Type*> fields)
+static bool checkImplicitNontrivialAssignOps(const vector<const Type*> &fields)
 {
 	if (!CGOptions::lang_cpp()) return false;
 	for (size_t i = 0; i < fields.size(); ++i) {
@@ -1708,7 +1708,7 @@ Type::SelectLType(bool no_volatile, eAssignOps op)
 }
 
 void
-Type::get_int_subfield_names(string prefix, vector<string>& names,
+Type::get_int_subfield_names(const string &prefix, vector<string>& names,
 		vector<const Type *>& types, const vector<int>& excluded_fields) const
 {
 	if (eType == eSimple) {

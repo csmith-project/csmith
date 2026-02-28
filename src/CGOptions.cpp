@@ -73,7 +73,9 @@ int CGOptions::pointer_size_ = 0;
 	DEFINE_GETTER_SETTER(int, 0, f)
 
 #define DEFINE_GETTER_SETTER_STRING_REF(f) \
-	DEFINE_GETTER_SETTER(std::string, "", f)
+	std::string CGOptions::f##_ = ""; \
+	std::string CGOptions::f(void) { return f##_; } \
+	std::string CGOptions::f(const std::string &p) { f##_ = p; return p; }
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -586,13 +588,13 @@ CGOptions::has_conflict(void)
 }
 
 void
-CGOptions::monitored_funcs(std::string fnames)
+CGOptions::monitored_funcs(const std::string &fnames)
 {
 	parse_string_options(fnames, OutputMgr::monitored_funcs_);
 }
 
 void
-CGOptions::parse_string_options(string vname, vector<std::string> &v)
+CGOptions::parse_string_options(const string &vname, vector<std::string> &v)
 {
 	if (vname.empty()) return;
 	// parse the string if there are multiple variable names in format "v1,v2,..."
@@ -600,7 +602,7 @@ CGOptions::parse_string_options(string vname, vector<std::string> &v)
 	size_t pos2 = 0;
 	do {
 		pos2 = vname.find_first_of(',', pos1);
-		string var_name = (pos2 != string::npos) ? vname.substr(pos1, pos2 - pos1) : vname.substr(pos1);
+		const string var_name = (pos2 != string::npos) ? vname.substr(pos1, pos2 - pos1) : vname.substr(pos1);
 		v.push_back(var_name);
 		pos1 = pos2 + 1;
 	} while (pos2 != string::npos);
@@ -625,7 +627,7 @@ CGOptions::vol_tests_mach(void)
 }
 
 void
-CGOptions::safe_math_wrapper(string ids)
+CGOptions::safe_math_wrapper(const string &ids)
 {
 	StringUtils::split_int_string(ids, safe_math_wrapper_ids_, ",");
 }
@@ -660,7 +662,7 @@ CGOptions::enable_builtin_kinds(const string &kinds)
 
 bool CGOptions::enabled_builtin_kind(const string &kind)
 {
-	map<string, bool>::iterator i = enabled_builtin_kinds_.find(kind);
+	const map<string, bool>::const_iterator i = enabled_builtin_kinds_.find(kind);
 	if (i == enabled_builtin_kinds_.end())
 		return false;
 	return i->second;

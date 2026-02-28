@@ -249,7 +249,7 @@ Effect::add_external_effect(const Effect &e)
  * variables of caller(s)
  */
 void
-Effect::add_external_effect(const Effect &e, std::vector<const Block*> call_chain)
+Effect::add_external_effect(const Effect &e, const std::vector<const Block*> &call_chain)
 {
 	if (this == &e) {
 		return;
@@ -327,9 +327,9 @@ Effect::is_read(const Variable *v) const
  *
  */
 bool
-Effect::is_read(string vname) const
+Effect::is_read(const string &vname) const
 {
-	vector<Variable *>::size_type len = read_vars.size();
+	const vector<Variable *>::size_type len = read_vars.size();
 	vector<Variable *>::size_type i;
 
 	for (i = 0; i < len; ++i) {
@@ -370,7 +370,7 @@ Effect::is_read(string vname) const
 bool
 Effect::is_written(const Variable *v) const
 {
-	vector<Variable *>::size_type len = write_vars.size();
+	const vector<Variable *>::size_type len = write_vars.size();
 	vector<Variable *>::size_type i;
 
 	for (i = 0; i < len; ++i) {
@@ -389,9 +389,9 @@ Effect::is_written(const Variable *v) const
  *
  */
 bool
-Effect::is_written(string vname) const
+Effect::is_written(const string &vname) const
 {
-	vector<Variable *>::size_type len = write_vars.size();
+	const vector<Variable *>::size_type len = write_vars.size();
 	vector<Variable *>::size_type i;
 
 	for (i = 0; i < len; ++i) {
@@ -435,7 +435,7 @@ Effect::field_is_read(const Variable *v) const
 	size_t j;
 	if (v->is_aggregate()) {
 		for (j=0; j<v->field_vars.size(); j++) {
-			Variable* field_var = v->field_vars[j];
+			Variable* const field_var = v->field_vars[j];
 			if (is_read(field_var) || field_is_read(field_var)) {
 				return true;
 			}
@@ -453,7 +453,7 @@ Effect::field_is_written(const Variable *v) const
 	size_t j;
 	if (v->is_aggregate()) {
 		for (j=0; j<v->field_vars.size(); j++) {
-			Variable* field_var = v->field_vars[j];
+			Variable* const field_var = v->field_vars[j];
 			if (is_written(field_var) || field_is_written(field_var)) {
 				return true;
 			}
@@ -465,7 +465,7 @@ Effect::field_is_written(const Variable *v) const
 bool
 Effect::sibling_union_field_is_read(const Variable *v) const
 {
-	const Variable* you = v->get_collective()->get_container_union();
+	const Variable* const you = v->get_collective()->get_container_union();
 	if (you) {
 		for (size_t i=0; i<read_vars.size(); i++) {
 			const Variable* me = read_vars[i]->get_collective()->get_container_union();
@@ -480,7 +480,7 @@ Effect::sibling_union_field_is_read(const Variable *v) const
 bool
 Effect::sibling_union_field_is_written(const Variable *v) const
 {
-	const Variable* you = v->get_collective()->get_container_union();
+	const Variable* const you = v->get_collective()->get_container_union();
 	if (you) {
 		for (size_t i=0; i<write_vars.size(); i++) {
 			const Variable* me = write_vars[i]->get_collective()->get_container_union();

@@ -105,7 +105,7 @@ DefaultOutputMgr::init()
 }
 
 bool
-DefaultOutputMgr::create_output_dir(std::string dir)
+DefaultOutputMgr::create_output_dir(const std::string &dir)
 {
 	return create_dir(dir.c_str());
 }
@@ -283,4 +283,3 @@ DefaultOutputMgr::~DefaultOutputMgr()
 		ofile_->close();
 	delete ofile_;
 }
-

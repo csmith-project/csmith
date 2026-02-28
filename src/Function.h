@@ -73,7 +73,7 @@ public:
 	// generate the signature, but not the body
 	static Function* make_random_signature(const CGContext& cg_context, const Type* type, const CVQualifiers* qfer=0);
 
-	static Function* choose_func(vector<Function *> funcs, const CGContext& cg_context, const Type* type, const CVQualifiers* qfer);
+	static Function* choose_func(const vector<Function *> &funcs, const CGContext& cg_context, const Type* type, const CVQualifiers* qfer);
 
 	static Function *get_one_function(const vector<Function *> &ok_funcs);
 
@@ -98,7 +98,7 @@ public:
 	bool is_var_oos(const Variable* var, const Statement* stm) const;
 
 	const std::vector<const Variable*>& get_referenced_ptrs(void) const { return referenced_ptrs;}
-	bool is_pointer_referenced(void) { return !referenced_ptrs.empty();} const
+	bool is_pointer_referenced(void) const { return !referenced_ptrs.empty(); }
 
 	std::string name;
 	std::vector<Variable*> param;

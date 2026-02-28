@@ -42,13 +42,13 @@ public:
 
 	~Enumerator();
 
-	void add_elem(Name name, int bound);
+	void add_elem(const Name &name, int bound);
 
-	void add_bool_elem(Name name, int value);
+	void add_bool_elem(const Name &name, int value);
 
-	void add_bool_elem_of_bool(Name name, bool value);
+	void add_bool_elem_of_bool(const Name &name, bool value);
 
-	int get_elem(Name name);
+	int get_elem(const Name &name);
 
 	Enumerator *next();
 
@@ -56,7 +56,7 @@ public:
 
 	Enumerator *begin();
 
-	bool is_changed(Name name);
+	bool is_changed(const Name &name);
 
 private:
 
@@ -74,13 +74,13 @@ private:
 
 		~EnumObject() { }
 
-		int bound() { return bound_; }
+		int bound() const { return bound_; }
 
-		bool bool_value() { return bool_value_; }
+		bool bool_value() const { return bool_value_; }
 
-		int get_current_value() { return current_value_; }
+		int get_current_value() const { return current_value_; }
 
-		bool is_bool() { return is_bool_; }
+		bool is_bool() const { return is_bool_; }
 
 		bool next()
 		{
@@ -104,7 +104,7 @@ private:
 
 		void reset_changed() { changed_ = 0; }
 
-		bool is_changed() { return changed_; }
+		bool is_changed() const { return changed_; }
 
 	private:
 		const int bound_;
@@ -177,7 +177,7 @@ Enumerator<Name>::begin()
 
 template <class Name>
 void
-Enumerator<Name>::add_elem(Name name, int bound)
+Enumerator<Name>::add_elem(const Name &name, int bound)
 {
 	assert(objs_.find(name) == objs_.end());
 
@@ -186,7 +186,7 @@ Enumerator<Name>::add_elem(Name name, int bound)
 
 template <class Name>
 void
-Enumerator<Name>::add_bool_elem_of_bool(Name name, bool value)
+Enumerator<Name>::add_bool_elem_of_bool(const Name &name, bool value)
 {
 	assert(objs_.find(name) == objs_.end());
 
@@ -197,7 +197,7 @@ Enumerator<Name>::add_bool_elem_of_bool(Name name, bool value)
 
 template<class Name>
 void
-Enumerator<Name>::add_bool_elem(Name name, int value)
+Enumerator<Name>::add_bool_elem(const Name &name, int value)
 {
 	int bound = 0;
 	bool bool_value = false;
@@ -220,7 +220,7 @@ Enumerator<Name>::add_bool_elem(Name name, int value)
 
 template <class Name>
 int
-Enumerator<Name>::get_elem(Name name)
+Enumerator<Name>::get_elem(const Name &name)
 {
 	assert(objs_.find(name) != objs_.end());
 
@@ -288,7 +288,7 @@ Enumerator<Name>::roll_back_current_pos()
 
 template <class Name>
 bool
-Enumerator<Name>::is_changed(Name name)
+Enumerator<Name>::is_changed(const Name &name)
 {
 	assert(objs_.find(name) != objs_.end());
 

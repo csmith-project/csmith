@@ -38,17 +38,17 @@ class Constant;
 
 class ExtensionValue {
 public:
-	ExtensionValue(const Type *type, std::string name);
+	ExtensionValue(const Type *type, const std::string &name);
 
 	~ExtensionValue();
 
-	const Type *get_type(void) { return type_; }
+	const Type *get_type(void) const { return type_; }
 
-	Constant *get_value(void) { return value_; }
+	Constant *get_value(void) const { return value_; }
 
-	const std::string &get_name(void) { return name_; }
+	const std::string &get_name(void) const { return name_; }
 
-	CVQualifiers get_qfer() { return qfer_; }
+	CVQualifiers get_qfer() const { return qfer_; }
 
 	void set_value(Constant *value) { value_ = value; }
 

@@ -73,7 +73,7 @@ Block* find_block_by_id(int blk_id)
 	const vector<Function*>& funcs = get_all_functions();
 	size_t i, j;
 	for (i=0; i<funcs.size(); i++) {
-		Function* f = funcs[i];
+		Function* const f = funcs[i];
 		if (f->is_builtin)
 			continue;
 		for (j=0; j<f->blocks.size(); j++) {
@@ -101,17 +101,17 @@ BlockProbability(Block &block)
 Block *
 Block::make_dummy_block(CGContext &cg_context)
 {
-	Function *curr_func = cg_context.get_current_func();
+	Function * const curr_func = cg_context.get_current_func();
 	assert(curr_func);
 
-	Block *b = new Block(cg_context.get_current_block(), 0);
+	Block * const b = new Block(cg_context.get_current_block(), 0);
 	b->func = curr_func;
 	b->in_array_loop = !(cg_context.iv_bounds.empty());
 	curr_func->blocks.push_back(b);
 	curr_func->stack.push_back(b);
-	FactMgr* fm = get_fact_mgr_for_func(curr_func);
+	FactMgr* const fm = get_fact_mgr_for_func(curr_func);
 	fm->set_fact_in(b, fm->global_facts);
-	Effect pre_effect = cg_context.get_accum_effect();
+	const Effect pre_effect = cg_context.get_accum_effect();
 	b->post_creation_analysis(cg_context, pre_effect);
 	curr_func->stack.pop_back();
 	return b;
@@ -126,10 +126,10 @@ Block::make_random(CGContext &cg_context, bool looping)
 	//static int bid = 0;
 	DEPTH_GUARD_BY_TYPE_RETURN(dtBlock, NULL);
 
-	Function *curr_func = cg_context.get_current_func();
+	Function * const curr_func = cg_context.get_current_func();
 	assert(curr_func);
 
-	Block *b = new Block(cg_context.get_current_block(), CGOptions::max_block_size());
+	Block * const b = new Block(cg_context.get_current_block(), CGOptions::max_block_size());
 	b->func = curr_func;
 	b->looping = looping;
 	// if there are induction variables, we are in a loop that traverses array(s)
@@ -142,11 +142,11 @@ Block::make_random(CGContext &cg_context, bool looping)
 
 	// record global facts at this moment so that subsequent statement
 	// inside the block doesn't ruin it
-	FactMgr* fm = get_fact_mgr_for_func(curr_func);
+	FactMgr* const fm = get_fact_mgr_for_func(curr_func);
 	fm->set_fact_in(b, fm->global_facts);
-	Effect pre_effect = cg_context.get_accum_effect();
+	const Effect pre_effect = cg_context.get_accum_effect();
 
-	unsigned int max = BlockProbability(*b);
+	const unsigned int max = BlockProbability(*b);
 	if (Error::get_error() != SUCCESS) {
 		curr_func->stack.pop_back();
 		delete b;
@@ -250,7 +250,7 @@ Block::~Block(void)
 std::string
 Block::create_new_tmp_var(enum eSimpleType type) const
 {
-	string var_name = gensym("t_");
+	const string var_name = gensym("t_");
 	macro_tmp_vars[var_name] = type;
 	return var_name;
 }
@@ -260,8 +260,8 @@ Block::OutputTmpVariableList(std::ostream &out, int indent) const
 {
 	std::map<string, enum eSimpleType>::const_iterator i;
 	for (i = macro_tmp_vars.begin(); i != macro_tmp_vars.end(); ++i) {
-		std::string name = (*i).first;
-		enum eSimpleType type = (*i).second;
+		const std::string name = (*i).first;
+		const enum eSimpleType type = (*i).second;
 		output_tab(out, indent);
 		Type::get_simple_type(type).Output(out);
 		out << " " << name << " = 0;" << std::endl;
@@ -348,7 +348,7 @@ Block::random_parent_block(void)
 		blks.push_back(tmp);
 		tmp = tmp->parent;
 	}
-	int index = rnd_upto(blks.size());
+	const int index = rnd_upto(blks.size());
 	ERROR_GUARD(NULL);
 	return blks[index];
 }
@@ -426,14 +426,14 @@ Block::from_tail_to_head(void) const
 Statement*
 Block::append_return_stmt(CGContext& cg_context)
 {
-	FactMgr* fm = get_fact_mgr_for_func(func);
+	FactMgr* const fm = get_fact_mgr_for_func(func);
 	FactVec pre_facts = fm->global_facts;
 	cg_context.get_effect_stm().clear();
 	Statement* sr = Statement::make_random(cg_context, eReturn);
 	ERROR_GUARD(NULL);
 	stms.push_back(sr);
 	fm->makeup_new_var_facts(pre_facts, fm->global_facts);
-	bool visited = sr->visit_facts(fm->global_facts, cg_context);
+	const bool visited = sr->visit_facts(fm->global_facts, cg_context);
 	assert(visited);
 
 	fm->set_fact_in(sr, pre_facts);
@@ -450,11 +450,11 @@ bool
 Block::need_nested_loop(const CGContext& cg_context)
 {
 	size_t i;
-	const Statement* s = get_last_stm();
+	const Statement* const s = get_last_stm();
 	if (looping && (s == NULL || !s->must_jump()) && cg_context.rw_directive) {
-		RWDirective* rwd = cg_context.rw_directive;
+		RWDirective* const rwd = cg_context.rw_directive;
 		for (i=0; i<rwd->must_read_vars.size(); i++) {
-			size_t dimen = rwd->must_read_vars[i]->get_dimension();
+			const size_t dimen = rwd->must_read_vars[i]->get_dimension();
 			if (dimen > cg_context.iv_bounds.size()) {
 				return true;
 			} else if (dimen == cg_context.iv_bounds.size() && rnd_flipcoin(10)) {
@@ -462,7 +462,7 @@ Block::need_nested_loop(const CGContext& cg_context)
 			}
 		}
 		for (i=0; i<rwd->must_write_vars.size(); i++) {
-			size_t dimen = rwd->must_write_vars[i]->get_dimension();
+			const size_t dimen = rwd->must_write_vars[i]->get_dimension();
 			if (dimen > cg_context.iv_bounds.size()) {
 				return true;
 			} else if (dimen == cg_context.iv_bounds.size() && rnd_flipcoin(10)) {
@@ -476,11 +476,11 @@ Block::need_nested_loop(const CGContext& cg_context)
 Statement*
 Block::append_nested_loop(CGContext& cg_context)
 {
-	FactMgr* fm = get_fact_mgr_for_func(func);
+	FactMgr* const fm = get_fact_mgr_for_func(func);
 	FactVec pre_facts = fm->global_facts;
 	cg_context.get_effect_stm().clear();
 
-	Statement* sf = Statement::make_random(cg_context, eFor);
+	Statement* const sf = Statement::make_random(cg_context, eFor);
 	ERROR_GUARD(NULL);
 	stms.push_back(sf);
 	fm->makeup_new_var_facts(pre_facts, fm->global_facts);
@@ -577,9 +577,10 @@ Block::contains_back_edge(void) const
  *    visit_one: when is true, the statements in this block must be visited at least once
  ****************************************************************************************************/
 bool
-Block::find_fixed_point(vector<const Fact*> inputs, vector<const Fact*>& post_facts, CGContext& cg_context, int& fail_index, bool visit_once) const
+Block::find_fixed_point(const vector<const Fact*> &inputs, vector<const Fact*>& post_facts, CGContext& cg_context, int& fail_index, bool visit_once) const
 {
-	FactMgr* fm = get_fact_mgr(&cg_context);
+	FactMgr* const fm = get_fact_mgr(&cg_context);
+	FactVec current_inputs(inputs);
 	// include outputs from all back edges leading to this block
 	size_t i;
 	static int g = 0;
@@ -596,16 +597,16 @@ Block::find_fixed_point(vector<const Fact*> inputs, vector<const Fact*>& post_fa
 			for (i=0; i<edges.size(); i++) {
 				const Statement* src = edges[i]->src;
 				//assert(fm->map_visited[src]);
-				merge_facts(inputs, fm->map_facts_out[src]);
+				merge_facts(current_inputs, fm->map_facts_out[src]);
 			}
 		}
 		if (!visit_once) {
-			int shortcut = shortcut_analysis(inputs, cg_context);
+			const int shortcut = shortcut_analysis(current_inputs, cg_context);
 			if (shortcut == 0) return true;
 		}
 		//if (shortcut == 1) return false;
 
-		FactVec outputs = inputs;
+		FactVec outputs = current_inputs;
 		// add facts for locals
 		for (i=0; i<local_vars.size(); i++) {
 			const Variable* v = local_vars[i];
@@ -614,7 +615,7 @@ Block::find_fixed_point(vector<const Fact*> inputs, vector<const Fact*>& post_fa
 
 		// revisit statements with new inputs
 		for (i=0; i<stms.size(); i++) {
-			int h = g++;
+			const int h = g++;
 			if (h == 558)
 				BREAK_NOP;		// for debugging
 			if (!stms[i]->analyze_with_edges_in(outputs, cg_context)) {
@@ -622,7 +623,7 @@ Block::find_fixed_point(vector<const Fact*> inputs, vector<const Fact*>& post_fa
 				return false;
 			}
 		}
-		fm->set_fact_in(this, inputs);
+		fm->set_fact_in(this, current_inputs);
 		post_facts = outputs;
 		FactMgr::update_facts_for_oos_vars(local_vars, outputs);
 		fm->set_fact_out(this, outputs);
@@ -638,9 +639,9 @@ void
 Block::set_accumulated_effect(CGContext& cg_context) const
 {
 	Effect eff;
-	FactMgr* fm = get_fact_mgr(&cg_context);
+	FactMgr* const fm = get_fact_mgr(&cg_context);
 	for (size_t i=0; i<stms.size(); i++) {
-		Statement* s = stms[i];
+		Statement* const s = stms[i];
 		eff.add_effect(fm->map_stm_effect[s]);
 	}
 	//cg_context.get_effect_stm() = eff;
@@ -753,7 +754,7 @@ void
 Block::post_creation_analysis(CGContext& cg_context, const Effect& pre_effect)
 {
 	int index;
-	FactMgr* fm = get_fact_mgr(&cg_context);
+	FactMgr* const fm = get_fact_mgr(&cg_context);
 	fm->map_visited[this] = true;
 	// compute accumulated effect
 	set_accumulated_effect(cg_context);
@@ -764,7 +765,7 @@ Block::post_creation_analysis(CGContext& cg_context, const Effect& pre_effect)
 	fm->set_fact_out(this, fm->global_facts);
 
 	// find out if fixed-point-searching is required
-	bool is_loop_body = !must_break_or_return() && looping;
+	const bool is_loop_body = !must_break_or_return() && looping;
 	bool self_back_edge = false;
 	if (is_loop_body || need_revisit || has_edge_in(false, true)) {
 		if (is_loop_body && from_tail_to_head()) {

@@ -82,7 +82,7 @@ gensym(const string& basename)
 
 static std::string errlog;
 
-bool log_analysis_fail(std::string msg)
+bool log_analysis_fail(const std::string &msg)
 {
 	errlog += "Analysis failed at " + msg  + "\n";
 	return false;
@@ -120,7 +120,7 @@ vector<intvec> permute(intvec in)
  *     (1, 0, 0), (1, 0, 1), (1, 1, 0), (1, 1, 1)
  * return: the size of the expanded array of arrays
  */
-int expand_within_ranges(vector<unsigned int> in, vector<intvec>& out)
+int expand_within_ranges(const vector<unsigned int>& in, vector<intvec>& out)
 {
 	int i, j;
 	int dimension = static_cast<int>(in.size());
@@ -159,7 +159,7 @@ void outputln(std::ostream &out)
 	output->outputln(out);
 }
 
-void output_print_str(std::ostream& out, std::string str, std::string str_value, int indent)
+void output_print_str(std::ostream& out, const std::string &str, const std::string &str_value, int indent)
 {
 	output_tab(out, indent);
 	out << "printf(\"";

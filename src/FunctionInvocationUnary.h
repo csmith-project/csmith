@@ -74,7 +74,7 @@ private:
 	std::string tmp_var;
 
 private:
-	FunctionInvocationUnary(eUnaryOps op, SafeOpFlags *flags, std::string &name);
+	FunctionInvocationUnary(eUnaryOps op, SafeOpFlags *flags, const std::string &name);
 
 	FunctionInvocationUnary(eUnaryOps op, SafeOpFlags *flags);
 

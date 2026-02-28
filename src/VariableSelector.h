@@ -71,8 +71,8 @@ public:
 			 eVariableScope scope=MAX_VAR_SCOPE);
 	static Variable* choose_ok_var(const vector<Variable *> &vars);
 	static const Variable* choose_ok_var(const vector<const Variable *> &vars);
-	static const Variable* choose_visible_read_var(const Block* b, vector<const Variable*> written_vars, const Type* type, const vector<const Fact*>& facts);
-	static Variable* choose_var(vector<Variable *> vars, Effect::Access access,
+	static const Variable* choose_visible_read_var(const Block* b, const vector<const Variable*> &written_vars, const Type* type, const vector<const Fact*>& facts);
+	static Variable* choose_var(const vector<Variable *> &vars, Effect::Access access,
 		   const CGContext &cg_context, const Type* type, const CVQualifiers* qfer,
 		   eMatchType mt, const vector<const Variable*>& invalid_vars, bool no_bitfield = false, bool no_expand_struct = false, bool no_union = false);
 	static Variable *select_deref_pointer(Effect::Access access, const CGContext &cg_context, const Type* type,
@@ -103,10 +103,10 @@ public:
 
 	static vector<Variable*> find_all_visible_vars(const Block* b);
 	static void get_all_local_vars(const Block* b, vector<const Variable *> &vars);
-	static const Variable* find_var_by_name(string name);
+	static const Variable* find_var_by_name(const string &name);
 
 private:
-	static ArrayVariable* create_array_and_itemize(Block* blk, string name, const CGContext& cg_context, const Type* t, const Expression* init, const CVQualifiers* qfer);
+	static ArrayVariable* create_array_and_itemize(Block* blk, const string &name, const CGContext& cg_context, const Type* t, const Expression* init, const CVQualifiers* qfer);
 
 	static ArrayVariable* create_random_array(const CGContext& cg_context);
 
@@ -150,7 +150,7 @@ private:
 	static bool is_eligible_var(const Variable* var, int deref_level, Effect::Access access, const CGContext& cg_context);
 
 	static Variable * create_and_initialize(Effect::Access access, const CGContext &cg_context, const Type* t,
-					const CVQualifiers* qfer, Block *blk, std::string name);
+					const CVQualifiers* qfer, Block *blk, const std::string &name);
 
 	// all variables generated
 	static vector<Variable*> AllVars;
@@ -166,7 +166,7 @@ private:
 };
 
 void OutputGlobalVariables(std::ostream &);
-void OutputGlobalVariablesDecls(std::ostream &, std::string prefix = "");
+void OutputGlobalVariablesDecls(std::ostream &, const std::string &prefix = "");
 void HashGlobalVariables(std::ostream &);
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -179,4 +179,3 @@ void HashGlobalVariables(std::ostream &);
 // End:
 
 // End of file.
-

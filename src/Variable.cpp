@@ -967,7 +967,7 @@ OutputVariableList(const vector<Variable*> &vars, std::ostream &out, int indent)
 }
 
 void
-OutputVariableDeclList(const vector<Variable*> &var, std::ostream &out, std::string prefix, int indent)
+OutputVariableDeclList(const vector<Variable*> &var, std::ostream &out, const std::string &prefix, int indent)
 {
 	// have to use iterator instead of map because we need indent as paramter
 	for (size_t i=0; i<var.size(); i++) {
@@ -1078,7 +1078,7 @@ Variable::to_string(void) const
 }
 
 int
-Variable::output_runtime_value(ostream &out, string prefix, string suffix, int indent, bool multi_lines) const
+Variable::output_runtime_value(ostream &out, const string &prefix, const string &suffix, int indent, bool multi_lines) const
 {
 	string directive = type->printf_directive();
 	ostringstream oss;
@@ -1293,7 +1293,7 @@ Variable::output_addressable_name(ostream &out, int indent) const
 }
 
 int
-Variable::output_value_dump(ostream &out, string prefix, int indent) const
+Variable::output_value_dump(ostream &out, const string &prefix, int indent) const
 {
 	size_t i;
 	if (is_virtual()) {

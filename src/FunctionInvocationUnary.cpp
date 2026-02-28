@@ -81,7 +81,7 @@ FunctionInvocationUnary::FunctionInvocationUnary(eUnaryOps op, SafeOpFlags *flag
 /*
  * XXX: replace with a useful constructor.
  */
-FunctionInvocationUnary::FunctionInvocationUnary(eUnaryOps op, SafeOpFlags *flags, std::string &name)
+FunctionInvocationUnary::FunctionInvocationUnary(eUnaryOps op, SafeOpFlags *flags, const std::string &name)
 	: FunctionInvocation(eUnaryPrim, flags),
 	  eFunc(op),
 	  tmp_var(name)

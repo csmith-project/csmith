@@ -120,7 +120,7 @@ StringUtils::split_string(const string &str, vector<string> &v, const char sep_c
 		ignore_spaces(str, pos);
 		start_pos = pos;
 		pos = str.find_first_of(sep_char, pos);
-		std::string s = str.substr(start_pos, (pos - start_pos));
+		const std::string s = str.substr(start_pos, (pos - start_pos));
 		if (!s.empty()) {
 			v.push_back(s);
 		}
@@ -131,7 +131,7 @@ StringUtils::split_string(const string &str, vector<string> &v, const char sep_c
 }
 
 void
-StringUtils::split_string(const string &str, vector<string> &v, string sep_chars)
+StringUtils::split_string(const string &str, vector<string> &v, const string &sep_chars)
 {
 	size_t pos = 0;
 	size_t start_pos = 0;
@@ -139,7 +139,7 @@ StringUtils::split_string(const string &str, vector<string> &v, string sep_chars
 		ignore_spaces(str, pos);
 		start_pos = pos;
 		pos = find_any_char(str, pos, sep_chars);
-		std::string s = str.substr(start_pos, (pos - start_pos));
+		const std::string s = str.substr(start_pos, (pos - start_pos));
 		if (!s.empty()) {
 			v.push_back(s);
 		}
@@ -150,7 +150,7 @@ StringUtils::split_string(const string &str, vector<string> &v, string sep_chars
 }
 
 void
-StringUtils::split_int_string(const string &str, vector<int> &values, string sep_chars)
+StringUtils::split_int_string(const string &str, vector<int> &values, const string &sep_chars)
 {
 	size_t pos = 0;
 	size_t start_pos = 0;
@@ -158,7 +158,7 @@ StringUtils::split_int_string(const string &str, vector<int> &values, string sep
 		ignore_spaces(str, pos);
 		start_pos = pos;
 		pos = find_any_char(str, pos, sep_chars);
-		std::string s = str.substr(start_pos, (pos - start_pos));
+		const std::string s = str.substr(start_pos, (pos - start_pos));
 		if (!s.empty()) {
 			values.push_back(str2int(s));
 		}
@@ -264,12 +264,12 @@ StringUtils::breakup_assigns(const string& assigns, vector<string>& vars, vector
 }
 
 bool
-StringUtils::end_with(string s, const string &tail)
+StringUtils::end_with(const string &s, const string &tail)
 {
-	if (tail.length() < s.length()) {
-		s = s.substr(s.length() - tail.length());
+	if (tail.length() > s.length()) {
+		return false;
 	}
-	return s == tail;
+	return s.compare(s.length() - tail.length(), tail.length(), tail) == 0;
 }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -54,8 +54,8 @@ public:
  	static FactPointTo *make_fact(const Variable* v);
 	static FactPointTo *make_fact(const Variable* v, const vector<const Variable*>& set);
 	static FactPointTo *make_fact(const Variable* v, const Variable* point_to);
-	static vector<const Fact*> make_facts(vector<const Variable*> vars, const vector<const Variable*>& set);
-	static vector<const Fact*> make_facts(vector<const Variable*> vars, const Variable* point_to);
+	static vector<const Fact*> make_facts(const vector<const Variable*> &vars, const vector<const Variable*>& set);
+	static vector<const Fact*> make_facts(const vector<const Variable*> &vars, const Variable* point_to);
 	static void doFinalization();
 
 	explicit FactPointTo(const Variable* v);

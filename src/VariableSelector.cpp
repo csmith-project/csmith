@@ -330,14 +330,14 @@ VariableSelector::has_eligible_volatile_var(const vector<Variable *>& vars, cons
 Variable *
 VariableSelector::choose_ok_var(const vector<Variable *> &vars)
 {
-	int len = vars.size();
+	const int len = vars.size();
 	Variable* v = NULL;
 	if (len == 1) {
 		v = vars[0];
 	}
 	else if (len > 1) {
 		DEPTH_GUARD_BY_DEPTH_RETURN(1, NULL);
-		unsigned int index = rnd_upto(len);
+		const unsigned int index = rnd_upto(len);
 		ERROR_GUARD(NULL);
 		v = vars[index];
 	}
@@ -354,14 +354,14 @@ VariableSelector::choose_ok_var(const vector<Variable *> &vars)
 const Variable *
 VariableSelector::choose_ok_var(const vector<const Variable *> &vars)
 {
-	int len = vars.size();
+	const int len = vars.size();
 	const Variable* v = NULL;
 	if (len == 1) {
 		v = vars[0];
 	}
 	else if (len > 1) {
 		DEPTH_GUARD_BY_DEPTH_RETURN(1, NULL);
-		unsigned int index = rnd_upto(len);
+		const unsigned int index = rnd_upto(len);
 		ERROR_GUARD(NULL);
 		v = vars[index];
 	}
@@ -376,15 +376,16 @@ VariableSelector::choose_ok_var(const vector<const Variable *> &vars)
 }
 
 const Variable *
-VariableSelector::choose_visible_read_var(const Block* b, vector<const Variable*> read_vars, const Type* type, const FactVec& facts)
+VariableSelector::choose_visible_read_var(const Block* b, const vector<const Variable*> &read_vars, const Type* type, const FactVec& facts)
 {
 	size_t i;
 	vector<const Variable*> ok_vars;
+	vector<const Variable*> expanded_read_vars(read_vars);
 	// include the fields of struct/unions
-	expand_struct_union_vars(read_vars, type);
+	expand_struct_union_vars(expanded_read_vars, type);
 
-	for (i=0; i<read_vars.size(); i++) {
-		const Variable* v = read_vars[i];
+	for (i=0; i<expanded_read_vars.size(); i++) {
+		const Variable* v = expanded_read_vars[i];
 		if (type->match(v->type, eConvert) &&
 			(b->is_var_on_stack(v) || v->is_global()) &&
 			!v->is_virtual() &&
@@ -411,7 +412,7 @@ VariableSelector::choose_visible_read_var(const Block* b, vector<const Variable*
  * see CVQualifier::match
  */
 Variable *
-VariableSelector::choose_var(vector<Variable *> vars,
+VariableSelector::choose_var(const vector<Variable *> &vars,
 		   Effect::Access access,
 		   const CGContext &cg_context,
 		   const Type* type,
@@ -423,19 +424,23 @@ VariableSelector::choose_var(vector<Variable *> vars,
 		   bool no_union)
 {
 	vector<Variable *> ok_vars;
-	vector<Variable *>::iterator i;
+	vector<Variable *> expanded_vars;
+	const vector<Variable *> *candidate_vars = &vars;
 
-	if (!no_expand_struct_union && type && (type->eType == eSimple || type->is_aggregate()))
-		expand_struct_union_vars(vars, type);
+	if (!no_expand_struct_union && type && (type->eType == eSimple || type->is_aggregate())) {
+		expanded_vars = vars;
+		expand_struct_union_vars(expanded_vars, type);
+		candidate_vars = &expanded_vars;
+	}
 
-	bool found = has_dereferenceable_var(vars, type, cg_context);
+	const bool found = has_dereferenceable_var(*candidate_vars, type, cg_context);
 	if (found) {
 		Bookkeeper::pointer_avail_for_dereference++;
 	}
 	// check availability of volatiles
-	has_eligible_volatile_var(vars, type, qfer, access, cg_context);
+	has_eligible_volatile_var(*candidate_vars, type, qfer, access, cg_context);
 
-	for (i = vars.begin(); i != vars.end(); ++i) {
+	for (vector<Variable *>::const_iterator i = candidate_vars->begin(); i != candidate_vars->end(); ++i) {
         // skip any type mismatched var
         if (no_bitfield && (*i)->isBitfield_)
 			continue;
@@ -451,7 +456,7 @@ VariableSelector::choose_var(vector<Variable *> vars,
 		if (is_variable_in_set(invalid_vars, *i)) {
 			continue;
 		}
-		int deref_level = (*i)->type->get_indirect_level() - type->get_indirect_level();
+		const int deref_level = (*i)->type->get_indirect_level() - type->get_indirect_level();
 		if (is_eligible_var((*i), deref_level, access, cg_context)) {
 			// Otherwise, this is an acceptable choice.
 			ok_vars.push_back(*i);
@@ -464,7 +469,7 @@ VariableSelector::choose_var(vector<Variable *> vars,
 		vector<Variable *> volatile_vars;
 		for (size_t j=0; j<ok_vars.size(); j++) {
 			Variable* vv = ok_vars[j];
-			int deref_level = vv->type->get_indirect_level() - type->get_indirect_level();
+			const int deref_level = vv->type->get_indirect_level() - type->get_indirect_level();
 			if (vv->is_volatile_after_deref(deref_level) || vv->is_volatile()) {
 				volatile_vars.push_back(vv);
 			}
@@ -510,7 +515,7 @@ VariableSelector::choose_var(vector<Variable *> vars,
 
 Variable *
 VariableSelector::create_and_initialize(Effect::Access access, const CGContext &cg_context, const Type* t,
-					const CVQualifiers* qfer, Block *blk, std::string name)
+					const CVQualifiers* qfer, Block *blk, const std::string &name)
 {
 	const Expression* init = NULL;
 	Variable* var = NULL;
@@ -1316,7 +1321,7 @@ VariableSelector::select_deref_pointer(Effect::Access access, const CGContext &c
  * create an array, and return an itemized member
  */
 ArrayVariable*
-VariableSelector::create_array_and_itemize(Block* blk, string name, const CGContext& cg_context,
+VariableSelector::create_array_and_itemize(Block* blk, const string &name, const CGContext& cg_context,
 		const Type* t, const Expression* init, const CVQualifiers* qfer)
 {
 	ArrayVariable* av = ArrayVariable::CreateArrayVariable(cg_context, blk, name, t, init, qfer, NULL);
@@ -1331,7 +1336,7 @@ VariableSelector::create_array_and_itemize(Block* blk, string name, const CGCont
 ArrayVariable*
 VariableSelector::create_random_array(const CGContext& cg_context)
 {
-	bool as_global = CGOptions::global_variables() && rnd_flipcoin(25);
+	const bool as_global = CGOptions::global_variables() && rnd_flipcoin(25);
 	ERROR_GUARD(NULL);
 	string name;
 	Block* blk = 0;
@@ -1341,7 +1346,7 @@ VariableSelector::create_random_array(const CGContext& cg_context)
 	}
 	else {
 		name = RandomLocalName();
-		size_t index = rnd_upto(func->stack.size());
+		const size_t index = rnd_upto(func->stack.size());
 		ERROR_GUARD(NULL);
 		blk = func->stack[index];
 		blk = expand_block_for_goto(blk, cg_context);
@@ -1534,7 +1539,7 @@ VariableSelector::make_dummy_static_variable(const string &name)
 
 
 const Variable*
-VariableSelector::find_var_by_name(string name)
+VariableSelector::find_var_by_name(const string &name)
 {
 	size_t i;
 	for (i=0; i<AllVars.size(); i++) {
@@ -1575,7 +1580,7 @@ OutputGlobalVariables(std::ostream &out)
 }
 
 void
-OutputGlobalVariablesDecls(std::ostream &out, std::string prefix)
+OutputGlobalVariablesDecls(std::ostream &out, const std::string &prefix)
 {
 	output_comment_line(out, "--- GLOBAL VARIABLES ---");
 

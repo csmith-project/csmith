@@ -44,7 +44,7 @@ public:
 
 	virtual ~DefaultOutputMgr();
 
-	static bool create_output_dir(std::string dir);
+	static bool create_output_dir(const std::string &dir);
 
 	virtual void OutputHeader(int argc, char *argv[], unsigned long seed);
 

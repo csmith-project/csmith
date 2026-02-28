@@ -103,7 +103,7 @@ PartialExpander::set_stmt_expand(eStatementType t, bool value)
 }
 
 bool
-PartialExpander::set_expand(const std::string s)
+PartialExpander::set_expand(const std::string &s)
 {
 
 	if (!s.compare("assignment")) {
@@ -189,5 +189,4 @@ PartialExpander::~PartialExpander()
 {
 
 }
-
 

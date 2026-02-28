@@ -99,7 +99,7 @@ FunctionInvocationBinary::FunctionInvocationBinary(eBinaryOps op, const SafeOpFl
 }
 
 FunctionInvocationBinary::FunctionInvocationBinary(eBinaryOps op, const SafeOpFlags *flags,
-						std::string &name1, std::string &name2)
+						const std::string &name1, const std::string &name2)
 	: FunctionInvocation(eBinaryPrim, flags),
 	  eFunc(op),
 	  tmp_var1(name1),

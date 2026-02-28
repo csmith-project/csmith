@@ -55,7 +55,7 @@ private:
 
 	static void copy_expands(std::map<eStatementType, bool> &dest, const map<eStatementType, bool> &src);
 
-	static bool set_expand(const std::string s);
+	static bool set_expand(const std::string &s);
 
 	static bool parse_options(const std::string &options, char sep_char);
 

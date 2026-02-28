@@ -123,14 +123,14 @@ public:
 	///////////////////////////////////////////////////////////////////////
 
 	virtual void Output(std::ostream &) const;
-	int output_runtime_value(ostream &out, string prefix, string suffix, int indent, bool multi_lines=false) const;
+	int output_runtime_value(ostream &out, const string &prefix, const string &suffix, int indent, bool multi_lines=false) const;
 	int output_addressable_name(ostream &out, int indent) const;
 	int output_volatile_address(ostream &out, int indent, const string &fp_string, vector<string> &seen_names) const;
 	int output_volatile_fprintf(ostream &out, int indent, const string &name,
 		const string &sizeof_string, const string &fp_string) const;
 	bool is_seen_name(vector<std::string> &seen_names, const std::string &name) const;
 	bool is_valid_volatile(void) const;
-	int output_value_dump(ostream &out, string prefix, int indent) const;
+	int output_value_dump(ostream &out, const string &prefix, int indent) const;
 	void OutputAddrOf(std::ostream &) const;
 	void OutputForComment(std::ostream &) const;
 	virtual void OutputDef(std::ostream &out, int indent) const;
@@ -180,7 +180,7 @@ private:
 };
 
 void OutputVariableList(const std::vector<Variable*> &var, std::ostream &out, int indent = 0);
-void OutputVariableDeclList(const std::vector<Variable*> &var, std::ostream &out, std::string prefix = "", int indent = 0);
+void OutputVariableDeclList(const std::vector<Variable*> &var, std::ostream &out, const std::string &prefix = "", int indent = 0);
 void OutputArrayInitializers(const vector<Variable*>& vars, std::ostream &out, int indent);
 void OutputArrayCtrlVars(const vector<const Variable*>& ctrl_vars, std::ostream &out, size_t dimen, int indent);
 void OutputVolatileAddress(const vector<Variable*> &vars, std::ostream &out, int indent, const string &fp_string);

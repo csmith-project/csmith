@@ -338,7 +338,7 @@ FactPointTo::make_fact(const Variable* v, const Variable* point_to)
 }
 
 vector<const Fact*>
-FactPointTo::make_facts(vector<const Variable*> vars, const vector<const Variable*>& set)
+FactPointTo::make_facts(const vector<const Variable*> &vars, const vector<const Variable*>& set)
 {
 	size_t i;
 	vector<const Fact*> facts;
@@ -352,7 +352,7 @@ FactPointTo::make_facts(vector<const Variable*> vars, const vector<const Variabl
 }
 
 vector<const Fact*>
-FactPointTo::make_facts(vector<const Variable*> vars, const Variable* point_to)
+FactPointTo::make_facts(const vector<const Variable*> &vars, const Variable* point_to)
 {
 	size_t i;
 	vector<const Fact*> facts;

@@ -214,7 +214,7 @@ GroupProbElem::get_random_single_prob(int orig_val, std::vector<unsigned int> &i
 }
 
 void
-GroupProbElem::initialize(Probabilities *impl, const std::map<ProbName, int> pairs)
+GroupProbElem::initialize(Probabilities *impl, const std::map<ProbName, int> &pairs)
 {
 	assert(impl);
 	std::map<ProbName, int>::const_iterator i;
@@ -1177,4 +1177,3 @@ int DistributionTable::rnd_num_to_key(int rnd) const
 	assert(0);
 	return -1;
 }
-

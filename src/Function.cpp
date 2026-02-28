@@ -275,7 +275,7 @@ RandomReturnType(void)
 Function *
 Function::get_one_function(const vector<Function *> &ok_funcs)
 {
-	vector<Function *>::size_type ok_size = ok_funcs.size();
+	const vector<Function *>::size_type ok_size = ok_funcs.size();
 
 	if (ok_size == 0) {
 		return 0;
@@ -283,7 +283,7 @@ Function::get_one_function(const vector<Function *> &ok_funcs)
 	if (ok_size == 1) {
 		return ok_funcs[0];
 	}
-	int index = rnd_upto(ok_size);
+	const int index = rnd_upto(ok_size);
 	return ok_funcs[index];
 }
 
@@ -292,14 +292,14 @@ Function::get_one_function(const vector<Function *> &ok_funcs)
  * Return null if no suitable function can be found.
  */
 Function *
-Function::choose_func(vector<Function *> funcs,
+Function::choose_func(const vector<Function *> &funcs,
 			const CGContext& cg_context,
 			const Type* type,
 			const CVQualifiers* qfer)
 {
 	vector<Function *> ok_funcs;
 	vector<Function *> ok_builtin_funcs;
-	vector<Function *>::iterator i;
+	vector<Function *>::const_iterator i;
 
 	for (i = funcs.begin(); i != funcs.end(); ++i) {
 		// skip any function which has incompatible return type
@@ -367,7 +367,7 @@ GenerateParameterListFromString(Function &currFunc, const string &params_string)
 {
 	vector<string> vs;
 	StringUtils::split_string(params_string, vs, ",");
-	int params_cnt = vs.size();
+	const int params_cnt = vs.size();
 	assert((params_cnt > 0) && "Invalid params_string!");
 	if ((params_cnt == 1) && (vs[0] == "Void")) {
 		return;
@@ -376,8 +376,8 @@ GenerateParameterListFromString(Function &currFunc, const string &params_string)
 		assert((vs[i] != "Void") && "Invalid parameter type!");
 		CVQualifiers qfer;
 		qfer.add_qualifiers(false, false);
-		const Type *ty = Type::get_type_from_string(vs[i]);
-		Variable *v = VariableSelector::GenerateParameterVariable(ty, &qfer);
+		const Type * const ty = Type::get_type_from_string(vs[i]);
+		Variable * const v = VariableSelector::GenerateParameterVariable(ty, &qfer);
 		assert(v);
 		currFunc.param.push_back(v);
 	}
@@ -389,7 +389,7 @@ GenerateParameterListFromString(Function &currFunc, const string &params_string)
 static void
 GenerateParameterList(Function &curFunc)
 {
-	unsigned int max = ParamListProbability();
+	const unsigned int max = ParamListProbability();
 	ERROR_RETURN();
 
 	for (unsigned int i =0; i <= max; i++) {
@@ -781,7 +781,7 @@ Function::initialize_builtin_functions()
 		"UShort; __builtin_bswap16; (UShort); ppc | clang"
 	};
 
-	int cnt = sizeof(builtin_function_strings) / sizeof(builtin_function_strings[0]);
+	const int cnt = sizeof(builtin_function_strings) / sizeof(builtin_function_strings[0]);
 	for (int i = 0; i < cnt; i++) {
 		make_builtin_function(builtin_function_strings[i]);
 	}
@@ -808,12 +808,12 @@ Function::make_builtin_function(const string &function_string)
 	Function *f = new Function(v[1], ty, /*is_builtin*/true);
 
 	// dummy variable representing return variable, we don't care about the type, so use 0
-	string rvname = f->name + "_" + "rv";
-	CVQualifiers ret_qfer = CVQualifiers::random_qualifiers(ty);
+	const string rvname = f->name + "_" + "rv";
+	const CVQualifiers ret_qfer = CVQualifiers::random_qualifiers(ty);
 	f->rv = Variable::CreateVariable(rvname, ty, NULL, &ret_qfer);
 
 	// create a fact manager for this function, with empty global facts
-	FactMgr* fm = new FactMgr(f);
+	FactMgr* const fm = new FactMgr(f);
 	FMList.push_back(fm);
 
 	GenerateParameterListFromString(*f, StringUtils::get_substring(v[2], '(', ')'));

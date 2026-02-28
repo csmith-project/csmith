@@ -79,10 +79,10 @@ public:
 	static int max_split_files(int p);
 
 	static std::string split_files_dir(void);
-	static std::string split_files_dir(std::string p);
+	static std::string split_files_dir(const std::string &p);
 
 	static std::string output_file(void);
-	static std::string output_file(std::string p);
+	static std::string output_file(const std::string &p);
 
 	static int max_funcs(void);
 	static int max_funcs(int p);
@@ -118,7 +118,7 @@ public:
 	static int max_nested_struct_level(int p);
 
 	static std::string struct_output();
-	static std::string struct_output(std::string p);
+	static std::string struct_output(const std::string &p);
 
 	static bool fixed_struct_fields();
 	static bool fixed_struct_fields(bool p);
@@ -169,7 +169,7 @@ public:
 	static bool dfs_exhaustive(bool p);
 
 	static std::string dfs_debug_sequence(void);
-	static std::string dfs_debug_sequence(std::string p);
+	static std::string dfs_debug_sequence(const std::string &p);
 
 	static int max_exhaustive_depth(void);
 	static int max_exhaustive_depth(int p);
@@ -211,19 +211,19 @@ public:
 	static bool bitfields(bool p);
 
 	static std::string partial_expand(void);
-	static std::string partial_expand(std::string p);
+	static std::string partial_expand(const std::string &p);
 
 	static std::string delta_monitor(void);
-	static std::string delta_monitor(std::string p);
+	static std::string delta_monitor(const std::string &p);
 
 	static std::string delta_output(void);
-	static std::string delta_output(std::string p);
+	static std::string delta_output(const std::string &p);
 
 	static std::string go_delta(void);
-	static std::string go_delta(std::string p);
+	static std::string go_delta(const std::string &p);
 
 	static std::string delta_input(void);
-	static std::string delta_input(std::string p);
+	static std::string delta_input(const std::string &p);
 
 	static bool no_delta_reduction(void);
 	static bool no_delta_reduction(bool p);
@@ -325,13 +325,13 @@ public:
 	static bool random_random(bool p);
 
 	static std::string dump_default_probabilities(void);
-	static std::string dump_default_probabilities(std::string p);
+	static std::string dump_default_probabilities(const std::string &p);
 
 	static std::string dump_random_probabilities(void);
-	static std::string dump_random_probabilities(std::string p);
+	static std::string dump_random_probabilities(const std::string &p);
 
 	static std::string probability_configuration(void);
-	static std::string probability_configuration(std::string p);
+	static std::string probability_configuration(const std::string &p);
 
 	static bool step_hash_by_stmt(void);
 	static bool step_hash_by_stmt(bool p);
@@ -342,7 +342,7 @@ public:
 	static int stop_by_stmt(void);
 	static int stop_by_stmt(int p);
 
-	static void monitored_funcs(string fnames);
+	static void monitored_funcs(const string &fnames);
 
 	static bool const_as_condition(void);
 	static bool const_as_condition(bool p);
@@ -380,7 +380,7 @@ public:
 	static bool identify_wrappers(void);
 	static bool identify_wrappers(bool p);
 
-	static void safe_math_wrapper(string ids);
+	static void safe_math_wrapper(const string &ids);
 	static bool safe_math_wrapper(int id);
 
 	static bool mark_mutable_const(void);
@@ -492,7 +492,7 @@ private:
 
 	static bool has_extension_conflict();
 
-	static void parse_string_options(string vname, vector<std::string> &v);
+	static void parse_string_options(const string &vname, vector<std::string> &v);
 
 	// Until I do this right, just make them all static.
 	static bool	compute_hash_;

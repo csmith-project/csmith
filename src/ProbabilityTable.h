@@ -45,9 +45,9 @@ class TableEntry {
 public:
 	TableEntry(Key k, Value v);
 
-	Key get_key() { return key_; }
+	Key get_key() const { return key_; }
 
-	Value get_value() { return value_; }
+	Value get_value() const { return value_; }
 
 private:
 	Key key_;
@@ -69,7 +69,7 @@ public:
 
 	void sorted_insert(Entry *t);
 
-	Value get_value(Key k);
+	Value get_value(Key k) const;
 
 private:
 	Key curr_max_key_;
@@ -146,11 +146,11 @@ ProbabilityTable<Key, Value>::add_elem(Key k, Value v)
 
 template <class Key, class Value>
 Value
-ProbabilityTable<Key, Value>::get_value(Key k)
+ProbabilityTable<Key, Value>::get_value(Key k) const
 {
 	assert(k < curr_max_key_);
 
-	typename vector<Entry *>::iterator i;
+	typename vector<Entry *>::const_iterator i;
 	i = find_if(table_.begin(), table_.end(),
 				[k](Entry *e) { return e->get_key() > k; });
 

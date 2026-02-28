@@ -55,7 +55,7 @@ public:
 	void write_var(const Variable *v);
 	void write_var_set(const std::vector<const Variable *>& vars);
 	void add_effect(const Effect &e, bool include_lhs_effects = false);
-	void add_external_effect(const Effect &e, std::vector<const Block*> call_chain);
+	void add_external_effect(const Effect &e, const std::vector<const Block*> &call_chain);
 	void add_external_effect(const Effect &e);
 	void clear(void);
 
@@ -63,9 +63,9 @@ public:
 	bool is_side_effect_free(void) const	{ return side_effect_free; }
 
 	bool is_read(const Variable *v) const;
-	bool is_read(std::string vname) const;
+	bool is_read(const std::string &vname) const;
 	bool is_written(const Variable *v) const;
-	bool is_written(std::string vname) const;
+	bool is_written(const std::string &vname) const;
 	bool field_is_read(const Variable *v) const;
 	bool field_is_written(const Variable *v) const;
 	bool sibling_union_field_is_read(const Variable *v) const;

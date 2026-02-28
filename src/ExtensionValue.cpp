@@ -36,7 +36,7 @@
 #include "Type.h"
 #include "Constant.h"
 
-ExtensionValue::ExtensionValue(const Type *type, string name)
+ExtensionValue::ExtensionValue(const Type *type, const string &name)
 	: type_(type),
 	  value_(NULL),
 	  name_(name)
@@ -52,4 +52,3 @@ ExtensionValue::~ExtensionValue()
 {
 	delete value_;
 }
-
