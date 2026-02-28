@@ -85,6 +85,7 @@ public:
 	bool is_const(void) const;
 	bool is_volatile(void) const;
 	bool is_access_once(void) const { return isAccessOnce; }
+	void mark_address_taken(void) const { isAddrTaken = true; }
 	bool is_const_after_deref(int deref_level) const;
 	bool is_partial_volatile_after_deref(int deref_level) const;
 	bool is_volatile_after_deref(int deref_level) const;
@@ -151,7 +152,7 @@ public:
 	const bool isStatic;
 	const bool isRegister;
 	const bool isBitfield_; // expanded from a full-bitfield struct var
-	bool isAddrTaken;
+	mutable bool isAddrTaken;
 	bool isAccessOnce;
 	const Variable* field_var_of; //expanded from a struct/union
 	const bool isArray;
