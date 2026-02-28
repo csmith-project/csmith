@@ -34,8 +34,7 @@
 
 #include <ostream>
 #include <vector>
-using namespace std;
-
+#include "StdLibAliases.h"
 enum eFactCategory {
     ePointTo=1,
 	eUnionWrite=2,

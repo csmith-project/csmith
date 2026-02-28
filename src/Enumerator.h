@@ -32,9 +32,7 @@
 
 #include <map>
 #include <cassert>
-
-using namespace std;
-
+#include "StdLibAliases.h"
 template <class Name>
 class Enumerator {
 public:

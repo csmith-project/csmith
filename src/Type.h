@@ -49,8 +49,7 @@
 #include "CVQualifiers.h"
 
 template <class Name> class Enumerator;
-using namespace std;
-
+#include "StdLibAliases.h"
 #define SIZE_UNKNOWN 0xFFFF
 
 /*

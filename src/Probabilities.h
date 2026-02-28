@@ -38,8 +38,7 @@
 
 template <class Key, class Value>
 class ProbabilityTable;
-
-using namespace std;
+#include "StdLibAliases.h"
 enum ProbName {
 	pMoreStructUnionProb,
 	pBitFieldsCreationProb,

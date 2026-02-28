@@ -37,9 +37,7 @@
 #include "VectorFilter.h"
 #include "CGOptions.h"
 #include "random.h"
-
-using namespace std;
-
+#include "StdLibAliases.h"
 template <class Key, class Value>
 class TableEntry {
 public:

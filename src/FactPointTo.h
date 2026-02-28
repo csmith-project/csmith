@@ -43,9 +43,7 @@ class Block;
 class Type;
 class StatementAssign;
 class StatementReturn;
-
-using namespace std;
-
+#include "StdLibAliases.h"
 ///////////////////////////////////////////////////////////////////////////////
 
 class FactPointTo : public Fact

@@ -33,8 +33,7 @@
 #include <string>
 #include <vector>
 #include "Common.h"
-using namespace std;
-
+#include "StdLibAliases.h"
 class StringUtils {
 public:
 	static bool empty_line(const std::string &line);

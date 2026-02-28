@@ -32,8 +32,7 @@
 
 #include <iostream>
 #include <vector>
-using namespace std;
-
+#include "StdLibAliases.h"
 ///////////////////////////////////////////////////////////////////////////////
 class Statement;
 class Block;

@@ -33,8 +33,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include <string>
 #include <vector>
-using namespace std;
-
+#include "StdLibAliases.h"
 class Variable;
 class Expression;
 class Statement;

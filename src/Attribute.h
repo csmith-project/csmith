@@ -4,8 +4,7 @@
 #include <string>
 #include <vector>
 #include <sstream>
-using namespace std;
-
+#include "StdLibAliases.h"
 class AttributeGenerator;
 
 //Base class with pure virtual methods which will be derived as per different types of attribute generation

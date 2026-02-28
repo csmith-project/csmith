@@ -35,9 +35,7 @@
 #include <ostream>
 #include <fstream>
 #include "OutputMgr.h"
-
-using namespace std;
-
+#include "StdLibAliases.h"
 class DefaultOutputMgr : public OutputMgr {
 public:
 	static DefaultOutputMgr *CreateInstance();

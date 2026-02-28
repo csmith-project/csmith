@@ -33,9 +33,7 @@
 #include <string>
 #include <sstream>
 #include <iostream>
-
-using namespace std;
-
+#include "StdLibAliases.h"
 template <class Container>
 class SequenceLineParser {
 public:

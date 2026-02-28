@@ -33,8 +33,7 @@
 #include <string>
 #include <vector>
 #include <map>
-using namespace std;
-
+#include "StdLibAliases.h"
 ///////////////////////////////////////////////////////////////////////////////
 
 /*

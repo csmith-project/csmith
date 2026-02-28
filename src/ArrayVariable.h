@@ -38,8 +38,7 @@
 #include "Variable.h"
 class Expression;
 class Block;
-using namespace std;
-
+#include "StdLibAliases.h"
 class ArrayVariable : public Variable
 {
 public:

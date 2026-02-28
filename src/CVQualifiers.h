@@ -32,8 +32,7 @@
 
 #include <vector>
 #include <string>
-using namespace std;
-
+#include "StdLibAliases.h"
 #include "Effect.h"
 class Type;
 class CGContext;

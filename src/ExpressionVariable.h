@@ -35,8 +35,7 @@
 #include <ostream>
 #include <vector>
 #include "Expression.h"
-using namespace std;
-
+#include "StdLibAliases.h"
 class CGContext;
 class Variable;
 

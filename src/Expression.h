@@ -47,8 +47,7 @@
 #include "ProbabilityTable.h"
 #include <vector>
 #include <string>
-using namespace std;
-
+#include "StdLibAliases.h"
 class CGContext;
 class Type;
 class FunctionInvocation;

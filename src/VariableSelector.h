@@ -34,7 +34,7 @@
 
 #include <string>
 #include <vector>
-using namespace std;
+#include "StdLibAliases.h"
 #include "Variable.h"
 #include "Type.h"
 

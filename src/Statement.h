@@ -44,8 +44,7 @@
 #include <sstream>
 #include <string>
 #include "Probabilities.h"
-using namespace std;
-
+#include "StdLibAliases.h"
 #ifndef STATEMENT_H
 #define STATEMENT_H
 

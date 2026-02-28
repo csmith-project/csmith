@@ -35,8 +35,7 @@
 #include <vector>
 #include <map>
 #include "Effect.h"
-using namespace std;
-
+#include "StdLibAliases.h"
 // Flags..
 #define NO_RETURN (1)
 #define IN_LOOP (2)

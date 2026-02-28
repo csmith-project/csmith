@@ -35,8 +35,7 @@
 #include <string>
 #include <map>
 #include "Statement.h"
-using namespace std;
-
+#include "StdLibAliases.h"
 class Expression;
 class Block;
 class Variable;

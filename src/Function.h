@@ -43,8 +43,7 @@
 
 #include <string>
 #include <vector>
-using namespace std;
-
+#include "StdLibAliases.h"
 #include "Effect.h"
 #include "Type.h"
 

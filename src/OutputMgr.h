@@ -33,8 +33,7 @@
 #include <ostream>
 #include <vector>
 #include <string>
-using namespace std;
-
+#include "StdLibAliases.h"
 class Variable;
 
 #define TAB "    "    // to beautify output: 1 tab is 4 spaces

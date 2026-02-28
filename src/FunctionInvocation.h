@@ -45,8 +45,7 @@
 #include <vector>
 #include "util.h"
 #include "CVQualifiers.h"
-using namespace std;
-
+#include "StdLibAliases.h"
 class CGContext;
 class Function;
 class Expression;

@@ -58,8 +58,7 @@ class CFGEdge;
 #include <map>
 #include "Effect.h"
 #include "Fact.h"
-using namespace std;
-
+#include "StdLibAliases.h"
 ///////////////////////////////////////////////////////////////////////////////
 
 class FactMgr

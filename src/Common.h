@@ -48,8 +48,7 @@
 
 using std::string;
 using std::vector;
-using namespace std ;
-
+#include "StdLibAliases.h"
 #ifdef WIN32
 #define INT64 __int64
 #else
