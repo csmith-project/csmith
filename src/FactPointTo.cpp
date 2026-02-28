@@ -111,8 +111,8 @@ FactPointTo::has_invisible(const Statement* stm) const
    not in point-to set, return null to indicate no
    update is neccessary
  */
-FactPointTo*
-FactPointTo::mark_dead_var(const Variable* v)
+const FactPointTo*
+FactPointTo::mark_dead_var(const Variable* v) const
 {
 	vector<const Variable*> var_set = point_to_vars;
 	int pos = find_variable_in_set(var_set, v);
@@ -137,8 +137,8 @@ FactPointTo::mark_dead_var(const Variable* v)
    this create a new fact, and if no local variable is in
    point-to set, return null to indicate no update is neccessary
  */
-FactPointTo*
-FactPointTo::mark_func_end(const Statement* stm)
+const FactPointTo*
+FactPointTo::mark_func_end(const Statement* stm) const
 {
 	vector<const Variable*> var_set = point_to_vars;
 	size_t len = var_set.size();

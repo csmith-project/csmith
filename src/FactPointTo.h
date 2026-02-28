@@ -70,8 +70,8 @@ public:
 	std::vector<const Fact*> rhs_to_lhs_transfer(const std::vector<const Fact*>& facts, const vector<const Variable*>& lvars, const Expression* rhs);
 	virtual int abstract_fact_for_assign(const std::vector<const Fact*>& /*facts*/, const Lhs* /*lhs*/, const Expression* /*rhs*/, std::vector<const Fact*>&) override;
 
-	FactPointTo* mark_dead_var(const Variable* v);
-	FactPointTo* mark_func_end(const Statement* stm);
+	const FactPointTo* mark_dead_var(const Variable* v) const;
+	const FactPointTo* mark_func_end(const Statement* stm) const;
 	const FactPointTo* update_with_modified_index(const Variable* index_var) const;
 
 	// lattice functions

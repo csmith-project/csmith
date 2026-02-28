@@ -168,8 +168,8 @@ FactMgr::update_facts_for_oos_vars(const vector<const Variable*>& vars, FactVec&
 		const Variable* var = vars[i];
 		for (j=0; j<facts.size(); j++) {
 			if (facts[j]->eCat == ePointTo) {
-				FactPointTo* f = const_cast<FactPointTo*>(static_cast<const FactPointTo*>(facts[j]));
-				FactPointTo* new_fact = f->mark_dead_var(var);
+				const FactPointTo* f = static_cast<const FactPointTo*>(facts[j]);
+				const FactPointTo* new_fact = f->mark_dead_var(var);
 				if (new_fact) {
 					facts[j] = new_fact;
 				}
@@ -204,8 +204,8 @@ FactMgr::remove_function_local_facts(std::vector<const Fact*>& inputs, const Sta
 	// function as "point to garbage"
 	for (i=0; i<inputs.size(); i++) {
 		if (inputs[i]->eCat == ePointTo) {
-			FactPointTo* f = const_cast<FactPointTo*>(static_cast<const FactPointTo*>(inputs[i]));
-			FactPointTo* new_fact = f->mark_func_end(stm);
+			const FactPointTo* f = static_cast<const FactPointTo*>(inputs[i]);
+			const FactPointTo* new_fact = f->mark_func_end(stm);
 			if (new_fact) {
 				inputs[i] = new_fact;
 			}
@@ -729,7 +729,7 @@ FactMgr::find_dangling_global_ptrs(Function* f)
 {
 	for (size_t i=0; i<global_facts.size(); i++) {
 		if (global_facts[i]->eCat == ePointTo) {
-			FactPointTo* fp = const_cast<FactPointTo*>(static_cast<const FactPointTo*>(global_facts[i]));
+			const FactPointTo* fp = static_cast<const FactPointTo*>(global_facts[i]);
 			const Variable* v = fp->get_var();
 			// const pointers should never be dangling
 			if (v->is_const() || !v->is_global()) continue;
