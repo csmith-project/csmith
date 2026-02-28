@@ -95,7 +95,7 @@ static int count_expr_key_var(const Expression* e)
 
 /*
  * find the "key" variable of an expression.
- * return NULL if expression is a function call, constant, or a binary
+ * return nullptr if expression is a function call, constant, or a binary
  * operation involves at least two variables
  */
 static const Variable* find_expr_key_var(const Expression* e)
@@ -114,11 +114,11 @@ static const Variable* find_expr_key_var(const Expression* e)
 			assert(fi.param_value.size() == 2);
 			const Variable* v0 = find_expr_key_var(fi.param_value[0]);
 			const Variable* v1 = find_expr_key_var(fi.param_value[1]);
-			if (v0 == NULL && v1 != NULL) return v1;
-			if (v0 != NULL && v1 == NULL) return v0;
+			if (v0 == nullptr && v1 != nullptr) return v1;
+			if (v0 != nullptr && v1 == nullptr) return v0;
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 //=======================================================================================
@@ -131,7 +131,7 @@ ArrayVariable::CreateArrayVariable(const CGContext& cg_context, Block* blk, cons
 
 	// quick way to choose a random array dimension: 1d 60%, 2d 30%, and son on
 	int num = rnd_upto(99)+1;
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 	int dimension = 0;
 	int step = 100;
 	for (; num > 0; num -= step) {
@@ -146,7 +146,7 @@ ArrayVariable::CreateArrayVariable(const CGContext& cg_context, Block* blk, cons
 	int total_size = 1;
 	for (int i=0; i<dimension; i++) {
 		unsigned int dimen_size = rnd_upto(CGOptions::max_array_length_per_dimension()) + 1;
-		ERROR_GUARD(NULL);
+		ERROR_GUARD(nullptr);
 		if (total_size * dimen_size > (unsigned int)CGOptions::max_array_length()) {
 			dimen_size = CGOptions::max_array_length() / total_size;
 		}
@@ -156,7 +156,7 @@ ArrayVariable::CreateArrayVariable(const CGContext& cg_context, Block* blk, cons
 		}
 	}
 	ArrayVariable *var = new ArrayVariable(blk, name, type, init, qfer, sizes, isFieldVarOf);
-	ERROR_GUARD_AND_DEL1(NULL, var);
+	ERROR_GUARD_AND_DEL1(nullptr, var);
 	if (type->is_aggregate()) {
 		var->create_field_vars(type);
 	}
@@ -172,7 +172,7 @@ ArrayVariable::CreateArrayVariable(const CGContext& cg_context, Block* blk, cons
 		}
 	} else {
 		for (size_t i=0; i<init_num; i++) {
-			Expression* e = NULL;
+			Expression* e = nullptr;
 			if (type->eType != ePointer || CGOptions::strict_const_arrays()) {
 				e = Constant::make_random(type);
 			} else {
@@ -192,7 +192,7 @@ ArrayVariable::CreateArrayVariable(const CGContext& cg_context, Block* blk, cons
  */
 ArrayVariable::ArrayVariable(Block* blk, const std::string &name, const Type *type, const Expression* init, const CVQualifiers* qfer, const vector<unsigned int>& sizes, const Variable* isFieldVarOf)
 	: Variable(name, type, init, qfer, isFieldVarOf, true),
-	  collective(NULL),
+	  collective(nullptr),
 	  parent(blk),
 	  sizes(sizes)
 {
@@ -220,7 +220,7 @@ ArrayVariable::~ArrayVariable(void)
 		for (i=0; i<indices.size(); i++) {
 			delete indices[i];
 		}
-		init = NULL;   // set to NULL to avoid being deleted twice
+		init = nullptr;   // set to nullptr to avoid being deleted twice
 	}
 }
 
@@ -344,7 +344,7 @@ ArrayVariable::rnd_mutate(void)
 {
 	assert(0 && "invalid call to rnd_mutate");
 	bool use_existing = rnd_flipcoin(20);
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 	size_t i;
 	if (use_existing) {
 		vector<Variable*> ok_vars;
@@ -354,7 +354,7 @@ ArrayVariable::rnd_mutate(void)
 			}
 		}
 		Variable* v = VariableSelector::choose_ok_var(ok_vars);
-		ERROR_GUARD(NULL);
+		ERROR_GUARD(nullptr);
 		if (v) {
 			ArrayVariable* av = dynamic_cast<ArrayVariable*>(v);
 			return av;
@@ -385,7 +385,7 @@ ArrayVariable::rnd_mutate(void)
         	fi->add_operand(new ExpressionVariable(*(ev->get_var())));
 			int offset = rnd_upto(sizes[i]);
 			if (offset == 0) offset = 1;	// give offset 1 more chance
-			ERROR_GUARD(NULL);
+			ERROR_GUARD(nullptr);
 			ostringstream oss;
 			oss << offset;
         	fi->add_operand(new Constant(get_int_type(), oss.str()));

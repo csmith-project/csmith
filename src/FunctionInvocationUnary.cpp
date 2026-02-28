@@ -51,7 +51,7 @@ FunctionInvocationUnary *
 FunctionInvocationUnary::CreateFunctionInvocationUnary(
 		CGContext &cg_context, eUnaryOps op, SafeOpFlags *flags)
 {
-	FunctionInvocationUnary *fi = NULL;
+	FunctionInvocationUnary *fi = nullptr;
 	if (flags) {
 		bool op1 = flags->get_op1_sign();
 		enum SafeOpSize size = flags->get_op_size();

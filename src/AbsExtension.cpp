@@ -65,14 +65,14 @@ AbsExtension::Initialize(unsigned int num, vector<ExtensionValue *> &values)
 FunctionInvocation*
 AbsExtension::MakeFuncInvocation(Function *func, std::vector<ExtensionValue *> &values)
 {
-	FunctionInvocationUser *fi = new FunctionInvocationUser(func, true, NULL);
+	FunctionInvocationUser *fi = new FunctionInvocationUser(func, true, nullptr);
 
 	vector<ExtensionValue *>::iterator i;
 	for (i = values.begin(); i != values.end(); ++i) {
 		assert(*i);
 		CVQualifiers qfer = (*i)->get_qfer();
 		Variable *v = VariableSelector::new_variable((*i)->get_name(), (*i)->get_type(),
-								NULL, &qfer);
+								nullptr, &qfer);
 		Expression *p = new ExpressionVariable(*v, (*i)->get_type());
 		fi->param_value.push_back(p);
 	}

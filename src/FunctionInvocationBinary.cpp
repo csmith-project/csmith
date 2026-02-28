@@ -56,7 +56,7 @@ FunctionInvocationBinary::CreateFunctionInvocationBinary(CGContext &cg_context,
 						eBinaryOps op,
 						SafeOpFlags *flags)
 {
-	FunctionInvocationBinary *fi = NULL;
+	FunctionInvocationBinary *fi = nullptr;
 	assert(flags);
 
 	if (flags && FunctionInvocationBinary::safe_ops(op)) {

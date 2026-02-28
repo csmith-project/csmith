@@ -40,7 +40,7 @@
 using namespace std;
 
 VectorFilter::VectorFilter(void)
-	: ptable(NULL),
+	: ptable(nullptr),
 	  flag_(FILTER_OUT)
 {
 	//Nothing to do
@@ -55,7 +55,7 @@ VectorFilter::VectorFilter(DistributionTable *table)
 
 VectorFilter::VectorFilter(std::vector<unsigned int> &vs, int flag)
 	: vs_(vs),
-	  ptable(NULL),
+	  ptable(nullptr),
 	  flag_(flag)
 {
 	//Nothing to do
@@ -95,7 +95,7 @@ VectorFilter::get_max_prob(void) const
 int
 VectorFilter::lookup(int v) const
 {
-	if (!this->valid_filter() || ptable == NULL)
+	if (!this->valid_filter() || ptable == nullptr)
 		return v;
 	return v = ptable->rnd_num_to_key(v);
 }

@@ -38,24 +38,24 @@ class DFSOutputMgr : public OutputMgr {
 public:
 	static DFSOutputMgr *CreateInstance();
 
-	virtual ~DFSOutputMgr();
+	virtual ~DFSOutputMgr() override;
 
-	virtual void OutputHeader(int argc, char *argv[], unsigned long seed);
+	virtual void OutputHeader(int argc, char *argv[], unsigned long seed) override;
 
-	virtual void OutputStructUnions(ostream& /*out*/);
+	virtual void OutputStructUnions(ostream& /*out*/) override;
 
-	virtual void Output();
+	virtual void Output() override;
 
-	virtual void outputln(ostream &out);
+	virtual void outputln(ostream &out) override;
 
-	virtual void output_comment_line(ostream &out, const std::string &comment);
+	virtual void output_comment_line(ostream &out, const std::string &comment) override;
 
-	virtual void output_tab(ostream &out, int indent);
+	virtual void output_tab(ostream &out, int indent) override;
 
 private:
 	DFSOutputMgr();
 
-	virtual std::ostream &get_main_out();
+	virtual std::ostream &get_main_out() override;
 
 	static DFSOutputMgr *instance_;
 

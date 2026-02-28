@@ -53,7 +53,7 @@ public:
 	StatementIf(Block* b, const Expression &test,
 				const Block &if_true, const Block &if_false);
 	StatementIf(const StatementIf &si);
-	virtual ~StatementIf(void);
+	virtual ~StatementIf(void) override;
 
 	virtual void get_exprs(std::vector<const Expression*>& exps) const {exps.push_back(&test);}
 	virtual void get_blocks(std::vector<const Block*>& blks) const { blks.push_back(&if_true); blks.push_back(&if_false);}
@@ -64,12 +64,12 @@ public:
 
 	void combine_branch_facts(vector<const Fact*>& pre_facts) const;
 
-	virtual bool must_return(void) const;
-	virtual bool must_jump(void) const;
+	virtual bool must_return(void) const override;
+	virtual bool must_jump(void) const override;
 	//
-	virtual bool visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const;
+	virtual bool visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const override;
 
-	virtual void Output(std::ostream &out, FactMgr* fm, int indent = 0) const;
+	virtual void Output(std::ostream &out, FactMgr* fm, int indent = 0) const override;
 	void output_condition(std::ostream &out, FactMgr* fm, int indent = 0) const;
 	void output_branches(std::ostream &out, FactMgr* fm, int indent = 0) const;
 

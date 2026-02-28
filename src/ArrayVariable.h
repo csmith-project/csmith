@@ -44,7 +44,7 @@ class ArrayVariable : public Variable
 public:
 	static ArrayVariable* CreateArrayVariable(const CGContext& cg_context, Block* blk, const std::string &name, const Type *type, const Expression* init, const CVQualifiers* qfer, const Variable* isFieldVarOf);
 	ArrayVariable(const ArrayVariable& av);
-	virtual ~ArrayVariable(void);
+	virtual ~ArrayVariable(void) override;
 
 	void add_index(const Expression* e);
 	void set_index(size_t index, const Expression* e);
@@ -62,18 +62,18 @@ public:
 	ArrayVariable* itemize(const std::vector<const Expression*>& indices, Block* blk) const;
 	ArrayVariable* rnd_mutate(void);
 	bool is_variant(const Variable* v) const;
-	virtual bool is_global(void) const;
-	virtual bool is_visible_local(const Block* blk) const;
+	virtual bool is_global(void) const override;
+	virtual bool is_visible_local(const Block* blk) const override;
 
 	string make_print_index_str(const vector<const Variable*> &cvs) const;
-	virtual void Output(std::ostream &) const;
-	virtual void OutputDef(std::ostream &out, int indent) const;
-	virtual void OutputDecl(std::ostream &) const;
-	virtual void hash(std::ostream& out) const;
+	virtual void Output(std::ostream &) const override;
+	virtual void OutputDef(std::ostream &out, int indent) const override;
+	virtual void OutputDecl(std::ostream &) const override;
+	virtual void hash(std::ostream& out) const override;
 	virtual const Variable* get_collective(void) const { return collective ? collective : this;}
 	virtual const ArrayVariable* get_array(string& /*field*/) const { return this;}
-	virtual void OutputLowerBound(std::ostream &) const;
-	virtual void OutputUpperBound(std::ostream &) const;
+	virtual void OutputLowerBound(std::ostream &) const override;
+	virtual void OutputUpperBound(std::ostream &) const override;
 	void output_with_indices(std::ostream &out, const std::vector<const Variable*>& cvs) const;
 	void output_checksum_with_indices(std::ostream &out, const std::vector<const Variable*>& cvs, const string &field_name) const;
 	void output_init(std::ostream &out, const Expression* init, const vector<const Variable*>& cvs, int indent) const;

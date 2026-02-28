@@ -170,10 +170,10 @@ StatementFor::make_iteration(CGContext& cg_context, StatementAssign*& init, Expr
 
 	// Select the loop control variable, avoid volatile
 	vector<const Variable*> invalid_vars;
-	Variable *var = NULL;
+	Variable *var = nullptr;
 	do {
 		var = VariableSelector::SelectLoopCtrlVar(cg_context, invalid_vars);
-		ERROR_GUARD(NULL);
+		ERROR_GUARD(nullptr);
 		if (var->is_volatile()) {
 			invalid_vars.push_back(var);
 		} else {
@@ -213,22 +213,22 @@ StatementFor::make_iteration(CGContext& cg_context, StatementAssign*& init, Expr
 		assert(var->type);
 		make_random_loop_control(init_n, limit_n, incr_n, test_op, incr_op, var->type->is_signed());
 	}
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 
 	// Build the IR for the subparts of the loop.
 	Constant * c_init = Constant::make_int(init_n);
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 
 	// if we chose control variable wisely, this should never return false
 	assert(var);
 	Lhs* lhs = new Lhs(*var);
-	ERROR_GUARD_AND_DEL1(NULL, c_init);
+	ERROR_GUARD_AND_DEL1(nullptr, c_init);
 	eBinaryOps bop = StatementAssign::compound_to_binary_ops(incr_op);
 	SafeOpFlags *flags1 = SafeOpFlags::make_random_binary(var->type, var->type, var->type, sOpAssign, bop);
-	ERROR_GUARD_AND_DEL2(NULL, c_init, lhs);
+	ERROR_GUARD_AND_DEL2(nullptr, c_init, lhs);
 
 	init = new StatementAssign(cg_context.get_current_block(), *lhs, *c_init, eSimpleAssign, flags1);
-	ERROR_GUARD_AND_DEL3(NULL, c_init, lhs, flags1);
+	ERROR_GUARD_AND_DEL3(nullptr, c_init, lhs, flags1);
 	bool visited = init->visit_facts(fm->global_facts, cg_context);
 	assert(visited);
 
@@ -238,10 +238,10 @@ StatementFor::make_iteration(CGContext& cg_context, StatementAssign*& init, Expr
 	Bookkeeper::record_volatile_access(v->get_var(), v->get_indirect_level(), true);
 
 	Constant *c_limit = Constant::make_int(limit_n);
-	ERROR_GUARD_AND_DEL2(NULL, init, v);
+	ERROR_GUARD_AND_DEL2(nullptr, init, v);
 
 	FunctionInvocation *invocation = FunctionInvocation::make_binary(cg_context, test_op, v, c_limit);
-	ERROR_GUARD_AND_DEL3(NULL, init, v, c_limit);
+	ERROR_GUARD_AND_DEL3(nullptr, init, v, c_limit);
 
 	test = new ExpressionFuncall(*invocation);
 
@@ -251,10 +251,10 @@ StatementFor::make_iteration(CGContext& cg_context, StatementAssign*& init, Expr
 	//const ExpressionFuncall funcall(fb);
 	Lhs *lhs1 = dynamic_cast<Lhs*>(lhs->clone());
 	//SafeOpFlags *flags2 = SafeOpFlags::make_random(sOpAssign);
-	ERROR_GUARD_AND_DEL3(NULL, init, test, lhs1);
+	ERROR_GUARD_AND_DEL3(nullptr, init, test, lhs1);
 
 	Constant * c_incr = Constant::make_int(incr_n);
-	ERROR_GUARD_AND_DEL3(NULL, init, test, lhs1);
+	ERROR_GUARD_AND_DEL3(nullptr, init, test, lhs1);
 
 	if (bound != INVALID_BOUND) {
 		incr = new StatementAssign(cg_context.get_current_block(), *lhs1, *c_incr, incr_op);
@@ -274,9 +274,9 @@ StatementFor::make_random(CGContext &cg_context)
 	assert(fm);
 	cg_context.get_effect_stm().clear();
 
-	StatementAssign* init = NULL;
-	StatementAssign* incr = NULL;
-	Expression* test = NULL;
+	StatementAssign* init = nullptr;
+	StatementAssign* incr = nullptr;
+	Expression* test = nullptr;
 	unsigned int bound = 0;
 	const Variable* iv = make_iteration(cg_context, init, test, incr, bound);
 	// record the effect and facts before loop body
@@ -286,7 +286,7 @@ StatementFor::make_random(CGContext &cg_context)
 	// create CGContext for body
 	CGContext body_cg_context(cg_context, cg_context.rw_directive, iv, bound);
 	Block *body = Block::make_random(body_cg_context, true);
-	ERROR_GUARD_AND_DEL3(NULL, init, test, incr);
+	ERROR_GUARD_AND_DEL3(nullptr, init, test, incr);
 
 	StatementFor* sf = new StatementFor(cg_context.get_current_block(), *init, *test, *incr, *body);
 	sf->post_loop_analysis(cg_context, pre_facts, pre_effects);
@@ -325,7 +325,7 @@ StatementFor::make_random_array_loop(const CGContext &cg_context)
 	}
 	RWDirective rwd(no_reads, no_writes, all_must_reads, all_must_writes);
 	// create CGContext for loop
-	CGContext loop_cg_context(cg_context, &rwd, NULL, 0);
+	CGContext loop_cg_context(cg_context, &rwd, nullptr, 0);
 	StatementFor* sf = make_random(loop_cg_context);
 	return sf;
 }

@@ -41,15 +41,15 @@ class ExtensionValue;
 class KleeExtension : public AbsExtension {
 	friend class ExtensionMgr;
 public:
-	virtual void GenerateValues();
+	virtual void GenerateValues() override;
 
-	virtual void OutputInit(std::ostream &out);
+	virtual void OutputInit(std::ostream &out) override;
 
-	virtual void OutputFirstFunInvocation(std::ostream &out, FunctionInvocation *invoke);
+	virtual void OutputFirstFunInvocation(std::ostream &out, FunctionInvocation *invoke) override;
 
-	virtual void OutputHeader(std::ostream &out);
+	virtual void OutputHeader(std::ostream &out) override;
 
-	virtual void OutputTail(std::ostream &out);
+	virtual void OutputTail(std::ostream &out) override;
 
 	virtual std::vector<ExtensionValue *> &get_values() { return values_; }
 

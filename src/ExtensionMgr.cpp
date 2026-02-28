@@ -45,7 +45,7 @@
 
 using namespace std;
 
-AbsExtension *ExtensionMgr::extension_ = NULL;
+AbsExtension *ExtensionMgr::extension_ = nullptr;
 
 void
 ExtensionMgr::CreateExtension()
@@ -72,7 +72,7 @@ void
 ExtensionMgr::DestroyExtension()
 {
 	delete ExtensionMgr::extension_;
-	ExtensionMgr::extension_ = NULL;
+	ExtensionMgr::extension_ = nullptr;
 }
 
 AbsExtension *
@@ -85,7 +85,7 @@ ExtensionMgr::GetExtension()
 void
 ExtensionMgr::GenerateFirstParameterList(Function &curFunc)
 {
-	if (ExtensionMgr::extension_ == NULL)
+	if (ExtensionMgr::extension_ == nullptr)
 		return;
 	std::vector<ExtensionValue *> &values = ExtensionMgr::extension_->get_values();
 	ExtensionMgr::extension_->GenerateFirstParameterList(curFunc, values);
@@ -94,7 +94,7 @@ ExtensionMgr::GenerateFirstParameterList(Function &curFunc)
 void
 ExtensionMgr::GenerateValues()
 {
-	if (ExtensionMgr::extension_ == NULL)
+	if (ExtensionMgr::extension_ == nullptr)
 		return;
 	ExtensionMgr::extension_->GenerateValues();
 }
@@ -102,7 +102,7 @@ ExtensionMgr::GenerateValues()
 FunctionInvocation *
 ExtensionMgr::MakeFuncInvocation(Function *curFunc, CGContext &cg_context)
 {
-	if (ExtensionMgr::extension_ == NULL) {
+	if (ExtensionMgr::extension_ == nullptr) {
 		return FunctionInvocation::make_random(curFunc, cg_context);
 	}
 	else {
@@ -114,7 +114,7 @@ ExtensionMgr::MakeFuncInvocation(Function *curFunc, CGContext &cg_context)
 void
 ExtensionMgr::OutputHeader(std::ostream &out)
 {
-	if (ExtensionMgr::extension_ == NULL) {
+	if (ExtensionMgr::extension_ == nullptr) {
 		return;
 	}
 	else {
@@ -125,7 +125,7 @@ ExtensionMgr::OutputHeader(std::ostream &out)
 void
 ExtensionMgr::OutputTail(ostream &out)
 {
-	if (ExtensionMgr::extension_ == NULL) {
+	if (ExtensionMgr::extension_ == nullptr) {
 		out << "    return 0;" << endl;
 	}
 	else {
@@ -136,7 +136,7 @@ ExtensionMgr::OutputTail(ostream &out)
 void
 ExtensionMgr::OutputInit(std::ostream &out)
 {
-	if (ExtensionMgr::extension_ == NULL) {
+	if (ExtensionMgr::extension_ == nullptr) {
 		if (CGOptions::accept_argc()) {
 			out << "int main (int argc, char* argv[])" << endl;
 		}
@@ -154,7 +154,7 @@ void
 ExtensionMgr::OutputFirstFunInvocation(std::ostream &out, FunctionInvocation *invoke)
 {
 	assert(invoke);
-	if (ExtensionMgr::extension_ == NULL) {
+	if (ExtensionMgr::extension_ == nullptr) {
         	out << "    ";
         	invoke->Output(out);
         	out << ";" << endl;

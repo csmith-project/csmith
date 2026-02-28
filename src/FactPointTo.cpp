@@ -182,7 +182,7 @@ FactPointTo::rhs_to_lhs_transfer(const vector<const Fact*>& facts, const vector<
 	for (size_t i=0; i<lvars.size(); i++) {
 		assert(lvars[i]->type->eType == ePointer);
 	}
-	if (rhs == NULL) {
+	if (rhs == nullptr) {
 		return FactPointTo::make_facts(lvars, garbage_ptr);
 	}
 	if (rhs->get_type().eType != ePointer && rhs->get_type().eType != eUnion) {
@@ -701,7 +701,7 @@ bool
 FactPointTo::is_assertable(const Statement* stm) const
 {
 	string dummy;
-	return (var->get_array(dummy) == NULL) &&
+	return (var->get_array(dummy) == nullptr) &&
 		   !is_variable_in_set(point_to_vars, garbage_ptr) &&
 		   !is_variable_in_set(point_to_vars, tbd_ptr) &&
 		   !has_invisible(stm);

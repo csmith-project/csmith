@@ -361,7 +361,7 @@ GroupProbElem::dump_val(std::ostream &out)
 
 /////////////////////////////////////////////////////////////////
 
-Probabilities* Probabilities::instance_ = NULL;
+Probabilities* Probabilities::instance_ = nullptr;
 
 Probabilities *
 Probabilities::GetInstance()
@@ -379,7 +379,7 @@ void
 Probabilities::DestroyInstance()
 {
 	delete instance_;
-	instance_ = NULL;
+	instance_ = nullptr;
 }
 
 void
@@ -893,7 +893,7 @@ Probabilities::unregister_extra_filter(ProbName pname, Filter *filter)
 	Probabilities *impl = Probabilities::GetInstance();
 	assert(impl);
 	assert(impl->extra_filters_[pname] == filter);
-	impl->extra_filters_[pname] = NULL;
+	impl->extra_filters_[pname] = nullptr;
 }
 
 bool
@@ -901,7 +901,7 @@ Probabilities::check_extra_filter(ProbName pname, int v)
 {
 	assert(v >= 0);
 	std::map<ProbName, Filter*>::iterator i = extra_filters_.find(pname);
-	if (i != extra_filters_.end() && ((*i).second != NULL))
+	if (i != extra_filters_.end() && ((*i).second != nullptr))
 		return (*i).second->filter(v);
 	else
 		return false;

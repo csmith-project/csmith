@@ -67,13 +67,13 @@ public:
 	static Block *make_dummy_block(CGContext &cg_context);
 
 	Block(Block* b, int block_size);
-	virtual ~Block(void);
+	virtual ~Block(void) override;
 
 	//
 	virtual bool set_depth_protect(bool b) { depth_protect = b; return b; }
 	virtual bool get_depth_protect(void) const { return depth_protect; }
 
-	virtual void Output(std::ostream &out, FactMgr* fm, int indent=0) const;
+	virtual void Output(std::ostream &out, FactMgr* fm, int indent=0) const override;
 
 	void OutputTmpVariableList(std::ostream &out, int indent) const;
 
@@ -95,14 +95,14 @@ public:
 	std::vector<const ExpressionVariable*> get_dereferenced_ptrs(void) const;
 
 	Statement* append_return_stmt(CGContext& cg_context);
-	virtual bool must_return(void) const;
+	virtual bool must_return(void) const override;
 	bool must_break_or_return(void) const;
-	virtual bool must_jump(void) const;
+	virtual bool must_jump(void) const override;
 	bool from_tail_to_head(void) const;
 	bool need_nested_loop(const CGContext& cg_context);
 	Statement* append_nested_loop(CGContext& cg_context);
 
-	virtual bool visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const;
+	virtual bool visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const override;
 
 	bool contains_back_edge(void) const;
 

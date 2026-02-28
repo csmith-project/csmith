@@ -53,11 +53,11 @@ public:
 
 	Lhs(const Variable &v, const Type* t, bool compound_assign);
 
-	virtual ~Lhs(void);
+	virtual ~Lhs(void) override;
 
-	virtual Expression *clone() const;
+	virtual Expression *clone() const override;
 
-	virtual CVQualifiers get_qualifiers(void) const;
+	virtual CVQualifiers get_qualifiers(void) const override;
 
 	virtual void get_eval_to_subexps(vector<const Expression*>& subs) const {subs.push_back(this);}
 
@@ -75,15 +75,15 @@ public:
 
 	bool visit_indices(vector<const Fact*>& inputs, CGContext& cg_context) const;
 	//
-	virtual std::vector<const ExpressionVariable*> get_dereferenced_ptrs(void) const;
-	virtual void get_referenced_ptrs(std::vector<const Variable*>& ptrs) const;
+	virtual std::vector<const ExpressionVariable*> get_dereferenced_ptrs(void) const override;
+	virtual void get_referenced_ptrs(std::vector<const Variable*>& ptrs) const override;
 	virtual unsigned int get_complexity(void) const { return 1;}
 
-	virtual bool visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const;
+	virtual bool visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const override;
 
-	virtual const Type &get_type(void) const;
+	virtual const Type &get_type(void) const override;
 
-	virtual void Output(std::ostream &) const;
+	virtual void Output(std::ostream &) const override;
 
 private:
 	explicit Lhs(const Lhs &lhs);

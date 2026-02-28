@@ -108,7 +108,7 @@ OutputMgr::OutputMain(std::ostream &out)
 						 Effect::get_empty_effect(),
 						 0);
 
-	FunctionInvocation *invoke = NULL;
+	FunctionInvocation *invoke = nullptr;
 	invoke = ExtensionMgr::MakeFuncInvocation(GetFirstFunction(), cg_context);
 	out << endl << endl;
 	output_comment_line(out, "----------------------------------------");

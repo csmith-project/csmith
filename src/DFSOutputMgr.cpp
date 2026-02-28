@@ -42,7 +42,7 @@
 
 using namespace std;
 
-DFSOutputMgr *DFSOutputMgr::instance_ = NULL;
+DFSOutputMgr *DFSOutputMgr::instance_ = nullptr;
 
 DFSOutputMgr::DFSOutputMgr()
 {

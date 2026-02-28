@@ -56,7 +56,7 @@ using namespace std;
 StatementReturn *
 StatementReturn::make_random(CGContext &cg_context)
 {
-	DEPTH_GUARD_BY_TYPE_RETURN(dtStatementReturn, NULL);
+	DEPTH_GUARD_BY_TYPE_RETURN(dtStatementReturn, nullptr);
 	Function *curr_func = cg_context.get_current_func();
 	assert(curr_func);
 	FactMgr* fm = get_fact_mgr(&cg_context);
@@ -66,7 +66,7 @@ StatementReturn::make_random(CGContext &cg_context)
 	// typecast, if needed.
 	ev->check_and_set_cast(curr_func->return_type);
 	// XXX
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 
 	StatementReturn* sr = new StatementReturn(cg_context.get_current_block(), *ev);
 	return sr;

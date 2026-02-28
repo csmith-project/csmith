@@ -440,7 +440,7 @@ Constant *
 Constant::make_random(const Type* type)
 {
 	string v = GenerateRandomConstant(type);
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 	return new Constant(type, v);
 }
 
@@ -449,7 +449,7 @@ Constant::make_random_upto(unsigned int limit)
 {
 	ostringstream oss;
 	oss << rnd_upto(limit);
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 	return new Constant(&Type::get_simple_type(eUInt), oss.str());
 }
 
@@ -457,7 +457,7 @@ Constant*
 Constant::make_random_nonzero(const Type* type)
 {
 	string v = GenerateRandomConstant(type);
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 	while (StringUtils::str2int(v) == 0) {
 		v = GenerateRandomConstant(type);
 	}
@@ -480,7 +480,7 @@ Constant::make_int(int v)
 #endif
 
 	const Type &int_type = Type::get_simple_type(eInt);
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 
 #if 0
 	// Initialize our cache of small-number constants.
@@ -576,12 +576,12 @@ Constant::Output(std::ostream &out) const
         output_cast(out);
         out << "(" << value << ")";
 	} else if (type->eType == ePointer && equals(0)){
-        // don't output cast for NULL:
+        // don't output cast for nullptr:
 		if (CGOptions::lang_cpp()) {
 			if (CGOptions::cpp11())
 				out << "nullptr";
 			else
-				out << "NULL";
+				out << "nullptr";
 		} else {
 			out << "(void*)" << value;
 		}

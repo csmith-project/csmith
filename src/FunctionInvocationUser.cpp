@@ -174,7 +174,7 @@ FunctionInvocationUser::~FunctionInvocationUser(void)
 FunctionInvocation *
 FunctionInvocationUser::clone() const
 {
-	assert(this->op_flags == NULL);
+	assert(this->op_flags == nullptr);
 
 	return new FunctionInvocationUser(*this);
 }
@@ -210,7 +210,7 @@ FunctionInvocationUser::build_invocation_and_function(CGContext &cg_context, con
 		cg_context.merge_param_context(param_cg_context);
 	}
 
-	FunctionInvocationUser* fiu = new FunctionInvocationUser(func, false, NULL);
+	FunctionInvocationUser* fiu = new FunctionInvocationUser(func, false, nullptr);
 	fiu->param_value = param_values;
 	// hand-over from caller to callee
 	FactMgr* fm = get_fact_mgr_for_func(func);
@@ -244,7 +244,7 @@ FunctionInvocationUser::build_invocation_and_function(CGContext &cg_context, con
 	// include facts for globals just created
 	for (i=0; i<func->new_globals.size(); i++) {
 		const Variable* var = func->new_globals[i];
-		caller_fm->add_new_var_fact_and_update_inout_maps(NULL, var);
+		caller_fm->add_new_var_fact_and_update_inout_maps(nullptr, var);
 	}
 
 	func->visited_cnt = 1;

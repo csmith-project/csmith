@@ -60,7 +60,7 @@ public:
 				 const Expression &test,
 				 const StatementAssign &incr,
 				 const Block &body);
-	virtual ~StatementFor(void);
+	virtual ~StatementFor(void) override;
 
 	void post_loop_analysis(CGContext& cg_context, vector<const Fact*>& pre_facts, Effect& pre_effect);
 	const StatementAssign* get_init(void) const { return &init;};
@@ -73,9 +73,9 @@ public:
 
 	virtual void get_exprs(std::vector<const Expression*>& exps) const {exps.push_back(&test);}
 
-	virtual bool visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const;
+	virtual bool visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const override;
 
-	virtual void Output(std::ostream &out, FactMgr* fm, int indent = 0) const;
+	virtual void Output(std::ostream &out, FactMgr* fm, int indent = 0) const override;
 
 private:
 	// XXX --- `init' and `incr' have the "wrong types."  Should be exprs.

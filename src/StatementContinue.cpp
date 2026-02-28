@@ -75,7 +75,7 @@ StatementContinue::make_random(CGContext &cg_context)
 	assert(b);
 	cg_context.get_effect_stm().clear();
 	Expression *expr = Expression::make_random(cg_context, get_int_type(), 0, true, true, eVariable);
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 	StatementContinue* sc = new StatementContinue(cg_context.get_current_block(), *expr, *b);
 	fm->create_cfg_edge(sc, b, false, true);
     return sc;

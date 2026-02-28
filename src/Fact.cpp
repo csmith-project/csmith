@@ -93,7 +93,7 @@ Fact::abstract_fact_for_var_init(const Variable* v)
 {
 	vector<const Fact*> empty;
 	// only consider points-to facts and union-write-field facts for now
-	if (v->type == NULL || (v->type->eType != ePointer && v->type->eType != eUnion)) return empty;
+	if (v->type == nullptr || (v->type->eType != ePointer && v->type->eType != eUnion)) return empty;
 
 	Lhs lhs(*v);
 	vector<const Fact*> facts;

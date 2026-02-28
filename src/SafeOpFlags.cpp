@@ -182,7 +182,7 @@ SafeOpFlags*
 SafeOpFlags::make_random_binary(const Type *rv_type, const Type *op1_type, const Type *op2_type,
 			SafeOpKind op_kind, eBinaryOps bop)
 {
-	DEPTH_GUARD_BY_TYPE_RETURN_WITH_FLAG(dtSafeOpFlags, op_kind, NULL);
+	DEPTH_GUARD_BY_TYPE_RETURN_WITH_FLAG(dtSafeOpFlags, op_kind, nullptr);
 	SafeOpFlags *flags = new SafeOpFlags();
 	assert("new SafeOpFlags fail!");
 	bool rv_is_float = return_float_type(rv_type, op1_type, op2_type, bop);
@@ -197,14 +197,14 @@ SafeOpFlags::make_random_binary(const Type *rv_type, const Type *op1_type, const
 	else {
 		flags->op1_ = rnd_flipcoin(SafeOpsSignedProb);
 	}
-	ERROR_GUARD_AND_DEL1(NULL, flags);
+	ERROR_GUARD_AND_DEL1(nullptr, flags);
 
 	if (op_kind == sOpBinary) {
 		if (rv_is_float)
 			flags->op2_ = true;
 		else
 			flags->op2_ = rnd_flipcoin(SafeOpsSignedProb);
-		ERROR_GUARD_AND_DEL1(NULL, flags);
+		ERROR_GUARD_AND_DEL1(nullptr, flags);
 	}
 	else {
 		flags->op2_ = flags->op1_;

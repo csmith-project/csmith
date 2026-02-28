@@ -45,7 +45,7 @@ char SequenceFactory::current_sep_char_ = '_';
 Sequence*
 SequenceFactory::make_sequence()
 {
-	Sequence *seq = NULL;
+	Sequence *seq = nullptr;
 	seq = new LinearSequence(LinearSequence::default_sep_char);
 	current_sep_char_ = LinearSequence::default_sep_char;
 

@@ -75,7 +75,7 @@ StatementGoto::make_random(CGContext &cg_context)
 	vector<Block*> blks = func->blocks;
 	Block* ok_blk = 0;
 	bool select_back_edge = rnd_flipcoin(40);
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 	if (select_back_edge) {
 		// create a backward "goto", this creates a loop when other_stm leads to stm
 		back_edge = true;
@@ -86,7 +86,7 @@ StatementGoto::make_random(CGContext &cg_context)
 		blks = func->blocks;
 		ok_blk = find_good_jump_block(blks, curr_blk, false);
 	}
-	if (ok_blk == NULL) return NULL;
+	if (ok_blk == nullptr) return nullptr;
 
 	const Statement* stm = 0;
 	const Statement* other_stm = 0;
@@ -110,12 +110,12 @@ StatementGoto::make_random(CGContext &cg_context)
 
 	if (ok_stms.size() > 0) {
 		size_t stm_id = rnd_upto(ok_stms.size());
-		ERROR_GUARD(NULL);
+		ERROR_GUARD(nullptr);
 		other_stm = ok_stms[stm_id];
 		cg_context.get_effect_stm().clear();
 		//Expression* test = Expression::make_random(cg_context, get_int_type(), true, true, eVariable);
 		// use a variable that is already read in the context to avoid introducing conflict by the condition
-		const Variable* cond_var = NULL;
+		const Variable* cond_var = nullptr;
 		if (back_edge) {
 			cond_var = VariableSelector::choose_visible_read_var(curr_blk,
 				cg_context.get_effect_accum()->get_read_vars(), get_int_type(), fm->global_facts);
@@ -125,7 +125,7 @@ StatementGoto::make_random(CGContext &cg_context)
 				fm->map_accum_effect[other_stm].get_read_vars(), get_int_type(), fm->map_facts_out[other_stm]);
 		}
 		if (cond_var == 0) {
-			return NULL;
+			return nullptr;
 		}
 		Expression* test = new ExpressionVariable(*cond_var);
 
@@ -169,7 +169,7 @@ StatementGoto::make_random(CGContext &cg_context)
 				if (!ok) {
 					fm->restore_stm_fact_maps(stm, facts_in_copy, facts_out_copy);
 					cg_context.reset_effect_accum(pre_effect);
-					return NULL;
+					return nullptr;
 				}
 				// in cases where "stm" contains "other_stm", the above "stm_visit_facts" will cause "map_facts_in[other_stm]" to be updated
 				if (stm->contains_stmt(other_stm)) {
@@ -206,7 +206,7 @@ StatementGoto::make_random(CGContext &cg_context)
 			Bookkeeper::forward_jump_cnt++;
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 /*
@@ -317,16 +317,16 @@ StatementGoto::has_init_skipped_vars(const Block* src_blk, const Statement* dest
 Block*
 StatementGoto::find_good_jump_block(vector<Block*>& blocks, const Block* blk, bool as_dest)
 {
-	if (blocks.empty()) return NULL;
+	if (blocks.empty()) return nullptr;
 	// if the current block is in array-traversing loop, we don't want any jumps into it
-	if (blk->in_array_loop && !as_dest) return NULL;
+	if (blk->in_array_loop && !as_dest) return nullptr;
 	// if the current block hasn't generated any statement, we can not create a "goto" targeted to this block
-	if (blk->stms.empty() && !as_dest) return NULL;
+	if (blk->stms.empty() && !as_dest) return nullptr;
 	const Statement* last_stm = blk->get_last_stm();
-	if (last_stm && last_stm->must_return() && as_dest) return NULL;
+	if (last_stm && last_stm->must_return() && as_dest) return nullptr;
 
 	size_t index = rnd_upto(blocks.size());
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 	// disallow jumping to a block that is inside an array traversing loop
 	if (blocks[index]->in_array_loop && as_dest) {
 		blocks.erase(blocks.begin() + index);

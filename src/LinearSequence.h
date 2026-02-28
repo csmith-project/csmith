@@ -39,21 +39,21 @@ class LinearSequence : public Sequence {
 public:
 	explicit LinearSequence(const char sep_char);
 
-	virtual ~LinearSequence();
+	virtual ~LinearSequence() override;
 
-	virtual void init_sequence();
+	virtual void init_sequence() override;
 
-	virtual unsigned INT64 sequence_length();
+	virtual unsigned INT64 sequence_length() override;
 
-	virtual void add_number(int v, int bound, int k);
+	virtual void add_number(int v, int bound, int k) override;
 
-	virtual int get_number(int bound);
+	virtual int get_number(int bound) override;
 
-	virtual int get_number_by_pos(int pos);
+	virtual int get_number_by_pos(int pos) override;
 
-	virtual void clear();
+	virtual void clear() override;
 
-	virtual void get_sequence(std::ostream &);
+	virtual void get_sequence(std::ostream &) override;
 
 	virtual char get_sep_char() const { return sep_char_; }
 

@@ -231,7 +231,7 @@ void remove_field_vars(vector<const Variable*>& set)
 const Variable*
 Variable::get_container_union(void) const
 {
-	if (type == NULL) return NULL;
+	if (type == nullptr) return nullptr;
 	const Variable* p = this;
 	for (; p && p->type->eType != eUnion; p = p->field_var_of)
 		;
@@ -416,11 +416,11 @@ Variable::CreateVariable(const std::string &name, const Type *type,
 	while (top->field_var_of) top = top->field_var_of;
 	var->init = (top->type->eType == eUnion) ? 0 : Constant::make_random(type);
 
-	ERROR_GUARD_AND_DEL1(NULL, var);
+	ERROR_GUARD_AND_DEL1(nullptr, var);
 	if (type->is_aggregate()) {
 		var->create_field_vars(type);
 	}
-	ERROR_GUARD_AND_DEL1(NULL, var);
+	ERROR_GUARD_AND_DEL1(nullptr, var);
 	return var;
 }
 
@@ -439,7 +439,7 @@ Variable::CreateVariable(const std::string &name, const Type *type, const Expres
 	if (type->is_aggregate()) {
 		var->create_field_vars(type);
 	}
-	ERROR_GUARD_AND_DEL1(NULL, var);
+	ERROR_GUARD_AND_DEL1(nullptr, var);
 	return var;
 }
 
@@ -704,7 +704,7 @@ Variable::get_array(string& field) const
 		field = name.substr(dot);
 		return (const ArrayVariable*)parent;
 	}
-	return NULL;
+	return nullptr;
 }
 
 // --------------------------------------------------------------
@@ -1178,11 +1178,11 @@ Variable::is_valid_volatile(void) const
 {
 	if (is_inside_union_field()) {
 		const Variable *uv = get_container_union();
-		assert(uv && "NULL union var!");
+		assert(uv && "nullptr union var!");
 		return uv->is_valid_volatile();
 	}
 
-	assert(init && "NULL init expression!");
+	assert(init && "nullptr init expression!");
 	if (!is_const() || init->not_equals(0) || (type->eType != ePointer))
 		return true;
 
@@ -1350,7 +1350,7 @@ Variable::match_var_name(const string& vname) const
 			return v;
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 void
@@ -1371,7 +1371,7 @@ bool
 Variable::is_packed_after_bitfield(void) const
 {
 	const Variable* parent = this->field_var_of;
-	if (parent == NULL) return false;
+	if (parent == nullptr) return false;
 	if (parent->type->eType == eStruct && parent->type->packed_) {
 		for (size_t i=0; i<parent->field_vars.size(); i++) {
 			if (parent->field_vars[i] == this) {

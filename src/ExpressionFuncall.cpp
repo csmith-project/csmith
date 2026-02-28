@@ -72,7 +72,7 @@ ExpressionFuncall::make_random(CGContext &cg_context, const Type* type, const CV
 {
 	Expression *e = 0;
 	bool std_func = ExpressionFunctionProbability(cg_context);
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
     // unary/binary "functions" produce scalar types only
 	if (type && (type->eType != eSimple || type->simple_type == eVoid))
 		std_func = false;
@@ -82,7 +82,7 @@ ExpressionFuncall::make_random(CGContext &cg_context, const Type* type, const CV
 	FactMgr* fm = get_fact_mgr(&cg_context);
 	vector<const Fact*> facts_copy = fm->global_facts;
 	FunctionInvocation *fi = FunctionInvocation::make_random(std_func, cg_context, type, qfer);
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 
 	if (fi->failed) {
 		// if it's a invalid invocation, (see FunctionInvocationUser::revisit)

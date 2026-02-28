@@ -85,7 +85,7 @@ public:
 
 	virtual void Output(std::ostream &out) const = 0;
 
-	virtual void OutputAssertion(std::ostream &out, const Statement* s = NULL) const;
+	virtual void OutputAssertion(std::ostream &out, const Statement* s = nullptr) const;
 
 	virtual const Variable* get_var(void) const { return 0;};
 

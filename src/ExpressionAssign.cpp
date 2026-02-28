@@ -52,7 +52,7 @@ Expression *
 ExpressionAssign::make_random(CGContext &cg_context, const Type* type, const CVQualifiers* qfer)
 {
 	CVQualifiers qf;
-	if (qfer == NULL) {
+	if (qfer == nullptr) {
 		qf = CVQualifiers::random_qualifiers(type, Effect::WRITE, cg_context, true);
 		qfer = &qf;
 	}
@@ -76,7 +76,7 @@ ExpressionAssign::~ExpressionAssign(void)
 {
 	/*if (assign) {
 		delete assign;
-		assign = NULL;
+		assign = nullptr;
 	}*/
 }
 

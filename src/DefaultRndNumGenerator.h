@@ -45,25 +45,25 @@ class DefaultRndNumGenerator : public AbsRndNumGenerator
 public:
 	static DefaultRndNumGenerator *make_rndnum_generator(const unsigned long seed);
 
-	virtual std::string get_prefixed_name(const std::string &name);
+	virtual std::string get_prefixed_name(const std::string &name) override;
 
-	virtual std::string& trace_depth();
+	virtual std::string& trace_depth() override;
 
-	virtual void get_sequence(std::string &sequence);
+	virtual void get_sequence(std::string &sequence) override;
 
-	virtual unsigned int rnd_upto(const unsigned int n, const Filter *f = NULL, const std::string *where = NULL);
+	virtual unsigned int rnd_upto(const unsigned int n, const Filter *f = nullptr, const std::string *where = nullptr) override;
 
-	virtual bool rnd_flipcoin(const unsigned int p, const Filter *f = NULL, const std::string *where = NULL);
+	virtual bool rnd_flipcoin(const unsigned int p, const Filter *f = nullptr, const std::string *where = nullptr) override;
 
-	virtual std::string RandomHexDigits( int num );
+	virtual std::string RandomHexDigits( int num ) override;
 
-	virtual std::string RandomDigits( int num );
+	virtual std::string RandomDigits( int num ) override;
 
 	virtual enum RNDNUM_GENERATOR kind() { return rDefaultRndNumGenerator; }
 
 	void set_rand_depth(unsigned INT64 depth) { rand_depth_ = depth; }
 
-	virtual ~DefaultRndNumGenerator();
+	virtual ~DefaultRndNumGenerator() override;
 
 private:
 	DefaultRndNumGenerator(const unsigned long seed, Sequence *concrete_seq);
@@ -78,7 +78,7 @@ private:
 
 	Sequence *seq_;
 
-	virtual unsigned long genrand(void);
+	virtual unsigned long genrand(void) override;
 
 	//void seedrand(unsigned long seed);
 

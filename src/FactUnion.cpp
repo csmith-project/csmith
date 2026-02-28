@@ -73,7 +73,7 @@ const Type*
 FactUnion::get_last_written_type(void) const
 {
 	assert(var->type && var->type->eType == eUnion);
-	if (is_top() || is_bottom()) return NULL;
+	if (is_top() || is_bottom()) return nullptr;
 	assert (last_written_fid >= 0 && last_written_fid < (int)(var->field_vars.size()));
 	return var->field_vars[last_written_fid]->type;
 }
@@ -86,7 +86,7 @@ FactUnion::rhs_to_lhs_transfer(const std::vector<const Fact*>& facts, const vect
 	for (size_t i=0; i<lvars.size(); i++) {
 		assert(lvars[i]->type->eType == eUnion);
 	}
-	assert(rhs != NULL);
+	assert(rhs != nullptr);
 	if (rhs->term_type == eConstant) {
 		return make_facts(lvars, 0);
 	}
@@ -135,7 +135,7 @@ FactUnion::abstract_fact_for_assign(const std::vector<const Fact*>& facts, const
 		return lvars.size();
 	}
 
-	if (rhs == NULL)
+	if (rhs == nullptr)
 		return lvars.size();
 
 	for (size_t i=0; i<lvars.size(); i++) {
@@ -167,7 +167,7 @@ FactUnion::clone(void) const
 FactUnion *
 FactUnion::make_fact(const Variable* v, int fid)
 {
-	assert(v == NULL || v->type->eType == eUnion);
+	assert(v == nullptr || v->type->eType == eUnion);
 	FactUnion *fact = new FactUnion(v, fid);
 	facts_.push_back(fact);
 	return fact;
@@ -194,7 +194,7 @@ FactUnion::is_nonreadable_field(const Variable *v, const std::vector<const Fact*
 		assert(v->is_union_field());
 		FactUnion tmp(v->field_var_of, v->get_field_id());
 		const FactUnion* fu = dynamic_cast<const FactUnion*>(find_related_fact(facts, &tmp));
-		if (fu==NULL || !tmp.imply(*fu)) {
+		if (fu==nullptr || !tmp.imply(*fu)) {
 			return true;
 		}
 	}

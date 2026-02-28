@@ -119,7 +119,7 @@ StatementAssign::make_random(CGContext &cg_context, const Type* type, const CVQu
 	// bool stand_alone_assign = false;
 
 	// decide type
-	if (type == NULL) {
+	if (type == nullptr) {
 		// stand_alone_assign = true;
 		type = Type::SelectLType(!cg_context.get_effect_context().is_side_effect_free(), op);
 	}
@@ -128,8 +128,8 @@ StatementAssign::make_random(CGContext &cg_context, const Type* type, const CVQu
 	FactMgr* fm = get_fact_mgr(&cg_context);
 	assert(fm);
 	// pre-generation initializations
-	Lhs *lhs = NULL;
-	Expression *e = NULL;
+	Lhs *lhs = nullptr;
+	Expression *e = nullptr;
 	Effect running_eff_context(cg_context.get_effect_context());
 	Effect rhs_accum, lhs_accum;
 	CGContext rhs_cg_context(cg_context, running_eff_context, &rhs_accum);
@@ -139,14 +139,14 @@ StatementAssign::make_random(CGContext &cg_context, const Type* type, const CVQu
 	if (need_no_rhs(op)) {
 		e = Constant::make_int(1);
 		// if we are creating standalone statements like x++, any qualifers fit
-		if (qf == NULL) qfer.wildcard = true;
+		if (qf == nullptr) qfer.wildcard = true;
 	}
 	else if (CGOptions::strict_volatile_rule()) {
 		if (type->is_volatile_struct_union())
-			return NULL;
+			return nullptr;
 
 		e = Expression::make_random(rhs_cg_context, type, qf);
-		ERROR_GUARD_AND_DEL1(NULL, e);
+		ERROR_GUARD_AND_DEL1(nullptr, e);
 		if (!qf) {
 			qfer = e->get_qualifiers();
 			// lhs should not has "const" qualifier
@@ -167,7 +167,7 @@ StatementAssign::make_random(CGContext &cg_context, const Type* type, const CVQu
 	}
 	else {
 		e = Expression::make_random(rhs_cg_context, type, qf);
-		ERROR_GUARD_AND_DEL1(NULL, e);
+		ERROR_GUARD_AND_DEL1(nullptr, e);
 		if (!qf) {
 			qfer = e->get_qualifiers();
 			// lhs should not has "const" qualifier
@@ -198,7 +198,7 @@ StatementAssign::make_random(CGContext &cg_context, const Type* type, const CVQu
 	}
 
 	if (qf) CGOptions::match_exact_qualifiers(prev_flag); // restore flag
-	ERROR_GUARD_AND_DEL2(NULL, e, lhs);
+	ERROR_GUARD_AND_DEL2(nullptr, e, lhs);
 
 	// typecast, if needed.
 	e->check_and_set_cast(type);
@@ -215,13 +215,13 @@ StatementAssign::make_random(CGContext &cg_context, const Type* type, const CVQu
 		Error::set_error(COMPATIBLE_CHECK_ERROR);
 		delete e;
 		delete lhs;
-		return NULL;
+		return nullptr;
 	}
 
 	cg_context.merge_param_context(lhs_cg_context, true);
-	ERROR_GUARD_AND_DEL2(NULL, e, lhs);
+	ERROR_GUARD_AND_DEL2(nullptr, e, lhs);
 	StatementAssign *stmt_assign = make_possible_compound_assign(cg_context, type, *lhs, op, *e);
-	ERROR_GUARD_AND_DEL2(NULL, e, lhs);
+	ERROR_GUARD_AND_DEL2(nullptr, e, lhs);
 	return stmt_assign;
 }
 
@@ -246,21 +246,21 @@ StatementAssign::make_possible_compound_assign(CGContext &cg_context,
 				 const Expression &e)
 {
 	eBinaryOps bop = compound_to_binary_ops(op);
-	const Expression *rhs = NULL;
-	SafeOpFlags *fs = NULL;
+	const Expression *rhs = nullptr;
+	SafeOpFlags *fs = nullptr;
 	std::string tmp1;
 	std::string tmp2;
 
 	if (bop != MAX_BINARY_OP) {
-		SafeOpFlags *local_fs  = NULL;
-		FunctionInvocation* fi = NULL;
+		SafeOpFlags *local_fs  = nullptr;
+		FunctionInvocation* fi = nullptr;
 		if (safe_assign(op)) {
 			local_fs = SafeOpFlags::make_dummy_flags();
 			fi = new FunctionInvocationBinary(bop, local_fs);
 		}
 		else {
 			local_fs = SafeOpFlags::make_random_binary(type, &(l.get_type()), &(l.get_type()), sOpAssign, bop);
-			ERROR_GUARD(NULL);
+			ERROR_GUARD(nullptr);
 			fi = FunctionInvocationBinary::CreateFunctionInvocationBinary(cg_context, bop, local_fs);
 			tmp1 = dynamic_cast<FunctionInvocationBinary*>(fi)->get_tmp_var1();
 			tmp2 = dynamic_cast<FunctionInvocationBinary*>(fi)->get_tmp_var2();
@@ -277,7 +277,7 @@ StatementAssign::make_possible_compound_assign(CGContext &cg_context,
 			const ExpressionFuncall* func = dynamic_cast<const ExpressionFuncall*>(&e);
 			if (!func->get_invoke().safe_invocation()) {
 				fs = SafeOpFlags::make_dummy_flags();
-				fs = NULL;
+				fs = nullptr;
 			}
 		}
 #endif
@@ -295,7 +295,7 @@ StatementAssign::make_possible_compound_assign(CGContext &cg_context,
 
 			tmp1 = blk->create_new_tmp_var(type1);
 			tmp2 = blk->create_new_tmp_var(type2);
-			ERROR_GUARD(NULL);
+			ERROR_GUARD(nullptr);
 		}
 	}
 	StatementAssign *sa = new StatementAssign(cg_context.get_current_block(), l, op, e, rhs, fs, tmp1, tmp2);

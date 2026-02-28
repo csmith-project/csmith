@@ -43,23 +43,23 @@ class Filter;
 class DFSRndNumGenerator : public AbsRndNumGenerator
 {
 public:
-	virtual ~DFSRndNumGenerator();
+	virtual ~DFSRndNumGenerator() override;
 
 	static DFSRndNumGenerator *make_rndnum_generator();
 
-	virtual std::string get_prefixed_name(const std::string &name);
+	virtual std::string get_prefixed_name(const std::string &name) override;
 
-	virtual std::string& trace_depth();
+	virtual std::string& trace_depth() override;
 
-	virtual void get_sequence(std::string &sequence);
+	virtual void get_sequence(std::string &sequence) override;
 
-	virtual unsigned int rnd_upto(const unsigned int n, const Filter *f = NULL, const std::string *where = NULL);
+	virtual unsigned int rnd_upto(const unsigned int n, const Filter *f = nullptr, const std::string *where = nullptr) override;
 
-	virtual bool rnd_flipcoin(const unsigned int p, const Filter *f = NULL, const std::string *where = NULL);
+	virtual bool rnd_flipcoin(const unsigned int p, const Filter *f = nullptr, const std::string *where = nullptr) override;
 
-	virtual std::string RandomHexDigits( int num );
+	virtual std::string RandomHexDigits( int num ) override;
 
-	virtual std::string RandomDigits( int num );
+	virtual std::string RandomDigits( int num ) override;
 
 	virtual enum RNDNUM_GENERATOR kind() { return rDFSRndNumGenerator; }
 
@@ -89,15 +89,15 @@ private:
 
 	void dumpCurrentState(int bound, const std::string &where);
 
-	virtual unsigned long genrand(void);
+	virtual unsigned long genrand(void) override;
 
 	bool filter_invalid_nums(vector<int> *invalid_nums, int v);
 
-	int random_choice(int bound, const Filter *f = NULL, const std::string *where = NULL, std::vector<int> *invalid_nums = NULL);
+	int random_choice(int bound, const Filter *f = nullptr, const std::string *where = nullptr, std::vector<int> *invalid_nums = nullptr);
 
 	void init_states(int size);
 
-	void log_depth(int d, const std::string *where = NULL, const char *log = NULL);
+	void log_depth(int d, const std::string *where = nullptr, const char *log = nullptr);
 
 	// ----------------------------------------------------------------------------------------
 	static DFSRndNumGenerator *impl_;

@@ -80,7 +80,7 @@ Statement*
 StatementArrayOp::make_random(CGContext &cg_context)
 {
 	bool ary_init = rnd_flipcoin(5);
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 	if (ary_init) {
 		return make_random_array_init(cg_context);
 	}
@@ -95,12 +95,12 @@ StatementArrayOp::make_random_array_init(CGContext &cg_context)
 	//static int g = 0;
 	//int h = g++;
 	ArrayVariable* av =  VariableSelector::select_array(cg_context);
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 	cg_context.get_effect_stm().clear();
 	// Select the loop control variable.
 	vector<const Variable*> invalid_vars;
 	vector<const Variable*> cvs;
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 	// the iteration settings are simple: start from index 0, step through all members
 	vector<int> inits, incrs;
 	size_t i;
@@ -113,7 +113,7 @@ StatementArrayOp::make_random_array_init(CGContext &cg_context)
 	for (i=0; i<av->get_dimension(); i++) {
 		inits.push_back(0);
 		incrs.push_back(1);
-		Variable *cv = NULL;
+		Variable *cv = nullptr;
 		do {
 			cv = VariableSelector::SelectLoopCtrlVar(cg_context, invalid_vars);
 			if (cv->type->is_float()) {

@@ -57,7 +57,7 @@ public:
 	static void doFinalization();
 
 	explicit FactPointTo(const Variable* v);
-	virtual ~FactPointTo(void);
+	virtual ~FactPointTo(void) override;
 
 	virtual const Variable* get_var(void) const { return var;};
 	const vector<const Variable*>& get_point_to_vars(void) const { return point_to_vars; };
@@ -68,7 +68,7 @@ public:
 	bool has_invisible(const Statement* stm) const;
 	int  size() const;
 	std::vector<const Fact*> rhs_to_lhs_transfer(const std::vector<const Fact*>& facts, const vector<const Variable*>& lvars, const Expression* rhs);
-	virtual int abstract_fact_for_assign(const std::vector<const Fact*>& /*facts*/, const Lhs* /*lhs*/, const Expression* /*rhs*/, std::vector<const Fact*>&);
+	virtual int abstract_fact_for_assign(const std::vector<const Fact*>& /*facts*/, const Lhs* /*lhs*/, const Expression* /*rhs*/, std::vector<const Fact*>&) override;
 
 	FactPointTo* mark_dead_var(const Variable* v);
 	FactPointTo* mark_func_end(const Statement* stm);
@@ -80,14 +80,14 @@ public:
 	virtual void set_top(void) { point_to_vars.clear();}
 	virtual void set_bottom(void) {};
 
-	virtual int join(const Fact& fact);
-	virtual int join_visits(const Fact& fact);
-	virtual Fact* clone(void) const;
-	virtual bool imply(const Fact& fact) const;
+	virtual int join(const Fact& fact) override;
+	virtual int join_visits(const Fact& fact) override;
+	virtual Fact* clone(void) const override;
+	virtual bool imply(const Fact& fact) const override;
 	virtual bool point_to(const Variable* v) const;
-	virtual bool equal(const Fact& fact) const;
-	virtual void Output(std::ostream &out) const;
-	virtual bool is_assertable(const Statement* s) const;
+	virtual bool equal(const Fact& fact) const override;
+	virtual void Output(std::ostream &out) const override;
+	virtual bool is_assertable(const Statement* s) const override;
 
 	static std::vector<const Variable*> merge_pointees_of_pointer(const Variable* ptr, int indirect, const std::vector<const Fact*>& facts);
 	static std::vector<const Variable*> merge_pointees_of_pointers(const std::vector<const Variable*>& ptrs, const std::vector<const Fact*>& facts);

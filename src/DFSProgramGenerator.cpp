@@ -53,7 +53,7 @@ DFSProgramGenerator::DFSProgramGenerator(int argc, char *argv[], unsigned long s
 	  argv_(argv),
 	  seed_(seed),
 	  good_count_(0),
-	  output_mgr_(NULL)
+	  output_mgr_(nullptr)
 {
 
 }

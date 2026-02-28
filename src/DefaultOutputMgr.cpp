@@ -59,7 +59,7 @@ static std::string dir_sep = "\\";
 
 using namespace std;
 
-DefaultOutputMgr *DefaultOutputMgr::instance_ = NULL;
+DefaultOutputMgr *DefaultOutputMgr::instance_ = nullptr;
 
 DefaultOutputMgr *
 DefaultOutputMgr::CreateInstance()
@@ -266,7 +266,7 @@ DefaultOutputMgr::DefaultOutputMgr(std::ofstream *ofile)
 }
 
 DefaultOutputMgr::DefaultOutputMgr()
-	: ofile_(NULL)
+	: ofile_(nullptr)
 {
 
 }

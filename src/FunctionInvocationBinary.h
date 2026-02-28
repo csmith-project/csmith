@@ -55,21 +55,21 @@ public:
 
 	FunctionInvocationBinary(eBinaryOps op, const Expression* exp1, const Expression* exp2, const SafeOpFlags *flags);
 
-	virtual ~FunctionInvocationBinary(void);
+	virtual ~FunctionInvocationBinary(void) override;
 
-	virtual FunctionInvocation * clone() const;
+	virtual FunctionInvocation * clone() const override;
 
 	virtual bool compatible(const Variable *) const { return false; }
 
-	virtual const Type &get_type(void) const;
+	virtual const Type &get_type(void) const override;
 
-	virtual void Output(std::ostream &) const;
+	virtual void Output(std::ostream &) const override;
 
-	virtual void indented_output(std::ostream &out, int indent) const;
+	virtual void indented_output(std::ostream &out, int indent) const override;
 
 	virtual bool safe_invocation() const { return false; }
 
-	virtual bool visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const;
+	virtual bool visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const override;
 
 	eBinaryOps get_operation(void) const {return eFunc;}
 	void set_operation(eBinaryOps op) { eFunc = op;}
@@ -80,8 +80,8 @@ public:
 
 	static std::string get_binop_string(eBinaryOps bop);
 
-	virtual bool equals(int num) const ;
-	virtual bool is_0_or_1(void) const;
+	virtual bool equals(int num) const  override;
+	virtual bool is_0_or_1(void) const override;
 
 private:
 	eBinaryOps eFunc;

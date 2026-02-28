@@ -71,7 +71,7 @@ std::vector<Fact*> FactMgr::meta_facts;
 void
 FactMgr::add_new_var_fact_and_update_inout_maps(const Block* blk, const Variable* var)
 {
-	if (blk == NULL) {
+	if (blk == nullptr) {
 		assert(var->is_global());
 	}
 	// var is global if blk == 0, we add fact to all blocks of this function
@@ -89,7 +89,7 @@ FactMgr::add_new_var_fact_and_update_inout_maps(const Block* blk, const Variable
 			map<const Statement*, FactVec>::iterator iter;
 			for(iter = map_facts_in.begin(); iter != map_facts_in.end(); ++iter) {
 				const Statement* stm = iter->first;
-				if (stm && (stm->in_block(blk) || blk == NULL)) {
+				if (stm && (stm->in_block(blk) || blk == nullptr)) {
 					iter->second.push_back(f);
 				}
 			}
@@ -276,7 +276,7 @@ FactMgr::set_fact_out(const Statement* s, const FactVec& facts)
 		FactMgr::update_facts_for_dest(facts, facts_copy, sg->dest);
 		map_facts_out[s] = facts_copy;
 	}
-	else if (s->eType == eReturn || s->parent==NULL) {
+	else if (s->eType == eReturn || s->parent==nullptr) {
 		FactVec facts_copy = facts;
 		remove_function_local_facts(facts_copy, s);
 		map_facts_out[s] = facts_copy;

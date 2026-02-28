@@ -86,12 +86,12 @@ FunctionInvocation::make_random(bool is_std_func,
 	FunctionInvocation *fi = 0;
 	// If we are looking for a program-defined function, try to find one.
 	if (!is_std_func) {
-		Function* callee = NULL;
+		Function* callee = nullptr;
 		if (pure_rnd_flipcoin(50)) {
 			callee = Function::choose_func(get_all_functions(), cg_context, type, qfer);
 		}
-		if (callee != NULL) {
-			FunctionInvocationUser *fiu = new FunctionInvocationUser(callee, true, NULL);
+		if (callee != nullptr) {
+			FunctionInvocationUser *fiu = new FunctionInvocationUser(callee, true, nullptr);
 			fiu->build_invocation(callee, cg_context);
 			fi = fiu;
 			if (!fiu->failed) {
@@ -102,13 +102,13 @@ FunctionInvocation::make_random(bool is_std_func,
 			fi = FunctionInvocationUser::build_invocation_and_function(cg_context, type, qfer);
 		} else {
 			// we can not find/create a function because we reach the limit, so give up
-			fi = new FunctionInvocationUser(NULL, false, NULL);
+			fi = new FunctionInvocationUser(nullptr, false, nullptr);
 			fi->failed = true;
 			return fi;
 		}
 	}
 	// now use standard functions, i.e., binary/unary operators to create an invocation
-	if (fi == NULL) {
+	if (fi == nullptr) {
 		int rnd_flag = rnd_flipcoin(StdUnaryFuncProb);
 		if (rnd_flag) {
 			fi = make_random_unary(cg_context, type);
@@ -129,9 +129,9 @@ FunctionInvocation *
 FunctionInvocation::make_random(Function *target,
 								CGContext &cg_context)
 {
-	FunctionInvocationUser *fi = new FunctionInvocationUser(target, true, NULL);
+	FunctionInvocationUser *fi = new FunctionInvocationUser(target, true, nullptr);
 	fi->build_invocation(target, cg_context);
-	ERROR_GUARD_AND_DEL1(NULL, fi);
+	ERROR_GUARD_AND_DEL1(nullptr, fi);
 	assert(!fi->failed);
 	return fi;
 }
@@ -142,23 +142,23 @@ FunctionInvocation::make_random(Function *target,
 FunctionInvocation *
 FunctionInvocation::make_random_unary(CGContext &cg_context, const Type* type)
 {
-	DEPTH_GUARD_BY_TYPE_RETURN(dtFunctionInvocationRandomUnary, NULL);
+	DEPTH_GUARD_BY_TYPE_RETURN(dtFunctionInvocationRandomUnary, nullptr);
 	assert(type);
 	eUnaryOps op;
 	do {
 		op = (eUnaryOps)(rnd_upto(MAX_UNARY_OP, UNARY_OPS_PROB_FILTER));
 	} while (type->is_float() && !UnaryOpWorksForFloat(op));
-	ERROR_GUARD(NULL);
-	SafeOpFlags *flags = NULL;
-	flags = SafeOpFlags::make_random_unary(type, NULL, op);
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
+	SafeOpFlags *flags = nullptr;
+	flags = SafeOpFlags::make_random_unary(type, nullptr, op);
+	ERROR_GUARD(nullptr);
 	type = flags->get_lhs_type();
 	assert(type);
 
 	FunctionInvocation *fi = FunctionInvocationUnary::CreateFunctionInvocationUnary(cg_context, op, flags);
 
 	Expression *operand = Expression::make_random(cg_context, type);
-	ERROR_GUARD_AND_DEL1(NULL, fi);
+	ERROR_GUARD_AND_DEL1(nullptr, fi);
 
 	fi->param_value.push_back(operand);
 	return fi;
@@ -170,9 +170,9 @@ FunctionInvocation::make_random_unary(CGContext &cg_context, const Type* type)
 FunctionInvocation *
 FunctionInvocation::make_random_binary(CGContext &cg_context, const Type* type)
 {
-	DEPTH_GUARD_BY_TYPE_RETURN(dtFunctionInvocationRandomBinary, NULL);
+	DEPTH_GUARD_BY_TYPE_RETURN(dtFunctionInvocationRandomBinary, nullptr);
 	if (rnd_flipcoin(10) && Type::has_pointer_type()) {
-		ERROR_GUARD(NULL);
+		ERROR_GUARD(nullptr);
 		return make_random_binary_ptr_comparison(cg_context);
 	}
 
@@ -180,11 +180,11 @@ FunctionInvocation::make_random_binary(CGContext &cg_context, const Type* type)
 	do {
 		op = (eBinaryOps)(rnd_upto(MAX_BINARY_OP, BINARY_OPS_PROB_FILTER));
 	} while (type->is_float() && !BinaryOpWorksForFloat(op));
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 	assert(type);
-	SafeOpFlags *flags = SafeOpFlags::make_random_binary(type, NULL, NULL, sOpBinary, op);
+	SafeOpFlags *flags = SafeOpFlags::make_random_binary(type, nullptr, nullptr, sOpBinary, op);
 	assert(flags);
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 	FunctionInvocationBinary *fi = FunctionInvocationBinary::CreateFunctionInvocationBinary(cg_context, op, flags);
 
 	Effect lhs_eff_accum;
@@ -200,7 +200,7 @@ FunctionInvocation::make_random_binary(CGContext &cg_context, const Type* type)
 	}
 
 	Expression *lhs = Expression::make_random(lhs_cg_context, lhs_type);
-	ERROR_GUARD_AND_DEL1(NULL, fi);
+	ERROR_GUARD_AND_DEL1(nullptr, fi);
 	Expression *rhs = 0;
 
 	cg_context.merge_param_context(lhs_cg_context, true);
@@ -234,7 +234,7 @@ FunctionInvocation::make_random_binary(CGContext &cg_context, const Type* type)
 			if (!not_constant) {
 				rhs = Constant::make_random_upto(lhs_type->SizeInBytes() * 8);
 			} else {
-				rhs = Expression::make_random(rhs_cg_context, rhs_type, NULL, false, true, tt);
+				rhs = Expression::make_random(rhs_cg_context, rhs_type, nullptr, false, true, tt);
 			}
 		}
 		else {
@@ -251,7 +251,7 @@ FunctionInvocation::make_random_binary(CGContext &cg_context, const Type* type)
 		cg_context.merge_param_context(rhs_cg_context, true);
 	}
 
-	ERROR_GUARD_AND_DEL2(NULL, fi, lhs);
+	ERROR_GUARD_AND_DEL2(nullptr, fi, lhs);
 	if (!BinaryOpWorksForFloat(op)) {
 		assert(!lhs->get_type().is_float() && "lhs is of float!");
 		assert(!rhs->get_type().is_float() && "rhs is of float!");
@@ -262,7 +262,7 @@ FunctionInvocation::make_random_binary(CGContext &cg_context, const Type* type)
 		delete lhs;
 		delete rhs;
 		delete fi;
-		return NULL;
+		return nullptr;
 	}
 
 	// ordered operators such as "||" or "&&" may skip the 2nd parameter
@@ -284,19 +284,19 @@ FunctionInvocation *
 FunctionInvocation::make_random_binary_ptr_comparison(CGContext &cg_context)
 {
 	eBinaryOps op = rnd_flipcoin(50) ? eCmpEq : eCmpNe;
-	ERROR_GUARD(NULL);
-	SafeOpFlags *flags = SafeOpFlags::make_random_binary(get_int_type(), NULL, NULL, sOpBinary, op);
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
+	SafeOpFlags *flags = SafeOpFlags::make_random_binary(get_int_type(), nullptr, nullptr, sOpBinary, op);
+	ERROR_GUARD(nullptr);
 
 	FunctionInvocation *fi = FunctionInvocationBinary::CreateFunctionInvocationBinary(cg_context, op, flags);
 	const Type* type = Type::choose_random_pointer_type();
-	ERROR_GUARD_AND_DEL1(NULL, fi);
+	ERROR_GUARD_AND_DEL1(nullptr, fi);
 
 	Effect lhs_eff_accum;
 	CGContext lhs_cg_context(cg_context, cg_context.get_effect_context(), &lhs_eff_accum);
 	lhs_cg_context.flags |= NO_DANGLING_PTR;
 	Expression *lhs = Expression::make_random(lhs_cg_context, type, 0, true);
-	ERROR_GUARD_AND_DEL1(NULL, fi);
+	ERROR_GUARD_AND_DEL1(nullptr, fi);
 	cg_context.merge_param_context(lhs_cg_context, true);
 
 	// now focus on RHS ...
@@ -329,7 +329,7 @@ FunctionInvocation::make_random_binary_ptr_comparison(CGContext &cg_context)
 		rhs = Expression::make_random(rhs_cg_context, type, 0, true, false, tt);
 		cg_context.merge_param_context(rhs_cg_context, true);
 	}
-	ERROR_GUARD_AND_DEL2(NULL, fi, lhs);
+	ERROR_GUARD_AND_DEL2(nullptr, fi, lhs);
 
 	// typecast, if needed.
 	rhs->check_and_set_cast(&lhs->get_type());
@@ -563,9 +563,9 @@ FunctionInvocation *
 FunctionInvocation::make_binary(CGContext &cg_context, eBinaryOps op,
 				Expression *lhs, Expression *rhs)
 {
-	DEPTH_GUARD_BY_TYPE_RETURN(dtFunctionInvocationBinary, NULL);
-	SafeOpFlags *flags = SafeOpFlags::make_random_binary(NULL, &(lhs->get_type()), &(rhs->get_type()), sOpBinary, op);
-	ERROR_GUARD(NULL);
+	DEPTH_GUARD_BY_TYPE_RETURN(dtFunctionInvocationBinary, nullptr);
+	SafeOpFlags *flags = SafeOpFlags::make_random_binary(nullptr, &(lhs->get_type()), &(rhs->get_type()), sOpBinary, op);
+	ERROR_GUARD(nullptr);
 	FunctionInvocation *fi = FunctionInvocationBinary::CreateFunctionInvocationBinary(cg_context, op, flags);
 	fi->param_value.push_back(lhs);
 	fi->param_value.push_back(rhs);

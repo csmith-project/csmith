@@ -53,9 +53,9 @@ public:
 	static Constant *make_random_upto(unsigned int limit);
 	static Constant *make_random_nonzero(const Type* type);
 
-	virtual bool compatible(const Variable *v) const;
+	virtual bool compatible(const Variable *v) const override;
 
-	virtual bool compatible(const Expression *exp) const;
+	virtual bool compatible(const Expression *exp) const override;
 
 	// Factory method.
 	static Constant *make_int(int v);
@@ -68,24 +68,24 @@ public:
 
 	Constant(const Type *t, const std::string &v);
 	explicit Constant(const Constant &c);
-	virtual ~Constant(void);
+	virtual ~Constant(void) override;
 
 	//
 
-	virtual const Type &get_type(void) const;
+	virtual const Type &get_type(void) const override;
 	// Unused:
 	const std::string &get_value(void) const { return value; }
 
 	string get_field(size_t fid) const;
 
-	virtual bool less_than(int num) const;
-	virtual bool not_equals(int num) const;
-	virtual bool equals(int num) const;
+	virtual bool less_than(int num) const override;
+	virtual bool not_equals(int num) const override;
+	virtual bool equals(int num) const override;
 
 	virtual void get_referenced_ptrs(std::vector<const Variable*>& /*ptrs*/) const {};
 	virtual unsigned int get_complexity(void) const { return 1;}
 	// unsigned long SizeInBytes(void) const;
-	virtual void Output(std::ostream &) const;
+	virtual void Output(std::ostream &) const override;
 
 private:
 	const Type* type;

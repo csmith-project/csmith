@@ -54,9 +54,9 @@ public:
 
 	int lookup(int v) const;
 
-	virtual ~VectorFilter(void);
+	virtual ~VectorFilter(void) override;
 
-	virtual bool filter(int v) const;
+	virtual bool filter(int v) const override;
 private:
 	std::vector<unsigned int> vs_;
 

@@ -38,7 +38,7 @@
 #include "AbsRndNumGenerator.h"
 #include "Filter.h"
 
-RandomNumber *RandomNumber::instance_ = NULL;
+RandomNumber *RandomNumber::instance_ = nullptr;
 
 RandomNumber::RandomNumber(const unsigned long seed)
 	: seed_(seed)
@@ -47,7 +47,7 @@ RandomNumber::RandomNumber(const unsigned long seed)
 
 	for (unsigned int i = 0; i < count; ++i) {
 		RNDNUM_GENERATOR rImpl = static_cast<RNDNUM_GENERATOR>(i);
-		generators_[rImpl] = NULL;
+		generators_[rImpl] = nullptr;
 	}
 }
 
@@ -110,7 +110,7 @@ RandomNumber::SwitchRndNumGenerator(RNDNUM_GENERATOR rImpl)
 {
 	unsigned int count = AbsRndNumGenerator::count();
 	AbsRndNumGenerator *generator = instance_->generators_[rImpl];
-	if (generator == NULL) {
+	if (generator == nullptr) {
 		generator = AbsRndNumGenerator::make_rndnum_generator(rImpl, instance_->seed_);
 		assert(generator);
 		instance_->generators_[rImpl] = generator;

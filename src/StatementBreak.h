@@ -48,13 +48,13 @@ public:
 
 	StatementBreak(Block* parent, const Expression &test, const Block& b);
 	StatementBreak(const StatementBreak &sc);
-	virtual ~StatementBreak(void);
+	virtual ~StatementBreak(void) override;
 	//
-	virtual bool must_jump(void) const;
+	virtual bool must_jump(void) const override;
 	virtual void get_blocks(std::vector<const Block*>& /* blks */) const {};
 	virtual void get_exprs(std::vector<const Expression*>& exps) const {exps.push_back(&test);}
-	virtual bool visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const;
-	virtual void Output(std::ostream &out, FactMgr* fm, int indent = 0) const;
+	virtual bool visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const override;
+	virtual void Output(std::ostream &out, FactMgr* fm, int indent = 0) const override;
 
 	const Expression &test;
 	const Block& loop_blk;

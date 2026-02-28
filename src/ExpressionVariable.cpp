@@ -57,7 +57,7 @@
 ExpressionVariable *
 ExpressionVariable::make_random(CGContext &cg_context, const Type* type, const CVQualifiers* qfer, bool as_param, bool as_return)
 {
-	DEPTH_GUARD_BY_TYPE_RETURN(dtExpressionVariable, NULL);
+	DEPTH_GUARD_BY_TYPE_RETURN(dtExpressionVariable, nullptr);
 	Function *curr_func = cg_context.get_current_func();
 	FactMgr* fm = get_fact_mgr_for_func(curr_func);
 	vector<const Variable*> dummy;
@@ -71,10 +71,10 @@ ExpressionVariable::make_random(CGContext &cg_context, const Type* type, const C
 		const Variable* var = 0;
 		// try to use one of must_read_vars in CGContext
 		var = VariableSelector::select_must_use_var(Effect::READ, cg_context, type, qfer);
-		if (var == NULL) {
+		if (var == nullptr) {
 			var = VariableSelector::select(Effect::READ, cg_context, type, qfer, dummy, eFlexible);
 		}
-		ERROR_GUARD(NULL);
+		ERROR_GUARD(nullptr);
 		if (!var)
 			continue;
 		if (!type->is_float() && var->type->is_float())

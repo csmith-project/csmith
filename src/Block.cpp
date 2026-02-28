@@ -82,7 +82,7 @@ Block* find_block_by_id(int blk_id)
 			}
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 /*
@@ -124,7 +124,7 @@ Block *
 Block::make_random(CGContext &cg_context, bool looping)
 {
 	//static int bid = 0;
-	DEPTH_GUARD_BY_TYPE_RETURN(dtBlock, NULL);
+	DEPTH_GUARD_BY_TYPE_RETURN(dtBlock, nullptr);
 
 	Function * const curr_func = cg_context.get_current_func();
 	assert(curr_func);
@@ -150,14 +150,14 @@ Block::make_random(CGContext &cg_context, bool looping)
 	if (Error::get_error() != SUCCESS) {
 		curr_func->stack.pop_back();
 		delete b;
-		return NULL;
+		return nullptr;
 	}
 	unsigned int i;
 	if (b->stm_id == 1)
 		BREAK_NOP;			// for debugging
 	for (i = 0; i <= max; ++i) {
 		Statement *s = Statement::make_random(cg_context);
-		// In the exhaustive mode, Statement::make_random could return NULL;
+		// In the exhaustive mode, Statement::make_random could return nullptr;
 		if (!s)
 			break;
 		b->stms.push_back(s);
@@ -169,7 +169,7 @@ Block::make_random(CGContext &cg_context, bool looping)
 	if (Error::get_error() != SUCCESS) {
 		curr_func->stack.pop_back();
 		delete b;
-		return NULL;
+		return nullptr;
 	}
 
 	// append nested loop if some must-read/write variables hasn't been accessed
@@ -183,14 +183,14 @@ Block::make_random(CGContext &cg_context, bool looping)
 	if (Error::get_error() != SUCCESS) {
 		curr_func->stack.pop_back();
 		delete b;
-		return NULL;
+		return nullptr;
 	}
 
 	curr_func->stack.pop_back();
 	if (Error::get_error() != SUCCESS) {
 		//curr_func->stack.pop_back();
 		delete b;
-		return NULL;
+		return nullptr;
 	}
 
 	// ISSUE: in the exhaustive mode, do we need a return statement here
@@ -341,7 +341,7 @@ Block::random_parent_block(void)
 {
 	vector<Block*> blks;
 	if (CGOptions::global_variables()) {
-		blks.push_back(NULL);
+		blks.push_back(nullptr);
 	}
 	Block* tmp = this;
 	while (tmp) {
@@ -349,7 +349,7 @@ Block::random_parent_block(void)
 		tmp = tmp->parent;
 	}
 	const int index = rnd_upto(blks.size());
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 	return blks[index];
 }
 
@@ -430,7 +430,7 @@ Block::append_return_stmt(CGContext& cg_context)
 	FactVec pre_facts = fm->global_facts;
 	cg_context.get_effect_stm().clear();
 	Statement* sr = Statement::make_random(cg_context, eReturn);
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 	stms.push_back(sr);
 	fm->makeup_new_var_facts(pre_facts, fm->global_facts);
 	const bool visited = sr->visit_facts(fm->global_facts, cg_context);
@@ -451,7 +451,7 @@ Block::need_nested_loop(const CGContext& cg_context)
 {
 	size_t i;
 	const Statement* const s = get_last_stm();
-	if (looping && (s == NULL || !s->must_jump()) && cg_context.rw_directive) {
+	if (looping && (s == nullptr || !s->must_jump()) && cg_context.rw_directive) {
 		RWDirective* const rwd = cg_context.rw_directive;
 		for (i=0; i<rwd->must_read_vars.size(); i++) {
 			const size_t dimen = rwd->must_read_vars[i]->get_dimension();
@@ -481,7 +481,7 @@ Block::append_nested_loop(CGContext& cg_context)
 	cg_context.get_effect_stm().clear();
 
 	Statement* const sf = Statement::make_random(cg_context, eFor);
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 	stms.push_back(sf);
 	fm->makeup_new_var_facts(pre_facts, fm->global_facts);
 	//assert(sf->visit_facts(fm->global_facts, cg_context));

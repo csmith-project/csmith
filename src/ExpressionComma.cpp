@@ -45,7 +45,7 @@
  *
  */
 
-// Needs cast only if it is NULL
+// Needs cast only if it is nullptr
 void
 cast_if_needed(Expression* exp)
 {
@@ -58,7 +58,7 @@ cast_if_needed(Expression* exp)
 ExpressionComma*
 ExpressionComma::make_random(CGContext &cg_context, const Type* type, const CVQualifiers* qfer)
 {
-	Expression* lhs = Expression::make_random(cg_context, NULL, NULL, false, true);
+	Expression* lhs = Expression::make_random(cg_context, nullptr, nullptr, false, true);
 	Expression* rhs = Expression::make_random(cg_context, type, qfer, false, false);
 	// typecast, if needed.
 	if(CGOptions::lang_cpp())

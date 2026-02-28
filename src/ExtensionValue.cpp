@@ -38,7 +38,7 @@
 
 ExtensionValue::ExtensionValue(const Type *type, const string &name)
 	: type_(type),
-	  value_(NULL),
+	  value_(nullptr),
 	  name_(name)
 {
 	vector<bool> isConsts;

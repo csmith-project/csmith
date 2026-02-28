@@ -142,7 +142,7 @@ Effect::read_var(const Variable *v)
 void
 Effect::access_deref_volatile(const Variable *v, int deref_level)
 {
-	assert(v && "NULL Variable!");
+	assert(v && "nullptr Variable!");
 	if (!CGOptions::strict_volatile_rule())
 		return;
 	while (deref_level > 0) {

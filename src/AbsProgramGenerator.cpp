@@ -42,7 +42,7 @@
 
 using namespace std;
 
-AbsProgramGenerator *AbsProgramGenerator::current_generator_ = NULL;
+AbsProgramGenerator *AbsProgramGenerator::current_generator_ = nullptr;
 
 OutputMgr *
 AbsProgramGenerator::GetOutputMgr()
@@ -82,7 +82,7 @@ AbsProgramGenerator::CreateInstance(int argc, char *argv[], unsigned long seed)
 	if (!(CGOptions::probability_configuration().empty())) {
 		if (!prob->parse_configuration(msg, CGOptions::probability_configuration())) {
 			cout << "parsing configuration file error:" << msg << endl;
-			return NULL;
+			return nullptr;
 		}
 	}
 

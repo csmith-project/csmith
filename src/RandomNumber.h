@@ -68,9 +68,9 @@ public:
 	// It would have potential problem to be misused.
 	// I defined them in this way only for compatible to the previous code.
 	// Use it carefully.
-	virtual unsigned int rnd_upto(const unsigned int n, const Filter *f = NULL, const std::string *where = NULL);
+	virtual unsigned int rnd_upto(const unsigned int n, const Filter *f = nullptr, const std::string *where = nullptr);
 
-	virtual bool rnd_flipcoin(const unsigned int p, const Filter *f = NULL, const std::string *where = NULL);
+	virtual bool rnd_flipcoin(const unsigned int p, const Filter *f = nullptr, const std::string *where = nullptr);
 
 	virtual ~RandomNumber(void);
 

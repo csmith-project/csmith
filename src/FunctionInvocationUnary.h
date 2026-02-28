@@ -50,21 +50,21 @@ public:
 				eUnaryOps op,
 				SafeOpFlags *flags);
 
-	virtual ~FunctionInvocationUnary(void);
+	virtual ~FunctionInvocationUnary(void) override;
 
-	virtual FunctionInvocation* clone() const;
+	virtual FunctionInvocation* clone() const override;
 
-	virtual const Type &get_type(void) const;
+	virtual const Type &get_type(void) const override;
 
-	virtual bool compatible(const Variable *v) const;
+	virtual bool compatible(const Variable *v) const override;
 
-	virtual void Output(std::ostream &) const;
+	virtual void Output(std::ostream &) const override;
 
-	virtual void indented_output(std::ostream &out, int indent) const;
+	virtual void indented_output(std::ostream &out, int indent) const override;
 
-	virtual bool safe_invocation() const;
+	virtual bool safe_invocation() const override;
 
-	virtual bool equals(int num) const;
+	virtual bool equals(int num) const override;
 
 	virtual bool is_0_or_1(void) const { return eFunc == eNot;}
 

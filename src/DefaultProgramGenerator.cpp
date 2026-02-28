@@ -48,7 +48,7 @@ DefaultProgramGenerator::DefaultProgramGenerator(int argc, char *argv[], unsigne
 	: argc_(argc),
 	  argv_(argv),
 	  seed_(seed),
-	  output_mgr_(NULL)
+	  output_mgr_(nullptr)
 {
 
 }

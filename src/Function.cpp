@@ -133,7 +133,7 @@ find_function_by_name(const string& name)
 			return FuncList[i];
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 int
@@ -152,7 +152,7 @@ const Block*
 find_blk_for_var(const Variable* v)
 {
 	if (v->is_global()) {
-		return NULL;
+		return nullptr;
 	}
 	size_t i, j;
 	for (i=0; i<FuncList.size(); i++) {
@@ -168,7 +168,7 @@ find_blk_for_var(const Variable* v)
 			}
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 bool
@@ -343,11 +343,11 @@ Function::choose_func(const vector<Function *> &funcs,
 			ok_funcs.push_back(*i);
 	}
 
-	Function *f = NULL;
+	Function *f = nullptr;
 	if (CGOptions::builtins() && rnd_flipcoin(BuiltinFunctionProb)) {
 		f = Function::get_one_function(ok_builtin_funcs);
 	}
-	if (f == NULL) {
+	if (f == nullptr) {
 		f = Function::get_one_function(ok_funcs);
 	}
 	return f;
@@ -441,8 +441,8 @@ Function::make_random_signature(const CGContext& cg_context, const Type* type, c
 	if (type == 0)
 		type = RandomReturnType();
 
-	DEPTH_GUARD_BY_TYPE_RETURN(dtFunction, NULL);
-	ERROR_GUARD(NULL);
+	DEPTH_GUARD_BY_TYPE_RETURN(dtFunction, nullptr);
+	ERROR_GUARD(nullptr);
 	Function *f = new Function(RandomFunctionName(), type);
 
 	// dummy variable representing return variable, we don't care about the type, so use 0
@@ -450,8 +450,8 @@ Function::make_random_signature(const CGContext& cg_context, const Type* type, c
 	f->alias_name = f->name + "_alias";
 	CVQualifiers ret_qfer = qfer==0 ? CVQualifiers::random_qualifiers(type, Effect::READ, cg_context, true)
 		                            : qfer->random_qualifiers(true, Effect::READ, cg_context);
-	ERROR_GUARD(NULL);
-	f->rv = Variable::CreateVariable(rvname, type, NULL, &ret_qfer);
+	ERROR_GUARD(nullptr);
+	f->rv = Variable::CreateVariable(rvname, type, nullptr, &ret_qfer);
 	GenerateParameterList(*f);
 	FMList.push_back(new FactMgr(f));
 	if (CGOptions::inline_function() && rnd_flipcoin(InlineFunctionProb))
@@ -466,9 +466,9 @@ Function *
 Function::make_random(const CGContext& cg_context, const Type* type, const CVQualifiers* qfer)
 {
 	Function* f = make_random_signature(cg_context, type, qfer);
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 	f->GenerateBody(cg_context);
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 	return f;
 }
 
@@ -479,15 +479,15 @@ Function *
 Function::make_first(void)
 {
 	const Type *ty = RandomReturnType();
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 
 	Function *f = new Function(RandomFunctionName(), ty);
 	// dummy variable representing return variable, we don't care about the type, so use 0
 	string rvname = f->name + "_" + "rv";
 	f->alias_name = f->name + "_alias";
 	CVQualifiers ret_qfer = CVQualifiers::random_qualifiers(ty);
-	ERROR_GUARD(NULL);
-	f->rv = Variable::CreateVariable(rvname, ty, NULL, &ret_qfer);
+	ERROR_GUARD(nullptr);
+	f->rv = Variable::CreateVariable(rvname, ty, nullptr, &ret_qfer);
 
 	// create a fact manager for this function, with empty global facts
 	FactMgr* fm = new FactMgr(f);
@@ -810,7 +810,7 @@ Function::make_builtin_function(const string &function_string)
 	// dummy variable representing return variable, we don't care about the type, so use 0
 	const string rvname = f->name + "_" + "rv";
 	const CVQualifiers ret_qfer = CVQualifiers::random_qualifiers(ty);
-	f->rv = Variable::CreateVariable(rvname, ty, NULL, &ret_qfer);
+	f->rv = Variable::CreateVariable(rvname, ty, nullptr, &ret_qfer);
 
 	// create a fact manager for this function, with empty global facts
 	FactMgr* const fm = new FactMgr(f);
@@ -933,12 +933,12 @@ Function::~Function()
 
 	if (body) {
 		delete body;
-		body = NULL;
+		body = nullptr;
 	}
 
 	if (CGOptions::depth_protect() && ret_c) {
 		delete ret_c;
-		ret_c = NULL;
+		ret_c = nullptr;
 	}
 }
 

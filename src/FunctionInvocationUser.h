@@ -62,17 +62,17 @@ public:
 	// factory method
 	static FunctionInvocationUser* build_invocation_and_function(CGContext &cg_context, const Type* type, const CVQualifiers* qfer);
 
-	virtual ~FunctionInvocationUser(void);
+	virtual ~FunctionInvocationUser(void) override;
 
-	virtual FunctionInvocation* clone() const;
+	virtual FunctionInvocation* clone() const override;
 
 	virtual bool compatible(const Variable *) const { return false; }
 
-	virtual const Type &get_type(void) const;
+	virtual const Type &get_type(void) const override;
 
-	virtual void Output(std::ostream &) const;
+	virtual void Output(std::ostream &) const override;
 
-	virtual void indented_output(std::ostream &out, int indent) const;
+	virtual void indented_output(std::ostream &out, int indent) const override;
 
 	virtual bool safe_invocation() const { return true; }
 

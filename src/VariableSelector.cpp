@@ -113,12 +113,12 @@ VariableSelectFilter::filter(int v) const
 	return false;
 }
 
-ProbabilityTable<unsigned int, eVariableScope> *VariableSelector::scopeTable_ = NULL;
+ProbabilityTable<unsigned int, eVariableScope> *VariableSelector::scopeTable_ = nullptr;
 
 void
 VariableSelector::InitScopeTable()
 {
-	if (scopeTable_ == NULL) {
+	if (scopeTable_ == nullptr) {
 		scopeTable_ = new ProbabilityTable<unsigned int, eVariableScope>();
 		if (CGOptions::global_variables()) {
 			scopeTable_->add_elem(35, eGlobal);
@@ -165,7 +165,7 @@ Variable *
 VariableSelector::new_variable(const std::string &name, const Type *type, const Expression* init, const CVQualifiers* qfer)
 {
 	Variable *var = Variable::CreateVariable(name, type, init, qfer);
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 	AllVars.push_back(var);
 	return var;
 }
@@ -331,14 +331,14 @@ Variable *
 VariableSelector::choose_ok_var(const vector<Variable *> &vars)
 {
 	const int len = vars.size();
-	Variable* v = NULL;
+	Variable* v = nullptr;
 	if (len == 1) {
 		v = vars[0];
 	}
 	else if (len > 1) {
-		DEPTH_GUARD_BY_DEPTH_RETURN(1, NULL);
+		DEPTH_GUARD_BY_DEPTH_RETURN(1, nullptr);
 		const unsigned int index = rnd_upto(len);
-		ERROR_GUARD(NULL);
+		ERROR_GUARD(nullptr);
 		v = vars[index];
 	}
 	// if v is "collective" array variable, return a "itemized" array member
@@ -355,14 +355,14 @@ const Variable *
 VariableSelector::choose_ok_var(const vector<const Variable *> &vars)
 {
 	const int len = vars.size();
-	const Variable* v = NULL;
+	const Variable* v = nullptr;
 	if (len == 1) {
 		v = vars[0];
 	}
 	else if (len > 1) {
-		DEPTH_GUARD_BY_DEPTH_RETURN(1, NULL);
+		DEPTH_GUARD_BY_DEPTH_RETURN(1, nullptr);
 		const unsigned int index = rnd_upto(len);
-		ERROR_GUARD(NULL);
+		ERROR_GUARD(nullptr);
 		v = vars[index];
 	}
 	// if v is "collective" array variable, return a "itemized" array member
@@ -475,7 +475,7 @@ VariableSelector::choose_var(const vector<Variable *> &vars,
 			}
 		}
 		Variable *var = choose_ok_var(volatile_vars);
-		if (var != NULL)
+		if (var != nullptr)
 			return var;
     }
 
@@ -489,7 +489,7 @@ VariableSelector::choose_var(const vector<Variable *> &vars,
 			}
 		}
 		Variable *var = choose_ok_var(ptrs);
-		if (var != NULL)
+		if (var != nullptr)
 			return var;
 	}
 
@@ -507,7 +507,7 @@ VariableSelector::choose_var(const vector<Variable *> &vars,
 			}
 		}
 		Variable *var = choose_ok_var(addressable_vars);
-		if (var != NULL)
+		if (var != nullptr)
 			return var;
 	}
 	return choose_ok_var(ok_vars);
@@ -517,8 +517,8 @@ Variable *
 VariableSelector::create_and_initialize(Effect::Access access, const CGContext &cg_context, const Type* t,
 					const CVQualifiers* qfer, Block *blk, const std::string &name)
 {
-	const Expression* init = NULL;
-	Variable* var = NULL;
+	const Expression* init = nullptr;
+	Variable* var = nullptr;
 
 	if (rnd_flipcoin(NewArrayVariableProb)) {
 		if (CGOptions::strict_const_arrays()) {
@@ -546,11 +546,11 @@ static int tmp_count = 0;
 Variable *
 VariableSelector::GenerateNewGlobal(Effect::Access access, const CGContext &cg_context, const Type* t, const CVQualifiers* qfer)
 {
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 	CVQualifiers var_qfer = (!qfer || qfer->wildcard)
 								? CVQualifiers::random_qualifiers(t, access, cg_context, false)
 								: *qfer;
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 	string name = RandomGlobalName();
 	tmp_count++;
 	Variable* var = create_and_initialize(access, cg_context, t, &var_qfer, 0, name);
@@ -558,7 +558,7 @@ VariableSelector::GenerateNewGlobal(Effect::Access access, const CGContext &cg_c
 	GlobalList.push_back(var);
 	// for DFA
 	FactMgr* fm = get_fact_mgr(&cg_context);
-	fm->add_new_var_fact_and_update_inout_maps(NULL, var->get_collective());
+	fm->add_new_var_fact_and_update_inout_maps(nullptr, var->get_collective());
 	cg_context.get_current_func()->new_globals.push_back(var);
 
 	if (!var_qfer.is_volatile()) {
@@ -574,22 +574,22 @@ VariableSelector::GenerateNewGlobal(Effect::Access access, const CGContext &cg_c
 Variable *
 VariableSelector::GenerateNewNonArrayGlobal(Effect::Access access, const CGContext &cg_context, const Type* t, const CVQualifiers* qfer)
 {
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 	CVQualifiers var_qfer = (!qfer || qfer->wildcard)
 								? CVQualifiers::random_qualifiers(t, access, cg_context, false)
 								: *qfer;
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 	string name = RandomGlobalName();
 	tmp_count++;
 
-	const Expression *init = make_init_value(access, cg_context, t, qfer, NULL);
-	ERROR_GUARD(NULL);
+	const Expression *init = make_init_value(access, cg_context, t, qfer, nullptr);
+	ERROR_GUARD(nullptr);
 	Variable *var = new_variable(name, t, init, qfer);
 
 	GlobalList.push_back(var);
 	// for DFA
 	FactMgr* fm = get_fact_mgr(&cg_context);
-	fm->add_new_var_fact_and_update_inout_maps(NULL, var->get_collective());
+	fm->add_new_var_fact_and_update_inout_maps(nullptr, var->get_collective());
 	cg_context.get_current_func()->new_globals.push_back(var);
 
 	if (!var_qfer.is_volatile()) {
@@ -624,9 +624,9 @@ VariableSelector::eager_create_global_struct(Effect::Access access, const CGCont
 		}
 	}
 	else
-		return NULL;
+		return nullptr;
 
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 	return choose_var(GlobalList, access, cg_context, type, qfer, mt, invalid_vars);
 }
 
@@ -655,12 +655,12 @@ VariableSelector::eager_create_local_struct(Block &block, Effect::Access access,
 		}
 	}
 	else
-		return NULL;
-	ERROR_GUARD(NULL);
+		return nullptr;
+	ERROR_GUARD(nullptr);
 	if (!t)
-		return NULL;
+		return nullptr;
 
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 	return choose_var(block.local_vars, access, cg_context, type, qfer, mt, invalid_vars);
 }
 
@@ -671,22 +671,22 @@ Variable *
 VariableSelector::SelectGlobal(Effect::Access access, const CGContext &cg_context, const Type* type, const CVQualifiers* qfer, eMatchType mt, const vector<const Variable*>& invalid_vars)
 {
 	Variable* var = choose_var(GlobalList, access, cg_context, type, qfer, mt, invalid_vars);
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 	if (var == 0) {
 		if (CGOptions::expand_struct()) {
 			var = VariableSelector::eager_create_global_struct(access, cg_context, type, qfer, mt, invalid_vars);
-			ERROR_GUARD(NULL);
+			ERROR_GUARD(nullptr);
 			if (var)
 				return var;
 		}
 
-		DEPTH_GUARD_BY_TYPE_RETURN(dtSelectGlobal, NULL);
+		DEPTH_GUARD_BY_TYPE_RETURN(dtSelectGlobal, nullptr);
 		bool no_volatile = false;
 		if (qfer && !qfer->wildcard && !qfer->is_volatile()) {
 			no_volatile = true;
 		}
 		const Type* t = Type::random_type_from_type(type, no_volatile);
-		ERROR_GUARD(NULL);
+		ERROR_GUARD(nullptr);
 		return GenerateNewGlobal(access, cg_context, t, qfer);
 	}
 	return var;
@@ -839,12 +839,12 @@ VariableSelector::make_init_value(Effect::Access access, const CGContext &cg_con
 	qfer.accept_stricter = false;
 
 	if (t->eType != ePointer || rnd_flipcoin(20)) {
-		ERROR_GUARD(NULL);
+		ERROR_GUARD(nullptr);
 		if (t->eType == eSimple)
 			assert(t->simple_type != eVoid);
 		return Constant::make_random(t);
 	}
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 	// for pointers, take address of a random visible local variable
 	const Type* type = t->ptr_type;
 	assert(type);
@@ -854,8 +854,8 @@ VariableSelector::make_init_value(Effect::Access access, const CGContext &cg_con
 
 	const bool no_union = !CGOptions::take_union_field_addr();
 
-	Variable *var = NULL;
-	// b == NULL means we are generating init for globals
+	Variable *var = nullptr;
+	// b == nullptr means we are generating init for globals
 	if (!b && CGOptions::ccomp()) {
 		get_all_array_vars(dummy);
 		var = choose_var(vars, access, cg_context, type, &qfer, eExact, dummy, true, true, no_union);
@@ -865,11 +865,11 @@ VariableSelector::make_init_value(Effect::Access access, const CGContext &cg_con
 			get_all_local_vars(b, dummy);
 		var = choose_var(vars, access, cg_context, type, &qfer, eExact, dummy, true, false, no_union);
 	}
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 
 	// if no such var, create a new one
 	if (var == 0) {
-		DEPTH_GUARD_BY_TYPE_RETURN(dtInitPointerValue, NULL);
+		DEPTH_GUARD_BY_TYPE_RETURN(dtInitPointerValue, nullptr);
 		// current context has no impact on variable initialization, which happens at declare time?
 		bool no_volatile = false; //!cg_context.get_effect_context().is_side_effect_free();
 		if (CGOptions::strict_volatile_rule())
@@ -879,11 +879,11 @@ VariableSelector::make_init_value(Effect::Access access, const CGContext &cg_con
 		qfer_deref.accept_stricter = false;
 		bool use_local = (!CGOptions::global_variables() || (b != 0 && type->eType == ePointer && !qfer_deref.is_volatile()));
 		const Type* tt = use_local ? Type::random_type_from_type(type, true, true) : Type::random_type_from_type(type, false, true);
-		ERROR_GUARD(NULL);
+		ERROR_GUARD(nullptr);
 		// create a local if it's not a volatile, and it's a pointer, and block is specified
 		if (CGOptions::addr_taken_of_locals() && use_local) {
 			var = GenerateNewParentLocal(*b, Effect::READ, cg_context, tt, &qfer_deref);
-			ERROR_GUARD(NULL);
+			ERROR_GUARD(nullptr);
 			Bookkeeper::record_volatile_access(var, var->type->get_indirect_level() - tt->get_indirect_level(), false);
 		}
 		else {
@@ -893,7 +893,7 @@ VariableSelector::make_init_value(Effect::Access access, const CGContext &cg_con
 			else {
 				var = GenerateNewGlobal(Effect::READ, cg_context, tt, &qfer_deref);
 			}
-			ERROR_GUARD(NULL);
+			ERROR_GUARD(nullptr);
 		}
 		Bookkeeper::record_address_taken(var);
 	}
@@ -915,7 +915,7 @@ VariableSelector::GenerateNewParentLocal(Block &block,
                        const Type* t,
 					   const CVQualifiers* qfer)
 {
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 	assert(t);
 	// if this is for a struct/union with volatile field(s), create a global variable instead
 	if (t->is_aggregate() && t->is_volatile_struct_union()) {
@@ -930,7 +930,7 @@ VariableSelector::GenerateNewParentLocal(Block &block,
 	CVQualifiers var_qfer = (!qfer || qfer->wildcard)
 								? CVQualifiers::random_qualifiers(t, access, cg_context, true)
 								: *qfer;
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 	var_qfer.restrict(access, cg_context);
 	assert(var_qfer.sanity_check(t));
 	string name = RandomLocalName();
@@ -988,7 +988,7 @@ VariableSelector::SelectParentLocal(Effect::Access access,
 				  eMatchType mt,
 				  const vector<const Variable*>& invalid_vars)
 {
-	DEPTH_GUARD_BY_TYPE_RETURN(dtSelectParentLocal, NULL);
+	DEPTH_GUARD_BY_TYPE_RETURN(dtSelectParentLocal, nullptr);
 	// Select from the local variables of the parent OR any of its block stack.
 	Function& parent = *cg_context.get_current_func();
 	if (parent.stack.empty()) {
@@ -999,20 +999,20 @@ VariableSelector::SelectParentLocal(Effect::Access access,
 	}
 
 	unsigned int index = rnd_upto(parent.stack.size());
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 	Block *block = parent.stack[index];
 
 	// Should be "generate new block local"...
-	const Type *t = NULL;
+	const Type *t = nullptr;
 	if (block->local_vars.empty()) {
 		if (CGOptions::expand_struct()) {
 			Variable *var = VariableSelector::eager_create_local_struct(*block, access, cg_context, type, qfer, mt, invalid_vars);
-			ERROR_GUARD(NULL);
+			ERROR_GUARD(nullptr);
 			if (var)
 				return var;
 		}
 		const Type* t = Type::random_type_from_type(type, true, false);
-		ERROR_GUARD(NULL);
+		ERROR_GUARD(nullptr);
 		return GenerateNewParentLocal(*block, access, cg_context, t, qfer);
 	}
 
@@ -1021,16 +1021,16 @@ VariableSelector::SelectParentLocal(Effect::Access access,
 	}
 	else {
 		t = Type::random_type_from_type(type, true, false);
-		ERROR_GUARD(NULL);
+		ERROR_GUARD(nullptr);
 	}
 
 	Variable* var = choose_var(block->local_vars, access, cg_context, t, qfer, mt, invalid_vars);
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 	if (var == 0) {
 #if 0
 		if (CGOptions::expand_struct()) {
 			var = VariableSelector::eager_create_local_struct(*block, access, cg_context, type, qfer, mt, invalid_vars);
-			ERROR_GUARD(NULL);
+			ERROR_GUARD(nullptr);
 			if (var)
 				return var;
 		}
@@ -1042,7 +1042,7 @@ VariableSelector::SelectParentLocal(Effect::Access access,
 
 // --------------------------------------------------------------
 static eVariableScope
-VariableSelectionProbability(eVariableScope upper = MAX_VAR_SCOPE, Filter *filter = NULL)
+VariableSelectionProbability(eVariableScope upper = MAX_VAR_SCOPE, Filter *filter = nullptr)
 {
 	// Should probably modify choice based on current list of params, parent
 	// params, parent locals, # of globals, etc.
@@ -1085,7 +1085,7 @@ VariableSelector::SelectParentParam(Effect::Access access,
 	if (parent.param.empty())
 		return SelectParentLocal(access, cg_context, type, qfer, mt, invalid_vars);
 	Variable* var = choose_var(parent.param, access, cg_context, type, qfer, mt, invalid_vars);
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 	return var ? var : SelectParentLocal(access, cg_context, type, qfer, mt, invalid_vars);
 }
 
@@ -1096,48 +1096,48 @@ VariableSelector::GenerateNewVariable(Effect::Access access,
                     const Type* type,
 					const CVQualifiers* qfer)
 {
-	DEPTH_GUARD_BY_TYPE_RETURN(dtGenerateNewVariable, NULL);
+	DEPTH_GUARD_BY_TYPE_RETURN(dtGenerateNewVariable, nullptr);
 	Variable *var = 0;
 	Function &func = *cg_context.get_current_func();
 	eVariableScope scope = VariableCreationProbability();
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 	const Type* t = 0;
 	switch (scope) {
 	case eGlobal:
-		DEPTH_GUARD_BY_TYPE_RETURN(dtGenerateNewGlobal, NULL);
+		DEPTH_GUARD_BY_TYPE_RETURN(dtGenerateNewGlobal, nullptr);
 		// TODO: it's ugly. For dfs_exhaustive mode, we've generate the first variable
 		// by SelectGlobal. To reduce the redundant code, we don't re-generate the first
 		// variable there.
 		if (!CGOptions::is_random() && GlobalList.empty()) {
 			Error::set_error(ERROR);
-			return NULL;
+			return nullptr;
 		}
 		t = Type::random_type_from_type(type);
-		ERROR_GUARD(NULL);
+		ERROR_GUARD(nullptr);
 		var = GenerateNewGlobal(access, cg_context, t, qfer);
 		break;
 	case eParentLocal:
 	{
-		DEPTH_GUARD_BY_DEPTH_RETURN(dtGenerateNewParentLocal, NULL);
+		DEPTH_GUARD_BY_DEPTH_RETURN(dtGenerateNewParentLocal, nullptr);
 		unsigned int index = rnd_upto(func.stack.size());
-		ERROR_GUARD(NULL);
+		ERROR_GUARD(nullptr);
 
 		// TODO: it's ugly. For dfs_exhaustive mode, we've generate the first variable
 		// by SelectGlobal. To reduce the redundant code, we don't re-generate the first
 		// variable there.
 		if (!CGOptions::is_random() && (*(func.stack[index])).local_vars.empty()) {
 			Error::set_error(ERROR);
-			return NULL;
+			return nullptr;
 		}
 		t = Type::random_type_from_type(type, true, false);
-		ERROR_GUARD(NULL);
+		ERROR_GUARD(nullptr);
 		var = GenerateNewParentLocal(*(func.stack[index]), access, cg_context, t, qfer);
 		break;
 	}
 	default:
 		break;
 	}
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 	var_created = true;
 	return var;
 }
@@ -1170,8 +1170,8 @@ VariableSelector::SelectLoopCtrlVar(const CGContext &cg_context, const vector<co
 		}
 	}
 	Variable* var = choose_var(vars, Effect::WRITE, cg_context, type, 0, eConvert, invalid_vars, true);
-	ERROR_GUARD(NULL);
-	if (var == NULL) {
+	ERROR_GUARD(nullptr);
+	if (var == nullptr) {
 		if (CGOptions::global_variables()) {
 			var = GenerateNewGlobal(Effect::WRITE, cg_context, type, 0);
 		}
@@ -1194,12 +1194,12 @@ VariableSelector::select(Effect::Access access,
 			   const vector<const Variable*>& invalid_vars,
 			   eMatchType mt, eVariableScope scope)
 {
-	DEPTH_GUARD_BY_TYPE_RETURN_WITH_FLAG(dtSelectVariable, scope, NULL);
+	DEPTH_GUARD_BY_TYPE_RETURN_WITH_FLAG(dtSelectVariable, scope, nullptr);
 	VariableSelectFilter filter(cg_context);
 	if (scope == MAX_VAR_SCOPE) {
 		scope = VariableSelectionProbability(scope, &filter);
 	}
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 	Variable *var = 0;
 	var_created = false;
 
@@ -1227,7 +1227,7 @@ VariableSelector::select(Effect::Access access,
 	case MAX_VAR_SCOPE:
 		assert (0);
 	}
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 	if (var && !cg_context.get_effect_context().is_side_effect_free()) {
 		assert(!var->is_volatile());
 	}
@@ -1278,7 +1278,7 @@ VariableSelector::select_deref_pointer(Effect::Access access, const CGContext &c
 			? CVQualifiers::random_qualifiers(ptr_type, access, cg_context, true)
 		        //: qfer->indirect_qualifiers(-1);
 			: qfer->random_add_qualifiers(!cg_context.get_effect_context().is_side_effect_free());
-		ERROR_GUARD(NULL);
+		ERROR_GUARD(nullptr);
 		ptr_qfer.accept_stricter = false;
 		if (access == Effect::WRITE) {
 			ptr_qfer.set_const(false, 1);
@@ -1287,12 +1287,12 @@ VariableSelector::select_deref_pointer(Effect::Access access, const CGContext &c
 			if (CGOptions::expand_struct()) {
 				var = VariableSelector::eager_create_global_struct(access, cg_context, ptr_type,
 							&ptr_qfer, eDereference, invalid_vars);
-				ERROR_GUARD(NULL);
+				ERROR_GUARD(nullptr);
 				if (var)
 					return var;
 				else {
 					Error::set_error(ERROR);
-					return NULL;
+					return nullptr;
 				}
 			}
 			var = GenerateNewGlobal(access, cg_context, ptr_type, &ptr_qfer);
@@ -1302,18 +1302,18 @@ VariableSelector::select_deref_pointer(Effect::Access access, const CGContext &c
 			if (CGOptions::expand_struct()) {
 				Variable *var = VariableSelector::eager_create_local_struct(*block, access,
 							cg_context, ptr_type, &ptr_qfer, eDereference, invalid_vars);
-				ERROR_GUARD(NULL);
+				ERROR_GUARD(nullptr);
 				if (var)
 					return var;
 				else {
 					Error::set_error(ERROR);
-					return NULL;
+					return nullptr;
 				}
 			}
 			var = GenerateNewParentLocal(*block, access, cg_context, ptr_type, &ptr_qfer);
 		}
 	}
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 	return var;
 }
 
@@ -1324,8 +1324,8 @@ ArrayVariable*
 VariableSelector::create_array_and_itemize(Block* blk, const string &name, const CGContext& cg_context,
 		const Type* t, const Expression* init, const CVQualifiers* qfer)
 {
-	ArrayVariable* av = ArrayVariable::CreateArrayVariable(cg_context, blk, name, t, init, qfer, NULL);
-	ERROR_GUARD(NULL);
+	ArrayVariable* av = ArrayVariable::CreateArrayVariable(cg_context, blk, name, t, init, qfer, nullptr);
+	ERROR_GUARD(nullptr);
 	AllVars.push_back(av);
 	return av->itemize();
 }
@@ -1337,7 +1337,7 @@ ArrayVariable*
 VariableSelector::create_random_array(const CGContext& cg_context)
 {
 	const bool as_global = CGOptions::global_variables() && rnd_flipcoin(25);
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 	string name;
 	Block* blk = 0;
 	Function* func = cg_context.get_current_func();
@@ -1347,7 +1347,7 @@ VariableSelector::create_random_array(const CGContext& cg_context)
 	else {
 		name = RandomLocalName();
 		const size_t index = rnd_upto(func->stack.size());
-		ERROR_GUARD(NULL);
+		ERROR_GUARD(nullptr);
 		blk = func->stack[index];
 		blk = expand_block_for_goto(blk, cg_context);
 	}
@@ -1355,19 +1355,19 @@ VariableSelector::create_random_array(const CGContext& cg_context)
 	do {
 		// don't make life complicated, restrict local variables to non-volatile
 		type = as_global ? Type::choose_random_nonvoid() : Type::choose_random_nonvoid_nonvolatile();
-		ERROR_GUARD(NULL);
+		ERROR_GUARD(nullptr);
 	} while (type->is_const_struct_union() || !cg_context.accept_type(type));
 	CVQualifiers qfer;
 	qfer.add_qualifiers(false, false);
 
 	Expression* init = Constant::make_random(type);
-	ArrayVariable* av = ArrayVariable::CreateArrayVariable(cg_context, blk, name, type, init, &qfer, NULL);
+	ArrayVariable* av = ArrayVariable::CreateArrayVariable(cg_context, blk, name, type, init, &qfer, nullptr);
 	AllVars.push_back(av);
 
 	// make the points-to fact known to DFA
 	FactMgr* fm = get_fact_mgr(&cg_context);
 	if (as_global) {
-		fm->add_new_var_fact_and_update_inout_maps(NULL, av);
+		fm->add_new_var_fact_and_update_inout_maps(nullptr, av);
 		cg_context.get_current_func()->new_globals.push_back(av);
 	} else {
 		fm->add_new_var_fact_and_update_inout_maps(blk, av);
@@ -1412,7 +1412,7 @@ VariableSelector::select_array(const CGContext &cg_context)
 	}
 	if (len == 1) return array_vars[0];
 	size_t index = rnd_upto(len);
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 	return array_vars[index];
 }
 
@@ -1420,7 +1420,7 @@ VariableSelector::select_array(const CGContext &cg_context)
 ArrayVariable*
 VariableSelector::itemize_array(CGContext& cg_context, const ArrayVariable* av)
 {
-	if (av->get_dimension() > cg_context.iv_bounds.size()) return NULL;
+	if (av->get_dimension() > cg_context.iv_bounds.size()) return nullptr;
 	vector<const Expression*> indices;
 
 	for (size_t i=0; i<av->get_dimension(); i++) {
@@ -1456,7 +1456,7 @@ VariableSelector::itemize_array(CGContext& cg_context, const ArrayVariable* av)
 		const Variable* v = choose_ok_var(ok_ivs);
 		// this could happen if the context contained 2 or more array to be used, but the longer one(s) has
 		// been removed, and leaving the shorter one that is too short for the induction variable's range
-		if (v == NULL) return NULL;
+		if (v == nullptr) return nullptr;
 
 		const Expression* ev = new ExpressionVariable(*v);;
 		// add random offset to the chosen induction variable
@@ -1476,7 +1476,7 @@ VariableSelector::itemize_array(CGContext& cg_context, const ArrayVariable* av)
 const Variable*
 VariableSelector::select_must_use_var(Effect::Access access, CGContext &cg_context, const Type* type, const CVQualifiers* qfer)
 {
-	if (cg_context.rw_directive == NULL) return NULL;
+	if (cg_context.rw_directive == nullptr) return nullptr;
 
 	const Variable* var = 0;
 	VariableSet& vars = (access == Effect::READ) ? cg_context.rw_directive->must_read_vars : cg_context.rw_directive->must_write_vars;
@@ -1548,7 +1548,7 @@ VariableSelector::find_var_by_name(const string &name)
 			return v;
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 /*

@@ -134,7 +134,7 @@ bool StatementFilter::label_attr_generate = false;
 
 // use a table to define probabilities of different kinds of statements
 // Must initialize it before use
-ProbabilityTable<unsigned int, ProbName> *Statement::stmtTable_ = NULL;
+ProbabilityTable<unsigned int, ProbName> *Statement::stmtTable_ = nullptr;
 
 void
 Statement::InitProbabilityTable()
@@ -256,7 +256,7 @@ Statement *
 Statement::make_random(CGContext &cg_context,
 					   eStatementType t)
 {
-	DEPTH_GUARD_BY_TYPE_RETURN_WITH_FLAG(dtStatement, t, NULL);
+	DEPTH_GUARD_BY_TYPE_RETURN_WITH_FLAG(dtStatement, t, nullptr);
 	// Should initialize table first
 	Statement::InitProbabilityTable();
 
@@ -273,7 +273,7 @@ Statement::make_random(CGContext &cg_context,
 	if (t == MAX_STATEMENT_TYPE) {
 		StatementFilter filter(cg_context);
 		t = StatementProbability(&filter);
-		ERROR_GUARD(NULL);
+		ERROR_GUARD(nullptr);
 	}
 	FactMgr* fm = get_fact_mgr(&cg_context);
 	FactVec pre_facts = fm->global_facts;
@@ -322,7 +322,7 @@ Statement::make_random(CGContext &cg_context,
 		break;
 	}
 
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 	if (is_compound(t)) {
 		cg_context.blk_depth--;
 	}
@@ -367,7 +367,7 @@ int
 Statement::get_blk_depth(void) const
 {
 	int depth = 0;
-	for (const Block* b = parent; b != NULL; b = b->parent) {
+	for (const Block* b = parent; b != nullptr; b = b->parent) {
 		depth++;
 	}
 	return depth;
@@ -794,7 +794,7 @@ Statement::get_direct_invocation(void) const
 			return ((const ExpressionFuncall*)e)->get_invoke();
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 /*

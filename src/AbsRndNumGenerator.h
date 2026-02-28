@@ -65,9 +65,9 @@ public:
 
 	virtual void get_sequence(std::string &sequence) = 0;
 
-	virtual unsigned int rnd_upto(const unsigned int n, const Filter *f = NULL, const std::string *where = NULL) = 0;
+	virtual unsigned int rnd_upto(const unsigned int n, const Filter *f = nullptr, const std::string *where = nullptr) = 0;
 
-	virtual bool rnd_flipcoin(const unsigned int p, const Filter *f = NULL, const std::string *where = NULL) = 0;
+	virtual bool rnd_flipcoin(const unsigned int p, const Filter *f = nullptr, const std::string *where = nullptr) = 0;
 
 	virtual std::string RandomHexDigits( int num ) = 0;
 

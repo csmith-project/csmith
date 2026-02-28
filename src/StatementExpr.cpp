@@ -54,14 +54,14 @@ using namespace std;
 StatementExpr *
 StatementExpr::make_random(CGContext &cg_context)
 {
-	DEPTH_GUARD_BY_TYPE_RETURN(dtStatementExpr, NULL);
+	DEPTH_GUARD_BY_TYPE_RETURN(dtStatementExpr, nullptr);
 	FunctionInvocation *invoke;
 	// make copies
 	Effect pre_effect = cg_context.get_accum_effect();
 	FactMgr* fm = get_fact_mgr(&cg_context);
 	vector<const Fact*> facts_copy = fm->global_facts;
 	invoke = FunctionInvocation::make_random(false, cg_context, 0, 0);
-	ERROR_GUARD(NULL);
+	ERROR_GUARD(nullptr);
 	if (invoke->failed) {
 		cg_context.reset_effect_accum(pre_effect);
 		fm->restore_facts(facts_copy);

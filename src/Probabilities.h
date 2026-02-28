@@ -271,9 +271,9 @@ class ProbabilityFilter : public Filter
 public:
 	ProbabilityFilter(ProbName pname);
 
-	virtual ~ProbabilityFilter(void);
+	virtual ~ProbabilityFilter(void) override;
 
-	virtual bool filter(int v) const;
+	virtual bool filter(int v) const override;
 private:
 	const ProbName pname_;
 };
@@ -301,23 +301,23 @@ class SingleProbElem : public ProbElem {
 public:
 	SingleProbElem(const std::string &sname, ProbName pname, int default_val, int val);
 
-	virtual ~SingleProbElem();
+	virtual ~SingleProbElem() override;
 
 	int get_prob_direct();
 
-	virtual int get_prob(ProbName pname);
+	virtual int get_prob(ProbName pname) override;
 
-	virtual void set_prob(ProbName pname, int val);
+	virtual void set_prob(ProbName pname, int val) override;
 
 	void set_prob(int val) { val_ = val; };
 
 	void get_all_values(std::vector<int> &values);
 
-	virtual void dump_default(std::ostream &out);
+	virtual void dump_default(std::ostream &out) override;
 
-	virtual void dump_val(std::ostream &out);
+	virtual void dump_val(std::ostream &out) override;
 
-	virtual void set_prob_table(ProbabilityTable<unsigned int, ProbName> * const table);
+	virtual void set_prob_table(ProbabilityTable<unsigned int, ProbName> * const table) override;
 
 	virtual bool is_equal() const { return false; }
 
@@ -343,17 +343,17 @@ class GroupProbElem : public ProbElem {
 public:
 	GroupProbElem(bool is_equal, const std::string &sname);
 
-	virtual ~GroupProbElem();
+	virtual ~GroupProbElem() override;
 
-	virtual int get_prob(ProbName pname);
+	virtual int get_prob(ProbName pname) override;
 
-	virtual void set_prob(ProbName pname, int val);
+	virtual void set_prob(ProbName pname, int val) override;
 
-	virtual void set_prob_table(ProbabilityTable<unsigned int, ProbName> * const table);
+	virtual void set_prob_table(ProbabilityTable<unsigned int, ProbName> * const table) override;
 
-	virtual void dump_default(std::ostream &out);
+	virtual void dump_default(std::ostream &out) override;
 
-	virtual void dump_val(std::ostream &out);
+	virtual void dump_val(std::ostream &out) override;
 
 	virtual bool is_equal() const { return is_equal_; }
 

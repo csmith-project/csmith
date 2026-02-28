@@ -68,9 +68,9 @@ public:
 	// Factory methods.
 	static Function *make_first(void);
 	// type = 0 means we don't care about the return type
-	static Function *make_random(const CGContext& cg_context, const Type* type = 0, const CVQualifiers* qfer=0);
+	static Function *make_random(const CGContext& cg_context, const Type* type = nullptr, const CVQualifiers* qfer=nullptr);
 	// generate the signature, but not the body
-	static Function* make_random_signature(const CGContext& cg_context, const Type* type, const CVQualifiers* qfer=0);
+	static Function* make_random_signature(const CGContext& cg_context, const Type* type, const CVQualifiers* qfer=nullptr);
 
 	static Function* choose_func(const vector<Function *> &funcs, const CGContext& cg_context, const Type* type, const CVQualifiers* qfer);
 

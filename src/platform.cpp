@@ -95,7 +95,7 @@ static long long read_time(void)
 #    include <time.h>
 static long long read_time(void)
 {
-	time_t t = time(NULL);
+	time_t t = time(nullptr);
 	return t;
 }
 #  endif

@@ -79,7 +79,7 @@ class StatementAssign : public Statement
 {
 public:
 	// Factory method.
-	static StatementAssign *make_random(CGContext &cg_context, const Type* type=0, const CVQualifiers* qfer=0);
+	static StatementAssign *make_random(CGContext &cg_context, const Type* type=nullptr, const CVQualifiers* qfer=nullptr);
 
 	static StatementAssign *make_possible_compound_assign(CGContext &cg_context,
 						 const Type *type,
@@ -87,7 +87,7 @@ public:
 						 eAssignOps op,
 						 const Expression &e);
 
-	StatementAssign(Block* b, const Lhs &l, const Expression &e, eAssignOps op = eSimpleAssign, const SafeOpFlags *flags = NULL);
+	StatementAssign(Block* b, const Lhs &l, const Expression &e, eAssignOps op = eSimpleAssign, const SafeOpFlags *flags = nullptr);
 
 	StatementAssign(Block* b, const Lhs &l, eAssignOps op, const Expression &e,
 			const Expression *er, const SafeOpFlags *flags,
@@ -110,16 +110,16 @@ public:
 
 	static bool AssignOpWorksForFloat(eAssignOps op);
 
-	virtual ~StatementAssign(void);
+	virtual ~StatementAssign(void) override;
 
 	virtual void get_blocks(std::vector<const Block*>& /* blks */) const {};
 	virtual void get_exprs(std::vector<const Expression*>& exps) const {exps.push_back(&expr); exps.push_back(&lhs);}
-	virtual bool visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const;
+	virtual bool visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const override;
 
-	virtual std::vector<const ExpressionVariable*> get_dereferenced_ptrs(void) const;
-	virtual bool has_uncertain_call_recursive(void) const;
+	virtual std::vector<const ExpressionVariable*> get_dereferenced_ptrs(void) const override;
+	virtual bool has_uncertain_call_recursive(void) const override;
 
-	virtual void Output(std::ostream &out, FactMgr* fm, int indent = 0) const;
+	virtual void Output(std::ostream &out, FactMgr* fm, int indent = 0) const override;
 	void output_op(std::ostream &out) const;
 
 	// XXX --- This should go away, once assignments are properly modeled as

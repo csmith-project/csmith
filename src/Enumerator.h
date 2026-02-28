@@ -50,7 +50,7 @@ public:
 
 	Enumerator *next();
 
-	Enumerator *end() { return NULL; }
+	Enumerator *end() { return nullptr; }
 
 	Enumerator *begin();
 
@@ -169,7 +169,7 @@ Enumerator<Name>::begin()
 	EnumObject *obj = (*forward_pos_).second;
 	assert(obj);
 	if (forward_pos_ == objs_.begin() && !obj->good_value())
-		return NULL;
+		return nullptr;
 	return this;
 }
 
@@ -325,7 +325,7 @@ Enumerator<Name>::next()
 			if(roll_back_current_pos())
 				return this;
 			else
-				return NULL;
+				return nullptr;
 		}
 		else {
 			reset_pos();
@@ -333,6 +333,6 @@ Enumerator<Name>::next()
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 #endif // ENUMERATOR_H

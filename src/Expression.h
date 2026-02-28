@@ -93,7 +93,7 @@ class Expression
 {
 public:
 	// Factory method.
-	static Expression *make_random(CGContext &cg_context, const Type* type, const CVQualifiers* qfer=0, bool no_func = false, bool no_const = false, enum eTermType tt=MAX_TERM_TYPES);
+	static Expression *make_random(CGContext &cg_context, const Type* type, const CVQualifiers* qfer=nullptr, bool no_func = false, bool no_const = false, enum eTermType tt=MAX_TERM_TYPES);
 
 	static Expression *make_random_param(CGContext &cg_context, const Type* type, const CVQualifiers* qfer, enum eTermType tt=MAX_TERM_TYPES);
 
@@ -115,7 +115,7 @@ public:
 
 	virtual void get_called_funcs(std::vector<const FunctionInvocationUser*>& /*funcs*/ ) const {};
 
-	virtual const FunctionInvocation* get_invoke(void) const {return NULL;};
+	virtual const FunctionInvocation* get_invoke(void) const {return nullptr;};
 
 	virtual bool visit_facts(vector<const Fact*>& /*inputs*/, CGContext& /*cg_context*/) const {return true;};
 

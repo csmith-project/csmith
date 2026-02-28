@@ -70,9 +70,9 @@ CGContext::CGContext(Function *current_func, const Effect &eff_context, Effect *
 	  expr_depth(0),
 	  flags(0),
 	  curr_blk(0),
-	  rw_directive(NULL),
+	  rw_directive(nullptr),
 	  iv_bounds(),
-	  curr_rhs(NULL),
+	  curr_rhs(nullptr),
 	  effect_context(eff_context),
 	  effect_accum(eff_accum)
 {
@@ -89,7 +89,7 @@ CGContext::CGContext(const CGContext &cgc, const Effect &eff_context, Effect *ef
 	  curr_blk(cgc.curr_blk),
 	  rw_directive(cgc.rw_directive),
 	  iv_bounds(cgc.iv_bounds),
-	  curr_rhs(NULL),
+	  curr_rhs(nullptr),
 	  effect_context(eff_context),
 	  effect_accum(eff_accum),
 	  effect_stm()
@@ -107,7 +107,7 @@ CGContext::CGContext(const CGContext &cgc, Function* f, const Effect &eff_contex
 	  curr_blk(cgc.curr_blk),
 	  rw_directive(cgc.rw_directive),
 	  iv_bounds(cgc.iv_bounds),
-	  curr_rhs(NULL),
+	  curr_rhs(nullptr),
 	  effect_context(eff_context),
 	  effect_accum(eff_accum)
 {
@@ -124,7 +124,7 @@ CGContext::CGContext(const CGContext &cgc, RWDirective* rwd, const Variable* iv,
 	  curr_blk(cgc.curr_blk),
 	  rw_directive(rwd),
 	  iv_bounds(cgc.iv_bounds),
-	  curr_rhs(NULL),
+	  curr_rhs(nullptr),
 	  effect_context(cgc.effect_context),
 	  effect_accum(cgc.effect_accum)
 {
@@ -187,7 +187,7 @@ CGContext::is_nonwritable(const Variable *v) const
 
 bool CGContext::check_deref_volatile(const Variable *v, int deref_level)
 {
-        assert(v && "NULL Variable!");
+        assert(v && "nullptr Variable!");
         if (!CGOptions::strict_volatile_rule())
                 return true;
 	int level = deref_level;

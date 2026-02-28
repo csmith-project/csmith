@@ -39,15 +39,15 @@ class DFSProgramGenerator : public AbsProgramGenerator {
 public:
 	DFSProgramGenerator(int argc, char *argv[], unsigned long seed);
 
-	virtual ~DFSProgramGenerator();
+	virtual ~DFSProgramGenerator() override;
 
 	virtual OutputMgr* getOutputMgr() { return output_mgr_; }
 
-	virtual void goGenerator();
+	virtual void goGenerator() override;
 
-	virtual void initialize();
+	virtual void initialize() override;
 
-	virtual std::string get_count_prefix(const std::string &name);
+	virtual std::string get_count_prefix(const std::string &name) override;
 
 private:
 	int argc_;
