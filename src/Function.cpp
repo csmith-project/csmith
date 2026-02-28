@@ -127,8 +127,7 @@ get_fact_mgr(const CGContext* cg)
 const Function*
 find_function_by_name(const string& name)
 {
-	size_t i;
-	for (i=0; i<FuncList.size(); i++) {
+	for (size_t i =0; i<FuncList.size(); i++) {
 		if (FuncList[i]->name == name) {
 			return FuncList[i];
 		}
@@ -139,8 +138,7 @@ find_function_by_name(const string& name)
 int
 find_function_in_set(const vector<const Function*>& set, const Function* f)
 {
-	size_t i;
-	for (i=0; i<set.size(); i++) {
+	for (size_t i =0; i<set.size(); i++) {
 		if (set[i] == f) {
 			return i;
 		}
@@ -174,8 +172,7 @@ find_blk_for_var(const Variable* v)
 bool
 Function::is_var_on_stack(const Variable* var, const Statement* stm) const
 {
-    size_t i;
-    for (i=0; i<param.size(); i++) {
+    for (size_t i =0; i<param.size(); i++) {
         if (param[i]->match(var)) {
             return true;
         }
@@ -209,8 +206,7 @@ Function::is_var_oos(const Variable* var, const Statement* stm) const
 {
 	if (!is_var_visible(var, stm)) {
 		//return true;
-		size_t i;
-		for (i=0; i<blocks.size(); i++) {
+		for (size_t i =0; i<blocks.size(); i++) {
 			if (find_variable_in_set(blocks[i]->local_vars, var) != -1) {
 				return true;
 			}

@@ -216,8 +216,7 @@ ArrayVariable::~ArrayVariable(void)
 {
 	// use Variable's destructor for collective variable
 	if (collective != 0) {
-		size_t i;
-		for (i=0; i<indices.size(); i++) {
+		for (size_t i =0; i<indices.size(); i++) {
 			delete indices[i];
 		}
 		init = nullptr;   // set to nullptr to avoid being deleted twice
@@ -239,9 +238,8 @@ ArrayVariable::set_index(size_t index, const Expression* e)
 unsigned long
 ArrayVariable::get_size(void) const
 {
-	size_t i;
 	unsigned long len = 1;
-	for (i=0; i<sizes.size(); i++) {
+	for (size_t i =0; i<sizes.size(); i++) {
 		len *= sizes[i];
 	}
 	return len;
@@ -251,8 +249,7 @@ unsigned long
 ArrayVariable::size_in_bytes(void) const
 {
 	unsigned long len = type->SizeInBytes();
-	size_t i;
-	for (i=0; i<sizes.size(); i++) {
+	for (size_t i =0; i<sizes.size(); i++) {
 		len *= sizes[i];
 	}
 	return len;
@@ -261,11 +258,10 @@ ArrayVariable::size_in_bytes(void) const
 ArrayVariable*
 ArrayVariable::itemize(void) const
 {
-	size_t i;
 	assert(collective == 0);
 	ArrayVariable* av = new ArrayVariable(*this);
 	VariableSelector::AllVars.push_back(av);
-	for (i=0; i<sizes.size(); i++) {
+	for (size_t i =0; i<sizes.size(); i++) {
 		int index = rnd_upto(sizes[i]);
 		av->add_index(new Constant(get_int_type(), StringUtils::int2str(index)));
 	}
@@ -280,12 +276,11 @@ ArrayVariable::itemize(void) const
 ArrayVariable*
 ArrayVariable::itemize(const vector<int>& const_indices) const
 {
-	size_t i;
 	assert(collective == 0);
 	assert(const_indices.size() == sizes.size());
 	ArrayVariable* av = new ArrayVariable(*this);
 	VariableSelector::AllVars.push_back(av);
-	for (i=0; i<sizes.size(); i++) {
+	for (size_t i =0; i<sizes.size(); i++) {
 		int index = const_indices[i];
 		av->add_index(new Constant(get_int_type(), StringUtils::int2str(index)));
 	}
@@ -300,13 +295,12 @@ ArrayVariable::itemize(const vector<int>& const_indices) const
 ArrayVariable*
 ArrayVariable::itemize(const std::vector<const Variable*>& indices, Block* blk) const
 {
-	size_t i;
 	// Looks like this function is dead.
 	assert(0 && "Invoke a dead function?");
 	assert(collective == 0);
 	ArrayVariable* av = new ArrayVariable(*this);
 	VariableSelector::AllVars.push_back(av);
-	for (i=0; i<sizes.size(); i++) {
+	for (size_t i =0; i<sizes.size(); i++) {
 		av->add_index(new ExpressionVariable(*indices[i]));
 	}
 	av->collective = this;
@@ -322,11 +316,10 @@ ArrayVariable::itemize(const std::vector<const Variable*>& indices, Block* blk) 
 ArrayVariable*
 ArrayVariable::itemize(const std::vector<const Expression*>& indices, Block* blk) const
 {
-	size_t i;
 	assert(collective == 0);
 	ArrayVariable* av = new ArrayVariable(*this);
 	VariableSelector::AllVars.push_back(av);
-	for (i=0; i<sizes.size(); i++) {
+	for (size_t i =0; i<sizes.size(); i++) {
 		av->add_index(indices[i]);
 	}
 	av->collective = this;
@@ -407,8 +400,7 @@ ArrayVariable::is_variant(const Variable* v) const
 		const ArrayVariable* av = dynamic_cast<const ArrayVariable*>(v);
 		assert(av);
 		if (av->collective != 0 && collective == av->collective && av->indices.size() == this->indices.size() ) {
-			size_t i;
-			for (i=0; i<indices.size(); i++) {
+			for (size_t i =0; i<indices.size(); i++) {
 				const Expression* e = indices[i];
 				const Expression* other_e = av->indices[i];
 				if (count_expr_key_var(e) != 1 ||
@@ -551,8 +543,7 @@ void ArrayVariable::OutputDecl(std::ostream &out) const
 	}
 	output_qualified_type(out);
 	out << get_actual_name();
-	size_t i;
-	for (i=0; i<sizes.size(); i++) {
+	for (size_t i =0; i<sizes.size(); i++) {
 		out << "[" << sizes[i] << "]";
 	}
 }
@@ -568,8 +559,7 @@ ArrayVariable::Output(std::ostream &out) const
 	else {
 		out << get_actual_name();
 		assert(!indices.empty());
-		size_t i;
-		for (i=0; i<indices.size(); i++) {
+		for (size_t i =0; i<indices.size(); i++) {
 			if (1) { //indices[i]->less_than(sizes[i])) {
 				out << "[";
 				indices[i]->Output(out);
@@ -598,8 +588,7 @@ void
 ArrayVariable::OutputUpperBound(std::ostream &out) const
 {
 	out << name;
-	size_t i;
-	for (i=0; i<get_dimension(); i++) {
+	for (size_t i =0; i<get_dimension(); i++) {
 		out << "[" << (sizes[i] - 1) << "]";
 	}
 }
@@ -609,8 +598,7 @@ void
 ArrayVariable::OutputLowerBound(std::ostream &out) const
 {
 	out << name;
-	size_t i;
-	for (i=0; i<get_dimension(); i++) {
+	for (size_t i =0; i<get_dimension(); i++) {
 		out << "[0]";
 	}
 }
@@ -619,9 +607,8 @@ ArrayVariable::OutputLowerBound(std::ostream &out) const
 void
 ArrayVariable::output_with_indices(std::ostream &out, const std::vector<const Variable*>& cvs) const
 {
-	size_t i;
 	out << get_actual_name();
-	for (i=0; i<get_dimension(); i++) {
+	for (size_t i =0; i<get_dimension(); i++) {
 		out << "[";
 		cvs[i]->Output(out);
 		out << "]";

@@ -127,8 +127,7 @@ Fact::doFinalization()
 int
 find_fact(const FactVec& facts, const Fact* fact)
 {
-    size_t i;
-    for (i=0; i<facts.size(); i++) {
+    for (size_t i =0; i<facts.size(); i++) {
         if (fact->equal(*facts[i])) {
             return i;
         }
@@ -139,8 +138,7 @@ find_fact(const FactVec& facts, const Fact* fact)
 const Fact*
 find_related_fact(const FactVec& facts, const Fact* new_fact)
 {
-    size_t i;
-    for (i=0; i<facts.size(); i++) {
+    for (size_t i =0; i<facts.size(); i++) {
         if (new_fact->is_related(*facts[i])) {
             return facts[i];
         }
@@ -151,8 +149,7 @@ find_related_fact(const FactVec& facts, const Fact* new_fact)
 const Fact*
 find_related_fact(const vector<Fact*>& facts, const Fact* new_fact)
 {
-    size_t i;
-    for (i=0; i<facts.size(); i++) {
+    for (size_t i =0; i<facts.size(); i++) {
         if (new_fact->is_related(*facts[i])) {
             return facts[i];
         }
@@ -213,9 +210,8 @@ renew_fact(FactVec& facts, const Fact* new_fact)
 bool
 merge_facts(FactVec& facts, const FactVec& new_facts)
 {
-    size_t i;
     bool changed = false;
-    for (i=0; i<new_facts.size(); i++) {
+    for (size_t i =0; i<new_facts.size(); i++) {
 		//new_facts[i]->Output(cout);
         if (merge_fact(facts, new_facts[i])) {
             changed = true;
@@ -227,9 +223,8 @@ merge_facts(FactVec& facts, const FactVec& new_facts)
 bool
 renew_facts(FactVec& facts, const FactVec& new_facts)
 {
-    size_t i;
     bool changed = false;
-    for (i=0; i<new_facts.size(); i++) {
+    for (size_t i =0; i<new_facts.size(); i++) {
         if (renew_fact(facts, new_facts[i])) {
             changed = true;
         }
@@ -240,9 +235,8 @@ renew_facts(FactVec& facts, const FactVec& new_facts)
 vector<Fact*>
 copy_facts(const FactVec& facts_in)
 {
-    size_t i;
 	vector<Fact*> facts_out;
-    for (i=0; i<facts_in.size(); i++) {
+    for (size_t i =0; i<facts_in.size(); i++) {
 		Fact* f = facts_in[i]->clone();
         facts_out.push_back(f);
     }
@@ -272,8 +266,7 @@ bool
 same_facts(const FactVec& facts1, const FactVec& facts2)
 {
 	if (facts1.size() == facts2.size()) {
-		size_t i;
-		for (i=0; i<facts1.size(); i++) {
+		for (size_t i =0; i<facts1.size(); i++) {
 			if (find_fact(facts2, facts1[i]) == -1) {
 				return false;
 			}
@@ -287,8 +280,7 @@ bool
 subset_facts(const FactVec& facts1, const FactVec& facts2)
 {
 	if (facts1.size() == facts2.size()) {
-		size_t i;
-		for (i=0; i<facts1.size(); i++) {
+		for (size_t i =0; i<facts1.size(); i++) {
 			const Fact* f1 = facts1[i];
 			const Fact* f2 = find_related_fact(facts2, f1);
 			if (f2 == 0 || !f2->imply(*f1)) {

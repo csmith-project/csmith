@@ -99,11 +99,10 @@ StringUtils::first_nonspace_char(const std::string &s)
 size_t
 StringUtils::find_any_char(const string &s, size_t pos, const string& to_match)
 {
-	size_t i;
 	if (s.empty() || to_match.empty()) {
 		return string::npos;
 	}
-	for (i=pos; i<s.length(); i++) {
+	for (size_t i =pos; i<s.length(); i++) {
 		if (to_match.find(s[i]) != string::npos) {
 			return i;
 		}
@@ -249,10 +248,9 @@ StringUtils::breakup_assigns(const string& assigns, vector<string>& vars, vector
 {
 	vector<string> tmp_strs;
 	StringUtils::split_string(assigns, tmp_strs, ';');
-	size_t i;
 
 	string short_assigns;
-	for (i=0; i<tmp_strs.size(); i++) {
+	for (size_t i =0; i<tmp_strs.size(); i++) {
 		vector<string> pair;
 		StringUtils::split_string(tmp_strs[i], pair, '=');
 		assert(pair.size() == 2);

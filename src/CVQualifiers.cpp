@@ -395,10 +395,9 @@ vector<bool>
 CVQualifiers::random_stricter_consts(void) const
 {
 	vector<bool> consts;
-	size_t i;
 	size_t depth = is_consts.size();
 	if (CGOptions::match_exact_qualifiers()) return is_consts;
-	for (i=0; i<depth; i++) {
+	for (size_t i =0; i<depth; i++) {
 		// special case
 		// const int** is not stricter than int**
 		// int * const ** is not stricter than int***
@@ -423,10 +422,9 @@ vector<bool>
 CVQualifiers::random_stricter_volatiles(void) const
 {
 	vector<bool> volatiles;
-	size_t i;
 	size_t depth = is_volatiles.size();
 	if (CGOptions::match_exact_qualifiers()) return is_volatiles;
-	for (i=0; i<depth; i++) {
+	for (size_t i =0; i<depth; i++) {
 		// first one (storage must match, any level followed by at least two more
 		// indirections must match
 		if (is_volatiles[i] || (i==0 && depth>1) || (depth - i > 2)) {
@@ -450,10 +448,9 @@ vector<bool>
 CVQualifiers::random_looser_consts(void) const
 {
 	vector<bool> consts;
-	size_t i;
 	size_t depth = is_consts.size();
 	if (CGOptions::match_exact_qualifiers()) return is_consts;
-	for (i=0; i<depth; i++) {
+	for (size_t i =0; i<depth; i++) {
 		// special case
 		if (!is_consts[i] || (depth - i > 2)) {
 			consts.push_back(is_consts[i]);
@@ -472,10 +469,9 @@ vector<bool>
 CVQualifiers::random_looser_volatiles(void) const
 {
 	vector<bool> volatiles;
-	size_t i;
 	size_t depth = is_volatiles.size();
 	if (CGOptions::match_exact_qualifiers()) return is_volatiles;
-	for (i=0; i<depth; i++) {
+	for (size_t i =0; i<depth; i++) {
 		if (!is_volatiles[i] || (i==0 && depth>1) || (depth - i > 2)) {
 			volatiles.push_back(is_volatiles[i]);
 		}
@@ -536,8 +532,7 @@ CVQualifiers::random_add_qualifiers(bool no_volatile) const
 void
 CVQualifiers::remove_qualifiers(int len)
 {
-	int i;
-	for (i=0; i<len; i++) {
+	for (int i =0; i<len; i++) {
 		is_consts.pop_back();
 		is_volatiles.pop_back();
 	}
@@ -581,9 +576,8 @@ CVQualifiers::output_qualified_type(const Type* t, std::ostream &out) const
 {
 	assert(t);
 	assert(sanity_check(t));
-	size_t i;
 	const Type* base = t->get_base_type();
-	for (i=0; i<is_consts.size(); i++) {
+	for (size_t i =0; i<is_consts.size(); i++) {
 		if (i>0) {
 			out << "*";
 		}

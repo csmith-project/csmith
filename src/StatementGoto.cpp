@@ -270,8 +270,7 @@ StatementGoto::Output(std::ostream &out, FactMgr* /*fm*/, int indent) const
 void
 StatementGoto::output_skipped_var_inits(std::ostream &out, int indent) const
 {
-	size_t i;
-	for (i=0; i<init_skipped_vars.size(); i++) {
+	for (size_t i =0; i<init_skipped_vars.size(); i++) {
 		output_tab(out, indent);
 		const Variable* v = init_skipped_vars[i];
 		out << v->get_actual_name() << " = ";
@@ -294,9 +293,8 @@ StatementGoto::has_init_skipped_vars(const Block* src_blk, const Statement* dest
 	for (; b && b != src_blk; b = b->parent) {
 		local_vars.insert(local_vars.end(), b->local_vars.begin(), b->local_vars.end());
 	}
-	size_t i;
 	skipped_vars.clear();
-	for (i=0; i<local_vars.size(); i++) {
+	for (size_t i =0; i<local_vars.size(); i++) {
 		const Variable* v = local_vars[i];
 		//b==parent means the jump destination is inside a block that also
 		//contains "goto", in that case, all locals in sub-blocks have been skipped
@@ -373,8 +371,7 @@ StatementGoto::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) c
 	if (!test.visit_facts(inputs, cg_context)) {
 		return log_analysis_fail("StatementGoto condition");
 	}
-	size_t i;
-	for (i=0; i<init_skipped_vars.size(); i++) {
+	for (size_t i =0; i<init_skipped_vars.size(); i++) {
 		if (!cg_context.check_write_var(init_skipped_vars[i], inputs)) {
 			return log_analysis_fail("StatementGoto skipped vars");
 		}

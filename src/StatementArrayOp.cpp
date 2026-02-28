@@ -210,8 +210,7 @@ StatementArrayOp::~StatementArrayOp(void)
 void
 StatementArrayOp::output_header(std::ostream& out, int& indent) const
 {
-	size_t i;
-	for (i=0; i<array_var->get_dimension(); i++) {
+	for (size_t i =0; i<array_var->get_dimension(); i++) {
 		if (i > 0) {
 			output_tab(out, indent);
 			out << "{";

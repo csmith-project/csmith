@@ -215,8 +215,7 @@ ExpressionFuncall::get_qualifiers(void) const
 bool
 ExpressionFuncall::use_var(const Variable* v) const
 {
-	size_t i;
-	for (i=0; i<invoke.param_value.size(); i++) {
+	for (size_t i =0; i<invoke.param_value.size(); i++) {
 		if (invoke.param_value[i]->use_var(v)) {
 			return true;
 		}

@@ -172,12 +172,11 @@ Bookkeeper::stat_blk_depths(void)
 void
 Bookkeeper::output_stmts_statistics(std::ostream &out)
 {
-	size_t i;
 	int stmt_cnt = stat_blk_depths();
 	formated_output(out, "stmts: ", stmt_cnt);
 	formated_output(out, "max block depth: ", (blk_depth_cnts.size() - 1));
 	out << "breakdown:" << endl;
-	for (i=0; i<blk_depth_cnts.size(); i++) {
+	for (size_t i =0; i<blk_depth_cnts.size(); i++) {
 		if (blk_depth_cnts[i]) {
 			out << "   depth: " << i << ", occurrence: " << blk_depth_cnts[i] << endl;
 		}
@@ -261,11 +260,10 @@ Bookkeeper::stat_expr_depths(void)
 void
 Bookkeeper::output_expr_statistics(std::ostream &out)
 {
-	size_t i;
 	stat_expr_depths();
 	formated_output(out, "max expression depth: ", (expr_depth_cnts.size() - 1));
 	out << "breakdown:" << endl;
-	for (i=0; i<expr_depth_cnts.size(); i++) {
+	for (size_t i =0; i<expr_depth_cnts.size(); i++) {
 		if (expr_depth_cnts[i]) {
 			out << "   depth: " << i << ", occurrence: " << expr_depth_cnts[i] << endl;
 		}
@@ -411,9 +409,8 @@ void
 Bookkeeper::record_volatile_access(const Variable* var, int deref_level, bool write)
 {
 	assert(var);
-	int i;
 	write ? record_bitfields_writes(var) : record_bitfields_reads(var);;
-	for (i=0; i<=deref_level; i++) {
+	for (int i =0; i<=deref_level; i++) {
 		if (write) {
 			if (var->qfer.is_volatile_after_deref(i)) {
 				if (i) {
@@ -561,9 +558,8 @@ void incr_counter(std::vector<int>& counters, int pos)
 
 int calc_total(const std::vector<int>& counters)
 {
-	size_t i;
 	int total = 0;
-	for (i=0; i<counters.size(); i++) {
+	for (size_t i =0; i<counters.size(); i++) {
 		total += counters[i];
 	}
 	return total;

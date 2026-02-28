@@ -450,10 +450,9 @@ StatementFor::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) co
 
 	// include the facts from "break" statements
 	// find edges leading to the end of this statement, and merge
-	size_t i;
 	vector<const CFGEdge*> edges;
 	find_edges_in(edges, true, false);
-	for (i=0; i<edges.size(); i++) {
+	for (size_t i =0; i<edges.size(); i++) {
 		const Statement* src = edges[i]->src;
 		FactMgr::merge_jump_facts(inputs, fm->map_facts_out[src]);
 	}

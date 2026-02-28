@@ -375,8 +375,7 @@ FunctionInvocation::has_uncertain_call(void) const
 	// we judge both calls as uncertain because the evaluation order can be
 	// either left-to-right or right-to-left
 	int has_func_param_cnt = 0;
-	size_t i;
-	for (i=0; i<param_value.size(); i++) {
+	for (size_t i =0; i<param_value.size(); i++) {
 		if (param_value[i]->func_count() > 0) {
 			has_func_param_cnt++;
 		}
@@ -387,8 +386,7 @@ FunctionInvocation::has_uncertain_call(void) const
 bool
 FunctionInvocation::has_uncertain_call_recursive(void) const
 {
-	size_t i;
-	for (i=0; i<param_value.size(); i++) {
+	for (size_t i =0; i<param_value.size(); i++) {
 		const Expression* e = param_value[i];
 		if (e->term_type == eFunction) {
 			const ExpressionFuncall* ef = static_cast<const ExpressionFuncall*>(e);
@@ -403,8 +401,7 @@ FunctionInvocation::has_uncertain_call_recursive(void) const
 bool
 FunctionInvocation::has_simple_params(void) const
 {
-	size_t i;
-	for (i=0; i<param_value.size(); i++) {
+	for (size_t i =0; i<param_value.size(); i++) {
 		const Expression* e = param_value[i];
 		if (e->term_type == eFunction) {
 			return false;

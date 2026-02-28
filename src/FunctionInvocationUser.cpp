@@ -92,9 +92,8 @@ get_return_fact_for_invocation(const FunctionInvocationUser* fiu, const Variable
 void
 add_return_fact_for_invocation(const FunctionInvocationUser* fiu, const Fact* f)
 {
-	size_t i;
 	assert(invocations.size() == return_facts.size());
-	for (i=0; i<invocations.size(); i++) {
+	for (size_t i =0; i<invocations.size(); i++) {
 		if (invocations[i] == fiu && return_facts[i]->is_related(*f)) {
 			return_facts[i] = f;
 			return;
@@ -110,8 +109,7 @@ add_return_fact_for_invocation(const FunctionInvocationUser* fiu, const Fact* f)
 void
 calls_to_funcs(const vector<const FunctionInvocationUser*>& calls, vector<const Function*>& funcs)
 {
-	size_t i;
-	for (i=0; i<calls.size(); i++) {
+	for (size_t i =0; i<calls.size(); i++) {
 		const Function* func = calls[i]->get_func();
 		if (find_function_in_set(funcs, func) == -1) {
 			funcs.push_back(func);
@@ -126,8 +124,7 @@ calls_to_funcs(const vector<const FunctionInvocationUser*>& calls, vector<const 
 void
 calls_to_funcs_recursive(const vector<const FunctionInvocationUser*>& calls, vector<const Function*>& funcs)
 {
-	size_t i;
-	for (i=0; i<calls.size(); i++) {
+	for (size_t i =0; i<calls.size(); i++) {
 		const Function* func = calls[i]->get_func();
 		if (find_function_in_set(funcs, func) == -1) {
 			funcs.push_back(func);
@@ -376,8 +373,7 @@ FunctionInvocationUser::revisit(std::vector<const Fact*>& inputs, CGContext& cg_
 void
 FunctionInvocationUser::save_return_fact(const vector<const Fact*>& facts) const
 {
-	size_t i;
-	for (i=0; i<facts.size(); i++) {
+	for (size_t i =0; i<facts.size(); i++) {
 		if (func->rv->match(facts[i]->get_var())) {
 			add_return_fact_for_invocation(this, facts[i]);
 		}
@@ -463,8 +459,7 @@ FunctionInvocationUser::indented_output(std::ostream &out, int indent) const
 	out << func->name;
 	outputln(out);
 	output_open_encloser("(", out, indent);
-	size_t i;
-	for (i=0; i<param_value.size(); i++) {
+	for (size_t i =0; i<param_value.size(); i++) {
 		if (i > 0) outputln(out);
 		param_value[i]->indented_output(out, indent);
 		out << ",";

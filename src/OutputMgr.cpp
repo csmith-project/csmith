@@ -349,8 +349,7 @@ OutputMgr::output_comment_line(ostream &out, const std::string &comment)
 void
 OutputMgr::OutputPtrResets(ostream &out, const vector<const Variable*>& ptrs)
 {
-	size_t i;
-	for (i=0; i<ptrs.size(); i++) {
+	for (size_t i =0; i<ptrs.size(); i++) {
 		const Variable* v = ptrs[i];
 		if (v->isArray) {
 			const ArrayVariable* av = static_cast<const ArrayVariable*>(v);

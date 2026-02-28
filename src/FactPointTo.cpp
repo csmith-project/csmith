@@ -69,8 +69,7 @@ vector<vector<const Variable*> > FactPointTo::all_aliases;
 bool
 FactPointTo::is_null() const
 {
-    size_t i;
-    for (i=0; i<point_to_vars.size(); i++) {
+    for (size_t i =0; i<point_to_vars.size(); i++) {
         if (point_to_vars[i] == null_ptr) {
             return true;
         }
@@ -93,11 +92,10 @@ FactPointTo::is_dead() const
 bool
 FactPointTo::has_invisible(const Statement* stm) const
 {
-    size_t i;
 	if (!var->is_visible(stm->parent)) {
 		return true;
 	}
-    for (i=0; i<point_to_vars.size(); i++) {
+    for (size_t i =0; i<point_to_vars.size(); i++) {
 		const Variable* v = point_to_vars[i];
 		if (v != null_ptr && v != garbage_ptr && v != tbd_ptr && !v->is_visible(stm->parent)) {
 			return true;
@@ -340,9 +338,8 @@ FactPointTo::make_fact(const Variable* v, const Variable* point_to)
 vector<const Fact*>
 FactPointTo::make_facts(const vector<const Variable*> &vars, const vector<const Variable*>& set)
 {
-	size_t i;
 	vector<const Fact*> facts;
-	for (i=0; i<vars.size(); i++) {
+	for (size_t i =0; i<vars.size(); i++) {
 		// if type is null, means they are special variables (most likely tbd_ptr) we don't care
 		if (vars[i]->type != 0) {
 			facts.push_back(make_fact(vars[i], set));
@@ -354,9 +351,8 @@ FactPointTo::make_facts(const vector<const Variable*> &vars, const vector<const 
 vector<const Fact*>
 FactPointTo::make_facts(const vector<const Variable*> &vars, const Variable* point_to)
 {
-	size_t i;
 	vector<const Fact*> facts;
-	for (i=0; i<vars.size(); i++) {
+	for (size_t i =0; i<vars.size(); i++) {
 		// if type is null, means they are special variables (most likely tbd_ptr) we don't care
 		if (vars[i]->type != 0) {
 			facts.push_back(make_fact(vars[i], point_to));
@@ -451,8 +447,7 @@ FactPointTo::is_valid_ptr(const Variable* p, const std::vector<const Fact*>& fac
 bool
 FactPointTo::is_valid_ptr(const char* name, const std::vector<const Fact*>& facts)
 {
-	size_t i;
-	for (i=0; i<facts.size(); i++) {
+	for (size_t i =0; i<facts.size(); i++) {
 		if (facts[i]->get_var()->name == name) {
 			if (facts[i]->eCat == ePointTo) {
 				const FactPointTo* fact = static_cast<const FactPointTo*>(facts[i]);
@@ -647,9 +642,8 @@ void output_var(const Variable* var, std::ostream &out)
 	// for array of pointers, only asserting the first pointer in array probably is enough?
 	if (var->isArray)
 	{
-		size_t i;
 		const ArrayVariable* av = static_cast<const ArrayVariable*>(var);
-		for (i=0; i<av->get_dimension(); i++) {
+		for (size_t i =0; i<av->get_dimension(); i++) {
 			out << "[0]";
 		}
 	}
@@ -793,8 +787,7 @@ FactPointTo::update_with_modified_index(const Variable* index_var) const
 void
 FactPointTo::update_facts_with_modified_index(std::vector<const Fact*>& facts, const Variable* index_var)
 {
-	size_t i;
-	for (i=0; i<facts.size(); i++) {
+	for (size_t i =0; i<facts.size(); i++) {
 		if (facts[i]->eCat == ePointTo) {
 			const FactPointTo* fp = static_cast<const FactPointTo*>(facts[i]);
 			const FactPointTo* new_fp = fp->update_with_modified_index(index_var);
@@ -838,9 +831,8 @@ FactPointTo::update_ptr_aliases(const vector<Fact*>& facts, vector<const Variabl
 void
 FactPointTo::aggregate_all_pointto_sets(void)
 {
-	size_t i;
 	const vector<Function*>& funcs = get_all_functions();
-	for (i=0; i<funcs.size(); i++) {
+	for (size_t i =0; i<funcs.size(); i++) {
 		if (funcs[i]->is_builtin)
 			continue;
 		FactMgr* fm = get_fact_mgr_for_func(funcs[i]);

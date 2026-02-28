@@ -176,9 +176,8 @@ FactUnion::make_fact(const Variable* v, int fid)
 vector<const Fact*>
 FactUnion::make_facts(const vector<const Variable*>& vars, int fid)
 {
-	size_t i;
 	vector<const Fact*> facts;
-	for (i=0; i<vars.size(); i++) {
+	for (size_t i =0; i<vars.size(); i++) {
 		facts.push_back(make_fact(vars[i], fid));
 	}
 	return facts;

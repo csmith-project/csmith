@@ -176,9 +176,8 @@ VariableSelector::new_variable(const std::string &name, const Type *type, const 
 void
 VariableSelector::expand_struct_union_vars(vector<Variable *>& vars, const Type* type)
 {
-    size_t i;
     size_t len = vars.size();
-    for (i=0; i<len; i++) {
+    for (size_t i =0; i<len; i++) {
         Variable* tmpvar = vars[i];
 		// don't expand virtual variables
 		if (tmpvar->is_virtual()) continue;
@@ -198,9 +197,8 @@ VariableSelector::expand_struct_union_vars(vector<Variable *>& vars, const Type*
 void
 VariableSelector::expand_struct_union_vars(vector<const Variable *>& vars, const Type* type)
 {
-    size_t i;
     size_t len = vars.size();
-    for (i=0; i<len; i++) {
+    for (size_t i =0; i<len; i++) {
         const Variable* tmpvar = vars[i];
 		// don't expand virtual variables
 		if (tmpvar->is_virtual()) continue;
@@ -378,13 +376,12 @@ VariableSelector::choose_ok_var(const vector<const Variable *> &vars)
 const Variable *
 VariableSelector::choose_visible_read_var(const Block* b, const vector<const Variable*> &read_vars, const Type* type, const FactVec& facts)
 {
-	size_t i;
 	vector<const Variable*> ok_vars;
 	vector<const Variable*> expanded_read_vars(read_vars);
 	// include the fields of struct/unions
 	expand_struct_union_vars(expanded_read_vars, type);
 
-	for (i=0; i<expanded_read_vars.size(); i++) {
+	for (size_t i =0; i<expanded_read_vars.size(); i++) {
 		const Variable* v = expanded_read_vars[i];
 		if (type->match(v->type, eConvert) &&
 			(b->is_var_on_stack(v) || v->is_global()) &&
@@ -1518,9 +1515,8 @@ ArrayVariable*
 VariableSelector::create_mutated_array_var(const ArrayVariable* av, const vector<const Expression*>& new_indices)
 {
 	assert(0 && "invalid call to create_mutated_array_var!");
-	size_t i;
 	ArrayVariable* new_av = new ArrayVariable(*av);
-	for (i=0; i<new_indices.size(); i++) {
+	for (size_t i =0; i<new_indices.size(); i++) {
 		new_av->set_index(i, new_indices[i]);
 	}
 	// add new variable to local list and all-variable list
@@ -1541,8 +1537,7 @@ VariableSelector::make_dummy_static_variable(const string &name)
 const Variable*
 VariableSelector::find_var_by_name(const string &name)
 {
-	size_t i;
-	for (i=0; i<AllVars.size(); i++) {
+	for (size_t i =0; i<AllVars.size(); i++) {
 		const Variable* v = AllVars[i]->match_var_name(name);
 		if (v) {
 			return v;
@@ -1557,8 +1552,7 @@ VariableSelector::find_var_by_name(const string &name)
 void
 VariableSelector::doFinalization(void)
 {
-	size_t i;
-	for(i=0; i<AllVars.size(); i++) {
+	for (size_t i =0; i<AllVars.size(); i++) {
 		delete AllVars[i];
 	}
 	AllVars.clear();

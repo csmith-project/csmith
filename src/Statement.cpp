@@ -202,8 +202,7 @@ bool StatementFilter::filter(int value) const
 
 int find_stm_in_set(const vector<const Statement*>& set, const Statement* s)
 {
-    size_t i;
-    for (i=0; i<set.size(); i++) {
+    for (size_t i =0; i<set.size(); i++) {
         if (set[i] == s) {
             return i;
         }
@@ -467,8 +466,7 @@ Statement::has_edge_in(bool post_dest, bool back_link) const
 	if (func != 0) {
 		FactMgr* fm = get_fact_mgr_for_func(func);
 		assert(fm);
-		size_t i;
-		for (i=0; i<fm->cfg_edges.size(); i++) {
+		for (size_t i =0; i<fm->cfg_edges.size(); i++) {
 			const CFGEdge* e = fm->cfg_edges[i];
 			if (e->dest == this && e->back_link == back_link && e->post_dest == post_dest) {
 				return true;
@@ -489,8 +487,7 @@ Statement::find_edges_in(vector<const CFGEdge*>& edges, bool post_dest, bool bac
 	if (func != 0) {
 		FactMgr* fm = get_fact_mgr_for_func(func);
 		assert(fm);
-		size_t i;
-		for (i=0; i<fm->cfg_edges.size(); i++) {
+		for (size_t i =0; i<fm->cfg_edges.size(); i++) {
 			const CFGEdge* e = fm->cfg_edges[i];
 			if (e->dest == this && e->back_link == back_link && e->post_dest == post_dest) {
 				edges.push_back(e);
@@ -509,8 +506,7 @@ Statement::find_jump_label(void) const
 	if (func != 0) {
 		FactMgr* fm = get_fact_mgr_for_func(func);
 		assert(fm);
-		size_t i;
-		for (i=0; i<fm->cfg_edges.size(); i++) {
+		for (size_t i =0; i<fm->cfg_edges.size(); i++) {
 			const CFGEdge* e = fm->cfg_edges[i];
 			if (e->dest == this && e->src->eType == eGoto) {
 				const StatementGoto* sg = dynamic_cast<const StatementGoto*>(e->src);
@@ -531,9 +527,8 @@ Statement::find_jump_sources(std::vector<const StatementGoto*>& gotos) const
 	if (func != 0) {
 		FactMgr* fm = get_fact_mgr_for_func(func);
 		assert(fm);
-		size_t i;
 		gotos.clear();
-		for (i=0; i<fm->cfg_edges.size(); i++) {
+		for (size_t i =0; i<fm->cfg_edges.size(); i++) {
 			const CFGEdge* e = fm->cfg_edges[i];
 			if (e->dest == this && e->src->eType == eGoto) {
 				const StatementGoto* sg = dynamic_cast<const StatementGoto*>(e->src);
@@ -697,8 +692,7 @@ Statement::is_jump_target_from_other_blocks(void) const
 {
 	vector<const StatementGoto*> gotos;
 	if (find_jump_sources(gotos)) {
-		size_t i;
-		for (i=0; i<gotos.size(); i++) {
+		for (size_t i =0; i<gotos.size(); i++) {
 			if (gotos[i]->parent != this->parent) {
 				return true;
 			}

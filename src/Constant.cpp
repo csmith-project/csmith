@@ -290,11 +290,10 @@ static string
 GenerateRandomStructConstant(const Type* type)
 {
 	string value = "{";
-	size_t i;
 	assert(type->eType == eStruct);
 	assert(type->fields.size() == type->bitfields_length_.size());
 
-	for (i = 0; i < type->fields.size(); i++) {
+	for (size_t i = 0; i < type->fields.size(); i++) {
 		bool is_bitfield = type->is_bitfield(i);
 		if (is_bitfield) {
 			int bound = type->bitfields_length_[i];

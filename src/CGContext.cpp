@@ -150,8 +150,7 @@ CGContext::is_nonreadable(const Variable *v) const
 {
 	if (rw_directive) {
 		VariableSet::size_type len = rw_directive->no_read_vars.size();
-		VariableSet::size_type i;
-		for (i = 0; i < len; ++i) {
+		for (VariableSet::size_type i = 0; i < len; ++i) {
 			if (rw_directive->no_read_vars[i]->match(v)) {
 				return true;
 			}
@@ -536,8 +535,7 @@ void CGContext::extend_call_chain(const CGContext& cg_context)
 void
 CGContext::output_call_chain(std::ostream &out)
 {
-	size_t i;
-	for (i=0; i<call_chain.size(); i++) {
+	for (size_t i =0; i<call_chain.size(); i++) {
 		const Block* b = call_chain[i];
 		if (i > 0) {
 			out << " -> ";

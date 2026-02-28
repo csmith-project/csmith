@@ -152,10 +152,9 @@ Block::make_random(CGContext &cg_context, bool looping)
 		delete b;
 		return nullptr;
 	}
-	unsigned int i;
 	if (b->stm_id == 1)
 		BREAK_NOP;			// for debugging
-	for (i = 0; i <= max; ++i) {
+	for (unsigned int i = 0; i <= max; ++i) {
 		Statement *s = Statement::make_random(cg_context);
 		// In the exhaustive mode, Statement::make_random could return nullptr;
 		if (!s)
@@ -274,8 +273,7 @@ Block::OutputTmpVariableList(std::ostream &out, int indent) const
 static void
 OutputStatementList(const vector<Statement*> &stms, std::ostream &out, FactMgr* fm, int indent)
 {
-	size_t i;
-	for (i=0; i<stms.size(); i++) {
+	for (size_t i =0; i<stms.size(); i++) {
 		const Statement* stm = stms[i];
 		stm->pre_output(out, fm, indent);
 		stm->Output(out, fm, indent);
@@ -502,8 +500,7 @@ Block::append_nested_loop(CGContext& cg_context)
 bool
 Block::is_var_on_stack(const Variable* var) const
 {
-    size_t i;
-    for (i=0; i<func->param.size(); i++) {
+    for (size_t i =0; i<func->param.size(); i++) {
         if (func->param[i]->match(var)) {
             return true;
         }
@@ -551,8 +548,7 @@ Block::contains_back_edge(void) const
 {
 	if (func != 0) {
 		FactMgr* fm = get_fact_mgr_for_func(func);
-		size_t i;
-		for (i=0; i<fm->cfg_edges.size(); i++) {
+		for (size_t i =0; i<fm->cfg_edges.size(); i++) {
 			const CFGEdge* edge = fm->cfg_edges[i];
 			if (edge->back_link && edge->dest->parent == this) {
 				return true;

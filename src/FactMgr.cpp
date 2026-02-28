@@ -487,8 +487,7 @@ FactMgr::FactMgr(const Function* f)
  */
 FactMgr::~FactMgr(void)
 {
-	size_t i;
-	for (i=0; i<cfg_edges.size(); i++) {
+	for (size_t i =0; i<cfg_edges.size(); i++) {
 		delete cfg_edges[i];
 	}
 	cfg_edges.clear();
@@ -520,8 +519,7 @@ FactMgr::restore_facts(vector<const Fact*>& old_facts)
 void
 FactMgr::makeup_new_var_facts(vector<const Fact*>& old_facts, const vector<const Fact*>& new_facts)
 {
-    size_t i;
-    for (i=0; i<new_facts.size(); i++) {
+    for (size_t i =0; i<new_facts.size(); i++) {
 		const Fact* f = new_facts[i];
 		const Variable* v = f->get_var();
 		if (v->is_global() || v->is_local()) {
@@ -602,9 +600,8 @@ FactMgr::reset_stm_fact_maps(const Statement* stm)
 bool
 FactMgr::merge_jump_facts(FactVec& facts, const FactVec& jump_facts)
 {
-    size_t i;
     bool changed = false;
-    for (i=0; i<facts.size(); i++) {
+    for (size_t i =0; i<facts.size(); i++) {
 		const Fact* f = facts[i];
 		if (!f->get_var()->is_rv()) {
 			const Fact* jump_f = find_related_fact(jump_facts, f);

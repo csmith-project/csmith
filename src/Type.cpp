@@ -1237,8 +1237,7 @@ Type::make_random_pointer_type(void)
 void
 Type::GenerateSimpleTypes(void)
 {
-    unsigned int st;
-    for (st=eChar; st<MAX_SIMPLE_TYPES; st++)
+    for (unsigned int st =eChar; st<MAX_SIMPLE_TYPES; st++)
     {
 		AllTypes.push_back(new Type((enum eSimpleType)st));
     }
@@ -1408,8 +1407,7 @@ bool
 Type::is_full_bitfields_struct() const
 {
 	if (eType != eStruct) return false;
-	size_t i;
-	for (i = 0; i < bitfields_length_.size(); ++i) {
+	for (size_t i = 0; i < bitfields_length_.size(); ++i) {
 		if (bitfields_length_[i] < 0)
 			return false;
 	}
@@ -1716,9 +1714,8 @@ Type::get_int_subfield_names(const string &prefix, vector<string>& names,
 		types.push_back(this);
 	}
 	else if (is_aggregate()) {
-		size_t i;
 		size_t j = 0;
-		for (i=0; i<fields.size(); i++) {
+		for (size_t i =0; i<fields.size(); i++) {
 			if (is_unamed_padding(i)) continue; // skip 0 length bitfields
 			// skip excluded fields
 			if (std::find(excluded_fields.begin(), excluded_fields.end(), j) != excluded_fields.end()) {
@@ -1979,9 +1976,8 @@ void OutputStructUnion(Type* type, std::ostream &out)
 void
 OutputStructUnionDeclarations(std::ostream &out)
 {
-    size_t i;
     output_comment_line(out, "--- Struct/Union Declarations ---");
-    for (i=0; i<AllTypes.size(); i++)
+    for (size_t i =0; i<AllTypes.size(); i++)
     {
         Type* t = AllTypes[i];
         if (t->used && (t->eType == eStruct || t->eType == eUnion)) {
