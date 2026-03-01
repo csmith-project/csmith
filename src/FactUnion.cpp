@@ -103,7 +103,7 @@ FactUnion::rhs_to_lhs_transfer(const std::vector<const Fact*>& facts, const vect
 	}
     else if (rhs->term_type == eFunction) {
         const FunctionInvocation* fi = rhs->get_invoke();
-		if (fi->invoke_type == eFuncCall) {
+		if (fi->invoke_type == eInvocationType::eFuncCall) {
 			const FunctionInvocationUser* fiu = dynamic_cast<const FunctionInvocationUser*>(fi);
 			// find the fact regarding return variable
 			const FactUnion* rv_fact = dynamic_cast<const FactUnion*>(get_return_fact_for_invocation(fiu, fiu->get_func()->rv, eUnionWrite));

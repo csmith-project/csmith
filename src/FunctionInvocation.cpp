@@ -362,7 +362,7 @@ FunctionInvocation::get_called_funcs(std::vector<const FunctionInvocationUser*>&
 		const Expression* value = param_value[i];
 		value->get_called_funcs(funcs);
 	}
-	if (invoke_type == eFuncCall) {
+	if (invoke_type == eInvocationType::eFuncCall) {
 		const FunctionInvocationUser* func_call = static_cast<const FunctionInvocationUser*>(this);
 		funcs.push_back(func_call);
 	}
@@ -485,7 +485,7 @@ CVQualifiers
 FunctionInvocation::get_qualifiers(void) const
 {
 	CVQualifiers qfer;
-	if (invoke_type == eFuncCall) {
+	if (invoke_type == eInvocationType::eFuncCall) {
 		const FunctionInvocationUser* func_call = dynamic_cast<const FunctionInvocationUser*>(this);
 		assert(func_call->get_func());
 		assert(func_call->get_func()->rv);
@@ -504,7 +504,7 @@ FunctionInvocation::visit_facts(vector<const Fact*>& inputs, CGContext& cg_conte
 {
 	bool unordered = false; //has_uncertain_call();
 	bool ok = false;
-	bool is_func_call = (invoke_type == eFuncCall);
+	bool is_func_call = (invoke_type == eInvocationType::eFuncCall);
 	static int g = 0;
 	Effect running_eff_context(cg_context.get_effect_context());
 	if (!unordered) {

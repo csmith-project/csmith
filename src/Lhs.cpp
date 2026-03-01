@@ -90,7 +90,7 @@ Lhs::make_random(CGContext &cg_context, const Type* t, const CVQualifiers* qfer,
 			if (!(new_qfer.wildcard)) {
 				new_qfer.restrict(Effect::WRITE, cg_context);
 			}
-			var = VariableSelector::select(Effect::WRITE, cg_context, t, &new_qfer, dummy, eDerefExact);
+			var = VariableSelector::select(Effect::WRITE, cg_context, t, &new_qfer, dummy, eMatchType::eDerefExact);
 			ERROR_GUARD(nullptr);
 			int deref_level = var->type->get_indirect_level() - t->get_indirect_level();
 			assert(!var->qfer.is_const_after_deref(deref_level));

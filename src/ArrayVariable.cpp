@@ -77,7 +77,7 @@ static int count_expr_key_var(const Expression* e)
 		assert(ef);
 		const FunctionInvocation* fi = ef->get_invoke();
 		// for calls
-		if (fi->invoke_type == eFuncCall) {
+		if (fi->invoke_type == eInvocationType::eFuncCall) {
 			return 2;
 		}
 		// for unary operations
@@ -106,8 +106,8 @@ static const Variable* find_expr_key_var(const Expression* e)
 	else if (e->term_type == eFunction) {
 		const ExpressionFuncall* ef = dynamic_cast<const ExpressionFuncall*>(e);
 		assert(ef);
-		const FunctionInvocation& fi = *(ef->get_invoke());
-		if (fi.invoke_type == eBinaryPrim || fi.invoke_type == eUnaryPrim) {
+			const FunctionInvocation& fi = *(ef->get_invoke());
+			if (fi.invoke_type == eInvocationType::eBinaryPrim || fi.invoke_type == eInvocationType::eUnaryPrim) {
 			if (fi.param_value.size()==1) {
 				return find_expr_key_var(fi.param_value[0]);
 			}

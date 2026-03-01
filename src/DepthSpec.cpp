@@ -355,7 +355,7 @@ DepthSpec::dtSafeOpFlags_minimal_depth(int flag)
 }
 
 //cout << "max_depth = " << max_depth << ", cur_depth = " << cur_depth << ", minimal = " << type##_minimal_depth(flag) << std::endl;
-#define DEPTH_GUARD_CASE(type, flag) case type: \
+#define DEPTH_GUARD_CASE(type, flag) case dType::type: \
 	{ \
 		assert(CGOptions::dfs_exhaustive()); \
 		int depth_needed = type##_minimal_depth(flag); \
@@ -381,7 +381,7 @@ DepthSpec::depth_guard_by_depth(int depth_needed)
 	return DepthSpec::backtracking(depth_needed);
 }
 
-int DepthSpec::depth_guard_by_type(enum dType ty, int extra_flag)
+int DepthSpec::depth_guard_by_type(dType ty, int extra_flag)
 {
 	if (!CGOptions::dfs_exhaustive()) {
 		return GOOD_DEPTH;

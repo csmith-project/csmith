@@ -38,7 +38,7 @@
 #define GOOD_DEPTH 0
 #define BAD_DEPTH -1
 
-enum dType {
+enum class dType {
 	dtFirstFunction,
 	dtFunction,
 	dtBlock,
@@ -103,19 +103,19 @@ enum dType {
 	}
 
 #define DPETH_GUARD_BY_TYPE_NORETURN(t) \
-	if (DepthSpec::depth_guard_by_type(t) != GOOD_DEPTH) \
+	if (DepthSpec::depth_guard_by_type(dType::t) != GOOD_DEPTH) \
 		return;
 
 #define DPETH_GUARD_BY_TYPE_NORETURN_WITH_FLAG(t, flag) \
-	if (DepthSpec::depth_guard_by_type(t, flag) != GOOD_DEPTH) \
+	if (DepthSpec::depth_guard_by_type(dType::t, flag) != GOOD_DEPTH) \
 		return;
 
 #define DEPTH_GUARD_BY_TYPE_RETURN(t, rv) \
-	if (DepthSpec::depth_guard_by_type(t) != GOOD_DEPTH) \
+	if (DepthSpec::depth_guard_by_type(dType::t) != GOOD_DEPTH) \
 		return rv;
 
 #define DEPTH_GUARD_BY_TYPE_RETURN_WITH_FLAG(t, flag, rv) \
-	if (DepthSpec::depth_guard_by_type(t, flag) != GOOD_DEPTH) \
+	if (DepthSpec::depth_guard_by_type(dType::t, flag) != GOOD_DEPTH) \
 		return rv;
 
 #define GETTER_DECL(type) \
@@ -125,7 +125,7 @@ enum dType {
 class DepthSpec
 {
 public:
-	static int depth_guard_by_type(enum dType ty, int extra_flag = 0);
+	static int depth_guard_by_type(dType ty, int extra_flag = 0);
 
 	static int depth_guard_by_depth(int depth_needed);
 

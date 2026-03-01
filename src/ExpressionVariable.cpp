@@ -72,7 +72,7 @@ ExpressionVariable::make_random(CGContext &cg_context, const Type* type, const C
 		// try to use one of must_read_vars in CGContext
 		var = VariableSelector::select_must_use_var(Effect::READ, cg_context, type, qfer);
 		if (var == nullptr) {
-			var = VariableSelector::select(Effect::READ, cg_context, type, qfer, dummy, eFlexible);
+			var = VariableSelector::select(Effect::READ, cg_context, type, qfer, dummy, eMatchType::eFlexible);
 		}
 		ERROR_GUARD(nullptr);
 		if (!var)

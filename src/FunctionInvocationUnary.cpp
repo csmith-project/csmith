@@ -71,7 +71,7 @@ FunctionInvocationUnary::CreateFunctionInvocationUnary(
 }
 
 FunctionInvocationUnary::FunctionInvocationUnary(eUnaryOps op, SafeOpFlags *flags)
-	: FunctionInvocation(eUnaryPrim, flags),
+	: FunctionInvocation(eInvocationType::eUnaryPrim, flags),
 	  eFunc(op),
 	  tmp_var("")
 {
@@ -82,7 +82,7 @@ FunctionInvocationUnary::FunctionInvocationUnary(eUnaryOps op, SafeOpFlags *flag
  * XXX: replace with a useful constructor.
  */
 FunctionInvocationUnary::FunctionInvocationUnary(eUnaryOps op, SafeOpFlags *flags, const std::string &name)
-	: FunctionInvocation(eUnaryPrim, flags),
+	: FunctionInvocation(eInvocationType::eUnaryPrim, flags),
 	  eFunc(op),
 	  tmp_var(name)
 {

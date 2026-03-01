@@ -148,7 +148,7 @@ ExpressionFuncall::get_complexity(void) const
 {
 	unsigned int comp = 0;
 	const FunctionInvocation* invoke = get_invoke();
-	if (invoke->invoke_type == eFuncCall) {
+	if (invoke->invoke_type == eInvocationType::eFuncCall) {
 		comp++;  // function call itself counts as 1 complexity
 	}
 	for (size_t i=0; i<invoke->param_value.size(); i++) {
@@ -186,7 +186,7 @@ ExpressionFuncall::get_referenced_ptrs(std::vector<const Variable*>& ptrs) const
 		const Expression* value = invoke.param_value[i];
 		value->get_referenced_ptrs(ptrs);
 	}
-	if (invoke.invoke_type == eFuncCall) {
+	if (invoke.invoke_type == eInvocationType::eFuncCall) {
 		const FunctionInvocationUser* fiu = dynamic_cast<const FunctionInvocationUser*>(&invoke);
 		assert(fiu);
 		//cout << "follow " << fiu->get_func()->name << endl;

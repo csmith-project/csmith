@@ -143,7 +143,7 @@ calls_to_funcs_recursive(const vector<const FunctionInvocationUser*>& calls, vec
  */
 FunctionInvocationUser::FunctionInvocationUser(Function *target,
 						   bool isBackLink, const SafeOpFlags *flags)
-	: FunctionInvocation(eFuncCall, flags),
+	: FunctionInvocation(eInvocationType::eFuncCall, flags),
 	  func(target),
 	  isBackLink(isBackLink)
 {

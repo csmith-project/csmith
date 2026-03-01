@@ -129,7 +129,7 @@ std::vector<const ExpressionVariable*>
 StatementExpr::get_dereferenced_ptrs(void) const
 {
 	std::vector<const ExpressionVariable*> vars;
-	if (get_invoke()->invoke_type == eFuncCall) {
+	if (get_invoke()->invoke_type == eInvocationType::eFuncCall) {
 		const FunctionInvocationUser* func_call = dynamic_cast<const FunctionInvocationUser*>(get_invoke());
 		for (size_t i=0; i<func_call->param_value.size(); i++) {
 			// the parameters might be dereferenced pointers

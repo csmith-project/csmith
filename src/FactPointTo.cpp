@@ -238,7 +238,7 @@ FactPointTo::rhs_to_lhs_transfer(const vector<const Fact*>& facts, const vector<
         const FunctionInvocation* fi = rhs->get_invoke();
 		assert(fi);
 		// TODO: support pointer arithmetics
-        if (fi->invoke_type == eFuncCall) {
+		if (fi->invoke_type == eInvocationType::eFuncCall) {
 			const FunctionInvocationUser* fiu = dynamic_cast<const FunctionInvocationUser*>(fi);
 			if (fiu->get_type().is_aggregate()) {
 				FactVec ret_facts;

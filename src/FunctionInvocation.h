@@ -97,7 +97,7 @@ enum eBinaryOps
 };
 inline constexpr eBinaryOps MAX_BINARY_OP = static_cast<eBinaryOps>(eLShift + 1);
 
-enum eInvocationType
+enum class eInvocationType
 {
     eBinaryPrim,
     eUnaryPrim,

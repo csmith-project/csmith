@@ -310,7 +310,7 @@ VariableSelector::has_eligible_volatile_var(const vector<Variable *>& vars, cons
 {
 	for (size_t i=0; i<vars.size(); i++) {
 		Variable* var = vars[i];
-		if (type && !type->match(var->type, eFlexible)) {
+		if (type && !type->match(var->type, eMatchType::eFlexible)) {
             continue;
 		}
 		if (qfer && !qfer->match_indirect(var->qfer)) {
@@ -383,7 +383,7 @@ VariableSelector::choose_visible_read_var(const Block* b, const vector<const Var
 
 	for (size_t i =0; i<expanded_read_vars.size(); i++) {
 		const Variable* v = expanded_read_vars[i];
-		if (type->match(v->type, eConvert) &&
+		if (type->match(v->type, eMatchType::eConvert) &&
 			(b->is_var_on_stack(v) || v->is_global()) &&
 			!v->is_virtual() &&
 			!v->is_volatile() &&
@@ -853,12 +853,12 @@ VariableSelector::make_init_value(Effect::Access access, const CGContext &cg_con
 	// b == nullptr means we are generating init for globals
 	if (!b && CGOptions::ccomp()) {
 		get_all_array_vars(dummy);
-		var = choose_var(vars, access, cg_context, type, &qfer, eExact, dummy, true, true, no_union);
+		var = choose_var(vars, access, cg_context, type, &qfer, eMatchType::eExact, dummy, true, true, no_union);
 	}
 	else {
 		if (!CGOptions::addr_taken_of_locals())
 			get_all_local_vars(b, dummy);
-		var = choose_var(vars, access, cg_context, type, &qfer, eExact, dummy, true, false, no_union);
+		var = choose_var(vars, access, cg_context, type, &qfer, eMatchType::eExact, dummy, true, false, no_union);
 	}
 	ERROR_GUARD(nullptr);
 
@@ -1114,7 +1114,7 @@ VariableSelector::GenerateNewVariable(Effect::Access access,
 	}
 	case eParentLocal:
 	{
-		DEPTH_GUARD_BY_DEPTH_RETURN(dtGenerateNewParentLocal, nullptr);
+		DEPTH_GUARD_BY_DEPTH_RETURN(static_cast<int>(dType::dtGenerateNewParentLocal), nullptr);
 		unsigned int index = rnd_upto(func.stack.size());
 		ERROR_GUARD(nullptr);
 
@@ -1165,7 +1165,7 @@ VariableSelector::SelectLoopCtrlVar(const CGContext &cg_context, const vector<co
 			len--;
 		}
 	}
-	Variable* var = choose_var(vars, Effect::WRITE, cg_context, type, 0, eConvert, invalid_vars, true);
+	Variable* var = choose_var(vars, Effect::WRITE, cg_context, type, 0, eMatchType::eConvert, invalid_vars, true);
 	ERROR_GUARD(nullptr);
 	if (var == nullptr) {
 		if (CGOptions::global_variables()) {
@@ -1261,7 +1261,7 @@ VariableSelector::select_deref_pointer(Effect::Access access, const CGContext &c
 	const Function* f = cg_context.get_current_func();
 	vars.insert(vars.end(), f->param.begin(), f->param.end());
 
-	Variable* var = choose_var(vars, access, cg_context, type, qfer, eDereference, invalid_vars);
+	Variable* var = choose_var(vars, access, cg_context, type, qfer, eMatchType::eDereference, invalid_vars);
 	if (var == 0) {
 		Type* ptr_type = 0;
 		if (type->get_indirect_level() < CGOptions::max_indirect_level()) {
@@ -1282,7 +1282,7 @@ VariableSelector::select_deref_pointer(Effect::Access access, const CGContext &c
 		if (ptr_qfer.is_volatile()) {
 			if (CGOptions::expand_struct()) {
 				var = VariableSelector::eager_create_global_struct(access, cg_context, ptr_type,
-							&ptr_qfer, eDereference, invalid_vars);
+							&ptr_qfer, eMatchType::eDereference, invalid_vars);
 				ERROR_GUARD(nullptr);
 				if (var)
 					return var;
@@ -1297,7 +1297,7 @@ VariableSelector::select_deref_pointer(Effect::Access access, const CGContext &c
 			Block *block = cg_context.get_current_block();
 			if (CGOptions::expand_struct()) {
 				Variable *var = VariableSelector::eager_create_local_struct(*block, access,
-							cg_context, ptr_type, &ptr_qfer, eDereference, invalid_vars);
+							cg_context, ptr_type, &ptr_qfer, eMatchType::eDereference, invalid_vars);
 				ERROR_GUARD(nullptr);
 				if (var)
 					return var;
@@ -1476,7 +1476,7 @@ VariableSelector::select_must_use_var(Effect::Access access, CGContext &cg_conte
 
 	const Variable* var = 0;
 	VariableSet& vars = (access == Effect::READ) ? cg_context.rw_directive->must_read_vars : cg_context.rw_directive->must_write_vars;
-	eMatchType mt = (access == Effect::READ) ? eFlexible : eDerefExact;
+	eMatchType mt = (access == Effect::READ) ? eMatchType::eFlexible : eMatchType::eDerefExact;
 	for (size_t i=0; i<vars.size(); i++) {
 		const Variable* v = vars[i];
 		if (v->is_visible(cg_context.get_current_block())) {

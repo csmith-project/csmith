@@ -90,7 +90,7 @@ FunctionInvocationBinary::CreateFunctionInvocationBinary(CGContext &cg_context,
  * XXX: replace with a useful constructor.
  */
 FunctionInvocationBinary::FunctionInvocationBinary(eBinaryOps op, const SafeOpFlags *flags)
-	: FunctionInvocation(eBinaryPrim, flags),
+	: FunctionInvocation(eInvocationType::eBinaryPrim, flags),
 	  eFunc(op),
 	  tmp_var1(""),
 	  tmp_var2("")
@@ -99,8 +99,8 @@ FunctionInvocationBinary::FunctionInvocationBinary(eBinaryOps op, const SafeOpFl
 }
 
 FunctionInvocationBinary::FunctionInvocationBinary(eBinaryOps op, const SafeOpFlags *flags,
-						const std::string &name1, const std::string &name2)
-	: FunctionInvocation(eBinaryPrim, flags),
+							const std::string &name1, const std::string &name2)
+	: FunctionInvocation(eInvocationType::eBinaryPrim, flags),
 	  eFunc(op),
 	  tmp_var1(name1),
 	  tmp_var2(name2)
@@ -121,7 +121,7 @@ FunctionInvocationBinary::FunctionInvocationBinary(const FunctionInvocationBinar
 }
 
 FunctionInvocationBinary::FunctionInvocationBinary(eBinaryOps op , const Expression* exp1, const Expression* exp2, const SafeOpFlags *flags)
-	: FunctionInvocation(eBinaryPrim, flags),
+	: FunctionInvocation(eInvocationType::eBinaryPrim, flags),
 	  eFunc(op)
 {
 	param_value.clear();

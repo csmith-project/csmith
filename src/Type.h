@@ -86,7 +86,7 @@ enum eSimpleType
 };
 inline constexpr eSimpleType MAX_SIMPLE_TYPES = static_cast<eSimpleType>(eUInt128 + 1);
 
-enum eMatchType
+enum class eMatchType
 {
 	eExact,
 	eConvert,
@@ -262,7 +262,7 @@ public:
     }
 	bool is_int(void) const { return eType == eSimple && simple_type != eVoid;}
 	bool is_aggregate(void) const { return eType == eStruct || eType == eUnion;}
-	bool match(const Type* t, enum eMatchType mt) const;
+	bool match(const Type* t, eMatchType mt) const;
 	unsigned long SizeInBytes(void) const;
 	void Output(std::ostream &) const;
 	std::string printf_directive(void) const;

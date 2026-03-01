@@ -223,7 +223,7 @@ Expression::make_random(CGContext &cg_context, const Type* type, const CVQualifi
 
 	// increment expression depth. A function call increase the depth by 1
 	if (e->term_type == eConstant || e->term_type == eVariable ||
-		(e->get_invoke() && e->get_invoke()->invoke_type == eFuncCall)) {
+		(e->get_invoke() && e->get_invoke()->invoke_type == eInvocationType::eFuncCall)) {
 		cg_context.expr_depth++;
 	}
 	ERROR_GUARD(nullptr);
@@ -298,7 +298,7 @@ Expression::make_random_param(CGContext &cg_context, const Type* type, const CVQ
 	}
 
 	if (e->term_type == eConstant || e->term_type == eVariable ||
-		(e->get_invoke() && e->get_invoke()->invoke_type == eFuncCall)) {
+		(e->get_invoke() && e->get_invoke()->invoke_type == eInvocationType::eFuncCall)) {
 		cg_context.expr_depth++;
 	}
 	ERROR_GUARD(nullptr);

@@ -1559,14 +1559,14 @@ Type::needs_cast(const Type* t) const
 }
 
 bool
-Type::match(const Type* t, enum eMatchType mt) const
+Type::match(const Type* t, eMatchType mt) const
 {
 	switch (mt) {
-	case eExact: return (this == t);
-	case eConvert: return is_convertable(t);
-	case eDereference: return is_dereferenced_from(t);
-	case eDerefExact: return (t == this || is_dereferenced_from(t));
-	case eFlexible: return is_derivable(t);
+	case eMatchType::eExact: return (this == t);
+	case eMatchType::eConvert: return is_convertable(t);
+	case eMatchType::eDereference: return is_dereferenced_from(t);
+	case eMatchType::eDerefExact: return (t == this || is_dereferenced_from(t));
+	case eMatchType::eFlexible: return is_derivable(t);
 	default: break;
 	}
 	return false;
