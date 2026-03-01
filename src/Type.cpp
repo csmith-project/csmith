@@ -36,9 +36,7 @@
 // July, 2005
 //
 
-#if HAVE_CONFIG_H
 #include <config.h>
-#endif
 
 #include "Attribute.h"
 #include "Bookkeeper.h"

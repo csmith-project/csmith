@@ -83,9 +83,7 @@ the pointer to pass by value)
         - If node uses pointer or array, it is potential heap store allocated.
 */
 
-#if HAVE_CONFIG_H
 #include <config.h>
-#endif
 
 #ifdef WIN32
 #pragma warning(disable : 4786) /* Disable annoying warning messages */

@@ -68,7 +68,7 @@ enum eUnaryOps {
 	ePostDec
 #endif // 0
 };
-inline constexpr eUnaryOps MAX_UNARY_OP = static_cast<eUnaryOps>(eBitNot + 1);
+inline constexpr unsigned int MAX_UNARY_OP = eBitNot + 1;
 #if 0 // TODO --- to be implemented
 inline constexpr eUnaryOps MAX_UNARY_OP = static_cast<eUnaryOps>(ePostDec + 1);
 #endif

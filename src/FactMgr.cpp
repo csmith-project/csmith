@@ -27,9 +27,7 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#if HAVE_CONFIG_H
 #include <config.h>
-#endif
 
 #ifdef WIN32
 #pragma warning(disable : 4786) /* Disable annoying warning messages */

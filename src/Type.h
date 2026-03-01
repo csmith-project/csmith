@@ -60,7 +60,7 @@ enum eTypeDesc {
   eUnion,
   eStruct,
 };
-inline constexpr eTypeDesc MAX_TYPE_DESC = static_cast<eTypeDesc>(eStruct + 1);
+inline constexpr unsigned int MAX_TYPE_DESC = eStruct + 1;
 
 /*
  *

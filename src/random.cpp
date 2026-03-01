@@ -30,9 +30,7 @@
 // random.cpp --- utilities for random choice
 // 		  Now it's just a wrapper to RandomNumber interface.
 
-#if HAVE_CONFIG_H
 #include <config.h>
-#endif
 
 #include <cassert>
 #include <cstdlib>
