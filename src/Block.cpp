@@ -711,9 +711,8 @@ void Block::post_creation_analysis(CGContext &cg_context,
     cg_context.reset_effect_accum(pre_effect);
     while (!find_fixed_point(facts_copy, post_facts, cg_context, index,
                              need_revisit)) {
-      size_t i, len;
-      len = stms.size();
-      for (i = index; i < len; i++) {
+	  size_t len = stms.size();
+      for (size_t i = index; i < len; i++) {
         remove_stmt(stms[i]);
         i = index - 1;
         len = stms.size();
