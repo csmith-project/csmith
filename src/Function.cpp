@@ -410,7 +410,7 @@ Function::Function(const string &name, const Type *return_type)
 	  is_inlined(false),
 	  is_builtin(false),
 	  visited_cnt(0),
-	  build_state(UNBUILT)
+	  build_state(BuildState::Unbuilt)
 {
 	FuncList.push_back(this);			// Add to global list of functions.
 }
@@ -424,7 +424,7 @@ Function::Function(const string &name, const Type *return_type, bool builtin)
 	  is_inlined(false),
 	  is_builtin(builtin),
 	  visited_cnt(0),
-	  build_state(UNBUILT)
+	  build_state(BuildState::Unbuilt)
 {
 	FuncList.push_back(this);			// Add to global list of functions.
 }
@@ -671,12 +671,12 @@ bool Function::need_return_stmt()
 void
 Function::GenerateBody(const CGContext &prev_context)
 {
-	if (build_state != UNBUILT) {
+	if (build_state != BuildState::Unbuilt) {
 		cerr << "warning: ignoring attempt to regenerate func" << endl;
 		return;
 	}
 
-	build_state = BUILDING;
+	build_state = BuildState::Building;
 	Effect effect_accum;
 	CGContext cg_context(this, prev_context.get_effect_context(), &effect_accum);
 	cg_context.extend_call_chain(prev_context);
@@ -707,18 +707,18 @@ Function::GenerateBody(const CGContext &prev_context)
 	ERROR_RETURN();
 
 	// Mark this function as built.
-	build_state = BUILT;
+	build_state = BuildState::Built;
 }
 
 void
 Function::generate_body_with_known_params(const CGContext &prev_context, Effect& effect_accum)
 {
-	if (build_state != UNBUILT) {
+	if (build_state != BuildState::Unbuilt) {
 		cerr << "warning: ignoring attempt to regenerate func" << endl;
 		return;
 	}
 
-	build_state = BUILDING;
+	build_state = BuildState::Building;
 	FactMgr* fm = get_fact_mgr_for_func(this);
 	CGContext cg_context(this, prev_context.get_effect_context(), &effect_accum);
 	cg_context.extend_call_chain(prev_context);
@@ -742,7 +742,7 @@ Function::generate_body_with_known_params(const CGContext &prev_context, Effect&
 	ERROR_RETURN();
 
 	// Mark this function as built.
-	build_state = BUILT;
+	build_state = BuildState::Built;
 }
 
 void

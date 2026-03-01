@@ -85,9 +85,9 @@ public:
 	void Output(std::ostream &);
 	void OutputForwardDecl(std::ostream &);
 
-	bool is_built(void) const { return (build_state == BUILT); }
+	bool is_built(void) const { return (build_state == BuildState::Built); }
 	bool need_return_stmt();
-	bool is_effect_known(void) const { return (build_state == BUILT); }
+	bool is_effect_known(void) const { return (build_state == BuildState::Built); }
 	const Effect &get_feffect(void) const { return feffect; }
 
 	void remove_irrelevant_facts(std::vector<const Fact*>& inputs) const;
@@ -142,7 +142,12 @@ private:
 	static void make_builtin_function(const string &function_string);
 
 private:
-	enum { UNBUILT, BUILDING, BUILT } build_state;
+	enum class BuildState {
+		Unbuilt,
+		Building,
+		Built,
+	};
+	BuildState build_state;
 	std::vector<const Variable*> referenced_ptrs;
 };
 
