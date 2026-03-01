@@ -83,7 +83,7 @@ enum eStatementType
 //  ..more?  try, catch, throw
 //	eHash,
 };
-#define MAX_STATEMENT_TYPE ((eStatementType) (eArrayOp+1))
+inline constexpr eStatementType MAX_STATEMENT_TYPE = static_cast<eStatementType>(eArrayOp + 1);
 
 /*
  *

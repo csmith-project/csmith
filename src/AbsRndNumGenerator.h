@@ -40,7 +40,7 @@ enum RNDNUM_GENERATOR {
 	rDFSRndNumGenerator,
 };
 
-#define MAX_RNDNUM_GENERATOR (rDFSRndNumGenerator+1)
+inline constexpr unsigned int MAX_RNDNUM_GENERATOR = static_cast<unsigned int>(rDFSRndNumGenerator + 1);
 
 // I could make AbsRndNumGenerator not pure, but want to force each subclass implement
 // it's own member functions, in case of forgetting something.
@@ -98,4 +98,3 @@ private:
 };
 
 #endif //ABS_RNDNUM_GENERATOR
-

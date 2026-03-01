@@ -70,7 +70,7 @@ enum eAssignOps
 	ePostIncr,
 	ePostDecr
 };
-#define MAX_ASSIGN_OP ((eAssignOps) (ePostDecr+1))
+inline constexpr eAssignOps MAX_ASSIGN_OP = static_cast<eAssignOps>(ePostDecr + 1);
 
 /*
  *

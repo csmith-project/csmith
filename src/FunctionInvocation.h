@@ -69,9 +69,9 @@ enum eUnaryOps
 	ePostDec
 #endif // 0
 };
-#define MAX_UNARY_OP ((eUnaryOps) (eBitNot+1))
+inline constexpr eUnaryOps MAX_UNARY_OP = static_cast<eUnaryOps>(eBitNot + 1);
 #if 0 // TODO --- to be implemented
-#  define MAX_UNARY_OP ((eUnaryOps) (ePostDec+1))
+inline constexpr eUnaryOps MAX_UNARY_OP = static_cast<eUnaryOps>(ePostDec + 1);
 #endif
 
 enum eBinaryOps
@@ -95,7 +95,7 @@ enum eBinaryOps
 	eRShift,
 	eLShift
 };
-#define MAX_BINARY_OP ((eBinaryOps) (eLShift+1))
+inline constexpr eBinaryOps MAX_BINARY_OP = static_cast<eBinaryOps>(eLShift + 1);
 
 enum eInvocationType
 {

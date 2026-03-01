@@ -30,7 +30,7 @@
 #ifndef ARRAY_VARIABLE_H
 #define ARRAY_VARIABLE_H
 
-#define INVALID_BOUND 0xFFFFFFFF
+inline constexpr unsigned int INVALID_BOUND = 0xFFFFFFFFu;
 
 ///////////////////////////////////////////////////////////////////////////////
 #include <vector>

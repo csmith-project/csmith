@@ -50,7 +50,7 @@
 
 template <class Name> class Enumerator;
 #include "StdLibAliases.h"
-#define SIZE_UNKNOWN 0xFFFF
+inline constexpr unsigned int SIZE_UNKNOWN = 0xFFFFu;
 
 /*
  *
@@ -62,7 +62,7 @@ enum eTypeDesc
 	eUnion,
     eStruct,
 };
-#define MAX_TYPE_DESC ((eTypeDesc) (eStruct+1))
+inline constexpr eTypeDesc MAX_TYPE_DESC = static_cast<eTypeDesc>(eStruct + 1);
 
 /*
  *
@@ -85,7 +85,7 @@ enum eSimpleType
 	eInt128,
 	eUInt128,
 };
-#define MAX_SIMPLE_TYPES ((eSimpleType) (eUInt128+1))
+inline constexpr eSimpleType MAX_SIMPLE_TYPES = static_cast<eSimpleType>(eUInt128 + 1);
 
 enum eMatchType
 {

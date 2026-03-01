@@ -36,7 +36,7 @@
 #include "StdLibAliases.h"
 class Variable;
 
-#define TAB "    "    // to beautify output: 1 tab is 4 spaces
+inline constexpr const char TAB[] = "    "; // to beautify output: 1 tab is 4 spaces
 
 class OutputMgr {
 public:

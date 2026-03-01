@@ -40,7 +40,7 @@ enum SafeOpKind {
 	sOpAssign,
 };
 
-#define MAX_SAFE_OP_KIND ((SafeOpKind) (sOpAssign+1))
+inline constexpr SafeOpKind MAX_SAFE_OP_KIND = static_cast<SafeOpKind>(sOpAssign + 1);
 
 enum SafeOpSize {
 	sInt8,
@@ -49,7 +49,7 @@ enum SafeOpSize {
 	sInt64,
 	sFloat,
 };
-#define MAX_SAFE_OP_SIZE ((SafeOpSize) (sFloat+1))
+inline constexpr SafeOpSize MAX_SAFE_OP_SIZE = static_cast<SafeOpSize>(sFloat + 1);
 
 class SafeOpFlags {
 public:

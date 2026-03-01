@@ -158,7 +158,7 @@ enum ProbName {
 
 };
 
-#define MAX_PROB_NAME ((ProbName)(pStatementProb+1))
+inline constexpr ProbName MAX_PROB_NAME = static_cast<ProbName>(pStatementProb + 1);
 
 inline unsigned int MoreStructUnionTypeProb();
 inline unsigned int BitFieldsCreationProb();

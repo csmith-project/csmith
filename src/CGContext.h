@@ -37,12 +37,12 @@
 #include "Effect.h"
 #include "StdLibAliases.h"
 // Flags..
-#define NO_RETURN (1)
-#define IN_LOOP (2)
-#define DO_HASH (4)
-#define NO_DANGLING_PTR (8)
-#define INVISIBLE (9999)
-#define INACTIVE (8888)
+inline constexpr unsigned int NO_RETURN = 1;
+inline constexpr unsigned int IN_LOOP = 2;
+inline constexpr unsigned int DO_HASH = 4;
+inline constexpr unsigned int NO_DANGLING_PTR = 8;
+inline constexpr int INVISIBLE = 9999;
+inline constexpr int INACTIVE = 8888;
 
 class Effect;
 class Function;

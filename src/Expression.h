@@ -81,7 +81,7 @@ enum eTermType
 	eCommaExpr,
 	eLhs
 };
-#define MAX_TERM_TYPES ((eTermType) (eCommaExpr+1))
+inline constexpr eTermType MAX_TERM_TYPES = static_cast<eTermType>(eCommaExpr + 1);
 
 template <class Key, class Value>
 class ProbabilityTable;

@@ -152,14 +152,13 @@ find_blk_for_var(const Variable* v)
 	if (v->is_global()) {
 		return nullptr;
 	}
-	size_t i, j;
-	for (i=0; i<FuncList.size(); i++) {
+	for (size_t i=0; i<FuncList.size(); i++) {
 		const Function* func = FuncList[i];
 		// for a parameter of a function, pretend it's a variable belongs to the top block
 		if (v->is_argument() && find_variable_in_set(func->param, v) != -1) {
 			return func->body;
 		}
-		for (j=0; j<func->blocks.size(); j++) {
+		for (size_t j=0; j<func->blocks.size(); j++) {
 			const Block* blk = func->blocks[j];
 			if (find_variable_in_set(blk->local_vars, v) != -1) {
 				return blk;
@@ -295,9 +294,8 @@ Function::choose_func(const vector<Function *> &funcs,
 {
 	vector<Function *> ok_funcs;
 	vector<Function *> ok_builtin_funcs;
-	vector<Function *>::const_iterator i;
 
-	for (i = funcs.begin(); i != funcs.end(); ++i) {
+	for (auto i = funcs.begin(); i != funcs.end(); ++i) {
 		// skip any function which has incompatible return type
 		// if type = 0, we don't care
 		if (type && !type->is_convertable((*i)->return_type))

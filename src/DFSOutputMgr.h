@@ -32,7 +32,7 @@
 
 #include "OutputMgr.h"
 
-#define DEFAULT_STRUCT_OUTPUT "csmith_structs.h"
+inline constexpr const char DEFAULT_STRUCT_OUTPUT[] = "csmith_structs.h";
 
 class DFSOutputMgr : public OutputMgr {
 public:
