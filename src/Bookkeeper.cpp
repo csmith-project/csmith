@@ -105,11 +105,11 @@ Bookkeeper::~Bookkeeper(void) {
   // Nothing to do.
 }
 
-static void formated_output(std::ostream &out, const char *msg, int num) {
+static void formatted_output(std::ostream &out, const char *msg, int num) {
   out << "XXX " << msg << num << endl;
 }
 
-static void formated_outputf(std::ostream &out, const char *msg, double num) {
+static void formatted_outputf(std::ostream &out, const char *msg, double num) {
   out << "XXX " << msg << num << endl;
 }
 
@@ -154,8 +154,8 @@ int Bookkeeper::stat_blk_depths(void) {
 
 void Bookkeeper::output_stmts_statistics(std::ostream &out) {
   int stmt_cnt = stat_blk_depths();
-  formated_output(out, "stmts: ", stmt_cnt);
-  formated_output(out, "max block depth: ", (blk_depth_cnts.size() - 1));
+  formatted_output(out, "stmts: ", stmt_cnt);
+  formatted_output(out, "max block depth: ", (blk_depth_cnts.size() - 1));
   out << "breakdown:" << endl;
   for (size_t i = 0; i < blk_depth_cnts.size(); i++) {
     if (blk_depth_cnts[i]) {
@@ -192,18 +192,18 @@ void Bookkeeper::output_statistics(std::ostream &out) {
 }
 
 void Bookkeeper::output_struct_union_statistics(std::ostream &out) {
-  formated_output(out, "max struct depth: ", (struct_depth_cnts.size() - 1));
+  formatted_output(out, "max struct depth: ", (struct_depth_cnts.size() - 1));
   out << "breakdown:" << endl;
   for (size_t i = 0; i < struct_depth_cnts.size(); i++) {
     out << "   depth: " << i << ", occurrence: " << struct_depth_cnts[i]
         << endl;
   }
-  formated_output(out, "total union variables: ", union_var_cnt);
+  formatted_output(out, "total union variables: ", union_var_cnt);
   Bookkeeper::output_bitfields(out);
 }
 
 void Bookkeeper::output_oob_statistics(std::ostream &out) {
-  formated_output(out, "total OOB instances added: ", oob_cnt);
+  formatted_output(out, "total OOB instances added: ", oob_cnt);
 }
 
 void Bookkeeper::stat_expr_depths_for_stmt(const Statement *s) {
@@ -232,7 +232,7 @@ void Bookkeeper::stat_expr_depths(void) {
 
 void Bookkeeper::output_expr_statistics(std::ostream &out) {
   stat_expr_depths();
-  formated_output(out, "max expression depth: ", (expr_depth_cnts.size() - 1));
+  formatted_output(out, "max expression depth: ", (expr_depth_cnts.size() - 1));
   out << "breakdown:" << endl;
   for (size_t i = 0; i < expr_depth_cnts.size(); i++) {
     if (expr_depth_cnts[i]) {
@@ -267,39 +267,39 @@ void Bookkeeper::output_pointer_statistics(std::ostream &out) {
     }
   }
 
-  formated_output(out, "total number of pointers: ", ptrs.size());
+  formatted_output(out, "total number of pointers: ", ptrs.size());
   if (ptrs.size() > 0) {
     out << endl;
-    formated_output(out,
+    formatted_output(out,
                     "times a variable address is taken: ", address_taken_cnt);
-    formated_output(out, "times a pointer is dereferenced on RHS: ",
+    formatted_output(out, "times a pointer is dereferenced on RHS: ",
                     calc_total(read_dereference_cnts));
     out << "breakdown:" << endl;
     for (size_t i = 1; i < read_dereference_cnts.size(); i++) {
       out << "   depth: " << i << ", occurrence: " << read_dereference_cnts[i]
           << endl;
     }
-    formated_output(out, "times a pointer is dereferenced on LHS: ",
+    formatted_output(out, "times a pointer is dereferenced on LHS: ",
                     calc_total(write_dereference_cnts));
     out << "breakdown:" << endl;
     for (size_t i = 1; i < write_dereference_cnts.size(); i++) {
       out << "   depth: " << i << ", occurrence: " << write_dereference_cnts[i]
           << endl;
     }
-    formated_output(out,
+    formatted_output(out,
                     "times a pointer is compared with null: ", cmp_ptr_to_null);
-    formated_output(
+    formatted_output(
         out, "times a pointer is compared with address of another variable: ",
         cmp_ptr_to_addr);
-    formated_output(out, "times a pointer is compared with another pointer: ",
+    formatted_output(out, "times a pointer is compared with another pointer: ",
                     cmp_ptr_to_ptr);
-    formated_output(out, "times a pointer is qualified to be dereferenced: ",
+    formatted_output(out, "times a pointer is qualified to be dereferenced: ",
                     pointer_avail_for_dereference);
 
     // if there are dereferenced pointers
     if (dereference_level_cnts.size()) {
       out << endl;
-      formated_output(
+      formatted_output(
           out, "max dereference level: ", dereference_level_cnts.size() - 1);
       out << "breakdown:" << endl;
       for (size_t i = 0; i < dereference_level_cnts.size(); i++) {
@@ -307,16 +307,16 @@ void Bookkeeper::output_pointer_statistics(std::ostream &out) {
             << ", occurrence: " << dereference_level_cnts[i] << endl;
       }
     }
-    formated_output(out,
+    formatted_output(out,
                     "number of pointers point to pointers: ", point_to_pointer);
-    formated_output(out,
+    formatted_output(out,
                     "number of pointers point to scalars: ", point_to_scalar);
-    formated_output(out,
+    formatted_output(out,
                     "number of pointers point to structs: ", point_to_struct);
     out.precision(3);
-    formated_outputf(out, "percent of pointers has null in alias set: ",
+    formatted_outputf(out, "percent of pointers has null in alias set: ",
                      total_has_null_ptr * 100.0 / ptrs.size());
-    formated_outputf(
+    formatted_outputf(
         out, "average alias set size: ", total_alias_cnt * 1.0 / ptrs.size());
   }
 }
@@ -414,50 +414,50 @@ void Bookkeeper::record_volatile_access(const Variable *var, int deref_level,
 
 void Bookkeeper::output_volatile_access_statistics(std::ostream &out) {
   // size_t i;
-  formated_output(out, "times a non-volatile is read: ", read_non_volatile_cnt);
-  formated_output(out,
+  formatted_output(out, "times a non-volatile is read: ", read_non_volatile_cnt);
+  formatted_output(out,
                   "times a non-volatile is write: ", write_non_volatile_cnt);
-  formated_output(out, "times a volatile is read: ", read_volatile_cnt);
-  formated_output(out,
+  formatted_output(out, "times a volatile is read: ", read_volatile_cnt);
+  formatted_output(out,
                   "   times read thru a pointer: ", read_volatile_thru_ptr_cnt);
-  formated_output(out, "times a volatile is write: ", write_volatile_cnt);
-  formated_output(
+  formatted_output(out, "times a volatile is write: ", write_volatile_cnt);
+  formatted_output(
       out, "   times written thru a pointer: ", write_volatile_thru_ptr_cnt);
   double percentage = (read_non_volatile_cnt + write_non_volatile_cnt) * 100.0 /
                       (read_non_volatile_cnt + write_non_volatile_cnt +
                        read_volatile_cnt + write_volatile_cnt);
 
-  formated_outputf(
+  formatted_outputf(
       out, "times a volatile is available for access: ", volatile_avail);
   out.precision(3);
-  formated_outputf(out, "percentage of non-volatile access: ", percentage);
+  formatted_outputf(out, "percentage of non-volatile access: ", percentage);
 }
 
 void Bookkeeper::output_bitfields(std::ostream &out) {
   if (CGOptions::bitfields()) {
     out << std::endl;
-    // formated_output(out, "structs with full-bitfields: ",
+    // formatted_output(out, "structs with full-bitfields: ",
     // structs_with_bitfields);
-    formated_output(
+    formatted_output(
         out, "non-zero bitfields defined in structs: ", bitfields_in_total);
-    formated_output(
+    formatted_output(
         out, "zero bitfields defined in structs: ", unamed_bitfields_in_total);
-    formated_output(
+    formatted_output(
         out, "const bitfields defined in structs: ", const_bitfields_in_total);
-    formated_output(out, "volatile bitfields defined in structs: ",
+    formatted_output(out, "volatile bitfields defined in structs: ",
                     volatile_bitfields_in_total);
     Bookkeeper::output_counters(out, "structs with bitfields in the program: ",
                                 "indirect level", vars_with_bitfields);
     Bookkeeper::output_counters(out, "full-bitfields structs in the program: ",
                                 "indirect level", vars_with_full_bitfields);
-    formated_output(out, "times a bitfields struct's address is taken: ",
+    formatted_output(out, "times a bitfields struct's address is taken: ",
                     vars_with_bitfields_address_taken_cnt);
-    formated_output(out, "times a bitfields struct on LHS: ",
+    formatted_output(out, "times a bitfields struct on LHS: ",
                     lhs_bitfields_structs_vars_cnt);
-    formated_output(out, "times a bitfields struct on RHS: ",
+    formatted_output(out, "times a bitfields struct on RHS: ",
                     rhs_bitfields_structs_vars_cnt);
-    formated_output(out, "times a single bitfield on LHS: ", lhs_bitfield_cnt);
-    formated_output(out, "times a single bitfield on RHS: ", rhs_bitfield_cnt);
+    formatted_output(out, "times a single bitfield on LHS: ", lhs_bitfield_cnt);
+    formatted_output(out, "times a single bitfield on RHS: ", rhs_bitfield_cnt);
   }
 }
 
@@ -499,15 +499,15 @@ void Bookkeeper::record_type_with_bitfields(const Type *typ) {
 }
 
 void Bookkeeper::output_jump_statistics(std::ostream &out) {
-  formated_output(out, "forward jumps: ", forward_jump_cnt);
-  formated_output(out, "backward jumps: ", backward_jump_cnt);
+  formatted_output(out, "forward jumps: ", forward_jump_cnt);
+  formatted_output(out, "backward jumps: ", backward_jump_cnt);
 }
 
 void Bookkeeper::output_var_freshness(std::ostream &out) {
   int total = use_new_var_cnt + use_old_var_cnt;
-  formated_outputf(out, "percentage a fresh-made variable is used: ",
+  formatted_outputf(out, "percentage a fresh-made variable is used: ",
                    use_new_var_cnt * 100.0 / total);
-  formated_outputf(out, "percentage an existing variable is used: ",
+  formatted_outputf(out, "percentage an existing variable is used: ",
                    use_old_var_cnt * 100.0 / total);
 }
 
@@ -516,7 +516,7 @@ void Bookkeeper::output_counters(std::ostream &out, const char *prefix_msg,
                                  const std::vector<int> &counters,
                                  int starting_pos) {
   assert(prefix_msg && breakdown_msg);
-  formated_output(out, prefix_msg, calc_total(counters));
+  formatted_output(out, prefix_msg, calc_total(counters));
   out << "breakdown:" << std::endl;
   for (size_t i = starting_pos; i < counters.size(); i++) {
     out << "   " << breakdown_msg << ": " << i
