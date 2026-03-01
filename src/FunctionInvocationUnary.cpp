@@ -50,7 +50,7 @@ FunctionInvocationUnary *FunctionInvocationUnary::CreateFunctionInvocationUnary(
   FunctionInvocationUnary *fi = nullptr;
   if (flags) {
     bool op1 = flags->get_op1_sign();
-    enum SafeOpSize size = flags->get_op_size();
+    SafeOpSize size = flags->get_op_size();
 
     eSimpleType type = SafeOpFlags::flags_to_type(op1, size);
     const Block *blk = cg_context.get_current_block();
@@ -117,18 +117,18 @@ const Type &FunctionInvocationUnary::get_type(void) const {
     assert(!"invalid operator in FunctionInvocationUnary::get_type()");
     break;
 
-  case ePlus:
-  case eMinus:
-  case eBitNot:
+  case eUnaryOps::ePlus:
+  case eUnaryOps::eMinus:
+  case eUnaryOps::eBitNot:
     return param_value[0]->get_type();
     break;
 
-  case eNot:
-    return Type::get_simple_type(eInt);
+  case eUnaryOps::eNot:
+    return Type::get_simple_type(eSimpleType::eInt);
     break;
   }
   assert(0);
-  return Type::get_simple_type(eInt);
+  return Type::get_simple_type(eSimpleType::eInt);
 }
 
 /*
@@ -143,13 +143,13 @@ bool FunctionInvocationUnary::compatible(const Variable *v) const {
 /* do some constant folding */
 bool FunctionInvocationUnary::equals(int num) const {
   assert(!param_value.empty());
-  if (num == 0 && eFunc == eNot && param_value[0]->not_equals(0)) {
+  if (num == 0 && eFunc == eUnaryOps::eNot && param_value[0]->not_equals(0)) {
     return true;
   }
-  if (num == 1 && eFunc == eNot && param_value[0]->equals(0)) {
+  if (num == 1 && eFunc == eUnaryOps::eNot && param_value[0]->equals(0)) {
     return true;
   }
-  if (eFunc == eMinus && param_value[0]->equals(num * -1)) {
+  if (eFunc == eUnaryOps::eMinus && param_value[0]->equals(num * -1)) {
     return true;
   }
   return false;
@@ -163,27 +163,27 @@ bool FunctionInvocationUnary::equals(int num) const {
 static void OutputStandardFuncName(eUnaryOps eFunc, std::ostream &out) {
   switch (eFunc) {
     // Math Ops
-  case ePlus:
+  case eUnaryOps::ePlus:
     out << "+";
     break;
-  case eMinus:
+  case eUnaryOps::eMinus:
     out << "-";
     break;
 
     // Logical Ops
-  case eNot:
+  case eUnaryOps::eNot:
     out << "!";
     break;
 
     // Bitwise Ops
-  case eBitNot:
+  case eUnaryOps::eBitNot:
     out << "~";
     break;
   }
 }
 
 bool FunctionInvocationUnary::safe_invocation() const {
-  return (eFunc != eMinus);
+  return (eFunc != eUnaryOps::eMinus);
 }
 
 /*
@@ -197,10 +197,10 @@ void FunctionInvocationUnary::Output(std::ostream &out) const {
     assert(!"invalid operator in FunctionInvocationUnary::Output()");
     break;
 
-  case eMinus:
+  case eUnaryOps::eMinus:
     if (CGOptions::avoid_signed_overflow()) {
       assert(op_flags);
-      if (op_flags->get_op_size() != sFloat) {
+      if (op_flags->get_op_size() != SafeOpSize::sFloat) {
         string fname = op_flags->to_string(eFunc);
         int id = SafeOpFlags::to_id(fname);
         // don't use safe math wrapper if this function is specified in
@@ -226,9 +226,9 @@ void FunctionInvocationUnary::Output(std::ostream &out) const {
     need_cast = true;
     // Fallthrough!
 
-  case ePlus:
-  case eNot:
-  case eBitNot:
+  case eUnaryOps::ePlus:
+  case eUnaryOps::eNot:
+  case eUnaryOps::eBitNot:
     OutputStandardFuncName(eFunc, out);
     // explicit type casting for op1
     if (need_cast) {
@@ -253,7 +253,7 @@ void FunctionInvocationUnary::indented_output(std::ostream &out,
     assert(!"invalid operator in FunctionInvocationUnary::Output()");
     break;
 
-  case eMinus:
+  case eUnaryOps::eMinus:
     if (CGOptions::avoid_signed_overflow()) {
       out << op_flags->to_string(eFunc);
       output_open_encloser("(", out, indent);
@@ -263,9 +263,9 @@ void FunctionInvocationUnary::indented_output(std::ostream &out,
     }
     // Fallthrough!
 
-  case ePlus:
-  case eNot:
-  case eBitNot:
+  case eUnaryOps::ePlus:
+  case eUnaryOps::eNot:
+  case eUnaryOps::eBitNot:
     OutputStandardFuncName(eFunc, out);
     param_value[0]->indented_output(out, indent);
     break;

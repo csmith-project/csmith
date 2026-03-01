@@ -63,11 +63,11 @@ using namespace std;
  * return 0 for constants, 2 for function calls
  */
 static int count_expr_key_var(const Expression *e) {
-  if (e->term_type == eVariable) {
+  if (e->term_type == eTermType::eVariable) {
     return 1;
-  } else if (e->term_type == eConstant) {
+  } else if (e->term_type == eTermType::eConstant) {
     return 0;
-  } else if (e->term_type == eFunction) {
+  } else if (e->term_type == eTermType::eFunction) {
     const ExpressionFuncall *ef = dynamic_cast<const ExpressionFuncall *>(e);
     assert(ef);
     const FunctionInvocation *fi = ef->get_invoke();
@@ -95,9 +95,9 @@ static int count_expr_key_var(const Expression *e) {
  * operation involves at least two variables
  */
 static const Variable *find_expr_key_var(const Expression *e) {
-  if (e->term_type == eVariable) {
+  if (e->term_type == eTermType::eVariable) {
     return static_cast<const ExpressionVariable *>(e)->get_var();
-  } else if (e->term_type == eFunction) {
+  } else if (e->term_type == eTermType::eFunction) {
     const ExpressionFuncall *ef = dynamic_cast<const ExpressionFuncall *>(e);
     assert(ef);
     const FunctionInvocation &fi = *(ef->get_invoke());
@@ -124,8 +124,8 @@ ArrayVariable *ArrayVariable::CreateArrayVariable(
     const Type *type, const Expression *init, const CVQualifiers *qfer,
     const Variable *isFieldVarOf) {
   assert(type);
-  if (type->eType == eSimple)
-    assert(type->simple_type != eVoid);
+  if (type->eType == eTypeDesc::eSimple)
+    assert(type->simple_type != eSimpleType::eVoid);
 
   // quick way to choose a random array dimension: 1d 60%, 2d 30%, and son on
   int num = rnd_upto(99) + 1;
@@ -165,7 +165,7 @@ ArrayVariable *ArrayVariable::CreateArrayVariable(
   unsigned int init_num = pure_rnd_upto(total_size / 2);
   if (0) { // keep the code for comparing the bug finding power with the else
            // branch
-    if (type->eType == eSimple || type->eType == eStruct) {
+    if (type->eType == eTypeDesc::eSimple || type->eType == eTypeDesc::eStruct) {
       unsigned int init_num = pure_rnd_upto(total_size - 1);
       for (size_t i = 0; i < init_num; i++) {
         Expression *e = Constant::make_random(type);
@@ -175,10 +175,10 @@ ArrayVariable *ArrayVariable::CreateArrayVariable(
   } else {
     for (size_t i = 0; i < init_num; i++) {
       Expression *e = nullptr;
-      if (type->eType != ePointer || CGOptions::strict_const_arrays()) {
+      if (type->eType != eTypeDesc::ePointer || CGOptions::strict_const_arrays()) {
         e = Constant::make_random(type);
       } else {
-        e = VariableSelector::make_init_value(Effect::READ, cg_context, type,
+        e = VariableSelector::make_init_value(Effect::Access::READ, cg_context, type,
                                               qfer, blk);
       }
       var->add_init_value(e);
@@ -355,11 +355,11 @@ ArrayVariable *ArrayVariable::rnd_mutate(void) {
   for (i = 0; i < get_dimension(); i++) {
     if (mutate_flags[i]) {
       const Expression *e = indices[i];
-      assert(e->term_type == eVariable);
+      assert(e->term_type == eTermType::eVariable);
       const ExpressionVariable *ev =
           dynamic_cast<const ExpressionVariable *>(e);
       // create a mutated index from the original by adding an constant offset
-      FunctionInvocation *fi = new FunctionInvocationBinary(eAdd, 0);
+      FunctionInvocation *fi = new FunctionInvocationBinary(eBinaryOps::eAdd, 0);
       fi->add_operand(new ExpressionVariable(*(ev->get_var())));
       int offset = rnd_upto(sizes[i]);
       if (offset == 0)
@@ -417,7 +417,7 @@ bool ArrayVariable::no_loop_initializer(void) const {
   // don't use loop initializer if we are doing test case reduction
   // can not use loop initializer if either array member are structs, or they
   // are constants, or it has > 1 initial values
-  return type->eType == eStruct || type->eType == eUnion || is_const() ||
+  return type->eType == eTypeDesc::eStruct || type->eType == eTypeDesc::eUnion || is_const() ||
          is_global() || (init_values.size() > 0);
 }
 
@@ -731,7 +731,7 @@ void ArrayVariable::hash(std::ostream &out) const {
   // for unions, find the fields that we don't want to hash due to union field
   // read rules. So FactUnion.cpp
   vector<int> excluded_fields;
-  if (type->eType == eUnion) {
+  if (type->eType == eTypeDesc::eUnion) {
     FactMgr *fm = get_fact_mgr_for_func(GetFirstFunction());
     assert(fm);
     for (size_t i = 0; i < field_vars.size(); i++) {
@@ -773,8 +773,8 @@ void ArrayVariable::hash(std::ostream &out) const {
   vname = oss.str();
   if (CGOptions::compute_hash()) {
     for (size_t j = 0; j < field_names.size(); j++) {
-      if (field_types[j]->eType == eSimple &&
-          field_types[j]->simple_type == eFloat) {
+      if (field_types[j]->eType == eTypeDesc::eSimple &&
+          field_types[j]->simple_type == eSimpleType::eFloat) {
         output_tab(out, indent);
         out << "transparent_crc_bytes(&" << vname << field_names[j] << ", ";
         out << "sizeof(" << vname << field_names[j] << "), ";
@@ -792,7 +792,7 @@ void ArrayVariable::hash(std::ostream &out) const {
       out << "if (print_hash_value) " << make_print_index_str(cvs) << endl;
     }
   } else {
-    if (type->eType == eSimple) {
+    if (type->eType == eTypeDesc::eSimple) {
       output_tab(out, indent);
       out << Variable::sink_var_name << " = ";
       output_with_indices(out, cvs);

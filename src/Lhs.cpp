@@ -71,12 +71,12 @@ Lhs *Lhs::make_random(CGContext &cg_context, const Type *t,
     DEPTH_GUARD_BY_TYPE_RETURN(dtLhs, nullptr);
     const Variable *var = 0;
     // try to use one of the "must_use" variables
-    var = VariableSelector::select_must_use_var(Effect::WRITE, cg_context, t,
+    var = VariableSelector::select_must_use_var(Effect::Access::WRITE, cg_context, t,
                                                 qfer);
     if (var == nullptr) {
       bool flag = rnd_flipcoin(SelectDerefPointerProb());
       if (flag) {
-        var = VariableSelector::select_deref_pointer(Effect::WRITE, cg_context,
+        var = VariableSelector::select_deref_pointer(Effect::Access::WRITE, cg_context,
                                                      t, qfer, dummy);
         ERROR_GUARD(nullptr);
         if (var) {
@@ -89,9 +89,9 @@ Lhs *Lhs::make_random(CGContext &cg_context, const Type *t,
     if (var == 0) {
       CVQualifiers new_qfer(*qfer);
       if (!(new_qfer.wildcard)) {
-        new_qfer.restrict(Effect::WRITE, cg_context);
+        new_qfer.restrict(Effect::Access::WRITE, cg_context);
       }
-      var = VariableSelector::select(Effect::WRITE, cg_context, t, &new_qfer,
+      var = VariableSelector::select(Effect::Access::WRITE, cg_context, t, &new_qfer,
                                      dummy, eMatchType::eDerefExact);
       ERROR_GUARD(nullptr);
       int deref_level =
@@ -107,7 +107,7 @@ Lhs *Lhs::make_random(CGContext &cg_context, const Type *t,
     // potential of overflowing it's possible for unsigned bitfield to overflow:
     // consider a 31-bit unsigned field that is promoted to 32-bit signed int
     // before arithematics
-    if (valid && t->eType == eSimple && no_signed_overflow &&
+    if (valid && t->eType == eTypeDesc::eSimple && no_signed_overflow &&
         (var->type->get_base_type()->is_signed() || var->isBitfield_)) {
       valid = false;
     }
@@ -147,20 +147,20 @@ Lhs *Lhs::make_random(CGContext &cg_context, const Type *t,
  *
  */
 Lhs::Lhs(const Variable &v)
-    : Expression(eLhs), var(v), type(v.type), for_compound_assign(false) {}
+    : Expression(eTermType::eLhs), var(v), type(v.type), for_compound_assign(false) {}
 
 /*
  * copy constructor
  */
 Lhs::Lhs(const Lhs &lhs)
-    : Expression(eLhs), var(lhs.var), type(lhs.type),
+    : Expression(eTermType::eLhs), var(lhs.var), type(lhs.type),
       for_compound_assign(lhs.for_compound_assign) {}
 
 /*
  *
  */
 Lhs::Lhs(const Variable &v, const Type *t, bool compound_assign)
-    : Expression(eLhs), var(v), type(t), for_compound_assign(compound_assign) {}
+    : Expression(eTermType::eLhs), var(v), type(t), for_compound_assign(compound_assign) {}
 
 /*
  *
@@ -319,7 +319,7 @@ bool Lhs::visit_facts(vector<const Fact *> &inputs,
     vector<const Expression *> subs;
     cg_context.curr_rhs->get_eval_to_subexps(subs);
     for (size_t i = 0; i < subs.size(); i++) {
-      if (subs[i]->term_type == eVariable || subs[i]->term_type == eLhs) {
+      if (subs[i]->term_type == eTermType::eVariable || subs[i]->term_type == eTermType::eLhs) {
         if (have_overlapping_fields(subs[i], this, inputs)) {
           return log_analysis_fail(v->name +
                                    " with Lhs. reason lhs and rhs overlap");

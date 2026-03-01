@@ -59,18 +59,18 @@ class CVQualifiers;
 /*
  *
  */
-enum eBinaryOp
+enum class eBinaryOp
 {
 	eAdd,
 	eSub
 };
-#define MAX_BINARY_OPS ((eBinaryOp)(eSub + 1))
+#define MAX_BINARY_OPS (static_cast<eBinaryOp>(static_cast<unsigned int>(eBinaryOp::eSub) + 1))
 #endif // 0
 
 /*
  *
  */
-enum eTermType {
+enum class eTermType {
   eConstant,
   eVariable,
   // eUnaryExpr,
@@ -81,7 +81,8 @@ enum eTermType {
   eLhs
 };
 inline constexpr eTermType MAX_TERM_TYPES =
-    static_cast<eTermType>(eCommaExpr + 1);
+    static_cast<eTermType>(static_cast<unsigned int>(eTermType::eCommaExpr) +
+                           1);
 
 template <class Key, class Value> class ProbabilityTable;
 
@@ -94,11 +95,11 @@ public:
   static Expression *make_random(CGContext &cg_context, const Type *type,
                                  const CVQualifiers *qfer = nullptr,
                                  bool no_func = false, bool no_const = false,
-                                 enum eTermType tt = MAX_TERM_TYPES);
+                                 eTermType tt = MAX_TERM_TYPES);
 
   static Expression *make_random_param(CGContext &cg_context, const Type *type,
                                        const CVQualifiers *qfer,
-                                       enum eTermType tt = MAX_TERM_TYPES);
+                                       eTermType tt = MAX_TERM_TYPES);
 
   static void InitProbabilityTables();
 
@@ -161,7 +162,7 @@ public:
   void check_and_set_cast(const Type *t);
   void output_cast(std::ostream &out) const;
 
-  enum eTermType term_type;
+  eTermType term_type;
   int expr_id;
 
   const Type *cast_type;

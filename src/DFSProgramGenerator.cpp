@@ -57,7 +57,7 @@ DFSProgramGenerator::~DFSProgramGenerator() {
 }
 
 void DFSProgramGenerator::initialize() {
-  RandomNumber::CreateInstance(rDFSRndNumGenerator, seed_);
+  RandomNumber::CreateInstance(RNDNUM_GENERATOR::rDFSRndNumGenerator, seed_);
   output_mgr_ = DFSOutputMgr::CreateInstance();
   assert(output_mgr_);
 }

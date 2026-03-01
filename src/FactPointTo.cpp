@@ -163,12 +163,12 @@ FactPointTo::rhs_to_lhs_transfer(const vector<const Fact *> &facts,
     return empty;
   // assert all possible LHS are pointers
   for (size_t i = 0; i < lvars.size(); i++) {
-    assert(lvars[i]->type->eType == ePointer);
+    assert(lvars[i]->type->eType == eTypeDesc::ePointer);
   }
   if (rhs == nullptr) {
     return FactPointTo::make_facts(lvars, garbage_ptr);
   }
-  if (rhs->get_type().eType != ePointer && rhs->get_type().eType != eUnion) {
+  if (rhs->get_type().eType != eTypeDesc::ePointer && rhs->get_type().eType != eTypeDesc::eUnion) {
     if (rhs->equals(0) && rhs->get_type().SizeInBytes() != SIZE_UNKNOWN &&
         rhs->get_type().SizeInBytes() >= 8) {
       return FactPointTo::make_facts(lvars, null_ptr);
@@ -176,16 +176,16 @@ FactPointTo::rhs_to_lhs_transfer(const vector<const Fact *> &facts,
       return FactPointTo::make_facts(lvars, garbage_ptr);
     }
   }
-  if (rhs->term_type == eConstant) {
+  if (rhs->term_type == eTermType::eConstant) {
     const Constant *c = dynamic_cast<const Constant *>(rhs);
-    if (rhs->get_type().eType == ePointer) {
+    if (rhs->get_type().eType == eTypeDesc::ePointer) {
       return FactPointTo::make_facts(lvars,
                                      rhs->equals(0) ? null_ptr : garbage_ptr);
     }
     // for unions, all pointer fields are equally initialized if the 1st field
     // is pointer
-    else if (rhs->get_type().eType == eUnion) {
-      if (lvars[0]->field_var_of->type->eType == eUnion &&
+    else if (rhs->get_type().eType == eTypeDesc::eUnion) {
+      if (lvars[0]->field_var_of->type->eType == eTypeDesc::eUnion &&
           lvars[0]->get_field_id() == 0 && c->get_field(0) == "0") {
         return FactPointTo::make_facts(lvars, null_ptr);
       } else {
@@ -195,7 +195,7 @@ FactPointTo::rhs_to_lhs_transfer(const vector<const Fact *> &facts,
       // remove this when we add pointer fields to structs later
       assert(0);
     }
-  } else if (rhs->term_type == eVariable) {
+  } else if (rhs->term_type == eTermType::eVariable) {
     const ExpressionVariable *expvar =
         static_cast<const ExpressionVariable *>(rhs);
     int indirect = expvar->get_indirect_level();
@@ -226,7 +226,7 @@ FactPointTo::rhs_to_lhs_transfer(const vector<const Fact *> &facts,
           expvar->get_var()->get_collective(), indirect + 1, facts);
       return FactPointTo::make_facts(lvars, var_set);
     }
-  } else if (rhs->term_type == eFunction) {
+  } else if (rhs->term_type == eTermType::eFunction) {
     const FunctionInvocation *fi = rhs->get_invoke();
     assert(fi);
     // TODO: support pointer arithmetics
@@ -239,7 +239,7 @@ FactPointTo::rhs_to_lhs_transfer(const vector<const Fact *> &facts,
         fiu->get_func()->rv->find_pointer_fields(pointers);
         for (size_t i = 0; i < lvars.size(); i++) {
           const FactPointTo *rv_fact = dynamic_cast<const FactPointTo *>(
-              get_return_fact_for_invocation(fiu, pointers[i], ePointTo));
+              get_return_fact_for_invocation(fiu, pointers[i], eFactCategory::ePointTo));
           const FactPointTo *fp =
               FactPointTo::make_fact(lvars[i], rv_fact->get_point_to_vars());
           ret_facts.push_back(fp);
@@ -248,15 +248,15 @@ FactPointTo::rhs_to_lhs_transfer(const vector<const Fact *> &facts,
       } else {
         // find the fact regarding return variable
         const FactPointTo *rv_fact = dynamic_cast<const FactPointTo *>(
-            get_return_fact_for_invocation(fiu, fiu->get_func()->rv, ePointTo));
+            get_return_fact_for_invocation(fiu, fiu->get_func()->rv, eFactCategory::ePointTo));
         assert(rv_fact);
         return FactPointTo::make_facts(lvars, rv_fact->get_point_to_vars());
       }
     }
-  } else if (rhs->term_type == eAssignment) {
+  } else if (rhs->term_type == eTermType::eAssignment) {
     const ExpressionAssign *ea = dynamic_cast<const ExpressionAssign *>(rhs);
     return rhs_to_lhs_transfer(facts, lvars, ea->get_rhs());
-  } else if (rhs->term_type == eCommaExpr) {
+  } else if (rhs->term_type == eTermType::eCommaExpr) {
     const ExpressionComma *ec = dynamic_cast<const ExpressionComma *>(rhs);
     return rhs_to_lhs_transfer(facts, lvars, ec->get_rhs());
   }
@@ -273,7 +273,7 @@ int FactPointTo::abstract_fact_for_assign(
       lhs->get_var()->get_collective(), lhs->get_indirect_level(), facts_in);
 
   // Handle points-to facts
-  if (lhs->get_type().eType == ePointer) {
+  if (lhs->get_type().eType == eTypeDesc::ePointer) {
     facts_out = rhs_to_lhs_transfer(facts_in, lvars, rhs);
     return lvars.size();
   }
@@ -282,10 +282,10 @@ int FactPointTo::abstract_fact_for_assign(
   for (size_t i = 0; i < lvars.size(); i++) {
     const Variable *v = lvars[i];
     if (v->is_inside_union_field()) {
-      for (; v && v->type->eType != eUnion; v = v->field_var_of) {
+      for (; v && v->type->eType != eTypeDesc::eUnion; v = v->field_var_of) {
         /* Empty. */
       }
-      assert(v && v->type->eType == eUnion);
+      assert(v && v->type->eType == eTypeDesc::eUnion);
     }
     vector<const Variable *> pointers;
     v->find_pointer_fields(pointers);
@@ -354,7 +354,7 @@ FactPointTo::make_facts(const vector<const Variable *> &vars,
 /*
  *
  */
-FactPointTo::FactPointTo(const Variable *v) : Fact(ePointTo), var(v) {
+FactPointTo::FactPointTo(const Variable *v) : Fact(eFactCategory::ePointTo), var(v) {
   // every pointer starts from un-initialized state
   point_to_vars.push_back(garbage_ptr);
 }
@@ -363,13 +363,13 @@ FactPointTo::FactPointTo(const Variable *v) : Fact(ePointTo), var(v) {
  *
  */
 FactPointTo::FactPointTo(const Variable *v, const vector<const Variable *> &set)
-    : Fact(ePointTo), var(v), point_to_vars(set) {}
+    : Fact(eFactCategory::ePointTo), var(v), point_to_vars(set) {}
 
 /*
  *
  */
 FactPointTo::FactPointTo(const Variable *v, const Variable *point_to)
-    : Fact(ePointTo), var(v) {
+    : Fact(eFactCategory::ePointTo), var(v) {
   point_to_vars.push_back(point_to);
 }
 
@@ -378,7 +378,7 @@ FactPointTo::FactPointTo(const Variable *v, const Variable *point_to)
  *
  */
 FactPointTo::FactPointTo(const FactPointTo& f) :
-    Fact(ePointTo),
+    Fact(eFactCategory::ePointTo),
     var(f.get_var()),
     point_to_vars(f.get_point_to_vars())
 {
@@ -425,7 +425,7 @@ bool FactPointTo::is_valid_ptr(const char *name,
                                const std::vector<const Fact *> &facts) {
   for (size_t i = 0; i < facts.size(); i++) {
     if (facts[i]->get_var()->name == name) {
-      if (facts[i]->eCat == ePointTo) {
+      if (facts[i]->eCat == eFactCategory::ePointTo) {
         const FactPointTo *fact = static_cast<const FactPointTo *>(facts[i]);
         return (!fact->is_null() && !fact->is_dead());
       }
@@ -753,7 +753,7 @@ FactPointTo::update_with_modified_index(const Variable *index_var) const {
 void FactPointTo::update_facts_with_modified_index(
     std::vector<const Fact *> &facts, const Variable *index_var) {
   for (size_t i = 0; i < facts.size(); i++) {
-    if (facts[i]->eCat == ePointTo) {
+    if (facts[i]->eCat == eFactCategory::ePointTo) {
       const FactPointTo *fp = static_cast<const FactPointTo *>(facts[i]);
       const FactPointTo *new_fp = fp->update_with_modified_index(index_var);
       if (new_fp != fp) {
@@ -768,7 +768,7 @@ void FactPointTo::update_ptr_aliases(
     vector<vector<const Variable *>> &aliases) {
   size_t i, j;
   for (j = 0; j < facts.size(); j++) {
-    if (facts[j]->eCat == ePointTo) {
+    if (facts[j]->eCat == eFactCategory::ePointTo) {
       const FactPointTo *f = static_cast<const FactPointTo *>(facts[j]);
       // don't include rv facts
       if (f->get_var()->type != 0) {
@@ -813,11 +813,11 @@ int FactPointTo::find_union_pointees(const vector<const Fact *> &facts,
                                      vector<const Variable *> &unions) {
   unions.clear();
   vector<const Variable *> vars;
-  if (e->term_type == eVariable) {
+  if (e->term_type == eTermType::eVariable) {
     const ExpressionVariable *ev = dynamic_cast<const ExpressionVariable *>(e);
     vars = merge_pointees_of_pointer(ev->get_var()->get_collective(),
                                      ev->get_indirect_level(), facts);
-  } else if (e->term_type == eLhs) {
+  } else if (e->term_type == eTermType::eLhs) {
     const Lhs *lhs = dynamic_cast<const Lhs *>(e);
     vars = merge_pointees_of_pointer(lhs->get_var()->get_collective(),
                                      lhs->get_indirect_level(), facts);

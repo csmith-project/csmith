@@ -34,13 +34,13 @@
 
 class Filter;
 
-enum RNDNUM_GENERATOR {
+enum class RNDNUM_GENERATOR {
   rDefaultRndNumGenerator = 0,
   rDFSRndNumGenerator,
 };
 
 inline constexpr unsigned int MAX_RNDNUM_GENERATOR =
-    static_cast<unsigned int>(rDFSRndNumGenerator + 1);
+    static_cast<unsigned int>(RNDNUM_GENERATOR::rDFSRndNumGenerator) + 1;
 
 // I could make AbsRndNumGenerator not pure, but want to force each subclass
 // implement it's own member functions, in case of forgetting something.
@@ -76,7 +76,7 @@ public:
   // Although it's not a good idea to return the kind of different
   // implementation, it's useful for error_handler. Basically we don't want to
   // make the code depend on the kind, use polymorphism instead.
-  virtual enum RNDNUM_GENERATOR kind() = 0;
+  virtual RNDNUM_GENERATOR kind() = 0;
 
   virtual ~AbsRndNumGenerator(void);
 

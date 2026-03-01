@@ -87,9 +87,9 @@ public:
   std::vector<Statement *> stms;
   std::vector<Statement *> deleted_stms;
   std::vector<Variable *> local_vars;
-  mutable std::map<std::string, enum eSimpleType> macro_tmp_vars;
+  mutable std::map<std::string, eSimpleType> macro_tmp_vars;
 
-  std::string create_new_tmp_var(enum eSimpleType type) const;
+  std::string create_new_tmp_var(eSimpleType type) const;
 
   virtual void get_blocks(std::vector<const Block *> &blks) const override {
     blks.push_back(this);

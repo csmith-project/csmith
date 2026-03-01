@@ -51,7 +51,7 @@ template <class Key, class Value> class ProbabilityTable;
  * "Assignment operators."  This is sort of a dumb model, but it will do for
  * now.
  */
-enum eAssignOps {
+enum class eAssignOps {
   eSimpleAssign,
   eMulAssign,
   eDivAssign,
@@ -69,7 +69,8 @@ enum eAssignOps {
   ePostDecr
 };
 inline constexpr eAssignOps MAX_ASSIGN_OP =
-    static_cast<eAssignOps>(ePostDecr + 1);
+    static_cast<eAssignOps>(static_cast<unsigned int>(eAssignOps::ePostDecr) +
+                            1);
 
 /*
  *
@@ -88,7 +89,7 @@ public:
                                                         const Expression &e);
 
   StatementAssign(Block *b, const Lhs &l, const Expression &e,
-                  eAssignOps op = eSimpleAssign,
+                  eAssignOps op = eAssignOps::eSimpleAssign,
                   const SafeOpFlags *flags = nullptr);
 
   StatementAssign(Block *b, const Lhs &l, eAssignOps op, const Expression &e,
@@ -98,11 +99,11 @@ public:
   static void InitProbabilityTable();
   static bool safe_assign(eAssignOps op);
   static bool need_no_rhs(eAssignOps op) {
-    return op == ePreIncr || op == ePreDecr || op == ePostIncr ||
-           op == ePostDecr;
+    return op == eAssignOps::ePreIncr || op == eAssignOps::ePreDecr ||
+           op == eAssignOps::ePostIncr || op == eAssignOps::ePostDecr;
   }
 
-  bool is_simple_assign(void) const { return op == eSimpleAssign; }
+  bool is_simple_assign(void) const { return op == eAssignOps::eSimpleAssign; }
 
   const Lhs *get_lhs(void) const { return &lhs; };
   const Expression *get_rhs(void) const { return rhs; };

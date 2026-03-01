@@ -135,7 +135,7 @@ void Statement::InitProbabilityTable() {
     return;
 
   Statement::stmtTable_ = new ProbabilityTable<unsigned int, ProbName>();
-  Statement::stmtTable_->initialize(pStatementProb);
+  Statement::stmtTable_->initialize(ProbName::pStatementProb);
 }
 
 eStatementType Statement::number_to_type(unsigned int value) {
@@ -161,16 +161,16 @@ bool StatementFilter::filter(int value) const {
 
   const Type *return_type = cg_context_.get_current_func()->return_type;
   bool no_return =
-      (return_type->eType == eSimple && return_type->simple_type == eVoid);
+      (return_type->eType == eTypeDesc::eSimple && return_type->simple_type == eSimpleType::eVoid);
 
-  if (type == eBlock) {
+  if (type == eStatementType::eBlock) {
     return true;
   }
-  if ((type == eReturn) && no_return) {
+  if ((type == eStatementType::eReturn) && no_return) {
     return true;
   }
 
-  if ((type == eBreak || type == eContinue) && !(cg_context_.flags & IN_LOOP)) {
+  if ((type == eStatementType::eBreak || type == eStatementType::eContinue) && !(cg_context_.flags & IN_LOOP)) {
     return true;
   }
 
@@ -178,7 +178,7 @@ bool StatementFilter::filter(int value) const {
   if (cg_context_.blk_depth >= CGOptions::max_blk_depth()) {
     return Statement::is_compound(type);
   } else if (Function::reach_max_functions_cnt()) { // Limit # of functions..
-    if (type != eInvoke)
+    if (type != eStatementType::eInvoke)
       return false;
     else
       return true;
@@ -211,11 +211,11 @@ int find_stm_in_set(const vector<const Statement *> &set, const Statement *s) {
 /*
 unsigned int probabilityStatement[eStatementType] =
 {
-        100, 	//	eAssign,
-        75, 	//	eIfElse,
-        30,		//	eFor,		// Make this a generic loop
-construct (while/for/do) 30,		//	eInvoke, 10,		//
-eReturn,
+        100, 	//	eStatementType::eAssign,
+        75, 	//	eStatementType::eIfElse,
+        30,		//	eStatementType::eFor,		// Make this a generic loop
+construct (while/for/do) 30,		//	eStatementType::eInvoke, 10,		//
+eStatementType::eReturn,
 }
 
 probability probStatement
@@ -240,12 +240,13 @@ int Statement::sid = 0;
  *
  */
 Statement *Statement::make_random(CGContext &cg_context, eStatementType t) {
-  DEPTH_GUARD_BY_TYPE_RETURN_WITH_FLAG(dtStatement, t, nullptr);
+  DEPTH_GUARD_BY_TYPE_RETURN_WITH_FLAG(dtStatement, static_cast<int>(t),
+                                       nullptr);
   // Should initialize table first
   Statement::InitProbabilityTable();
 
   if ((CGOptions::stop_by_stmt() >= 0) && (sid >= CGOptions::stop_by_stmt())) {
-    t = eReturn;
+    t = eStatementType::eReturn;
   }
 
   // Add more statements:
@@ -274,34 +275,34 @@ Statement *Statement::make_random(CGContext &cg_context, eStatementType t) {
   default:
     assert(!"unknown Statement type");
     break;
-  case eAssign:
+  case eStatementType::eAssign:
     s = StatementAssign::make_random(cg_context);
     break;
-  case eBlock:
+  case eStatementType::eBlock:
     s = Block::make_random(cg_context);
     break;
-  case eFor:
+  case eStatementType::eFor:
     s = StatementFor::make_random(cg_context);
     break;
-  case eIfElse:
+  case eStatementType::eIfElse:
     s = StatementIf::make_random(cg_context);
     break;
-  case eInvoke:
+  case eStatementType::eInvoke:
     s = StatementExpr::make_random(cg_context);
     break;
-  case eReturn:
+  case eStatementType::eReturn:
     s = StatementReturn::make_random(cg_context);
     break;
-  case eBreak:
+  case eStatementType::eBreak:
     s = StatementBreak::make_random(cg_context);
     break;
-  case eContinue:
+  case eStatementType::eContinue:
     s = StatementContinue::make_random(cg_context);
     break;
-  case eGoto:
+  case eStatementType::eGoto:
     s = StatementGoto::make_random(cg_context);
     break;
-  case eArrayOp:
+  case eStatementType::eArrayOp:
     s = StatementArrayOp::make_random(cg_context);
     break;
   }
@@ -413,7 +414,7 @@ bool Statement::dominate(const Statement *s) const {
  */
 const Statement *Statement::find_container_stm(void) const {
   const Block *b =
-      (eType == eBlock) ? static_cast<const Block *>(this) : parent;
+      (eType == eStatementType::eBlock) ? static_cast<const Block *>(this) : parent;
   if (b != 0 && b->parent != 0) {
     for (size_t i = 0; i < b->parent->stms.size(); i++) {
       const Statement *s = b->parent->stms[i];
@@ -476,7 +477,7 @@ std::string Statement::find_jump_label(void) const {
     assert(fm);
     for (size_t i = 0; i < fm->cfg_edges.size(); i++) {
       const CFGEdge *e = fm->cfg_edges[i];
-      if (e->dest == this && e->src->eType == eGoto) {
+      if (e->dest == this && e->src->eType == eStatementType::eGoto) {
         const StatementGoto *sg = dynamic_cast<const StatementGoto *>(e->src);
         assert(sg);
         return sg->label;
@@ -497,7 +498,7 @@ int Statement::find_jump_sources(
     gotos.clear();
     for (size_t i = 0; i < fm->cfg_edges.size(); i++) {
       const CFGEdge *e = fm->cfg_edges[i];
-      if (e->dest == this && e->src->eType == eGoto) {
+      if (e->dest == this && e->src->eType == eStatementType::eGoto) {
         const StatementGoto *sg = dynamic_cast<const StatementGoto *>(e->src);
         assert(sg);
         gotos.push_back(sg);
@@ -524,7 +525,7 @@ void Statement::set_accumulated_effect_after_block(
  */
 void Statement::add_back_return_facts(FactMgr *fm,
                                       std::vector<const Fact *> &facts) const {
-  if (eType == eReturn) {
+  if (eType == eStatementType::eReturn) {
     merge_facts(facts, fm->map_facts_out[this]);
   } else {
     vector<const Block *> blks;
@@ -588,7 +589,7 @@ bool Statement::validate_and_update_facts(vector<const Fact *> &inputs,
        must be feed into s1 in order to achieve a fixed point */
     for (size_t i = 0; i < fm->cfg_edges.size(); i++) {
       const Statement *s = fm->cfg_edges[i]->src;
-      if (s->eType == eGoto && contains_stmt(s)) {
+      if (s->eType == eStatementType::eGoto && contains_stmt(s)) {
         fm->map_visited[s] = true;
       }
     }
@@ -630,7 +631,8 @@ bool Statement::stm_visit_facts(vector<const Fact *> &inputs,
  */
 int Statement::find_typed_stmts(vector<const Statement *> &stms,
                                 const vector<int> &stmt_types) const {
-  if (std::find(stmt_types.begin(), stmt_types.end(), eType) !=
+  if (std::find(stmt_types.begin(), stmt_types.end(),
+                static_cast<int>(eType)) !=
       stmt_types.end()) {
     stms.push_back(this);
   }
@@ -684,7 +686,7 @@ bool Statement::contains_stmt(const Statement *s) const {
   if (this == s) {
     return true;
   }
-  if (eType == eBlock) {
+  if (eType == eStatementType::eBlock) {
     for (const Block *tmp = s->parent; tmp; tmp = tmp->parent) {
       if (tmp == static_cast<const Block *>(this)) {
         return true;
@@ -724,18 +726,18 @@ int Statement::find_contained_labels(vector<string> &labels) const {
  * find all the functions directly called in this statement
  */
 const FunctionInvocation *Statement::get_direct_invocation(void) const {
-  if (eType == eAssign) {
+  if (eType == eStatementType::eAssign) {
     const Expression *e =
         static_cast<const StatementAssign *>(this)->get_expr();
-    if (e->term_type == eFunction) {
+    if (e->term_type == eTermType::eFunction) {
       return static_cast<const ExpressionFuncall *>(e)->get_invoke();
     }
-  } else if (eType == eInvoke) {
+  } else if (eType == eStatementType::eInvoke) {
     return static_cast<const StatementExpr *>(this)->get_invoke();
-  } else if (eType == eIfElse) {
+  } else if (eType == eStatementType::eIfElse) {
     const StatementIf *si = static_cast<const StatementIf *>(this);
     const Expression *e = si->get_test();
-    if (e->term_type == eFunction) {
+    if (e->term_type == eTermType::eFunction) {
       return static_cast<const ExpressionFuncall *>(e)->get_invoke();
     }
   }
@@ -780,11 +782,11 @@ bool Statement::contains_unfixed_goto(void) const {
           goto label;
        }
     */
-    if (edge->src->eType == eGoto && contains_stmt(edge->src) &&
+    if (edge->src->eType == eStatementType::eGoto && contains_stmt(edge->src) &&
         !fm->map_visited[edge->src] && !contains_stmt(edge->dest)) {
       return true;
     }
-    if (edge->src->eType == eGoto && fm->map_visited[edge->src] &&
+    if (edge->src->eType == eStatementType::eGoto && fm->map_visited[edge->src] &&
         contains_stmt(edge->dest)) {
       // take care the special case caused by StatementGoto::visit_facts
       if (!fm->map_facts_out[edge->src].empty() &&
@@ -850,7 +852,7 @@ void Statement::post_creation_analysis(vector<const Fact *> &pre_facts,
                                        const Effect &pre_effect,
                                        CGContext &cg_context) const {
   FactMgr *fm = get_fact_mgr_for_func(func);
-  if (eType == eIfElse) {
+  if (eType == eStatementType::eIfElse) {
     (static_cast<const StatementIf *>(this))->combine_branch_facts(pre_facts);
   } else {
     fm->makeup_new_var_facts(pre_facts, fm->global_facts);
@@ -882,12 +884,12 @@ void Statement::post_creation_analysis(vector<const Fact *> &pre_facts,
     // for if...else..., we don't want to walk through the true branch and false
     // branch again compute the output with consideration of return statement(s)
     // in both branches
-    if (eType == eAssign) {
+    if (eType == eStatementType::eAssign) {
       const StatementAssign *sa = static_cast<const StatementAssign *>(this);
       // abstract fact for assignment itself. No analysis on function calls
       // on RHS since they are already handled during statement generation
       FactMgr::update_fact_for_assign(sa, fm->global_facts);
-    } else if (eType == eReturn) {
+    } else if (eType == eStatementType::eReturn) {
       const StatementReturn *sr = static_cast<const StatementReturn *>(this);
       FactMgr::update_fact_for_return(sr, fm->global_facts);
     }
@@ -923,7 +925,7 @@ int Statement::pre_output(std::ostream &out, FactMgr * /* fm */,
 
 void Statement::post_output(std::ostream &out, FactMgr *fm, int indent) const {
   // don't print facts after block because it would mess up "if ... else ..."
-  if (fm && CGOptions::paranoid() && !CGOptions::concise() && eType != eBlock) {
+  if (fm && CGOptions::paranoid() && !CGOptions::concise() && eType != eStatementType::eBlock) {
     fm->output_assertions(out, this, indent, true);
   }
 }

@@ -66,36 +66,39 @@ using namespace std;
 DistributionTable StatementAssign::assignOpsTable_;
 
 void StatementAssign::InitProbabilityTable() {
-  assignOpsTable_.add_entry((int)eSimpleAssign, 70);
-  assignOpsTable_.add_entry((int)eBitAndAssign, 10);
-  assignOpsTable_.add_entry((int)eBitXorAssign, 10);
-  assignOpsTable_.add_entry((int)eBitOrAssign, 10);
+  assignOpsTable_.add_entry((int)eAssignOps::eSimpleAssign, 70);
+  assignOpsTable_.add_entry((int)eAssignOps::eBitAndAssign, 10);
+  assignOpsTable_.add_entry((int)eAssignOps::eBitXorAssign, 10);
+  assignOpsTable_.add_entry((int)eAssignOps::eBitOrAssign, 10);
   if (CGOptions::pre_incr_operator())
-    assignOpsTable_.add_entry((int)ePreIncr, 5);
+    assignOpsTable_.add_entry((int)eAssignOps::ePreIncr, 5);
   if (CGOptions::pre_decr_operator())
-    assignOpsTable_.add_entry((int)ePreDecr, 5);
+    assignOpsTable_.add_entry((int)eAssignOps::ePreDecr, 5);
   if (CGOptions::post_incr_operator())
-    assignOpsTable_.add_entry((int)ePostIncr, 5);
+    assignOpsTable_.add_entry((int)eAssignOps::ePostIncr, 5);
   if (CGOptions::post_decr_operator()) {
-    assignOpsTable_.add_entry((int)ePostDecr, 5);
+    assignOpsTable_.add_entry((int)eAssignOps::ePostDecr, 5);
   }
 }
 
 eAssignOps StatementAssign::AssignOpsProbability(const Type *type) {
   if (!CGOptions::compound_assignment()) {
-    return eSimpleAssign;
+    return eAssignOps::eSimpleAssign;
   }
   // First, floating point values do not apply to |=, &= and ^=.
   // Second, similar to signed integers, we don't generate pre- or post-
   // operators for floating point values. Instead, we will wrap all
   // of these operations into safe_float_math later.
-  if (type && (type->eType != eSimple || type->get_base_type()->is_float())) {
-    return eSimpleAssign;
+  if (type && (type->eType != eTypeDesc::eSimple || type->get_base_type()->is_float())) {
+    return eAssignOps::eSimpleAssign;
   }
 
   VectorFilter filter(&assignOpsTable_);
   if (type && type->is_signed()) {
-    filter.add(ePreIncr).add(ePreDecr).add(ePostIncr).add(ePostDecr);
+    filter.add(static_cast<unsigned int>(eAssignOps::ePreIncr))
+        .add(static_cast<unsigned int>(eAssignOps::ePreDecr))
+        .add(static_cast<unsigned int>(eAssignOps::ePostIncr))
+        .add(static_cast<unsigned int>(eAssignOps::ePostDecr));
   }
 
   int value = rnd_upto(filter.get_max_prob(), &filter);
@@ -150,7 +153,7 @@ StatementAssign *StatementAssign::make_random(CGContext &cg_context,
     }
 
     // for compound assignment, generate LHS in the effect context of RHS
-    if (op != eSimpleAssign) {
+    if (op != eAssignOps::eSimpleAssign) {
       running_eff_context.add_effect(rhs_accum);
       // for now, just use non-volatile as LHS for compound assignments
       qfer.set_volatile(false);
@@ -170,7 +173,7 @@ StatementAssign *StatementAssign::make_random(CGContext &cg_context,
     }
 
     // for compound assignment, generate LHS in the effect context of RHS
-    if (op != eSimpleAssign) {
+    if (op != eAssignOps::eSimpleAssign) {
       running_eff_context.add_effect(rhs_accum);
       // for now, just use non-volatile as LHS for compound assignments
       qfer.set_volatile(false);
@@ -190,9 +193,9 @@ StatementAssign *StatementAssign::make_random(CGContext &cg_context,
         true); // force exact qualifier match when selecting vars
   if (CGOptions::strict_float()) {
     lhs = Lhs::make_random(lhs_cg_context, &e->get_type(), &qfer,
-                           op != eSimpleAssign, need_no_rhs(op));
+                           op != eAssignOps::eSimpleAssign, need_no_rhs(op));
   } else {
-    lhs = Lhs::make_random(lhs_cg_context, type, &qfer, op != eSimpleAssign,
+    lhs = Lhs::make_random(lhs_cg_context, type, &qfer, op != eAssignOps::eSimpleAssign,
                            need_no_rhs(op));
   }
 
@@ -209,7 +212,7 @@ StatementAssign *StatementAssign::make_random(CGContext &cg_context,
   if ((lhs->get_var()->type->get_base_type()->is_float() ||
        e->get_type().get_base_type()->is_float()) &&
       !StatementAssign::AssignOpWorksForFloat(op)) {
-    op = eSimpleAssign;
+    op = eAssignOps::eSimpleAssign;
   }
 
   if (CompatibleChecker::compatible_check(e, lhs)) {
@@ -229,9 +232,9 @@ StatementAssign *StatementAssign::make_random(CGContext &cg_context,
 
 bool StatementAssign::safe_assign(eAssignOps op) {
   switch (op) {
-  case eBitAndAssign: // fall-through
-  case eBitXorAssign: // fall-through
-  case eBitOrAssign:
+  case eAssignOps::eBitAndAssign: // fall-through
+  case eAssignOps::eBitXorAssign: // fall-through
+  case eAssignOps::eBitOrAssign:
     return true;
   default:
     return false;
@@ -255,7 +258,7 @@ StatementAssign *StatementAssign::make_possible_compound_assign(
       fi = new FunctionInvocationBinary(bop, local_fs);
     } else {
       local_fs = SafeOpFlags::make_random_binary(
-          type, &(l.get_type()), &(l.get_type()), sOpAssign, bop);
+          type, &(l.get_type()), &(l.get_type()), SafeOpKind::sOpAssign, bop);
       ERROR_GUARD(nullptr);
       fi = FunctionInvocationBinary::CreateFunctionInvocationBinary(
           cg_context, bop, local_fs);
@@ -269,7 +272,7 @@ StatementAssign *StatementAssign::make_possible_compound_assign(
   } else {
     rhs = &e;
 #if 0
-		if (e.term_type == eFunction) {
+		if (e.term_type == eTermType::eFunction) {
 			const ExpressionFuncall* func = dynamic_cast<const ExpressionFuncall*>(&e);
 			if (!func->get_invoke().safe_invocation()) {
 				fs = SafeOpFlags::make_dummy_flags();
@@ -277,12 +280,12 @@ StatementAssign *StatementAssign::make_possible_compound_assign(
 			}
 		}
 #endif
-    if (op != eSimpleAssign) {
+    if (op != eAssignOps::eSimpleAssign) {
       fs = SafeOpFlags::make_random_binary(type, &(l.get_type()),
-                                           &(rhs->get_type()), sOpAssign, bop);
+                                           &(rhs->get_type()), SafeOpKind::sOpAssign, bop);
       bool op1 = fs->get_op1_sign();
       bool op2 = fs->get_op2_sign();
-      enum SafeOpSize size = fs->get_op_size();
+      SafeOpSize size = fs->get_op_size();
 
       eSimpleType type1 = SafeOpFlags::flags_to_type(op1, size);
       eSimpleType type2 = SafeOpFlags::flags_to_type(op2, size);
@@ -303,47 +306,47 @@ StatementAssign *StatementAssign::make_possible_compound_assign(
 eBinaryOps StatementAssign::compound_to_binary_ops(eAssignOps op) {
   eBinaryOps bop = MAX_BINARY_OP;
   switch (op) {
-  case eAddAssign:
-    bop = eAdd;
+  case eAssignOps::eAddAssign:
+    bop = eBinaryOps::eAdd;
     break;
-  case eSubAssign:
-    bop = eSub;
+  case eAssignOps::eSubAssign:
+    bop = eBinaryOps::eSub;
     break;
-  case eMulAssign:
-    bop = eMul;
+  case eAssignOps::eMulAssign:
+    bop = eBinaryOps::eMul;
     break;
-  case eDivAssign:
-    bop = eDiv;
+  case eAssignOps::eDivAssign:
+    bop = eBinaryOps::eDiv;
     break;
-  case eRemAssign:
-    bop = eMod;
+  case eAssignOps::eRemAssign:
+    bop = eBinaryOps::eMod;
     break;
-  case eBitAndAssign:
-    bop = eBitAnd;
+  case eAssignOps::eBitAndAssign:
+    bop = eBinaryOps::eBitAnd;
     break;
-  case eBitXorAssign:
-    bop = eBitXor;
+  case eAssignOps::eBitXorAssign:
+    bop = eBinaryOps::eBitXor;
     break;
-  case eBitOrAssign:
-    bop = eBitOr;
+  case eAssignOps::eBitOrAssign:
+    bop = eBinaryOps::eBitOr;
     break;
-  case ePreDecr:
-    bop = eSub;
+  case eAssignOps::ePreDecr:
+    bop = eBinaryOps::eSub;
     break;
-  case ePostDecr:
-    bop = eSub;
+  case eAssignOps::ePostDecr:
+    bop = eBinaryOps::eSub;
     break;
-  case ePreIncr:
-    bop = eAdd;
+  case eAssignOps::ePreIncr:
+    bop = eBinaryOps::eAdd;
     break;
-  case ePostIncr:
-    bop = eAdd;
+  case eAssignOps::ePostIncr:
+    bop = eBinaryOps::eAdd;
     break;
-  case eLShiftAssign:
-    bop = eLShift;
+  case eAssignOps::eLShiftAssign:
+    bop = eBinaryOps::eLShift;
     break;
-  case eRShiftAssign:
-    bop = eRShift;
+  case eAssignOps::eRShiftAssign:
+    bop = eBinaryOps::eRShift;
     break;
   default:
     bop = MAX_BINARY_OP;
@@ -365,8 +368,8 @@ bool StatementAssign::visit_facts(vector<const Fact *> &inputs,
 
   // for compound assignment, LHS needs to be evaluated in the effect context of
   // RHS Yang: do we also need to consider strict_volatile_rule here? if ((op !=
-  // eSimpleAssign) || (CGOptions::strict_volatile_rule())) {
-  if (op != eSimpleAssign) {
+  // eAssignOps::eSimpleAssign) || (CGOptions::strict_volatile_rule())) {
+  if (op != eAssignOps::eSimpleAssign) {
     running_eff_context.add_effect(rhs_accum);
   }
   cg_context.merge_param_context(rhs_cg_context, true);
@@ -401,7 +404,7 @@ bool StatementAssign::has_uncertain_call_recursive(void) const {
  */
 StatementAssign::StatementAssign(Block *b, const Lhs &l, const Expression &e,
                                  eAssignOps op, const SafeOpFlags *flags)
-    : Statement(eAssign, b), op(op), lhs(l), expr(e), rhs(&expr),
+    : Statement(eStatementType::eAssign, b), op(op), lhs(l), expr(e), rhs(&expr),
       op_flags(flags) {
   // Nothing else to do.
 }
@@ -413,7 +416,7 @@ StatementAssign::StatementAssign(Block *b, const Lhs &l, eAssignOps op,
                                  const Expression &e, const Expression *er,
                                  const SafeOpFlags *flags,
                                  std::string &tmp_name1, std::string &tmp_name2)
-    : Statement(eAssign, b), op(op), lhs(l), expr(e), rhs(er), op_flags(flags),
+    : Statement(eStatementType::eAssign, b), op(op), lhs(l), expr(e), rhs(er), op_flags(flags),
       tmp_var1(tmp_name1), tmp_var2(tmp_name2) {}
 
 #if 0
@@ -449,50 +452,50 @@ StatementAssign::~StatementAssign(void) {
  */
 void StatementAssign::output_op(std::ostream &out) const {
   switch (op) {
-  case eSimpleAssign:
+  case eAssignOps::eSimpleAssign:
     out << "=";
     break;
-  case eMulAssign:
+  case eAssignOps::eMulAssign:
     out << "*=";
     break;
-  case eDivAssign:
+  case eAssignOps::eDivAssign:
     out << "/=";
     break;
-  case eRemAssign:
+  case eAssignOps::eRemAssign:
     out << "%=";
     break;
-  case eAddAssign:
+  case eAssignOps::eAddAssign:
     out << "+=";
     break;
-  case eSubAssign:
+  case eAssignOps::eSubAssign:
     out << "-=";
     break;
-  case eLShiftAssign:
+  case eAssignOps::eLShiftAssign:
     out << "<<=";
     break;
-  case eRShiftAssign:
+  case eAssignOps::eRShiftAssign:
     out << ">>=";
     break;
-  case eBitAndAssign:
+  case eAssignOps::eBitAndAssign:
     out << "&=";
     break;
-  case eBitXorAssign:
+  case eAssignOps::eBitXorAssign:
     out << "^=";
     break;
-  case eBitOrAssign:
+  case eAssignOps::eBitOrAssign:
     out << "|=";
     break;
 
-  case ePreIncr:
+  case eAssignOps::ePreIncr:
     out << "++";
     break;
-  case ePreDecr:
+  case eAssignOps::ePreDecr:
     out << "--";
     break;
-  case ePostIncr:
+  case eAssignOps::ePostIncr:
     out << "++";
     break;
-  case ePostDecr:
+  case eAssignOps::ePostDecr:
     out << "--";
     break;
   }
@@ -519,14 +522,14 @@ void StatementAssign::OutputSimple(std::ostream &out) const {
     expr.Output(out);
     break;
 
-  case ePreIncr:
-  case ePreDecr:
+  case eAssignOps::ePreIncr:
+  case eAssignOps::ePreDecr:
     output_op(out);
     lhs.Output(out);
     break;
 
-  case ePostIncr:
-  case ePostDecr:
+  case eAssignOps::ePostIncr:
+  case eAssignOps::ePostDecr:
     lhs.Output(out);
     output_op(out);
     break;
@@ -540,10 +543,10 @@ void StatementAssign::OutputAsExpr(std::ostream &out) const {
   if (CGOptions::avoid_signed_overflow() && op_flags) {
     switch (op) {
 
-    case eSimpleAssign:
-    case eBitAndAssign:
-    case eBitXorAssign:
-    case eBitOrAssign: {
+    case eAssignOps::eSimpleAssign:
+    case eAssignOps::eBitAndAssign:
+    case eAssignOps::eBitXorAssign:
+    case eAssignOps::eBitOrAssign: {
       eBinaryOps bop = compound_to_binary_ops(op);
       lhs.Output(out);
       out << " ";
@@ -560,26 +563,26 @@ void StatementAssign::OutputAsExpr(std::ostream &out) const {
       break;
     }
 
-    case ePreIncr:
+    case eAssignOps::ePreIncr:
       out << "++";
       lhs.Output(out);
       break;
-    case ePreDecr:
+    case eAssignOps::ePreDecr:
       out << "--";
       lhs.Output(out);
       break;
-    case ePostIncr:
+    case eAssignOps::ePostIncr:
       lhs.Output(out);
       out << "++";
       break;
-    case ePostDecr:
+    case eAssignOps::ePostDecr:
       lhs.Output(out);
       out << "--";
       break;
 
-    case eAddAssign:
-    case eSubAssign: {
-      enum eBinaryOps bop = compound_to_binary_ops(op);
+    case eAssignOps::eAddAssign:
+    case eAssignOps::eSubAssign: {
+      eBinaryOps bop = compound_to_binary_ops(op);
       assert(op_flags);
       string fname = op_flags->to_string(bop);
       int id = SafeOpFlags::to_id(fname);
@@ -601,7 +604,7 @@ void StatementAssign::OutputAsExpr(std::ostream &out) const {
         out << tmp_var2 << ", ";
       }
 
-      if (op == eAddAssign || op == eSubAssign) {
+      if (op == eAssignOps::eAddAssign || op == eAssignOps::eSubAssign) {
         expr.Output(out);
       } else {
         out << (CGOptions::mark_mutable_const() ? "(1)" : "1");
@@ -623,11 +626,11 @@ void StatementAssign::OutputAsExpr(std::ostream &out) const {
 
 bool StatementAssign::AssignOpWorksForFloat(eAssignOps op) {
   switch (op) {
-  case eSimpleAssign:
-  case eMulAssign:
-  case eDivAssign:
-  case eAddAssign:
-  case eSubAssign:
+  case eAssignOps::eSimpleAssign:
+  case eAssignOps::eMulAssign:
+  case eAssignOps::eDivAssign:
+  case eAssignOps::eAddAssign:
+  case eAssignOps::eSubAssign:
     return true;
   default:
     return false;

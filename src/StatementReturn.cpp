@@ -100,7 +100,7 @@ bool StatementReturn::visit_facts(vector<const Fact *> &inputs,
  *
  */
 StatementReturn::StatementReturn(Block *b, const ExpressionVariable &v)
-    : Statement(eReturn, b), var(v) {
+    : Statement(eStatementType::eReturn, b), var(v) {
   // Nothing else to do.
 }
 

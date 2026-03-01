@@ -59,7 +59,7 @@ FunctionInvocationBinary::CreateFunctionInvocationBinary(CGContext &cg_context,
   if (flags && FunctionInvocationBinary::safe_ops(op)) {
     bool op1 = flags->get_op1_sign();
     bool op2 = flags->get_op2_sign();
-    enum SafeOpSize size = flags->get_op_size();
+    SafeOpSize size = flags->get_op_size();
 
     eSimpleType type1 = SafeOpFlags::flags_to_type(op1, size);
     eSimpleType type2 = SafeOpFlags::flags_to_type(op2, size);
@@ -69,7 +69,7 @@ FunctionInvocationBinary::CreateFunctionInvocationBinary(CGContext &cg_context,
 
     std::string tmp_var1 = blk->create_new_tmp_var(type1);
     std::string tmp_var2;
-    if (op == eLShift || op == eRShift)
+    if (op == eBinaryOps::eLShift || op == eBinaryOps::eRShift)
       tmp_var2 = blk->create_new_tmp_var(type2);
     else
       tmp_var2 = blk->create_new_tmp_var(type1);
@@ -137,13 +137,13 @@ FunctionInvocation *FunctionInvocationBinary::clone() const {
 
 bool FunctionInvocationBinary::safe_ops(eBinaryOps op) {
   switch (op) {
-  case eAdd:
-  case eSub:
-  case eMul:
-  case eMod:
-  case eDiv:
-  case eLShift:
-  case eRShift:
+  case eBinaryOps::eAdd:
+  case eBinaryOps::eSub:
+  case eBinaryOps::eMul:
+  case eBinaryOps::eMod:
+  case eBinaryOps::eDiv:
+  case eBinaryOps::eLShift:
+  case eBinaryOps::eRShift:
     return true;
   default:
     return false;
@@ -155,21 +155,21 @@ bool FunctionInvocationBinary::equals(int num) const {
   assert(param_value.size() == 2);
   if (num == 0) {
     if (param_value[0]->equals(0) &&
-        (eFunc == eMul || eFunc == eDiv || eFunc == eMod || eFunc == eLShift ||
-         eFunc == eRShift || eFunc == eAnd || eFunc == eBitAnd)) {
+        (eFunc == eBinaryOps::eMul || eFunc == eBinaryOps::eDiv || eFunc == eBinaryOps::eMod || eFunc == eBinaryOps::eLShift ||
+         eFunc == eBinaryOps::eRShift || eFunc == eBinaryOps::eAnd || eFunc == eBinaryOps::eBitAnd)) {
       return true;
     }
     if (param_value[1]->equals(0) &&
-        (eFunc == eMul || eFunc == eAnd || eFunc == eBitAnd)) {
+        (eFunc == eBinaryOps::eMul || eFunc == eBinaryOps::eAnd || eFunc == eBinaryOps::eBitAnd)) {
       return true;
     }
     if (param_value[0] == param_value[1] &&
-        (eFunc == eSub || eFunc == eCmpGt || eFunc == eCmpLt ||
-         eFunc == eCmpNe)) {
+        (eFunc == eBinaryOps::eSub || eFunc == eBinaryOps::eCmpGt || eFunc == eBinaryOps::eCmpLt ||
+         eFunc == eBinaryOps::eCmpNe)) {
       return true;
     }
     if ((param_value[1]->equals(1) || param_value[1]->equals(-1)) &&
-        eFunc == eMod) {
+        eFunc == eBinaryOps::eMod) {
       return true;
     }
   }
@@ -177,13 +177,13 @@ bool FunctionInvocationBinary::equals(int num) const {
 }
 
 bool FunctionInvocationBinary::is_0_or_1(void) const {
-  return eFunc == eCmpGt || eFunc == eCmpLt || eFunc == eCmpGe ||
-         eFunc == eCmpLe || eFunc == eCmpEq || eFunc == eCmpNe;
+  return eFunc == eBinaryOps::eCmpGt || eFunc == eBinaryOps::eCmpLt || eFunc == eBinaryOps::eCmpGe ||
+         eFunc == eBinaryOps::eCmpLe || eFunc == eBinaryOps::eCmpEq || eFunc == eBinaryOps::eCmpNe;
 }
 
 bool FunctionInvocationBinary::is_return_type_float() const {
   assert(op_flags);
-  return op_flags->get_op_size() == sFloat;
+  return op_flags->get_op_size() == SafeOpSize::sFloat;
 }
 
 /*
@@ -191,54 +191,54 @@ bool FunctionInvocationBinary::is_return_type_float() const {
  */
 const Type &FunctionInvocationBinary::get_type(void) const {
   if (is_return_type_float())
-    return Type::get_simple_type(eFloat);
+    return Type::get_simple_type(eSimpleType::eFloat);
   switch (eFunc) {
   default:
     assert(!"invalid operator in FunctionInvocationBinary::get_type()");
     break;
 
-  case eAdd:
-  case eSub:
-  case eMul:
-  case eDiv:
-  case eMod:
-  case eBitXor:
-  case eBitAnd:
-  case eBitOr: {
+  case eBinaryOps::eAdd:
+  case eBinaryOps::eSub:
+  case eBinaryOps::eMul:
+  case eBinaryOps::eDiv:
+  case eBinaryOps::eMod:
+  case eBinaryOps::eBitXor:
+  case eBinaryOps::eBitAnd:
+  case eBinaryOps::eBitOr: {
     const Type &l_type = param_value[0]->get_type();
     const Type &r_type = param_value[1]->get_type();
     // XXX --- not really right!
     if ((l_type.is_signed()) && (r_type.is_signed())) {
-      return Type::get_simple_type(eInt);
+      return Type::get_simple_type(eSimpleType::eInt);
     } else {
-      return Type::get_simple_type(eUInt);
+      return Type::get_simple_type(eSimpleType::eUInt);
     }
   } break;
 
-  case eCmpGt:
-  case eCmpLt:
-  case eCmpGe:
-  case eCmpLe:
-  case eCmpEq:
-  case eCmpNe:
-  case eAnd:
-  case eOr:
-    return Type::get_simple_type(eInt);
+  case eBinaryOps::eCmpGt:
+  case eBinaryOps::eCmpLt:
+  case eBinaryOps::eCmpGe:
+  case eBinaryOps::eCmpLe:
+  case eBinaryOps::eCmpEq:
+  case eBinaryOps::eCmpNe:
+  case eBinaryOps::eAnd:
+  case eBinaryOps::eOr:
+    return Type::get_simple_type(eSimpleType::eInt);
     break;
 
-  case eRShift:
-  case eLShift: {
+  case eBinaryOps::eRShift:
+  case eBinaryOps::eLShift: {
     const Type &l_type = param_value[0]->get_type();
     // XXX --- not really right!
     if (l_type.is_signed()) {
-      return Type::get_simple_type(eInt);
+      return Type::get_simple_type(eSimpleType::eInt);
     } else {
-      return Type::get_simple_type(eUInt);
+      return Type::get_simple_type(eSimpleType::eUInt);
     }
   } break;
   }
   assert(0);
-  return Type::get_simple_type(eInt);
+  return Type::get_simple_type(eSimpleType::eInt);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -249,62 +249,62 @@ const Type &FunctionInvocationBinary::get_type(void) const {
 static void OutputStandardFuncName(eBinaryOps eFunc, std::ostream &out) {
   switch (eFunc) {
     // Math Ops
-  case eAdd:
+  case eBinaryOps::eAdd:
     out << "+";
     break;
-  case eSub:
+  case eBinaryOps::eSub:
     out << "-";
     break;
-  case eMul:
+  case eBinaryOps::eMul:
     out << "*";
     break;
-  case eDiv:
+  case eBinaryOps::eDiv:
     out << "/";
     break;
-  case eMod:
+  case eBinaryOps::eMod:
     out << "%";
     break;
 
     // Logical Ops
-  case eAnd:
+  case eBinaryOps::eAnd:
     out << "&&";
     break;
-  case eOr:
+  case eBinaryOps::eOr:
     out << "||";
     break;
-  case eCmpEq:
+  case eBinaryOps::eCmpEq:
     out << "==";
     break;
-  case eCmpNe:
+  case eBinaryOps::eCmpNe:
     out << "!=";
     break;
-  case eCmpGt:
+  case eBinaryOps::eCmpGt:
     out << ">";
     break;
-  case eCmpLt:
+  case eBinaryOps::eCmpLt:
     out << "<";
     break;
-  case eCmpLe:
+  case eBinaryOps::eCmpLe:
     out << "<=";
     break;
-  case eCmpGe:
+  case eBinaryOps::eCmpGe:
     out << ">=";
     break;
 
     // Bitwise Ops
-  case eBitAnd:
+  case eBinaryOps::eBitAnd:
     out << "&";
     break;
-  case eBitOr:
+  case eBinaryOps::eBitOr:
     out << "|";
     break;
-  case eBitXor:
+  case eBinaryOps::eBitXor:
     out << "^";
     break;
-  case eLShift:
+  case eBinaryOps::eLShift:
     out << "<<";
     break;
-  case eRShift:
+  case eBinaryOps::eRShift:
     out << ">>";
     break;
   }
@@ -313,28 +313,28 @@ static void OutputStandardFuncName(eBinaryOps eFunc, std::ostream &out) {
 std::string FunctionInvocationBinary::get_binop_string(eBinaryOps bop) {
   string op_string;
   switch (bop) {
-  case eAdd:
+  case eBinaryOps::eAdd:
     op_string = "+";
     break;
-  case eSub:
+  case eBinaryOps::eSub:
     op_string = "-";
     break;
-  case eMul:
+  case eBinaryOps::eMul:
     op_string = "*";
     break;
-  case eDiv:
+  case eBinaryOps::eDiv:
     op_string = "/";
     break;
-  case eMod:
+  case eBinaryOps::eMod:
     op_string = "%";
     break;
-  case eBitAnd:
+  case eBinaryOps::eBitAnd:
     op_string = "&";
     break;
-  case eBitXor:
+  case eBinaryOps::eBitXor:
     op_string = "^";
     break;
-  case eBitOr:
+  case eBinaryOps::eBitOr:
     op_string = "|";
     break;
   default:
@@ -354,19 +354,19 @@ void FunctionInvocationBinary::Output(std::ostream &out) const {
   // the rational is we don't need overflow check for this addition because
   // the induction variable is small --- less than the size of array, which
   // has a small upper bound
-  if (eFunc == eAdd && op_flags == 0) {
+  if (eFunc == eBinaryOps::eAdd && op_flags == 0) {
     param_value[0]->Output(out);
     out << " + ";
     param_value[1]->Output(out);
   } else {
     switch (eFunc) {
-    case eAdd:
-    case eSub:
-    case eMul:
-    case eMod:
-    case eDiv:
-    case eLShift:
-    case eRShift:
+    case eBinaryOps::eAdd:
+    case eBinaryOps::eSub:
+    case eBinaryOps::eMul:
+    case eBinaryOps::eMod:
+    case eBinaryOps::eDiv:
+    case eBinaryOps::eLShift:
+    case eBinaryOps::eRShift:
       if (CGOptions::avoid_signed_overflow()) {
         string fname = op_flags->to_string(eFunc);
         int id = SafeOpFlags::to_id(fname);
@@ -433,20 +433,20 @@ void FunctionInvocationBinary::indented_output(std::ostream &out,
   // the rational is we don't need overflow check for this addition because
   // the induction variable is small --- less than the size of array, which
   // by default is 10 at most
-  if (eFunc == eAdd && op_flags == 0) {
+  if (eFunc == eBinaryOps::eAdd && op_flags == 0) {
     param_value[0]->indented_output(out, indent);
     out << " + ";
     outputln(out);
     param_value[1]->indented_output(out, indent);
   } else {
     switch (eFunc) {
-    case eAdd:
-    case eSub:
-    case eMul:
-    case eMod:
-    case eDiv:
-    case eLShift:
-    case eRShift:
+    case eBinaryOps::eAdd:
+    case eBinaryOps::eSub:
+    case eBinaryOps::eMul:
+    case eBinaryOps::eMod:
+    case eBinaryOps::eDiv:
+    case eBinaryOps::eLShift:
+    case eBinaryOps::eRShift:
       if (CGOptions::avoid_signed_overflow()) {
         output_tab(out, indent);
         out << op_flags->to_string(eFunc);

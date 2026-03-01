@@ -520,7 +520,7 @@ bool CGContext::allow_volatile(void) const {
 }
 
 bool CGContext::allow_const(Effect::Access access) const {
-  return access != Effect::WRITE;
+  return access != Effect::Access::WRITE;
 }
 
 bool CGContext::accept_type(const Type *t) const {
@@ -567,7 +567,7 @@ bool CGContext::in_conflict(const Effect &eff) const {
 void CGContext::find_reachable_frame_vars(vector<const Fact *> &facts,
                                           VariableSet &frame_vars) const {
   for (size_t i = 0; i < facts.size(); i++) {
-    if (facts[i]->eCat == ePointTo) {
+    if (facts[i]->eCat == eFactCategory::ePointTo) {
       const FactPointTo *fp = static_cast<const FactPointTo *>(facts[i]);
       for (size_t j = 0; j < fp->get_point_to_vars().size(); j++) {
         const Variable *v = fp->get_point_to_vars()[j];

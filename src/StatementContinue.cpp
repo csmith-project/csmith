@@ -71,7 +71,7 @@ StatementContinue *StatementContinue::make_random(CGContext &cg_context) {
   assert(b);
   cg_context.get_effect_stm().clear();
   Expression *expr = Expression::make_random(cg_context, get_int_type(), 0,
-                                             true, true, eVariable);
+                                             true, true, eTermType::eVariable);
   ERROR_GUARD(nullptr);
   StatementContinue *sc =
       new StatementContinue(cg_context.get_current_block(), *expr, *b);
@@ -84,7 +84,7 @@ StatementContinue *StatementContinue::make_random(CGContext &cg_context) {
  */
 StatementContinue::StatementContinue(Block *parent, const Expression &test,
                                      const Block &b)
-    : Statement(eContinue, parent), test(test), loop_blk(b) {
+    : Statement(eStatementType::eContinue, parent), test(test), loop_blk(b) {
   // Nothing else to do.
 }
 

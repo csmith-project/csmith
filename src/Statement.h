@@ -67,7 +67,7 @@ class Variable;
 class Expression;
 class AttributeGenerator;
 
-enum eStatementType {
+enum class eStatementType {
   eAssign,
   eBlock,
   eFor, // Make this a generic loop construct (while/for/do)
@@ -82,7 +82,8 @@ enum eStatementType {
   //	eHash,
 };
 inline constexpr eStatementType MAX_STATEMENT_TYPE =
-    static_cast<eStatementType>(eArrayOp + 1);
+    static_cast<eStatementType>(
+        static_cast<unsigned int>(eStatementType::eArrayOp) + 1);
 
 /*
  *
@@ -156,11 +157,13 @@ public:
   const Statement *find_container_stm(void) const;
 
   static bool is_compound(eStatementType t) {
-    return t == eBlock || t == eFor || t == eIfElse || t == eArrayOp;
+    return t == eStatementType::eBlock || t == eStatementType::eFor ||
+           t == eStatementType::eIfElse || t == eStatementType::eArrayOp;
   }
 
   bool is_ctrl_stmt(void) const {
-    return eType == eContinue || eType == eBreak || eType == eGoto;
+    return eType == eStatementType::eContinue ||
+           eType == eStatementType::eBreak || eType == eStatementType::eGoto;
   }
 
   bool is_1st_stm(void) const;

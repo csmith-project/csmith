@@ -79,7 +79,7 @@ bool rnd_flipcoin(const unsigned int p, const Filter *f,
 std::string PureRandomHexDigits(int num) {
   if (!CGOptions::is_random()) {
     RNDNUM_GENERATOR old;
-    old = RandomNumber::SwitchRndNumGenerator(rDefaultRndNumGenerator);
+    old = RandomNumber::SwitchRndNumGenerator(RNDNUM_GENERATOR::rDefaultRndNumGenerator);
     std::string rv = RandomHexDigits(num);
     RandomNumber::SwitchRndNumGenerator(old);
     return rv;
@@ -92,7 +92,7 @@ std::string PureRandomDigits(int num) {
 
   if (!CGOptions::is_random()) {
     RNDNUM_GENERATOR old;
-    old = RandomNumber::SwitchRndNumGenerator(rDefaultRndNumGenerator);
+    old = RandomNumber::SwitchRndNumGenerator(RNDNUM_GENERATOR::rDefaultRndNumGenerator);
     std::string rv = RandomDigits(num);
     RandomNumber::SwitchRndNumGenerator(old);
     return rv;
@@ -107,7 +107,7 @@ unsigned int pure_rnd_upto(const unsigned int n, const Filter *f,
     return 0; // not a random choice, but we still need to handle it though
   if (!CGOptions::is_random()) {
     RNDNUM_GENERATOR old;
-    old = RandomNumber::SwitchRndNumGenerator(rDefaultRndNumGenerator);
+    old = RandomNumber::SwitchRndNumGenerator(RNDNUM_GENERATOR::rDefaultRndNumGenerator);
     unsigned int rv = rnd_upto(n, f, where);
     RandomNumber::SwitchRndNumGenerator(old);
     return rv;
@@ -120,7 +120,7 @@ bool pure_rnd_flipcoin(const unsigned int n, const Filter *f,
                        const std::string *where) {
   if (!CGOptions::is_random()) {
     RNDNUM_GENERATOR old;
-    old = RandomNumber::SwitchRndNumGenerator(rDefaultRndNumGenerator);
+    old = RandomNumber::SwitchRndNumGenerator(RNDNUM_GENERATOR::rDefaultRndNumGenerator);
     bool rv = rnd_flipcoin(n, f, where);
     RandomNumber::SwitchRndNumGenerator(old);
     return rv;

@@ -88,7 +88,7 @@ static unsigned int BlockProbability(Block &block) {
   vector<unsigned int> v;
   v.push_back(block.block_size() - 1);
   VectorFilter filter(v, VectorFilter::Mode::Keep);
-  filter.disable(fDefault);
+  filter.disable(FilterKind::fDefault);
   return rnd_upto(block.block_size(), &filter);
 }
 
@@ -194,7 +194,7 @@ Block *Block::make_random(CGContext &cg_context, bool looping) {
  *
  */
 Block::Block(Block *b, int block_size)
-    : Statement(eBlock, b), need_revisit(false), depth_protect(false),
+    : Statement(eStatementType::eBlock, b), need_revisit(false), depth_protect(false),
       block_size_(block_size) {}
 
 /*
@@ -215,7 +215,7 @@ Block::~Block(void) {
   macro_tmp_vars.clear();
 }
 
-std::string Block::create_new_tmp_var(enum eSimpleType type) const {
+std::string Block::create_new_tmp_var(eSimpleType type) const {
   const string var_name = gensym("t_");
   macro_tmp_vars[var_name] = type;
   return var_name;
@@ -224,7 +224,7 @@ std::string Block::create_new_tmp_var(enum eSimpleType type) const {
 void Block::OutputTmpVariableList(std::ostream &out, int indent) const {
   for (auto i = macro_tmp_vars.begin(); i != macro_tmp_vars.end(); ++i) {
     const std::string name = (*i).first;
-    const enum eSimpleType type = (*i).second;
+    const eSimpleType type = (*i).second;
     output_tab(out, indent);
     Type::get_simple_type(type).Output(out);
     out << " " << name << " = 0;" << std::endl;
@@ -283,7 +283,7 @@ const Statement *Block::get_last_stm(void) const {
   const Statement *s = 0;
   for (size_t i = 0; i < stms.size(); i++) {
     s = stms[i];
-    if (s->eType == eReturn) {
+    if (s->eType == eStatementType::eReturn) {
       break;
     }
   }
@@ -377,7 +377,7 @@ Statement *Block::append_return_stmt(CGContext &cg_context) {
   FactMgr *const fm = get_fact_mgr_for_func(func);
   FactVec pre_facts = fm->global_facts;
   cg_context.get_effect_stm().clear();
-  Statement *sr = Statement::make_random(cg_context, eReturn);
+  Statement *sr = Statement::make_random(cg_context, eStatementType::eReturn);
   ERROR_GUARD(nullptr);
   stms.push_back(sr);
   fm->makeup_new_var_facts(pre_facts, fm->global_facts);
@@ -423,7 +423,7 @@ Statement *Block::append_nested_loop(CGContext &cg_context) {
   FactVec pre_facts = fm->global_facts;
   cg_context.get_effect_stm().clear();
 
-  Statement *const sf = Statement::make_random(cg_context, eFor);
+  Statement *const sf = Statement::make_random(cg_context, eStatementType::eFor);
   ERROR_GUARD(nullptr);
   stms.push_back(sf);
   fm->makeup_new_var_facts(pre_facts, fm->global_facts);
@@ -595,9 +595,9 @@ size_t Block::remove_stmt(const Statement *s) {
   FactMgr *fm = get_fact_mgr_for_func(func);
   vector<const Statement *> cfg_stms;
   vector<int> types;
-  types.push_back(eContinue);
-  types.push_back(eBreak);
-  types.push_back(eGoto);
+  types.push_back(static_cast<int>(eStatementType::eContinue));
+  types.push_back(static_cast<int>(eStatementType::eBreak));
+  types.push_back(static_cast<int>(eStatementType::eGoto));
   // if (func->name == "func_109")
   //	s->Output(cout, fm);
   if (s->find_typed_stmts(cfg_stms, types)) {
@@ -641,7 +641,7 @@ size_t Block::remove_stmt(const Statement *s) {
       i--;
       len--;
       // delete the source statement (most likely goto) as well
-      if (src->eType == eGoto) {
+      if (src->eType == eStatementType::eGoto) {
         int deleted = src->parent->remove_stmt(src);
         if (src->parent == this) {
           cnt += deleted;

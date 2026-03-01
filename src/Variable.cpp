@@ -227,7 +227,7 @@ const Variable *Variable::get_container_union(void) const {
   if (type == nullptr)
     return nullptr;
   const Variable *p = this;
-  for (; p && p->type->eType != eUnion; p = p->field_var_of)
+  for (; p && p->type->eType != eTypeDesc::eUnion; p = p->field_var_of)
     ;
   return p;
 }
@@ -386,13 +386,13 @@ Variable *Variable::CreateVariable(const std::string &name, const Type *type,
   Variable *var = new Variable(name, type, isConsts, isVolatiles, isAuto,
                                isStatic, isRegister, isBitfield, isFieldVarOf);
   assert(type);
-  if (type->eType == eSimple)
-    assert(type->simple_type != eVoid);
+  if (type->eType == eTypeDesc::eSimple)
+    assert(type->simple_type != eSimpleType::eVoid);
 
   const Variable *top = isFieldVarOf;
   while (top->field_var_of)
     top = top->field_var_of;
-  var->init = (top->type->eType == eUnion) ? 0 : Constant::make_random(type);
+  var->init = (top->type->eType == eTypeDesc::eUnion) ? 0 : Constant::make_random(type);
 
   ERROR_GUARD_AND_DEL1(nullptr, var);
   if (type->is_aggregate()) {
@@ -410,8 +410,8 @@ Variable *Variable::CreateVariable(const std::string &name, const Type *type,
     Variable::var_attr_generate = true;
   }
   assert(type);
-  if (type->eType == eSimple)
-    assert(type->simple_type != eVoid);
+  if (type->eType == eTypeDesc::eSimple)
+    assert(type->simple_type != eSimpleType::eVoid);
 
   Variable *var = new Variable(name, type, init, qfer);
   if (type->is_aggregate()) {
@@ -895,7 +895,7 @@ void Variable::hash(std::ostream &out) const {
   if (type->is_aggregate()) {
     FactMgr *fm = get_fact_mgr_for_func(GetFirstFunction());
     for (size_t i = 0; i < field_vars.size(); i++) {
-      if (type->eType == eUnion &&
+      if (type->eType == eTypeDesc::eUnion &&
           !FactUnion::is_field_readable(this, i, fm->global_facts)) {
         // don't read union fields that is not last written into or have
         // possible padding bits
@@ -903,10 +903,10 @@ void Variable::hash(std::ostream &out) const {
       }
       field_vars[i]->hash(out);
     }
-  } else if (type->eType == eSimple) {
+  } else if (type->eType == eTypeDesc::eSimple) {
     if (CGOptions::compute_hash()) {
       // FIXME handle double here too, once we generate those
-      if (type->simple_type == eFloat) {
+      if (type->simple_type == eSimpleType::eFloat) {
         out << "    transparent_crc_bytes (&";
         Output(out);
         out << ", sizeof(";
@@ -922,7 +922,7 @@ void Variable::hash(std::ostream &out) const {
       Output(out);
       out << ";" << endl;
     }
-  } else if (type->eType == ePointer) {
+  } else if (type->eType == eTypeDesc::ePointer) {
   }
 }
 
@@ -951,8 +951,8 @@ std::string Variable::to_string(void) const {
     return ret;
   }
   switch (type->eType) {
-  case eUnion:
-  case eStruct:
+  case eTypeDesc::eUnion:
+  case eTypeDesc::eStruct:
     // ret = "(";
     for (i = 0; i < field_vars.size(); i++) {
       if (i > 0)
@@ -1073,7 +1073,7 @@ bool Variable::is_valid_volatile(void) const {
   }
 
   assert(init && "nullptr init expression!");
-  if (!is_const() || init->not_equals(0) || (type->eType != ePointer))
+  if (!is_const() || init->not_equals(0) || (type->eType != eTypeDesc::ePointer))
     return true;
 
   return false;
@@ -1109,7 +1109,7 @@ int Variable::output_volatile_address(ostream &out, int indent,
       member->output_volatile_address(out, indent, fp_string, seen_names);
     }
     //		}
-  } else if ((type->eType == eSimple || type->eType == ePointer) &&
+  } else if ((type->eType == eTypeDesc::eSimple || type->eType == eTypeDesc::ePointer) &&
              is_volatile() && is_global()) {
     // handle a special case where clang put two vars at the same addr
     // int32_t * const  volatile g_201 = 0;
@@ -1157,7 +1157,7 @@ int Variable::output_addressable_name(ostream &out, int indent) const {
       ArrayVariable *member = av->itemize(all_indices[i]);
       member->output_addressable_name(out, indent);
     }
-  } else if (type->eType == eSimple || type->eType == ePointer) {
+  } else if (type->eType == eTypeDesc::eSimple || type->eType == eTypeDesc::ePointer) {
     string str = "<0x%0x = &";
     str += to_string();
     str += ">\\n";
@@ -1165,13 +1165,13 @@ int Variable::output_addressable_name(ostream &out, int indent) const {
     str_value += to_string();
     output_print_str(out, str, str_value, indent);
     outputln(out);
-  } else if (type->eType == eStruct || type->eType == eUnion) {
+  } else if (type->eType == eTypeDesc::eStruct || type->eType == eTypeDesc::eUnion) {
     for (i = 0; i < field_vars.size(); i++) {
       // bit fields can not be taken address
       if (!field_vars[i]->isBitfield_) {
         field_vars[i]->output_addressable_name(out, indent);
         // Unions fields all start from the same location
-        if (type->eType == eUnion)
+        if (type->eType == eTypeDesc::eUnion)
           break;
       }
     }
@@ -1191,17 +1191,17 @@ int Variable::output_value_dump(ostream &out, const string &prefix,
       ArrayVariable *member = av->itemize(all_indices[i]);
       member->output_value_dump(out, prefix, indent);
     }
-  } else if (type->eType == eSimple) {
+  } else if (type->eType == eTypeDesc::eSimple) {
     output_print_str(
         out, prefix + to_string() + " = " + type->printf_directive() + "\\n",
         to_string(), indent);
     outputln(out);
-  } else if (type->eType == eStruct) {
+  } else if (type->eType == eTypeDesc::eStruct) {
     for (i = 0; i < field_vars.size(); i++) {
       // bit fields can not be taken address
       field_vars[i]->output_value_dump(out, prefix, indent);
     }
-  } else if (type->eType == eUnion) {
+  } else if (type->eType == eTypeDesc::eUnion) {
     const vector<const Fact *> &facts = FactMgr::get_program_end_facts();
     for (i = 0; i < field_vars.size(); i++) {
       if (FactUnion::is_field_readable(this, i, facts)) {
@@ -1251,7 +1251,7 @@ bool Variable::is_packed_after_bitfield(void) const {
   const Variable *parent = this->field_var_of;
   if (parent == nullptr)
     return false;
-  if (parent->type->eType == eStruct && parent->type->packed_) {
+  if (parent->type->eType == eTypeDesc::eStruct && parent->type->packed_) {
     for (size_t i = 0; i < parent->field_vars.size(); i++) {
       if (parent->field_vars[i] == this) {
         break;

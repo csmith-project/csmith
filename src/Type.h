@@ -54,18 +54,19 @@ inline constexpr unsigned int SIZE_UNKNOWN = 0xFFFFu;
 /*
  *
  */
-enum eTypeDesc {
+enum class eTypeDesc {
   eSimple,
   ePointer,
   eUnion,
   eStruct,
 };
-inline constexpr unsigned int MAX_TYPE_DESC = eStruct + 1;
+inline constexpr unsigned int MAX_TYPE_DESC =
+    static_cast<unsigned int>(eTypeDesc::eStruct) + 1;
 
 /*
  *
  */
-enum eSimpleType {
+enum class eSimpleType {
   eVoid,
   eChar,
   eInt,
@@ -82,8 +83,11 @@ enum eSimpleType {
   eInt128,
   eUInt128,
 };
-inline constexpr eSimpleType MAX_SIMPLE_TYPES =
-    static_cast<eSimpleType>(eUInt128 + 1);
+inline constexpr unsigned int MAX_SIMPLE_TYPES =
+    static_cast<unsigned int>(eSimpleType::eUInt128) + 1;
+inline constexpr unsigned int to_index(eSimpleType t) {
+  return static_cast<unsigned int>(t);
+}
 
 enum class eMatchType {
   eExact,
@@ -248,19 +252,23 @@ public:
                               const vector<int> &excluded_fields) const;
   bool is_signed(void) const;
   bool is_long_long(void) const {
-    return ((eType == eSimple) &&
-            (simple_type == eLongLong || simple_type == eULongLong));
+    return ((eType == eTypeDesc::eSimple) &&
+            (simple_type == eSimpleType::eLongLong ||
+             simple_type == eSimpleType::eULongLong));
   }
   const Type *to_unsigned(void) const;
   bool is_pointer_to_char(void) const {
-    return ptr_type && ptr_type->eType == eSimple &&
-           (ptr_type->simple_type == eChar || ptr_type->simple_type == eUChar);
+    return ptr_type && ptr_type->eType == eTypeDesc::eSimple &&
+           (ptr_type->simple_type == eSimpleType::eChar ||
+            ptr_type->simple_type == eSimpleType::eUChar);
   }
   bool is_signed_char() const {
-    return ((eType == eSimple) && (simple_type == eChar));
+    return ((eType == eTypeDesc::eSimple) &&
+            (simple_type == eSimpleType::eChar));
   }
   bool is_float() const {
-    return ((eType == eSimple) && (simple_type == eFloat));
+    return ((eType == eTypeDesc::eSimple) &&
+            (simple_type == eSimpleType::eFloat));
   }
   bool is_promotable(const Type *t) const;
   bool is_convertable(const Type *t) const;
@@ -280,8 +288,12 @@ public:
   bool has_implicit_nontrivial_assign_ops() const {
     return has_implicit_nontrivial_assign_ops_;
   }
-  bool is_int(void) const { return eType == eSimple && simple_type != eVoid; }
-  bool is_aggregate(void) const { return eType == eStruct || eType == eUnion; }
+  bool is_int(void) const {
+    return eType == eTypeDesc::eSimple && simple_type != eSimpleType::eVoid;
+  }
+  bool is_aggregate(void) const {
+    return eType == eTypeDesc::eStruct || eType == eTypeDesc::eUnion;
+  }
   bool match(const Type *t, eMatchType mt) const;
   unsigned long SizeInBytes(void) const;
   void Output(std::ostream &) const;

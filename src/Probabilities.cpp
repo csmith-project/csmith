@@ -106,7 +106,7 @@ int SingleProbElem::get_prob(ProbName pname) {
 void SingleProbElem::set_prob(ProbName pname, int val) {
   assert(pname == pname_);
   VAL_ASSERT(val);
-  if (pname == pVoidProb) {
+  if (pname == ProbName::pVoidProb) {
     assert(
         !val &&
         "Invalid probability - the probability value of void_prob must be 0!");
@@ -337,126 +337,128 @@ void Probabilities::set_single_name(const char *sname, ProbName pname,
 }
 
 #define SET_SINGLE_NAME(s, type, value)                                        \
-  set_single_name(s, p##type##Prob, e##type);                                  \
-  m[p##type##Prob] = value;
+  set_single_name(s, ProbName::p##type##Prob,                                 \
+                  static_cast<unsigned int>(eSimpleType::e##type));            \
+  m[ProbName::p##type##Prob] = value;
 
 #define SET_SINGLE_NAME1(str, type, value)                                     \
-  set_single_name(str, p##type##Prob, s##type);                                \
-  m[p##type##Prob] = value;
+  set_single_name(str, ProbName::p##type##Prob,                               \
+                  static_cast<unsigned int>(SafeOpSize::s##type));             \
+  m[ProbName::p##type##Prob] = value;
 
 void Probabilities::set_single_name_maps() {
   // for single probs
   // for generating more struct or union types
-  set_single_name("more_struct_union_type_prob", pMoreStructUnionProb);
+  set_single_name("more_struct_union_type_prob", ProbName::pMoreStructUnionProb);
 
-  set_single_name("bitfields_creation_prob", pBitFieldsCreationProb);
+  set_single_name("bitfields_creation_prob", ProbName::pBitFieldsCreationProb);
 
   // for single bitfield in a normal struct
   set_single_name("bitfield_in_normal_struct_prob",
-                  pBitFieldInNormalStructProb);
+                  ProbName::pBitFieldInNormalStructProb);
 
   // for single field in a full-bitfields struct
   set_single_name("scalar_field_in_full_bitfields_struct_prob",
-                  pScalarFieldInFullBitFieldsProb);
+                  ProbName::pScalarFieldInFullBitFieldsProb);
 
   // for single field in exhaustive mode
-  set_single_name("exhaustive_bitfield_prob", pExhaustiveBitFieldsProb);
+  set_single_name("exhaustive_bitfield_prob", ProbName::pExhaustiveBitFieldsProb);
 
   // for signed flag of struct/union fields.
-  set_single_name("bitfields_signed_prob", pBitFieldsSignedProb);
+  set_single_name("bitfields_signed_prob", ProbName::pBitFieldsSignedProb);
 
   // for signed flag of safe ops
-  set_single_name("safe_ops_signed_prob", pSafeOpsSignedProb);
+  set_single_name("safe_ops_signed_prob", ProbName::pSafeOpsSignedProb);
 
   // for selecting deref pointer
-  set_single_name("select_deref_pointer_prob", pSelectDerefPointerProb);
+  set_single_name("select_deref_pointer_prob", ProbName::pSelectDerefPointerProb);
 
   // for regular volatile
-  set_single_name("regular_volatile_prob", pRegularVolatileProb);
+  set_single_name("regular_volatile_prob", ProbName::pRegularVolatileProb);
 
   // for regular const
-  set_single_name("regular_const_prob", pRegularConstProb);
+  set_single_name("regular_const_prob", ProbName::pRegularConstProb);
 
   // for stricter const
-  set_single_name("stricter_const_prob", pStricterConstProb);
+  set_single_name("stricter_const_prob", ProbName::pStricterConstProb);
 
   // for looser const
-  set_single_name("looser_const_prob", pLooserConstProb);
+  set_single_name("looser_const_prob", ProbName::pLooserConstProb);
 
   // for field
-  set_single_name("field_volatile_prob", pFieldVolatileProb);
+  set_single_name("field_volatile_prob", ProbName::pFieldVolatileProb);
 
   // for field
-  set_single_name("field_const_prob", pFieldConstProb);
+  set_single_name("field_const_prob", ProbName::pFieldConstProb);
 
   // for std func
-  set_single_name("std_unary_func_prob", pStdUnaryFuncProb);
+  set_single_name("std_unary_func_prob", ProbName::pStdUnaryFuncProb);
 
   // for shift by non constant
-  set_single_name("shift_by_non_constant_prob", pShiftByNonConstantProb);
+  set_single_name("shift_by_non_constant_prob", ProbName::pShiftByNonConstantProb);
 
   // for choosing pointer as LType
-  set_single_name("pointer_as_ltype_prob", pPointerAsLTypeProb);
+  set_single_name("pointer_as_ltype_prob", ProbName::pPointerAsLTypeProb);
 
   // for choosing struct as LType
-  set_single_name("struct_as_ltype_prob", pStructAsLTypeProb);
+  set_single_name("struct_as_ltype_prob", ProbName::pStructAsLTypeProb);
 
   // for choosing union as LType
-  set_single_name("union_as_ltype_prob", pUnionAsLTypeProb);
+  set_single_name("union_as_ltype_prob", ProbName::pUnionAsLTypeProb);
 
   // for choosing float as LType
-  set_single_name("float_as_ltype_prob", pFloatAsLTypeProb);
+  set_single_name("float_as_ltype_prob", ProbName::pFloatAsLTypeProb);
 
   // for creating new array var
-  set_single_name("new_array_var_prob", pNewArrayVariableProb);
+  set_single_name("new_array_var_prob", ProbName::pNewArrayVariableProb);
 
   // for wrapping all accesses to a var by ACCESS_ONCE macro
-  set_single_name("access_once_var_prob", pAccessOnceVariableProb);
+  set_single_name("access_once_var_prob", ProbName::pAccessOnceVariableProb);
 
   // for marking each function as inline
-  set_single_name("inline_function_prob", pInlineFunctionProb);
+  set_single_name("inline_function_prob", ProbName::pInlineFunctionProb);
 
   // for choosing a builtin function
-  set_single_name("builtin_function_prob", pBuiltinFunctionProb);
+  set_single_name("builtin_function_prob", ProbName::pBuiltinFunctionProb);
 
   // for choosing OOB limit
-  set_single_name("array_oob_prob", pArrayOOBProb);
+  set_single_name("array_oob_prob", ProbName::pArrayOOBProb);
 
   //////////////////////////////////////////////////////////////////
   // group for statement
-  set_single_name("statement_prob", pStatementProb);
+  set_single_name("statement_prob", ProbName::pStatementProb);
 
   // group for assignment ops
-  set_single_name("assign_ops_prob", pAssignOpsProb);
+  set_single_name("assign_ops_prob", ProbName::pAssignOpsProb);
 
   // group for unary ops which equal probability
-  set_single_name("assign_unary_ops_prob", pUnaryOpsProb);
+  set_single_name("assign_unary_ops_prob", ProbName::pUnaryOpsProb);
 
   // group for binary ops which equal probability
-  set_single_name("assign_binary_ops_prob", pBinaryOpsProb);
+  set_single_name("assign_binary_ops_prob", ProbName::pBinaryOpsProb);
 
   // group for simple types which equal probability
-  set_single_name("simple_types_prob", pSimpleTypesProb);
+  set_single_name("simple_types_prob", ProbName::pSimpleTypesProb);
 
   // group for simple types which equal probability
-  set_single_name("safe_ops_size_prob", pSafeOpsSizeProb);
+  set_single_name("safe_ops_size_prob", ProbName::pSafeOpsSizeProb);
 
   /*------------GCC C Extensions---------------*/
 
   // for choosing function attributes
-  set_single_name("func_attr_flag", pFuncAttrProb);
+  set_single_name("func_attr_flag", ProbName::pFuncAttrProb);
 
   // for choosing type attributes
-  set_single_name("type_attr_flag", pTypeAttrProb);
+  set_single_name("type_attr_flag", ProbName::pTypeAttrProb);
 
   // for choosing label attributes
-  set_single_name("label_attr_flag", pLabelAttrProb);
+  set_single_name("label_attr_flag", ProbName::pLabelAttrProb);
 
   // for choosing variable attributes
-  set_single_name("var_attr_flag", pVarAttrProb);
+  set_single_name("var_attr_flag", ProbName::pVarAttrProb);
 
   // for choosing binary constants
-  set_single_name("binary_constant", pBinaryConstProb);
+  set_single_name("binary_constant", ProbName::pBinaryConstProb);
 }
 
 void Probabilities::set_prob_table(
@@ -482,76 +484,76 @@ int Probabilities::get_random_single_prob(int orig_val) {
 
 void Probabilities::initialize_single_probs() {
   std::map<ProbName, int> m;
-  m[pMoreStructUnionProb] = 50;
-  m[pBitFieldsCreationProb] = 50;
-  m[pBitFieldInNormalStructProb] = 10;
-  m[pScalarFieldInFullBitFieldsProb] = 10;
-  m[pExhaustiveBitFieldsProb] = 10;
-  m[pBitFieldsSignedProb] = 50;
-  m[pSafeOpsSignedProb] = 50;
+  m[ProbName::pMoreStructUnionProb] = 50;
+  m[ProbName::pBitFieldsCreationProb] = 50;
+  m[ProbName::pBitFieldInNormalStructProb] = 10;
+  m[ProbName::pScalarFieldInFullBitFieldsProb] = 10;
+  m[ProbName::pExhaustiveBitFieldsProb] = 10;
+  m[ProbName::pBitFieldsSignedProb] = 50;
+  m[ProbName::pSafeOpsSignedProb] = 50;
 
   // GCC C Extensions
-  m[pFuncAttrProb] = 30;
-  m[pTypeAttrProb] = 50;
-  m[pLabelAttrProb] = 30;
-  m[pVarAttrProb] = 30;
-  m[pBinaryConstProb] = 3;
+  m[ProbName::pFuncAttrProb] = 30;
+  m[ProbName::pTypeAttrProb] = 50;
+  m[ProbName::pLabelAttrProb] = 30;
+  m[ProbName::pVarAttrProb] = 30;
+  m[ProbName::pBinaryConstProb] = 3;
 
   if (CGOptions::volatiles())
-    m[pRegularVolatileProb] = 50;
+    m[ProbName::pRegularVolatileProb] = 50;
   else
-    m[pRegularVolatileProb] = 0;
+    m[ProbName::pRegularVolatileProb] = 0;
 
   if (CGOptions::consts())
-    m[pRegularConstProb] = 10;
+    m[ProbName::pRegularConstProb] = 10;
   else
-    m[pRegularConstProb] = 0;
+    m[ProbName::pRegularConstProb] = 0;
 
   if (CGOptions::consts())
-    m[pStricterConstProb] = 50;
+    m[ProbName::pStricterConstProb] = 50;
   else
-    m[pStricterConstProb] = 0;
+    m[ProbName::pStricterConstProb] = 0;
 
   if (CGOptions::consts())
-    m[pLooserConstProb] = 50;
+    m[ProbName::pLooserConstProb] = 50;
   else
-    m[pLooserConstProb] = 0;
+    m[ProbName::pLooserConstProb] = 0;
 
   if (CGOptions::volatiles() && CGOptions::vol_struct_union_fields() &&
       CGOptions::global_variables())
-    m[pFieldVolatileProb] = 30;
+    m[ProbName::pFieldVolatileProb] = 30;
   else
-    m[pFieldVolatileProb] = 0;
+    m[ProbName::pFieldVolatileProb] = 0;
 
   if (CGOptions::consts() && CGOptions::const_struct_union_fields())
-    m[pFieldConstProb] = 20;
+    m[ProbName::pFieldConstProb] = 20;
   else
-    m[pFieldConstProb] = 0;
+    m[ProbName::pFieldConstProb] = 0;
 
-  m[pStdUnaryFuncProb] = 5;
-  m[pShiftByNonConstantProb] = 50;
-  m[pStructAsLTypeProb] = 30;
-  m[pUnionAsLTypeProb] = 25;
+  m[ProbName::pStdUnaryFuncProb] = 5;
+  m[ProbName::pShiftByNonConstantProb] = 50;
+  m[ProbName::pStructAsLTypeProb] = 30;
+  m[ProbName::pUnionAsLTypeProb] = 25;
   if (CGOptions::enable_float())
-    m[pFloatAsLTypeProb] = 40;
+    m[ProbName::pFloatAsLTypeProb] = 40;
   else
-    m[pFloatAsLTypeProb] = 0;
+    m[ProbName::pFloatAsLTypeProb] = 0;
   if (CGOptions::arrays())
-    m[pNewArrayVariableProb] = 20;
+    m[ProbName::pNewArrayVariableProb] = 20;
   else
-    m[pNewArrayVariableProb] = 0;
+    m[ProbName::pNewArrayVariableProb] = 0;
   if (CGOptions::pointers()) {
-    m[pPointerAsLTypeProb] = 50;
-    m[pSelectDerefPointerProb] = 80;
+    m[ProbName::pPointerAsLTypeProb] = 50;
+    m[ProbName::pSelectDerefPointerProb] = 80;
   } else {
-    m[pPointerAsLTypeProb] = 0;
-    m[pSelectDerefPointerProb] = 0;
+    m[ProbName::pPointerAsLTypeProb] = 0;
+    m[ProbName::pSelectDerefPointerProb] = 0;
   }
 
-  m[pAccessOnceVariableProb] = 20;
-  m[pInlineFunctionProb] = CGOptions::inline_function_prob();
-  m[pBuiltinFunctionProb] = CGOptions::builtin_function_prob();
-  m[pArrayOOBProb] = CGOptions::array_oob_prob();
+  m[ProbName::pAccessOnceVariableProb] = 20;
+  m[ProbName::pInlineFunctionProb] = CGOptions::inline_function_prob();
+  m[ProbName::pBuiltinFunctionProb] = CGOptions::builtin_function_prob();
+  m[ProbName::pArrayOOBProb] = CGOptions::array_oob_prob();
 
   std::map<ProbName, int>::iterator i;
   for (i = m.begin(); i != m.end(); ++i) {
@@ -610,8 +612,8 @@ void Probabilities::set_default_safe_ops_size_prob() {
     SET_SINGLE_NAME1("safe_ops_size_int64", Int64, 0);
   }
 
-  set_group_prob(true, pSafeOpsSizeProb, m);
-  set_prob_filter(pSafeOpsSizeProb);
+  set_group_prob(true, ProbName::pSafeOpsSizeProb, m);
+  set_prob_filter(ProbName::pSafeOpsSizeProb);
 }
 void Probabilities::set_default_simple_types_prob() {
   std::map<ProbName, int> m;
@@ -673,9 +675,15 @@ void Probabilities::set_default_simple_types_prob() {
     SET_SINGLE_NAME("float_prob", Float, 0);
   }
 
-  set_group_prob(true, pSimpleTypesProb, m);
-  set_prob_filter(pSimpleTypesProb);
+  set_group_prob(true, ProbName::pSimpleTypesProb, m);
+  set_prob_filter(ProbName::pSimpleTypesProb);
 }
+
+#undef SET_SINGLE_NAME
+#define SET_SINGLE_NAME(s, type, value)                                        \
+  set_single_name(s, ProbName::p##type##Prob,                                 \
+                  static_cast<unsigned int>(eUnaryOps::e##type));             \
+  m[ProbName::p##type##Prob] = value;
 
 void Probabilities::set_default_unary_ops_prob() {
   std::map<ProbName, int> m;
@@ -691,9 +699,15 @@ void Probabilities::set_default_unary_ops_prob() {
   SET_SINGLE_NAME("unary_not_prob", Not, 1);
   SET_SINGLE_NAME("unary_bit_not_prob", BitNot, 1);
 
-  set_group_prob(true, pUnaryOpsProb, m);
-  set_prob_filter(pUnaryOpsProb);
+  set_group_prob(true, ProbName::pUnaryOpsProb, m);
+  set_prob_filter(ProbName::pUnaryOpsProb);
 }
+
+#undef SET_SINGLE_NAME
+#define SET_SINGLE_NAME(s, type, value)                                        \
+  set_single_name(s, ProbName::p##type##Prob,                                 \
+                  static_cast<unsigned int>(eBinaryOps::e##type));            \
+  m[ProbName::p##type##Prob] = value;
 
 void Probabilities::set_default_binary_ops_prob() {
   std::map<ProbName, int> m;
@@ -729,9 +743,15 @@ void Probabilities::set_default_binary_ops_prob() {
   SET_SINGLE_NAME("binary_bit_rshift_prob", RShift, 1);
   SET_SINGLE_NAME("binary_bit_lshift_prob", LShift, 1);
 
-  set_group_prob(true, pBinaryOpsProb, m);
-  set_prob_filter(pBinaryOpsProb);
+  set_group_prob(true, ProbName::pBinaryOpsProb, m);
+  set_prob_filter(ProbName::pBinaryOpsProb);
 }
+
+#undef SET_SINGLE_NAME
+#define SET_SINGLE_NAME(s, type, value)                                        \
+  set_single_name(s, ProbName::p##type##Prob,                                 \
+                  static_cast<unsigned int>(eStatementType::e##type));         \
+  m[ProbName::p##type##Prob] = value;
 
 void Probabilities::set_default_statement_prob() {
   std::map<ProbName, int> m;
@@ -759,7 +779,7 @@ void Probabilities::set_default_statement_prob() {
   // use the remaining probabilities for assignments
   SET_SINGLE_NAME("statement_assign_prob", Assign, 100);
 
-  set_group_prob(false, pStatementProb, m);
+  set_group_prob(false, ProbName::pStatementProb, m);
 }
 
 Filter *Probabilities::get_prob_filter(ProbName pname) {

@@ -178,12 +178,14 @@ FunctionInvocation::make_random_binary(CGContext &cg_context,
 
   eBinaryOps op;
   do {
-    op = (eBinaryOps)(rnd_upto(MAX_BINARY_OP, BINARY_OPS_PROB_FILTER()));
+    op = static_cast<eBinaryOps>(
+        rnd_upto(static_cast<unsigned int>(MAX_BINARY_OP),
+                 BINARY_OPS_PROB_FILTER()));
   } while (type->is_float() && !BinaryOpWorksForFloat(op));
   ERROR_GUARD(nullptr);
   assert(type);
   SafeOpFlags *flags =
-      SafeOpFlags::make_random_binary(type, nullptr, nullptr, sOpBinary, op);
+      SafeOpFlags::make_random_binary(type, nullptr, nullptr, SafeOpKind::sOpBinary, op);
   assert(flags);
   ERROR_GUARD(nullptr);
   FunctionInvocationBinary *fi =
@@ -212,7 +214,7 @@ FunctionInvocation::make_random_binary(CGContext &cg_context,
   vector<const Fact *> facts_copy = fm->global_facts;
 
 #if 0
-	if (lhs->term_type == eVariable) {
+	if (lhs->term_type == eTermType::eVariable) {
 		lhs_eff_accum.read_deref_volatile(static_cast<ExpressionVariable*>(lhs));
 	}
 #endif
@@ -231,7 +233,7 @@ FunctionInvocation::make_random_binary(CGContext &cg_context,
     Effect rhs_eff_accum;
 
     CGContext rhs_cg_context(cg_context, rhs_eff_context, &rhs_eff_accum);
-    if (op == eLShift || op == eRShift) {
+    if (op == eBinaryOps::eLShift || op == eBinaryOps::eRShift) {
       eTermType tt = MAX_TERM_TYPES;
       bool not_constant = rnd_flipcoin(ShiftByNonConstantProb());
       // avoid shifting negative or too much
@@ -244,11 +246,15 @@ FunctionInvocation::make_random_binary(CGContext &cg_context,
     } else {
       rhs = Expression::make_random(rhs_cg_context, rhs_type);
       // avoid divide by zero or possible zero (reached by pointer comparison)
-      if ((op == eMod || op == eDiv) && (rhs->equals(0) || rhs->is_0_or_1()) &&
+      if ((op == eBinaryOps::eMod || op == eBinaryOps::eDiv) && (rhs->equals(0) || rhs->is_0_or_1()) &&
           !lhs_type->is_float() && !rhs_type->is_float()) {
         VectorFilter f;
-        f.add(eMod).add(eDiv).add(eLShift).add(eRShift);
-        op = (eBinaryOps)(rnd_upto(MAX_BINARY_OP, &f));
+        f.add(static_cast<unsigned int>(eBinaryOps::eMod))
+            .add(static_cast<unsigned int>(eBinaryOps::eDiv))
+            .add(static_cast<unsigned int>(eBinaryOps::eLShift))
+            .add(static_cast<unsigned int>(eBinaryOps::eRShift));
+        op = static_cast<eBinaryOps>(
+            rnd_upto(static_cast<unsigned int>(MAX_BINARY_OP), &f));
         fi->set_operation(op);
       }
     }
@@ -274,7 +280,7 @@ FunctionInvocation::make_random_binary(CGContext &cg_context,
     fm->makeup_new_var_facts(facts_copy, fm->global_facts);
     merge_facts(fm->global_facts, facts_copy);
   }
-  // TODO: fix `rhs' for eLShift and eRShift and ...
+  // TODO: fix `rhs' for eBinaryOps::eLShift and eBinaryOps::eRShift and ...
   // Currently, the "fix" is handled in `FunctionInvocationBinary::Output'.
   fi->param_value.push_back(lhs);
   fi->param_value.push_back(rhs);
@@ -286,10 +292,10 @@ FunctionInvocation::make_random_binary(CGContext &cg_context,
  */
 FunctionInvocation *
 FunctionInvocation::make_random_binary_ptr_comparison(CGContext &cg_context) {
-  eBinaryOps op = rnd_flipcoin(50) ? eCmpEq : eCmpNe;
+  eBinaryOps op = rnd_flipcoin(50) ? eBinaryOps::eCmpEq : eBinaryOps::eCmpNe;
   ERROR_GUARD(nullptr);
   SafeOpFlags *flags = SafeOpFlags::make_random_binary(get_int_type(), nullptr,
-                                                       nullptr, sOpBinary, op);
+                                                       nullptr, SafeOpKind::sOpBinary, op);
   ERROR_GUARD(nullptr);
 
   FunctionInvocation *fi =
@@ -307,10 +313,10 @@ FunctionInvocation::make_random_binary_ptr_comparison(CGContext &cg_context) {
   cg_context.merge_param_context(lhs_cg_context, true);
 
   // now focus on RHS ...
-  enum eTermType tt = MAX_TERM_TYPES;
+  eTermType tt = MAX_TERM_TYPES;
   // if LHS is const, there is no need for RHS to be const as well
-  if (lhs->term_type == eConstant) {
-    tt = eVariable;
+  if (lhs->term_type == eTermType::eConstant) {
+    tt = eTermType::eVariable;
   }
   Expression *rhs = 0;
 
@@ -342,7 +348,7 @@ FunctionInvocation::make_random_binary_ptr_comparison(CGContext &cg_context) {
   // typecast, if needed.
   rhs->check_and_set_cast(&lhs->get_type());
 
-  // TODO: fix `rhs' for eLShift and eRShift and ...
+  // TODO: fix `rhs' for eBinaryOps::eLShift and eBinaryOps::eRShift and ...
   // Currently, the "fix" is handled in `FunctionInvocationBinary::Output'.
   fi->param_value.push_back(lhs);
   fi->param_value.push_back(rhs);
@@ -390,7 +396,7 @@ bool FunctionInvocation::has_uncertain_call(void) const {
 bool FunctionInvocation::has_uncertain_call_recursive(void) const {
   for (size_t i = 0; i < param_value.size(); i++) {
     const Expression *e = param_value[i];
-    if (e->term_type == eFunction) {
+    if (e->term_type == eTermType::eFunction) {
       const ExpressionFuncall *ef = static_cast<const ExpressionFuncall *>(e);
       if (ef->has_uncertain_call_recursive()) {
         return true;
@@ -403,7 +409,7 @@ bool FunctionInvocation::has_uncertain_call_recursive(void) const {
 bool FunctionInvocation::has_simple_params(void) const {
   for (size_t i = 0; i < param_value.size(); i++) {
     const Expression *e = param_value[i];
-    if (e->term_type == eFunction) {
+    if (e->term_type == eTermType::eFunction) {
       return false;
     }
   }
@@ -564,7 +570,7 @@ FunctionInvocation *FunctionInvocation::make_binary(CGContext &cg_context,
                                                     Expression *rhs) {
   DEPTH_GUARD_BY_TYPE_RETURN(dtFunctionInvocationBinary, nullptr);
   SafeOpFlags *flags = SafeOpFlags::make_random_binary(
-      nullptr, &(lhs->get_type()), &(rhs->get_type()), sOpBinary, op);
+      nullptr, &(lhs->get_type()), &(rhs->get_type()), SafeOpKind::sOpBinary, op);
   ERROR_GUARD(nullptr);
   FunctionInvocation *fi =
       FunctionInvocationBinary::CreateFunctionInvocationBinary(cg_context, op,
@@ -621,7 +627,7 @@ FunctionInvocation::~FunctionInvocation(void) {
  * arguments.
  */
 bool FunctionInvocation::IsOrderedStandardFunc(eBinaryOps eFunc) {
-  return ((eFunc == eAnd) || (eFunc == eOr));
+  return ((eFunc == eBinaryOps::eAnd) || (eFunc == eBinaryOps::eOr));
 }
 
 /*
@@ -629,16 +635,16 @@ bool FunctionInvocation::IsOrderedStandardFunc(eBinaryOps eFunc) {
  */
 bool FunctionInvocation::BinaryOpWorksForFloat(eBinaryOps op) {
   switch (op) {
-  case eAdd:
-  case eSub:
-  case eMul:
-  case eDiv:
-  case eCmpGt:
-  case eCmpLt:
-  case eCmpGe:
-  case eCmpLe:
-  case eCmpEq:
-  case eCmpNe: // fall-through
+  case eBinaryOps::eAdd:
+  case eBinaryOps::eSub:
+  case eBinaryOps::eMul:
+  case eBinaryOps::eDiv:
+  case eBinaryOps::eCmpGt:
+  case eBinaryOps::eCmpLt:
+  case eBinaryOps::eCmpGe:
+  case eBinaryOps::eCmpLe:
+  case eBinaryOps::eCmpEq:
+  case eBinaryOps::eCmpNe: // fall-through
     return true;
   default:
     return false;
@@ -647,9 +653,9 @@ bool FunctionInvocation::BinaryOpWorksForFloat(eBinaryOps op) {
 
 bool FunctionInvocation::UnaryOpWorksForFloat(eUnaryOps op) {
   switch (op) {
-  case ePlus:
-  case eMinus:
-  case eNot: // fall-through
+  case eUnaryOps::ePlus:
+  case eUnaryOps::eMinus:
+  case eUnaryOps::eNot: // fall-through
     return true;
   default:
     return false;

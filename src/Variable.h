@@ -105,7 +105,7 @@ public:
   const Variable *get_container_union(void) const;
   int get_field_id(void) const;
   bool is_union_field(void) const {
-    return field_var_of != 0 && field_var_of->type->eType == eUnion;
+    return field_var_of != 0 && field_var_of->type->eType == eTypeDesc::eUnion;
   };
   bool is_inside_union_field(void) const {
     return is_union_field() ||
@@ -117,7 +117,7 @@ public:
   bool is_aggregate(void) const { return type && type->is_aggregate(); }
   bool match(const Variable *v) const;
   bool loose_match(const Variable *v) const;
-  bool is_pointer(void) const { return type && type->eType == ePointer; }
+  bool is_pointer(void) const { return type && type->eType == eTypeDesc::ePointer; }
   bool is_rv(void) const { return name.find("_rv") != string::npos; }
   int get_seq_num(void) const;
   void find_pointer_fields(vector<const Variable *> &ptr_fields) const;

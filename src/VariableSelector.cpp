@@ -94,7 +94,7 @@ VariableSelectFilter::~VariableSelectFilter() {}
 
 bool VariableSelectFilter::filter(int v) const {
   eVariableScope scope = VariableSelector::scopeTable_->get_value(v);
-  if (scope == eParentParam) {
+  if (scope == eVariableScope::eParentParam) {
     Function &parent = *cg_context_.get_current_func();
     return parent.param.empty();
   }
@@ -108,14 +108,14 @@ void VariableSelector::InitScopeTable() {
   if (scopeTable_ == nullptr) {
     scopeTable_ = new ProbabilityTable<unsigned int, eVariableScope>();
     if (CGOptions::global_variables()) {
-      scopeTable_->add_elem(35, eGlobal);
-      scopeTable_->add_elem(65, eParentLocal);
-      scopeTable_->add_elem(95, eParentParam);
-      scopeTable_->add_elem(100, eNewValue);
+      scopeTable_->add_elem(35, eVariableScope::eGlobal);
+      scopeTable_->add_elem(65, eVariableScope::eParentLocal);
+      scopeTable_->add_elem(95, eVariableScope::eParentParam);
+      scopeTable_->add_elem(100, eVariableScope::eNewValue);
     } else {
-      scopeTable_->add_elem(50, eParentLocal);
-      scopeTable_->add_elem(95, eParentParam);
-      scopeTable_->add_elem(100, eNewValue);
+      scopeTable_->add_elem(50, eVariableScope::eParentLocal);
+      scopeTable_->add_elem(95, eVariableScope::eParentParam);
+      scopeTable_->add_elem(100, eVariableScope::eNewValue);
     }
   }
 }
@@ -248,7 +248,7 @@ bool VariableSelector::is_eligible_var(const Variable *var, int deref_level,
   //
   // We can neither read nor write a variable that is being written in
   // the current effect context.
-  if (((access == Effect::READ) || (access == Effect::WRITE)) &&
+  if (((access == Effect::Access::READ) || (access == Effect::Access::WRITE)) &&
       (effect_context.is_written_partially(var))) {
     return false;
   }
@@ -258,21 +258,21 @@ bool VariableSelector::is_eligible_var(const Variable *var, int deref_level,
   // context. JYTODO: this is too restrictive, with dereference, var is not the
   // variable being written, but the pointed variable. Nevertheless, we excluded
   // var here
-  if ((access == Effect::WRITE && deref_level == 0) &&
+  if ((access == Effect::Access::WRITE && deref_level == 0) &&
       effect_context.is_read_partially(var)) {
     return false;
   }
   // ISSUE: generating correct C programs.
   //
   // We cannot write `const' variables.
-  if ((access == Effect::WRITE) && is_const) {
+  if ((access == Effect::Access::WRITE) && is_const) {
     return false;
   }
   // ISSUE: generating "interesting" C programs.
   //
   // We cannot read a variable if the current code-generation context
   // says that we should not.
-  if ((access == Effect::READ) &&
+  if ((access == Effect::Access::READ) &&
       (cg_context.is_nonreadable(var) ||
        (FactUnion::is_nonreadable_field(var, fm->global_facts)))) {
     return false;
@@ -281,7 +281,7 @@ bool VariableSelector::is_eligible_var(const Variable *var, int deref_level,
   //
   // We cannot write a variable if the current code-generation context
   // says that we should not.
-  if ((access == Effect::WRITE) && cg_context.is_nonwritable(var)) {
+  if ((access == Effect::Access::WRITE) && cg_context.is_nonwritable(var)) {
     return false;
   }
   return true;
@@ -398,7 +398,7 @@ Variable *VariableSelector::choose_var(
   const vector<Variable *> *candidate_vars = &vars;
 
   if (!no_expand_struct_union && type &&
-      (type->eType == eSimple || type->is_aggregate())) {
+      (type->eType == eTypeDesc::eSimple || type->is_aggregate())) {
     expanded_vars = vars;
     expand_struct_union_vars(expanded_vars, type);
     candidate_vars = &expanded_vars;
@@ -468,7 +468,7 @@ Variable *VariableSelector::choose_var(
   }
 
   // artificially increase the odds of taking address of another variable
-  if (type && type->eType == ePointer && ok_vars.size() > 1) {
+  if (type && type->eType == eTypeDesc::ePointer && ok_vars.size() > 1) {
     vector<Variable *> addressable_vars;
     for (size_t j = 0; j < ok_vars.size(); j++) {
       Variable *vv = ok_vars[j];
@@ -746,7 +746,7 @@ Block *VariableSelector::expand_block_for_goto(Block *b,
     size_t i;
     for (i = 0; i < fm->cfg_edges.size(); i++) {
       const CFGEdge *edge = fm->cfg_edges[i];
-      if (edge->src->eType == eGoto && b->contains_stmt(edge->dest) &&
+      if (edge->src->eType == eStatementType::eGoto && b->contains_stmt(edge->dest) &&
           !b->contains_stmt(edge->src)) {
         while (b && !b->contains_stmt(edge->src)) {
           b = b->parent;
@@ -808,10 +808,10 @@ Expression *VariableSelector::make_init_value(Effect::Access access,
   // initialized
   qfer.accept_stricter = false;
 
-  if (t->eType != ePointer || rnd_flipcoin(20)) {
+  if (t->eType != eTypeDesc::ePointer || rnd_flipcoin(20)) {
     ERROR_GUARD(nullptr);
-    if (t->eType == eSimple)
-      assert(t->simple_type != eVoid);
+    if (t->eType == eTypeDesc::eSimple)
+      assert(t->simple_type != eSimpleType::eVoid);
     return Constant::make_random(t);
   }
   ERROR_GUARD(nullptr);
@@ -853,7 +853,7 @@ Expression *VariableSelector::make_init_value(Effect::Access access,
     qfer_deref.accept_stricter = false;
     bool use_local =
         (!CGOptions::global_variables() ||
-         (b != 0 && type->eType == ePointer && !qfer_deref.is_volatile()));
+         (b != 0 && type->eType == eTypeDesc::ePointer && !qfer_deref.is_volatile()));
     const Type *tt = use_local ? Type::random_type_from_type(type, true, true)
                                : Type::random_type_from_type(type, false, true);
     ERROR_GUARD(nullptr);
@@ -861,17 +861,17 @@ Expression *VariableSelector::make_init_value(Effect::Access access,
     // specified
     if (CGOptions::addr_taken_of_locals() && use_local) {
       var =
-          GenerateNewParentLocal(*b, Effect::READ, cg_context, tt, &qfer_deref);
+          GenerateNewParentLocal(*b, Effect::Access::READ, cg_context, tt, &qfer_deref);
       ERROR_GUARD(nullptr);
       Bookkeeper::record_volatile_access(
           var, var->type->get_indirect_level() - tt->get_indirect_level(),
           false);
     } else {
       if (CGOptions::ccomp()) {
-        var = GenerateNewNonArrayGlobal(Effect::READ, cg_context, tt,
+        var = GenerateNewNonArrayGlobal(Effect::Access::READ, cg_context, tt,
                                         &qfer_deref);
       } else {
-        var = GenerateNewGlobal(Effect::READ, cg_context, tt, &qfer_deref);
+        var = GenerateNewGlobal(Effect::Access::READ, cg_context, tt, &qfer_deref);
       }
       ERROR_GUARD(nullptr);
     }
@@ -946,8 +946,8 @@ void VariableSelector::GenerateParameterVariable(Function &curFunc) {
     t = Type::choose_random_nonvoid_nonvolatile();
   }
   ERROR_RETURN();
-  if (t->eType == eSimple)
-    assert(t->simple_type != eVoid);
+  if (t->eType == eTypeDesc::eSimple)
+    assert(t->simple_type != eSimpleType::eVoid);
 
   CVQualifiers qfer = CVQualifiers::random_qualifiers(t);
   ERROR_RETURN();
@@ -990,7 +990,7 @@ Variable *VariableSelector::SelectParentLocal(
     return GenerateNewParentLocal(*block, access, cg_context, t, qfer);
   }
 
-  if (type && type->eType == eSimple && (type->simple_type != eVoid)) {
+  if (type && type->eType == eTypeDesc::eSimple && (type->simple_type != eSimpleType::eVoid)) {
     t = get_int_type();
   } else {
     t = Type::random_type_from_type(type, true, false);
@@ -1016,7 +1016,7 @@ Variable *VariableSelector::SelectParentLocal(
 
 // --------------------------------------------------------------
 static eVariableScope
-VariableSelectionProbability(eVariableScope upper = MAX_VAR_SCOPE,
+VariableSelectionProbability(eVariableScope upper = eVariableScope::MAX_VAR_SCOPE,
                              Filter *filter = nullptr) {
   // Should probably modify choice based on current list of params, parent
   // params, parent locals, # of globals, etc.
@@ -1025,23 +1025,23 @@ VariableSelectionProbability(eVariableScope upper = MAX_VAR_SCOPE,
   VariableSelector::InitScopeTable();
   do {
     int i = rnd_upto(100, filter);
-    ERROR_GUARD(MAX_VAR_SCOPE);
+    ERROR_GUARD(eVariableScope::MAX_VAR_SCOPE);
     eVariableScope scope = VariableSelector::scopeTable_->get_value(i);
     if (scope < upper) {
       return scope;
     }
   } while (true);
-  return MAX_VAR_SCOPE;
+  return eVariableScope::MAX_VAR_SCOPE;
 }
 
 // --------------------------------------------------------------
 static eVariableScope VariableCreationProbability(void) {
   bool flag = CGOptions::global_variables() && rnd_flipcoin(10);
-  ERROR_GUARD(MAX_VAR_SCOPE);
+  ERROR_GUARD(eVariableScope::MAX_VAR_SCOPE);
   if (flag) // 10% chance to create new global var
-    return eGlobal;
+    return eVariableScope::eGlobal;
   else
-    return eParentLocal;
+    return eVariableScope::eParentLocal;
 }
 
 // --------------------------------------------------------------
@@ -1071,7 +1071,7 @@ Variable *VariableSelector::GenerateNewVariable(Effect::Access access,
   eVariableScope scope = VariableCreationProbability();
   ERROR_GUARD(nullptr);
   switch (scope) {
-  case eGlobal: {
+  case eVariableScope::eGlobal: {
     DEPTH_GUARD_BY_TYPE_RETURN(dtGenerateNewGlobal, nullptr);
     // TODO: it's ugly. For dfs_exhaustive mode, we've generate the first
     // variable by SelectGlobal. To reduce the redundant code, we don't
@@ -1085,7 +1085,7 @@ Variable *VariableSelector::GenerateNewVariable(Effect::Access access,
     var = GenerateNewGlobal(access, cg_context, t, qfer);
     break;
   }
-  case eParentLocal: {
+  case eVariableScope::eParentLocal: {
     DEPTH_GUARD_BY_DEPTH_RETURN(
         static_cast<int>(dType::dtGenerateNewParentLocal), nullptr);
     unsigned int index = rnd_upto(func.stack.size());
@@ -1133,22 +1133,22 @@ Variable *VariableSelector::SelectLoopCtrlVar(
     if (vars[i]->type &&
         (!vars[i]->type->has_int_field() || // remove variables isn't (or
                                             // doesn't contain) integers
-         (vars[i]->type->eType == eUnion &&
+         (vars[i]->type->eType == eTypeDesc::eUnion &&
           vars[i]->type->contain_pointer_field()))) {
       vars.erase(vars.begin() + i);
       i--;
       len--;
     }
   }
-  Variable *var = choose_var(vars, Effect::WRITE, cg_context, type, 0,
+  Variable *var = choose_var(vars, Effect::Access::WRITE, cg_context, type, 0,
                              eMatchType::eConvert, invalid_vars, true);
   ERROR_GUARD(nullptr);
   if (var == nullptr) {
     if (CGOptions::global_variables()) {
-      var = GenerateNewGlobal(Effect::WRITE, cg_context, type, 0);
+      var = GenerateNewGlobal(Effect::Access::WRITE, cg_context, type, 0);
     } else {
       var = GenerateNewParentLocal(*cg_context.get_current_block(),
-                                   Effect::WRITE, cg_context, type, 0);
+                                   Effect::Access::WRITE, cg_context, type, 0);
     }
   }
   return var;
@@ -1162,9 +1162,10 @@ Variable *VariableSelector::select(Effect::Access access,
                                    const Type *type, const CVQualifiers *qfer,
                                    const vector<const Variable *> &invalid_vars,
                                    eMatchType mt, eVariableScope scope) {
-  DEPTH_GUARD_BY_TYPE_RETURN_WITH_FLAG(dtSelectVariable, scope, nullptr);
+  DEPTH_GUARD_BY_TYPE_RETURN_WITH_FLAG(dtSelectVariable,
+                                       static_cast<int>(scope), nullptr);
   VariableSelectFilter filter(cg_context);
-  if (scope == MAX_VAR_SCOPE) {
+  if (scope == eVariableScope::MAX_VAR_SCOPE) {
     scope = VariableSelectionProbability(scope, &filter);
   }
   ERROR_GUARD(nullptr);
@@ -1174,25 +1175,25 @@ Variable *VariableSelector::select(Effect::Access access,
   // Note that many of the functions that select `var' can return null, if
   // they cannot find a suitable variable.  So we loop.
   switch (scope) {
-  case eGlobal:
+  case eVariableScope::eGlobal:
     var = SelectGlobal(access, cg_context, type, qfer, mt, invalid_vars);
     break;
-  case eParentLocal:
+  case eVariableScope::eParentLocal:
     // ...a local var from one of its blocks.
     var = SelectParentLocal(access, cg_context, type, qfer, mt, invalid_vars);
     break;
-  case eParentParam:
+  case eVariableScope::eParentParam:
     // ...one of the function's parameters.
     var = SelectParentParam(access, cg_context, type, qfer, mt, invalid_vars);
     break;
-  case eNewValue:
+  case eVariableScope::eNewValue:
     // Must decide where to put the new variable (global or parent
     // local)?
     var = GenerateNewVariable(access, cg_context, type, qfer);
     if (CGOptions::expand_struct())
       Error::set_error(ERROR);
     break;
-  case MAX_VAR_SCOPE:
+  case eVariableScope::MAX_VAR_SCOPE:
     assert(0);
   }
   ERROR_GUARD(nullptr);
@@ -1206,7 +1207,7 @@ Variable *VariableSelector::select(Effect::Access access,
       Bookkeeper::use_new_var_cnt++;
       Bookkeeper::record_vars_with_bitfields(t);
       incr_counter(Bookkeeper::struct_depth_cnts, t->get_struct_depth());
-      if (t->eType == eUnion)
+      if (t->eType == eTypeDesc::eUnion)
         Bookkeeper::union_var_cnt++;
     } else {
       Bookkeeper::use_old_var_cnt++;
@@ -1254,7 +1255,7 @@ Variable *VariableSelector::select_deref_pointer(
                   !cg_context.get_effect_context().is_side_effect_free());
     ERROR_GUARD(nullptr);
     ptr_qfer.accept_stricter = false;
-    if (access == Effect::WRITE) {
+    if (access == Effect::Access::WRITE) {
       ptr_qfer.set_const(false, 1);
     }
     if (ptr_qfer.is_volatile()) {
@@ -1449,7 +1450,7 @@ ArrayVariable *VariableSelector::itemize_array(CGContext &cg_context,
     }
     if (offset) {
       const FunctionInvocation *fi = new FunctionInvocationBinary(
-          eAdd, ev, new Constant(get_int_type(), StringUtils::int2str(offset)),
+          eBinaryOps::eAdd, ev, new Constant(get_int_type(), StringUtils::int2str(offset)),
           0);
       ev = new ExpressionFuncall(*fi);
     }
@@ -1466,10 +1467,10 @@ VariableSelector::select_must_use_var(Effect::Access access,
     return nullptr;
 
   const Variable *var = 0;
-  VariableSet &vars = (access == Effect::READ)
+  VariableSet &vars = (access == Effect::Access::READ)
                           ? cg_context.rw_directive->must_read_vars
                           : cg_context.rw_directive->must_write_vars;
-  eMatchType mt = (access == Effect::READ) ? eMatchType::eFlexible
+  eMatchType mt = (access == Effect::Access::READ) ? eMatchType::eFlexible
                                            : eMatchType::eDerefExact;
   for (size_t i = 0; i < vars.size(); i++) {
     const Variable *v = vars[i];
@@ -1478,7 +1479,7 @@ VariableSelector::select_must_use_var(Effect::Access access,
         int deref_level =
             v->type->get_indirect_level() - type->get_indirect_level();
         // for LHS, make sure the array type is not constant after dereference
-        if (access == Effect::WRITE &&
+        if (access == Effect::Access::WRITE &&
             v->qfer.is_const_after_deref(deref_level)) {
           continue;
         }

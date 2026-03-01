@@ -111,7 +111,7 @@ StatementIf *StatementIf::make_random(CGContext &cg_context) {
  */
 StatementIf::StatementIf(Block *b, const Expression &test, const Block &if_true,
                          const Block &if_false)
-    : Statement(eIfElse, b), test(test), if_true(if_true), if_false(if_false) {
+    : Statement(eStatementType::eIfElse, b), test(test), if_true(if_true), if_false(if_false) {
   // Nothing else to do.
 }
 

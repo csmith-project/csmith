@@ -75,7 +75,7 @@ static vector<const Fact *> return_facts; // list of return facts
 
 const Fact *get_return_fact_for_invocation(const FunctionInvocationUser *fiu,
                                            const Variable *var,
-                                           enum eFactCategory cat) {
+                                           eFactCategory cat) {
   assert(invocations.size() == return_facts.size());
   for (size_t i = 0; i < return_facts.size(); i++) {
     if (invocations[i] == fiu) {

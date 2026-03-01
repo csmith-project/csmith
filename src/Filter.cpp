@@ -45,16 +45,16 @@ Filter::~Filter(void) { kinds_.reset(); }
  *
  */
 void Filter::enable(FilterKind kind) {
-  assert(kind < MAX_FILTER_KIND_SIZE);
-  kinds_[kind] = true;
+  assert(kind < FilterKind::MAX_FILTER_KIND_SIZE);
+  kinds_[static_cast<std::size_t>(kind)] = true;
 }
 
 /*
  *
  */
 void Filter::disable(FilterKind kind) {
-  assert(kind < MAX_FILTER_KIND_SIZE);
-  kinds_[kind] = false;
+  assert(kind < FilterKind::MAX_FILTER_KIND_SIZE);
+  kinds_[static_cast<std::size_t>(kind)] = false;
 }
 
 /*
@@ -62,10 +62,10 @@ void Filter::disable(FilterKind kind) {
  */
 FilterKind Filter::current_kind(void) const {
   if (CGOptions::random_based())
-    return fDefault;
+    return FilterKind::fDefault;
   else if (CGOptions::dfs_exhaustive())
-    return fDFS;
-  return MAX_FILTER_KIND_SIZE;
+    return FilterKind::fDFS;
+  return FilterKind::MAX_FILTER_KIND_SIZE;
 }
 
 /*
@@ -74,7 +74,7 @@ FilterKind Filter::current_kind(void) const {
 bool Filter::valid_filter() const {
   FilterKind k = current_kind();
 
-  if (!kinds_.test(k))
+  if (!kinds_.test(static_cast<std::size_t>(k)))
     return false;
   return true;
 }

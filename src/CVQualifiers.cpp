@@ -218,7 +218,7 @@ CVQualifiers::random_qualifiers(bool no_volatile, Effect::Access access,
   consts = !accept_stricter ? random_looser_consts() : random_stricter_consts();
   make_scalar_consts(consts);
   ERROR_GUARD(CVQualifiers(consts, volatiles));
-  if (access == Effect::WRITE) {
+  if (access == Effect::Access::WRITE) {
     consts[consts.size() - 1] = false;
   }
   return CVQualifiers(consts, volatiles);
@@ -253,7 +253,7 @@ CVQualifiers::random_loose_qualifiers(bool no_volatile, Effect::Access access,
   consts = random_looser_consts();
   make_scalar_consts(consts);
   ERROR_GUARD(CVQualifiers(consts, volatiles));
-  if (access == Effect::WRITE) {
+  if (access == Effect::Access::WRITE) {
     consts[consts.size() - 1] = false;
   }
   return CVQualifiers(consts, volatiles);
@@ -270,12 +270,12 @@ CVQualifiers CVQualifiers::random_qualifiers(const Type *t,
 static bool is_volatile_ok_on_one_level(const Type *t) {
   if (!CGOptions::lang_cpp())
     return true;
-  if (t->eType != eStruct && t->eType != eUnion)
+  if (t->eType != eTypeDesc::eStruct && t->eType != eTypeDesc::eUnion)
     return true;
 
   if (!t->has_assign_ops())
     return false;
-  if (t->eType == eStruct)
+  if (t->eType == eTypeDesc::eStruct)
     return true;
 
   // Union with a struct field: we can't make it volatile, or we won't be able
@@ -283,9 +283,9 @@ static bool is_volatile_ok_on_one_level(const Type *t) {
   for (size_t i = 0; i < t->fields.size(); ++i) {
     const Type *field = t->fields[i];
 
-    if (field->eType == eStruct)
+    if (field->eType == eTypeDesc::eStruct)
       return false;
-    if (field->eType == eUnion) {
+    if (field->eType == eTypeDesc::eUnion) {
       if (!is_volatile_ok_on_one_level(field))
         return false;
     }
@@ -333,7 +333,7 @@ CVQualifiers CVQualifiers::random_qualifiers(
   // set random volatile/const properties for variable itself
   bool volatile_ok =
       effect_context.is_side_effect_free() && is_volatile_ok_on_one_level(t);
-  bool const_ok = (access != Effect::WRITE);
+  bool const_ok = (access != Effect::Access::WRITE);
 
   isVolatile = volatile_ok ? rnd_flipcoin(volatile_prob) : false;
   isConst = const_ok ? rnd_flipcoin(const_prob) : false;
@@ -358,7 +358,7 @@ CVQualifiers CVQualifiers::random_qualifiers(
  * and no volatile allowed
  */
 CVQualifiers CVQualifiers::random_qualifiers(const Type *t) {
-  return random_qualifiers(t, Effect::READ, CGContext::get_empty_context(),
+  return random_qualifiers(t, Effect::Access::READ, CGContext::get_empty_context(),
                            true);
 }
 
@@ -369,7 +369,7 @@ CVQualifiers CVQualifiers::random_qualifiers(const Type *t) {
 CVQualifiers CVQualifiers::random_qualifiers(const Type *t,
                                              unsigned int const_prob,
                                              unsigned int volatile_prob) {
-  return random_qualifiers(t, Effect::READ, CGContext::get_empty_context(),
+  return random_qualifiers(t, Effect::Access::READ, CGContext::get_empty_context(),
                            false, const_prob, volatile_prob);
 }
 
@@ -602,7 +602,7 @@ void CVQualifiers::set_volatile(bool is_volatile, int pos) {
 
 void CVQualifiers::restrict(Effect::Access access,
                             const CGContext &cg_context) {
-  if (access == Effect::WRITE) {
+  if (access == Effect::Access::WRITE) {
     set_const(false);
   }
   if (!cg_context.get_effect_context().is_side_effect_free()) {

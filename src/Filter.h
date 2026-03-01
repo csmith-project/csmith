@@ -32,7 +32,7 @@
 
 #include <bitset>
 
-enum FilterKind {
+enum class FilterKind {
   fDefault,
   fDFS,
   MAX_FILTER_KIND_SIZE,
@@ -55,7 +55,8 @@ protected:
 
   // What kind of mode this filter can apply to
   // By default, it can work for all modes.
-  std::bitset<MAX_FILTER_KIND_SIZE> kinds_;
+  std::bitset<static_cast<std::size_t>(FilterKind::MAX_FILTER_KIND_SIZE)>
+      kinds_;
 
 private:
   FilterKind current_kind() const;

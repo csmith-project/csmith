@@ -74,7 +74,7 @@ static void make_random_loop_control(int &init, int &limit, int &incr,
   init = pure_rnd_flipcoin(50) ? 0 : (pure_rnd_upto(60) - 30);
   limit = iv_signed ? (pure_rnd_upto(60) - 30) : (pure_rnd_upto(60) + 1);
 
-  eBinaryOps t_ops[] = {eCmpLt, eCmpLe, eCmpGt, eCmpGe, eCmpEq, eCmpNe};
+  eBinaryOps t_ops[] = {eBinaryOps::eCmpLt, eBinaryOps::eCmpLe, eBinaryOps::eCmpGt, eBinaryOps::eCmpGe, eBinaryOps::eCmpEq, eBinaryOps::eCmpNe};
   test_op = t_ops[pure_rnd_upto(sizeof(t_ops) / sizeof(*t_ops))];
   ERROR_RETURN();
 
@@ -84,10 +84,10 @@ static void make_random_loop_control(int &init, int &limit, int &incr,
     // make sure the limit can be reached without wrap-around
     incr = pure_rnd_upto(10);
     // avoid an infinite loop due to inexact division, e.g,
-    // init = 0, limit = 3, step = 2, test_op = eCmpNe
-    if (test_op == eCmpNe && incr > 1)
+    // init = 0, limit = 3, step = 2, test_op = eBinaryOps::eCmpNe
+    if (test_op == eBinaryOps::eCmpNe && incr > 1)
       limit = (limit - init) / incr * incr + init;
-    incr_op = (limit >= init) ? eAddAssign : eSubAssign;
+    incr_op = (limit >= init) ? eAssignOps::eAddAssign : eAssignOps::eSubAssign;
     if (incr == 0)
       incr = 1;
 
@@ -95,27 +95,27 @@ static void make_random_loop_control(int &init, int &limit, int &incr,
     // and limit is multiple of incr, and the incr goes to wrong direction.
     // For example: init = 8, limit = 1, incr = -7. test_op is >=
     if (CGOptions::fast_execution() && (limit - init) % incr == 0 &&
-        (test_op == eCmpGe || test_op == eCmpLe)) {
-      limit = (incr_op == eAddAssign) ? limit + 1 : limit - 1;
+        (test_op == eBinaryOps::eCmpGe || test_op == eBinaryOps::eCmpLe)) {
+      limit = (incr_op == eAssignOps::eAddAssign) ? limit + 1 : limit - 1;
     }
   } else {
     ERROR_RETURN();
     // Do `++' or `--', pre- or post-.
     // make sure the limit can be reached without wrap-around
-    if ((limit < init) || ((limit == init) && (test_op == eCmpGe))) {
-      incr_op = pure_rnd_flipcoin(50) ? ePreDecr : ePostDecr;
+    if ((limit < init) || ((limit == init) && (test_op == eBinaryOps::eCmpGe))) {
+      incr_op = pure_rnd_flipcoin(50) ? eAssignOps::ePreDecr : eAssignOps::ePostDecr;
     } else {
-      incr_op = pure_rnd_flipcoin(50) ? ePreIncr : ePostIncr;
+      incr_op = pure_rnd_flipcoin(50) ? eAssignOps::ePreIncr : eAssignOps::ePostIncr;
     }
-    if (((incr_op == ePreIncr) && !CGOptions::pre_incr_operator()) ||
-        ((incr_op == ePostIncr) && !CGOptions::post_incr_operator())) {
+    if (((incr_op == eAssignOps::ePreIncr) && !CGOptions::pre_incr_operator()) ||
+        ((incr_op == eAssignOps::ePostIncr) && !CGOptions::post_incr_operator())) {
 
-      incr_op = eAddAssign;
+      incr_op = eAssignOps::eAddAssign;
     }
-    if (((incr_op == ePreDecr) && !CGOptions::pre_decr_operator()) ||
-        ((incr_op == ePostDecr) && !CGOptions::post_decr_operator())) {
+    if (((incr_op == eAssignOps::ePreDecr) && !CGOptions::pre_decr_operator()) ||
+        ((incr_op == eAssignOps::ePostDecr) && !CGOptions::post_decr_operator())) {
 
-      incr_op = eSubAssign;
+      incr_op = eAssignOps::eSubAssign;
     }
     incr = 1;
   }
@@ -132,14 +132,14 @@ static unsigned int make_random_array_control(unsigned int bound, int &init,
                                               bool is_signed) {
   // choose either increment or decrement
   int oob_flipcoin = pure_rnd_flipcoin(CGOptions::array_oob_prob());
-  test_op = is_signed ? (rnd_flipcoin(50) ? eCmpLe : eCmpGe) : eCmpLe;
-  if (test_op == eCmpLe) {
+  test_op = is_signed ? (rnd_flipcoin(50) ? eBinaryOps::eCmpLe : eBinaryOps::eCmpGe) : eBinaryOps::eCmpLe;
+  if (test_op == eBinaryOps::eCmpLe) {
     init = oob_flipcoin            ? -1000
            : pure_rnd_flipcoin(50) ? 0
                                    : pure_rnd_upto(bound / 2);
     // increment, start near index 0
     limit = bound;
-    incr_op = eAddAssign;
+    incr_op = eAssignOps::eAddAssign;
     incr = pure_rnd_flipcoin(50) ? 1 : pure_rnd_upto(bound / 4);
     if (incr == 0)
       incr = 1;
@@ -150,7 +150,7 @@ static unsigned int make_random_array_control(unsigned int bound, int &init,
     limit = oob_flipcoin            ? -1000
             : pure_rnd_flipcoin(50) ? 0
                                     : pure_rnd_upto(bound / 2);
-    incr_op = eSubAssign;
+    incr_op = eAssignOps::eSubAssign;
     incr = pure_rnd_flipcoin(50) ? 1 : pure_rnd_upto(bound / 4);
     if (incr == 0)
       incr = 1;
@@ -196,7 +196,7 @@ const Variable *StatementFor::make_iteration(CGContext &cg_context,
   // Select the loop parameters: init, limit, increment, etc.
   int init_n = 0, limit_n = 0, incr_n = 0;
   eBinaryOps test_op;
-  eAssignOps incr_op = eAddAssign;
+  eAssignOps incr_op = eAssignOps::eAddAssign;
   bound = INVALID_BOUND;
 
   // choose a random array from must use variables, and find the dimension with
@@ -235,11 +235,11 @@ const Variable *StatementFor::make_iteration(CGContext &cg_context,
   ERROR_GUARD_AND_DEL1(nullptr, c_init);
   eBinaryOps bop = StatementAssign::compound_to_binary_ops(incr_op);
   SafeOpFlags *flags1 = SafeOpFlags::make_random_binary(
-      var->type, var->type, var->type, sOpAssign, bop);
+      var->type, var->type, var->type, SafeOpKind::sOpAssign, bop);
   ERROR_GUARD_AND_DEL2(nullptr, c_init, lhs);
 
   init = new StatementAssign(cg_context.get_current_block(), *lhs, *c_init,
-                             eSimpleAssign, flags1);
+                             eAssignOps::eSimpleAssign, flags1);
   ERROR_GUARD_AND_DEL3(nullptr, c_init, lhs, flags1);
   bool visited = init->visit_facts(fm->global_facts, cg_context);
   assert(visited);
@@ -262,10 +262,10 @@ const Variable *StatementFor::make_iteration(CGContext &cg_context,
 
   // canonize before validation
   // const ExpressionVariable exp_var(*var);
-  // const FunctionInvocationBinary fb(eAdd, &exp_var, c_incr);
+  // const FunctionInvocationBinary fb(eBinaryOps::eAdd, &exp_var, c_incr);
   // const ExpressionFuncall funcall(fb);
   Lhs *lhs1 = dynamic_cast<Lhs *>(lhs->clone());
-  // SafeOpFlags *flags2 = SafeOpFlags::make_random(sOpAssign);
+  // SafeOpFlags *flags2 = SafeOpFlags::make_random(SafeOpKind::sOpAssign);
   ERROR_GUARD_AND_DEL3(nullptr, init, test, lhs1);
 
   Constant *c_incr = Constant::make_int(incr_n);
@@ -375,7 +375,7 @@ void StatementFor::post_loop_analysis(CGContext &cg_context,
 StatementFor::StatementFor(Block *b, const StatementAssign &init,
                            const Expression &test, const StatementAssign &incr,
                            const Block &body)
-    : Statement(eFor, b), init(init), test(test), incr(incr), body(body) {
+    : Statement(eStatementType::eFor, b), init(init), test(test), incr(incr), body(body) {
   // Nothing else to do.
 }
 
@@ -437,7 +437,7 @@ bool StatementFor::visit_facts(vector<const Fact *> &inputs,
   const Variable *iv = init.get_lhs()->get_var();
   // the indction variable should be scalar, and shouldn't be the IV of an outer
   // loop
-  assert(iv->type->eType == eSimple);
+  assert(iv->type->eType == eTypeDesc::eSimple);
   assert(cg_context.iv_bounds.find(iv) == cg_context.iv_bounds.end());
   // give an arbitrary bound that we don't check against
   cg_context.iv_bounds[iv] = 0;

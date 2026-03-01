@@ -115,8 +115,9 @@ int DepthSpec::dtBlock_minimal_depth(int) {
 }
 
 int DepthSpec::dtStatement_minimal_depth(int flag) {
-  return (flag == MAX_STATEMENT_TYPE) ? (dtStatement_minimal_depth_() + 1)
-                                      : dtStatement_minimal_depth_();
+  return (flag == static_cast<int>(MAX_STATEMENT_TYPE))
+             ? (dtStatement_minimal_depth_() + 1)
+             : dtStatement_minimal_depth_();
 }
 
 int DepthSpec::dtStatementAssign_minimal_depth(int) {
@@ -201,12 +202,12 @@ int DepthSpec::dtFunctionInvocationRandom_minimal_depth(int) {
 
 int DepthSpec::dtExpressionRandomParam_minimal_depth(int flag) {
   int rv = dtConstant_minimal_depth(flag);
-  return (flag == MAX_TERM_TYPES) ? (rv + 1) : rv;
+  return (flag == static_cast<int>(MAX_TERM_TYPES)) ? (rv + 1) : rv;
 }
 
 int DepthSpec::dtExpression_minimal_depth(int flag) {
   int rv = dtConstant_minimal_depth(flag);
-  return (flag == MAX_TERM_TYPES) ? (rv + 1) : rv;
+  return (flag == static_cast<int>(MAX_TERM_TYPES)) ? (rv + 1) : rv;
   // vector<int> vs;
   // vs.push_back(dtConstant_minimal_depth());
   // vs.push_back(dtExpressionVariable_minimal_depth());
@@ -250,8 +251,9 @@ int DepthSpec::dtSelectLValue_minimal_depth(int flag) {
 }
 
 int DepthSpec::dtSelectVariable_minimal_depth(int flag) {
-  return (flag == MAX_VAR_SCOPE) ? dtVariableSelection_minimal_depth(flag) + 1
-                                 : dtVariableSelection_minimal_depth(flag);
+  return (flag == static_cast<int>(eVariableScope::MAX_VAR_SCOPE))
+             ? dtVariableSelection_minimal_depth(flag) + 1
+             : dtVariableSelection_minimal_depth(flag);
 }
 
 int DepthSpec::dtSelectDerefPointer_minimal_depth(int) { return 0; }
@@ -304,7 +306,7 @@ int DepthSpec::dtInitPointerValue_minimal_depth(int) {
 }
 
 int DepthSpec::dtSafeOpFlags_minimal_depth(int flag) {
-  return (flag == sOpBinary) ? 2 : 3;
+  return (flag == static_cast<int>(SafeOpKind::sOpBinary)) ? 2 : 3;
 }
 
 // cout << "max_depth = " << max_depth << ", cur_depth = " << cur_depth << ",

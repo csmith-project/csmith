@@ -285,7 +285,7 @@ bool Effect::is_read(const Variable *v) const {
   // however we can not say the same thing for unions: reading a particular
   // unions field can cause unspecified behaviors, while reading the whole
   // union won't
-  if (v->field_var_of && v->field_var_of->type->eType == eStruct) {
+  if (v->field_var_of && v->field_var_of->type->eType == eTypeDesc::eStruct) {
     return is_read(v->field_var_of);
   }
 

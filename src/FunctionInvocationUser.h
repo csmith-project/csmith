@@ -102,7 +102,7 @@ private:
 
 const Fact *get_return_fact_for_invocation(const FunctionInvocationUser *fiu,
                                            const Variable *var,
-                                           enum eFactCategory cat);
+                                           eFactCategory cat);
 
 void calls_to_funcs(const vector<const FunctionInvocationUser *> &calls,
                     vector<const Function *> &funcs);

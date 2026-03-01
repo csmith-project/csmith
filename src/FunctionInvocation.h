@@ -56,7 +56,7 @@ class SafeOpFlags;
 class Variable;
 class CVQualifiers;
 
-enum eUnaryOps {
+enum class eUnaryOps {
   ePlus,
   eMinus,
   eNot,
@@ -68,12 +68,13 @@ enum eUnaryOps {
 	ePostDec
 #endif // 0
 };
-inline constexpr unsigned int MAX_UNARY_OP = eBitNot + 1;
+inline constexpr unsigned int MAX_UNARY_OP =
+    static_cast<unsigned int>(eUnaryOps::eBitNot) + 1;
 #if 0 // TODO --- to be implemented
 inline constexpr eUnaryOps MAX_UNARY_OP = static_cast<eUnaryOps>(ePostDec + 1);
 #endif
 
-enum eBinaryOps {
+enum class eBinaryOps {
   eAdd,
   eSub,
   eMul,
@@ -94,7 +95,8 @@ enum eBinaryOps {
   eLShift
 };
 inline constexpr eBinaryOps MAX_BINARY_OP =
-    static_cast<eBinaryOps>(eLShift + 1);
+    static_cast<eBinaryOps>(static_cast<unsigned int>(eBinaryOps::eLShift) +
+                            1);
 
 enum class eInvocationType { eBinaryPrim, eUnaryPrim, eFuncCall };
 

@@ -60,7 +60,7 @@ public:
 
   virtual std::string RandomDigits(int num) override;
 
-  virtual enum RNDNUM_GENERATOR kind() override { return rDefaultRndNumGenerator; }
+  virtual RNDNUM_GENERATOR kind() override { return RNDNUM_GENERATOR::rDefaultRndNumGenerator; }
 
   void set_rand_depth(unsigned INT64 depth) { rand_depth_ = depth; }
 

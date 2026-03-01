@@ -70,7 +70,7 @@ Expression *ExpressionFuncall::make_random(CGContext &cg_context,
   bool std_func = ExpressionFunctionProbability(cg_context);
   ERROR_GUARD(nullptr);
   // unary/binary "functions" produce scalar types only
-  if (type && (type->eType != eSimple || type->simple_type == eVoid))
+  if (type && (type->eType != eTypeDesc::eSimple || type->simple_type == eSimpleType::eVoid))
     std_func = false;
 
   Effect effect_accum = cg_context.get_accum_effect();
@@ -107,7 +107,7 @@ Expression *ExpressionFuncall::clone() const {
  *
  */
 ExpressionFuncall::ExpressionFuncall(const FunctionInvocation &fi)
-    : Expression(eFunction), invoke(fi) {}
+    : Expression(eTermType::eFunction), invoke(fi) {}
 
 /*
  *

@@ -52,7 +52,7 @@ DefaultProgramGenerator::~DefaultProgramGenerator() {
 }
 
 void DefaultProgramGenerator::initialize() {
-  RandomNumber::CreateInstance(rDefaultRndNumGenerator, seed_);
+  RandomNumber::CreateInstance(RNDNUM_GENERATOR::rDefaultRndNumGenerator, seed_);
   output_mgr_ = DefaultOutputMgr::CreateInstance();
   assert(output_mgr_);
 

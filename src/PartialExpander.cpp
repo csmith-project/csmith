@@ -42,17 +42,18 @@ std::map<eStatementType, bool> PartialExpander::expands_backup_;
 void print_map(const map<eStatementType, bool> &m) {
   std::map<eStatementType, bool>::const_iterator i;
   for (i = m.begin(); i != m.end(); ++i) {
-    cout << "t = " << (*i).first << " , v = " << (*i).second << std::endl;
+    cout << "t = " << static_cast<int>((*i).first) << " , v = " << (*i).second
+         << std::endl;
   }
 }
 
 void PartialExpander::init_map(map<eStatementType, bool> &m, bool value) {
-  m[eAssign] = value;
-  m[eBlock] = value;
-  m[eFor] = value;
-  m[eIfElse] = value;
-  m[eInvoke] = value;
-  m[eReturn] = value;
+  m[eStatementType::eAssign] = value;
+  m[eStatementType::eBlock] = value;
+  m[eStatementType::eFor] = value;
+  m[eStatementType::eIfElse] = value;
+  m[eStatementType::eInvoke] = value;
+  m[eStatementType::eReturn] = value;
   m[MAX_STATEMENT_TYPE] = value;
 }
 
@@ -92,17 +93,17 @@ void PartialExpander::set_stmt_expand(eStatementType t, bool value) {
 bool PartialExpander::set_expand(const std::string &s) {
 
   if (!s.compare("assignment")) {
-    PartialExpander::set_stmt_expand(eAssign, true);
+    PartialExpander::set_stmt_expand(eStatementType::eAssign, true);
   } else if (!s.compare("block")) {
-    PartialExpander::set_stmt_expand(eBlock, true);
+    PartialExpander::set_stmt_expand(eStatementType::eBlock, true);
   } else if (!s.compare("for")) {
-    PartialExpander::set_stmt_expand(eFor, true);
+    PartialExpander::set_stmt_expand(eStatementType::eFor, true);
   } else if (!s.compare("if-else")) {
-    PartialExpander::set_stmt_expand(eIfElse, true);
+    PartialExpander::set_stmt_expand(eStatementType::eIfElse, true);
   } else if (!s.compare("invoke")) {
-    PartialExpander::set_stmt_expand(eInvoke, true);
+    PartialExpander::set_stmt_expand(eStatementType::eInvoke, true);
   } else if (!s.compare("return")) {
-    PartialExpander::set_stmt_expand(eReturn, true);
+    PartialExpander::set_stmt_expand(eStatementType::eReturn, true);
   } else if (!s.compare("all")) {
     PartialExpander::init_map(expands_, true);
   } else {
@@ -140,8 +141,8 @@ bool PartialExpander::expand_check(eStatementType t) {
   bool rv = false;
   rv = expands_[t];
 
-  if (t == eAssign) {
-    rv = rv || expands_[eInvoke];
+  if (t == eStatementType::eAssign) {
+    rv = rv || expands_[eStatementType::eInvoke];
   }
 
   if (rv) {

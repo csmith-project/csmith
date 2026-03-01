@@ -62,13 +62,13 @@ static string GenerateRandomConstant(const Type *type);
  *
  */
 Constant::Constant(const Type *t, const string &v)
-    : Expression(eConstant), type(t), value(v) {}
+    : Expression(eTermType::eConstant), type(t), value(v) {}
 
 /*
  *
  */
 Constant::Constant(const Constant &c)
-    : Expression(eConstant), type(c.type), value(c.value) {}
+    : Expression(eTermType::eConstant), type(c.type), value(c.value) {}
 
 /*
  *
@@ -99,7 +99,7 @@ string HexToBinary(const string &val) {
 // --------------------------------------------------------------
 static string GenerateRandomCharConstant(void) {
   string ch;
-  if (CGOptions::binary_constant() && rnd_flipcoin(pBinaryConstProb)) {
+  if (CGOptions::binary_constant() && rnd_flipcoin(BinaryConstProb())) {
     ch = string("0b") + HexToBinary(RandomHexDigits(2));
   } else if (CGOptions::ccomp() || !CGOptions::longlong())
     ch = string("0x") + RandomHexDigits(2);
@@ -112,7 +112,7 @@ static string GenerateRandomCharConstant(void) {
 static string GenerateRandomIntConstant(void) {
   string val;
   // Int constant - Max 8 Hex digits on 32-bit platforms
-  if (CGOptions::binary_constant() && rnd_flipcoin(pBinaryConstProb)) {
+  if (CGOptions::binary_constant() && rnd_flipcoin(BinaryConstProb())) {
     val = string("0b") + HexToBinary(RandomHexDigits(8));
   } else if (CGOptions::ccomp() || !CGOptions::longlong())
     val = "0x" + RandomHexDigits(8);
@@ -125,7 +125,7 @@ static string GenerateRandomIntConstant(void) {
 // --------------------------------------------------------------
 static string GenerateRandomInt128Constant(void) {
   string val;
-  if (CGOptions::binary_constant() && rnd_flipcoin(pBinaryConstProb)) {
+  if (CGOptions::binary_constant() && rnd_flipcoin(BinaryConstProb())) {
     val = string("0b") + HexToBinary(RandomHexDigits(16));
   } else
     val = "0x" + RandomHexDigits(16);
@@ -136,7 +136,7 @@ static string GenerateRandomInt128Constant(void) {
 static string GenerateRandomShortConstant(void) {
   string val;
   // Short constant - Max 4 Hex digits on 32-bit platforms
-  if (CGOptions::binary_constant() && rnd_flipcoin(pBinaryConstProb)) {
+  if (CGOptions::binary_constant() && rnd_flipcoin(BinaryConstProb())) {
     val = string("0b") + HexToBinary(RandomHexDigits(4));
   } else if (CGOptions::ccomp() || !CGOptions::longlong())
     val = "0x" + RandomHexDigits(4);
@@ -150,7 +150,7 @@ static string GenerateRandomShortConstant(void) {
 static string GenerateRandomLongConstant(void) {
   string val;
   // Long constant - Max 8 Hex digits on 32-bit platforms
-  if (CGOptions::binary_constant() && rnd_flipcoin(pBinaryConstProb)) {
+  if (CGOptions::binary_constant() && rnd_flipcoin(BinaryConstProb())) {
     val = string("0b") + HexToBinary(RandomHexDigits(8));
   } else if (!CGOptions::longlong())
     val = "0x" + RandomHexDigits(8);
@@ -163,7 +163,7 @@ static string GenerateRandomLongConstant(void) {
 static string GenerateRandomLongLongConstant(void) {
   string val;
   // Long constant - Max 8 Hex digits on 32-bit platforms
-  if (CGOptions::binary_constant() && rnd_flipcoin(pBinaryConstProb)) {
+  if (CGOptions::binary_constant() && rnd_flipcoin(BinaryConstProb())) {
     val = string("0b") + HexToBinary(RandomHexDigits(16)) + "LL";
   } else
     val = "0x" + RandomHexDigits(16) + "LL";
@@ -220,10 +220,10 @@ static string GenerateSmallRandomFloatHexConstant(int num) {
 }
 
 static string GenerateRandomConstantInRange(const Type *type, int bound) {
-  assert(type->eType == eSimple);
+  assert(type->eType == eTypeDesc::eSimple);
 
   ostringstream oss;
-  if (type->simple_type == eInt) {
+  if (type->simple_type == eSimpleType::eInt) {
     int b = static_cast<int>(pow(2, static_cast<double>(bound) / 2));
     int num = pure_rnd_upto(b);
     ERROR_GUARD("");
@@ -233,7 +233,7 @@ static string GenerateRandomConstantInRange(const Type *type, int bound) {
       oss << num;
     else
       oss << "-" << num;
-  } else if (type->simple_type == eUInt) {
+  } else if (type->simple_type == eSimpleType::eUInt) {
     int b = static_cast<int>(pow(2, static_cast<double>(bound) / 2));
     if (b < 0)
       b = INT_MAX;
@@ -252,7 +252,7 @@ static string GenerateRandomConstantInRange(const Type *type, int bound) {
  *************************************************************/
 static string GenerateRandomStructConstant(const Type *type) {
   string value = "{";
-  assert(type->eType == eStruct);
+  assert(type->eType == eTypeDesc::eStruct);
   assert(type->fields.size() == type->bitfields_length_.size());
 
   for (size_t i = 0; i < type->fields.size(); i++) {
@@ -286,7 +286,7 @@ static string GenerateRandomStructConstant(const Type *type) {
  *************************************************************/
 static string GenerateRandomUnionConstant(const Type *type) {
   string value = "{";
-  assert(type->eType == eUnion &&
+  assert(type->eType == eTypeDesc::eUnion &&
          type->fields.size() == type->bitfields_length_.size());
   value += GenerateRandomConstant(type->fields[0]);
   value += "}";
@@ -297,19 +297,19 @@ static string GenerateRandomConstant(const Type *type) {
   string v;
   if (type == 0) {
     v = "0";
-  } else if (type->eType == eStruct) {
+  } else if (type->eType == eTypeDesc::eStruct) {
     v = GenerateRandomStructConstant(type);
     ERROR_GUARD("");
-  } else if (type->eType == eUnion) {
+  } else if (type->eType == eTypeDesc::eUnion) {
     v = GenerateRandomUnionConstant(type);
     ERROR_GUARD("");
   }
   // the only possible constant for a pointer is "0"
-  else if (type->eType == ePointer) {
+  else if (type->eType == eTypeDesc::ePointer) {
     v = "0";
-  } else if (type->eType == eSimple) {
+  } else if (type->eType == eTypeDesc::eSimple) {
     eSimpleType st = type->simple_type;
-    assert(st != eVoid);
+    assert(st != eSimpleType::eVoid);
     // assert((eType >= 0) && (eType <= MAX_SIMPLE_TYPES));
     if (pure_rnd_flipcoin(50)) {
       ERROR_GUARD("");
@@ -325,32 +325,32 @@ static string GenerateRandomConstant(const Type *type) {
       // trouble for some static analyzers
       ostringstream oss;
       switch (st) {
-      case eUChar:
+      case eSimpleType::eUChar:
         oss << (unsigned int)(unsigned char)num;
         break;
-      case eUShort:
+      case eSimpleType::eUShort:
         oss << (unsigned short)num;
         break;
-      case eUInt:
+      case eSimpleType::eUInt:
         oss << (unsigned int)num;
         break;
-      case eULong:
-      case eULongLong:
+      case eSimpleType::eULong:
+      case eSimpleType::eULongLong:
         if (!CGOptions::longlong()) {
           oss << (unsigned int)num;
         } else {
-          oss << ((type->simple_type == eULong) ? (unsigned long)num
+          oss << ((type->simple_type == eSimpleType::eULong) ? (unsigned long)num
                                                 : (unsigned INT64)num);
         }
         break;
-      case eFloat:
+      case eSimpleType::eFloat:
         oss << GenerateSmallRandomFloatHexConstant(num);
         break;
       default:
         oss << num;
         break;
       }
-      if (type->simple_type == eFloat) {
+      if (type->simple_type == eSimpleType::eFloat) {
         v = oss.str();
       } else {
         if (CGOptions::ccomp() || !CGOptions::longlong())
@@ -360,46 +360,46 @@ static string GenerateRandomConstant(const Type *type) {
       }
     } else {
       switch (st) {
-      case eVoid:
+      case eSimpleType::eVoid:
         v = "/* void */";
         break;
-      case eChar:
+      case eSimpleType::eChar:
         v = GenerateRandomCharConstant();
         break;
-      case eInt:
+      case eSimpleType::eInt:
         v = GenerateRandomIntConstant();
         break;
-      case eShort:
+      case eSimpleType::eShort:
         v = GenerateRandomShortConstant();
         break;
-      case eLong:
+      case eSimpleType::eLong:
         v = GenerateRandomLongConstant();
         break;
-      case eLongLong:
+      case eSimpleType::eLongLong:
         v = GenerateRandomLongLongConstant();
         break;
-      case eUChar:
+      case eSimpleType::eUChar:
         v = GenerateRandomCharConstant();
         break;
-      case eUInt:
+      case eSimpleType::eUInt:
         v = GenerateRandomIntConstant();
         break;
-      case eUShort:
+      case eSimpleType::eUShort:
         v = GenerateRandomShortConstant();
         break;
-      case eULong:
+      case eSimpleType::eULong:
         v = GenerateRandomLongConstant();
         break;
-      case eULongLong:
+      case eSimpleType::eULongLong:
         v = GenerateRandomLongLongConstant();
         break;
-      case eFloat:
+      case eSimpleType::eFloat:
         v = GenerateRandomFloatHexConstant();
         break;
-      case eInt128:
+      case eSimpleType::eInt128:
         v = GenerateRandomInt128Constant();
         break;
-      case eUInt128:
+      case eSimpleType::eUInt128:
         v = GenerateRandomInt128Constant();
         break;
       // case eDouble:    v = GenerateRandomFloatConstant();		break;
@@ -410,7 +410,7 @@ static string GenerateRandomConstant(const Type *type) {
   } else {
     assert(0); // no support for types other than integers and structs for now
   }
-  return (type->eType == eSimple && CGOptions::mark_mutable_const())
+  return (type->eType == eTypeDesc::eSimple && CGOptions::mark_mutable_const())
              ? "(" + v + ")"
              : v;
 }
@@ -430,7 +430,7 @@ Constant *Constant::make_random_upto(unsigned int limit) {
   ostringstream oss;
   oss << rnd_upto(limit);
   ERROR_GUARD(nullptr);
-  return new Constant(&Type::get_simple_type(eUInt), oss.str());
+  return new Constant(&Type::get_simple_type(eSimpleType::eUInt), oss.str());
 }
 
 Constant *Constant::make_random_nonzero(const Type *type) {
@@ -455,7 +455,7 @@ Constant *Constant::make_int(int v) {
 	static Constant *cache_constants[cache_size];
 #endif
 
-  const Type &int_type = Type::get_simple_type(eInt);
+  const Type &int_type = Type::get_simple_type(eSimpleType::eInt);
   ERROR_GUARD(nullptr);
 
 #if 0
@@ -535,7 +535,7 @@ void Constant::Output(std::ostream &out) const {
   if (!value.empty() && value[0] == '-') {
     output_cast(out);
     out << "(" << value << ")";
-  } else if (type->eType == ePointer && equals(0)) {
+  } else if (type->eType == eTypeDesc::ePointer && equals(0)) {
     // don't output cast for nullptr:
     if (CGOptions::lang_cpp()) {
       if (CGOptions::cpp11())

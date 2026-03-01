@@ -159,7 +159,7 @@ void FactMgr::update_facts_for_oos_vars(const vector<const Variable *> &vars,
   // "point to garbage"
   for (const Variable *var : vars) {
     for (size_t j = 0; j < facts.size(); j++) {
-      if (facts[j]->eCat == ePointTo) {
+      if (facts[j]->eCat == eFactCategory::ePointTo) {
         const FactPointTo *f = static_cast<const FactPointTo *>(facts[j]);
         const FactPointTo *new_fact = f->mark_dead_var(var);
         if (new_fact) {
@@ -195,7 +195,7 @@ void FactMgr::remove_function_local_facts(std::vector<const Fact *> &inputs,
   // mark any remaining facts that may point to a local vars of this
   // function as "point to garbage"
   for (i = 0; i < inputs.size(); i++) {
-    if (inputs[i]->eCat == ePointTo) {
+    if (inputs[i]->eCat == eFactCategory::ePointTo) {
       const FactPointTo *f = static_cast<const FactPointTo *>(inputs[i]);
       const FactPointTo *new_fact = f->mark_func_end(stm);
       if (new_fact) {
@@ -254,16 +254,16 @@ void FactMgr::set_fact_in(const Statement *s, const FactVec &facts) {
  * local varibles of the function
  */
 void FactMgr::set_fact_out(const Statement *s, const FactVec &facts) {
-  if (s->eType == eContinue || s->eType == eBreak) {
+  if (s->eType == eStatementType::eContinue || s->eType == eStatementType::eBreak) {
     FactVec facts_copy = facts;
     remove_loop_local_facts(s, facts_copy);
     map_facts_out[s] = facts_copy;
-  } else if (s->eType == eGoto) {
+  } else if (s->eType == eStatementType::eGoto) {
     const StatementGoto *sg = dynamic_cast<const StatementGoto *>(s);
     FactVec facts_copy;
     FactMgr::update_facts_for_dest(facts, facts_copy, sg->dest);
     map_facts_out[s] = facts_copy;
-  } else if (s->eType == eReturn || s->parent == nullptr) {
+  } else if (s->eType == eStatementType::eReturn || s->parent == nullptr) {
     FactVec facts_copy = facts;
     remove_function_local_facts(facts_copy, s);
     map_facts_out[s] = facts_copy;
@@ -280,9 +280,9 @@ void FactMgr::set_fact_out(const Statement *s, const FactVec &facts) {
 void FactMgr::add_fact_out(const Statement *stm, const Fact *fact) {
   const Variable *var = fact->get_var();
   if (func->is_var_visible(var, stm)) {
-    if (stm->eType == eReturn && !var->is_global())
+    if (stm->eType == eStatementType::eReturn && !var->is_global())
       return;
-    if (stm->eType == eBreak || stm->eType == eContinue) {
+    if (stm->eType == eStatementType::eBreak || stm->eType == eStatementType::eContinue) {
       Block *b;
       for (b = stm->parent; b && !b->looping; b = b->parent) {
         /* Empty. */
@@ -291,7 +291,7 @@ void FactMgr::add_fact_out(const Statement *stm, const Fact *fact) {
         return;
       }
     }
-    if (stm->eType == eGoto) {
+    if (stm->eType == eStatementType::eGoto) {
       const StatementGoto *sg = static_cast<const StatementGoto *>(stm);
       if (!func->is_var_visible(var, sg->dest)) {
         return;
@@ -334,7 +334,7 @@ void FactMgr::caller_to_callee_handover(const FunctionInvocationUser *fiu,
     for (i = 0; i < len; i++) {
       // const Variable* v = f->get_var();
       for (j = 0; j < keep_facts.size(); j++) {
-        if (keep_facts[j]->eCat == ePointTo) {
+        if (keep_facts[j]->eCat == eFactCategory::ePointTo) {
           const FactPointTo *fp =
               dynamic_cast<const FactPointTo *>(keep_facts[j]);
           if (fp->point_to(inputs[i]->get_var())) {
@@ -440,7 +440,7 @@ void FactMgr::update_facts_for_dest(const FactVec &facts_in, FactVec &facts_out,
         oos_vars.push_back(var);
       }
     }
-    if (f->eCat == ePointTo) {
+    if (f->eCat == eFactCategory::ePointTo) {
       const FactPointTo *fp = dynamic_cast<const FactPointTo *>(f);
       for (j = 0; j < fp->get_point_to_vars().size(); j++) {
         const Variable *v = fp->get_point_to_vars()[j];
@@ -475,13 +475,13 @@ FactMgr::~FactMgr(void) {
 
 void FactMgr::add_interested_facts(int interests) {
   // create meta facts for subsequent iterations
-  if (interests & ePointTo) {
+  if (interests & static_cast<int>(eFactCategory::ePointTo)) {
     // meta_facts.push_back(new FactPointTo(0));
     // meta_facts.push_back(FactPointTo::make_fact(0));
     FactPointTo *fp = FactPointTo::make_fact(0);
     meta_facts.push_back(fp);
   }
-  if (interests & eUnionWrite) {
+  if (interests & static_cast<int>(eFactCategory::eUnionWrite)) {
     FactUnion *fu = FactUnion::make_fact(0, 0);
     meta_facts.push_back(fu);
   }
@@ -576,10 +576,10 @@ bool FactMgr::merge_jump_facts(FactVec &facts, const FactVec &jump_facts) {
       const Fact *jump_f = find_related_fact(jump_facts, f);
       // this should not happen: jump over initializers
       if (jump_f == 0) {
-        if (f->eCat == ePointTo) {
+        if (f->eCat == eFactCategory::ePointTo) {
           jump_f =
               FactPointTo::make_fact(f->get_var(), FactPointTo::garbage_ptr);
-        } else if (f->eCat == eUnionWrite) {
+        } else if (f->eCat == eFactCategory::eUnionWrite) {
           jump_f = FactUnion::make_fact(f->get_var(), FactUnion::BOTTOM);
         }
       }
@@ -603,7 +603,7 @@ void FactMgr::create_cfg_edge(const Statement *src, const Statement *dest,
 void FactMgr::remove_loop_local_facts(const Statement *s, FactVec &facts) {
   // filter out out-of-scope facts
   const Block *b =
-      (s->eType == eBlock) ? static_cast<const Block *>(s) : s->parent;
+      (s->eType == eStatementType::eBlock) ? static_cast<const Block *>(s) : s->parent;
   vector<Variable *> local_vars = b->local_vars;
   while (b && !b->looping) {
     b = b->parent;
@@ -624,13 +624,13 @@ void FactMgr::output_assertions(std::ostream &out, const Statement *stm,
   if (facts.empty())
     return;
 
-  if (stm->eType == eFor || stm->eType == eIfElse) {
+  if (stm->eType == eStatementType::eFor || stm->eType == eStatementType::eIfElse) {
     output_tab(out, indent);
     std::ostringstream ss;
-    ss << "facts after " << (stm->eType == eFor ? "for loop" : "branching");
+    ss << "facts after " << (stm->eType == eStatementType::eFor ? "for loop" : "branching");
     output_comment_line(out, ss.str());
   }
-  if (stm->eType == eAssign || stm->eType == eInvoke || stm->eType == eReturn) {
+  if (stm->eType == eStatementType::eAssign || stm->eType == eStatementType::eInvoke || stm->eType == eStatementType::eReturn) {
     output_tab(out, indent);
     std::ostringstream ss;
     ss << "statement id: " << stm->stm_id;
@@ -689,7 +689,7 @@ void FactMgr::find_updated_final_facts(const Statement *stm,
 
 void FactMgr::find_dangling_global_ptrs(Function *f) {
   for (size_t i = 0; i < global_facts.size(); i++) {
-    if (global_facts[i]->eCat == ePointTo) {
+    if (global_facts[i]->eCat == eFactCategory::ePointTo) {
       const FactPointTo *fp = static_cast<const FactPointTo *>(global_facts[i]);
       const Variable *v = fp->get_var();
       // const pointers should never be dangling

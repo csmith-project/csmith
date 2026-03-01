@@ -46,7 +46,7 @@
 // Needs cast only if it is nullptr
 void cast_if_needed(Expression *exp) {
   const Type &exp_type = exp->get_type();
-  if ((exp->term_type == eConstant) && (exp_type.eType == ePointer) &&
+  if ((exp->term_type == eTermType::eConstant) && (exp_type.eType == eTypeDesc::ePointer) &&
       exp->equals(0)) {
     exp->cast_type = &exp_type;
   }
@@ -67,7 +67,7 @@ ExpressionComma *ExpressionComma::make_random(CGContext &cg_context,
 }
 
 ExpressionComma::ExpressionComma(const Expression &l, const Expression &r)
-    : Expression(eCommaExpr), lhs(l), rhs(r) {
+    : Expression(eTermType::eCommaExpr), lhs(l), rhs(r) {
   // nothing else to do
 }
 

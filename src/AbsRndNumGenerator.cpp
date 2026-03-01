@@ -69,10 +69,10 @@ AbsRndNumGenerator::make_rndnum_generator(RNDNUM_GENERATOR impl,
 
   AbsRndNumGenerator::seedrand(seed);
   switch (impl) {
-  case rDefaultRndNumGenerator:
+  case RNDNUM_GENERATOR::rDefaultRndNumGenerator:
     rImpl = DefaultRndNumGenerator::make_rndnum_generator(seed);
     break;
-  case rDFSRndNumGenerator:
+  case RNDNUM_GENERATOR::rDFSRndNumGenerator:
     rImpl = DFSRndNumGenerator::make_rndnum_generator();
     break;
   default:

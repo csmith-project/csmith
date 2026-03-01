@@ -47,7 +47,7 @@ class Fact;
 class CVQualifiers;
 class ArrayVariable;
 
-enum eVariableScope {
+enum class eVariableScope {
   eGlobal,
   eParentLocal,
   eParentParam,
@@ -69,7 +69,8 @@ public:
   static Variable *select(Effect::Access access, const CGContext &cg_context,
                           const Type *type, const CVQualifiers *qfer,
                           const vector<const Variable *> &invalid_vars,
-                          eMatchType mt, eVariableScope scope = MAX_VAR_SCOPE);
+                          eMatchType mt,
+                          eVariableScope scope = eVariableScope::MAX_VAR_SCOPE);
   static Variable *choose_ok_var(const vector<Variable *> &vars);
   static const Variable *choose_ok_var(const vector<const Variable *> &vars);
   static const Variable *

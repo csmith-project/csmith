@@ -47,23 +47,23 @@ void CrestExtension::GenerateValues() {
 }
 
 std::string CrestExtension::type_to_string(const Type *t) {
-  assert(t->eType == eSimple);
+  assert(t->eType == eTypeDesc::eSimple);
   switch (t->simple_type) {
-  case eChar:
+  case eSimpleType::eChar:
     return "char";
-  case eUChar:
+  case eSimpleType::eUChar:
     return "unsigned_char";
-  case eShort:
+  case eSimpleType::eShort:
     return "short";
-  case eUShort:
+  case eSimpleType::eUShort:
     return "unsigned_short";
-  case eInt:
+  case eSimpleType::eInt:
     return "int";
-  case eUInt:
+  case eSimpleType::eUInt:
     return "unsigned_int";
-  case eLong:
+  case eSimpleType::eLong:
     return "int";
-  case eULong:
+  case eSimpleType::eULong:
     return "unsigned_int";
   default:
     assert(0);

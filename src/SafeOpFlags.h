@@ -34,16 +34,17 @@
 #include "Type.h"
 #include <ostream>
 
-enum SafeOpKind {
+enum class SafeOpKind {
   sOpUnary,
   sOpBinary,
   sOpAssign,
 };
 
 inline constexpr SafeOpKind MAX_SAFE_OP_KIND =
-    static_cast<SafeOpKind>(sOpAssign + 1);
+    static_cast<SafeOpKind>(static_cast<unsigned int>(SafeOpKind::sOpAssign) +
+                            1);
 
-enum SafeOpSize {
+enum class SafeOpSize {
   sInt8,
   sInt16,
   sInt32,
@@ -51,7 +52,7 @@ enum SafeOpSize {
   sFloat,
 };
 inline constexpr SafeOpSize MAX_SAFE_OP_SIZE =
-    static_cast<SafeOpSize>(sFloat + 1);
+    static_cast<SafeOpSize>(static_cast<unsigned int>(SafeOpSize::sFloat) + 1);
 
 class SafeOpFlags {
 public:
@@ -65,7 +66,7 @@ public:
 
   static SafeOpFlags *make_dummy_flags();
 
-  static eSimpleType flags_to_type(bool sign, enum SafeOpSize size);
+  static eSimpleType flags_to_type(bool sign, SafeOpSize size);
 
   const Type *get_lhs_type(void);
   const Type *get_rhs_type(void);
@@ -84,10 +85,10 @@ public:
 
   bool get_op2_sign() const { return op2_; }
 
-  enum SafeOpSize get_op_size() const { return op_size_; }
+  SafeOpSize get_op_size() const { return op_size_; }
 
-  std::string to_string(enum eBinaryOps op) const;
-  std::string to_string(enum eUnaryOps op) const;
+  std::string to_string(eBinaryOps op) const;
+  std::string to_string(eUnaryOps op) const;
   static int to_id(const std::string &fname);
 
   ~SafeOpFlags();
@@ -108,7 +109,7 @@ private:
   bool static return_float_type(const Type *rv_type, const Type *op1_type,
                                 eUnaryOps uop);
 
-  std::string safe_float_func_string(enum eBinaryOps op) const;
+  std::string safe_float_func_string(eBinaryOps op) const;
 
   SafeOpFlags();
 

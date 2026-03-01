@@ -233,7 +233,8 @@ void CGOptions::set_default_settings(void) {
   max_exhaustive_depth(CGOPTIONS_DEFAULT_MAX_EXHAUSTIVE_DEPTH);
   max_indirect_level(CGOPTIONS_DEFAULT_MAX_INDIRECT_LEVEL);
   output_file(CGOPTIONS_DEFAULT_OUTPUT_FILE);
-  interested_facts(ePointTo | eUnionWrite);
+  interested_facts(static_cast<int>(eFactCategory::ePointTo) |
+                   static_cast<int>(eFactCategory::eUnionWrite));
   allow_const_volatile(true);
   avoid_signed_overflow(true);
   CGOptions::paranoid(false);

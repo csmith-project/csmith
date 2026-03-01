@@ -127,7 +127,7 @@ void Bookkeeper::doFinalization() {
 
 int Bookkeeper::stat_blk_depths_for_stmt(const Statement *s) {
   int cnt = 0;
-  if (s->eType != eBlock) {
+  if (s->eType != eStatementType::eBlock) {
     incr_counter(blk_depth_cnts, s->get_blk_depth() - 1);
     cnt++;
   }
@@ -257,12 +257,12 @@ void Bookkeeper::output_pointer_statistics(std::ostream &out) {
     }
     const Variable *var = ptrs[i];
     const Type *t = var->type;
-    assert(t->eType == ePointer);
+    assert(t->eType == eTypeDesc::ePointer);
     if (t->get_indirect_level() > 1) {
       point_to_pointer++;
-    } else if (t->ptr_type->eType == eSimple) {
+    } else if (t->ptr_type->eType == eTypeDesc::eSimple) {
       point_to_scalar++;
-    } else if (t->ptr_type->eType == eStruct) {
+    } else if (t->ptr_type->eType == eTypeDesc::eStruct) {
       point_to_struct++;
     }
   }
@@ -360,13 +360,13 @@ void Bookkeeper::record_bitfields_writes(const Variable *var) {
  */
 void Bookkeeper::record_pointer_comparisons(const Expression *lhs,
                                             const Expression *rhs) {
-  if (lhs->term_type != eFunction && rhs->term_type != eFunction) {
-    assert(lhs->get_type().eType == ePointer &&
-           rhs->get_type().eType == ePointer);
-    if ((lhs->term_type == eVariable && rhs->term_type == eConstant) ||
-        (rhs->term_type == eVariable && lhs->term_type == eConstant)) {
+  if (lhs->term_type != eTermType::eFunction && rhs->term_type != eTermType::eFunction) {
+    assert(lhs->get_type().eType == eTypeDesc::ePointer &&
+           rhs->get_type().eType == eTypeDesc::ePointer);
+    if ((lhs->term_type == eTermType::eVariable && rhs->term_type == eTermType::eConstant) ||
+        (rhs->term_type == eTermType::eVariable && lhs->term_type == eTermType::eConstant)) {
       cmp_ptr_to_null++;
-    } else if (lhs->term_type == eVariable && rhs->term_type == eVariable) {
+    } else if (lhs->term_type == eTermType::eVariable && rhs->term_type == eTermType::eVariable) {
       const ExpressionVariable *left =
           static_cast<const ExpressionVariable *>(lhs);
       const ExpressionVariable *right =

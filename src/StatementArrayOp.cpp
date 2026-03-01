@@ -140,7 +140,7 @@ StatementArrayOp::make_random_array_init(CGContext &cg_context) {
   // JYTODO: initialize only field(s) of array members if they are of type
   // struct
   Block *b = cg_context.get_current_block()->random_parent_block();
-  Expression *init = VariableSelector::make_init_value(Effect::READ, cg_context,
+  Expression *init = VariableSelector::make_init_value(Effect::Access::READ, cg_context,
                                                        av->type, &av->qfer, b);
   assert(init->visit_facts(fm->global_facts, cg_context));
   StatementArrayOp *sa = new StatementArrayOp(cg_context.get_current_block(),
@@ -166,7 +166,7 @@ StatementArrayOp::StatementArrayOp(Block *b, const ArrayVariable *av,
                                    const std::vector<int> &inits,
                                    const std::vector<int> &incrs,
                                    const Block *body)
-    : Statement(eArrayOp, b), array_var(av), ctrl_vars(cvs), inits(inits),
+    : Statement(eStatementType::eArrayOp, b), array_var(av), ctrl_vars(cvs), inits(inits),
       incrs(incrs), body(body), init_value(0) {
   // Nothing else to do.
 }
@@ -179,7 +179,7 @@ StatementArrayOp::StatementArrayOp(Block *b, const ArrayVariable *av,
                                    const std::vector<int> &inits,
                                    const std::vector<int> &incrs,
                                    const Expression *e)
-    : Statement(eArrayOp, b), array_var(av), ctrl_vars(cvs), inits(inits),
+    : Statement(eStatementType::eArrayOp, b), array_var(av), ctrl_vars(cvs), inits(inits),
       incrs(incrs), body(0), init_value(e) {
   // Nothing else to do.
 }
@@ -236,7 +236,7 @@ void StatementArrayOp::Output(std::ostream &out, FactMgr *fm,
     outputln(out);
     // cannot assign array members to a struct/union constant directly, has to
     // create a "fake" struct var first
-    if (init_value->term_type == eConstant && array_var->is_aggregate()) {
+    if (init_value->term_type == eTermType::eConstant && array_var->is_aggregate()) {
       output_tab(out, indent + 1);
       array_var->type->Output(out);
       out << " tmp = ";

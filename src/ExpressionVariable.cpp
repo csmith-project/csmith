@@ -69,10 +69,10 @@ ExpressionVariable *ExpressionVariable::make_random(CGContext &cg_context,
   do {
     const Variable *var = 0;
     // try to use one of must_read_vars in CGContext
-    var = VariableSelector::select_must_use_var(Effect::READ, cg_context, type,
+    var = VariableSelector::select_must_use_var(Effect::Access::READ, cg_context, type,
                                                 qfer);
     if (var == nullptr) {
-      var = VariableSelector::select(Effect::READ, cg_context, type, qfer,
+      var = VariableSelector::select(Effect::Access::READ, cg_context, type, qfer,
                                      dummy, eMatchType::eFlexible);
     }
     ERROR_GUARD(nullptr);
@@ -134,19 +134,19 @@ ExpressionVariable *ExpressionVariable::make_random(CGContext &cg_context,
  *
  */
 ExpressionVariable::ExpressionVariable(const Variable &v)
-    : Expression(eVariable), var(v), type(v.type) {}
+    : Expression(eTermType::eVariable), var(v), type(v.type) {}
 
 /*
  *
  */
 ExpressionVariable::ExpressionVariable(const Variable &v, const Type *t)
-    : Expression(eVariable), var(v), type(t) {}
+    : Expression(eTermType::eVariable), var(v), type(t) {}
 
 /*
  *
  */
 ExpressionVariable::ExpressionVariable(const ExpressionVariable &expr)
-    : Expression(eVariable), var(expr.var), type(expr.type) {
+    : Expression(eTermType::eVariable), var(expr.var), type(expr.type) {
   // Nothing to do
 }
 
@@ -264,7 +264,7 @@ bool ExpressionVariable::visit_facts(vector<const Fact *> &inputs,
 bool ExpressionVariable::compatible(const Expression *exp) const {
   assert(exp);
 
-  // if (!(exp->term_type == eVariable))
+  // if (!(exp->term_type == eTermType::eVariable))
   // return false;
 
   return exp->compatible(&var);

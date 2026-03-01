@@ -416,9 +416,9 @@ Function *Function::make_random_signature(const CGContext &cg_context,
   string rvname = f->name + "_" + "rv";
   f->alias_name = f->name + "_alias";
   CVQualifiers ret_qfer =
-      qfer == 0 ? CVQualifiers::random_qualifiers(type, Effect::READ,
+      qfer == 0 ? CVQualifiers::random_qualifiers(type, Effect::Access::READ,
                                                   cg_context, true)
-                : qfer->random_qualifiers(true, Effect::READ, cg_context);
+                : qfer->random_qualifiers(true, Effect::Access::READ, cg_context);
   ERROR_GUARD(nullptr);
   f->rv = Variable::CreateVariable(rvname, type, nullptr, &ret_qfer);
   GenerateParameterList(*f);
@@ -489,9 +489,9 @@ static int OutputFormalParam(Variable *var, std::ostream *pOut) {
   param_first = false;
   // var->type->Output( out );
   if (!CGOptions::arg_structs() && var->type)
-    assert(var->type->eType != eStruct);
+    assert(var->type->eType != eTypeDesc::eStruct);
   if (!CGOptions::arg_unions() && var->type)
-    assert(var->type->eType != eUnion);
+    assert(var->type->eType != eTypeDesc::eUnion);
 
   var->output_qualified_type(out);
   out << " " << var->name;
@@ -519,9 +519,9 @@ void Function::OutputFormalParamList(std::ostream &out) {
  */
 void Function::OutputHeader(std::ostream &out) {
   if (!CGOptions::return_structs() && return_type)
-    assert(return_type->eType != eStruct);
+    assert(return_type->eType != eTypeDesc::eStruct);
   if (!CGOptions::return_unions() && return_type)
-    assert(return_type->eType != eUnion);
+    assert(return_type->eType != eTypeDesc::eUnion);
   if (is_inlined)
     out << "inline ";
   // force functions to be static if necessary
@@ -611,8 +611,8 @@ void Function::Output(std::ostream &out) {
 void Function::make_return_const() {
   if (CGOptions::depth_protect() && need_return_stmt()) {
     assert(return_type);
-    if (return_type->eType == eSimple)
-      assert(return_type->simple_type != eVoid);
+    if (return_type->eType == eTypeDesc::eSimple)
+      assert(return_type->simple_type != eSimpleType::eVoid);
     Constant *c = Constant::make_random(return_type);
     ERROR_RETURN();
     this->ret_c = c;
@@ -620,7 +620,7 @@ void Function::make_return_const() {
 }
 
 bool Function::need_return_stmt() {
-  return (return_type->eType != eSimple || return_type->simple_type != eVoid);
+  return (return_type->eType != eTypeDesc::eSimple || return_type->simple_type != eSimpleType::eVoid);
 }
 
 /*

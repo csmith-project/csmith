@@ -52,17 +52,17 @@ const int FactUnion::BOTTOM = -1;
  * constructor
  */
 FactUnion::FactUnion(const Variable *v)
-    : Fact(eUnionWrite), var(v), last_written_fid(TOP) {
+    : Fact(eFactCategory::eUnionWrite), var(v), last_written_fid(TOP) {
   // nothing else to do
 }
 
 FactUnion::FactUnion(const Variable *v, int fid)
-    : Fact(eUnionWrite), var(v), last_written_fid(fid) {
+    : Fact(eFactCategory::eUnionWrite), var(v), last_written_fid(fid) {
   // nothing else to do
 }
 
 const Type *FactUnion::get_last_written_type(void) const {
-  assert(var->type && var->type->eType == eUnion);
+  assert(var->type && var->type->eType == eTypeDesc::eUnion);
   if (is_top() || is_bottom())
     return nullptr;
   assert(last_written_fid >= 0 &&
@@ -77,12 +77,12 @@ FactUnion::rhs_to_lhs_transfer(const std::vector<const Fact *> &facts,
   vector<const Fact *> empty;
   // assert all possible LHS are unions
   for (size_t i = 0; i < lvars.size(); i++) {
-    assert(lvars[i]->type->eType == eUnion);
+    assert(lvars[i]->type->eType == eTypeDesc::eUnion);
   }
   assert(rhs != nullptr);
-  if (rhs->term_type == eConstant) {
+  if (rhs->term_type == eTermType::eConstant) {
     return make_facts(lvars, 0);
-  } else if (rhs->term_type == eVariable) {
+  } else if (rhs->term_type == eTermType::eVariable) {
     const ExpressionVariable *expvar =
         static_cast<const ExpressionVariable *>(rhs);
     int indirect = expvar->get_indirect_level();
@@ -95,7 +95,7 @@ FactUnion::rhs_to_lhs_transfer(const std::vector<const Fact *> &facts,
     if (rhs_fact) {
       return make_facts(lvars, rhs_fact->get_last_written_fid());
     }
-  } else if (rhs->term_type == eFunction) {
+  } else if (rhs->term_type == eTermType::eFunction) {
     const FunctionInvocation *fi = rhs->get_invoke();
     if (fi->invoke_type == eInvocationType::eFuncCall) {
       const FunctionInvocationUser *fiu =
@@ -103,14 +103,14 @@ FactUnion::rhs_to_lhs_transfer(const std::vector<const Fact *> &facts,
       // find the fact regarding return variable
       const FactUnion *rv_fact =
           dynamic_cast<const FactUnion *>(get_return_fact_for_invocation(
-              fiu, fiu->get_func()->rv, eUnionWrite));
+              fiu, fiu->get_func()->rv, eFactCategory::eUnionWrite));
       assert(rv_fact);
       return make_facts(lvars, rv_fact->get_last_written_fid());
     }
-  } else if (rhs->term_type == eAssignment) {
+  } else if (rhs->term_type == eTermType::eAssignment) {
     const ExpressionAssign *ea = dynamic_cast<const ExpressionAssign *>(rhs);
     return rhs_to_lhs_transfer(facts, lvars, ea->get_rhs());
-  } else if (rhs->term_type == eCommaExpr) {
+  } else if (rhs->term_type == eTermType::eCommaExpr) {
     const ExpressionComma *ec = dynamic_cast<const ExpressionComma *>(rhs);
     return rhs_to_lhs_transfer(facts, lvars, ec->get_rhs());
   }
@@ -126,7 +126,7 @@ int FactUnion::abstract_fact_for_assign(const std::vector<const Fact *> &facts,
   // find all the pointed variables on LHS
   std::vector<const Variable *> lvars = FactPointTo::merge_pointees_of_pointer(
       lhs->get_var()->get_collective(), lhs->get_indirect_level(), facts);
-  if (lhs->get_type().eType == eUnion) {
+  if (lhs->get_type().eType == eTypeDesc::eUnion) {
     facts_out = rhs_to_lhs_transfer(facts, lvars, rhs);
     return lvars.size();
   }
@@ -160,7 +160,7 @@ Fact *FactUnion::clone(void) const {
 }
 
 FactUnion *FactUnion::make_fact(const Variable *v, int fid) {
-  assert(v == nullptr || v->type->eType == eUnion);
+  assert(v == nullptr || v->type->eType == eTypeDesc::eUnion);
   FactUnion *fact = new FactUnion(v, fid);
   facts_.push_back(fact);
   return fact;
@@ -261,7 +261,7 @@ bool FactUnion::imply(const Fact &f) const {
 
 bool FactUnion::is_field_readable(const Variable *v, int fid,
                                   const vector<const Fact *> &facts) {
-  assert(v->type->eType == eUnion && fid >= 0 &&
+  assert(v->type->eType == eTypeDesc::eUnion && fid >= 0 &&
          fid < (int)(v->type->fields.size()));
   FactUnion tmp(v, fid);
   const FactUnion *fu =

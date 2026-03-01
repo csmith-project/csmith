@@ -71,7 +71,7 @@ StatementExpr *StatementExpr::make_random(CGContext &cg_context) {
  *
  */
 StatementExpr::StatementExpr(Block *b, const FunctionInvocation &e)
-    : Statement(eInvoke, b), expr(e) {
+    : Statement(eStatementType::eInvoke, b), expr(e) {
   // Nothing else to do.
 }
 

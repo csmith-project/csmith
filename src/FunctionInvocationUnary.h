@@ -64,7 +64,7 @@ public:
 
   virtual bool equals(int num) const override;
 
-  virtual bool is_0_or_1(void) const override { return eFunc == eNot; }
+  virtual bool is_0_or_1(void) const override { return eFunc == eUnaryOps::eNot; }
 
 private:
   eUnaryOps eFunc;

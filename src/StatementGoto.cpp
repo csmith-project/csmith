@@ -112,7 +112,7 @@ StatementGoto *StatementGoto::make_random(CGContext &cg_context) {
     other_stm = ok_stms[stm_id];
     cg_context.get_effect_stm().clear();
     // Expression* test = Expression::make_random(cg_context, get_int_type(),
-    // true, true, eVariable);
+    // true, true, eTermType::eVariable);
     //  use a variable that is already read in the context to avoid introducing
     //  conflict by the condition
     const Variable *cond_var = nullptr;
@@ -206,7 +206,7 @@ StatementGoto *StatementGoto::make_random(CGContext &cg_context) {
       // special handling for control statements: their output facts has been
       // altered for oos variables use the input facts intead (warning: this
       // rely on the assumption that these statements doesn't change fact env.
-      if (stm->is_ctrl_stmt() || stm->eType == eReturn) {
+      if (stm->is_ctrl_stmt() || stm->eType == eStatementType::eReturn) {
         fm->global_facts = fm->map_facts_in[stm];
       }
       Bookkeeper::forward_jump_cnt++;
@@ -221,7 +221,7 @@ StatementGoto *StatementGoto::make_random(CGContext &cg_context) {
 StatementGoto::StatementGoto(Block *b, const Expression &test,
                              const Statement *dest,
                              const std::vector<const Variable *> &vars)
-    : Statement(eGoto, b), test(test), dest(dest), init_skipped_vars(vars) {
+    : Statement(eStatementType::eGoto, b), test(test), dest(dest), init_skipped_vars(vars) {
   if (stm_labels.find(dest) != stm_labels.end()) {
     label = stm_labels[dest];
   } else {
@@ -338,7 +338,7 @@ Block *StatementGoto::find_good_jump_block(vector<Block *> &blocks,
   // if the block has only return statement, we can not use it as the jump
   // source, so delete and throw dice again
   if (blocks[index]->stms.size() == 1 &&
-      blocks[index]->stms[0]->eType == eReturn && !as_dest) {
+      blocks[index]->stms[0]->eType == eStatementType::eReturn && !as_dest) {
     blocks.erase(blocks.begin() + index);
     return find_good_jump_block(blocks, blk, as_dest);
   }

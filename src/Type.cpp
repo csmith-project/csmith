@@ -119,7 +119,7 @@ NonVoidTypeFilter::~NonVoidTypeFilter() {}
 bool NonVoidTypeFilter::filter(int v) const {
   assert(static_cast<unsigned int>(v) < AllTypes.size());
   Type *type = AllTypes[v];
-  if (type->eType == eSimple && type->simple_type == eVoid)
+  if (type->eType == eTypeDesc::eSimple && type->simple_type == eSimpleType::eVoid)
     return true;
 
   if (!type->used) {
@@ -128,9 +128,9 @@ bool NonVoidTypeFilter::filter(int v) const {
   }
 
   typ_ = type;
-  if (type->eType == eSimple) {
+  if (type->eType == eTypeDesc::eSimple) {
     Filter *filter = SIMPLE_TYPES_PROB_FILTER();
-    return filter->filter(typ_->simple_type);
+    return filter->filter(static_cast<int>(typ_->simple_type));
   }
 
   return false;
@@ -162,17 +162,17 @@ NonVoidNonVolatileTypeFilter::~NonVoidNonVolatileTypeFilter() {}
 bool NonVoidNonVolatileTypeFilter::filter(int v) const {
   assert(static_cast<unsigned int>(v) < AllTypes.size());
   Type *type = AllTypes[v];
-  if (type->eType == eSimple && type->simple_type == eVoid)
+  if (type->eType == eTypeDesc::eSimple && type->simple_type == eSimpleType::eVoid)
     return true;
 
   if (type->is_aggregate() && type->is_volatile_struct_union())
     return true;
 
-  if ((type->eType == eStruct) && (!CGOptions::arg_structs())) {
+  if ((type->eType == eTypeDesc::eStruct) && (!CGOptions::arg_structs())) {
     return true;
   }
 
-  if ((type->eType == eUnion) && (!CGOptions::arg_unions())) {
+  if ((type->eType == eTypeDesc::eUnion) && (!CGOptions::arg_unions())) {
     return true;
   }
 
@@ -182,9 +182,9 @@ bool NonVoidNonVolatileTypeFilter::filter(int v) const {
   }
 
   typ_ = type;
-  if (type->eType == eSimple) {
+  if (type->eType == eTypeDesc::eSimple) {
     Filter *filter = SIMPLE_TYPES_PROB_FILTER();
-    return filter->filter(typ_->simple_type);
+    return filter->filter(static_cast<int>(typ_->simple_type));
   }
 
   return false;
@@ -224,10 +224,10 @@ bool ChooseRandomTypeFilter::filter(int v) const {
   assert((v >= 0) && (static_cast<unsigned int>(v) < AllTypes.size()));
   typ_ = AllTypes[v];
   assert(typ_);
-  if (typ_->eType == eSimple) {
+  if (typ_->eType == eTypeDesc::eSimple) {
     Filter *filter = SIMPLE_TYPES_PROB_FILTER();
-    return filter->filter(typ_->simple_type);
-  } else if ((typ_->eType == eStruct) && (!CGOptions::return_structs())) {
+    return filter->filter(static_cast<int>(typ_->simple_type));
+  } else if ((typ_->eType == eTypeDesc::eStruct) && (!CGOptions::return_structs())) {
     return true;
   }
 
@@ -262,7 +262,7 @@ checkImplicitNontrivialAssignOps(const vector<const Type *> &fields) {
   for (size_t i = 0; i < fields.size(); ++i) {
     const Type *field = fields[i];
     if (field->has_implicit_nontrivial_assign_ops()) {
-      assert((field->eType == eStruct) || (field->eType == eUnion));
+      assert((field->eType == eTypeDesc::eStruct) || (field->eType == eTypeDesc::eUnion));
       return true;
     }
   }
@@ -275,7 +275,7 @@ checkImplicitNontrivialAssignOps(const vector<const Type *> &fields) {
 /* constructor for simple types
  ********************************************************/
 Type::Type(eSimpleType simple_type)
-    : eType(eSimple), ptr_type(0), simple_type(simple_type),
+    : eType(eTypeDesc::eSimple), ptr_type(0), simple_type(simple_type),
       sid(0), // not used for simple types
       used(false), printed(false), packed_(false), has_assign_ops_(false),
       has_implicit_nontrivial_assign_ops_(false) {
@@ -288,16 +288,17 @@ Type::Type(eSimpleType simple_type)
 Type::Type(vector<const Type *> &struct_fields, bool isStruct, bool packed,
            vector<CVQualifiers> &qfers, vector<int> &fields_length,
            bool hasAssignOps, bool hasImplicitNontrivialAssignOps)
-    : ptr_type(0), simple_type(MAX_SIMPLE_TYPES), // not a valid simple type
+    : ptr_type(0), simple_type(eSimpleType::eVoid),
+      // Placeholder: ignored unless eType == eTypeDesc::eSimple.
       fields(struct_fields), used(false), printed(false), packed_(packed),
       has_assign_ops_(hasAssignOps),
       has_implicit_nontrivial_assign_ops_(hasImplicitNontrivialAssignOps),
       qfers_(qfers), bitfields_length_(fields_length) {
   static unsigned int sequence = 0;
   if (isStruct)
-    eType = eStruct;
+    eType = eTypeDesc::eStruct;
   else
-    eType = eUnion;
+    eType = eTypeDesc::eUnion;
   sid = sequence++;
 }
 
@@ -305,8 +306,8 @@ Type::Type(vector<const Type *> &struct_fields, bool isStruct, bool packed,
 /* constructor for pointers
  *******************************************************/
 Type::Type(const Type *t)
-    : eType(ePointer), ptr_type(t),
-      simple_type(MAX_SIMPLE_TYPES), // not a valid simple type
+    : eType(eTypeDesc::ePointer), ptr_type(t), simple_type(eSimpleType::eVoid),
+      // Placeholder: ignored unless eType == eTypeDesc::eSimple.
       used(false), printed(false), packed_(false), has_assign_ops_(false),
       has_implicit_nontrivial_assign_ops_(false) {
   // Nothing else to do.
@@ -339,62 +340,62 @@ Type::operator=(const Type& t)
 const Type &Type::get_simple_type(eSimpleType st) {
   static bool inited = false;
 
-  assert(st != MAX_SIMPLE_TYPES);
+  assert(to_index(st) < MAX_SIMPLE_TYPES);
 
   if (!inited) {
-    for (int i = 0; i < MAX_SIMPLE_TYPES; ++i) {
+    for (unsigned int i = 0; i < MAX_SIMPLE_TYPES; ++i) {
       Type::simple_types[i] = 0;
     }
     inited = true;
   }
 
-  if (Type::simple_types[st] == 0) {
-    // find if type is in the allTypes already (most likely only "eVoid" is not
+  if (Type::simple_types[to_index(st)] == 0) {
+    // find if type is in the allTypes already (most likely only "eSimpleType::eVoid" is not
     // there)
     for (size_t i = 0; i < AllTypes.size(); i++) {
       Type *tt = AllTypes[i];
-      if (tt->eType == eSimple && tt->simple_type == st) {
-        Type::simple_types[st] = tt;
+      if (tt->eType == eTypeDesc::eSimple && tt->simple_type == st) {
+        Type::simple_types[to_index(st)] = tt;
       }
     }
-    if (Type::simple_types[st] == 0) {
+    if (Type::simple_types[to_index(st)] == 0) {
       Type *t = new Type(st);
-      Type::simple_types[st] = t;
+      Type::simple_types[to_index(st)] = t;
       AllTypes.push_back(t);
     }
   }
-  return *Type::simple_types[st];
+  return *Type::simple_types[to_index(st)];
 }
 
 const Type *Type::get_type_from_string(const string &type_string) {
   if (type_string == "Void") {
     return Type::void_type;
   } else if (type_string == "Char") {
-    return &Type::get_simple_type(eChar);
+    return &Type::get_simple_type(eSimpleType::eChar);
   } else if (type_string == "UChar") {
-    return &Type::get_simple_type(eUChar);
+    return &Type::get_simple_type(eSimpleType::eUChar);
   } else if (type_string == "Short") {
-    return &Type::get_simple_type(eShort);
+    return &Type::get_simple_type(eSimpleType::eShort);
   } else if (type_string == "UShort") {
-    return &Type::get_simple_type(eUShort);
+    return &Type::get_simple_type(eSimpleType::eUShort);
   } else if (type_string == "Int") {
-    return &Type::get_simple_type(eInt);
+    return &Type::get_simple_type(eSimpleType::eInt);
   } else if (type_string == "UInt") {
-    return &Type::get_simple_type(eUInt);
+    return &Type::get_simple_type(eSimpleType::eUInt);
   } else if (type_string == "Long") {
-    return &Type::get_simple_type(eLong);
+    return &Type::get_simple_type(eSimpleType::eLong);
   } else if (type_string == "ULong") {
-    return &Type::get_simple_type(eULong);
+    return &Type::get_simple_type(eSimpleType::eULong);
   } else if (type_string == "Longlong") {
-    return &Type::get_simple_type(eLongLong);
+    return &Type::get_simple_type(eSimpleType::eLongLong);
   } else if (type_string == "ULonglong") {
-    return &Type::get_simple_type(eULongLong);
+    return &Type::get_simple_type(eSimpleType::eULongLong);
   } else if (type_string == "Float") {
-    return &Type::get_simple_type(eFloat);
+    return &Type::get_simple_type(eSimpleType::eFloat);
   } else if (type_string == "Int128") {
-    return &Type::get_simple_type(eInt128);
+    return &Type::get_simple_type(eSimpleType::eInt128);
   } else if (type_string == "UInt128") {
-    return &Type::get_simple_type(eUInt128);
+    return &Type::get_simple_type(eSimpleType::eUInt128);
   }
 
   assert(0 && "Unsupported type string!");
@@ -404,7 +405,7 @@ const Type *Type::get_type_from_string(const string &type_string) {
 // ---------------------------------------------------------------------
 /* return the most commonly used type - integer
  *************************************************************/
-const Type *get_int_type() { return &Type::get_simple_type(eInt); }
+const Type *get_int_type() { return &Type::get_simple_type(eSimpleType::eInt); }
 
 Type *Type::find_type(const Type *t) {
   for (size_t i = 0; i < AllTypes.size(); i++) {
@@ -479,7 +480,7 @@ bool Type::has_int_field() const {
 }
 
 bool Type::signed_overflow_possible() const {
-  return eType == eSimple && is_signed() &&
+  return eType == eTypeDesc::eSimple && is_signed() &&
          ((int)SizeInBytes()) >= CGOptions::int_size();
 }
 
@@ -489,9 +490,9 @@ void Type::get_all_ok_struct_union_types(vector<Type *> &ok_types,
   vector<Type *>::iterator i;
   for (i = AllTypes.begin(); i != AllTypes.end(); ++i) {
     Type *t = (*i);
-    if (bStruct && t->eType != eStruct)
+    if (bStruct && t->eType != eTypeDesc::eStruct)
       continue;
-    if (!bStruct && t->eType != eUnion)
+    if (!bStruct && t->eType != eTypeDesc::eUnion)
       continue;
     if ((no_const && t->is_const_struct_union()) ||
         (no_volatile && t->is_volatile_struct_union()) ||
@@ -570,12 +571,12 @@ const Type *Type::random_type_from_type(const Type *type, bool no_volatile,
                     : choose_random_nonvoid();
     ERROR_GUARD(nullptr);
   }
-  if (type->eType == eSimple && !strict_simple_type) {
+  if (type->eType == eTypeDesc::eSimple && !strict_simple_type) {
     t = choose_random_simple();
     ERROR_GUARD(nullptr);
   }
-  if (t->eType == eSimple) {
-    assert(t->simple_type != eVoid);
+  if (t->eType == eTypeDesc::eSimple) {
+    assert(t->simple_type != eSimpleType::eVoid);
   }
   return t;
 }
@@ -594,11 +595,11 @@ eSimpleType Type::choose_random_nonvoid_simple(void) {
   eSimpleType simple_type;
 #if 0
 	vector<unsigned int> vs;
-	vs.push_back(eVoid);
+	vs.push_back(eSimpleType::eVoid);
 
 	if (!CGOptions::allow_int64()) {
-		vs.push_back(eLongLong);
-		vs.push_back(eULongLong);
+		vs.push_back(eSimpleType::eLongLong);
+		vs.push_back(eSimpleType::eULongLong);
 	}
 
 	VectorFilter filter(vs);
@@ -618,7 +619,7 @@ void Type::make_one_bitfield(vector<const Type *> &random_fields,
   ERROR_RETURN();
 
   const Type *type =
-      sign ? &Type::get_simple_type(eInt) : &Type::get_simple_type(eUInt);
+      sign ? &Type::get_simple_type(eSimpleType::eInt) : &Type::get_simple_type(eSimpleType::eUInt);
   random_fields.push_back(type);
   CVQualifiers qual = CVQualifiers::random_qualifiers(type, FieldConstProb(),
                                                       FieldVolatileProb());
@@ -692,7 +693,7 @@ void Type::make_one_union_field(vector<const Type *> &fields,
       if (AllTypes[i]->contain_pointer_field())
         continue;
 
-      if ((AllTypes[i]->eType != eStruct) && (AllTypes[i]->eType != eUnion)) {
+      if ((AllTypes[i]->eType != eTypeDesc::eStruct) && (AllTypes[i]->eType != eTypeDesc::eUnion)) {
         ok_nonstruct_types.push_back(AllTypes[i]);
         continue;
       }
@@ -706,7 +707,7 @@ void Type::make_one_union_field(vector<const Type *> &fields,
       if (AllTypes[i]->has_implicit_nontrivial_assign_ops())
         continue;
 
-      if (AllTypes[i]->eType == eStruct) {
+      if (AllTypes[i]->eType == eTypeDesc::eStruct) {
         struct_types.push_back(AllTypes[i]);
       } else { // union
                // no union in union currently
@@ -717,12 +718,13 @@ void Type::make_one_union_field(vector<const Type *> &fields,
       // 15% chance to be struct field
       if (!struct_types.empty() && pure_rnd_flipcoin(15)) {
         type = struct_types[pure_rnd_upto(struct_types.size())];
-        assert(type->eType == eStruct);
+        assert(type->eType == eTypeDesc::eStruct);
       } else {
         unsigned int i = pure_rnd_upto(ok_nonstruct_types.size());
         const Type *t = ok_nonstruct_types[i];
-        if (t->eType == eSimple &&
-            SIMPLE_TYPES_PROB_FILTER()->filter(t->simple_type)) {
+        if (t->eType == eTypeDesc::eSimple &&
+            SIMPLE_TYPES_PROB_FILTER()->filter(
+                static_cast<int>(t->simple_type))) {
           continue;
         }
         type = t;
@@ -846,7 +848,7 @@ bool Type::make_one_bitfield_by_enum(Enumerator<string> &enumerator,
   if (pure_rnd_flipcoin(50))
     sign = true;
   const Type *type =
-      sign ? &Type::get_simple_type(eInt) : &Type::get_simple_type(eUInt);
+      sign ? &Type::get_simple_type(eSimpleType::eInt) : &Type::get_simple_type(eSimpleType::eUInt);
   random_fields.push_back(type);
   int qual_index = enumerator.get_elem(ss2.str());
   assert((qual_index >= 0) &&
@@ -880,9 +882,9 @@ bool Type::make_one_normal_field_by_enum(Enumerator<string> &enumerator,
   int typ_index = enumerator.get_elem(ss1.str());
   assert(typ_index >= 0 && typ_index < types_size);
   Type *typ = const_cast<Type *>(all_types[typ_index]);
-  if (typ->eType == eSimple) {
-    assert(typ->simple_type != eVoid);
-    if (filter->filter(typ->simple_type))
+  if (typ->eType == eTypeDesc::eSimple) {
+    assert(typ->simple_type != eSimpleType::eVoid);
+    if (filter->filter(static_cast<int>(typ->simple_type)))
       return false;
   }
 
@@ -984,7 +986,7 @@ void Type::delete_useless_structs(vector<const Type *> &all_types,
   assert(all_types.size() <= accum_types.size());
   for (size_t i = 0; i < all_types.size(); ++i) {
     const Type *t = all_types[i];
-    if (t->eType == eStruct) {
+    if (t->eType == eTypeDesc::eStruct) {
       const Type *t1 = accum_types[i];
       delete t1;
       accum_types[i] = t;
@@ -1140,7 +1142,7 @@ Type *Type::make_random_pointer_type(void) {
   ERROR_GUARD(nullptr);
   // consolidate all integer pointer types into "int*", hopefully this increase
   // chance of pointer assignments and dereferences
-  if (t->eType == eSimple) {
+  if (t->eType == eTypeDesc::eSimple) {
     t = get_int_type();
     ERROR_GUARD(nullptr);
   }
@@ -1149,10 +1151,11 @@ Type *Type::make_random_pointer_type(void) {
 
 // ---------------------------------------------------------------------
 void Type::GenerateSimpleTypes(void) {
-  for (unsigned int st = eChar; st < MAX_SIMPLE_TYPES; st++) {
-    AllTypes.push_back(new Type((enum eSimpleType)st));
+  for (unsigned int st = static_cast<unsigned int>(eSimpleType::eChar);
+       st < MAX_SIMPLE_TYPES; st++) {
+    AllTypes.push_back(new Type(static_cast<eSimpleType>(st)));
   }
-  Type::void_type = new Type((enum eSimpleType)eVoid);
+  Type::void_type = new Type(static_cast<eSimpleType>(eSimpleType::eVoid));
 }
 
 // ---------------------------------------------------------------------
@@ -1222,7 +1225,7 @@ const Type *Type::choose_random_simple(void) {
   DEPTH_GUARD_BY_TYPE_RETURN(dtTypeChooseSimple, nullptr);
   eSimpleType ty = choose_random_nonvoid_simple();
   ERROR_GUARD(nullptr);
-  assert(ty != eVoid);
+  assert(ty != eSimpleType::eVoid);
   return &get_simple_type(ty);
 }
 
@@ -1240,7 +1243,7 @@ int Type::get_indirect_level() const {
 // ---------------------------------------------------------------------
 int Type::get_struct_depth() const {
   int depth = 0;
-  if (eType == eStruct) {
+  if (eType == eTypeDesc::eStruct) {
     depth++;
     int max_depth = 0;
     for (size_t i = 0; i < fields.size(); i++) {
@@ -1273,7 +1276,7 @@ bool Type::has_bitfields() const {
     if (bitfields_length_[i] >= 0) {
       return true;
     }
-    if (fields[i]->eType == eStruct && fields[i]->has_bitfields()) {
+    if (fields[i]->eType == eTypeDesc::eStruct && fields[i]->has_bitfields()) {
       return true;
     }
   }
@@ -1283,7 +1286,7 @@ bool Type::has_bitfields() const {
 // conservatively assume padding is present in all unpacked structures
 // or whenever there is bitfields
 bool Type::has_padding(void) const {
-  if (eType == eStruct && !packed_)
+  if (eType == eTypeDesc::eStruct && !packed_)
     return true;
   for (size_t i = 0; i < fields.size(); i++) {
     if (is_bitfield(i) || fields[i]->has_padding()) {
@@ -1294,7 +1297,7 @@ bool Type::has_padding(void) const {
 }
 
 bool Type::is_full_bitfields_struct() const {
-  if (eType != eStruct)
+  if (eType != eTypeDesc::eStruct)
     return false;
   for (size_t i = 0; i < bitfields_length_.size(); ++i) {
     if (bitfields_length_[i] < 0)
@@ -1308,14 +1311,14 @@ bool Type::is_signed(void) const {
   default:
     return false;
 
-  case eSimple:
+  case eTypeDesc::eSimple:
     switch (simple_type) {
-    case eUChar:
-    case eUInt:
-    case eUShort:
-    case eULong:
-    case eULongLong:
-    case eUInt128:
+    case eSimpleType::eUChar:
+    case eSimpleType::eUInt:
+    case eSimpleType::eUShort:
+    case eSimpleType::eULong:
+    case eSimpleType::eULongLong:
+    case eSimpleType::eUInt128:
       return false;
       break;
     default:
@@ -1327,28 +1330,28 @@ bool Type::is_signed(void) const {
 }
 
 const Type *Type::to_unsigned(void) const {
-  if (eType == eSimple) {
+  if (eType == eTypeDesc::eSimple) {
     switch (simple_type) {
-    case eUChar:
-    case eUInt:
-    case eUShort:
-    case eULong:
-    case eULongLong:
+    case eSimpleType::eUChar:
+    case eSimpleType::eUInt:
+    case eSimpleType::eUShort:
+    case eSimpleType::eULong:
+    case eSimpleType::eULongLong:
       return this;
-    case eChar:
-      return &get_simple_type(eUChar);
-    case eInt:
-      return &get_simple_type(eUInt);
-    case eShort:
-      return &get_simple_type(eUShort);
-    case eLong:
-      return &get_simple_type(eULong);
-    case eLongLong:
-      return &get_simple_type(eULongLong);
-    case eInt128:
-      return &get_simple_type(eInt128);
-    case eUInt128:
-      return &get_simple_type(eUInt128);
+    case eSimpleType::eChar:
+      return &get_simple_type(eSimpleType::eUChar);
+    case eSimpleType::eInt:
+      return &get_simple_type(eSimpleType::eUInt);
+    case eSimpleType::eShort:
+      return &get_simple_type(eSimpleType::eUShort);
+    case eSimpleType::eLong:
+      return &get_simple_type(eSimpleType::eULong);
+    case eSimpleType::eLongLong:
+      return &get_simple_type(eSimpleType::eULongLong);
+    case eSimpleType::eInt128:
+      return &get_simple_type(eSimpleType::eInt128);
+    case eSimpleType::eUInt128:
+      return &get_simple_type(eSimpleType::eUInt128);
     default:
       break;
     }
@@ -1365,29 +1368,29 @@ const Type *Type::get_base_type(void) const {
 }
 
 bool Type::is_promotable(const Type *t) const {
-  if (eType == eSimple && t->eType == eSimple) {
+  if (eType == eTypeDesc::eSimple && t->eType == eTypeDesc::eSimple) {
     switch (simple_type) {
-    case eChar:
-    case eUChar:
-      return (t->simple_type != eVoid);
-    case eShort:
-    case eUShort:
-      return (t->simple_type != eVoid && t->simple_type != eChar &&
-              t->simple_type != eUChar);
-    case eInt:
-    case eUInt:
-      return (t->simple_type != eVoid && t->simple_type != eChar &&
-              t->simple_type != eUChar && t->simple_type != eShort &&
-              t->simple_type != eUShort);
-    case eLong:
-    case eULong:
-      return (t->simple_type == eLong || t->simple_type == eULong ||
-              t->simple_type == eLongLong || t->simple_type == eULongLong);
-    case eLongLong:
-    case eULongLong:
-      return (t->simple_type == eLongLong || t->simple_type == eULongLong);
-    case eFloat:
-      return (t->simple_type != eVoid);
+    case eSimpleType::eChar:
+    case eSimpleType::eUChar:
+      return (t->simple_type != eSimpleType::eVoid);
+    case eSimpleType::eShort:
+    case eSimpleType::eUShort:
+      return (t->simple_type != eSimpleType::eVoid && t->simple_type != eSimpleType::eChar &&
+              t->simple_type != eSimpleType::eUChar);
+    case eSimpleType::eInt:
+    case eSimpleType::eUInt:
+      return (t->simple_type != eSimpleType::eVoid && t->simple_type != eSimpleType::eChar &&
+              t->simple_type != eSimpleType::eUChar && t->simple_type != eSimpleType::eShort &&
+              t->simple_type != eSimpleType::eUShort);
+    case eSimpleType::eLong:
+    case eSimpleType::eULong:
+      return (t->simple_type == eSimpleType::eLong || t->simple_type == eSimpleType::eULong ||
+              t->simple_type == eSimpleType::eLongLong || t->simple_type == eSimpleType::eULongLong);
+    case eSimpleType::eLongLong:
+    case eSimpleType::eULongLong:
+      return (t->simple_type == eSimpleType::eLongLong || t->simple_type == eSimpleType::eULongLong);
+    case eSimpleType::eFloat:
+      return (t->simple_type != eSimpleType::eVoid);
     default:
       break;
     }
@@ -1403,25 +1406,25 @@ bool Type::is_promotable(const Type *t) const {
 bool Type::is_convertable(const Type *t) const {
   if (this == t)
     return true;
-  if (eType == eSimple && t->eType == eSimple) {
+  if (eType == eTypeDesc::eSimple && t->eType == eTypeDesc::eSimple) {
     // forbiden conversion from float to int
     if (t->is_float() && !is_float())
       return false;
-    if ((simple_type != eVoid && t->simple_type != eVoid) ||
+    if ((simple_type != eSimpleType::eVoid && t->simple_type != eSimpleType::eVoid) ||
         simple_type == t->simple_type)
       return true;
-  } else if (eType == ePointer && t->eType == ePointer) {
+  } else if (eType == eTypeDesc::ePointer && t->eType == eTypeDesc::ePointer) {
     if (ptr_type == t->ptr_type) {
       return true;
     }
-    if (ptr_type->eType == eSimple && t->ptr_type->eType == eSimple) {
+    if (ptr_type->eType == eTypeDesc::eSimple && t->ptr_type->eType == eTypeDesc::eSimple) {
       if (ptr_type->simple_type == t->ptr_type->simple_type)
         return true;
       else if (CGOptions::strict_float() &&
-               ((ptr_type->simple_type == eFloat &&
-                 t->ptr_type->simple_type != eFloat) ||
-                (ptr_type->simple_type != eFloat &&
-                 t->ptr_type->simple_type == eFloat)))
+               ((ptr_type->simple_type == eSimpleType::eFloat &&
+                 t->ptr_type->simple_type != eSimpleType::eFloat) ||
+                (ptr_type->simple_type != eSimpleType::eFloat &&
+                 t->ptr_type->simple_type == eSimpleType::eFloat)))
         return false;
       else if (CGOptions::lang_cpp())
         return false; // or we need an explicit cast here
@@ -1434,12 +1437,12 @@ bool Type::is_convertable(const Type *t) const {
   return false;
 }
 
-// eLong & eInt, eULong & eUInt are equivalent
+// eSimpleType::eLong & eSimpleType::eInt, eSimpleType::eULong & eSimpleType::eUInt are equivalent
 bool Type::is_equivalent(const Type *t) const {
   if (this == t)
     return true;
 
-  if (eType == eSimple) {
+  if (eType == eTypeDesc::eSimple) {
     return (is_signed() == t->is_signed()) &&
            (SizeInBytes() == t->SizeInBytes());
   }
@@ -1448,7 +1451,7 @@ bool Type::is_equivalent(const Type *t) const {
 }
 
 bool Type::needs_cast(const Type *t) const {
-  return (eType == ePointer) &&
+  return (eType == eTypeDesc::ePointer) &&
          !get_base_type()->is_equivalent(t->get_base_type());
 }
 
@@ -1475,7 +1478,7 @@ bool Type::match(const Type *t, eMatchType mt) const {
  * by dereferencing
  *************************************************************/
 bool Type::is_dereferenced_from(const Type *t) const {
-  if (t->eType == ePointer) {
+  if (t->eType == eTypeDesc::ePointer) {
     const Type *pt = t->ptr_type;
     while (pt) {
       if (pt == this) {
@@ -1503,40 +1506,40 @@ unsigned long Type::SizeInBytes(void) const {
   switch (eType) {
   default:
     break;
-  case eSimple:
+  case eTypeDesc::eSimple:
     switch (simple_type) {
-    case eVoid:
+    case eSimpleType::eVoid:
       return 0;
-    case eInt:
+    case eSimpleType::eInt:
       return 4;
-    case eShort:
+    case eSimpleType::eShort:
       return 2;
-    case eChar:
+    case eSimpleType::eChar:
       return 1;
-    case eLong:
+    case eSimpleType::eLong:
       return 4;
-    case eLongLong:
+    case eSimpleType::eLongLong:
       return 8;
-    case eUChar:
+    case eSimpleType::eUChar:
       return 1;
-    case eUInt:
+    case eSimpleType::eUInt:
       return 4;
-    case eUShort:
+    case eSimpleType::eUShort:
       return 2;
-    case eULong:
+    case eSimpleType::eULong:
       return 4;
-    case eULongLong:
+    case eSimpleType::eULongLong:
       return 8;
-    case eFloat:
+    case eSimpleType::eFloat:
       return 4;
-    case eInt128:
+    case eSimpleType::eInt128:
       return 16;
-    case eUInt128:
+    case eSimpleType::eUInt128:
       return 16;
       //              case eDouble:   return 8;
     }
     break;
-  case eUnion: {
+  case eTypeDesc::eUnion: {
     unsigned int max_size = 0;
     for (size_t i = 0; i < fields.size(); i++) {
       unsigned int sz = 0;
@@ -1554,7 +1557,7 @@ unsigned long Type::SizeInBytes(void) const {
     }
     return max_size;
   }
-  case eStruct: {
+  case eTypeDesc::eStruct: {
     if (!this->packed_)
       return SIZE_UNKNOWN;
     // give up if there are bitfields, too much compiler-dependence and
@@ -1570,7 +1573,7 @@ unsigned long Type::SizeInBytes(void) const {
     }
     return total_size;
   }
-  case ePointer:
+  case eTypeDesc::ePointer:
     CGOptions::pointer_size();
     break;
   }
@@ -1586,14 +1589,14 @@ const Type *Type::SelectLType(bool no_volatile, eAssignOps op) {
   // We haven't implemented pointer arith,
   // so choose pointer types iff we create simple assignment
   // (see Statement::make_random)
-  if (op == eSimpleAssign && rnd_flipcoin(PointerAsLTypeProb())) {
+  if (op == eAssignOps::eSimpleAssign && rnd_flipcoin(PointerAsLTypeProb())) {
     ERROR_GUARD(nullptr);
     type = Type::make_random_pointer_type();
   }
   ERROR_GUARD(nullptr);
 
   // choose a struct type as LHS type
-  if (!type && (op == eSimpleAssign)) {
+  if (!type && (op == eAssignOps::eSimpleAssign)) {
     vector<Type *> ok_struct_types;
     get_all_ok_struct_union_types(ok_struct_types, true, no_volatile, false,
                                   true);
@@ -1606,7 +1609,7 @@ const Type *Type::SelectLType(bool no_volatile, eAssignOps op) {
   if (!type) {
     if (StatementAssign::AssignOpWorksForFloat(op) &&
         rnd_flipcoin(FloatAsLTypeProb())) {
-      type = &Type::get_simple_type(eFloat);
+      type = &Type::get_simple_type(eSimpleType::eFloat);
     }
   }
 
@@ -1620,7 +1623,7 @@ const Type *Type::SelectLType(bool no_volatile, eAssignOps op) {
 void Type::get_int_subfield_names(const string &prefix, vector<string> &names,
                                   vector<const Type *> &types,
                                   const vector<int> &excluded_fields) const {
-  if (eType == eSimple) {
+  if (eType == eTypeDesc::eSimple) {
     names.push_back(prefix);
     types.push_back(this);
   } else if (is_aggregate()) {
@@ -1642,9 +1645,9 @@ void Type::get_int_subfield_names(const string &prefix, vector<string> &names,
 }
 
 bool Type::contain_pointer_field(void) const {
-  if (eType == ePointer)
+  if (eType == eTypeDesc::ePointer)
     return true;
-  if (eType == eStruct || eType == eUnion) {
+  if (eType == eTypeDesc::eStruct || eType == eTypeDesc::eUnion) {
     for (size_t i = 0; i < fields.size(); i++) {
       if (fields[i]->contain_pointer_field()) {
         return true;
@@ -1657,14 +1660,14 @@ bool Type::contain_pointer_field(void) const {
 // ---------------------------------------------------------------------
 void Type::Output(std::ostream &out) const {
   switch (eType) {
-  case eSimple:
-    if (this->simple_type == eVoid) {
+  case eTypeDesc::eSimple:
+    if (this->simple_type == eSimpleType::eVoid) {
       out << "void";
-    } else if (this->simple_type == eFloat) {
+    } else if (this->simple_type == eSimpleType::eFloat) {
       out << "float";
-    } else if (this->simple_type == eInt128) {
+    } else if (this->simple_type == eSimpleType::eInt128) {
       out << "__int" << (SizeInBytes() * 8);
-    } else if (this->simple_type == eUInt128) {
+    } else if (this->simple_type == eSimpleType::eUInt128) {
       out << "unsigned __int" << (SizeInBytes() * 8);
     } else {
       out << (is_signed() ? "int" : "uint");
@@ -1672,14 +1675,14 @@ void Type::Output(std::ostream &out) const {
       out << "_t";
     }
     break;
-  case ePointer:
+  case eTypeDesc::ePointer:
     ptr_type->Output(out);
     out << "*";
     break;
-  case eUnion:
+  case eTypeDesc::eUnion:
     out << "union U" << sid;
     break;
-  case eStruct:
+  case eTypeDesc::eStruct:
     out << "struct S" << sid;
     break;
   }
@@ -1708,7 +1711,7 @@ void Type::get_type_sizeof_string(std::string &s) const {
 // operator as well
 void OutputStructAssignOp(Type *type, std::ostream &out, bool vol) {
   if (CGOptions::lang_cpp()) {
-    if (type->has_assign_ops() && (type->eType == eStruct)) {
+    if (type->has_assign_ops() && (type->eType == eTypeDesc::eStruct)) {
       out << "    ";
       if (vol) {
         out << "volatile ";
@@ -1768,7 +1771,7 @@ void OutputStructAssignOp(Type *type, std::ostream &out, bool vol) {
 
 void OutputUnionAssignOps(Type *type, std::ostream &out, bool vol) {
   if (CGOptions::lang_cpp()) {
-    if (type->has_assign_ops() && (type->eType == eUnion)) {
+    if (type->has_assign_ops() && (type->eType == eTypeDesc::eUnion)) {
 
       out << "    ";
       if (vol) {
@@ -1843,11 +1846,11 @@ void OutputStructUnion(Type *type, std::ostream &out) {
       const Type *field = type->fields[i];
       bool is_bitfield = type->is_bitfield(i);
       if (is_bitfield) {
-        assert(field->eType == eSimple);
+        assert(field->eType == eTypeDesc::eSimple);
         type->qfers_[i].OutputFirstQuals(out);
-        if (field->simple_type == eInt)
+        if (field->simple_type == eSimpleType::eInt)
           out << "signed";
-        else if (field->simple_type == eUInt)
+        else if (field->simple_type == eSimpleType::eUInt)
           out << "unsigned";
         else
           assert(0);
@@ -1865,7 +1868,7 @@ void OutputStructUnion(Type *type, std::ostream &out) {
       really_outputln(out);
     }
 
-    if (type->eType == eStruct) {
+    if (type->eType == eTypeDesc::eStruct) {
       OutputStructAssignOp(type, out, false);
       OutputStructAssignOp(type, out, true);
     } else {
@@ -1874,7 +1877,7 @@ void OutputStructUnion(Type *type, std::ostream &out) {
     }
 
     out << "}";
-    if (type->eType == eStruct || type->eType == eUnion) {
+    if (type->eType == eTypeDesc::eStruct || type->eType == eTypeDesc::eUnion) {
       struct_type_attr_generator.Output(out);
       union_type_attr_generator.Output(out);
     }
@@ -1900,7 +1903,7 @@ void OutputStructUnionDeclarations(std::ostream &out) {
   output_comment_line(out, "--- Struct/Union Declarations ---");
   for (size_t i = 0; i < AllTypes.size(); i++) {
     Type *t = AllTypes[i];
-    if (t->used && (t->eType == eStruct || t->eType == eUnion)) {
+    if (t->used && (t->eType == eTypeDesc::eStruct || t->eType == eTypeDesc::eUnion)) {
       OutputStructUnion(AllTypes[i], out);
     }
   }
@@ -1912,18 +1915,18 @@ void OutputStructUnionDeclarations(std::ostream &out) {
 std::string Type::printf_directive(void) const {
   string ret;
   switch (eType) {
-  case eSimple:
+  case eTypeDesc::eSimple:
     if (SizeInBytes() >= 8) {
       ret = is_signed() ? "%lld" : "%llu";
     } else {
       ret = is_signed() ? "%d" : "%u";
     }
     break;
-  case ePointer:
+  case eTypeDesc::ePointer:
     ret = "0x%0x";
     break;
-  case eUnion:
-  case eStruct:
+  case eTypeDesc::eUnion:
+  case eTypeDesc::eStruct:
     ret = "{";
     for (size_t i = 0; i < fields.size(); i++) {
       if (i > 0)

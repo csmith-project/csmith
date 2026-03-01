@@ -92,7 +92,7 @@ public:
     lhs_write_vars = vars;
   }
 
-  typedef enum { READ, WRITE } Access;
+  enum class Access { READ, WRITE };
 
   void Output(std::ostream &out) const;
   bool has_global_effect(void) const;

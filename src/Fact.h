@@ -35,7 +35,7 @@
 #include "StdLibAliases.h"
 #include <ostream>
 #include <vector>
-enum eFactCategory {
+enum class eFactCategory {
   ePointTo = 1,
   eUnionWrite = 2,
   /* todo
@@ -109,7 +109,7 @@ public:
 
   static void doFinalization();
 
-  enum eFactCategory eCat;
+  eFactCategory eCat;
 
 protected:
   // keep track all created facts. used for releasing memory in doFinalization
