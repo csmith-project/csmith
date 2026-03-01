@@ -250,13 +250,6 @@ bool FunctionInvocationUser::build_invocation(Function *target,
   func = target; // XXX: unnecessary; done by constructor
   Effect running_eff_context(cg_context.get_effect_context());
   FactMgr *fm = get_fact_mgr(&cg_context);
-  // XXX DEBUGGING
-  if (func->name == "func_36" &&
-      cg_context.get_current_func()->name == "func_22") {
-    volatile unsigned int debug_i = 0; // Set breakpoint here.
-    (void)debug_i;
-  }
-
   for (size_t i = 0; i < func->param.size(); i++) {
     Effect param_eff_accum;
     CGContext param_cg_context(cg_context, running_eff_context,

@@ -809,10 +809,6 @@ bool Statement::analyze_with_edges_in(vector<const Fact *> &inputs,
                                       CGContext &cg_context) const {
   FactMgr *fm = get_fact_mgr(&cg_context);
   vector<const CFGEdge *> edges;
-  if (find_jump_label() == "lbl_101") {
-    volatile size_t debug_i = 0;
-    (void)debug_i;
-  }
   // consider output from back edges. we should not merge them if this is the
   // first time
   if (fm->map_visited[this] && has_edge_in(false, true)) {
