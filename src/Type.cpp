@@ -81,15 +81,15 @@ void
 InitializeTypeAttributes()
 {
 	if(CGOptions::type_attr_flag()){
-		struct_type_attr_generator.attributes.push_back(new AlignedAttribute("aligned", TypeAttrProb, 8));
-		struct_type_attr_generator.attributes.push_back(new AlignedAttribute("warn_if_not_aligned", TypeAttrProb, 8));
-		struct_type_attr_generator.attributes.push_back(new BooleanAttribute("deprecated", TypeAttrProb));
-		struct_type_attr_generator.attributes.push_back(new BooleanAttribute("unused", TypeAttrProb));
-		union_type_attr_generator.attributes.push_back(new AlignedAttribute("aligned", TypeAttrProb, 8));
-                union_type_attr_generator.attributes.push_back(new AlignedAttribute("warn_if_not_aligned", TypeAttrProb, 8));
-                union_type_attr_generator.attributes.push_back(new BooleanAttribute("deprecated", TypeAttrProb));
-                union_type_attr_generator.attributes.push_back(new BooleanAttribute("unused", TypeAttrProb));
-                union_type_attr_generator.attributes.push_back(new BooleanAttribute("transparent_union", TypeAttrProb));
+		struct_type_attr_generator.attributes.push_back(new AlignedAttribute("aligned", TypeAttrProb(), 8));
+		struct_type_attr_generator.attributes.push_back(new AlignedAttribute("warn_if_not_aligned", TypeAttrProb(), 8));
+		struct_type_attr_generator.attributes.push_back(new BooleanAttribute("deprecated", TypeAttrProb()));
+		struct_type_attr_generator.attributes.push_back(new BooleanAttribute("unused", TypeAttrProb()));
+		union_type_attr_generator.attributes.push_back(new AlignedAttribute("aligned", TypeAttrProb(), 8));
+                union_type_attr_generator.attributes.push_back(new AlignedAttribute("warn_if_not_aligned", TypeAttrProb(), 8));
+                union_type_attr_generator.attributes.push_back(new BooleanAttribute("deprecated", TypeAttrProb()));
+                union_type_attr_generator.attributes.push_back(new BooleanAttribute("unused", TypeAttrProb()));
+                union_type_attr_generator.attributes.push_back(new BooleanAttribute("transparent_union", TypeAttrProb()));
 	}
 }
 
@@ -135,7 +135,7 @@ NonVoidTypeFilter::filter(int v) const
 
 	typ_ = type;
 	if (type->eType == eSimple) {
-		Filter *filter = SIMPLE_TYPES_PROB_FILTER;
+		Filter *filter = SIMPLE_TYPES_PROB_FILTER();
 		return filter->filter(typ_->simple_type);
 	}
 
@@ -202,7 +202,7 @@ NonVoidNonVolatileTypeFilter::filter(int v) const
 
 	typ_ = type;
 	if (type->eType == eSimple) {
-		Filter *filter = SIMPLE_TYPES_PROB_FILTER;
+		Filter *filter = SIMPLE_TYPES_PROB_FILTER();
 		return filter->filter(typ_->simple_type);
 	}
 
@@ -252,7 +252,7 @@ ChooseRandomTypeFilter::filter(int v) const
 	typ_ = AllTypes[v];
 	assert(typ_);
 	if (typ_->eType == eSimple) {
-		Filter *filter = SIMPLE_TYPES_PROB_FILTER;
+		Filter *filter = SIMPLE_TYPES_PROB_FILTER();
 		return filter->filter(typ_->simple_type);
 	}
 	else if ((typ_->eType == eStruct) && (!CGOptions::return_structs())) {
@@ -577,7 +577,7 @@ Type::if_struct_will_have_assign_ops()
 	// randomly choose if the struct will have assign operators (for C++):
 	if (!CGOptions::lang_cpp())
 		return false;
-	return rnd_flipcoin(RegularVolatileProb);
+	return rnd_flipcoin(RegularVolatileProb());
 }
 
 // To have volatile unions in C++. I am not sure if we need those
@@ -588,7 +588,7 @@ Type::if_union_will_have_assign_ops()
 	// randomly choose if the union will have assign operators (for C++):
 	if (!CGOptions::lang_cpp())
 		return false;
-	return rnd_flipcoin(RegularVolatileProb);
+	return rnd_flipcoin(RegularVolatileProb());
 }
 
 const Type*
@@ -669,7 +669,7 @@ MoreTypesProbability(void)
 	if (AllTypes.size() < 10)
 		return true;
 	// by default 50% probability for each additional struct or union type.
-	return rnd_flipcoin(MoreStructUnionTypeProb);
+	return rnd_flipcoin(MoreStructUnionTypeProb());
 }
 
 // ---------------------------------------------------------------------
@@ -689,7 +689,7 @@ Type::choose_random_nonvoid_simple(void)
 	VectorFilter filter(vs);
 #endif
 
-	simple_type = (eSimpleType) rnd_upto(MAX_SIMPLE_TYPES, SIMPLE_TYPES_PROB_FILTER);
+	simple_type = (eSimpleType) rnd_upto(MAX_SIMPLE_TYPES, SIMPLE_TYPES_PROB_FILTER());
 
 	return simple_type;
 }
@@ -699,12 +699,12 @@ Type::make_one_bitfield(vector<const Type*> &random_fields, vector<CVQualifiers>
 			vector<int> &fields_length)
 {
 	int max_length = CGOptions::int_size() * 8;
-	bool sign = rnd_flipcoin(BitFieldsSignedProb);
+	bool sign = rnd_flipcoin(BitFieldsSignedProb());
 	ERROR_RETURN();
 
 	const Type *type = sign ? &Type::get_simple_type(eInt) : &Type::get_simple_type(eUInt);
 	random_fields.push_back(type);
-	CVQualifiers qual = CVQualifiers::random_qualifiers(type, FieldConstProb, FieldVolatileProb);
+	CVQualifiers qual = CVQualifiers::random_qualifiers(type, FieldConstProb(), FieldVolatileProb());
 	ERROR_RETURN();
 	qualifiers.push_back(qual);
 	int length = rnd_upto(max_length);
@@ -728,7 +728,7 @@ Type::make_full_bitfields_struct_fields(size_t field_cnt, vector<const Type*> &r
 					bool structHasAssignOps)
 {
 	for (size_t i=0; i<field_cnt; i++) {
-		bool is_non_bitfield = rnd_flipcoin(ScalarFieldInFullBitFieldsProb);
+		bool is_non_bitfield = rnd_flipcoin(ScalarFieldInFullBitFieldsProb());
 		if (is_non_bitfield) {
 			make_one_struct_field(random_fields, qualifiers, fields_length, structHasAssignOps);
 		}
@@ -749,7 +749,7 @@ Type::make_one_struct_field(vector<const Type*> &random_fields,
 	ERROR_RETURN();
 	const Type* type = AllTypes[i];
 	random_fields.push_back(type);
-	CVQualifiers qual = CVQualifiers::random_qualifiers(type, FieldConstProb, FieldVolatileProb);
+	CVQualifiers qual = CVQualifiers::random_qualifiers(type, FieldConstProb(), FieldVolatileProb());
 	ERROR_RETURN();
 	qualifiers.push_back(qual);
 	fields_length.push_back(-1);
@@ -758,7 +758,7 @@ Type::make_one_struct_field(vector<const Type*> &random_fields,
 void
 Type::make_one_union_field(vector<const Type*> &fields, vector<CVQualifiers> &qfers, vector<int> &lens)
 {
-	bool is_bitfield = CGOptions::bitfields() && !CGOptions::ccomp() && rnd_flipcoin(BitFieldInNormalStructProb);
+	bool is_bitfield = CGOptions::bitfields() && !CGOptions::ccomp() && rnd_flipcoin(BitFieldInNormalStructProb());
 	if (is_bitfield) {
 		make_one_bitfield(fields, qfers, lens);
 	}
@@ -805,7 +805,7 @@ Type::make_one_union_field(vector<const Type*> &fields, vector<CVQualifiers> &qf
 			else {
 				unsigned int i = pure_rnd_upto(ok_nonstruct_types.size());
 				const Type* t = ok_nonstruct_types[i];
-				if (t->eType == eSimple && SIMPLE_TYPES_PROB_FILTER->filter(t->simple_type)) {
+				if (t->eType == eSimple && SIMPLE_TYPES_PROB_FILTER()->filter(t->simple_type)) {
 					continue;
 				}
 				type = t;
@@ -813,7 +813,7 @@ Type::make_one_union_field(vector<const Type*> &fields, vector<CVQualifiers> &qf
 		} while (type == nullptr);
 
 		fields.push_back(type);
-		CVQualifiers qual = CVQualifiers::random_qualifiers(type, FieldConstProb, FieldVolatileProb);
+		CVQualifiers qual = CVQualifiers::random_qualifiers(type, FieldConstProb(), FieldVolatileProb());
 		ERROR_RETURN();
 		qfers.push_back(qual);
 		lens.push_back(-1);
@@ -828,7 +828,7 @@ Type::make_normal_struct_fields(size_t field_cnt, vector<const Type*> &random_fi
 {
 	for (size_t i=0; i<field_cnt; i++)
 	{
-		bool is_bitfield = CGOptions::bitfields() && rnd_flipcoin(BitFieldInNormalStructProb);
+		bool is_bitfield = CGOptions::bitfields() && rnd_flipcoin(BitFieldInNormalStructProb());
 		if (is_bitfield) {
 			make_one_bitfield(random_fields, qualifiers, fields_length);
 		}
@@ -962,7 +962,7 @@ Type::make_one_normal_field_by_enum(Enumerator<string> &enumerator, vector<const
 {
 	int types_size = all_types.size();
 	int quals_size = all_quals.size();
-	Filter *filter = SIMPLE_TYPES_PROB_FILTER;
+	Filter *filter = SIMPLE_TYPES_PROB_FILTER();
 
 	std::ostringstream ss1, ss2;
 	ss1 << "field" << i;
@@ -1034,7 +1034,7 @@ Type::make_all_struct_types_with_bitfields(Enumerator<string> &enumerator,
 		if (!rv)
 			return;
 	}
-	if ((ExhaustiveBitFieldsProb > 0) && (ExhaustiveBitFieldsProb < 100) &&
+	if ((ExhaustiveBitFieldsProb() > 0) && (ExhaustiveBitFieldsProb() < 100) &&
 		((bitfields_cnt == field_cnt) || (normal_fields_cnt == field_cnt)))
 		return;
 
@@ -1092,13 +1092,13 @@ Type::make_all_struct_types(int level, vector<const Type*> &accum_types)
 	reset_accum_types(accum_types);
 
 	vector<CVQualifiers> all_quals;
-	CVQualifiers::get_all_qualifiers(all_quals, RegularConstProb, RegularVolatileProb);
+	CVQualifiers::get_all_qualifiers(all_quals, RegularConstProb(), RegularVolatileProb());
 
 	vector<CVQualifiers> all_bitfield_quals;
-	CVQualifiers::get_all_qualifiers(all_bitfield_quals, FieldConstProb, FieldVolatileProb);
+	CVQualifiers::get_all_qualifiers(all_bitfield_quals, FieldConstProb(), FieldVolatileProb());
 
 	Enumerator<string> fields_enumerator;
-	init_is_bitfield_enumerator(fields_enumerator, ExhaustiveBitFieldsProb);
+	init_is_bitfield_enumerator(fields_enumerator, ExhaustiveBitFieldsProb());
 
 	Enumerator<string> *i;
 	for (i = fields_enumerator.begin(); i != fields_enumerator.end(); i = i->next()) {
@@ -1156,7 +1156,7 @@ Type::make_random_struct_type(void)
     vector<const Type*> random_fields;
     vector<CVQualifiers> qualifiers;
     vector<int> fields_length;
-    bool is_bitfields = CGOptions::bitfields() && rnd_flipcoin(BitFieldsCreationProb);
+    bool is_bitfields = CGOptions::bitfields() && rnd_flipcoin(BitFieldsCreationProb());
     ERROR_GUARD(nullptr);
 	bool hasAssignOps = if_struct_will_have_assign_ops();
     //if (CGOptions::bitfields())
@@ -1676,7 +1676,7 @@ Type::SelectLType(bool no_volatile, eAssignOps op)
 	// We haven't implemented pointer arith,
 	// so choose pointer types iff we create simple assignment
 	// (see Statement::make_random)
-	if (op == eSimpleAssign && rnd_flipcoin(PointerAsLTypeProb)) {
+	if (op == eSimpleAssign && rnd_flipcoin(PointerAsLTypeProb())) {
 		ERROR_GUARD(nullptr);
 		type = Type::make_random_pointer_type();
 	}
@@ -1686,14 +1686,14 @@ Type::SelectLType(bool no_volatile, eAssignOps op)
 	if (!type && (op == eSimpleAssign)) {
 		vector<Type *> ok_struct_types;
 		get_all_ok_struct_union_types(ok_struct_types, true, no_volatile, false, true);
-		if ((ok_struct_types.size() > 0)  && rnd_flipcoin(StructAsLTypeProb)) {
+		if ((ok_struct_types.size() > 0)  && rnd_flipcoin(StructAsLTypeProb())) {
 			type = Type::choose_random_struct_union_type(ok_struct_types);
 		}
 	}
 
 	// choose float as LHS type
 	if (!type) {
-		if (StatementAssign::AssignOpWorksForFloat(op) && rnd_flipcoin(FloatAsLTypeProb)) {
+		if (StatementAssign::AssignOpWorksForFloat(op) && rnd_flipcoin(FloatAsLTypeProb())) {
 			type = &Type::get_simple_type(eFloat);
 		}
 	}

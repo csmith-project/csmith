@@ -109,7 +109,7 @@ FunctionInvocation::make_random(bool is_std_func,
 	}
 	// now use standard functions, i.e., binary/unary operators to create an invocation
 	if (fi == nullptr) {
-		int rnd_flag = rnd_flipcoin(StdUnaryFuncProb);
+		int rnd_flag = rnd_flipcoin(StdUnaryFuncProb());
 		if (rnd_flag) {
 			fi = make_random_unary(cg_context, type);
 		} else {
@@ -146,7 +146,7 @@ FunctionInvocation::make_random_unary(CGContext &cg_context, const Type* type)
 	assert(type);
 	eUnaryOps op;
 	do {
-		op = (eUnaryOps)(rnd_upto(MAX_UNARY_OP, UNARY_OPS_PROB_FILTER));
+		op = (eUnaryOps)(rnd_upto(MAX_UNARY_OP, UNARY_OPS_PROB_FILTER()));
 	} while (type->is_float() && !UnaryOpWorksForFloat(op));
 	ERROR_GUARD(nullptr);
 	SafeOpFlags *flags = nullptr;
@@ -178,7 +178,7 @@ FunctionInvocation::make_random_binary(CGContext &cg_context, const Type* type)
 
 	eBinaryOps op;
 	do {
-		op = (eBinaryOps)(rnd_upto(MAX_BINARY_OP, BINARY_OPS_PROB_FILTER));
+		op = (eBinaryOps)(rnd_upto(MAX_BINARY_OP, BINARY_OPS_PROB_FILTER()));
 	} while (type->is_float() && !BinaryOpWorksForFloat(op));
 	ERROR_GUARD(nullptr);
 	assert(type);
@@ -229,7 +229,7 @@ FunctionInvocation::make_random_binary(CGContext &cg_context, const Type* type)
 		CGContext rhs_cg_context(cg_context, rhs_eff_context, &rhs_eff_accum);
 		if (op == eLShift || op == eRShift) {
 			eTermType tt = MAX_TERM_TYPES;
-			bool not_constant = rnd_flipcoin(ShiftByNonConstantProb);
+			bool not_constant = rnd_flipcoin(ShiftByNonConstantProb());
 			// avoid shifting negative or too much
 			if (!not_constant) {
 				rhs = Constant::make_random_upto(lhs_type->SizeInBytes() * 8);

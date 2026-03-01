@@ -160,111 +160,43 @@ enum ProbName {
 
 #define MAX_PROB_NAME ((ProbName)(pStatementProb+1))
 
-#define MoreStructUnionTypeProb \
-	Probabilities::get_prob(pMoreStructUnionProb)
-
-#define BitFieldsCreationProb \
-	Probabilities::get_prob(pBitFieldsCreationProb)
-
-#define BitFieldInNormalStructProb \
-	Probabilities::get_prob(pBitFieldInNormalStructProb)
-
-#define ScalarFieldInFullBitFieldsProb \
-	Probabilities::get_prob(pScalarFieldInFullBitFieldsProb)
-
-#define ExhaustiveBitFieldsProb \
-	Probabilities::get_prob(pExhaustiveBitFieldsProb)
-
-#define BitFieldsSignedProb \
-	Probabilities::get_prob(pBitFieldsSignedProb)
-
-#define SafeOpsSignedProb \
-	Probabilities::get_prob(pSafeOpsSignedProb)
-
-#define SelectDerefPointerProb \
-	Probabilities::get_prob(pSelectDerefPointerProb)
-
-#define RegularVolatileProb \
-	Probabilities::get_prob(pRegularVolatileProb)
-
-#define RegularConstProb \
-	Probabilities::get_prob(pRegularConstProb)
-
-#define StricterConstProb \
-	Probabilities::get_prob(pStricterConstProb)
-
-#define LooserConstProb \
-	Probabilities::get_prob(pLooserConstProb)
-
-#define FieldVolatileProb \
-	Probabilities::get_prob(pFieldVolatileProb)
-
-#define FieldConstProb \
-	Probabilities::get_prob(pFieldConstProb)
-
-#define StdUnaryFuncProb \
-	Probabilities::get_prob(pStdUnaryFuncProb)
-
-#define ShiftByNonConstantProb \
-	Probabilities::get_prob(pShiftByNonConstantProb)
-
-#define PointerAsLTypeProb \
-	Probabilities::get_prob(pPointerAsLTypeProb)
-
-#define StructAsLTypeProb \
-	Probabilities::get_prob(pStructAsLTypeProb)
-
-#define UnionAsLTypeProb \
-	Probabilities::get_prob(pUnionAsLTypeProb)
-
-#define FloatAsLTypeProb \
-	Probabilities::get_prob(pFloatAsLTypeProb)
-
-#define NewArrayVariableProb \
-	Probabilities::get_prob(pNewArrayVariableProb)
-
-#define AccessOnceVariableProb \
-	Probabilities::get_prob(pAccessOnceVariableProb)
-
-#define InlineFunctionProb \
-	Probabilities::get_prob(pInlineFunctionProb)
-
-#define BuiltinFunctionProb \
-	Probabilities::get_prob(pBuiltinFunctionProb)
-
-#define FuncAttrProb \
-	Probabilities::get_prob(pFuncAttrProb)
-
-#define TypeAttrProb \
-	Probabilities::get_prob(pTypeAttrProb)
-
-#define LabelAttrProb \
-	Probabilities::get_prob(pLabelAttrProb)
-
-#define VarAttrProb \
-	Probabilities::get_prob(pVarAttrProb)
-
-#define Int128Prob \
-	Probabilities::get_prob(pInt128Prob)
-
-#define UInt128Prob \
-	Probabilities::get_prob(pUInt128Prob)
-
-#define BinaryConstProb \
-        Probabilities::get_prob(pBinaryConstProb)
+inline unsigned int MoreStructUnionTypeProb();
+inline unsigned int BitFieldsCreationProb();
+inline unsigned int BitFieldInNormalStructProb();
+inline unsigned int ScalarFieldInFullBitFieldsProb();
+inline unsigned int ExhaustiveBitFieldsProb();
+inline unsigned int BitFieldsSignedProb();
+inline unsigned int SafeOpsSignedProb();
+inline unsigned int SelectDerefPointerProb();
+inline unsigned int RegularVolatileProb();
+inline unsigned int RegularConstProb();
+inline unsigned int StricterConstProb();
+inline unsigned int LooserConstProb();
+inline unsigned int FieldVolatileProb();
+inline unsigned int FieldConstProb();
+inline unsigned int StdUnaryFuncProb();
+inline unsigned int ShiftByNonConstantProb();
+inline unsigned int PointerAsLTypeProb();
+inline unsigned int StructAsLTypeProb();
+inline unsigned int UnionAsLTypeProb();
+inline unsigned int FloatAsLTypeProb();
+inline unsigned int NewArrayVariableProb();
+inline unsigned int AccessOnceVariableProb();
+inline unsigned int InlineFunctionProb();
+inline unsigned int BuiltinFunctionProb();
+inline unsigned int FuncAttrProb();
+inline unsigned int TypeAttrProb();
+inline unsigned int LabelAttrProb();
+inline unsigned int VarAttrProb();
+inline unsigned int Int128Prob();
+inline unsigned int UInt128Prob();
+inline unsigned int BinaryConstProb();
 
 //////////////////////////////////////////////////
-#define UNARY_OPS_PROB_FILTER \
-	Probabilities::get_prob_filter(pUnaryOpsProb)
-
-#define BINARY_OPS_PROB_FILTER \
-	Probabilities::get_prob_filter(pBinaryOpsProb)
-
-#define SIMPLE_TYPES_PROB_FILTER \
-	Probabilities::get_prob_filter(pSimpleTypesProb)
-
-#define SAFE_OPS_SIZE_PROB_FILTER \
-	Probabilities::get_prob_filter(pSafeOpsSizeProb)
+inline Filter *UNARY_OPS_PROB_FILTER();
+inline Filter *BINARY_OPS_PROB_FILTER();
+inline Filter *SIMPLE_TYPES_PROB_FILTER();
+inline Filter *SAFE_OPS_SIZE_PROB_FILTER();
 
 class ProbabilityFilter : public Filter
 {
@@ -484,5 +416,215 @@ private:
 
 	~Probabilities();
 };
+
+inline unsigned int
+MoreStructUnionTypeProb()
+{
+	return Probabilities::get_prob(pMoreStructUnionProb);
+}
+
+inline unsigned int
+BitFieldsCreationProb()
+{
+	return Probabilities::get_prob(pBitFieldsCreationProb);
+}
+
+inline unsigned int
+BitFieldInNormalStructProb()
+{
+	return Probabilities::get_prob(pBitFieldInNormalStructProb);
+}
+
+inline unsigned int
+ScalarFieldInFullBitFieldsProb()
+{
+	return Probabilities::get_prob(pScalarFieldInFullBitFieldsProb);
+}
+
+inline unsigned int
+ExhaustiveBitFieldsProb()
+{
+	return Probabilities::get_prob(pExhaustiveBitFieldsProb);
+}
+
+inline unsigned int
+BitFieldsSignedProb()
+{
+	return Probabilities::get_prob(pBitFieldsSignedProb);
+}
+
+inline unsigned int
+SafeOpsSignedProb()
+{
+	return Probabilities::get_prob(pSafeOpsSignedProb);
+}
+
+inline unsigned int
+SelectDerefPointerProb()
+{
+	return Probabilities::get_prob(pSelectDerefPointerProb);
+}
+
+inline unsigned int
+RegularVolatileProb()
+{
+	return Probabilities::get_prob(pRegularVolatileProb);
+}
+
+inline unsigned int
+RegularConstProb()
+{
+	return Probabilities::get_prob(pRegularConstProb);
+}
+
+inline unsigned int
+StricterConstProb()
+{
+	return Probabilities::get_prob(pStricterConstProb);
+}
+
+inline unsigned int
+LooserConstProb()
+{
+	return Probabilities::get_prob(pLooserConstProb);
+}
+
+inline unsigned int
+FieldVolatileProb()
+{
+	return Probabilities::get_prob(pFieldVolatileProb);
+}
+
+inline unsigned int
+FieldConstProb()
+{
+	return Probabilities::get_prob(pFieldConstProb);
+}
+
+inline unsigned int
+StdUnaryFuncProb()
+{
+	return Probabilities::get_prob(pStdUnaryFuncProb);
+}
+
+inline unsigned int
+ShiftByNonConstantProb()
+{
+	return Probabilities::get_prob(pShiftByNonConstantProb);
+}
+
+inline unsigned int
+PointerAsLTypeProb()
+{
+	return Probabilities::get_prob(pPointerAsLTypeProb);
+}
+
+inline unsigned int
+StructAsLTypeProb()
+{
+	return Probabilities::get_prob(pStructAsLTypeProb);
+}
+
+inline unsigned int
+UnionAsLTypeProb()
+{
+	return Probabilities::get_prob(pUnionAsLTypeProb);
+}
+
+inline unsigned int
+FloatAsLTypeProb()
+{
+	return Probabilities::get_prob(pFloatAsLTypeProb);
+}
+
+inline unsigned int
+NewArrayVariableProb()
+{
+	return Probabilities::get_prob(pNewArrayVariableProb);
+}
+
+inline unsigned int
+AccessOnceVariableProb()
+{
+	return Probabilities::get_prob(pAccessOnceVariableProb);
+}
+
+inline unsigned int
+InlineFunctionProb()
+{
+	return Probabilities::get_prob(pInlineFunctionProb);
+}
+
+inline unsigned int
+BuiltinFunctionProb()
+{
+	return Probabilities::get_prob(pBuiltinFunctionProb);
+}
+
+inline unsigned int
+FuncAttrProb()
+{
+	return Probabilities::get_prob(pFuncAttrProb);
+}
+
+inline unsigned int
+TypeAttrProb()
+{
+	return Probabilities::get_prob(pTypeAttrProb);
+}
+
+inline unsigned int
+LabelAttrProb()
+{
+	return Probabilities::get_prob(pLabelAttrProb);
+}
+
+inline unsigned int
+VarAttrProb()
+{
+	return Probabilities::get_prob(pVarAttrProb);
+}
+
+inline unsigned int
+Int128Prob()
+{
+	return Probabilities::get_prob(pInt128Prob);
+}
+
+inline unsigned int
+UInt128Prob()
+{
+	return Probabilities::get_prob(pUInt128Prob);
+}
+
+inline unsigned int
+BinaryConstProb()
+{
+	return Probabilities::get_prob(pBinaryConstProb);
+}
+
+inline Filter *
+UNARY_OPS_PROB_FILTER()
+{
+	return Probabilities::get_prob_filter(pUnaryOpsProb);
+}
+
+inline Filter *
+BINARY_OPS_PROB_FILTER()
+{
+	return Probabilities::get_prob_filter(pBinaryOpsProb);
+}
+
+inline Filter *
+SIMPLE_TYPES_PROB_FILTER()
+{
+	return Probabilities::get_prob_filter(pSimpleTypesProb);
+}
+
+inline Filter *
+SAFE_OPS_SIZE_PROB_FILTER()
+{
+	return Probabilities::get_prob_filter(pSafeOpsSizeProb);
+}
 
 #endif //PROBABILITIES_H

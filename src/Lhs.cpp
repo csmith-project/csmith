@@ -75,7 +75,7 @@ Lhs::make_random(CGContext &cg_context, const Type* t, const CVQualifiers* qfer,
 		// try to use one of the "must_use" variables
 		var = VariableSelector::select_must_use_var(Effect::WRITE, cg_context, t, qfer);
 		if (var == nullptr) {
-			bool flag = rnd_flipcoin(SelectDerefPointerProb);
+			bool flag = rnd_flipcoin(SelectDerefPointerProb());
 			if (flag) {
 				var = VariableSelector::select_deref_pointer(Effect::WRITE, cg_context, t, qfer, dummy);
 				ERROR_GUARD(nullptr);

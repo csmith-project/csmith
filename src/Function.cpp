@@ -91,13 +91,13 @@ Function::InitializeAttributes()
 							"no_sanitize_undefined", "no_split_stack", "noinline", "noplt", "stack_protect"};
 		vector<string>::iterator itr;
 		for(itr = common_func_attributes.begin(); itr < common_func_attributes.end(); itr++)
-			func_attr_generator.attributes.push_back(new BooleanAttribute(*itr, FuncAttrProb));
+			func_attr_generator.attributes.push_back(new BooleanAttribute(*itr, FuncAttrProb()));
 
-		func_attr_generator.attributes.push_back(new MultiChoiceAttribute("visibility", FuncAttrProb, {"default", "hidden", "protected", "internal"}));
-		func_attr_generator.attributes.push_back(new MultiChoiceAttribute("no_sanitize", FuncAttrProb, {"address", "thread", "undefined", "kernel-address", "pointer-compare", "pointer-subtract", "leak"}));
-		func_attr_generator.attributes.push_back(new MultiChoiceAttribute("optimize", FuncAttrProb, {"-O0", "-O1", "-O2", "-O3", "-Os", "-Ofast", "-Og"}));
-		func_attr_generator.attributes.push_back(new AlignedAttribute("aligned", FuncAttrProb, 16));
-		func_attr_generator.attributes.push_back(new SectionAttribute("section", FuncAttrProb));
+		func_attr_generator.attributes.push_back(new MultiChoiceAttribute("visibility", FuncAttrProb(), {"default", "hidden", "protected", "internal"}));
+		func_attr_generator.attributes.push_back(new MultiChoiceAttribute("no_sanitize", FuncAttrProb(), {"address", "thread", "undefined", "kernel-address", "pointer-compare", "pointer-subtract", "leak"}));
+		func_attr_generator.attributes.push_back(new MultiChoiceAttribute("optimize", FuncAttrProb(), {"-O0", "-O1", "-O2", "-O3", "-Os", "-Ofast", "-Og"}));
+		func_attr_generator.attributes.push_back(new AlignedAttribute("aligned", FuncAttrProb(), 16));
+		func_attr_generator.attributes.push_back(new SectionAttribute("section", FuncAttrProb()));
 	}
 }
 
@@ -340,7 +340,7 @@ Function::choose_func(const vector<Function *> &funcs,
 	}
 
 	Function *f = nullptr;
-	if (CGOptions::builtins() && rnd_flipcoin(BuiltinFunctionProb)) {
+	if (CGOptions::builtins() && rnd_flipcoin(BuiltinFunctionProb())) {
 		f = Function::get_one_function(ok_builtin_funcs);
 	}
 	if (f == nullptr) {
@@ -450,7 +450,7 @@ Function::make_random_signature(const CGContext& cg_context, const Type* type, c
 	f->rv = Variable::CreateVariable(rvname, type, nullptr, &ret_qfer);
 	GenerateParameterList(*f);
 	FMList.push_back(new FactMgr(f));
-	if (CGOptions::inline_function() && rnd_flipcoin(InlineFunctionProb))
+	if (CGOptions::inline_function() && rnd_flipcoin(InlineFunctionProb()))
 		f->is_inlined = true;
 	return f;
 }
@@ -493,7 +493,7 @@ Function::make_first(void)
 
 	// No Parameter List
 	f->GenerateBody(CGContext::get_empty_context());
-	if (CGOptions::inline_function() && rnd_flipcoin(InlineFunctionProb))
+	if (CGOptions::inline_function() && rnd_flipcoin(InlineFunctionProb()))
 		f->is_inlined = true;
 	fm->setup_in_out_maps(true);
 

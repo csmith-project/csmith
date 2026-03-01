@@ -87,13 +87,13 @@ void
 InitializeVariableAttributes()
 {
 	if(CGOptions::var_attr_flag()){
-		Variable::var_attr_generator.attributes.push_back(new MultiChoiceAttribute("visibility", VarAttrProb, {"default", "hidden", "protected", "internal"}));
-		Variable::var_attr_generator.attributes.push_back(new AlignedAttribute("aligned", VarAttrProb, 8));
-		Variable::var_attr_generator.attributes.push_back(new BooleanAttribute("common", VarAttrProb));
-		Variable::var_attr_generator.attributes.push_back(new BooleanAttribute("uncommon", VarAttrProb));
-		Variable::var_attr_generator.attributes.push_back(new BooleanAttribute("deprecated", VarAttrProb));
-		Variable::var_attr_generator.attributes.push_back(new BooleanAttribute("unused", VarAttrProb));
-		Variable::var_attr_generator.attributes.push_back(new BooleanAttribute("used", VarAttrProb));
+		Variable::var_attr_generator.attributes.push_back(new MultiChoiceAttribute("visibility", VarAttrProb(), {"default", "hidden", "protected", "internal"}));
+		Variable::var_attr_generator.attributes.push_back(new AlignedAttribute("aligned", VarAttrProb(), 8));
+		Variable::var_attr_generator.attributes.push_back(new BooleanAttribute("common", VarAttrProb()));
+		Variable::var_attr_generator.attributes.push_back(new BooleanAttribute("uncommon", VarAttrProb()));
+		Variable::var_attr_generator.attributes.push_back(new BooleanAttribute("deprecated", VarAttrProb()));
+		Variable::var_attr_generator.attributes.push_back(new BooleanAttribute("unused", VarAttrProb()));
+		Variable::var_attr_generator.attributes.push_back(new BooleanAttribute("used", VarAttrProb()));
 	}
 }
 

@@ -517,7 +517,7 @@ VariableSelector::create_and_initialize(Effect::Access access, const CGContext &
 	const Expression* init = nullptr;
 	Variable* var = nullptr;
 
-	if (rnd_flipcoin(NewArrayVariableProb)) {
+	if (rnd_flipcoin(NewArrayVariableProb())) {
 		if (CGOptions::strict_const_arrays()) {
 			init = Constant::make_random(t);
 		} else {
@@ -559,7 +559,7 @@ VariableSelector::GenerateNewGlobal(Effect::Access access, const CGContext &cg_c
 	cg_context.get_current_func()->new_globals.push_back(var);
 
 	if (!var_qfer.is_volatile()) {
-		if (CGOptions::access_once() && rnd_flipcoin(AccessOnceVariableProb)) {
+		if (CGOptions::access_once() && rnd_flipcoin(AccessOnceVariableProb())) {
 			var->isAccessOnce = true;
 		}
 		GlobalNonvolatilesList.push_back(var);

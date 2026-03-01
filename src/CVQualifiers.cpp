@@ -285,7 +285,7 @@ CVQualifiers
 CVQualifiers::random_qualifiers(const Type* t, Effect::Access access,
 				const CGContext &cg_context, bool no_volatile)
 {
-	return random_qualifiers(t, access, cg_context, no_volatile, RegularConstProb, RegularVolatileProb);
+	return random_qualifiers(t, access, cg_context, no_volatile, RegularConstProb(), RegularVolatileProb());
 }
 
 static bool is_volatile_ok_on_one_level(const Type* t)
@@ -409,7 +409,7 @@ CVQualifiers::random_stricter_consts(void) const
 		}
 		else {
 			DEPTH_GUARD_BY_DEPTH_RETURN(1, consts);
-			bool index = rnd_flipcoin(StricterConstProb);
+			bool index = rnd_flipcoin(StricterConstProb());
 			ERROR_GUARD(consts);
 			consts.push_back(index);
 		}
@@ -434,7 +434,7 @@ CVQualifiers::random_stricter_volatiles(void) const
 		}
 		else {
 			DEPTH_GUARD_BY_DEPTH_RETURN(1, volatiles);
-			bool index = rnd_flipcoin(RegularVolatileProb);
+			bool index = rnd_flipcoin(RegularVolatileProb());
 			ERROR_GUARD(volatiles);
 			volatiles.push_back(index);
 		}
@@ -456,7 +456,7 @@ CVQualifiers::random_looser_consts(void) const
 		}
 		else {
 			DEPTH_GUARD_BY_DEPTH_RETURN(1, consts);
-			bool index = rnd_flipcoin(LooserConstProb);
+			bool index = rnd_flipcoin(LooserConstProb());
 			ERROR_GUARD(consts);
 			consts.push_back(index);
 		}
@@ -476,7 +476,7 @@ CVQualifiers::random_looser_volatiles(void) const
 		}
 		else {
 			DEPTH_GUARD_BY_DEPTH_RETURN(1, volatiles);
-			bool index = rnd_flipcoin(RegularVolatileProb);
+			bool index = rnd_flipcoin(RegularVolatileProb());
 			ERROR_GUARD(volatiles);
 			volatiles.push_back(index);
 		}
@@ -514,14 +514,14 @@ CVQualifiers::random_add_qualifiers(bool no_volatile) const
 	if (!CGOptions::const_pointers())
 		is_const = false;
 	else
-		is_const = rnd_flipcoin(RegularConstProb);
+		is_const = rnd_flipcoin(RegularConstProb());
 	ERROR_GUARD(qfer);
-	//bool is_volatile = no_volatile ? false : rnd_upto(RegularVolatileProb);
+	//bool is_volatile = no_volatile ? false : rnd_upto(RegularVolatileProb());
 	bool is_volatile;
 	if (no_volatile || !CGOptions::volatile_pointers())
 		is_volatile = false;
 	else
-		is_volatile = rnd_flipcoin(RegularVolatileProb);
+		is_volatile = rnd_flipcoin(RegularVolatileProb());
 
 	ERROR_GUARD(qfer);
 	qfer.add_qualifiers(is_const, is_volatile);

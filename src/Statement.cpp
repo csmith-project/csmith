@@ -97,8 +97,8 @@ void
 InitializeLabelAttributes()
 {
 	if(CGOptions::label_attr_flag()){
-		Statement::label_attr_generator.attributes.push_back(new BooleanAttribute("hot", TypeAttrProb));
-		Statement::label_attr_generator.attributes.push_back(new BooleanAttribute("cold", TypeAttrProb));
+		Statement::label_attr_generator.attributes.push_back(new BooleanAttribute("hot", TypeAttrProb()));
+		Statement::label_attr_generator.attributes.push_back(new BooleanAttribute("cold", TypeAttrProb()));
 	}
 }
 

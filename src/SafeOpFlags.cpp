@@ -161,7 +161,7 @@ SafeOpFlags::make_random_unary(const Type *rv_type, const Type *op1_type, eUnary
 		flags->op1_ = true;
 	}
 	else {
-		flags->op1_ = rnd_flipcoin(SafeOpsSignedProb);
+		flags->op1_ = rnd_flipcoin(SafeOpsSignedProb());
 	}
 	flags->op2_ = flags->op1_;
 
@@ -173,7 +173,7 @@ SafeOpFlags::make_random_unary(const Type *rv_type, const Type *op1_type, eUnary
 		flags->op_size_ = sFloat;
 	}
 	else {
-		flags->op_size_ = (SafeOpSize)rnd_upto(MAX_SAFE_OP_SIZE-1, SAFE_OPS_SIZE_PROB_FILTER);
+		flags->op_size_ = (SafeOpSize)rnd_upto(MAX_SAFE_OP_SIZE-1, SAFE_OPS_SIZE_PROB_FILTER());
 	}
 	return flags;
 }
@@ -195,7 +195,7 @@ SafeOpFlags::make_random_binary(const Type *rv_type, const Type *op1_type, const
 		flags->op1_ = true;
 	}
 	else {
-		flags->op1_ = rnd_flipcoin(SafeOpsSignedProb);
+		flags->op1_ = rnd_flipcoin(SafeOpsSignedProb());
 	}
 	ERROR_GUARD_AND_DEL1(nullptr, flags);
 
@@ -203,7 +203,7 @@ SafeOpFlags::make_random_binary(const Type *rv_type, const Type *op1_type, const
 		if (rv_is_float)
 			flags->op2_ = true;
 		else
-			flags->op2_ = rnd_flipcoin(SafeOpsSignedProb);
+			flags->op2_ = rnd_flipcoin(SafeOpsSignedProb());
 		ERROR_GUARD_AND_DEL1(nullptr, flags);
 	}
 	else {
@@ -219,7 +219,7 @@ SafeOpFlags::make_random_binary(const Type *rv_type, const Type *op1_type, const
 		flags->op_size_ = sFloat;
 	}
 	else {
-		flags->op_size_ = (SafeOpSize)rnd_upto(MAX_SAFE_OP_SIZE-1, SAFE_OPS_SIZE_PROB_FILTER);
+		flags->op_size_ = (SafeOpSize)rnd_upto(MAX_SAFE_OP_SIZE-1, SAFE_OPS_SIZE_PROB_FILTER());
 	}
 	return flags;
 }
