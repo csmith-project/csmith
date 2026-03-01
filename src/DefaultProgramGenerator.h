@@ -40,7 +40,7 @@ public:
 
   virtual ~DefaultProgramGenerator() override;
 
-  virtual OutputMgr *getOutputMgr() { return output_mgr_; }
+  virtual OutputMgr *getOutputMgr() override { return output_mgr_; }
 
   virtual void goGenerator() override;
 

@@ -61,7 +61,7 @@ public:
   explicit FactPointTo(const Variable *v);
   virtual ~FactPointTo(void) override;
 
-  virtual const Variable *get_var(void) const { return var; };
+  virtual const Variable *get_var(void) const override { return var; };
   const vector<const Variable *> &get_point_to_vars(void) const {
     return point_to_vars;
   };
@@ -86,12 +86,12 @@ public:
   update_with_modified_index(const Variable *index_var) const;
 
   // lattice functions
-  virtual bool is_top(void) const { return point_to_vars.empty(); }
-  virtual bool is_bottom(void) const {
+  virtual bool is_top(void) const override { return point_to_vars.empty(); }
+  virtual bool is_bottom(void) const override {
     return false;
   } // there is no bottom, we just grow the points-to set
-  virtual void set_top(void) { point_to_vars.clear(); }
-  virtual void set_bottom(void) {};
+  virtual void set_top(void) override { point_to_vars.clear(); }
+  virtual void set_bottom(void) override {};
 
   virtual int join(const Fact &fact) override;
   virtual int join_visits(const Fact &fact) override;

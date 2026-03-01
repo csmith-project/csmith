@@ -70,11 +70,11 @@ public:
   const Block *get_body(void) const { return &body; };
   void output_header(std::ostream &out, int indent) const;
   //
-  virtual void get_blocks(std::vector<const Block *> &blks) const {
+  virtual void get_blocks(std::vector<const Block *> &blks) const override {
     blks.push_back(&body);
   }
 
-  virtual void get_exprs(std::vector<const Expression *> &exps) const {
+  virtual void get_exprs(std::vector<const Expression *> &exps) const override {
     exps.push_back(&test);
   }
 

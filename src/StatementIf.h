@@ -54,10 +54,10 @@ public:
   StatementIf(const StatementIf &si);
   virtual ~StatementIf(void) override;
 
-  virtual void get_exprs(std::vector<const Expression *> &exps) const {
+  virtual void get_exprs(std::vector<const Expression *> &exps) const override {
     exps.push_back(&test);
   }
-  virtual void get_blocks(std::vector<const Block *> &blks) const {
+  virtual void get_blocks(std::vector<const Block *> &blks) const override {
     blks.push_back(&if_true);
     blks.push_back(&if_false);
   }

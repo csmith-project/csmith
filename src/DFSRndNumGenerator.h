@@ -61,7 +61,7 @@ public:
 
   virtual std::string RandomDigits(int num) override;
 
-  virtual enum RNDNUM_GENERATOR kind() { return rDFSRndNumGenerator; }
+  virtual enum RNDNUM_GENERATOR kind() override { return rDFSRndNumGenerator; }
 
   bool eager_backtracking(int depth_needed);
 

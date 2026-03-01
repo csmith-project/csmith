@@ -54,7 +54,7 @@ public:
 
   virtual void OutputTail(std::ostream &out) override;
 
-  virtual std::vector<ExtensionValue *> &get_values() { return values_; }
+  virtual std::vector<ExtensionValue *> &get_values() override { return values_; }
 
 private:
   static std::string array_base_name_;

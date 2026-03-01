@@ -91,13 +91,13 @@ public:
 
   std::string create_new_tmp_var(enum eSimpleType type) const;
 
-  virtual void get_blocks(std::vector<const Block *> &blks) const {
+  virtual void get_blocks(std::vector<const Block *> &blks) const override {
     blks.push_back(this);
   }
-  virtual void get_exprs(std::vector<const Expression *> & /* exps */) const {};
+  virtual void get_exprs(std::vector<const Expression *> & /* exps */) const override {};
   const Statement *get_last_stm(void) const;
   bool is_var_on_stack(const Variable *v) const;
-  std::vector<const ExpressionVariable *> get_dereferenced_ptrs(void) const;
+  std::vector<const ExpressionVariable *> get_dereferenced_ptrs(void) const override ;
 
   Statement *append_return_stmt(CGContext &cg_context);
   virtual bool must_return(void) const override;

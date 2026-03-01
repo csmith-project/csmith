@@ -62,11 +62,11 @@ public:
   virtual ~StatementArrayOp(void) override;
 
   void output_header(std::ostream &out, int &indent) const;
-  virtual void get_exprs(std::vector<const Expression *> &exps) const {
+  virtual void get_exprs(std::vector<const Expression *> &exps) const override {
     if (init_value)
       exps.push_back(init_value);
   }
-  virtual void get_blocks(std::vector<const Block *> &blks) const {
+  virtual void get_blocks(std::vector<const Block *> &blks) const override {
     if (body)
       blks.push_back(body);
   }

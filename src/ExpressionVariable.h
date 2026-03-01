@@ -61,7 +61,7 @@ public:
 
   virtual CVQualifiers get_qualifiers(void) const override;
 
-  virtual void get_eval_to_subexps(vector<const Expression *> &subs) const {
+  virtual void get_eval_to_subexps(vector<const Expression *> &subs) const override {
     subs.push_back(this);
   }
 
@@ -74,7 +74,7 @@ public:
   virtual void
   get_referenced_ptrs(std::vector<const Variable *> &ptrs) const override;
 
-  virtual unsigned int get_complexity(void) const { return 1; }
+  virtual unsigned int get_complexity(void) const override { return 1; }
 
   virtual bool visit_facts(vector<const Fact *> &inputs,
                            CGContext &cg_context) const override;
@@ -85,7 +85,7 @@ public:
 
   virtual bool compatible(const Variable *v) const override;
 
-  virtual bool use_var(const Variable *v) const { return v == &var; }
+  virtual bool use_var(const Variable *v) const override { return v == &var; }
 
   virtual void Output(std::ostream &) const override;
 

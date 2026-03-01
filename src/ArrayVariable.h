@@ -52,7 +52,7 @@ public:
 
   void add_index(const Expression *e);
   void set_index(size_t index, const Expression *e);
-  virtual size_t get_dimension(void) const { return sizes.size(); }
+  virtual size_t get_dimension(void) const override { return sizes.size(); }
   unsigned long size_in_bytes(void) const;
   unsigned long get_size(void) const;
   std::vector<unsigned int> get_sizes(void) const { return sizes; }
@@ -80,10 +80,10 @@ public:
   virtual void OutputDef(std::ostream &out, int indent) const override;
   virtual void OutputDecl(std::ostream &) const override;
   virtual void hash(std::ostream &out) const override;
-  virtual const Variable *get_collective(void) const {
+  virtual const Variable *get_collective(void) const override {
     return collective ? collective : this;
   }
-  virtual const ArrayVariable *get_array(string & /*field*/) const {
+  virtual const ArrayVariable *get_array(string & /*field*/) const override {
     return this;
   }
   virtual void OutputLowerBound(std::ostream &) const override;

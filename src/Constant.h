@@ -59,11 +59,11 @@ public:
   // Factory method.
   static Constant *make_int(int v);
 
-  Expression *clone() const;
+  Expression *clone() const override ;
 
-  CVQualifiers get_qualifiers(void) const { return CVQualifiers(true, false); }
+  CVQualifiers get_qualifiers(void) const override { return CVQualifiers(true, false); }
 
-  virtual void get_eval_to_subexps(vector<const Expression *> &subs) const {
+  virtual void get_eval_to_subexps(vector<const Expression *> &subs) const override {
     subs.push_back(this);
   }
 
@@ -84,8 +84,8 @@ public:
   virtual bool equals(int num) const override;
 
   virtual void
-  get_referenced_ptrs(std::vector<const Variable *> & /*ptrs*/) const {};
-  virtual unsigned int get_complexity(void) const { return 1; }
+  get_referenced_ptrs(std::vector<const Variable *> & /*ptrs*/) const override {};
+  virtual unsigned int get_complexity(void) const override { return 1; }
   // unsigned long SizeInBytes(void) const;
   virtual void Output(std::ostream &) const override;
 

@@ -67,7 +67,7 @@ public:
 
   virtual FunctionInvocation *clone() const override;
 
-  virtual bool compatible(const Variable *) const { return false; }
+  virtual bool compatible(const Variable *) const override { return false; }
 
   virtual const Type &get_type(void) const override;
 
@@ -75,7 +75,7 @@ public:
 
   virtual void indented_output(std::ostream &out, int indent) const override;
 
-  virtual bool safe_invocation() const { return true; }
+  virtual bool safe_invocation() const override { return true; }
 
   const Function *get_func(void) const { return func; };
 

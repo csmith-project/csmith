@@ -57,15 +57,15 @@ public:
   virtual void Output(std::ostream &out, FactMgr *fm,
                       int indent = 0) const override;
 
-  virtual bool must_return(void) const { return true; }
+  virtual bool must_return(void) const override { return true; }
 
-  virtual bool must_jump(void) const { return true; }
+  virtual bool must_jump(void) const override { return true; }
 
   virtual std::vector<const ExpressionVariable *>
   get_dereferenced_ptrs(void) const override;
 
-  virtual void get_blocks(std::vector<const Block *> & /* blks */) const {};
-  virtual void get_exprs(std::vector<const Expression *> &exps) const {
+  virtual void get_blocks(std::vector<const Block *> & /* blks */) const override {};
+  virtual void get_exprs(std::vector<const Expression *> &exps) const override {
     exps.push_back(&var);
   }
 

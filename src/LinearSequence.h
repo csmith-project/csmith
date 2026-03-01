@@ -55,7 +55,7 @@ public:
 
   virtual void get_sequence(std::ostream &) override;
 
-  virtual char get_sep_char() const { return sep_char_; }
+  virtual char get_sep_char() const override { return sep_char_; }
 
   static const char default_sep_char;
 

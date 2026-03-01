@@ -58,11 +58,11 @@ public:
 
   virtual CVQualifiers get_qualifiers(void) const override;
 
-  virtual void get_eval_to_subexps(vector<const Expression *> &subs) const {
+  virtual void get_eval_to_subexps(vector<const Expression *> &subs) const override {
     subs.push_back(this);
   }
 
-  virtual const FunctionInvocation *get_invoke(void) const { return &invoke; };
+  virtual const FunctionInvocation *get_invoke(void) const override { return &invoke; };
 
   virtual const Type &get_type(void) const override;
 
@@ -82,15 +82,15 @@ public:
 
   virtual bool use_var(const Variable *v) const override;
 
-  virtual bool equals(int num) const { return invoke.equals(num); }
-  virtual bool is_0_or_1(void) const { return invoke.is_0_or_1(); }
+  virtual bool equals(int num) const override { return invoke.equals(num); }
+  virtual bool is_0_or_1(void) const override { return invoke.is_0_or_1(); }
 
   virtual std::vector<const ExpressionVariable *>
   get_dereferenced_ptrs(void) const override;
   virtual void
   get_referenced_ptrs(std::vector<const Variable *> &ptrs) const override;
 
-  void Output(std::ostream &) const;
+  void Output(std::ostream &) const override ;
   virtual void indented_output(std::ostream &out, int indent) const override;
 
 private:

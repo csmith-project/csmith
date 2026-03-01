@@ -60,10 +60,10 @@ public:
                                      bool as_dest);
 
   virtual bool must_jump(void) const override;
-  virtual void get_exprs(std::vector<const Expression *> &exps) const {
+  virtual void get_exprs(std::vector<const Expression *> &exps) const override {
     exps.push_back(&test);
   }
-  virtual void get_blocks(std::vector<const Block *> & /* blks */) const {};
+  virtual void get_blocks(std::vector<const Block *> & /* blks */) const override {};
   virtual bool visit_facts(vector<const Fact *> &inputs,
                            CGContext &cg_context) const override;
   virtual void Output(std::ostream &out, FactMgr *fm,

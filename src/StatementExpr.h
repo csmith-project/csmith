@@ -69,8 +69,8 @@ public:
 
   virtual bool has_uncertain_call_recursive(void) const override;
 
-  virtual void get_blocks(std::vector<const Block *> & /* blks */) const {};
-  virtual void get_exprs(std::vector<const Expression *> &exps) const {
+  virtual void get_blocks(std::vector<const Block *> & /* blks */) const override {};
+  virtual void get_exprs(std::vector<const Expression *> &exps) const override {
     exps.push_back(&expr);
   }
 

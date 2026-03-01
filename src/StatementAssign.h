@@ -117,8 +117,8 @@ public:
 
   virtual ~StatementAssign(void) override;
 
-  virtual void get_blocks(std::vector<const Block *> & /* blks */) const {};
-  virtual void get_exprs(std::vector<const Expression *> &exps) const {
+  virtual void get_blocks(std::vector<const Block *> & /* blks */) const override {};
+  virtual void get_exprs(std::vector<const Expression *> &exps) const override {
     exps.push_back(&expr);
     exps.push_back(&lhs);
   }

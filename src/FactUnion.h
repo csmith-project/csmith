@@ -55,7 +55,7 @@ public:
 
   virtual ~FactUnion(void) {};
 
-  virtual const Variable *get_var(void) const { return var; };
+  virtual const Variable *get_var(void) const override { return var; };
   void set_var(const Variable *v) { var = v; }
   const Type *get_last_written_type(void) const;
   int get_last_written_fid(void) const { return last_written_fid; };
@@ -63,10 +63,10 @@ public:
                                 const vector<const Fact *> &facts);
 
   // lattice functions
-  virtual bool is_top(void) const { return last_written_fid == TOP; }
-  virtual bool is_bottom(void) const { return last_written_fid == BOTTOM; }
-  virtual void set_top(void) { last_written_fid = TOP; }
-  virtual void set_bottom(void) { last_written_fid = BOTTOM; }
+  virtual bool is_top(void) const override { return last_written_fid == TOP; }
+  virtual bool is_bottom(void) const override { return last_written_fid == BOTTOM; }
+  virtual void set_top(void) override { last_written_fid = TOP; }
+  virtual void set_bottom(void) override { last_written_fid = BOTTOM; }
   virtual bool imply(const Fact &fact) const override;
   virtual bool equal(const Fact &fact) const override;
   virtual int join(const Fact &fact) override;
@@ -88,10 +88,10 @@ public:
   virtual Fact *clone(void) const override;
 
   // output functions
-  virtual bool is_assertable(const Statement * /*s*/) const { return false; }
+  virtual bool is_assertable(const Statement * /*s*/) const override { return false; }
   virtual void Output(std::ostream &out) const override;
   virtual void OutputAssertion(std::ostream & /*out*/,
-                               const Statement * /*s*/) const {};
+                               const Statement * /*s*/) const override {};
 
   // constants to indicate lattice top/bottom
   static const int TOP;
