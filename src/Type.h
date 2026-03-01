@@ -44,7 +44,6 @@
 #include <string>
 #include <ostream>
 #include <vector>
-#include "CommonMacros.h"
 #include "StatementAssign.h"
 #include "CVQualifiers.h"
 

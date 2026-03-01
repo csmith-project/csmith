@@ -31,8 +31,6 @@
 #ifndef ERROR_H
 #define ERROR_H
 
-#include "CommonMacros.h"
-
 #define SUCCESS 0
 #define ERROR -1
 #define EXCEED_MAX_DEPTH_ERROR -2

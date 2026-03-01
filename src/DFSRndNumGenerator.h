@@ -34,7 +34,6 @@
 #include <string>
 
 #include "Common.h"
-#include "CommonMacros.h"
 #include "AbsRndNumGenerator.h"
 
 class Sequence;

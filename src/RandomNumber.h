@@ -34,7 +34,6 @@
 
 #include <string>
 #include <map>
-#include "CommonMacros.h"
 #include "AbsRndNumGenerator.h"
 
 class Filter;

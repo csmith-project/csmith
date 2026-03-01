@@ -31,7 +31,6 @@
 #define ABS_RNDNUM_GENERATOR
 
 #include <string>
-#include "CommonMacros.h"
 
 class Filter;
 

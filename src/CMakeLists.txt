@@ -68,7 +68,6 @@ set(csmith_SOURCES
   CVQualifiers.cpp
   CVQualifiers.h
   Common.h
-  CommonMacros.h
   CompatibleChecker.cpp
   CompatibleChecker.h
   Constant.cpp
