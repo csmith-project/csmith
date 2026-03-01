@@ -126,7 +126,6 @@ void Bookkeeper::doFinalization() {
 }
 
 int Bookkeeper::stat_blk_depths_for_stmt(const Statement *s) {
-  size_t i, j;
   int cnt = 0;
   if (s->eType != eBlock) {
     incr_counter(blk_depth_cnts, s->get_blk_depth() - 1);
@@ -134,8 +133,8 @@ int Bookkeeper::stat_blk_depths_for_stmt(const Statement *s) {
   }
   vector<const Block *> blks;
   s->get_blocks(blks);
-  for (i = 0; i < blks.size(); i++) {
-    for (j = 0; j < blks[i]->stms.size(); j++) {
+  for (size_t i = 0; i < blks.size(); i++) {
+    for (size_t j = 0; j < blks[i]->stms.size(); j++) {
       cnt += stat_blk_depths_for_stmt(blks[i]->stms[j]);
     }
   }
@@ -208,16 +207,15 @@ void Bookkeeper::output_oob_statistics(std::ostream &out) {
 }
 
 void Bookkeeper::stat_expr_depths_for_stmt(const Statement *s) {
-  size_t i, j;
   vector<const Expression *> exprs;
   vector<const Block *> blks;
   s->get_exprs(exprs);
-  for (i = 0; i < exprs.size(); i++) {
+  for (size_t i = 0; i < exprs.size(); i++) {
     incr_counter(expr_depth_cnts, exprs[i]->get_complexity());
   }
   s->get_blocks(blks);
-  for (i = 0; i < blks.size(); i++) {
-    for (j = 0; j < blks[i]->stms.size(); j++) {
+  for (size_t i = 0; i < blks.size(); i++) {
+    for (size_t j = 0; j < blks[i]->stms.size(); j++) {
       stat_expr_depths_for_stmt(blks[i]->stms[j]);
     }
   }
@@ -245,14 +243,13 @@ void Bookkeeper::output_expr_statistics(std::ostream &out) {
 }
 
 void Bookkeeper::output_pointer_statistics(std::ostream &out) {
-  size_t i;
   int total_alias_cnt = 0;
   int total_has_null_ptr = 0;
   int point_to_scalar = 0;
   int point_to_struct = 0;
   int point_to_pointer = 0;
   const vector<const Variable *> &ptrs = FactPointTo::all_ptrs;
-  for (i = 0; i < ptrs.size(); i++) {
+  for (size_t i = 0; i < ptrs.size(); i++) {
     total_alias_cnt += FactPointTo::all_aliases[i].size();
     if (find_variable_in_set(FactPointTo::all_aliases[i],
                              FactPointTo::null_ptr) >= 0) {
@@ -278,14 +275,14 @@ void Bookkeeper::output_pointer_statistics(std::ostream &out) {
     formated_output(out, "times a pointer is dereferenced on RHS: ",
                     calc_total(read_dereference_cnts));
     out << "breakdown:" << endl;
-    for (i = 1; i < read_dereference_cnts.size(); i++) {
+    for (size_t i = 1; i < read_dereference_cnts.size(); i++) {
       out << "   depth: " << i << ", occurrence: " << read_dereference_cnts[i]
           << endl;
     }
     formated_output(out, "times a pointer is dereferenced on LHS: ",
                     calc_total(write_dereference_cnts));
     out << "breakdown:" << endl;
-    for (i = 1; i < write_dereference_cnts.size(); i++) {
+    for (size_t i = 1; i < write_dereference_cnts.size(); i++) {
       out << "   depth: " << i << ", occurrence: " << write_dereference_cnts[i]
           << endl;
     }
@@ -305,7 +302,7 @@ void Bookkeeper::output_pointer_statistics(std::ostream &out) {
       formated_output(
           out, "max dereference level: ", dereference_level_cnts.size() - 1);
       out << "breakdown:" << endl;
-      for (i = 0; i < dereference_level_cnts.size(); i++) {
+      for (size_t i = 0; i < dereference_level_cnts.size(); i++) {
         out << "   level: " << i
             << ", occurrence: " << dereference_level_cnts[i] << endl;
       }
