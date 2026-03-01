@@ -34,29 +34,29 @@
 /* Limits of integral types.  */
 
 /* Minimum of signed integral types.  */
-# define INT8_MIN		(-128)
-# define INT16_MIN		(-32767-1)
-# define INT32_MIN		(-2147483647-1)
+#define INT8_MIN (-128)
+#define INT16_MIN (-32767 - 1)
+#define INT32_MIN (-2147483647 - 1)
 #ifndef NO_LONGLONG
-# define INT64_MIN		(-(9223372036854775807LL)-1)
+#define INT64_MIN (-(9223372036854775807LL) - 1)
 #endif
 /* Maximum of signed integral types.  */
-# define INT8_MAX		(127)
-# define INT16_MAX		(32767)
-# define INT32_MAX		(2147483647)
+#define INT8_MAX (127)
+#define INT16_MAX (32767)
+#define INT32_MAX (2147483647)
 #ifndef NO_LONGLONG
-# define INT64_MAX		(9223372036854775807LL)
+#define INT64_MAX (9223372036854775807LL)
 #endif
 
 /* Maximum of unsigned integral types.  */
-# define UINT8_MAX		(255)
-# define UINT16_MAX		(65535)
-# define UINT32_MAX		(4294967295U)
+#define UINT8_MAX (255)
+#define UINT16_MAX (65535)
+#define UINT32_MAX (4294967295U)
 #ifndef NO_LONGLONG
-# define UINT64_MAX		(18446744073709551615ULL)
+#define UINT64_MAX (18446744073709551615ULL)
 #endif
 
-#  define CHAR_BIT	8
+#define CHAR_BIT 8
 
 /* Limits of FP types.  */
 

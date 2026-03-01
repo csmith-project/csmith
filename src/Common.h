@@ -42,9 +42,9 @@
 
 #include <algorithm>
 #include <functional>
-#include <vector>
-#include <string>
 #include <iostream>
+#include <string>
+#include <vector>
 
 using std::string;
 using std::vector;
@@ -55,7 +55,9 @@ using std::vector;
 #define INT64 long long
 #endif
 
-#define BREAK_NOP do { } while (0)
+#define BREAK_NOP                                                              \
+  do {                                                                         \
+  } while (0)
 
 // ----------------------------------------------------------------
 // Forward class declarations

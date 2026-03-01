@@ -36,30 +36,32 @@ inline constexpr const char DEFAULT_STRUCT_OUTPUT[] = "csmith_structs.h";
 
 class DFSOutputMgr : public OutputMgr {
 public:
-	static DFSOutputMgr *CreateInstance();
+  static DFSOutputMgr *CreateInstance();
 
-	virtual ~DFSOutputMgr() override;
+  virtual ~DFSOutputMgr() override;
 
-	virtual void OutputHeader(int argc, char *argv[], unsigned long seed) override;
+  virtual void OutputHeader(int argc, char *argv[],
+                            unsigned long seed) override;
 
-	virtual void OutputStructUnions(ostream& /*out*/) override;
+  virtual void OutputStructUnions(ostream & /*out*/) override;
 
-	virtual void Output() override;
+  virtual void Output() override;
 
-	virtual void outputln(ostream &out) override;
+  virtual void outputln(ostream &out) override;
 
-	virtual void output_comment_line(ostream &out, const std::string &comment) override;
+  virtual void output_comment_line(ostream &out,
+                                   const std::string &comment) override;
 
-	virtual void output_tab(ostream &out, int indent) override;
+  virtual void output_tab(ostream &out, int indent) override;
 
 private:
-	DFSOutputMgr();
+  DFSOutputMgr();
 
-	virtual std::ostream &get_main_out() override;
+  virtual std::ostream &get_main_out() override;
 
-	static DFSOutputMgr *instance_;
+  static DFSOutputMgr *instance_;
 
-	std::string struct_output_;
+  std::string struct_output_;
 };
 
 #endif // DFS_OUTPUT_MGR_H

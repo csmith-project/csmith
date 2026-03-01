@@ -30,66 +30,60 @@
 #ifndef SEQUENCE_LINE_PARSER_H
 #define SEQUENCE_LINE_PARSER_H
 
-#include <string>
-#include <sstream>
-#include <iostream>
 #include "StdLibAliases.h"
-template <class Container>
-class SequenceLineParser {
+#include <iostream>
+#include <sstream>
+#include <string>
+template <class Container> class SequenceLineParser {
 public:
-	SequenceLineParser();
+  SequenceLineParser();
 
-	~SequenceLineParser();
+  ~SequenceLineParser();
 
-	static bool parse_sequence(Container &q, const std::string &seq, const char sep_char = ',');
+  static bool parse_sequence(Container &q, const std::string &seq,
+                             const char sep_char = ',');
 
 private:
-	static int str2int(const std::string &s);
+  static int str2int(const std::string &s);
 };
 
 template <class Container>
-SequenceLineParser<Container>::SequenceLineParser()
-{
+SequenceLineParser<Container>::SequenceLineParser() {}
 
+template <class Container>
+SequenceLineParser<Container>::~SequenceLineParser() {}
+
+template <class Container>
+bool SequenceLineParser<Container>::parse_sequence(Container &q,
+                                                   const std::string &seq,
+                                                   const char sep_char) {
+  // while (pos < static_cast<int>(seq.size())) {
+  for (size_t pos = 0; true;) {
+    size_t start_pos = 0;
+    while (seq[pos] == ' ')
+      pos++;
+
+    start_pos = pos;
+    pos = seq.find_first_of(sep_char, pos);
+    std::string s = seq.substr(start_pos, (pos - start_pos));
+    int i = SequenceLineParser::str2int(s);
+    if (i < 0)
+      return false;
+    q.push_back(i);
+    if (pos == string::npos)
+      break;
+    pos++;
+  }
+  return true;
 }
 
 template <class Container>
-SequenceLineParser<Container>::~SequenceLineParser()
-{
+int SequenceLineParser<Container>::str2int(const std::string &s) {
+  stringstream ss(s);
+  int i = -1;
+  ss >> i;
 
-}
-
-template <class Container> bool
-SequenceLineParser<Container>::parse_sequence(Container &q, const std::string &seq, const char sep_char)
-{
-	//while (pos < static_cast<int>(seq.size())) {
-	for (size_t pos = 0; true; ) {
-		size_t start_pos = 0;
-		while (seq[pos] == ' ')
-			pos++;
-
-		start_pos = pos;
-		pos = seq.find_first_of(sep_char, pos);
-		std::string s = seq.substr(start_pos, (pos - start_pos));
-		int i = SequenceLineParser::str2int(s);
-		if (i < 0)
-			return false;
-		q.push_back(i);
-		if (pos == string::npos)
-			break;
-		pos++;
-	}
-	return true;
-}
-
-template <class Container> int
-SequenceLineParser<Container>::str2int(const std::string &s)
-{
-	stringstream ss(s);
-	int i = -1;
-	ss >> i;
-
-	return i;
+  return i;
 }
 
 #endif // SEQUENCE_PARSER_H

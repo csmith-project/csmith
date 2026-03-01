@@ -28,18 +28,11 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 #if HAVE_CONFIG_H
-#  include <config.h>
+#include <config.h>
 #endif
 
 #include "Sequence.h"
 
-Sequence::Sequence()
-{
+Sequence::Sequence() {}
 
-}
-
-Sequence::~Sequence()
-{
-
-}
-
+Sequence::~Sequence() {}

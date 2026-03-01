@@ -32,64 +32,72 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <ostream>
-#include <vector>
 #include "Expression.h"
 #include "StdLibAliases.h"
+#include <ostream>
+#include <vector>
 class CGContext;
 class Variable;
 
 /*
  *
  */
-class ExpressionVariable : public Expression
-{
+class ExpressionVariable : public Expression {
 public:
-	// Factory method.
-	static ExpressionVariable *make_random(CGContext &cg_context, const Type* type, const CVQualifiers* qfer=nullptr, bool as_param=false, bool as_return=false);
+  // Factory method.
+  static ExpressionVariable *make_random(CGContext &cg_context,
+                                         const Type *type,
+                                         const CVQualifiers *qfer = nullptr,
+                                         bool as_param = false,
+                                         bool as_return = false);
 
-	explicit ExpressionVariable(const Variable &v);
+  explicit ExpressionVariable(const Variable &v);
 
-	ExpressionVariable(const Variable &v, const Type* t);
+  ExpressionVariable(const Variable &v, const Type *t);
 
-	virtual ~ExpressionVariable(void) override;
+  virtual ~ExpressionVariable(void) override;
 
-	virtual Expression* clone() const override;
+  virtual Expression *clone() const override;
 
-	virtual CVQualifiers get_qualifiers(void) const override;
+  virtual CVQualifiers get_qualifiers(void) const override;
 
-	virtual void get_eval_to_subexps(vector<const Expression*>& subs) const {subs.push_back(this);}
+  virtual void get_eval_to_subexps(vector<const Expression *> &subs) const {
+    subs.push_back(this);
+  }
 
-	int get_indirect_level(void) const;
+  int get_indirect_level(void) const;
 
-	const Variable* get_var(void) const {return &var;};
-	//
-	virtual std::vector<const ExpressionVariable*> get_dereferenced_ptrs(void) const override;
-	virtual void get_referenced_ptrs(std::vector<const Variable*>& ptrs) const override;
+  const Variable *get_var(void) const { return &var; };
+  //
+  virtual std::vector<const ExpressionVariable *>
+  get_dereferenced_ptrs(void) const override;
+  virtual void
+  get_referenced_ptrs(std::vector<const Variable *> &ptrs) const override;
 
-	virtual unsigned int get_complexity(void) const { return 1;}
+  virtual unsigned int get_complexity(void) const { return 1; }
 
-	virtual bool visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const override;
+  virtual bool visit_facts(vector<const Fact *> &inputs,
+                           CGContext &cg_context) const override;
 
-	virtual const Type &get_type(void) const override;
+  virtual const Type &get_type(void) const override;
 
-	virtual bool compatible(const Expression *exp) const override;
+  virtual bool compatible(const Expression *exp) const override;
 
-	virtual bool compatible(const Variable *v) const override;
+  virtual bool compatible(const Variable *v) const override;
 
-	virtual bool use_var(const Variable* v) const { return v == &var;}
+  virtual bool use_var(const Variable *v) const { return v == &var; }
 
-	virtual void Output(std::ostream &) const override;
+  virtual void Output(std::ostream &) const override;
 
 private:
-	explicit ExpressionVariable(const ExpressionVariable &expr);
+  explicit ExpressionVariable(const ExpressionVariable &expr);
 
-	const Variable &var;
+  const Variable &var;
 
-	const Type* type;
+  const Type *type;
 
-	// unimplementable
-	ExpressionVariable &operator=(const ExpressionVariable &ev);
+  // unimplementable
+  ExpressionVariable &operator=(const ExpressionVariable &ev);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

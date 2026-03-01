@@ -30,51 +30,52 @@
 #ifndef COVERAGE_TEST_EXTENSION_H
 #define COVERAGE_TEST_EXTENSION_H
 
-#include <vector>
-#include <ostream>
-#include <string>
 #include "AbsExtension.h"
 #include "CVQualifiers.h"
+#include <ostream>
+#include <string>
+#include <vector>
 
 class ExtensionValue;
 class Constant;
 
 class CoverageTestExtension : public AbsExtension {
-	friend class ExtensionMgr;
+  friend class ExtensionMgr;
+
 public:
-	virtual void GenerateValues() override;
+  virtual void GenerateValues() override;
 
-	virtual void OutputInit(std::ostream &out) override;
+  virtual void OutputInit(std::ostream &out) override;
 
-	virtual void OutputFirstFunInvocation(std::ostream &out, FunctionInvocation *invoke) override;
+  virtual void OutputFirstFunInvocation(std::ostream &out,
+                                        FunctionInvocation *invoke) override;
 
-	virtual void OutputHeader(std::ostream &out) override;
+  virtual void OutputHeader(std::ostream &out) override;
 
-	virtual void OutputTail(std::ostream &out) override;
+  virtual void OutputTail(std::ostream &out) override;
 
-	virtual std::vector<ExtensionValue *> &get_values() { return values_; }
+  virtual std::vector<ExtensionValue *> &get_values() { return values_; }
 
 private:
+  static std::string array_base_name_;
 
-	static std::string array_base_name_;
+  static std::string array_index_;
 
-	static std::string array_index_;
+  void output_array_init(std::ostream &out, int count);
 
-	void output_array_init(std::ostream &out, int count);
+  void output_decls(std::ostream &out);
 
-	void output_decls(std::ostream &out);
+  int inputs_size_;
 
-	int inputs_size_;
+  // used for tmp vars
+  std::vector<ExtensionValue *> values_;
 
-	// used for tmp vars
-	std::vector<ExtensionValue*> values_;
+  // hold actual values passed to func_1
+  std::vector<Constant *> test_values_;
 
-	// hold actual values passed to func_1
-	std::vector<Constant*> test_values_;
+  CoverageTestExtension(int input_size);
 
-	CoverageTestExtension(int input_size);
-
-	~CoverageTestExtension();
+  ~CoverageTestExtension();
 };
 
 #endif // COVERAGE_TEST_EXTENSION_H

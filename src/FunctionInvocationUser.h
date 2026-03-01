@@ -41,11 +41,11 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <ostream>
-#include <vector>
+#include "Fact.h"
 #include "FunctionInvocation.h"
 #include "Type.h"
-#include "Fact.h"
+#include <ostream>
+#include <vector>
 
 class CGContext;
 class Function;
@@ -54,54 +54,61 @@ class Variable;
 class SafeOpFlags;
 class Variable;
 
-class FunctionInvocationUser: public FunctionInvocation
-{
-	friend class FunctionInvocation;
+class FunctionInvocationUser : public FunctionInvocation {
+  friend class FunctionInvocation;
 
 public:
-	// factory method
-	static FunctionInvocationUser* build_invocation_and_function(CGContext &cg_context, const Type* type, const CVQualifiers* qfer);
+  // factory method
+  static FunctionInvocationUser *
+  build_invocation_and_function(CGContext &cg_context, const Type *type,
+                                const CVQualifiers *qfer);
 
-	virtual ~FunctionInvocationUser(void) override;
+  virtual ~FunctionInvocationUser(void) override;
 
-	virtual FunctionInvocation* clone() const override;
+  virtual FunctionInvocation *clone() const override;
 
-	virtual bool compatible(const Variable *) const { return false; }
+  virtual bool compatible(const Variable *) const { return false; }
 
-	virtual const Type &get_type(void) const override;
+  virtual const Type &get_type(void) const override;
 
-	virtual void Output(std::ostream &) const override;
+  virtual void Output(std::ostream &) const override;
 
-	virtual void indented_output(std::ostream &out, int indent) const override;
+  virtual void indented_output(std::ostream &out, int indent) const override;
 
-	virtual bool safe_invocation() const { return true; }
+  virtual bool safe_invocation() const { return true; }
 
-	const Function* get_func(void) const { return func; };
+  const Function *get_func(void) const { return func; };
 
-	bool revisit(std::vector<const Fact*>& inputs, CGContext& cg_context) const;
+  bool revisit(std::vector<const Fact *> &inputs, CGContext &cg_context) const;
 
-	void save_return_fact(const vector<const Fact*>& facts) const;
+  void save_return_fact(const vector<const Fact *> &facts) const;
 
-	static void doFinalization(void);
+  static void doFinalization(void);
 
-	FunctionInvocationUser(Function *target, bool isBackLink, const SafeOpFlags *flags);
+  FunctionInvocationUser(Function *target, bool isBackLink,
+                         const SafeOpFlags *flags);
 
 private:
-	Function *func;
-	bool isBackLink;
+  Function *func;
+  bool isBackLink;
 
 private:
-	explicit FunctionInvocationUser(const FunctionInvocationUser &fiu);
+  explicit FunctionInvocationUser(const FunctionInvocationUser &fiu);
 
-	FunctionInvocationUser &operator=(const FunctionInvocationUser &fi) = delete;
+  FunctionInvocationUser &operator=(const FunctionInvocationUser &fi) = delete;
 
-	bool build_invocation(Function *target, CGContext &cg_context);
+  bool build_invocation(Function *target, CGContext &cg_context);
 };
 
-const Fact* get_return_fact_for_invocation(const FunctionInvocationUser* fiu, const Variable* var, enum eFactCategory cat);
+const Fact *get_return_fact_for_invocation(const FunctionInvocationUser *fiu,
+                                           const Variable *var,
+                                           enum eFactCategory cat);
 
-void calls_to_funcs(const vector<const FunctionInvocationUser*>& calls, vector<const Function*>& funcs);
-void calls_to_funcs_recursive(const vector<const FunctionInvocationUser*>& calls, vector<const Function*>& funcs);
+void calls_to_funcs(const vector<const FunctionInvocationUser *> &calls,
+                    vector<const Function *> &funcs);
+void calls_to_funcs_recursive(
+    const vector<const FunctionInvocationUser *> &calls,
+    vector<const Function *> &funcs);
 
 ///////////////////////////////////////////////////////////////////////////////
 

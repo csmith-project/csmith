@@ -33,27 +33,25 @@
 
 /*****************************************************************************/
 
-//#include <stdint.h>
+// #include <stdint.h>
 
 static void platform_main_begin(void);
-static void platform_main_begin(void)
-{
-	/* Nothing to do. */
-}
+static void platform_main_begin(void) { /* Nothing to do. */ }
 
 static void platform_main_end(uint32_t crc, int flag);
-static void platform_main_end(uint32_t crc, int flag)
-{
-	uint16_t crc16 = crc ^ (crc >> 16);
+static void platform_main_end(uint32_t crc, int flag) {
+  uint16_t crc16 = crc ^ (crc >> 16);
 
-	asm volatile("cli" "\n\t"
-				 "mov r30, %A0" "\n\t"
-				 "mov r31, %B0" "\n\t"
-				 "break"
-				 :
-				 : "r" (crc16)
-				 : "memory"
-				 );
+  asm volatile("cli"
+               "\n\t"
+               "mov r30, %A0"
+               "\n\t"
+               "mov r31, %B0"
+               "\n\t"
+               "break"
+               :
+               : "r"(crc16)
+               : "memory");
 }
 
 #define printf(...)

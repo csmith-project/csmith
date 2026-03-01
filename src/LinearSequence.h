@@ -37,32 +37,32 @@
 
 class LinearSequence : public Sequence {
 public:
-	explicit LinearSequence(const char sep_char);
+  explicit LinearSequence(const char sep_char);
 
-	virtual ~LinearSequence() override;
+  virtual ~LinearSequence() override;
 
-	virtual void init_sequence() override;
+  virtual void init_sequence() override;
 
-	virtual unsigned INT64 sequence_length() override;
+  virtual unsigned INT64 sequence_length() override;
 
-	virtual void add_number(int v, int bound, int k) override;
+  virtual void add_number(int v, int bound, int k) override;
 
-	virtual int get_number(int bound) override;
+  virtual int get_number(int bound) override;
 
-	virtual int get_number_by_pos(int pos) override;
+  virtual int get_number_by_pos(int pos) override;
 
-	virtual void clear() override;
+  virtual void clear() override;
 
-	virtual void get_sequence(std::ostream &) override;
+  virtual void get_sequence(std::ostream &) override;
 
-	virtual char get_sep_char() const { return sep_char_; }
+  virtual char get_sep_char() const { return sep_char_; }
 
-	static const char default_sep_char;
+  static const char default_sep_char;
 
 private:
-	std::map<int, int> seq_map_;
+  std::map<int, int> seq_map_;
 
-	const char sep_char_;
+  const char sep_char_;
 };
 
 #endif // LINEAR_SEQUENCE_H

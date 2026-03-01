@@ -30,309 +30,256 @@
 #ifndef ENUMERATOR_H
 #define ENUMERATOR_H
 
-#include <map>
-#include <cassert>
 #include "StdLibAliases.h"
-template <class Name>
-class Enumerator {
+#include <cassert>
+#include <map>
+template <class Name> class Enumerator {
 public:
-	Enumerator();
+  Enumerator();
 
-	~Enumerator();
+  ~Enumerator();
 
-	void add_elem(const Name &name, int bound);
+  void add_elem(const Name &name, int bound);
 
-	void add_bool_elem(const Name &name, int value);
+  void add_bool_elem(const Name &name, int value);
 
-	void add_bool_elem_of_bool(const Name &name, bool value);
+  void add_bool_elem_of_bool(const Name &name, bool value);
 
-	int get_elem(const Name &name);
+  int get_elem(const Name &name);
 
-	Enumerator *next();
+  Enumerator *next();
 
-	Enumerator *end() { return nullptr; }
+  Enumerator *end() { return nullptr; }
 
-	Enumerator *begin();
+  Enumerator *begin();
 
-	bool is_changed(const Name &name);
+  bool is_changed(const Name &name);
 
 private:
+  class EnumObject {
+  public:
+    EnumObject(int bound, bool is_bool, bool bool_value)
+        : bound_(bound), current_value_(0), is_bool_(is_bool),
+          bool_value_(bool_value), changed_(false) {
+      assert(bound_ > 0);
+    }
 
-	class EnumObject {
-	public:
-		EnumObject(int bound, bool is_bool, bool bool_value)
-			: bound_(bound),
-		  	  current_value_(0),
-			  is_bool_(is_bool),
-			  bool_value_(bool_value),
-			  changed_(false)
-		{
-			assert(bound_ > 0);
-		}
+    ~EnumObject() {}
 
-		~EnumObject() { }
+    int bound() const { return bound_; }
 
-		int bound() const { return bound_; }
+    bool bool_value() const { return bool_value_; }
 
-		bool bool_value() const { return bool_value_; }
+    int get_current_value() const { return current_value_; }
 
-		int get_current_value() const { return current_value_; }
+    bool is_bool() const { return is_bool_; }
 
-		bool is_bool() const { return is_bool_; }
+    bool next() {
+      current_value_++;
+      if (current_value_ < bound_) {
+        changed_ = true;
+        return true;
+      } else {
+        current_value_--;
+        return false;
+      }
+    }
 
-		bool next()
-		{
-			current_value_++;
-			if (current_value_ < bound_) {
-				changed_ = true;
-				return true;
-			}
-			else {
-				current_value_--;
-				return false;
-			}
-		}
+    bool good_value() { return (current_value_ < bound_); }
 
-		bool good_value()
-		{
-			return (current_value_ < bound_);
-		}
+    void clear_value() { current_value_ = 0; }
 
-		void clear_value() { current_value_ = 0; }
+    void reset_changed() { changed_ = 0; }
 
-		void reset_changed() { changed_ = 0; }
+    bool is_changed() const { return changed_; }
 
-		bool is_changed() const { return changed_; }
+  private:
+    const int bound_;
 
-	private:
-		const int bound_;
+    int current_value_;
 
-		int current_value_;
+    const bool is_bool_;
 
-		const bool is_bool_;
+    const bool bool_value_;
 
-		const bool bool_value_;
+    bool changed_;
+  };
 
-		bool changed_;
-	};
+  void reset_all_changed();
 
-	void reset_all_changed();
+  void reset_pos();
 
-	void reset_pos();
+  void reset_after_backward_pos();
 
-	void reset_after_backward_pos();
+  bool roll_back_current_pos();
 
-	bool roll_back_current_pos();
+  std::map<Name, EnumObject *> objs_;
 
-	std::map<Name, EnumObject*> objs_;
+  typename std::map<Name, EnumObject *>::iterator forward_pos_;
 
-	typename std::map<Name, EnumObject*>::iterator forward_pos_;
-
-	typename std::map<Name, EnumObject*>::iterator backward_pos_;
-
+  typename std::map<Name, EnumObject *>::iterator backward_pos_;
 };
 
 /////////////////////////////////////////////////////////////////////////////////////
 
-template <class Name>
-Enumerator<Name>::Enumerator()
-{
-	forward_pos_ = objs_.end();
-	backward_pos_ = objs_.end();
+template <class Name> Enumerator<Name>::Enumerator() {
+  forward_pos_ = objs_.end();
+  backward_pos_ = objs_.end();
+}
+
+template <class Name> Enumerator<Name>::~Enumerator() {
+  typename map<Name, EnumObject *>::iterator i;
+  for (i = objs_.begin(); i != objs_.end(); ++i) {
+    delete i->second;
+  }
+  objs_.clear();
+}
+
+template <class Name> void Enumerator<Name>::reset_pos() {
+  forward_pos_ = objs_.end();
+  --forward_pos_;
+  backward_pos_ = forward_pos_;
+  --backward_pos_;
+}
+
+template <class Name> Enumerator<Name> *Enumerator<Name>::begin() {
+  reset_pos();
+  EnumObject *obj = (*forward_pos_).second;
+  assert(obj);
+  if (forward_pos_ == objs_.begin() && !obj->good_value())
+    return nullptr;
+  return this;
 }
 
 template <class Name>
-Enumerator<Name>::~Enumerator()
-{
-	typename map<Name, EnumObject*>::iterator i;
-	for (i = objs_.begin(); i != objs_.end(); ++i) {
-		delete i->second;
-	}
-	objs_.clear();
+void Enumerator<Name>::add_elem(const Name &name, int bound) {
+  assert(objs_.find(name) == objs_.end());
+
+  objs_[name] = new EnumObject(bound, false, false);
 }
 
 template <class Name>
-void
-Enumerator<Name>::reset_pos()
-{
-	forward_pos_ = objs_.end();
-	--forward_pos_;
-	backward_pos_ = forward_pos_;
-	--backward_pos_;
+void Enumerator<Name>::add_bool_elem_of_bool(const Name &name, bool value) {
+  assert(objs_.find(name) == objs_.end());
+
+  int bound = value ? 2 : 1;
+
+  objs_[name] = new EnumObject(bound, true, false);
 }
 
 template <class Name>
-Enumerator<Name> *
-Enumerator<Name>::begin()
-{
-	reset_pos();
-	EnumObject *obj = (*forward_pos_).second;
-	assert(obj);
-	if (forward_pos_ == objs_.begin() && !obj->good_value())
-		return nullptr;
-	return this;
+void Enumerator<Name>::add_bool_elem(const Name &name, int value) {
+  int bound = 0;
+  bool bool_value = false;
+  if (value == 0) {
+    bound = 1;
+    bool_value = false;
+  } else if (value == 100) {
+    bound = 1;
+    bool_value = true;
+  } else {
+    bound = 2;
+  }
+
+  assert(objs_.find(name) == objs_.end());
+
+  objs_[name] = new EnumObject(bound, true, bool_value);
 }
 
-template <class Name>
-void
-Enumerator<Name>::add_elem(const Name &name, int bound)
-{
-	assert(objs_.find(name) == objs_.end());
+template <class Name> int Enumerator<Name>::get_elem(const Name &name) {
+  assert(objs_.find(name) != objs_.end());
 
-	objs_[name] = new EnumObject(bound, false, false);
+  EnumObject *obj = objs_[name];
+  assert(obj);
+  int rv = obj->get_current_value();
+  assert(rv >= 0);
+  if (obj->is_bool()) {
+    if (obj->bound() == 1)
+      return obj->bool_value();
+    else
+      return (rv != 0);
+  } else {
+    return rv;
+  }
 }
 
-template <class Name>
-void
-Enumerator<Name>::add_bool_elem_of_bool(const Name &name, bool value)
-{
-	assert(objs_.find(name) == objs_.end());
-
-	int bound = value ? 2 : 1;
-
-	objs_[name] = new EnumObject(bound, true, false);
+template <class Name> void Enumerator<Name>::reset_after_backward_pos() {
+  typename map<Name, EnumObject *>::iterator i = backward_pos_;
+  ++i;
+  while (i != objs_.end()) {
+    EnumObject *obj = (*i).second;
+    assert(obj);
+    obj->clear_value();
+    ++i;
+  }
+  forward_pos_ = backward_pos_;
+  ++forward_pos_;
 }
 
-template<class Name>
-void
-Enumerator<Name>::add_bool_elem(const Name &name, int value)
-{
-	int bound = 0;
-	bool bool_value = false;
-	if (value == 0) {
-		bound = 1;
-		bool_value = false;
-	}
-	else if (value == 100) {
-		bound = 1;
-		bool_value = true;
-	}
-	else {
-		bound = 2;
-	}
-
-	assert(objs_.find(name) == objs_.end());
-
-	objs_[name] = new EnumObject(bound, true, bool_value);
+template <class Name> bool Enumerator<Name>::roll_back_current_pos() {
+  if (backward_pos_ == objs_.begin()) {
+    EnumObject *obj = (*backward_pos_).second;
+    assert(obj);
+    bool rv = obj->next();
+    if (!rv)
+      return false;
+    reset_after_backward_pos();
+    reset_pos();
+    return true;
+  } else {
+    EnumObject *obj = (*backward_pos_).second;
+    assert(obj);
+    if (obj->next()) {
+      reset_after_backward_pos();
+      reset_pos();
+      // forward_pos_= backward_pos_;
+      //++forward_pos_;
+      return true;
+    } else {
+      --backward_pos_;
+      return roll_back_current_pos();
+    }
+  }
 }
 
-template <class Name>
-int
-Enumerator<Name>::get_elem(const Name &name)
-{
-	assert(objs_.find(name) != objs_.end());
+template <class Name> bool Enumerator<Name>::is_changed(const Name &name) {
+  assert(objs_.find(name) != objs_.end());
 
-	EnumObject *obj = objs_[name];
-	assert(obj);
-	int rv = obj->get_current_value();
-	assert(rv >= 0);
-	if (obj->is_bool()) {
-		if (obj->bound() == 1)
-			return obj->bool_value();
-		else
-			return (rv != 0);
-	}
-	else {
-		return rv;
-	}
+  EnumObject *obj = objs_[name];
+  assert(obj);
+  return obj->is_changed();
 }
 
-template <class Name>
-void
-Enumerator<Name>::reset_after_backward_pos()
-{
-	typename map<Name, EnumObject*>::iterator i = backward_pos_;
-	++i;
-	while(i != objs_.end()) {
-		EnumObject *obj = (*i).second;
-		assert(obj);
-		obj->clear_value();
-		++i;
-	}
-	forward_pos_ = backward_pos_;
-	++forward_pos_;
+template <class Name> void Enumerator<Name>::reset_all_changed() {
+  typename map<Name, EnumObject *>::iterator i;
+  for (i = objs_.begin(); i != objs_.end(); ++i) {
+    EnumObject *obj = (*i).second;
+    assert(obj);
+    obj->reset_changed();
+  }
 }
 
-template <class Name>
-bool
-Enumerator<Name>::roll_back_current_pos()
-{
-	if (backward_pos_ == objs_.begin()) {
-		EnumObject *obj = (*backward_pos_).second;
-		assert(obj);
-		bool rv = obj->next();
-		if (!rv)
-			return false;
-		reset_after_backward_pos();
-		reset_pos();
-		return true;
-	}
-	else {
-		EnumObject *obj = (*backward_pos_).second;
-		assert(obj);
-		if (obj->next()) {
-			reset_after_backward_pos();
-			reset_pos();
-			//forward_pos_= backward_pos_;
-			//++forward_pos_;
-			return true;
-		}
-		else {
-			--backward_pos_;
-			return roll_back_current_pos();
-		}
-	}
-}
+template <class Name> Enumerator<Name> *Enumerator<Name>::next() {
+  assert(forward_pos_ != objs_.end());
 
-template <class Name>
-bool
-Enumerator<Name>::is_changed(const Name &name)
-{
-	assert(objs_.find(name) != objs_.end());
+  reset_all_changed();
+  EnumObject *obj = (*forward_pos_).second;
+  assert(obj);
+  if (obj->next()) {
+    return this;
+  } else {
+    ++forward_pos_;
+    if (forward_pos_ == objs_.end()) {
+      if (roll_back_current_pos())
+        return this;
+      else
+        return nullptr;
+    } else {
+      reset_pos();
+      return next();
+    }
+  }
 
-	EnumObject *obj = objs_[name];
-	assert(obj);
-	return obj->is_changed();
-}
-
-template <class Name>
-void
-Enumerator<Name>::reset_all_changed()
-{
-	typename map<Name, EnumObject*>::iterator i;
-	for (i = objs_.begin(); i != objs_.end(); ++i) {
-		EnumObject *obj = (*i).second;
-		assert(obj);
-		obj->reset_changed();
-	}
-}
-
-template <class Name>
-Enumerator<Name> *
-Enumerator<Name>::next()
-{
-	assert(forward_pos_ != objs_.end());
-
-	reset_all_changed();
-	EnumObject *obj = (*forward_pos_).second;
-	assert(obj);
-	if (obj->next()) {
-		return this;
-	}
-	else {
-		++forward_pos_;
-		if (forward_pos_ == objs_.end()) {
-			if(roll_back_current_pos())
-				return this;
-			else
-				return nullptr;
-		}
-		else {
-			reset_pos();
-			return next();
-		}
-	}
-
-	return nullptr;
+  return nullptr;
 }
 #endif // ENUMERATOR_H

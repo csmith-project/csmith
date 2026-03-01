@@ -30,58 +30,60 @@
 #ifndef DEFAULT_OUTPUT_MGR_H
 #define DEFAULT_OUTPUT_MGR_H
 
-#include <vector>
-#include <string>
-#include <ostream>
-#include <fstream>
 #include "OutputMgr.h"
 #include "StdLibAliases.h"
+#include <fstream>
+#include <ostream>
+#include <string>
+#include <vector>
 class DefaultOutputMgr : public OutputMgr {
 public:
-	static DefaultOutputMgr *CreateInstance();
+  static DefaultOutputMgr *CreateInstance();
 
-	virtual ~DefaultOutputMgr() override;
+  virtual ~DefaultOutputMgr() override;
 
-	static bool create_output_dir(const std::string &dir);
+  static bool create_output_dir(const std::string &dir);
 
-	virtual void OutputHeader(int argc, char *argv[], unsigned long seed) override;
+  virtual void OutputHeader(int argc, char *argv[],
+                            unsigned long seed) override;
 
-	virtual void Output() override;
+  virtual void Output() override;
 
-	virtual void outputln(ostream &out) override;
+  virtual void outputln(ostream &out) override;
 
-	virtual void output_comment_line(ostream &out, const std::string &comment) override;
+  virtual void output_comment_line(ostream &out,
+                                   const std::string &comment) override;
 
-	virtual void output_tab(ostream &out, int indent) override;
+  virtual void output_tab(ostream &out, int indent) override;
 
 private:
-	explicit DefaultOutputMgr(std::ofstream *ofile);
+  explicit DefaultOutputMgr(std::ofstream *ofile);
 
-	DefaultOutputMgr();
+  DefaultOutputMgr();
 
-	virtual std::ostream &get_main_out() override;
+  virtual std::ostream &get_main_out() override;
 
-	bool is_split();
+  bool is_split();
 
-	std::ofstream* open_one_output_file(int num);
+  std::ofstream *open_one_output_file(int num);
 
-	void init();
+  void init();
 
-	void OutputGlobals();
+  void OutputGlobals();
 
-	void OutputAllHeaders();
+  void OutputAllHeaders();
 
-	void RandomOutputDefs();
+  void RandomOutputDefs();
 
-	void RandomOutputVarDefs();
+  void RandomOutputVarDefs();
 
-	void RandomOutputFuncDefs();
+  void RandomOutputFuncDefs();
 
-	static DefaultOutputMgr *instance_;
+  static DefaultOutputMgr *instance_;
 
-	std::vector<std::ofstream* > outs;
+  std::vector<std::ofstream *> outs;
 
-	std::ofstream *ofile_;
+  std::ofstream *ofile_;
 };
 
 #endif // DEFAULT_OUTPUT_MGR_H

@@ -33,33 +33,32 @@
 #include <bitset>
 
 enum FilterKind {
-	fDefault,
-	fDFS,
-	MAX_FILTER_KIND_SIZE,
+  fDefault,
+  fDFS,
+  MAX_FILTER_KIND_SIZE,
 };
 
 // Filter base class
-class Filter
-{
+class Filter {
 public:
-	Filter();
-	virtual ~Filter(void);
+  Filter();
+  virtual ~Filter(void);
 
-	virtual bool filter(int v) const = 0;
+  virtual bool filter(int v) const = 0;
 
-	void enable(FilterKind kind);
+  void enable(FilterKind kind);
 
-	void disable(FilterKind kind);
+  void disable(FilterKind kind);
 
 protected:
-	bool valid_filter() const;
+  bool valid_filter() const;
 
-	// What kind of mode this filter can apply to
-	// By default, it can work for all modes.
-	std::bitset<MAX_FILTER_KIND_SIZE> kinds_;
+  // What kind of mode this filter can apply to
+  // By default, it can work for all modes.
+  std::bitset<MAX_FILTER_KIND_SIZE> kinds_;
 
 private:
-	FilterKind current_kind() const;
+  FilterKind current_kind() const;
 };
 
 #endif // FILTER_H

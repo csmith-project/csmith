@@ -33,27 +33,26 @@
 
 /*****************************************************************************/
 
-//#include <stdint.h>
+// #include <stdint.h>
 
 static void platform_main_begin(void);
-static void platform_main_begin(void)
-{
-	/* Nothing to do. */
-}
+static void platform_main_begin(void) { /* Nothing to do. */ }
 
 static void platform_main_end(uint32_t crc, int flag);
-static void platform_main_end(uint32_t crc, int flag)
-{
-	uint16_t crc16 = crc ^ (crc >> 16);
+static void platform_main_end(uint32_t crc, int flag) {
+  uint16_t crc16 = crc ^ (crc >> 16);
 
-	asm volatile("dint" "\n\t"
-				 "mov %0, r10" "\n\t"
-				 "mov #llo(-16657), &5000"  "\n\t"
-				 :
-				 : "r" (crc16)
-				 : "memory"
-				 );
-	while (1) { }
+  asm volatile("dint"
+               "\n\t"
+               "mov %0, r10"
+               "\n\t"
+               "mov #llo(-16657), &5000"
+               "\n\t"
+               :
+               : "r"(crc16)
+               : "memory");
+  while (1) {
+  }
 }
 
 #define printf(...)

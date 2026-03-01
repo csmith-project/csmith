@@ -41,66 +41,68 @@ class Type;
 class Variable;
 class CGContext;
 
-class FunctionInvocationBinary : public FunctionInvocation
-{
-	friend class FunctionInvocation; /* XXX --- yuck! */
+class FunctionInvocationBinary : public FunctionInvocation {
+  friend class FunctionInvocation; /* XXX --- yuck! */
 
 public:
+  static FunctionInvocationBinary *
+  CreateFunctionInvocationBinary(CGContext &cg_context, eBinaryOps op,
+                                 SafeOpFlags *flags);
 
-	static FunctionInvocationBinary *CreateFunctionInvocationBinary(CGContext &cg_context, eBinaryOps op, SafeOpFlags *flags);
+  FunctionInvocationBinary(eBinaryOps op, const SafeOpFlags *flags);
 
-	FunctionInvocationBinary(eBinaryOps op, const SafeOpFlags *flags);
+  FunctionInvocationBinary(eBinaryOps op, const SafeOpFlags *flags,
+                           const std::string &name1, const std::string &name2);
 
-	FunctionInvocationBinary(eBinaryOps op, const SafeOpFlags *flags, const std::string &name1, const std::string &name2);
+  FunctionInvocationBinary(eBinaryOps op, const Expression *exp1,
+                           const Expression *exp2, const SafeOpFlags *flags);
 
-	FunctionInvocationBinary(eBinaryOps op, const Expression* exp1, const Expression* exp2, const SafeOpFlags *flags);
+  virtual ~FunctionInvocationBinary(void) override;
 
-	virtual ~FunctionInvocationBinary(void) override;
+  virtual FunctionInvocation *clone() const override;
 
-	virtual FunctionInvocation * clone() const override;
+  virtual bool compatible(const Variable *) const { return false; }
 
-	virtual bool compatible(const Variable *) const { return false; }
+  virtual const Type &get_type(void) const override;
 
-	virtual const Type &get_type(void) const override;
+  virtual void Output(std::ostream &) const override;
 
-	virtual void Output(std::ostream &) const override;
+  virtual void indented_output(std::ostream &out, int indent) const override;
 
-	virtual void indented_output(std::ostream &out, int indent) const override;
+  virtual bool safe_invocation() const { return false; }
 
-	virtual bool safe_invocation() const { return false; }
+  virtual bool visit_facts(vector<const Fact *> &inputs,
+                           CGContext &cg_context) const override;
 
-	virtual bool visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const override;
+  eBinaryOps get_operation(void) const { return eFunc; }
+  void set_operation(eBinaryOps op) { eFunc = op; }
 
-	eBinaryOps get_operation(void) const {return eFunc;}
-	void set_operation(eBinaryOps op) { eFunc = op;}
+  const std::string &get_tmp_var1() const { return tmp_var1; }
 
-	const std::string &get_tmp_var1() const { return tmp_var1; }
+  const std::string &get_tmp_var2() const { return tmp_var2; }
 
-	const std::string &get_tmp_var2() const { return tmp_var2; }
+  static std::string get_binop_string(eBinaryOps bop);
 
-	static std::string get_binop_string(eBinaryOps bop);
-
-	virtual bool equals(int num) const  override;
-	virtual bool is_0_or_1(void) const override;
-
-private:
-	eBinaryOps eFunc;
-
-	std::string tmp_var1;
-
-	std::string tmp_var2;
+  virtual bool equals(int num) const override;
+  virtual bool is_0_or_1(void) const override;
 
 private:
+  eBinaryOps eFunc;
 
-	bool is_return_type_float() const;
+  std::string tmp_var1;
 
-	static bool safe_ops(eBinaryOps op);
+  std::string tmp_var2;
 
-	// unimplemented
-	FunctionInvocationBinary &operator=(const FunctionInvocationBinary &fi) = delete;
+private:
+  bool is_return_type_float() const;
 
-	explicit FunctionInvocationBinary(const FunctionInvocationBinary &fbinary);
+  static bool safe_ops(eBinaryOps op);
 
+  // unimplemented
+  FunctionInvocationBinary &
+  operator=(const FunctionInvocationBinary &fi) = delete;
+
+  explicit FunctionInvocationBinary(const FunctionInvocationBinary &fbinary);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

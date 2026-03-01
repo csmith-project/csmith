@@ -36,29 +36,30 @@ class OutputMgr;
 
 class AbsProgramGenerator {
 public:
-	static AbsProgramGenerator* CreateInstance(int argc, char *argv[], unsigned long seed);
+  static AbsProgramGenerator *CreateInstance(int argc, char *argv[],
+                                             unsigned long seed);
 
-	static AbsProgramGenerator* GetInstance();
+  static AbsProgramGenerator *GetInstance();
 
-	AbsProgramGenerator();
+  AbsProgramGenerator();
 
-	virtual ~AbsProgramGenerator();
+  virtual ~AbsProgramGenerator();
 
-	static OutputMgr* GetOutputMgr();
+  static OutputMgr *GetOutputMgr();
 
-	virtual void goGenerator() = 0;
+  virtual void goGenerator() = 0;
 
-	virtual OutputMgr* getOutputMgr() = 0;
+  virtual OutputMgr *getOutputMgr() = 0;
 
-	virtual std::string get_count_prefix(const std::string &name) = 0;
+  virtual std::string get_count_prefix(const std::string &name) = 0;
 
 protected:
-	virtual void initialize() = 0;
+  virtual void initialize() = 0;
 
 private:
-	static AbsProgramGenerator *current_generator_;
+  static AbsProgramGenerator *current_generator_;
 
-	static OutputMgr *getmgr(AbsProgramGenerator *gen);
+  static OutputMgr *getmgr(AbsProgramGenerator *gen);
 };
 
 #endif

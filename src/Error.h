@@ -39,59 +39,59 @@
 #define COMPATIBLE_CHECK_ERROR -5
 #define INVALID_SIMPLE_DELTA_SEQUENCE -6
 
-#define ERROR_RETURN() \
-	if (Error::get_error() != SUCCESS) \
-		return;\
+#define ERROR_RETURN()                                                         \
+  if (Error::get_error() != SUCCESS)                                           \
+    return;
 
-#define ERROR_GUARD(rv) \
-	if (Error::get_error() != SUCCESS) \
-		return rv; \
+#define ERROR_GUARD(rv)                                                        \
+  if (Error::get_error() != SUCCESS)                                           \
+    return rv;
 
-#define ERROR_GUARD_AND_DEL1(rv, p) \
-	if (Error::get_error() != SUCCESS) {\
-		delete p; \
-		return rv; \
-	} \
+#define ERROR_GUARD_AND_DEL1(rv, p)                                            \
+  if (Error::get_error() != SUCCESS) {                                         \
+    delete p;                                                                  \
+    return rv;                                                                 \
+  }
 
-#define ERROR_GUARD_AND_DEL2(rv, p1, p2) \
-	if (Error::get_error() != SUCCESS) {\
-		delete p1; \
-		delete p2; \
-		return rv; \
-	} \
+#define ERROR_GUARD_AND_DEL2(rv, p1, p2)                                       \
+  if (Error::get_error() != SUCCESS) {                                         \
+    delete p1;                                                                 \
+    delete p2;                                                                 \
+    return rv;                                                                 \
+  }
 
-#define ERROR_GUARD_AND_DEL3(rv, p1, p2, p3) \
-	if (Error::get_error() != SUCCESS) {\
-		delete p1; \
-		delete p2; \
-		delete p3; \
-		return rv; \
-	} \
+#define ERROR_GUARD_AND_DEL3(rv, p1, p2, p3)                                   \
+  if (Error::get_error() != SUCCESS) {                                         \
+    delete p1;                                                                 \
+    delete p2;                                                                 \
+    delete p3;                                                                 \
+    return rv;                                                                 \
+  }
 
-#define ERROR_GUARD_AND_DEL4(rv, p1, p2, p3, p4) \
-	if (Error::get_error() != SUCCESS) {\
-		delete p1; \
-		delete p2; \
-		delete p3; \
-		delete p4; \
-		return rv; \
-	} \
+#define ERROR_GUARD_AND_DEL4(rv, p1, p2, p3, p4)                               \
+  if (Error::get_error() != SUCCESS) {                                         \
+    delete p1;                                                                 \
+    delete p2;                                                                 \
+    delete p3;                                                                 \
+    delete p4;                                                                 \
+    return rv;                                                                 \
+  }
 
-
-#define PRT_ERROR(msg) \
-	cout << "error: " << msg << ", errorno: " << Error::get_error() << std::endl; \
+#define PRT_ERROR(msg)                                                         \
+  cout << "error: " << msg << ", errorno: " << Error::get_error() << std::endl;
 
 class Error {
 public:
-	static int get_error() { return Error::r_error_; }
-	static void set_error(int error) { Error::r_error_ = error; }
-private:
-	Error();
-	~Error();
-	static int r_error_;
+  static int get_error() { return Error::r_error_; }
+  static void set_error(int error) { Error::r_error_ = error; }
 
-	Error(const Error&) = delete;
-	Error& operator=(const Error&) = delete;
+private:
+  Error();
+  ~Error();
+  static int r_error_;
+
+  Error(const Error &) = delete;
+  Error &operator=(const Error &) = delete;
 };
 
 #endif // ERROR_H

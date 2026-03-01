@@ -30,178 +30,162 @@
 // util.cpp --- various utility functions
 
 #if HAVE_CONFIG_H
-#  include <config.h>
+#include <config.h>
 #endif
 
 #include "util.h"
 
-#include <string>
-#include <iostream>
-#include <sstream>
-#include <cassert>
-#include <vector>
-#include <algorithm>
-#include "OutputMgr.h"
 #include "AbsProgramGenerator.h"
 #include "CGOptions.h"
+#include "OutputMgr.h"
+#include <algorithm>
+#include <cassert>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
 
 using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
 
 static int gensym_count = 0;
 
-void
-reset_gensym()
-{
-	gensym_count = 0;
+void reset_gensym() { gensym_count = 0; }
+
+/*
+ *
+ */
+string gensym(const char *basename) {
+  ostringstream ss; //(basename, ios_base::ate); somehow this yields weird
+                    //result on windows
+  ss << basename;
+  ss << ++gensym_count;
+  return ss.str();
 }
 
 /*
  *
  */
-string
-gensym(const char* basename)
-{
-	ostringstream ss; //(basename, ios_base::ate); somehow this yields weird result on windows
-	ss << basename;
-	ss << ++gensym_count;
-	return ss.str();
-}
-
-/*
- *
- */
-string
-gensym(const string& basename)
-{
-	ostringstream ss; //(basename, ios_base::ate);
-	ss << basename;
-	ss << ++gensym_count;
-	return ss.str();
+string gensym(const string &basename) {
+  ostringstream ss; //(basename, ios_base::ate);
+  ss << basename;
+  ss << ++gensym_count;
+  return ss.str();
 }
 
 static std::string errlog;
 
-bool log_analysis_fail(const std::string &msg)
-{
-	errlog += "Analysis failed at " + msg  + "\n";
-	return false;
+bool log_analysis_fail(const std::string &msg) {
+  errlog += "Analysis failed at " + msg + "\n";
+  return false;
 }
 
 /*
  * permute an integer array
  * return: all possible permutations of input integer array
  */
-vector<intvec> permute(intvec in)
-{
-	/* basic cases */
-	std::vector<intvec> out;
-	if (in.size() == 0) {
-		return out;
-        }
+vector<intvec> permute(intvec in) {
+  /* basic cases */
+  std::vector<intvec> out;
+  if (in.size() == 0) {
+    return out;
+  }
 
-	out.push_back(in);
-	if (in.size() == 1) {
-		return out;
-	}
+  out.push_back(in);
+  if (in.size() == 1) {
+    return out;
+  }
 
-        // generate all permutations from 'in'
-        while(std::next_permutation(in.begin(), in.end())) {
-		out.push_back(in);
-        }
+  // generate all permutations from 'in'
+  while (std::next_permutation(in.begin(), in.end())) {
+    out.push_back(in);
+  }
 
-	return out;
+  return out;
 }
 
 /*
- * given a multi-dimensional array sizes, expand it into all possible array indices
- * for example: a (2, 2, 2) array will be expanded into the following array of arrays
- *     (0, 0, 0), (0, 0, 1), (0, 1, 0), (0, 1, 1),
- *     (1, 0, 0), (1, 0, 1), (1, 1, 0), (1, 1, 1)
- * return: the size of the expanded array of arrays
+ * given a multi-dimensional array sizes, expand it into all possible array
+ * indices for example: a (2, 2, 2) array will be expanded into the following
+ * array of arrays (0, 0, 0), (0, 0, 1), (0, 1, 0), (0, 1, 1), (1, 0, 0), (1, 0,
+ * 1), (1, 1, 0), (1, 1, 1) return: the size of the expanded array of arrays
  */
-int expand_within_ranges(const vector<unsigned int>& in, vector<intvec>& out)
-{
-	int i, j;
-	int dimension = static_cast<int>(in.size());
-	intvec limits(dimension);
-	// figure out the maximum number the remaining indices can represent
-	// like in decimal, the max for each digit starting from right is 10, 100, 1000...
-	limits[dimension - 1] = in[dimension - 1];
-	for (i = dimension - 2; i>=0; i--) {
-		limits[i] = limits[i+1] * in[i];
-	}
-	out.clear();
-	// limit[0] is the maximum number can be represented by all dimensions combined
-	for (i=0; i<limits[0]; i++) {
-		intvec tmp;
-		int num = i;
-		// calculate the index for each dimension
-		for (j=0; j<dimension-1; j++) {
-			tmp.push_back(num / limits[j+1]);
-			num = num % limits[j+1];
-		}
-		tmp.push_back(num);
-		out.push_back(tmp);
-	}
-	return out.size();
+int expand_within_ranges(const vector<unsigned int> &in, vector<intvec> &out) {
+  int i, j;
+  int dimension = static_cast<int>(in.size());
+  intvec limits(dimension);
+  // figure out the maximum number the remaining indices can represent
+  // like in decimal, the max for each digit starting from right is 10, 100,
+  // 1000...
+  limits[dimension - 1] = in[dimension - 1];
+  for (i = dimension - 2; i >= 0; i--) {
+    limits[i] = limits[i + 1] * in[i];
+  }
+  out.clear();
+  // limit[0] is the maximum number can be represented by all dimensions
+  // combined
+  for (i = 0; i < limits[0]; i++) {
+    intvec tmp;
+    int num = i;
+    // calculate the index for each dimension
+    for (j = 0; j < dimension - 1; j++) {
+      tmp.push_back(num / limits[j + 1]);
+      num = num % limits[j + 1];
+    }
+    tmp.push_back(num);
+    out.push_back(tmp);
+  }
+  return out.size();
 }
 
-void really_outputln(std::ostream &out)
-{
-	OutputMgr::really_outputln(out);
+void really_outputln(std::ostream &out) { OutputMgr::really_outputln(out); }
+
+void outputln(std::ostream &out) {
+  OutputMgr *output = AbsProgramGenerator::GetOutputMgr();
+  assert(output);
+  output->outputln(out);
 }
 
-void outputln(std::ostream &out)
-{
-	OutputMgr *output = AbsProgramGenerator::GetOutputMgr();
-	assert(output);
-	output->outputln(out);
+void output_print_str(std::ostream &out, const std::string &str,
+                      const std::string &str_value, int indent) {
+  output_tab(out, indent);
+  out << "printf(\"";
+  out << str;
+  out << "\"";
+  if (!str_value.empty()) {
+    out << ", ";
+    out << str_value;
+  }
+  out << ");";
 }
 
-void output_print_str(std::ostream& out, const std::string &str, const std::string &str_value, int indent)
-{
-	output_tab(out, indent);
-	out << "printf(\"";
-	out << str;
-	out << "\"";
-	if (!str_value.empty()) {
-		out << ", ";
-		out << str_value;
-	}
-	out << ");";
+void output_open_encloser(const char *symbol, std::ostream &out, int &indent) {
+  output_tab(out, indent);
+  out << symbol;
+  outputln(out);
+  indent++;
 }
 
-void output_open_encloser(const char* symbol, std::ostream &out, int& indent)
-{
-	output_tab(out, indent);
-	out << symbol;
-	outputln(out);
-	indent++;
+void output_close_encloser(const char *symbol, std::ostream &out, int &indent,
+                           bool no_newline) {
+  if (!no_newline) {
+    outputln(out);
+  }
+  indent--;
+  output_tab(out, indent);
+  out << symbol;
 }
 
-void output_close_encloser(const char* symbol, std::ostream &out, int& indent, bool no_newline)
-{
-	if (!no_newline) {
-		outputln(out);
-	}
-	indent--;
-	output_tab(out, indent);
-	out << symbol;
+void output_comment_line(std::ostream &out, const std::string &comment) {
+  OutputMgr *output = AbsProgramGenerator::GetOutputMgr();
+  assert(output);
+  output->output_comment_line(out, comment);
 }
 
-void output_comment_line(std::ostream &out, const std::string &comment)
-{
-	OutputMgr *output = AbsProgramGenerator::GetOutputMgr();
-	assert(output);
-	output->output_comment_line(out, comment);
-}
-
-void output_tab(std::ostream &out, int indent)
-{
-	OutputMgr *output = AbsProgramGenerator::GetOutputMgr();
-	assert(output);
-	output->output_tab(out, indent);
+void output_tab(std::ostream &out, int indent) {
+  OutputMgr *output = AbsProgramGenerator::GetOutputMgr();
+  assert(output);
+  output->output_tab(out, indent);
 }
 ///////////////////////////////////////////////////////////////////////////////
 

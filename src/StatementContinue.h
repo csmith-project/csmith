@@ -31,8 +31,8 @@
 #define STATEMENT_CONTINUE_H
 
 ///////////////////////////////////////////////////////////////////////////////
-#include <ostream>
 #include "Statement.h"
+#include <ostream>
 
 class Expression;
 class Block;
@@ -40,24 +40,27 @@ class CGContext;
 /*
  *
  */
-class StatementContinue : public Statement
-{
+class StatementContinue : public Statement {
 public:
-	// Factory method.
-	static StatementContinue *make_random(CGContext &cg_context);
+  // Factory method.
+  static StatementContinue *make_random(CGContext &cg_context);
 
-	StatementContinue(Block* parent, const Expression &test, const Block& b);
-	StatementContinue(const StatementContinue &sc);
-	virtual ~StatementContinue(void) override;
-	//
-	virtual bool must_jump(void) const override;
-	virtual void get_blocks(std::vector<const Block*>& /* blks */) const {};
-	virtual void get_exprs(std::vector<const Expression*>& exps) const {exps.push_back(&test);}
-	virtual bool visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const override;
-	virtual void Output(std::ostream &out, FactMgr* fm, int indent = 0) const override;
+  StatementContinue(Block *parent, const Expression &test, const Block &b);
+  StatementContinue(const StatementContinue &sc);
+  virtual ~StatementContinue(void) override;
+  //
+  virtual bool must_jump(void) const override;
+  virtual void get_blocks(std::vector<const Block *> & /* blks */) const {};
+  virtual void get_exprs(std::vector<const Expression *> &exps) const {
+    exps.push_back(&test);
+  }
+  virtual bool visit_facts(vector<const Fact *> &inputs,
+                           CGContext &cg_context) const override;
+  virtual void Output(std::ostream &out, FactMgr *fm,
+                      int indent = 0) const override;
 
-	const Expression &test;
-	const Block& loop_blk;
+  const Expression &test;
+  const Block &loop_blk;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

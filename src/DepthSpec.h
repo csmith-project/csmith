@@ -39,171 +39,168 @@
 #define BAD_DEPTH -1
 
 enum class dType {
-	dtFirstFunction,
-	dtFunction,
-	dtBlock,
-	dtStatement,
-	dtStatementAssign,
-	dtStatementFor,
-	dtStatementIf,
-	dtStatementExpr,
-	dtStatementReturn,
-	dtFunctionInvocationUnary,
-	dtFunctionInvocationBinary,
-	dtFunctionInvocationRandomUnary,
-	dtFunctionInvocationRandomRegularBinary,
-	dtFunctionInvocationRandomBinaryPointer,
-	dtFunctionInvocationRandomBinary,
-	dtFunctionInvocationRandom,
-	dtFunctionInvocationStdFunc,
-	dtFunctionUserBuildInvocation,
-	dtExpression,
-	dtExpressionRandomParam,
-	dtExpressionFuncall,
-	dtExpressionVariable,
-	dtLhs,
-	dtReturnType,
-	dtRandomTypeFromType,
-	dtFunctionGenerateBody,
-	dtGenerateParamList,
-	dtTypeChooseSimple,
-	dtSelectLValue,
-	dtSelectVariable,
-	dtSelectDerefPointer,
-	dtSelectExistingVariable,
-	dtInitVariable,
-	dtSelectGlobal,
-	dtGenerateNewGlobal,
-	dtSelectParentLocal,
-	dtGenerateNewParentLocal,
-	dtGenerateNewVariable,
-	dtInitPointerValue,
-	dtSafeOpFlags,
+  dtFirstFunction,
+  dtFunction,
+  dtBlock,
+  dtStatement,
+  dtStatementAssign,
+  dtStatementFor,
+  dtStatementIf,
+  dtStatementExpr,
+  dtStatementReturn,
+  dtFunctionInvocationUnary,
+  dtFunctionInvocationBinary,
+  dtFunctionInvocationRandomUnary,
+  dtFunctionInvocationRandomRegularBinary,
+  dtFunctionInvocationRandomBinaryPointer,
+  dtFunctionInvocationRandomBinary,
+  dtFunctionInvocationRandom,
+  dtFunctionInvocationStdFunc,
+  dtFunctionUserBuildInvocation,
+  dtExpression,
+  dtExpressionRandomParam,
+  dtExpressionFuncall,
+  dtExpressionVariable,
+  dtLhs,
+  dtReturnType,
+  dtRandomTypeFromType,
+  dtFunctionGenerateBody,
+  dtGenerateParamList,
+  dtTypeChooseSimple,
+  dtSelectLValue,
+  dtSelectVariable,
+  dtSelectDerefPointer,
+  dtSelectExistingVariable,
+  dtInitVariable,
+  dtSelectGlobal,
+  dtGenerateNewGlobal,
+  dtSelectParentLocal,
+  dtGenerateNewParentLocal,
+  dtGenerateNewVariable,
+  dtInitPointerValue,
+  dtSafeOpFlags,
 };
 
-#define DEPTH_GUARD_BY_DEPTH_NORETURN(d) \
-	if (DepthSpec::depth_guard_by_depth(d) != GOOD_DEPTH) \
-		return;
+#define DEPTH_GUARD_BY_DEPTH_NORETURN(d)                                       \
+  if (DepthSpec::depth_guard_by_depth(d) != GOOD_DEPTH)                        \
+    return;
 
-#define DEPTH_GUARD_BY_DEPTH_RETURN(d, rv) \
-	if (DepthSpec::depth_guard_by_depth(d) != GOOD_DEPTH) \
-		return rv;
+#define DEPTH_GUARD_BY_DEPTH_RETURN(d, rv)                                     \
+  if (DepthSpec::depth_guard_by_depth(d) != GOOD_DEPTH)                        \
+    return rv;
 
-#define DEPTH_GUARD_BY_DEPTH_RETURN_DEL1(d, t1, rv) \
-	if (DepthSpec::depth_guard_by_depth(d) != GOOD_DEPTH) { \
-		delete t1; \
-		return rv; \
-	}
+#define DEPTH_GUARD_BY_DEPTH_RETURN_DEL1(d, t1, rv)                            \
+  if (DepthSpec::depth_guard_by_depth(d) != GOOD_DEPTH) {                      \
+    delete t1;                                                                 \
+    return rv;                                                                 \
+  }
 
-#define DEPTH_GUARD_BY_DEPTH_RETURN_DEL2(d, t1, t2, rv) \
-	if (DepthSpec::depth_guard_by_depth(d) != GOOD_DEPTH) { \
-		delete t1; \
-		delete t2; \
-		return rv; \
-	}
+#define DEPTH_GUARD_BY_DEPTH_RETURN_DEL2(d, t1, t2, rv)                        \
+  if (DepthSpec::depth_guard_by_depth(d) != GOOD_DEPTH) {                      \
+    delete t1;                                                                 \
+    delete t2;                                                                 \
+    return rv;                                                                 \
+  }
 
-#define DPETH_GUARD_BY_TYPE_NORETURN(t) \
-	if (DepthSpec::depth_guard_by_type(dType::t) != GOOD_DEPTH) \
-		return;
+#define DPETH_GUARD_BY_TYPE_NORETURN(t)                                        \
+  if (DepthSpec::depth_guard_by_type(dType::t) != GOOD_DEPTH)                  \
+    return;
 
-#define DPETH_GUARD_BY_TYPE_NORETURN_WITH_FLAG(t, flag) \
-	if (DepthSpec::depth_guard_by_type(dType::t, flag) != GOOD_DEPTH) \
-		return;
+#define DPETH_GUARD_BY_TYPE_NORETURN_WITH_FLAG(t, flag)                        \
+  if (DepthSpec::depth_guard_by_type(dType::t, flag) != GOOD_DEPTH)            \
+    return;
 
-#define DEPTH_GUARD_BY_TYPE_RETURN(t, rv) \
-	if (DepthSpec::depth_guard_by_type(dType::t) != GOOD_DEPTH) \
-		return rv;
+#define DEPTH_GUARD_BY_TYPE_RETURN(t, rv)                                      \
+  if (DepthSpec::depth_guard_by_type(dType::t) != GOOD_DEPTH)                  \
+    return rv;
 
-#define DEPTH_GUARD_BY_TYPE_RETURN_WITH_FLAG(t, flag, rv) \
-	if (DepthSpec::depth_guard_by_type(dType::t, flag) != GOOD_DEPTH) \
-		return rv;
+#define DEPTH_GUARD_BY_TYPE_RETURN_WITH_FLAG(t, flag, rv)                      \
+  if (DepthSpec::depth_guard_by_type(dType::t, flag) != GOOD_DEPTH)            \
+    return rv;
 
-#define GETTER_DECL(type) \
-	static int \
-	type##_minimal_depth(int flag = -1);
+#define GETTER_DECL(type) static int type##_minimal_depth(int flag = -1);
 
-class DepthSpec
-{
+class DepthSpec {
 public:
-	static int depth_guard_by_type(dType ty, int extra_flag = 0);
+  static int depth_guard_by_type(dType ty, int extra_flag = 0);
 
-	static int depth_guard_by_depth(int depth_needed);
+  static int depth_guard_by_depth(int depth_needed);
 
-	static void depth_print();
+  static void depth_print();
 
-//private:
+  // private:
 
-	const static int dtVariableSelection_minimal_depth_;
+  const static int dtVariableSelection_minimal_depth_;
 
-	const static int dtLoopControl_minimal_depth_;
+  const static int dtLoopControl_minimal_depth_;
 
-	const static int dtTypeNonVoidSimple_minimal_depth_;
+  const static int dtTypeNonVoidSimple_minimal_depth_;
 
-	const static int dtTypeChooseRandom_minimal_depth_;
+  const static int dtTypeChooseRandom_minimal_depth_;
 
-	const static int dtChooseRandomPointerType_minimal_depth_;
+  const static int dtChooseRandomPointerType_minimal_depth_;
 
-	const static int dtConstant_minimal_depth_;
+  const static int dtConstant_minimal_depth_;
 
-	const static int dtInitVariable_minimal_depth_;
+  const static int dtInitVariable_minimal_depth_;
 
-	static int dtFunction_minimal_depth_(int flag = 0);
-	static int dtStatement_minimal_depth_(int flag = 0);
+  static int dtFunction_minimal_depth_(int flag = 0);
+  static int dtStatement_minimal_depth_(int flag = 0);
 
-	GETTER_DECL(dtLoopControl)
-	GETTER_DECL(dtTypeNonVoidSimple)
-	GETTER_DECL(dtTypeChooseRandom)
-	GETTER_DECL(dtChooseRandomPointerType)
-	GETTER_DECL(dtVariableSelection)
-	GETTER_DECL(dtConstant)
-	GETTER_DECL(dtInitVariable)
+  GETTER_DECL(dtLoopControl)
+  GETTER_DECL(dtTypeNonVoidSimple)
+  GETTER_DECL(dtTypeChooseRandom)
+  GETTER_DECL(dtChooseRandomPointerType)
+  GETTER_DECL(dtVariableSelection)
+  GETTER_DECL(dtConstant)
+  GETTER_DECL(dtInitVariable)
 
-	GETTER_DECL(dtFirstFunction)
-	GETTER_DECL(dtFunction)
-	GETTER_DECL(dtBlock)
-	GETTER_DECL(dtStatement)
-	GETTER_DECL(dtStatementAssign)
-	GETTER_DECL(dtStatementFor)
-	GETTER_DECL(dtStatementIf)
-	GETTER_DECL(dtStatementExpr)
-	GETTER_DECL(dtStatementReturn)
-	GETTER_DECL(dtFunctionInvocationUnary)
-	GETTER_DECL(dtFunctionInvocationBinary)
-	GETTER_DECL(dtFunctionInvocationRandomUnary)
-	GETTER_DECL(dtFunctionInvocationRandomRegularBinary)
-	GETTER_DECL(dtFunctionInvocationRandomBinaryPointer)
-	GETTER_DECL(dtFunctionInvocationRandomBinary)
-	GETTER_DECL(dtFunctionInvocationRandom)
-	GETTER_DECL(dtFunctionInvocationStdFunc)
-	GETTER_DECL(dtFunctionUserBuildInvocation)
-	GETTER_DECL(dtExpression)
-	GETTER_DECL(dtExpressionRandomParam)
-	GETTER_DECL(dtExpressionVariable)
-	GETTER_DECL(dtExpressionFuncall)
-	GETTER_DECL(dtLhs)
-	GETTER_DECL(dtReturnType)
-	GETTER_DECL(dtRandomTypeFromType)
-	GETTER_DECL(dtFunctionGenerateBody)
-	GETTER_DECL(dtGenerateParamList)
-	GETTER_DECL(dtTypeChooseSimple)
-	GETTER_DECL(dtSelectLValue)
-	GETTER_DECL(dtSelectVariable)
-	GETTER_DECL(dtSelectDerefPointer)
-	GETTER_DECL(dtSelectExistingVariable)
-	GETTER_DECL(dtSelectGlobal)
-	GETTER_DECL(dtGenerateNewGlobal)
-	GETTER_DECL(dtSelectParentLocal)
-	GETTER_DECL(dtGenerateNewParentLocal)
-	GETTER_DECL(dtGenerateNewVariable)
-	GETTER_DECL(dtInitPointerValue)
-	GETTER_DECL(dtSafeOpFlags)
+  GETTER_DECL(dtFirstFunction)
+  GETTER_DECL(dtFunction)
+  GETTER_DECL(dtBlock)
+  GETTER_DECL(dtStatement)
+  GETTER_DECL(dtStatementAssign)
+  GETTER_DECL(dtStatementFor)
+  GETTER_DECL(dtStatementIf)
+  GETTER_DECL(dtStatementExpr)
+  GETTER_DECL(dtStatementReturn)
+  GETTER_DECL(dtFunctionInvocationUnary)
+  GETTER_DECL(dtFunctionInvocationBinary)
+  GETTER_DECL(dtFunctionInvocationRandomUnary)
+  GETTER_DECL(dtFunctionInvocationRandomRegularBinary)
+  GETTER_DECL(dtFunctionInvocationRandomBinaryPointer)
+  GETTER_DECL(dtFunctionInvocationRandomBinary)
+  GETTER_DECL(dtFunctionInvocationRandom)
+  GETTER_DECL(dtFunctionInvocationStdFunc)
+  GETTER_DECL(dtFunctionUserBuildInvocation)
+  GETTER_DECL(dtExpression)
+  GETTER_DECL(dtExpressionRandomParam)
+  GETTER_DECL(dtExpressionVariable)
+  GETTER_DECL(dtExpressionFuncall)
+  GETTER_DECL(dtLhs)
+  GETTER_DECL(dtReturnType)
+  GETTER_DECL(dtRandomTypeFromType)
+  GETTER_DECL(dtFunctionGenerateBody)
+  GETTER_DECL(dtGenerateParamList)
+  GETTER_DECL(dtTypeChooseSimple)
+  GETTER_DECL(dtSelectLValue)
+  GETTER_DECL(dtSelectVariable)
+  GETTER_DECL(dtSelectDerefPointer)
+  GETTER_DECL(dtSelectExistingVariable)
+  GETTER_DECL(dtSelectGlobal)
+  GETTER_DECL(dtGenerateNewGlobal)
+  GETTER_DECL(dtSelectParentLocal)
+  GETTER_DECL(dtGenerateNewParentLocal)
+  GETTER_DECL(dtGenerateNewVariable)
+  GETTER_DECL(dtInitPointerValue)
+  GETTER_DECL(dtSafeOpFlags)
 
 private:
-	DepthSpec() {}
+  DepthSpec() {}
 
-	~DepthSpec() {}
+  ~DepthSpec() {}
 
-	static int backtracking(int depth_needed);
+  static int backtracking(int depth_needed);
 };
 
-#endif //DEPTH_SPEC_H
+#endif // DEPTH_SPEC_H

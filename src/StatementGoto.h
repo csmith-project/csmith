@@ -31,11 +31,11 @@
 #define STATEMENT_GOTO_H
 
 ///////////////////////////////////////////////////////////////////////////////
-#include <ostream>
-#include <string>
-#include <map>
 #include "Statement.h"
 #include "StdLibAliases.h"
+#include <map>
+#include <ostream>
+#include <string>
 class Expression;
 class Block;
 class Variable;
@@ -44,33 +44,39 @@ class Statement;
 /*
  *
  */
-class StatementGoto : public Statement
-{
+class StatementGoto : public Statement {
 public:
-	// Factory method.
-	static StatementGoto *make_random(CGContext &cg_context);
+  // Factory method.
+  static StatementGoto *make_random(CGContext &cg_context);
 
-	StatementGoto(Block* b, const Expression &test, const Statement* dest, const std::vector<const Variable*>& vars);
-	StatementGoto(const StatementGoto &sg);
-	virtual ~StatementGoto(void) override;
-	//
-	static bool has_init_skipped_vars(const Block* src_blk, const Statement* dest);
-	static Block* find_good_jump_block(vector<Block*>& blocks, const Block* blk, bool as_dest);
+  StatementGoto(Block *b, const Expression &test, const Statement *dest,
+                const std::vector<const Variable *> &vars);
+  StatementGoto(const StatementGoto &sg);
+  virtual ~StatementGoto(void) override;
+  //
+  static bool has_init_skipped_vars(const Block *src_blk,
+                                    const Statement *dest);
+  static Block *find_good_jump_block(vector<Block *> &blocks, const Block *blk,
+                                     bool as_dest);
 
-	virtual bool must_jump(void) const override;
-	virtual void get_exprs(std::vector<const Expression*>& exps) const {exps.push_back(&test);}
-	virtual void get_blocks(std::vector<const Block*>& /* blks */) const {};
-	virtual bool visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const override;
-	virtual void Output(std::ostream &out, FactMgr* fm, int indent = 0) const override;
-	void output_skipped_var_inits(std::ostream &out, int indent) const;
+  virtual bool must_jump(void) const override;
+  virtual void get_exprs(std::vector<const Expression *> &exps) const {
+    exps.push_back(&test);
+  }
+  virtual void get_blocks(std::vector<const Block *> & /* blks */) const {};
+  virtual bool visit_facts(vector<const Fact *> &inputs,
+                           CGContext &cg_context) const override;
+  virtual void Output(std::ostream &out, FactMgr *fm,
+                      int indent = 0) const override;
+  void output_skipped_var_inits(std::ostream &out, int indent) const;
 
-	static void doFinalization(void);
+  static void doFinalization(void);
 
-	const Expression &test;
-	const Statement* dest;
-	std::string label;
-	std::vector<const Variable*> init_skipped_vars;
-	static std::map<const Statement*, std::string> stm_labels;
+  const Expression &test;
+  const Statement *dest;
+  std::string label;
+  std::vector<const Variable *> init_skipped_vars;
+  static std::map<const Statement *, std::string> stm_labels;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

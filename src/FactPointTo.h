@@ -32,9 +32,9 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "Fact.h"
 #include <ostream>
 #include <vector>
-#include "Fact.h"
 
 class Variable;
 class Function;
@@ -46,82 +46,113 @@ class StatementReturn;
 #include "StdLibAliases.h"
 ///////////////////////////////////////////////////////////////////////////////
 
-class FactPointTo : public Fact
-{
+class FactPointTo : public Fact {
 public:
- 	static FactPointTo *make_fact(const Variable* v);
-	static FactPointTo *make_fact(const Variable* v, const vector<const Variable*>& set);
-	static FactPointTo *make_fact(const Variable* v, const Variable* point_to);
-	static vector<const Fact*> make_facts(const vector<const Variable*> &vars, const vector<const Variable*>& set);
-	static vector<const Fact*> make_facts(const vector<const Variable*> &vars, const Variable* point_to);
-	static void doFinalization();
+  static FactPointTo *make_fact(const Variable *v);
+  static FactPointTo *make_fact(const Variable *v,
+                                const vector<const Variable *> &set);
+  static FactPointTo *make_fact(const Variable *v, const Variable *point_to);
+  static vector<const Fact *> make_facts(const vector<const Variable *> &vars,
+                                         const vector<const Variable *> &set);
+  static vector<const Fact *> make_facts(const vector<const Variable *> &vars,
+                                         const Variable *point_to);
+  static void doFinalization();
 
-	explicit FactPointTo(const Variable* v);
-	virtual ~FactPointTo(void) override;
+  explicit FactPointTo(const Variable *v);
+  virtual ~FactPointTo(void) override;
 
-	virtual const Variable* get_var(void) const { return var;};
-	const vector<const Variable*>& get_point_to_vars(void) const { return point_to_vars; };
+  virtual const Variable *get_var(void) const { return var; };
+  const vector<const Variable *> &get_point_to_vars(void) const {
+    return point_to_vars;
+  };
 
-	bool is_null(void) const;
-	bool is_tbd_only(void) const;
-	bool is_dead(void) const;
-	bool has_invisible(const Statement* stm) const;
-	int  size() const;
-	std::vector<const Fact*> rhs_to_lhs_transfer(const std::vector<const Fact*>& facts, const vector<const Variable*>& lvars, const Expression* rhs);
-	virtual int abstract_fact_for_assign(const std::vector<const Fact*>& /*facts*/, const Lhs* /*lhs*/, const Expression* /*rhs*/, std::vector<const Fact*>&) override;
+  bool is_null(void) const;
+  bool is_tbd_only(void) const;
+  bool is_dead(void) const;
+  bool has_invisible(const Statement *stm) const;
+  int size() const;
+  std::vector<const Fact *>
+  rhs_to_lhs_transfer(const std::vector<const Fact *> &facts,
+                      const vector<const Variable *> &lvars,
+                      const Expression *rhs);
+  virtual int
+  abstract_fact_for_assign(const std::vector<const Fact *> & /*facts*/,
+                           const Lhs * /*lhs*/, const Expression * /*rhs*/,
+                           std::vector<const Fact *> &) override;
 
-	const FactPointTo* mark_dead_var(const Variable* v) const;
-	const FactPointTo* mark_func_end(const Statement* stm) const;
-	const FactPointTo* update_with_modified_index(const Variable* index_var) const;
+  const FactPointTo *mark_dead_var(const Variable *v) const;
+  const FactPointTo *mark_func_end(const Statement *stm) const;
+  const FactPointTo *
+  update_with_modified_index(const Variable *index_var) const;
 
-	// lattice functions
-	virtual bool is_top(void) const { return point_to_vars.empty();}
-	virtual bool is_bottom(void) const { return false;} // there is no bottom, we just grow the points-to set
-	virtual void set_top(void) { point_to_vars.clear();}
-	virtual void set_bottom(void) {};
+  // lattice functions
+  virtual bool is_top(void) const { return point_to_vars.empty(); }
+  virtual bool is_bottom(void) const {
+    return false;
+  } // there is no bottom, we just grow the points-to set
+  virtual void set_top(void) { point_to_vars.clear(); }
+  virtual void set_bottom(void) {};
 
-	virtual int join(const Fact& fact) override;
-	virtual int join_visits(const Fact& fact) override;
-	virtual Fact* clone(void) const override;
-	virtual bool imply(const Fact& fact) const override;
-	virtual bool point_to(const Variable* v) const;
-	virtual bool equal(const Fact& fact) const override;
-	virtual void Output(std::ostream &out) const override;
-	virtual bool is_assertable(const Statement* s) const override;
+  virtual int join(const Fact &fact) override;
+  virtual int join_visits(const Fact &fact) override;
+  virtual Fact *clone(void) const override;
+  virtual bool imply(const Fact &fact) const override;
+  virtual bool point_to(const Variable *v) const;
+  virtual bool equal(const Fact &fact) const override;
+  virtual void Output(std::ostream &out) const override;
+  virtual bool is_assertable(const Statement *s) const override;
 
-	static std::vector<const Variable*> merge_pointees_of_pointer(const Variable* ptr, int indirect, const std::vector<const Fact*>& facts);
-	static std::vector<const Variable*> merge_pointees_of_pointers(const std::vector<const Variable*>& ptrs, const std::vector<const Fact*>& facts);
-	static void update_facts_with_modified_index(std::vector<const Fact*>& facts, const Variable* var);
-	static void aggregate_all_pointto_sets(void);
+  static std::vector<const Variable *>
+  merge_pointees_of_pointer(const Variable *ptr, int indirect,
+                            const std::vector<const Fact *> &facts);
+  static std::vector<const Variable *>
+  merge_pointees_of_pointers(const std::vector<const Variable *> &ptrs,
+                             const std::vector<const Fact *> &facts);
+  static void update_facts_with_modified_index(std::vector<const Fact *> &facts,
+                                               const Variable *var);
+  static void aggregate_all_pointto_sets(void);
 
-	static int opportunistic_validate(const Variable* var, const Type* type, const std::vector<const Fact*>& facts);
-	static bool is_valid_ptr(const Variable* p, const std::vector<const Fact*>& facts);
-	static bool is_valid_ptr(const char* name, const std::vector<const Fact*>& facts);
-	static bool is_dangling_ptr(const Variable* p, const std::vector<const Fact*>& facts);
-	static bool is_special_ptr(const Variable* p) { return p==null_ptr || p==garbage_ptr || p==tbd_ptr;}
-	static bool is_pointing_to_locals(const Variable* v, const Block* b, int indirection, const vector<const Fact*>& facts);
-	static int  find_union_pointees(const vector<const Fact*>& facts, const Expression* e, vector<const Variable*>& unions);
+  static int opportunistic_validate(const Variable *var, const Type *type,
+                                    const std::vector<const Fact *> &facts);
+  static bool is_valid_ptr(const Variable *p,
+                           const std::vector<const Fact *> &facts);
+  static bool is_valid_ptr(const char *name,
+                           const std::vector<const Fact *> &facts);
+  static bool is_dangling_ptr(const Variable *p,
+                              const std::vector<const Fact *> &facts);
+  static bool is_special_ptr(const Variable *p) {
+    return p == null_ptr || p == garbage_ptr || p == tbd_ptr;
+  }
+  static bool is_pointing_to_locals(const Variable *v, const Block *b,
+                                    int indirection,
+                                    const vector<const Fact *> &facts);
+  static int find_union_pointees(const vector<const Fact *> &facts,
+                                 const Expression *e,
+                                 vector<const Variable *> &unions);
 
-	static std::string point_to_str(const Variable* v);
+  static std::string point_to_str(const Variable *v);
 
-	static const Variable* null_ptr;
-	static const Variable* garbage_ptr;
-	static const Variable* tbd_ptr;
+  static const Variable *null_ptr;
+  static const Variable *garbage_ptr;
+  static const Variable *tbd_ptr;
 
-	static vector<const Variable*> all_ptrs;
-	static vector<vector<const Variable*> > all_aliases;
+  static vector<const Variable *> all_ptrs;
+  static vector<vector<const Variable *>> all_aliases;
+
 private:
-	FactPointTo(const Variable* v, const vector<const Variable*>& set);
-	FactPointTo(const Variable* v, const Variable* point_to);
+  FactPointTo(const Variable *v, const vector<const Variable *> &set);
+  FactPointTo(const Variable *v, const Variable *point_to);
 
-	const Variable* var;
-	vector<const Variable*> point_to_vars;
+  const Variable *var;
+  vector<const Variable *> point_to_vars;
 
-	static void update_ptr_aliases(const vector<Fact*>& facts, vector<const Variable*>& ptrs, vector<vector<const Variable*> >& aliases);
+  static void update_ptr_aliases(const vector<Fact *> &facts,
+                                 vector<const Variable *> &ptrs,
+                                 vector<vector<const Variable *>> &aliases);
 
-	// unimplement
-	FactPointTo(const FactPointTo& f);
-	FactPointTo &operator=(const FactPointTo &ev);
+  // unimplement
+  FactPointTo(const FactPointTo &f);
+  FactPointTo &operator=(const FactPointTo &ev);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

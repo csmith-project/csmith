@@ -28,25 +28,25 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 #if HAVE_CONFIG_H
-#  include <config.h>
+#include <config.h>
 #endif
 
 #ifdef WIN32
-#pragma warning(disable : 4786)   /* Disable annoying warning messages */
+#pragma warning(disable : 4786) /* Disable annoying warning messages */
 #endif
 
-#include "StatementContinue.h"
-#include <iostream>
-#include <cassert>
-#include "CGOptions.h"
-#include "CGContext.h"
 #include "Block.h"
-#include "Type.h"
-#include "Function.h"
+#include "Bookkeeper.h"
+#include "CGContext.h"
+#include "CGOptions.h"
+#include "Error.h"
 #include "Expression.h"
 #include "FactMgr.h"
-#include "Bookkeeper.h"
-#include "Error.h"
+#include "Function.h"
+#include "StatementContinue.h"
+#include "Type.h"
+#include <cassert>
+#include <iostream>
 
 using namespace std;
 
@@ -55,97 +55,84 @@ using namespace std;
 /*
  *
  */
-StatementContinue *
-StatementContinue::make_random(CGContext &cg_context)
-{
-	//static int g =0;
-	FactMgr* fm = get_fact_mgr(&cg_context);
-	// find the closest looping parent block: the one "continue"
-	// would apply to
-	//int h = g++;
-	const Block* b = cg_context.get_current_block();
-	const Statement* prev_stm = b->get_last_stm();
-	// don't generate "continue" as the first statement in a block
-	if (prev_stm == 0) {
-		return 0;
-	}
-	while (b && !b->looping) {
-		b = b->parent;
-	}
-	assert(b);
-	cg_context.get_effect_stm().clear();
-	Expression *expr = Expression::make_random(cg_context, get_int_type(), 0, true, true, eVariable);
-	ERROR_GUARD(nullptr);
-	StatementContinue* sc = new StatementContinue(cg_context.get_current_block(), *expr, *b);
-	fm->create_cfg_edge(sc, b, false, true);
-    return sc;
+StatementContinue *StatementContinue::make_random(CGContext &cg_context) {
+  // static int g =0;
+  FactMgr *fm = get_fact_mgr(&cg_context);
+  // find the closest looping parent block: the one "continue"
+  // would apply to
+  // int h = g++;
+  const Block *b = cg_context.get_current_block();
+  const Statement *prev_stm = b->get_last_stm();
+  // don't generate "continue" as the first statement in a block
+  if (prev_stm == 0) {
+    return 0;
+  }
+  while (b && !b->looping) {
+    b = b->parent;
+  }
+  assert(b);
+  cg_context.get_effect_stm().clear();
+  Expression *expr = Expression::make_random(cg_context, get_int_type(), 0,
+                                             true, true, eVariable);
+  ERROR_GUARD(nullptr);
+  StatementContinue *sc =
+      new StatementContinue(cg_context.get_current_block(), *expr, *b);
+  fm->create_cfg_edge(sc, b, false, true);
+  return sc;
 }
 
 /*
  *
  */
-StatementContinue::StatementContinue(Block* parent, const Expression &test, const Block &b)
-	: Statement(eContinue, parent),
-	  test(test),
-	  loop_blk(b)
-{
-	// Nothing else to do.
+StatementContinue::StatementContinue(Block *parent, const Expression &test,
+                                     const Block &b)
+    : Statement(eContinue, parent), test(test), loop_blk(b) {
+  // Nothing else to do.
 }
 
 /*
  *
  */
 StatementContinue::StatementContinue(const StatementContinue &sc)
-: Statement(sc.get_type(), sc.parent),
-	  test(sc.test),
-	  loop_blk(sc.loop_blk)
-{
-	// Nothing else to do.
+    : Statement(sc.get_type(), sc.parent), test(sc.test),
+      loop_blk(sc.loop_blk) {
+  // Nothing else to do.
 }
 
 /*
  *
  */
-StatementContinue::~StatementContinue(void)
-{
-	delete &test;
-}
+StatementContinue::~StatementContinue(void) { delete &test; }
 
 /*
  * return true if condition is always true
  */
-bool
-StatementContinue::must_jump(void) const
-{
-	return test.not_equals(0);
-}
+bool StatementContinue::must_jump(void) const { return test.not_equals(0); }
 
 /*
  *
  */
-void
-StatementContinue::Output(std::ostream &out, FactMgr* /*fm*/, int indent) const
-{
-	output_tab(out, indent);
-	out << "if (";
-	test.Output(out);
-	out << ")";
-	outputln(out);
-	output_tab(out, indent+1);
-	out << "continue;";
-	outputln(out);
+void StatementContinue::Output(std::ostream &out, FactMgr * /*fm*/,
+                               int indent) const {
+  output_tab(out, indent);
+  out << "if (";
+  test.Output(out);
+  out << ")";
+  outputln(out);
+  output_tab(out, indent + 1);
+  out << "continue;";
+  outputln(out);
 }
 
-bool
-StatementContinue::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const
-{
-	// evaludate condition first
-	if (!test.visit_facts(inputs, cg_context)) {
-		return log_analysis_fail("StatementContinue");
-	}
-	FactMgr* fm = get_fact_mgr(&cg_context);
-	fm->map_stm_effect[this] = cg_context.get_effect_stm();
-	return true;
+bool StatementContinue::visit_facts(vector<const Fact *> &inputs,
+                                    CGContext &cg_context) const {
+  // evaludate condition first
+  if (!test.visit_facts(inputs, cg_context)) {
+    return log_analysis_fail("StatementContinue");
+  }
+  FactMgr *fm = get_fact_mgr(&cg_context);
+  fm->map_stm_effect[this] = cg_context.get_effect_stm();
+  return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

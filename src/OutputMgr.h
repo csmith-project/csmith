@@ -30,71 +30,71 @@
 #ifndef OUTPUT_MGR_H
 #define OUTPUT_MGR_H
 
-#include <ostream>
-#include <vector>
-#include <string>
 #include "StdLibAliases.h"
+#include <ostream>
+#include <string>
+#include <vector>
 class Variable;
 
-inline constexpr const char TAB[] = "    "; // to beautify output: 1 tab is 4 spaces
+inline constexpr const char TAB[] =
+    "    "; // to beautify output: 1 tab is 4 spaces
 
 class OutputMgr {
 public:
-	OutputMgr();
+  OutputMgr();
 
-	virtual ~OutputMgr() = 0;
+  virtual ~OutputMgr() = 0;
 
-	static void OutputHashFuncDef(std::ostream &out);
+  static void OutputHashFuncDef(std::ostream &out);
 
-	static void OutputHashFuncDecl(std::ostream &out);
+  static void OutputHashFuncDecl(std::ostream &out);
 
-	static void OutputHashFuncInvocation(std::ostream &out, int indent);
+  static void OutputHashFuncInvocation(std::ostream &out, int indent);
 
-	static void OutputStepHashFuncInvocation(std::ostream &out, int indent, int stmt_id);
+  static void OutputStepHashFuncInvocation(std::ostream &out, int indent,
+                                           int stmt_id);
 
-	static void OutputStepHashFuncDecl(std::ostream &out);
+  static void OutputStepHashFuncDecl(std::ostream &out);
 
-	static void OutputStepHashFuncDef(std::ostream &out);
+  static void OutputStepHashFuncDef(std::ostream &out);
 
-	static void really_outputln(std::ostream &out);
+  static void really_outputln(std::ostream &out);
 
-	static void set_curr_func(const std::string &fname);
+  static void set_curr_func(const std::string &fname);
 
-	virtual void OutputHeader(int argc, char *argv[], unsigned long seed) = 0;
+  virtual void OutputHeader(int argc, char *argv[], unsigned long seed) = 0;
 
-	virtual void OutputStructUnions(ostream& /* out */) {};
+  virtual void OutputStructUnions(ostream & /* out */) {};
 
-	virtual void Output() = 0;
+  virtual void Output() = 0;
 
-	virtual void outputln(ostream &out) {out << std::endl;}
+  virtual void outputln(ostream &out) { out << std::endl; }
 
-	virtual void output_comment_line(ostream &out, const std::string &comment);
+  virtual void output_comment_line(ostream &out, const std::string &comment);
 
-	virtual void output_tab(ostream &out, int indent);
+  virtual void output_tab(ostream &out, int indent);
 
-	void OutputPtrResets(ostream &out, const vector<const Variable*>& ptrs);
+  void OutputPtrResets(ostream &out, const vector<const Variable *> &ptrs);
 
-	static const char *hash_func_name;
+  static const char *hash_func_name;
 
-	static const char *step_hash_func_name;
+  static const char *step_hash_func_name;
 
-	static vector<std::string> monitored_funcs_;
+  static vector<std::string> monitored_funcs_;
 
 protected:
-	virtual std::ostream &get_main_out() = 0;
+  virtual std::ostream &get_main_out() = 0;
 
-	static void output_tab_(ostream &out, int indent);
+  static void output_tab_(ostream &out, int indent);
 
-	void OutputTail(std::ostream &out);
+  void OutputTail(std::ostream &out);
 
-	void OutputMain(std::ostream &out);
+  void OutputMain(std::ostream &out);
 
 private:
+  static bool is_monitored_func(void);
 
-	static bool is_monitored_func(void);
-
-	static std::string curr_func_;
-
+  static std::string curr_func_;
 };
 
 #endif // OUTPUT_MGR_H

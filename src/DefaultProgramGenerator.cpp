@@ -28,67 +28,55 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 #if HAVE_CONFIG_H
-#  include <config.h>
+#include <config.h>
 #endif
 
-#include "DefaultProgramGenerator.h"
-#include <cassert>
-#include <sstream>
-#include "RandomNumber.h"
 #include "AbsRndNumGenerator.h"
+#include "CGOptions.h"
 #include "DefaultOutputMgr.h"
+#include "DefaultProgramGenerator.h"
+#include "ExtensionMgr.h"
 #include "Finalization.h"
 #include "Function.h"
-#include "Type.h"
-#include "CGOptions.h"
+#include "RandomNumber.h"
 #include "SafeOpFlags.h"
-#include "ExtensionMgr.h"
+#include "Type.h"
+#include <cassert>
+#include <sstream>
 
-DefaultProgramGenerator::DefaultProgramGenerator(int argc, char *argv[], unsigned long seed)
-	: argc_(argc),
-	  argv_(argv),
-	  seed_(seed),
-	  output_mgr_(nullptr)
-{
+DefaultProgramGenerator::DefaultProgramGenerator(int argc, char *argv[],
+                                                 unsigned long seed)
+    : argc_(argc), argv_(argv), seed_(seed), output_mgr_(nullptr) {}
 
+DefaultProgramGenerator::~DefaultProgramGenerator() {
+  Finalization::doFinalization();
+  delete output_mgr_;
 }
 
-DefaultProgramGenerator::~DefaultProgramGenerator()
-{
-	Finalization::doFinalization();
-	delete output_mgr_;
+void DefaultProgramGenerator::initialize() {
+  RandomNumber::CreateInstance(rDefaultRndNumGenerator, seed_);
+  output_mgr_ = DefaultOutputMgr::CreateInstance();
+  assert(output_mgr_);
+
+  ExtensionMgr::CreateExtension();
 }
 
-void
-DefaultProgramGenerator::initialize()
-{
-	RandomNumber::CreateInstance(rDefaultRndNumGenerator, seed_);
-	output_mgr_ = DefaultOutputMgr::CreateInstance();
-	assert(output_mgr_);
-
-	ExtensionMgr::CreateExtension();
+std::string DefaultProgramGenerator::get_count_prefix(const std::string &) {
+  assert(0);
+  return "";
 }
 
-std::string
-DefaultProgramGenerator::get_count_prefix(const std::string &)
-{
-	assert(0);
-	return "";
+void DefaultProgramGenerator::goGenerator() {
+  output_mgr_->OutputHeader(argc_, argv_, seed_);
+
+  GenerateAllTypes();
+  GenerateFunctions();
+  output_mgr_->Output();
+  if (CGOptions::identify_wrappers()) {
+    ofstream ofile;
+    ofile.open("wrapper.h");
+    ofile << "#define N_WRAP " << SafeOpFlags::wrapper_names.size()
+          << std::endl;
+    ofile.close();
+  }
 }
-
-void
-DefaultProgramGenerator::goGenerator()
-{
-	output_mgr_->OutputHeader(argc_, argv_, seed_);
-
-	GenerateAllTypes();
-	GenerateFunctions();
-	output_mgr_->Output();
-	if (CGOptions::identify_wrappers()) {
-		ofstream ofile;
-		ofile.open("wrapper.h");
-		ofile << "#define N_WRAP " << SafeOpFlags::wrapper_names.size() << std::endl;
-		ofile.close();
-	}
-}
-

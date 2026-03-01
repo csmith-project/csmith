@@ -32,10 +32,11 @@
 
 class Finalization {
 public:
-	static void doFinalization();
+  static void doFinalization();
+
 private:
-	Finalization();
-	~Finalization();
+  Finalization();
+  ~Finalization();
 };
 
 #endif // FINALIZATION_H

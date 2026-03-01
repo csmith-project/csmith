@@ -28,259 +28,252 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 #if HAVE_CONFIG_H
-#  include <config.h>
+#include <config.h>
 #endif
 
-#include "FactUnion.h"
-#include <iostream>
 #include "CGOptions.h"
-#include "Fact.h"
-#include "Type.h"
 #include "Common.h"
-#include "Function.h"
-#include "FactMgr.h"
-#include "FactPointTo.h"
-#include "Lhs.h"
-#include "ExpressionVariable.h"
-#include "FunctionInvocationUser.h"
 #include "ExpressionAssign.h"
 #include "ExpressionComma.h"
+#include "ExpressionVariable.h"
+#include "Fact.h"
+#include "FactMgr.h"
+#include "FactPointTo.h"
+#include "FactUnion.h"
+#include "Function.h"
+#include "FunctionInvocationUser.h"
+#include "Lhs.h"
+#include "Type.h"
 #include <cassert>
+#include <iostream>
 
-const int  FactUnion::TOP = -2;
-const int  FactUnion::BOTTOM = -1;
+const int FactUnion::TOP = -2;
+const int FactUnion::BOTTOM = -1;
 
 /*
  * constructor
  */
-FactUnion::FactUnion(const Variable* v) :
-    Fact(eUnionWrite),
-    var(v),
-    last_written_fid(TOP)
-{
-	// nothing else to do
+FactUnion::FactUnion(const Variable *v)
+    : Fact(eUnionWrite), var(v), last_written_fid(TOP) {
+  // nothing else to do
 }
 
-FactUnion::FactUnion(const Variable* v, int fid) :
-    Fact(eUnionWrite),
-    var(v),
-    last_written_fid(fid)
-{
-	// nothing else to do
+FactUnion::FactUnion(const Variable *v, int fid)
+    : Fact(eUnionWrite), var(v), last_written_fid(fid) {
+  // nothing else to do
 }
 
-const Type*
-FactUnion::get_last_written_type(void) const
-{
-	assert(var->type && var->type->eType == eUnion);
-	if (is_top() || is_bottom()) return nullptr;
-	assert (last_written_fid >= 0 && last_written_fid < (int)(var->field_vars.size()));
-	return var->field_vars[last_written_fid]->type;
+const Type *FactUnion::get_last_written_type(void) const {
+  assert(var->type && var->type->eType == eUnion);
+  if (is_top() || is_bottom())
+    return nullptr;
+  assert(last_written_fid >= 0 &&
+         last_written_fid < (int)(var->field_vars.size()));
+  return var->field_vars[last_written_fid]->type;
 }
 
-std::vector<const Fact*>
-FactUnion::rhs_to_lhs_transfer(const std::vector<const Fact*>& facts, const vector<const Variable*>& lvars, const Expression* rhs)
-{
-	vector<const Fact*> empty;
-	// assert all possible LHS are unions
-	for (size_t i=0; i<lvars.size(); i++) {
-		assert(lvars[i]->type->eType == eUnion);
-	}
-	assert(rhs != nullptr);
-	if (rhs->term_type == eConstant) {
-		return make_facts(lvars, 0);
-	}
-    else if (rhs->term_type == eVariable) {
-        const ExpressionVariable* expvar = static_cast<const ExpressionVariable*>(rhs);
-		int indirect = expvar->get_indirect_level();
-        assert (indirect >= 0);
+std::vector<const Fact *>
+FactUnion::rhs_to_lhs_transfer(const std::vector<const Fact *> &facts,
+                               const vector<const Variable *> &lvars,
+                               const Expression *rhs) {
+  vector<const Fact *> empty;
+  // assert all possible LHS are unions
+  for (size_t i = 0; i < lvars.size(); i++) {
+    assert(lvars[i]->type->eType == eUnion);
+  }
+  assert(rhs != nullptr);
+  if (rhs->term_type == eConstant) {
+    return make_facts(lvars, 0);
+  } else if (rhs->term_type == eVariable) {
+    const ExpressionVariable *expvar =
+        static_cast<const ExpressionVariable *>(rhs);
+    int indirect = expvar->get_indirect_level();
+    assert(indirect >= 0);
 
-		vector<const Variable*> rvars = FactPointTo::merge_pointees_of_pointer(expvar->get_var()->get_collective(), indirect, facts);
-		const FactUnion* rhs_fact = dynamic_cast<const FactUnion*>(join_var_facts(facts, rvars));
-		if (rhs_fact) {
-			return make_facts(lvars, rhs_fact->get_last_written_fid());
-		}
-	}
-    else if (rhs->term_type == eFunction) {
-        const FunctionInvocation* fi = rhs->get_invoke();
-		if (fi->invoke_type == eInvocationType::eFuncCall) {
-			const FunctionInvocationUser* fiu = dynamic_cast<const FunctionInvocationUser*>(fi);
-			// find the fact regarding return variable
-			const FactUnion* rv_fact = dynamic_cast<const FactUnion*>(get_return_fact_for_invocation(fiu, fiu->get_func()->rv, eUnionWrite));
-			assert(rv_fact);
-			return make_facts(lvars, rv_fact->get_last_written_fid());
-        }
+    vector<const Variable *> rvars = FactPointTo::merge_pointees_of_pointer(
+        expvar->get_var()->get_collective(), indirect, facts);
+    const FactUnion *rhs_fact =
+        dynamic_cast<const FactUnion *>(join_var_facts(facts, rvars));
+    if (rhs_fact) {
+      return make_facts(lvars, rhs_fact->get_last_written_fid());
     }
-	else if (rhs->term_type == eAssignment) {
-		const ExpressionAssign* ea = dynamic_cast<const ExpressionAssign*>(rhs);
-		return rhs_to_lhs_transfer(facts, lvars, ea->get_rhs());
-	}
-	else if (rhs->term_type == eCommaExpr) {
-		const ExpressionComma* ec = dynamic_cast<const ExpressionComma*>(rhs);
-		return rhs_to_lhs_transfer(facts, lvars, ec->get_rhs());
-	}
-	return empty;
+  } else if (rhs->term_type == eFunction) {
+    const FunctionInvocation *fi = rhs->get_invoke();
+    if (fi->invoke_type == eInvocationType::eFuncCall) {
+      const FunctionInvocationUser *fiu =
+          dynamic_cast<const FunctionInvocationUser *>(fi);
+      // find the fact regarding return variable
+      const FactUnion *rv_fact =
+          dynamic_cast<const FactUnion *>(get_return_fact_for_invocation(
+              fiu, fiu->get_func()->rv, eUnionWrite));
+      assert(rv_fact);
+      return make_facts(lvars, rv_fact->get_last_written_fid());
+    }
+  } else if (rhs->term_type == eAssignment) {
+    const ExpressionAssign *ea = dynamic_cast<const ExpressionAssign *>(rhs);
+    return rhs_to_lhs_transfer(facts, lvars, ea->get_rhs());
+  } else if (rhs->term_type == eCommaExpr) {
+    const ExpressionComma *ec = dynamic_cast<const ExpressionComma *>(rhs);
+    return rhs_to_lhs_transfer(facts, lvars, ec->get_rhs());
+  }
+  return empty;
 }
 
 /* draw facts from an assignment */
-int
-FactUnion::abstract_fact_for_assign(const std::vector<const Fact*>& facts, const Lhs* lhs, const Expression* rhs, std::vector<const Fact*>& facts_out)
-{
-	facts_out.clear();
+int FactUnion::abstract_fact_for_assign(const std::vector<const Fact *> &facts,
+                                        const Lhs *lhs, const Expression *rhs,
+                                        std::vector<const Fact *> &facts_out) {
+  facts_out.clear();
 
-	// find all the pointed variables on LHS
-	std::vector<const Variable*> lvars = FactPointTo::merge_pointees_of_pointer(lhs->get_var()->get_collective(), lhs->get_indirect_level(), facts);
-	if (lhs->get_type().eType == eUnion) {
-		facts_out = rhs_to_lhs_transfer(facts, lvars, rhs);
-		return lvars.size();
-	}
-
-	if (rhs == nullptr)
-		return lvars.size();
-
-	for (size_t i=0; i<lvars.size(); i++) {
-		const Variable* v = lvars[i];
-		const FactUnion* fu = 0;
-		if (v->is_union_field()) {
-			// If one of the lvars is a union field, we report the fact and let FactMgr decides what to do.
-			fu = make_fact(v->field_var_of, v->get_field_id());
-		}
-		else if (v->is_inside_union_field() && (v->type->has_padding() || v->is_packed_after_bitfield())) {
-			fu = make_fact(v->get_container_union(), BOTTOM);
-		}
-
-		if (fu) {
-			facts_out.push_back(fu);
-		}
-	}
+  // find all the pointed variables on LHS
+  std::vector<const Variable *> lvars = FactPointTo::merge_pointees_of_pointer(
+      lhs->get_var()->get_collective(), lhs->get_indirect_level(), facts);
+  if (lhs->get_type().eType == eUnion) {
+    facts_out = rhs_to_lhs_transfer(facts, lvars, rhs);
     return lvars.size();
-}
+  }
 
-Fact*
-FactUnion::clone(void) const
-{
-	FactUnion *fact = new FactUnion(var, last_written_fid);
-	facts_.push_back(fact);
-	return fact;
-}
+  if (rhs == nullptr)
+    return lvars.size();
 
-FactUnion *
-FactUnion::make_fact(const Variable* v, int fid)
-{
-	assert(v == nullptr || v->type->eType == eUnion);
-	FactUnion *fact = new FactUnion(v, fid);
-	facts_.push_back(fact);
-	return fact;
-}
-
-vector<const Fact*>
-FactUnion::make_facts(const vector<const Variable*>& vars, int fid)
-{
-	vector<const Fact*> facts;
-	for (size_t i =0; i<vars.size(); i++) {
-		facts.push_back(make_fact(vars[i], fid));
-	}
-	return facts;
-}
-
-bool
-FactUnion::is_nonreadable_field(const Variable *v, const std::vector<const Fact*>& facts)
-{
-	if (v->is_inside_union_field()) {
-		for (; v && !v->is_union_field(); v = v->field_var_of) {
-			/* Empty */
-		}
-		assert(v->is_union_field());
-		FactUnion tmp(v->field_var_of, v->get_field_id());
-		const FactUnion* fu = dynamic_cast<const FactUnion*>(find_related_fact(facts, &tmp));
-		if (fu==nullptr || !tmp.imply(*fu)) {
-			return true;
-		}
-	}
-	return false;
-}
-
-bool
-FactUnion::equal(const Fact& f) const
-{
-    if (is_related(f)) {
-        const FactUnion& fact = (const FactUnion&)f;
-		return last_written_fid == fact.get_last_written_fid();
+  for (size_t i = 0; i < lvars.size(); i++) {
+    const Variable *v = lvars[i];
+    const FactUnion *fu = 0;
+    if (v->is_union_field()) {
+      // If one of the lvars is a union field, we report the fact and let
+      // FactMgr decides what to do.
+      fu = make_fact(v->field_var_of, v->get_field_id());
+    } else if (v->is_inside_union_field() &&
+               (v->type->has_padding() || v->is_packed_after_bitfield())) {
+      fu = make_fact(v->get_container_union(), BOTTOM);
     }
-    return false;
+
+    if (fu) {
+      facts_out.push_back(fu);
+    }
+  }
+  return lvars.size();
+}
+
+Fact *FactUnion::clone(void) const {
+  FactUnion *fact = new FactUnion(var, last_written_fid);
+  facts_.push_back(fact);
+  return fact;
+}
+
+FactUnion *FactUnion::make_fact(const Variable *v, int fid) {
+  assert(v == nullptr || v->type->eType == eUnion);
+  FactUnion *fact = new FactUnion(v, fid);
+  facts_.push_back(fact);
+  return fact;
+}
+
+vector<const Fact *> FactUnion::make_facts(const vector<const Variable *> &vars,
+                                           int fid) {
+  vector<const Fact *> facts;
+  for (size_t i = 0; i < vars.size(); i++) {
+    facts.push_back(make_fact(vars[i], fid));
+  }
+  return facts;
+}
+
+bool FactUnion::is_nonreadable_field(const Variable *v,
+                                     const std::vector<const Fact *> &facts) {
+  if (v->is_inside_union_field()) {
+    for (; v && !v->is_union_field(); v = v->field_var_of) {
+      /* Empty */
+    }
+    assert(v->is_union_field());
+    FactUnion tmp(v->field_var_of, v->get_field_id());
+    const FactUnion *fu =
+        dynamic_cast<const FactUnion *>(find_related_fact(facts, &tmp));
+    if (fu == nullptr || !tmp.imply(*fu)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool FactUnion::equal(const Fact &f) const {
+  if (is_related(f)) {
+    const FactUnion &fact = (const FactUnion &)f;
+    return last_written_fid == fact.get_last_written_fid();
+  }
+  return false;
 }
 
 /*
- * return 1 if changed, 0 otherwise. currently facts from diff. categories are not joined
+ * return 1 if changed, 0 otherwise. currently facts from diff. categories are
+ * not joined
  */
-int
-FactUnion::join(const Fact& f)
-{
-	if (is_related(f)) {
-		if (imply(f)) return 0;
-		if (f.imply(*this)) {
-			last_written_fid = ((const FactUnion&)f).get_last_written_fid();
-		} else {
-			set_bottom();
-		}
-		return 1;
-	}
-	return 0;
+int FactUnion::join(const Fact &f) {
+  if (is_related(f)) {
+    if (imply(f))
+      return 0;
+    if (f.imply(*this)) {
+      last_written_fid = ((const FactUnion &)f).get_last_written_fid();
+    } else {
+      set_bottom();
+    }
+    return 1;
+  }
+  return 0;
 }
 
 /*
  * join facts about a list of vars, return the merged facts
  */
-Fact*
-FactUnion::join_var_facts(const vector<const Fact*>& facts, const vector<const Variable*>& vars) const
-{
-	FactUnion* fu = 0;
-	for (size_t i=0; i<vars.size(); i++) {
-		FactUnion tmp(vars[i]);
-		const FactUnion* exist_fact = dynamic_cast<const FactUnion*>(find_related_fact(facts, &tmp));
-		if (exist_fact) {
-			if (fu == 0) {
-				fu = dynamic_cast<FactUnion*>(exist_fact->clone());
-			} else {
-				// hack: both facts have to be the property of the same variable to be able to merge
-				fu->set_var(exist_fact->get_var());
-				fu->join(*exist_fact);
-			}
-		}
-	}
-	return fu;
+Fact *FactUnion::join_var_facts(const vector<const Fact *> &facts,
+                                const vector<const Variable *> &vars) const {
+  FactUnion *fu = 0;
+  for (size_t i = 0; i < vars.size(); i++) {
+    FactUnion tmp(vars[i]);
+    const FactUnion *exist_fact =
+        dynamic_cast<const FactUnion *>(find_related_fact(facts, &tmp));
+    if (exist_fact) {
+      if (fu == 0) {
+        fu = dynamic_cast<FactUnion *>(exist_fact->clone());
+      } else {
+        // hack: both facts have to be the property of the same variable to be
+        // able to merge
+        fu->set_var(exist_fact->get_var());
+        fu->join(*exist_fact);
+      }
+    }
+  }
+  return fu;
 }
 
 /*
  * return true if this fact is lower than the other fact in lattice
  * i.e. merging with the other fact causes no change to this fact
  */
-bool
-FactUnion::imply(const Fact& f) const
-{
-	if (is_related(f)) {
-		if (is_bottom()) return true;			// bottom implies every node
-		const FactUnion& fu = (const FactUnion&)f;
-		if (fu.is_bottom()) return false;
-		if (equal(fu)) return true;
-	}
-	return false;
+bool FactUnion::imply(const Fact &f) const {
+  if (is_related(f)) {
+    if (is_bottom())
+      return true; // bottom implies every node
+    const FactUnion &fu = (const FactUnion &)f;
+    if (fu.is_bottom())
+      return false;
+    if (equal(fu))
+      return true;
+  }
+  return false;
 }
 
-bool
-FactUnion::is_field_readable(const Variable* v, int fid, const vector<const Fact*>& facts)
-{
-	assert(v->type->eType == eUnion && fid >=0 && fid < (int)(v->type->fields.size()));
-	FactUnion tmp(v, fid);
-	const FactUnion* fu = dynamic_cast<const FactUnion*>(find_related_fact(facts, &tmp));
-	return (fu && tmp.imply(*fu)) ;
+bool FactUnion::is_field_readable(const Variable *v, int fid,
+                                  const vector<const Fact *> &facts) {
+  assert(v->type->eType == eUnion && fid >= 0 &&
+         fid < (int)(v->type->fields.size()));
+  FactUnion tmp(v, fid);
+  const FactUnion *fu =
+      dynamic_cast<const FactUnion *>(find_related_fact(facts, &tmp));
+  return (fu && tmp.imply(*fu));
 }
 
-void
-FactUnion::Output(std::ostream &out) const
-{
-	var->Output(out);
-	out << " last written field: " << last_written_fid;
+void FactUnion::Output(std::ostream &out) const {
+  var->Output(out);
+  out << " last written field: " << last_written_fid;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

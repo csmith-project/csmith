@@ -36,26 +36,26 @@ class OutputMgr;
 
 class DefaultProgramGenerator : public AbsProgramGenerator {
 public:
-	DefaultProgramGenerator(int argc, char *argv[], unsigned long seed);
+  DefaultProgramGenerator(int argc, char *argv[], unsigned long seed);
 
-	virtual ~DefaultProgramGenerator() override;
+  virtual ~DefaultProgramGenerator() override;
 
-	virtual OutputMgr* getOutputMgr() { return output_mgr_; }
+  virtual OutputMgr *getOutputMgr() { return output_mgr_; }
 
-	virtual void goGenerator() override;
+  virtual void goGenerator() override;
 
-	virtual void initialize() override;
+  virtual void initialize() override;
 
-	virtual std::string get_count_prefix(const std::string &name) override;
+  virtual std::string get_count_prefix(const std::string &name) override;
 
 private:
-	int argc_;
+  int argc_;
 
-	char **argv_;
+  char **argv_;
 
-	unsigned long seed_;
+  unsigned long seed_;
 
-	OutputMgr *output_mgr_;
+  OutputMgr *output_mgr_;
 };
 
 #endif

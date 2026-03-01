@@ -34,92 +34,86 @@
 /*****************************************************************************/
 
 #ifdef STANDALONE
-extern int printf (const char *, ...);
+extern int printf(const char *, ...);
 #else
 #include <stdio.h>
 #endif
 
-static void
-platform_main_begin(void)
-{
-	/* Nothing to do. */
-}
+static void platform_main_begin(void) { /* Nothing to do. */ }
 
-static void
-platform_main_end(uint32_t crc, int flag)
-{
-#if defined (__FRAMAC)
-    Frama_C_dump_assert_each();
+static void platform_main_end(uint32_t crc, int flag) {
+#if defined(__FRAMAC)
+  Frama_C_dump_assert_each();
 #endif
 
 #ifndef NOT_PRINT_CHECKSUM
-	printf ("checksum = %X\n", crc);
+  printf("checksum = %X\n", crc);
 #endif
 
-#if defined (LOG_WRAPPERS)
-	{
-		int i, first;
+#if defined(LOG_WRAPPERS)
+  {
+    int i, first;
 
-		printf ("executed wrappers: ");
-		first = 1;
-		for (i=1; i<N_WRAP+1; i++) {
-			if (__executed_checks[i]) {
-				if (!first) {
-					printf (",");
-				} else {
-					first = 0;
-				}
-				printf ("%d", i);
-			}
-		}
-		printf ("\n");
+    printf("executed wrappers: ");
+    first = 1;
+    for (i = 1; i < N_WRAP + 1; i++) {
+      if (__executed_checks[i]) {
+        if (!first) {
+          printf(",");
+        } else {
+          first = 0;
+        }
+        printf("%d", i);
+      }
+    }
+    printf("\n");
 
-		printf ("dead wrappers: ");
-		first = 1;
-		for (i=1; i<N_WRAP+1; i++) {
-			if (!__executed_checks[i]) {
-				if (!first) {
-					printf (",");
-				} else {
-					first = 0;
-				}
-				printf ("%d", i);
-			}
-		}
-		printf ("\n");
+    printf("dead wrappers: ");
+    first = 1;
+    for (i = 1; i < N_WRAP + 1; i++) {
+      if (!__executed_checks[i]) {
+        if (!first) {
+          printf(",");
+        } else {
+          first = 0;
+        }
+        printf("%d", i);
+      }
+    }
+    printf("\n");
 
-		printf ("wrappers that failed at least once: ");
-		first = 1;
-		for (i=1; i<N_WRAP+1; i++) {
-			if (__failed_checks[i]) {
-				if (!first) {
-					printf (",");
-				} else {
-					first = 0;
-				}
-				printf ("%d", i);
-			}
-		}
-		printf ("\n");
+    printf("wrappers that failed at least once: ");
+    first = 1;
+    for (i = 1; i < N_WRAP + 1; i++) {
+      if (__failed_checks[i]) {
+        if (!first) {
+          printf(",");
+        } else {
+          first = 0;
+        }
+        printf("%d", i);
+      }
+    }
+    printf("\n");
 
-		printf ("wrappers that never failed (or never executed): ");
-		first = 1;
-		for (i=1; i<N_WRAP+1; i++) {
-			if (!__failed_checks[i]) {
-				if (!first) {
-					printf (",");
-				} else {
-					first = 0;
-				}
-				printf ("%d", i);
-			}
-		}
-		printf ("\n");
-	}
+    printf("wrappers that never failed (or never executed): ");
+    first = 1;
+    for (i = 1; i < N_WRAP + 1; i++) {
+      if (!__failed_checks[i]) {
+        if (!first) {
+          printf(",");
+        } else {
+          first = 0;
+        }
+        printf("%d", i);
+      }
+    }
+    printf("\n");
+  }
 #endif
 }
 
-#define MB (1<<20)
+#define MB (1 << 20)
 
 /*****************************************************************************/
 

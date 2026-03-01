@@ -40,48 +40,48 @@
 class Type;
 class CGContext;
 
-class FunctionInvocationUnary : public FunctionInvocation
-{
-	friend class FunctionInvocation; /* XXX --- yuck! */
+class FunctionInvocationUnary : public FunctionInvocation {
+  friend class FunctionInvocation; /* XXX --- yuck! */
 
 public:
-	static FunctionInvocationUnary *CreateFunctionInvocationUnary(
-				CGContext &cg_context,
-				eUnaryOps op,
-				SafeOpFlags *flags);
+  static FunctionInvocationUnary *
+  CreateFunctionInvocationUnary(CGContext &cg_context, eUnaryOps op,
+                                SafeOpFlags *flags);
 
-	virtual ~FunctionInvocationUnary(void) override;
+  virtual ~FunctionInvocationUnary(void) override;
 
-	virtual FunctionInvocation* clone() const override;
+  virtual FunctionInvocation *clone() const override;
 
-	virtual const Type &get_type(void) const override;
+  virtual const Type &get_type(void) const override;
 
-	virtual bool compatible(const Variable *v) const override;
+  virtual bool compatible(const Variable *v) const override;
 
-	virtual void Output(std::ostream &) const override;
+  virtual void Output(std::ostream &) const override;
 
-	virtual void indented_output(std::ostream &out, int indent) const override;
+  virtual void indented_output(std::ostream &out, int indent) const override;
 
-	virtual bool safe_invocation() const override;
+  virtual bool safe_invocation() const override;
 
-	virtual bool equals(int num) const override;
+  virtual bool equals(int num) const override;
 
-	virtual bool is_0_or_1(void) const { return eFunc == eNot;}
-
-private:
-	eUnaryOps eFunc;
-
-	std::string tmp_var;
+  virtual bool is_0_or_1(void) const { return eFunc == eNot; }
 
 private:
-	FunctionInvocationUnary(eUnaryOps op, SafeOpFlags *flags, const std::string &name);
+  eUnaryOps eFunc;
 
-	FunctionInvocationUnary(eUnaryOps op, SafeOpFlags *flags);
+  std::string tmp_var;
 
-	explicit FunctionInvocationUnary(const FunctionInvocationUnary &funary);
+private:
+  FunctionInvocationUnary(eUnaryOps op, SafeOpFlags *flags,
+                          const std::string &name);
 
-	// unimplemented
-	FunctionInvocationUnary &operator=(const FunctionInvocationUnary &fi) = delete;
+  FunctionInvocationUnary(eUnaryOps op, SafeOpFlags *flags);
+
+  explicit FunctionInvocationUnary(const FunctionInvocationUnary &funary);
+
+  // unimplemented
+  FunctionInvocationUnary &
+  operator=(const FunctionInvocationUnary &fi) = delete;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

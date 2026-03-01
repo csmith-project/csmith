@@ -30,40 +30,41 @@
 #ifndef KLEE_EXTENSION_H
 #define KLEE_EXTENSION_H
 
-#include <vector>
-#include <ostream>
-#include <string>
 #include "AbsExtension.h"
 #include "CVQualifiers.h"
+#include <ostream>
+#include <string>
+#include <vector>
 
 class ExtensionValue;
 
 class KleeExtension : public AbsExtension {
-	friend class ExtensionMgr;
+  friend class ExtensionMgr;
+
 public:
-	virtual void GenerateValues() override;
+  virtual void GenerateValues() override;
 
-	virtual void OutputInit(std::ostream &out) override;
+  virtual void OutputInit(std::ostream &out) override;
 
-	virtual void OutputFirstFunInvocation(std::ostream &out, FunctionInvocation *invoke) override;
+  virtual void OutputFirstFunInvocation(std::ostream &out,
+                                        FunctionInvocation *invoke) override;
 
-	virtual void OutputHeader(std::ostream &out) override;
+  virtual void OutputHeader(std::ostream &out) override;
 
-	virtual void OutputTail(std::ostream &out) override;
+  virtual void OutputTail(std::ostream &out) override;
 
-	virtual std::vector<ExtensionValue *> &get_values() { return values_; }
+  virtual std::vector<ExtensionValue *> &get_values() { return values_; }
 
 private:
+  static std::string input_base_name_;
 
-	static std::string input_base_name_;
+  void output_symbolics(std::ostream &out);
 
-	void output_symbolics(std::ostream &out);
+  std::vector<ExtensionValue *> values_;
 
-	std::vector<ExtensionValue*> values_;
+  KleeExtension();
 
-	KleeExtension();
-
-	~KleeExtension();
+  ~KleeExtension();
 };
 
 #endif // KLEE_EXTENSION_H

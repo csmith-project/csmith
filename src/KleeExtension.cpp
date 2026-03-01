@@ -28,69 +28,51 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 #if HAVE_CONFIG_H
-#  include <config.h>
+#include <config.h>
 #endif
 
-#include "KleeExtension.h"
-#include <cassert>
-#include "Type.h"
 #include "ExtensionValue.h"
+#include "KleeExtension.h"
+#include "Type.h"
+#include <cassert>
 
 using namespace std;
 
 std::string KleeExtension::input_base_name_ = "input";
 
-KleeExtension::KleeExtension()
-{
+KleeExtension::KleeExtension() {}
 
+KleeExtension::~KleeExtension() { values_.clear(); }
+
+void KleeExtension::GenerateValues() {}
+
+void KleeExtension::output_symbolics(ostream &out) {
+  for (int count = 0; count < static_cast<int>(values_.size()); ++count) {
+    ExtensionValue *value = values_[count];
+    assert(value);
+    out << AbsExtension::tab_;
+    out << "klee_make_symbolic(&" << value->get_name() << ", sizeof("
+        << value->get_name() << "), ";
+    out << "\"" << KleeExtension::input_base_name_ << count << "\");" << endl;
+  }
 }
 
-KleeExtension::~KleeExtension()
-{
-	values_.clear();
+void KleeExtension::OutputInit(std::ostream &out) {
+  out << "int main(void)" << endl;
+  out << "{" << endl;
+  AbsExtension::default_output_definitions(out, values_, false);
+  output_symbolics(out);
 }
 
-void
-KleeExtension::GenerateValues()
-{
-
+void KleeExtension::OutputHeader(std::ostream &out) {
+  out << "#include \"klee/klee.h\"" << endl;
 }
 
-void
-KleeExtension::output_symbolics(ostream &out)
-{
-	for (int count = 0; count < static_cast<int>(values_.size()); ++count) {
-		ExtensionValue* value = values_[count];
-		assert(value);
-		out << AbsExtension::tab_;
-		out << "klee_make_symbolic(&" << value->get_name() << ", sizeof(" << value->get_name() << "), ";
-		out << "\"" << KleeExtension::input_base_name_ << count << "\");" << endl;
-	}
+void KleeExtension::OutputTail(std::ostream &out) {
+  out << AbsExtension::tab_ << "return 0;" << endl;
 }
 
-void
-KleeExtension::OutputInit(std::ostream &out)
-{
-	out << "int main(void)" << endl;
-	out << "{" << endl;
-	AbsExtension::default_output_definitions(out, values_, false);
-	output_symbolics(out);
-}
-
-void
-KleeExtension::OutputHeader(std::ostream &out)
-{
-	out << "#include \"klee/klee.h\"" << endl;
-}
-
-void
-KleeExtension::OutputTail(std::ostream &out)
-{
-	out << AbsExtension::tab_ << "return 0;" << endl;
-}
-
-void
-KleeExtension::OutputFirstFunInvocation(std::ostream &out, FunctionInvocation *invoke)
-{
-	AbsExtension::OutputFirstFunInvocation(out, invoke);
+void KleeExtension::OutputFirstFunInvocation(std::ostream &out,
+                                             FunctionInvocation *invoke) {
+  AbsExtension::OutputFirstFunInvocation(out, invoke);
 }

@@ -34,7 +34,7 @@
 
 unsigned long platform_gen_seed();
 
-bool create_dir(const char* dir);
+bool create_dir(const char *dir);
 
 ///////////////////////////////////////////////////////////////////////////////
 

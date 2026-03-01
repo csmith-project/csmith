@@ -28,287 +28,256 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 #if HAVE_CONFIG_H
-#  include <config.h>
+#include <config.h>
 #endif
 
-#include <cassert>
-#include "Fact.h"
-#include "Variable.h"
-#include "Lhs.h"
-#include "Function.h"
 #include "ArrayVariable.h"
+#include "Fact.h"
+#include "Function.h"
+#include "Lhs.h"
 #include "StatementAssign.h"
 #include "StatementReturn.h"
+#include "Variable.h"
+#include <cassert>
 
 using namespace std;
-std::vector<Fact*> Fact::facts_;
+std::vector<Fact *> Fact::facts_;
 
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
  *
  */
-Fact::Fact(eFactCategory e) :
-    eCat(e)
-{
-	// Nothing else to do.
+Fact::Fact(eFactCategory e) : eCat(e) {
+  // Nothing else to do.
 }
 
 /*
  *
  */
-Fact::~Fact(void)
-{
-	// Nothing else to do.
+Fact::~Fact(void) {
+  // Nothing else to do.
 }
 
 /*
  * output an assertion about the fact to check the correctness of compiler
  * or generation time analysis
  */
-void
-Fact::OutputAssertion(std::ostream &out, const Statement* s) const
-{
-	if (!is_top()) {
-		if (s && !is_assertable(s)) {
-			out << "//";
-		}
-        out << "assert (";
-        Output(out);
-        out << ");" << endl;
+void Fact::OutputAssertion(std::ostream &out, const Statement *s) const {
+  if (!is_top()) {
+    if (s && !is_assertable(s)) {
+      out << "//";
     }
+    out << "assert (";
+    Output(out);
+    out << ");" << endl;
+  }
 }
 
-std::vector<const Fact*>
-Fact::abstract_fact_for_return(const std::vector<const Fact*>& facts, const ExpressionVariable* expr, const Function* func)
-{
-	Lhs lhs(*func->rv);
-    vector<const Fact*> facts_out;
-	abstract_fact_for_assign(facts, &lhs, expr, facts_out);
-	return facts_out;
+std::vector<const Fact *>
+Fact::abstract_fact_for_return(const std::vector<const Fact *> &facts,
+                               const ExpressionVariable *expr,
+                               const Function *func) {
+  Lhs lhs(*func->rv);
+  vector<const Fact *> facts_out;
+  abstract_fact_for_assign(facts, &lhs, expr, facts_out);
+  return facts_out;
 }
 
-vector<const Fact*>
-Fact::abstract_fact_for_var_init(const Variable* v)
-{
-	vector<const Fact*> empty;
-	// only consider points-to facts and union-write-field facts for now
-	if (v->type == nullptr || (v->type->eType != ePointer && v->type->eType != eUnion)) return empty;
+vector<const Fact *> Fact::abstract_fact_for_var_init(const Variable *v) {
+  vector<const Fact *> empty;
+  // only consider points-to facts and union-write-field facts for now
+  if (v->type == nullptr ||
+      (v->type->eType != ePointer && v->type->eType != eUnion))
+    return empty;
 
-	Lhs lhs(*v);
-	vector<const Fact*> facts;
-	int lvar_cnt = abstract_fact_for_assign(empty, &lhs, v->init, facts);
-	assert(lvar_cnt == 1);
+  Lhs lhs(*v);
+  vector<const Fact *> facts;
+  int lvar_cnt = abstract_fact_for_assign(empty, &lhs, v->init, facts);
+  assert(lvar_cnt == 1);
 
-	if (v->isArray) {
-		const ArrayVariable* av = dynamic_cast<const ArrayVariable*>(v);
-		assert(av);
-		for (size_t i=0; i<av->get_more_init_values().size(); i++) {
-			const Expression* init = av->get_more_init_values()[i];
-			vector<const Fact*> more_facts;
-			abstract_fact_for_assign(empty, &lhs, init, more_facts);
-			merge_facts(facts, more_facts);
-		}
-	}
-	return facts;
+  if (v->isArray) {
+    const ArrayVariable *av = dynamic_cast<const ArrayVariable *>(v);
+    assert(av);
+    for (size_t i = 0; i < av->get_more_init_values().size(); i++) {
+      const Expression *init = av->get_more_init_values()[i];
+      vector<const Fact *> more_facts;
+      abstract_fact_for_assign(empty, &lhs, init, more_facts);
+      merge_facts(facts, more_facts);
+    }
+  }
+  return facts;
 }
 
-void
-Fact::doFinalization()
-{
-	std::vector<Fact*>::iterator i;
-	for( i = facts_.begin(); i != facts_.end(); ++i) {
-		delete (*i);
-	}
-	facts_.clear();
+void Fact::doFinalization() {
+  std::vector<Fact *>::iterator i;
+  for (i = facts_.begin(); i != facts_.end(); ++i) {
+    delete (*i);
+  }
+  facts_.clear();
 }
 
 // fact manipulating functions
-int
-find_fact(const FactVec& facts, const Fact* fact)
-{
-    for (size_t i =0; i<facts.size(); i++) {
-        if (fact->equal(*facts[i])) {
-            return i;
-        }
+int find_fact(const FactVec &facts, const Fact *fact) {
+  for (size_t i = 0; i < facts.size(); i++) {
+    if (fact->equal(*facts[i])) {
+      return i;
     }
-    return -1;
+  }
+  return -1;
 }
 
-const Fact*
-find_related_fact(const FactVec& facts, const Fact* new_fact)
-{
-    for (size_t i =0; i<facts.size(); i++) {
-        if (new_fact->is_related(*facts[i])) {
-            return facts[i];
-        }
+const Fact *find_related_fact(const FactVec &facts, const Fact *new_fact) {
+  for (size_t i = 0; i < facts.size(); i++) {
+    if (new_fact->is_related(*facts[i])) {
+      return facts[i];
     }
-    return 0;
+  }
+  return 0;
 }
 
-const Fact*
-find_related_fact(const vector<Fact*>& facts, const Fact* new_fact)
-{
-    for (size_t i =0; i<facts.size(); i++) {
-        if (new_fact->is_related(*facts[i])) {
-            return facts[i];
-        }
+const Fact *find_related_fact(const vector<Fact *> &facts,
+                              const Fact *new_fact) {
+  for (size_t i = 0; i < facts.size(); i++) {
+    if (new_fact->is_related(*facts[i])) {
+      return facts[i];
     }
-    return 0;
+  }
+  return 0;
 }
 
-// TODO: we really need to free the memory properly while maintain the memory in compact
-// way, i.e., don't allocate a Fact object unless it's absolutely necessary
-bool
-merge_fact(FactVec& facts, const Fact* new_fact)
-{
-    bool changed = false;
-    size_t i;
-    for (i=0; i<facts.size(); i++) {
-        const Fact* f = facts[i];
-        if (f->is_related(*new_fact)) {
-            if (!f->imply(*new_fact)) {
-				Fact* copy_fact = new_fact->clone();
-                copy_fact->join(*f);
-                facts[i] = copy_fact;
-                changed = true;
-				// TODO: release the memory for f???
-            }
-            else {
-                //delete new_fact;   // new fact is useless, unsafe to do so???
-            }
-            break;
-        }
-    }
-    if (i == facts.size()) {// if not found
-        facts.push_back(new_fact);
+// TODO: we really need to free the memory properly while maintain the memory in
+// compact way, i.e., don't allocate a Fact object unless it's absolutely
+// necessary
+bool merge_fact(FactVec &facts, const Fact *new_fact) {
+  bool changed = false;
+  size_t i;
+  for (i = 0; i < facts.size(); i++) {
+    const Fact *f = facts[i];
+    if (f->is_related(*new_fact)) {
+      if (!f->imply(*new_fact)) {
+        Fact *copy_fact = new_fact->clone();
+        copy_fact->join(*f);
+        facts[i] = copy_fact;
         changed = true;
+        // TODO: release the memory for f???
+      } else {
+        // delete new_fact;   // new fact is useless, unsafe to do so???
+      }
+      break;
     }
-    return changed;
+  }
+  if (i == facts.size()) { // if not found
+    facts.push_back(new_fact);
+    changed = true;
+  }
+  return changed;
 }
 
-bool
-renew_fact(FactVec& facts, const Fact* new_fact)
-{
-    size_t i;
-    for (i=0; i<facts.size(); i++) {
-        if (new_fact->is_related(*facts[i])) {
-            if (new_fact->equal(*facts[i])) {
-                return false;
-            }
-            facts[i] = new_fact;
-            break;
-        }
+bool renew_fact(FactVec &facts, const Fact *new_fact) {
+  size_t i;
+  for (i = 0; i < facts.size(); i++) {
+    if (new_fact->is_related(*facts[i])) {
+      if (new_fact->equal(*facts[i])) {
+        return false;
+      }
+      facts[i] = new_fact;
+      break;
     }
-    // if not found, append the new fact
-    if (i==facts.size()) {
-        facts.push_back(new_fact);
-    }
-    return true;
+  }
+  // if not found, append the new fact
+  if (i == facts.size()) {
+    facts.push_back(new_fact);
+  }
+  return true;
 }
 
-bool
-merge_facts(FactVec& facts, const FactVec& new_facts)
-{
-    bool changed = false;
-    for (size_t i =0; i<new_facts.size(); i++) {
-		//new_facts[i]->Output(cout);
-        if (merge_fact(facts, new_facts[i])) {
-            changed = true;
-        }
+bool merge_facts(FactVec &facts, const FactVec &new_facts) {
+  bool changed = false;
+  for (size_t i = 0; i < new_facts.size(); i++) {
+    // new_facts[i]->Output(cout);
+    if (merge_fact(facts, new_facts[i])) {
+      changed = true;
     }
-    return changed;
+  }
+  return changed;
 }
 
-bool
-renew_facts(FactVec& facts, const FactVec& new_facts)
-{
-    bool changed = false;
-    for (size_t i =0; i<new_facts.size(); i++) {
-        if (renew_fact(facts, new_facts[i])) {
-            changed = true;
-        }
+bool renew_facts(FactVec &facts, const FactVec &new_facts) {
+  bool changed = false;
+  for (size_t i = 0; i < new_facts.size(); i++) {
+    if (renew_fact(facts, new_facts[i])) {
+      changed = true;
     }
-    return changed;
+  }
+  return changed;
 }
 
-vector<Fact*>
-copy_facts(const FactVec& facts_in)
-{
-	vector<Fact*> facts_out;
-    for (size_t i =0; i<facts_in.size(); i++) {
-		Fact* f = facts_in[i]->clone();
-        facts_out.push_back(f);
-    }
-	return facts_out;
+vector<Fact *> copy_facts(const FactVec &facts_in) {
+  vector<Fact *> facts_out;
+  for (size_t i = 0; i < facts_in.size(); i++) {
+    Fact *f = facts_in[i]->clone();
+    facts_out.push_back(f);
+  }
+  return facts_out;
 }
 
 /*************************************************************
  * combine facts obtained from two visits to the same piece of code
  *************************************************************/
-void
-combine_facts(vector<Fact*>& facts1, const FactVec& facts2)
-{
-    size_t i, j;
-    for (i=0; i<facts2.size(); i++) {
-		for (j=0; j<facts1.size(); j++) {
-			Fact* old_fact = facts1[j];
-			if (old_fact->is_related(*facts2[i])) {
-				old_fact->join_visits(*facts2[i]);
-				break;
-			}
-		}
-	}
+void combine_facts(vector<Fact *> &facts1, const FactVec &facts2) {
+  size_t i, j;
+  for (i = 0; i < facts2.size(); i++) {
+    for (j = 0; j < facts1.size(); j++) {
+      Fact *old_fact = facts1[j];
+      if (old_fact->is_related(*facts2[i])) {
+        old_fact->join_visits(*facts2[i]);
+        break;
+      }
+    }
+  }
 }
 
-bool
-same_facts(const FactVec& facts1, const FactVec& facts2)
-{
-	if (facts1.size() == facts2.size()) {
-		for (size_t i =0; i<facts1.size(); i++) {
-			if (find_fact(facts2, facts1[i]) == -1) {
-				return false;
-			}
-		}
-		return true;
-	}
-	return false;
+bool same_facts(const FactVec &facts1, const FactVec &facts2) {
+  if (facts1.size() == facts2.size()) {
+    for (size_t i = 0; i < facts1.size(); i++) {
+      if (find_fact(facts2, facts1[i]) == -1) {
+        return false;
+      }
+    }
+    return true;
+  }
+  return false;
 }
 
-bool
-subset_facts(const FactVec& facts1, const FactVec& facts2)
-{
-	if (facts1.size() == facts2.size()) {
-		for (size_t i =0; i<facts1.size(); i++) {
-			const Fact* f1 = facts1[i];
-			const Fact* f2 = find_related_fact(facts2, f1);
-			if (f2 == 0 || !f2->imply(*f1)) {
-				return false;
-			}
-		}
-		return true;
-	}
-	return false;
+bool subset_facts(const FactVec &facts1, const FactVec &facts2) {
+  if (facts1.size() == facts2.size()) {
+    for (size_t i = 0; i < facts1.size(); i++) {
+      const Fact *f1 = facts1[i];
+      const Fact *f2 = find_related_fact(facts2, f1);
+      if (f2 == 0 || !f2->imply(*f1)) {
+        return false;
+      }
+    }
+    return true;
+  }
+  return false;
 }
 
-void
-print_facts(const FactVec& facts)
-{
-	for (size_t i=0; i<facts.size(); i++) {
-		const Fact* f = facts[i];
-		f->OutputAssertion(cout);
-	}
+void print_facts(const FactVec &facts) {
+  for (size_t i = 0; i < facts.size(); i++) {
+    const Fact *f = facts[i];
+    f->OutputAssertion(cout);
+  }
 }
 
-void
-print_var_fact(const FactVec& facts, const char* vname)
-{
-	for (size_t i=0; i<facts.size(); i++) {
-		const Fact* f = facts[i];
-		if (f->get_var()->name == vname) {
-			f->OutputAssertion(cout);
-		}
-	}
+void print_var_fact(const FactVec &facts, const char *vname) {
+  for (size_t i = 0; i < facts.size(); i++) {
+    const Fact *f = facts[i];
+    if (f->get_var()->name == vname) {
+      f->OutputAssertion(cout);
+    }
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

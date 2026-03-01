@@ -43,61 +43,69 @@ class Constant;
 /*
  *
  */
-class Lhs : public Expression
-{
+class Lhs : public Expression {
 public:
-	// Factory method.
-	static Lhs *make_random(CGContext &cg_context, const Type* t, const CVQualifiers* qfer, bool for_compound_assign, bool no_signed_overflow=false);
+  // Factory method.
+  static Lhs *make_random(CGContext &cg_context, const Type *t,
+                          const CVQualifiers *qfer, bool for_compound_assign,
+                          bool no_signed_overflow = false);
 
-	explicit Lhs(const Variable &v);
+  explicit Lhs(const Variable &v);
 
-	Lhs(const Variable &v, const Type* t, bool compound_assign);
+  Lhs(const Variable &v, const Type *t, bool compound_assign);
 
-	virtual ~Lhs(void) override;
+  virtual ~Lhs(void) override;
 
-	virtual Expression *clone() const override;
+  virtual Expression *clone() const override;
 
-	virtual CVQualifiers get_qualifiers(void) const override;
+  virtual CVQualifiers get_qualifiers(void) const override;
 
-	virtual void get_eval_to_subexps(vector<const Expression*>& subs) const {subs.push_back(this);}
+  virtual void get_eval_to_subexps(vector<const Expression *> &subs) const {
+    subs.push_back(this);
+  }
 
-	int get_indirect_level(void) const;
+  int get_indirect_level(void) const;
 
-	void get_lvars(const vector<const Fact*>& facts, vector<const Variable*>& vars) const;
+  void get_lvars(const vector<const Fact *> &facts,
+                 vector<const Variable *> &vars) const;
 
-	bool is_volatile() const;
+  bool is_volatile() const;
 
-	const Variable* get_var(void) const {return &var;};
+  const Variable *get_var(void) const { return &var; };
 
-	bool compatible(const Variable *v) const;
+  bool compatible(const Variable *v) const;
 
-	bool compatible(const Expression *c) const;
+  bool compatible(const Expression *c) const;
 
-	bool visit_indices(vector<const Fact*>& inputs, CGContext& cg_context) const;
-	//
-	virtual std::vector<const ExpressionVariable*> get_dereferenced_ptrs(void) const override;
-	virtual void get_referenced_ptrs(std::vector<const Variable*>& ptrs) const override;
-	virtual unsigned int get_complexity(void) const { return 1;}
+  bool visit_indices(vector<const Fact *> &inputs, CGContext &cg_context) const;
+  //
+  virtual std::vector<const ExpressionVariable *>
+  get_dereferenced_ptrs(void) const override;
+  virtual void
+  get_referenced_ptrs(std::vector<const Variable *> &ptrs) const override;
+  virtual unsigned int get_complexity(void) const { return 1; }
 
-	virtual bool visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const override;
+  virtual bool visit_facts(vector<const Fact *> &inputs,
+                           CGContext &cg_context) const override;
 
-	virtual const Type &get_type(void) const override;
+  virtual const Type &get_type(void) const override;
 
-	virtual void Output(std::ostream &) const override;
+  virtual void Output(std::ostream &) const override;
 
 private:
-	explicit Lhs(const Lhs &lhs);
+  explicit Lhs(const Lhs &lhs);
 
-	bool ptr_modified_in_rhs(vector<const Fact*>& inputs, CGContext& cg_context) const;
+  bool ptr_modified_in_rhs(vector<const Fact *> &inputs,
+                           CGContext &cg_context) const;
 
-	const Variable &var;
+  const Variable &var;
 
-	const Type* type;
+  const Type *type;
 
-	const bool for_compound_assign;
+  const bool for_compound_assign;
 
-	// unimplementable
-	Lhs &operator=(const Lhs &ev);
+  // unimplementable
+  Lhs &operator=(const Lhs &ev);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -34,18 +34,18 @@
 /*****************************************************************************/
 
 #ifndef WRAP_VOLATILES
-#  define WRAP_VOLATILES 0
+#define WRAP_VOLATILES 0
 #endif
 
 #if WRAP_VOLATILES
 /*
  * Wrap accesses to volatile variables with function calls.
  */
-#  include <stdint.h>
+#include <stdint.h>
 
-#  define DECLARE_VOLATILE_WRAPPERS(type)						\
-	type volatile_##type##_ptr_read(volatile type *p);			\
-	volatile type *volatile_##type##_ptr_id(volatile type *p);
+#define DECLARE_VOLATILE_WRAPPERS(type)                                        \
+  type volatile_##type##_ptr_read(volatile type *p);                           \
+  volatile type *volatile_##type##_ptr_id(volatile type *p);
 
 DECLARE_VOLATILE_WRAPPERS(int8_t)
 DECLARE_VOLATILE_WRAPPERS(int16_t)
@@ -56,17 +56,17 @@ DECLARE_VOLATILE_WRAPPERS(uint16_t)
 DECLARE_VOLATILE_WRAPPERS(uint32_t)
 DECLARE_VOLATILE_WRAPPERS(uint64_t)
 
-#  undef DECLARE_VOLATILE_WRAPPERS
+#undef DECLARE_VOLATILE_WRAPPERS
 
-#  define VOL_LVAL(var, type)	(*(volatile_##type##_ptr_id(&(var))))
-#  define VOL_RVAL(var, type)	(volatile_##type##_ptr_read(&(var)))
+#define VOL_LVAL(var, type) (*(volatile_##type##_ptr_id(&(var))))
+#define VOL_RVAL(var, type) (volatile_##type##_ptr_read(&(var)))
 
 #else
 /*
  * Access volatile variables directly.
  */
-#  define VOL_LVAL(var, type) (var)
-#  define VOL_RVAL(var, type) (var)
+#define VOL_LVAL(var, type) (var)
+#define VOL_RVAL(var, type) (var)
 
 #endif /* WRAP_VOLATILES */
 

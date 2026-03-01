@@ -28,27 +28,21 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 #if HAVE_CONFIG_H
-#  include <config.h>
+#include <config.h>
 #endif
 
-#include "ExtensionValue.h"
-#include <vector>
-#include "Type.h"
 #include "Constant.h"
+#include "ExtensionValue.h"
+#include "Type.h"
+#include <vector>
 
 ExtensionValue::ExtensionValue(const Type *type, const string &name)
-	: type_(type),
-	  value_(nullptr),
-	  name_(name)
-{
-	vector<bool> isConsts;
-	vector<bool> isVolatiles;
-	isConsts.push_back(false);
-	isVolatiles.push_back(false);
-	qfer_ = CVQualifiers(isConsts, isVolatiles);
+    : type_(type), value_(nullptr), name_(name) {
+  vector<bool> isConsts;
+  vector<bool> isVolatiles;
+  isConsts.push_back(false);
+  isVolatiles.push_back(false);
+  qfer_ = CVQualifiers(isConsts, isVolatiles);
 }
 
-ExtensionValue::~ExtensionValue()
-{
-	delete value_;
-}
+ExtensionValue::~ExtensionValue() { delete value_; }

@@ -30,9 +30,9 @@
 #ifndef CFG_EDGE_H
 #define CFG_EDGE_H
 
+#include "StdLibAliases.h"
 #include <iostream>
 #include <vector>
-#include "StdLibAliases.h"
 ///////////////////////////////////////////////////////////////////////////////
 class Statement;
 class Block;
@@ -40,19 +40,19 @@ class Block;
 /*
  *
  */
-class CFGEdge
-{
+class CFGEdge {
 public:
-	CFGEdge(const Statement* src, const Statement* dest, bool post_dest, bool back_link);
-	CFGEdge(const CFGEdge &edge);
-	virtual ~CFGEdge(void);
+  CFGEdge(const Statement *src, const Statement *dest, bool post_dest,
+          bool back_link);
+  CFGEdge(const CFGEdge &edge);
+  virtual ~CFGEdge(void);
 
-	// void Output(std::ostream &out) const;
+  // void Output(std::ostream &out) const;
 
-	const Statement* src;
-	const Statement* dest;
-	bool  post_dest;
-	bool  back_link;
+  const Statement *src;
+  const Statement *dest;
+  bool post_dest;
+  bool back_link;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

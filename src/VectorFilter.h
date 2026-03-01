@@ -30,38 +30,36 @@
 #ifndef VECTOR_FILTER_H
 #define VECTOR_FILTER_H
 
-#include <vector>
 #include "Filter.h"
+#include <vector>
 
 class DistributionTable;
 
-class VectorFilter : public Filter
-{
+class VectorFilter : public Filter {
 public:
-	enum class Mode {
-		FilterOut,
-		Keep
-	};
+  enum class Mode { FilterOut, Keep };
 
-	VectorFilter(void);
-	VectorFilter(DistributionTable *table);
-	explicit VectorFilter(std::vector<unsigned int> &vs, Mode mode = Mode::FilterOut);
+  VectorFilter(void);
+  VectorFilter(DistributionTable *table);
+  explicit VectorFilter(std::vector<unsigned int> &vs,
+                        Mode mode = Mode::FilterOut);
 
-	VectorFilter& add(unsigned int item);
+  VectorFilter &add(unsigned int item);
 
-	int get_max_prob(void) const;
+  int get_max_prob(void) const;
 
-	int lookup(int v) const;
+  int lookup(int v) const;
 
-	virtual ~VectorFilter(void) override;
+  virtual ~VectorFilter(void) override;
 
-	virtual bool filter(int v) const override;
+  virtual bool filter(int v) const override;
+
 private:
-	std::vector<unsigned int> vs_;
+  std::vector<unsigned int> vs_;
 
-	DistributionTable *ptable;
+  DistributionTable *ptable;
 
-	Mode mode_;
+  Mode mode_;
 };
 
 #endif // VECTOR_FILTER_H

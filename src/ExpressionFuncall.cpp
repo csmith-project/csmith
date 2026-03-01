@@ -28,7 +28,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 #if HAVE_CONFIG_H
-#  include <config.h>
+#include <config.h>
 #endif
 
 #include "ExpressionFuncall.h"
@@ -36,18 +36,18 @@
 
 #include "Common.h"
 
+#include "Block.h"
+#include "Bookkeeper.h"
 #include "CGContext.h"
 #include "CGOptions.h"
+#include "Error.h"
 #include "ExpressionVariable.h"
+#include "FactMgr.h"
 #include "Function.h"
 #include "FunctionInvocation.h"
 #include "FunctionInvocationUser.h"
-#include "VariableSelector.h"
-#include "FactMgr.h"
-#include "Error.h"
-#include "Bookkeeper.h"
 #include "StringUtils.h"
-#include "Block.h"
+#include "VariableSelector.h"
 #include "random.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -55,202 +55,174 @@
 /*
  *
  */
-static bool
-ExpressionFunctionProbability(const CGContext &/*cg_context*/)
-{
-	if (Function::reach_max_functions_cnt() && !CGOptions::builtins()) {
-		return true;
-	}
-	return rnd_flipcoin(80);
+static bool ExpressionFunctionProbability(const CGContext & /*cg_context*/) {
+  if (Function::reach_max_functions_cnt() && !CGOptions::builtins()) {
+    return true;
+  }
+  return rnd_flipcoin(80);
 }
 
 /*
  *
  */
-Expression *
-ExpressionFuncall::make_random(CGContext &cg_context, const Type* type, const CVQualifiers* qfer)
-{
-	Expression *e = 0;
-	bool std_func = ExpressionFunctionProbability(cg_context);
-	ERROR_GUARD(nullptr);
-    // unary/binary "functions" produce scalar types only
-	if (type && (type->eType != eSimple || type->simple_type == eVoid))
-		std_func = false;
+Expression *ExpressionFuncall::make_random(CGContext &cg_context,
+                                           const Type *type,
+                                           const CVQualifiers *qfer) {
+  Expression *e = 0;
+  bool std_func = ExpressionFunctionProbability(cg_context);
+  ERROR_GUARD(nullptr);
+  // unary/binary "functions" produce scalar types only
+  if (type && (type->eType != eSimple || type->simple_type == eVoid))
+    std_func = false;
 
-	Effect effect_accum = cg_context.get_accum_effect();
-	Effect effect_stm = cg_context.get_effect_stm();
-	FactMgr* fm = get_fact_mgr(&cg_context);
-	vector<const Fact*> facts_copy = fm->global_facts;
-	FunctionInvocation *fi = FunctionInvocation::make_random(std_func, cg_context, type, qfer);
-	ERROR_GUARD(nullptr);
+  Effect effect_accum = cg_context.get_accum_effect();
+  Effect effect_stm = cg_context.get_effect_stm();
+  FactMgr *fm = get_fact_mgr(&cg_context);
+  vector<const Fact *> facts_copy = fm->global_facts;
+  FunctionInvocation *fi =
+      FunctionInvocation::make_random(std_func, cg_context, type, qfer);
+  ERROR_GUARD(nullptr);
 
-	if (fi->failed) {
-		// if it's a invalid invocation, (see FunctionInvocationUser::revisit)
-		// restore the env, and replace invocation with a simple var
-		cg_context.reset_effect_accum(effect_accum);
-		cg_context.reset_effect_stm(effect_stm);
-		fm->restore_facts(facts_copy);
-		e = ExpressionVariable::make_random(cg_context, type, qfer);
-		delete fi;
-	}
-	else {
-		e = new ExpressionFuncall(*fi);
-	}
-	return e;
+  if (fi->failed) {
+    // if it's a invalid invocation, (see FunctionInvocationUser::revisit)
+    // restore the env, and replace invocation with a simple var
+    cg_context.reset_effect_accum(effect_accum);
+    cg_context.reset_effect_stm(effect_stm);
+    fm->restore_facts(facts_copy);
+    e = ExpressionVariable::make_random(cg_context, type, qfer);
+    delete fi;
+  } else {
+    e = new ExpressionFuncall(*fi);
+  }
+  return e;
 }
 
 /*
  *
  */
-Expression *
-ExpressionFuncall::clone() const
-{
-	const FunctionInvocation *fi = (this->invoke).clone();
-	return new ExpressionFuncall(*fi);
+Expression *ExpressionFuncall::clone() const {
+  const FunctionInvocation *fi = (this->invoke).clone();
+  return new ExpressionFuncall(*fi);
 }
 
 /*
  *
  */
 ExpressionFuncall::ExpressionFuncall(const FunctionInvocation &fi)
-	: Expression(eFunction),
-	  invoke(fi)
-{
-}
+    : Expression(eFunction), invoke(fi) {}
 
 /*
  *
  */
-ExpressionFuncall::~ExpressionFuncall(void)
-{
-	delete &invoke;
-}
+ExpressionFuncall::~ExpressionFuncall(void) { delete &invoke; }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
  *
  */
-const Type &
-ExpressionFuncall::get_type(void) const
-{
-	return invoke.get_type();
+const Type &ExpressionFuncall::get_type(void) const {
+  return invoke.get_type();
 }
 
-void
-ExpressionFuncall::get_called_funcs(std::vector<const FunctionInvocationUser*>& funcs) const
-{
-	invoke.get_called_funcs(funcs);
+void ExpressionFuncall::get_called_funcs(
+    std::vector<const FunctionInvocationUser *> &funcs) const {
+  invoke.get_called_funcs(funcs);
 }
 
-unsigned int
-ExpressionFuncall::get_complexity(void) const
-{
-	unsigned int comp = 0;
-	const FunctionInvocation* invoke = get_invoke();
-	if (invoke->invoke_type == eInvocationType::eFuncCall) {
-		comp++;  // function call itself counts as 1 complexity
-	}
-	for (size_t i=0; i<invoke->param_value.size(); i++) {
-		comp += invoke->param_value[i]->get_complexity();
-	}
-	return comp;
+unsigned int ExpressionFuncall::get_complexity(void) const {
+  unsigned int comp = 0;
+  const FunctionInvocation *invoke = get_invoke();
+  if (invoke->invoke_type == eInvocationType::eFuncCall) {
+    comp++; // function call itself counts as 1 complexity
+  }
+  for (size_t i = 0; i < invoke->param_value.size(); i++) {
+    comp += invoke->param_value[i]->get_complexity();
+  }
+  return comp;
 }
 
-bool
-ExpressionFuncall::visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const
-{
-	return invoke.visit_facts(inputs, cg_context);
+bool ExpressionFuncall::visit_facts(vector<const Fact *> &inputs,
+                                    CGContext &cg_context) const {
+  return invoke.visit_facts(inputs, cg_context);
 }
 
-std::vector<const ExpressionVariable*>
-ExpressionFuncall::get_dereferenced_ptrs(void) const
-{
-	// return a empty vector by default
-	std::vector<const ExpressionVariable*> refs;
-	for (size_t i=0; i<invoke.param_value.size(); i++) {
-		// the parameters might has pointer dereferences
-		const Expression* value = invoke.param_value[i];
-		vector<const ExpressionVariable*> deref_ptrs = value->get_dereferenced_ptrs();
-		refs.insert(refs.end(),  deref_ptrs.begin(), deref_ptrs.end());
-	}
-	return refs;
+std::vector<const ExpressionVariable *>
+ExpressionFuncall::get_dereferenced_ptrs(void) const {
+  // return a empty vector by default
+  std::vector<const ExpressionVariable *> refs;
+  for (size_t i = 0; i < invoke.param_value.size(); i++) {
+    // the parameters might has pointer dereferences
+    const Expression *value = invoke.param_value[i];
+    vector<const ExpressionVariable *> deref_ptrs =
+        value->get_dereferenced_ptrs();
+    refs.insert(refs.end(), deref_ptrs.begin(), deref_ptrs.end());
+  }
+  return refs;
 }
 
-// find pointers used in the expression, recursively go into callee if this is a call
-void
-ExpressionFuncall::get_referenced_ptrs(std::vector<const Variable*>& ptrs) const
-{
-	for (size_t i=0; i<invoke.param_value.size(); i++) {
-		// the parameters might has pointer references
-		const Expression* value = invoke.param_value[i];
-		value->get_referenced_ptrs(ptrs);
-	}
-	if (invoke.invoke_type == eInvocationType::eFuncCall) {
-		const FunctionInvocationUser* fiu = dynamic_cast<const FunctionInvocationUser*>(&invoke);
-		assert(fiu);
-		//cout << "follow " << fiu->get_func()->name << endl;
-		add_variables_to_set(ptrs, fiu->get_func()->get_referenced_ptrs());
-	}
+// find pointers used in the expression, recursively go into callee if this is a
+// call
+void ExpressionFuncall::get_referenced_ptrs(
+    std::vector<const Variable *> &ptrs) const {
+  for (size_t i = 0; i < invoke.param_value.size(); i++) {
+    // the parameters might has pointer references
+    const Expression *value = invoke.param_value[i];
+    value->get_referenced_ptrs(ptrs);
+  }
+  if (invoke.invoke_type == eInvocationType::eFuncCall) {
+    const FunctionInvocationUser *fiu =
+        dynamic_cast<const FunctionInvocationUser *>(&invoke);
+    assert(fiu);
+    // cout << "follow " << fiu->get_func()->name << endl;
+    add_variables_to_set(ptrs, fiu->get_func()->get_referenced_ptrs());
+  }
 }
 
-bool
-ExpressionFuncall::has_uncertain_call_recursive(void) const
-{
-	return invoke.has_uncertain_call_recursive();
+bool ExpressionFuncall::has_uncertain_call_recursive(void) const {
+  return invoke.has_uncertain_call_recursive();
 }
 
 /*
  * return the const/volatile qualifiers for function calls
  */
-CVQualifiers
-ExpressionFuncall::get_qualifiers(void) const
-{
-	return invoke.get_qualifiers();
+CVQualifiers ExpressionFuncall::get_qualifiers(void) const {
+  return invoke.get_qualifiers();
 }
 
 /*
  * return if a variable is referenced in this expression
  */
-bool
-ExpressionFuncall::use_var(const Variable* v) const
-{
-	for (size_t i =0; i<invoke.param_value.size(); i++) {
-		if (invoke.param_value[i]->use_var(v)) {
-			return true;
-		}
-	}
-	return false;
+bool ExpressionFuncall::use_var(const Variable *v) const {
+  for (size_t i = 0; i < invoke.param_value.size(); i++) {
+    if (invoke.param_value[i]->use_var(v)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /*
  *
  */
-bool
-ExpressionFuncall::compatible(const Variable *v) const
-{
-	return invoke.compatible(v);
+bool ExpressionFuncall::compatible(const Variable *v) const {
+  return invoke.compatible(v);
 }
 
-bool ExpressionFuncall::compatible(const Expression * /*exp*/) const
-{
-	return false;
+bool ExpressionFuncall::compatible(const Expression * /*exp*/) const {
+  return false;
 }
 
 /*
  *
  */
-void
-ExpressionFuncall::Output(std::ostream &out) const
-{
-	output_cast(out);
-	invoke.Output(out);
+void ExpressionFuncall::Output(std::ostream &out) const {
+  output_cast(out);
+  invoke.Output(out);
 }
 
-void
-ExpressionFuncall::indented_output(std::ostream &out, int indent) const
-{
-	invoke.indented_output(out, indent);
+void ExpressionFuncall::indented_output(std::ostream &out, int indent) const {
+  invoke.indented_output(out, indent);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

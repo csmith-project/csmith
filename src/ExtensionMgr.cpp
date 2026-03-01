@@ -28,140 +28,117 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 #if HAVE_CONFIG_H
-#  include <config.h>
+#include <config.h>
 #endif
 
-#include "ExtensionMgr.h"
-#include <vector>
-#include <cassert>
+#include "CGContext.h"
 #include "CGOptions.h"
-#include "KleeExtension.h"
-#include "CrestExtension.h"
 #include "CoverageTestExtension.h"
+#include "CrestExtension.h"
+#include "ExtensionMgr.h"
 #include "ExtensionValue.h"
 #include "Function.h"
 #include "FunctionInvocation.h"
-#include "CGContext.h"
+#include "KleeExtension.h"
+#include <cassert>
+#include <vector>
 
 using namespace std;
 
 AbsExtension *ExtensionMgr::extension_ = nullptr;
 
-void
-ExtensionMgr::CreateExtension()
-{
-	int params_size = CGOptions::func1_max_params();
-	if (CGOptions::klee()) {
-		extension_ = dynamic_cast<AbsExtension*>(new KleeExtension());
-	}
-	else if (CGOptions::crest()) {
-		extension_ = dynamic_cast<AbsExtension*>(new CrestExtension());
-	}
-	else if (CGOptions::coverage_test()) {
-		extension_ = dynamic_cast<AbsExtension*>(new CoverageTestExtension(CGOptions::coverage_test_size()));
-	}
-	else {
-		return;
-	}
-	assert(extension_);
-	std::vector<ExtensionValue *> &values = ExtensionMgr::extension_->get_values();
-	ExtensionMgr::extension_->Initialize(params_size, values);
+void ExtensionMgr::CreateExtension() {
+  int params_size = CGOptions::func1_max_params();
+  if (CGOptions::klee()) {
+    extension_ = dynamic_cast<AbsExtension *>(new KleeExtension());
+  } else if (CGOptions::crest()) {
+    extension_ = dynamic_cast<AbsExtension *>(new CrestExtension());
+  } else if (CGOptions::coverage_test()) {
+    extension_ = dynamic_cast<AbsExtension *>(
+        new CoverageTestExtension(CGOptions::coverage_test_size()));
+  } else {
+    return;
+  }
+  assert(extension_);
+  std::vector<ExtensionValue *> &values =
+      ExtensionMgr::extension_->get_values();
+  ExtensionMgr::extension_->Initialize(params_size, values);
 }
 
-void
-ExtensionMgr::DestroyExtension()
-{
-	delete ExtensionMgr::extension_;
-	ExtensionMgr::extension_ = nullptr;
+void ExtensionMgr::DestroyExtension() {
+  delete ExtensionMgr::extension_;
+  ExtensionMgr::extension_ = nullptr;
 }
 
-AbsExtension *
-ExtensionMgr::GetExtension()
-{
-	assert(ExtensionMgr::extension_);
-	return ExtensionMgr::extension_;
+AbsExtension *ExtensionMgr::GetExtension() {
+  assert(ExtensionMgr::extension_);
+  return ExtensionMgr::extension_;
 }
 
-void
-ExtensionMgr::GenerateFirstParameterList(Function &curFunc)
-{
-	if (ExtensionMgr::extension_ == nullptr)
-		return;
-	std::vector<ExtensionValue *> &values = ExtensionMgr::extension_->get_values();
-	ExtensionMgr::extension_->GenerateFirstParameterList(curFunc, values);
+void ExtensionMgr::GenerateFirstParameterList(Function &curFunc) {
+  if (ExtensionMgr::extension_ == nullptr)
+    return;
+  std::vector<ExtensionValue *> &values =
+      ExtensionMgr::extension_->get_values();
+  ExtensionMgr::extension_->GenerateFirstParameterList(curFunc, values);
 }
 
-void
-ExtensionMgr::GenerateValues()
-{
-	if (ExtensionMgr::extension_ == nullptr)
-		return;
-	ExtensionMgr::extension_->GenerateValues();
+void ExtensionMgr::GenerateValues() {
+  if (ExtensionMgr::extension_ == nullptr)
+    return;
+  ExtensionMgr::extension_->GenerateValues();
 }
 
-FunctionInvocation *
-ExtensionMgr::MakeFuncInvocation(Function *curFunc, CGContext &cg_context)
-{
-	if (ExtensionMgr::extension_ == nullptr) {
-		return FunctionInvocation::make_random(curFunc, cg_context);
-	}
-	else {
-		std::vector<ExtensionValue *> &values = ExtensionMgr::extension_->get_values();
-		return ExtensionMgr::extension_->MakeFuncInvocation(curFunc, values);
-	}
+FunctionInvocation *ExtensionMgr::MakeFuncInvocation(Function *curFunc,
+                                                     CGContext &cg_context) {
+  if (ExtensionMgr::extension_ == nullptr) {
+    return FunctionInvocation::make_random(curFunc, cg_context);
+  } else {
+    std::vector<ExtensionValue *> &values =
+        ExtensionMgr::extension_->get_values();
+    return ExtensionMgr::extension_->MakeFuncInvocation(curFunc, values);
+  }
 }
 
-void
-ExtensionMgr::OutputHeader(std::ostream &out)
-{
-	if (ExtensionMgr::extension_ == nullptr) {
-		return;
-	}
-	else {
-		ExtensionMgr::extension_->OutputHeader(out);
-	}
+void ExtensionMgr::OutputHeader(std::ostream &out) {
+  if (ExtensionMgr::extension_ == nullptr) {
+    return;
+  } else {
+    ExtensionMgr::extension_->OutputHeader(out);
+  }
 }
 
-void
-ExtensionMgr::OutputTail(ostream &out)
-{
-	if (ExtensionMgr::extension_ == nullptr) {
-		out << "    return 0;" << endl;
-	}
-	else {
-		ExtensionMgr::extension_->OutputTail(out);
-	}
+void ExtensionMgr::OutputTail(ostream &out) {
+  if (ExtensionMgr::extension_ == nullptr) {
+    out << "    return 0;" << endl;
+  } else {
+    ExtensionMgr::extension_->OutputTail(out);
+  }
 }
 
-void
-ExtensionMgr::OutputInit(std::ostream &out)
-{
-	if (ExtensionMgr::extension_ == nullptr) {
-		if (CGOptions::accept_argc()) {
-			out << "int main (int argc, char* argv[])" << endl;
-		}
-		else {
-			out << "int main (void)" << endl;
-		}
-		out << "{" << endl;
-	}
-	else {
-		ExtensionMgr::extension_->OutputInit(out);
-	}
+void ExtensionMgr::OutputInit(std::ostream &out) {
+  if (ExtensionMgr::extension_ == nullptr) {
+    if (CGOptions::accept_argc()) {
+      out << "int main (int argc, char* argv[])" << endl;
+    } else {
+      out << "int main (void)" << endl;
+    }
+    out << "{" << endl;
+  } else {
+    ExtensionMgr::extension_->OutputInit(out);
+  }
 }
 
-void
-ExtensionMgr::OutputFirstFunInvocation(std::ostream &out, FunctionInvocation *invoke)
-{
-	assert(invoke);
-	if (ExtensionMgr::extension_ == nullptr) {
-        	out << "    ";
-        	invoke->Output(out);
-        	out << ";" << endl;
-	}
-	else {
-		ExtensionMgr::extension_->OutputFirstFunInvocation(out, invoke);
-	}
+void ExtensionMgr::OutputFirstFunInvocation(std::ostream &out,
+                                            FunctionInvocation *invoke) {
+  assert(invoke);
+  if (ExtensionMgr::extension_ == nullptr) {
+    out << "    ";
+    invoke->Output(out);
+    out << ";" << endl;
+  } else {
+    ExtensionMgr::extension_->OutputFirstFunInvocation(out, invoke);
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////

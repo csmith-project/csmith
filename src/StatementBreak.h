@@ -31,8 +31,8 @@
 #define STATEMENT_BREAK_H
 
 ///////////////////////////////////////////////////////////////////////////////
-#include <ostream>
 #include "Statement.h"
+#include <ostream>
 
 class Expression;
 class Block;
@@ -40,24 +40,27 @@ class CGContext;
 /*
  *
  */
-class StatementBreak : public Statement
-{
+class StatementBreak : public Statement {
 public:
-	// Factory method.
-	static StatementBreak *make_random(CGContext &cg_context);
+  // Factory method.
+  static StatementBreak *make_random(CGContext &cg_context);
 
-	StatementBreak(Block* parent, const Expression &test, const Block& b);
-	StatementBreak(const StatementBreak &sc);
-	virtual ~StatementBreak(void) override;
-	//
-	virtual bool must_jump(void) const override;
-	virtual void get_blocks(std::vector<const Block*>& /* blks */) const {};
-	virtual void get_exprs(std::vector<const Expression*>& exps) const {exps.push_back(&test);}
-	virtual bool visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const override;
-	virtual void Output(std::ostream &out, FactMgr* fm, int indent = 0) const override;
+  StatementBreak(Block *parent, const Expression &test, const Block &b);
+  StatementBreak(const StatementBreak &sc);
+  virtual ~StatementBreak(void) override;
+  //
+  virtual bool must_jump(void) const override;
+  virtual void get_blocks(std::vector<const Block *> & /* blks */) const {};
+  virtual void get_exprs(std::vector<const Expression *> &exps) const {
+    exps.push_back(&test);
+  }
+  virtual bool visit_facts(vector<const Fact *> &inputs,
+                           CGContext &cg_context) const override;
+  virtual void Output(std::ostream &out, FactMgr *fm,
+                      int indent = 0) const override;
 
-	const Expression &test;
-	const Block& loop_blk;
+  const Expression &test;
+  const Block &loop_blk;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

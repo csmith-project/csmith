@@ -39,29 +39,30 @@ class CGContext;
 
 class ExtensionMgr {
 public:
-	static void CreateExtension();
+  static void CreateExtension();
 
-	static void DestroyExtension();
+  static void DestroyExtension();
 
-	static AbsExtension *GetExtension();
+  static AbsExtension *GetExtension();
 
-	static void GenerateFirstParameterList(Function &curFunc);
+  static void GenerateFirstParameterList(Function &curFunc);
 
-	static void GenerateValues();
+  static void GenerateValues();
 
-	static FunctionInvocation *MakeFuncInvocation(Function *curFunc, CGContext &cg_context);
+  static FunctionInvocation *MakeFuncInvocation(Function *curFunc,
+                                                CGContext &cg_context);
 
-	static void OutputTail(std::ostream &out);
+  static void OutputTail(std::ostream &out);
 
-	static void OutputHeader(std::ostream &out);
+  static void OutputHeader(std::ostream &out);
 
-	static void OutputInit(std::ostream &out);
+  static void OutputInit(std::ostream &out);
 
-	static void OutputFirstFunInvocation(std::ostream &out, FunctionInvocation *invoke);
+  static void OutputFirstFunInvocation(std::ostream &out,
+                                       FunctionInvocation *invoke);
 
 private:
-	static AbsExtension *extension_;
-
+  static AbsExtension *extension_;
 };
 
 #endif // EXTENSION_MGR_H

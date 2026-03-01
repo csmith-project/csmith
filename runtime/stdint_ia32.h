@@ -25,7 +25,7 @@
  * This file is based on the system stdint.h for ia32
  */
 #ifndef _STDINT_IA32_H
-#define _STDINT_IA32_H	1
+#define _STDINT_IA32_H 1
 
 #include "custom_limits.h"
 
@@ -34,19 +34,19 @@
 /* Signed.  */
 
 /* There is some amount of overlap with <sys/types.h> as known by inet code */
-typedef signed char		int8_t;
-typedef short int		int16_t;
-typedef int			int32_t;
+typedef signed char int8_t;
+typedef short int int16_t;
+typedef int int32_t;
 #ifndef NO_LONGLONG
-typedef long long int		int64_t;
+typedef long long int int64_t;
 #endif
 
 /* Unsigned.  */
-typedef unsigned char		uint8_t;
-typedef unsigned short int	uint16_t;
-typedef unsigned int		uint32_t;
+typedef unsigned char uint8_t;
+typedef unsigned short int uint16_t;
+typedef unsigned int uint32_t;
 #ifndef NO_LONGLONG
-typedef unsigned long long int	uint64_t;
+typedef unsigned long long int uint64_t;
 #endif
 
 #endif /* stdint_ia32.h */

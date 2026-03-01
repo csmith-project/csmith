@@ -25,7 +25,7 @@
  * This file is based on the system stdint.h for msp430
  */
 #ifndef _STDINT_MSP430_H
-#define _STDINT_MSP430_H	1
+#define _STDINT_MSP430_H 1
 
 #include "custom_limits.h"
 
@@ -34,15 +34,15 @@
 /* Signed.  */
 
 /* There is some amount of overlap with <sys/types.h> as known by inet code */
-typedef signed char				int8_t;
-typedef int					int16_t;
-typedef long int				int32_t;
-__extension__ typedef long long int		int64_t;
+typedef signed char int8_t;
+typedef int int16_t;
+typedef long int int32_t;
+__extension__ typedef long long int int64_t;
 
 /* Unsigned.  */
-typedef unsigned char				uint8_t;
-typedef unsigned int				uint16_t;
-typedef unsigned long int			uint32_t;
-__extension__ typedef unsigned long long int	uint64_t;
+typedef unsigned char uint8_t;
+typedef unsigned int uint16_t;
+typedef unsigned long int uint32_t;
+__extension__ typedef unsigned long long int uint64_t;
 
 #endif /* stdint_msp430.h */

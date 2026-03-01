@@ -29,9 +29,9 @@
  */
 
 #ifdef NO_PRINTF
-int putchar (int);
+int putchar(int);
 #else
-extern int printf (const char *, ...);
+extern int printf(const char *, ...);
 #endif
 
 // FIXME-- need more versions, and a way to figure out which is needed
@@ -52,9 +52,9 @@ extern int printf (const char *, ...);
 // FIXME
 #define assert(x)
 
-#if defined (USE_MATH_MACROS_NOTMP)
+#if defined(USE_MATH_MACROS_NOTMP)
 #include "safe_math_macros_notmp.h"
-#elif defined (USE_MATH_MACROS)
+#elif defined(USE_MATH_MACROS)
 #include "safe_math_macros.h"
 #else
 #define FUNC_NAME(x) (safe_##x)
@@ -62,101 +62,123 @@ extern int printf (const char *, ...);
 #undef FUNC_NAME
 #endif
 
-static inline void platform_main_begin(void)
-{
-}
+static inline void platform_main_begin(void) {}
 
-static inline void crc32_gentab (void)
-{
-}
+static inline void crc32_gentab(void) {}
 
-#define _CSMITH_BITFIELD(x) ((x>32)?(x%32):x)
+#define _CSMITH_BITFIELD(x) ((x > 32) ? (x % 32) : x)
 
 uint64_t crc32_context;
 
 #ifdef TCC
-int strcmp (const char *s1, const char *s2)
-{
-  for(; *s1 == *s2; ++s1, ++s2)
-    if(*s1 == 0)
+int strcmp(const char *s1, const char *s2) {
+  for (; *s1 == *s2; ++s1, ++s2)
+    if (*s1 == 0)
       return 0;
   return *(unsigned char *)s1 < *(unsigned char *)s2 ? -1 : 1;
 }
 #else
-extern int strcmp (const char *, const char *);
+extern int strcmp(const char *, const char *);
 #endif
 
-static inline void 
-transparent_crc (uint64_t val, char* vname, int flag)
-{
+static inline void transparent_crc(uint64_t val, char *vname, int flag) {
 #ifndef NO_PRINTF
-  if (flag) printf ("%s %d\n", vname, val);
+  if (flag)
+    printf("%s %d\n", vname, val);
 #endif
   crc32_context += val;
 }
 
-static void 
-transparent_crc_bytes (char *ptr, int nbytes, char* vname, int flag)
-{
+static void transparent_crc_bytes(char *ptr, int nbytes, char *vname,
+                                  int flag) {
   int i;
-  for (i=0; i<nbytes; i++) {
+  for (i = 0; i < nbytes; i++) {
     crc32_context += ptr[i];
   }
 #ifndef NO_PRINTF
   if (flag) {
-    printf("...checksum after hashing %s : %lX\n", vname, crc32_context ^ 0xFFFFFFFFUL);
+    printf("...checksum after hashing %s : %lX\n", vname,
+           crc32_context ^ 0xFFFFFFFFUL);
   }
 #endif
 }
 
 #ifdef NO_PRINTF
-void my_puts (char *p)
-{
+void my_puts(char *p) {
   int i = 0;
   while (p[i]) {
-    putchar (p[i]);
+    putchar(p[i]);
     i++;
   }
 }
 
-void put_hex (int x)
-{
+void put_hex(int x) {
   switch (x) {
-  case 0x0: putchar ('0'); break;
-  case 0x1: putchar ('1'); break;
-  case 0x2: putchar ('2'); break;
-  case 0x3: putchar ('3'); break;
-  case 0x4: putchar ('4'); break;
-  case 0x5: putchar ('5'); break;
-  case 0x6: putchar ('6'); break;
-  case 0x7: putchar ('7'); break;
-  case 0x8: putchar ('8'); break;
-  case 0x9: putchar ('9'); break;
-  case 0xa: putchar ('a'); break;
-  case 0xb: putchar ('b'); break;
-  case 0xc: putchar ('c'); break;
-  case 0xd: putchar ('d'); break;
-  case 0xe: putchar ('e'); break;
-  case 0xf: putchar ('f'); break;
+  case 0x0:
+    putchar('0');
+    break;
+  case 0x1:
+    putchar('1');
+    break;
+  case 0x2:
+    putchar('2');
+    break;
+  case 0x3:
+    putchar('3');
+    break;
+  case 0x4:
+    putchar('4');
+    break;
+  case 0x5:
+    putchar('5');
+    break;
+  case 0x6:
+    putchar('6');
+    break;
+  case 0x7:
+    putchar('7');
+    break;
+  case 0x8:
+    putchar('8');
+    break;
+  case 0x9:
+    putchar('9');
+    break;
+  case 0xa:
+    putchar('a');
+    break;
+  case 0xb:
+    putchar('b');
+    break;
+  case 0xc:
+    putchar('c');
+    break;
+  case 0xd:
+    putchar('d');
+    break;
+  case 0xe:
+    putchar('e');
+    break;
+  case 0xf:
+    putchar('f');
+    break;
   }
 }
 #endif
 
-static inline void
-platform_main_end (uint64_t x, int flag)
-{
+static inline void platform_main_end(uint64_t x, int flag) {
 #ifndef NOT_PRINT_CHECKSUM
   if (!flag) {
 #ifdef NO_PRINTF
     int i;
-    my_puts ("checksum = ");
-    for (i=0; i<16; i++) {
-      put_hex (x & 0xf);
+    my_puts("checksum = ");
+    for (i = 0; i < 16; i++) {
+      put_hex(x & 0xf);
       x >>= 4;
     }
-    putchar ('\n');
+    putchar('\n');
 #else
-    printf ("checksum = %llx\n", x);
+    printf("checksum = %llx\n", x);
 #endif
   }
 #endif

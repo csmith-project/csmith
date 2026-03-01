@@ -41,11 +41,11 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <ostream>
-#include <vector>
-#include "util.h"
 #include "CVQualifiers.h"
 #include "StdLibAliases.h"
+#include "util.h"
+#include <ostream>
+#include <vector>
 class CGContext;
 class Function;
 class Expression;
@@ -56,13 +56,12 @@ class SafeOpFlags;
 class Variable;
 class CVQualifiers;
 
-enum eUnaryOps
-{
-	ePlus,
-	eMinus,
-	eNot,
-	eBitNot
-#if 0 // TODO --- to be implemented
+enum eUnaryOps {
+  ePlus,
+  eMinus,
+  eNot,
+  eBitNot
+#if 0  // TODO --- to be implemented
 	ePreInc,
 	ePreDec,
 	ePostInc,
@@ -74,116 +73,115 @@ inline constexpr eUnaryOps MAX_UNARY_OP = static_cast<eUnaryOps>(eBitNot + 1);
 inline constexpr eUnaryOps MAX_UNARY_OP = static_cast<eUnaryOps>(ePostDec + 1);
 #endif
 
-enum eBinaryOps
-{
-	eAdd,
-	eSub,
-	eMul,
-	eDiv,
-	eMod,
-	eCmpGt,
-	eCmpLt,
-	eCmpGe,
-	eCmpLe,
-	eCmpEq,
-	eCmpNe,
-	eAnd,
-	eOr,
-	eBitXor,
-	eBitAnd,
-	eBitOr,
-	eRShift,
-	eLShift
+enum eBinaryOps {
+  eAdd,
+  eSub,
+  eMul,
+  eDiv,
+  eMod,
+  eCmpGt,
+  eCmpLt,
+  eCmpGe,
+  eCmpLe,
+  eCmpEq,
+  eCmpNe,
+  eAnd,
+  eOr,
+  eBitXor,
+  eBitAnd,
+  eBitOr,
+  eRShift,
+  eLShift
 };
-inline constexpr eBinaryOps MAX_BINARY_OP = static_cast<eBinaryOps>(eLShift + 1);
+inline constexpr eBinaryOps MAX_BINARY_OP =
+    static_cast<eBinaryOps>(eLShift + 1);
 
-enum class eInvocationType
-{
-    eBinaryPrim,
-    eUnaryPrim,
-    eFuncCall
-};
+enum class eInvocationType { eBinaryPrim, eUnaryPrim, eFuncCall };
 
-class FunctionInvocation
-{
+class FunctionInvocation {
 public:
-	FunctionInvocation(eInvocationType e, const SafeOpFlags *flags);
+  FunctionInvocation(eInvocationType e, const SafeOpFlags *flags);
 
-	virtual ~FunctionInvocation(void);
+  virtual ~FunctionInvocation(void);
 
-	virtual FunctionInvocation *clone() const = 0;
+  virtual FunctionInvocation *clone() const = 0;
 
-	static FunctionInvocation *make_random(bool,
-										   CGContext &cg_context,
-                                           const Type* type,
-										   const CVQualifiers* qfer);
-	static FunctionInvocation *make_random(Function *target,
-										   CGContext &cg_context);
+  static FunctionInvocation *make_random(bool, CGContext &cg_context,
+                                         const Type *type,
+                                         const CVQualifiers *qfer);
+  static FunctionInvocation *make_random(Function *target,
+                                         CGContext &cg_context);
 
-	static FunctionInvocation *make_random_unary(CGContext &cg_context, const Type* type);
+  static FunctionInvocation *make_random_unary(CGContext &cg_context,
+                                               const Type *type);
 
-	static FunctionInvocation *make_random_binary(CGContext &cg_context, const Type* type);
+  static FunctionInvocation *make_random_binary(CGContext &cg_context,
+                                                const Type *type);
 
-	static FunctionInvocation * make_random_binary_ptr_comparison(CGContext &cg_context);
+  static FunctionInvocation *
+  make_random_binary_ptr_comparison(CGContext &cg_context);
 
-	static FunctionInvocation *make_unary(CGContext &cg_context, eUnaryOps op,
-										  Expression *operand);
-	static FunctionInvocation *make_binary(CGContext &cg_context, eBinaryOps op,
-										   Expression *lhs,
-										   Expression *rhs);
+  static FunctionInvocation *make_unary(CGContext &cg_context, eUnaryOps op,
+                                        Expression *operand);
+  static FunctionInvocation *make_binary(CGContext &cg_context, eBinaryOps op,
+                                         Expression *lhs, Expression *rhs);
 
-	virtual bool visit_facts(vector<const Fact*>& inputs, CGContext& cg_context) const;
+  virtual bool visit_facts(vector<const Fact *> &inputs,
+                           CGContext &cg_context) const;
 
-	virtual void get_called_funcs(std::vector<const FunctionInvocationUser*>& funcs ) const;
+  virtual void
+  get_called_funcs(std::vector<const FunctionInvocationUser *> &funcs) const;
 
-	virtual bool has_uncertain_call(void) const;
+  virtual bool has_uncertain_call(void) const;
 
-	vector<intvec> permute_param_oders(void) const;
+  vector<intvec> permute_param_oders(void) const;
 
-	bool visit_unordered_params(vector<const Fact*>& inputs, CGContext& cg_context) const;
+  bool visit_unordered_params(vector<const Fact *> &inputs,
+                              CGContext &cg_context) const;
 
-	bool has_uncertain_call_recursive(void) const;
+  bool has_uncertain_call_recursive(void) const;
 
-	bool has_simple_params(void) const;
+  bool has_simple_params(void) const;
 
-	CVQualifiers get_qualifiers(void) const;
+  CVQualifiers get_qualifiers(void) const;
 
-	void add_operand(const Expression* e);
+  void add_operand(const Expression *e);
 
-	static bool IsOrderedStandardFunc(eBinaryOps eFunc);
+  static bool IsOrderedStandardFunc(eBinaryOps eFunc);
 
-	static bool BinaryOpWorksForFloat(eBinaryOps op);
+  static bool BinaryOpWorksForFloat(eBinaryOps op);
 
-	static bool UnaryOpWorksForFloat(eUnaryOps op);
+  static bool UnaryOpWorksForFloat(eUnaryOps op);
 
-	virtual const Type &get_type(void) const = 0;
+  virtual const Type &get_type(void) const = 0;
 
-	virtual bool compatible(const Variable *) const { return false; }
+  virtual bool compatible(const Variable *) const { return false; }
 
-	virtual bool is_0_or_1(void) const { return false;}
+  virtual bool is_0_or_1(void) const { return false; }
 
-	virtual bool equals(int /*num*/) const { return false;}
+  virtual bool equals(int /*num*/) const { return false; }
 
-	virtual void Output(std::ostream &) const = 0;
+  virtual void Output(std::ostream &) const = 0;
 
-	virtual void indented_output(std::ostream &out, int indent) const = 0;
+  virtual void indented_output(std::ostream &out, int indent) const = 0;
 
-	virtual bool safe_invocation() const = 0;
+  virtual bool safe_invocation() const = 0;
 
-	eInvocationType invoke_type;
+  eInvocationType invoke_type;
 
-	std::vector<const Expression*> param_value;
+  std::vector<const Expression *> param_value;
 
-	bool failed;	// indicates whether this invocation has failed to pass pointer/effect analysis
-	bool ptr_cmp;	// indicates whether this is a pointer comparison
+  bool failed;  // indicates whether this invocation has failed to pass
+                // pointer/effect analysis
+  bool ptr_cmp; // indicates whether this is a pointer comparison
 protected:
-	explicit FunctionInvocation(const FunctionInvocation &fi);
+  explicit FunctionInvocation(const FunctionInvocation &fi);
 
-	const SafeOpFlags *op_flags;
+  const SafeOpFlags *op_flags;
 
 private:
-	// unimplemented
-	FunctionInvocation &operator=(const FunctionInvocation &fi) = delete;
+  // unimplemented
+  FunctionInvocation &operator=(const FunctionInvocation &fi) = delete;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
