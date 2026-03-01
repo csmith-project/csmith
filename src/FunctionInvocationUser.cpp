@@ -180,8 +180,7 @@ FunctionInvocationUser *FunctionInvocationUser::build_invocation_and_function(
   if (func->name == "func_51")
     BREAK_NOP; // for debugging
   vector<const Expression *> param_values;
-  size_t i;
-  for (i = 0; i < func->param.size(); i++) {
+  for (size_t i = 0; i < func->param.size(); i++) {
     Effect param_eff_accum;
     CGContext param_cg_context(cg_context, running_eff_context,
                                &param_eff_accum);
@@ -234,7 +233,7 @@ FunctionInvocationUser *FunctionInvocationUser::build_invocation_and_function(
                                   func->new_globals.begin(),
                                   func->new_globals.end());
   // include facts for globals just created
-  for (i = 0; i < func->new_globals.size(); i++) {
+  for (size_t i = 0; i < func->new_globals.size(); i++) {
     const Variable *var = func->new_globals[i];
     caller_fm->add_new_var_fact_and_update_inout_maps(nullptr, var);
   }
@@ -248,17 +247,17 @@ FunctionInvocationUser *FunctionInvocationUser::build_invocation_and_function(
  */
 bool FunctionInvocationUser::build_invocation(Function *target,
                                               CGContext &cg_context) {
-  unsigned int i;
   func = target; // XXX: unnecessary; done by constructor
   Effect running_eff_context(cg_context.get_effect_context());
   FactMgr *fm = get_fact_mgr(&cg_context);
   // XXX DEBUGGING
   if (func->name == "func_36" &&
       cg_context.get_current_func()->name == "func_22") {
-    i = 0; // Set breakpoint here.
+    volatile unsigned int debug_i = 0; // Set breakpoint here.
+    (void)debug_i;
   }
 
-  for (i = 0; i < func->param.size(); i++) {
+  for (size_t i = 0; i < func->param.size(); i++) {
     Effect param_eff_accum;
     CGContext param_cg_context(cg_context, running_eff_context,
                                &param_eff_accum);
@@ -419,7 +418,7 @@ static void OutputActualParamExpression(const Expression *expr,
 static void OutputExpressionVector(const vector<const Expression *> &var,
                                    std::ostream &out) {
   needcomma.push_back(false);
-  for (vector<const Expression *>::const_iterator i = var.begin();
+  for (auto i = var.begin();
        i != var.end(); ++i) {
     OutputActualParamExpression(*i, &out);
   }

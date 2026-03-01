@@ -68,9 +68,8 @@ bool ProbabilityFilter::filter(int v) const {
   assert(elem);
   assert(elem->is_equal());
 
-  map<ProbName, SingleProbElem *>::iterator i;
   bool rv = false;
-  for (i = elem->probs_.begin(); i != elem->probs_.end(); ++i) {
+  for (auto i = elem->probs_.begin(); i != elem->probs_.end(); ++i) {
     ProbName pname = (*i).first;
     unsigned val = Probabilities::pname_to_type(pname);
     if ((static_cast<unsigned int>(v)) == val) {
@@ -151,8 +150,7 @@ GroupProbElem::GroupProbElem(bool is_equal, const std::string &sname)
 {}
 
 GroupProbElem::~GroupProbElem() {
-  std::map<ProbName, SingleProbElem *>::iterator i;
-  for (i = probs_.begin(); i != probs_.end(); ++i) {
+  for (auto i = probs_.begin(); i != probs_.end(); ++i) {
     delete i->second;
   }
   probs_.clear();
@@ -176,13 +174,12 @@ int GroupProbElem::get_random_single_prob(
 void GroupProbElem::initialize(Probabilities *impl,
                                const std::map<ProbName, int> &pairs) {
   assert(impl);
-  std::map<ProbName, int>::const_iterator i;
   std::vector<unsigned int> invalid_vals;
   invalid_vals.push_back(100);
   invalid_vals.push_back(0);
   std::vector<SingleProbElem *> valid_probs;
 
-  for (i = pairs.begin(); i != pairs.end(); ++i) {
+  for (auto i = pairs.begin(); i != pairs.end(); ++i) {
     bool valid = false;
     int default_val = (*i).second;
     int val = default_val;
@@ -209,7 +206,7 @@ void GroupProbElem::initialize(Probabilities *impl,
     // we can't allow all 0 vals for equal prob group
     // if we got one, just use the default settings.
     if (is_equal_ && size == 0) {
-      for (i = pairs.begin(); i != pairs.end(); ++i) {
+      for (auto i = pairs.begin(); i != pairs.end(); ++i) {
         int val = (*i).second;
         assert(val >= 0 && val <= 100);
         ProbName pname = (*i).first;
@@ -226,7 +223,7 @@ void GroupProbElem::initialize(Probabilities *impl,
 }
 
 bool GroupProbElem::elem_exist(ProbName pname) {
-  std::map<ProbName, SingleProbElem *>::iterator i = probs_.find(pname);
+  auto i = probs_.find(pname);
   return (!(i == probs_.end()));
 }
 
@@ -247,8 +244,7 @@ int GroupProbElem::get_prob(ProbName pname) {
 
 void GroupProbElem::set_prob_table(
     ProbabilityTable<unsigned int, ProbName> *const table) {
-  map<ProbName, SingleProbElem *>::iterator i;
-  for (i = probs_.begin(); i != probs_.end(); ++i) {
+  for (auto i = probs_.begin(); i != probs_.end(); ++i) {
     SingleProbElem *elem = (*i).second;
     assert(elem);
     ProbName pname = (*i).first;
@@ -261,8 +257,7 @@ void GroupProbElem::set_prob_table(
 }
 
 void GroupProbElem::get_all_values(vector<SingleProbElem *> &values) {
-  map<ProbName, SingleProbElem *>::iterator i;
-  for (i = probs_.begin(); i != probs_.end(); ++i)
+  for (auto i = probs_.begin(); i != probs_.end(); ++i)
     values.push_back((*i).second);
 }
 
@@ -278,13 +273,11 @@ void GroupProbElem::dump_default(std::ostream &out) {
 #if 0
 	sort(values.begin(), values.end(), single_elem_less);
 #endif
-  size_t count = 0;
-  for (count = 0; count < values.size() - 1; count++) {
+  for (size_t count = 0; count < values.size() - 1; count++) {
     values[count]->dump_default(out);
     out << group_sep_char;
   }
-  assert(count < values.size());
-  values[count]->dump_default(out);
+  values.back()->dump_default(out);
   out << close_delim;
 }
 
@@ -293,7 +286,7 @@ void GroupProbElem::dump_val(std::ostream &out) {
   char close_delim = is_equal_ ? equal_close_delim : group_close_delim;
 
   out << open_delim << sname_ << group_sep_char;
-  map<ProbName, SingleProbElem *>::iterator i = probs_.begin();
+  auto i = probs_.begin();
   for (size_t count = 0; count < probs_.size() - 1; count++) {
     ((*i).second)->dump_val(out);
     out << group_sep_char;
@@ -555,8 +548,7 @@ void Probabilities::initialize_single_probs() {
   m[ProbName::pBuiltinFunctionProb] = CGOptions::builtin_function_prob();
   m[ProbName::pArrayOOBProb] = CGOptions::array_oob_prob();
 
-  std::map<ProbName, int>::iterator i;
-  for (i = m.begin(); i != m.end(); ++i) {
+  for (auto i = m.begin(); i != m.end(); ++i) {
     int default_val = (*i).second;
     int val = default_val;
     assert(val >= 0 && val <= 100);
@@ -813,7 +805,7 @@ void Probabilities::unregister_extra_filter(ProbName pname, Filter *filter) {
 
 bool Probabilities::check_extra_filter(ProbName pname, int v) {
   assert(v >= 0);
-  std::map<ProbName, Filter *>::iterator i = extra_filters_.find(pname);
+  auto i = extra_filters_.find(pname);
   if (i != extra_filters_.end() && ((*i).second != nullptr))
     return (*i).second->filter(v);
   else
@@ -839,14 +831,14 @@ unsigned int Probabilities::get_prob(ProbName pname) {
 }
 
 ProbName Probabilities::get_pname(const string &sname) {
-  std::map<std::string, ProbName>::iterator i = sname_to_pname_.find(sname);
+  auto i = sname_to_pname_.find(sname);
   if (i == sname_to_pname_.end())
     assert("invalid string in the configuration file:" && sname.c_str() && 0);
   return (*i).second;
 }
 
 std::string Probabilities::get_sname(ProbName pname) {
-  std::map<ProbName, std::string>::iterator i = pname_to_sname_.find(pname);
+  auto i = pname_to_sname_.find(pname);
   if (i == pname_to_sname_.end())
     assert("invalid string in the configuration file" && 0);
   return (*i).second;
@@ -989,8 +981,7 @@ void Probabilities::dump_default_probabilities(const string &fname) {
   assert(!fname.empty());
   ofstream out(fname.c_str());
 
-  std::map<ProbName, ProbElem *>::iterator i;
-  for (i = probabilities_.begin(); i != probabilities_.end(); ++i) {
+  for (auto i = probabilities_.begin(); i != probabilities_.end(); ++i) {
     (*i).second->dump_default(out);
     out << std::endl << std::endl;
   }
@@ -1002,8 +993,7 @@ void Probabilities::dump_actual_probabilities(const string &fname,
   ofstream out(fname.c_str());
   out << "# Seed: " << seed << std::endl << std::endl;
 
-  std::map<ProbName, ProbElem *>::iterator i;
-  for (i = probabilities_.begin(); i != probabilities_.end(); ++i) {
+  for (auto i = probabilities_.begin(); i != probabilities_.end(); ++i) {
     (*i).second->dump_val(out);
     out << std::endl << std::endl;
   }
@@ -1013,8 +1003,7 @@ void Probabilities::dump_actual_probabilities(const string &fname,
 Probabilities::Probabilities() {}
 
 void Probabilities::clear_filter(std::map<ProbName, Filter *> &filters) {
-  std::map<ProbName, Filter *>::iterator j;
-  for (j = filters.begin(); j != filters.end(); ++j) {
+  for (auto j = filters.begin(); j != filters.end(); ++j) {
     Filter *f = (*j).second;
     if (f)
       delete f;
@@ -1023,8 +1012,7 @@ void Probabilities::clear_filter(std::map<ProbName, Filter *> &filters) {
 }
 
 Probabilities::~Probabilities() {
-  std::map<ProbName, ProbElem *>::iterator i;
-  for (i = probabilities_.begin(); i != probabilities_.end(); ++i) {
+  for (auto i = probabilities_.begin(); i != probabilities_.end(); ++i) {
     ProbElem *elem = (*i).second;
     assert(elem);
     delete elem;

@@ -109,24 +109,23 @@ vector<intvec> permute(intvec in) {
  * 1), (1, 1, 0), (1, 1, 1) return: the size of the expanded array of arrays
  */
 int expand_within_ranges(const vector<unsigned int> &in, vector<intvec> &out) {
-  int i, j;
   int dimension = static_cast<int>(in.size());
   intvec limits(dimension);
   // figure out the maximum number the remaining indices can represent
   // like in decimal, the max for each digit starting from right is 10, 100,
   // 1000...
   limits[dimension - 1] = in[dimension - 1];
-  for (i = dimension - 2; i >= 0; i--) {
+  for (int i = dimension - 2; i >= 0; i--) {
     limits[i] = limits[i + 1] * in[i];
   }
   out.clear();
   // limit[0] is the maximum number can be represented by all dimensions
   // combined
-  for (i = 0; i < limits[0]; i++) {
+  for (int i = 0; i < limits[0]; i++) {
     intvec tmp;
     int num = i;
     // calculate the index for each dimension
-    for (j = 0; j < dimension - 1; j++) {
+    for (int j = 0; j < dimension - 1; j++) {
       tmp.push_back(num / limits[j + 1]);
       num = num % limits[j + 1];
     }

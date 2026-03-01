@@ -73,8 +73,6 @@ using namespace std;
 AttributeGenerator func_attr_generator;
 static vector<Function *> FuncList; // List of all functions in the program
 static vector<FactMgr *> FMList;    // list of fact managers for each function
-static long
-    cur_func_idx; // Index into FuncList that we are currently working on
 static bool param_first = true; // Flag to track output of commas
 static int builtin_functions_cnt;
 
@@ -103,8 +101,7 @@ void Function::InitializeAttributes() {
                                              "noinline",
                                              "noplt",
                                              "stack_protect"};
-    vector<string>::iterator itr;
-    for (itr = common_func_attributes.begin();
+    for (auto itr = common_func_attributes.begin();
          itr < common_func_attributes.end(); itr++)
       func_attr_generator.attributes.push_back(
           new BooleanAttribute(*itr, FuncAttrProb()));
@@ -507,8 +504,7 @@ void Function::OutputFormalParamList(std::ostream &out) {
     Type::void_type->Output(out);
   } else {
     param_first = true;
-    for (vector<Variable *>::iterator i = param.begin(); i != param.end();
-         ++i) {
+    for (auto i = param.begin(); i != param.end(); ++i) {
       OutputFormalParam(*i, &out);
     }
   }
@@ -802,7 +798,7 @@ void GenerateFunctions(void) {
 
   // -----------------
   // Create body of each function, continue until no new functions are created.
-  for (cur_func_idx = 0; cur_func_idx < FuncListSize(); cur_func_idx++) {
+  for (long cur_func_idx = 0; cur_func_idx < FuncListSize(); cur_func_idx++) {
     // Dynamically adds new functions to the end of the list..
     if (FuncList[cur_func_idx]->is_built() == false) {
       FuncList[cur_func_idx]->GenerateBody(CGContext::get_empty_context());
@@ -817,8 +813,7 @@ void OutputForwardDeclarations(std::ostream &out) {
   outputln(out);
   outputln(out);
   output_comment_line(out, "--- FORWARD DECLARATIONS ---");
-  for (vector<Function *>::iterator i = FuncList.begin(); i != FuncList.end();
-       ++i) {
+  for (auto i = FuncList.begin(); i != FuncList.end(); ++i) {
     (*i)->OutputForwardDecl(out);
   }
 
@@ -826,8 +821,7 @@ void OutputForwardDeclarations(std::ostream &out) {
     outputln(out);
     outputln(out);
     output_comment_line(out, "--- FORWARD ALIAS DECLARATIONS ---");
-    for (vector<Function *>::iterator i = FuncList.begin(); i != FuncList.end();
-         ++i) {
+    for (auto i = FuncList.begin(); i != FuncList.end(); ++i) {
       (*i)->OutputForwardDeclAlias(out);
     }
   }
@@ -840,8 +834,7 @@ void OutputFunctions(std::ostream &out) {
   outputln(out);
   outputln(out);
   output_comment_line(out, "--- FUNCTIONS ---");
-  for (vector<Function *>::iterator i = FuncList.begin(); i != FuncList.end();
-       ++i) {
+  for (auto i = FuncList.begin(); i != FuncList.end(); ++i) {
     (*i)->Output(out);
   }
 }
@@ -850,15 +843,13 @@ void OutputFunctions(std::ostream &out) {
  * Release all dynamic memory
  */
 void Function::doFinalization(void) {
-  for (vector<Function *>::iterator i = FuncList.begin(); i != FuncList.end();
-       ++i) {
+  for (auto i = FuncList.begin(); i != FuncList.end(); ++i) {
     delete (*i);
   }
 
   FuncList.clear();
 
-  std::vector<FactMgr *>::iterator i;
-  for (i = FMList.begin(); i != FMList.end(); ++i) {
+  for (auto i = FMList.begin(); i != FMList.end(); ++i) {
     delete (*i);
   }
   FMList.clear();

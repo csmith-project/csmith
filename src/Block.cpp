@@ -602,9 +602,9 @@ size_t Block::remove_stmt(const Statement *s) {
   //	s->Output(cout, fm);
   if (s->find_typed_stmts(cfg_stms, types)) {
     // remove from the break_stms list if it is or contains a break
-    Block *b;
-    for (b = this; b && !b->looping; b = b->parent) {
-      /* Empty. */
+    Block *b = this;
+    while (b && !b->looping) {
+      b = b->parent;
     }
     if (b != 0) {
       int len = b->break_stms.size();

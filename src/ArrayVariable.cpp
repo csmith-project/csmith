@@ -322,10 +322,9 @@ ArrayVariable *ArrayVariable::rnd_mutate(void) {
   assert(0 && "invalid call to rnd_mutate");
   bool use_existing = rnd_flipcoin(20);
   ERROR_GUARD(nullptr);
-  size_t i;
   if (use_existing) {
     vector<Variable *> ok_vars;
-    for (i = 0; i < parent->local_vars.size(); i++) {
+    for (size_t i = 0; i < parent->local_vars.size(); i++) {
       if (is_variant(parent->local_vars[i])) {
         ok_vars.push_back(parent->local_vars[i]);
       }
@@ -340,7 +339,7 @@ ArrayVariable *ArrayVariable::rnd_mutate(void) {
   vector<const Expression *> new_indices;
   vector<bool> mutate_flags;
   bool no_mutate = true;
-  for (i = 0; i < get_dimension(); i++) {
+  for (size_t i = 0; i < get_dimension(); i++) {
     bool mutate = rnd_flipcoin(10);
     ERROR_GUARD(0);
     mutate_flags.push_back(mutate);
@@ -352,7 +351,7 @@ ArrayVariable *ArrayVariable::rnd_mutate(void) {
   if (no_mutate) {
     return this;
   }
-  for (i = 0; i < get_dimension(); i++) {
+  for (size_t i = 0; i < get_dimension(); i++) {
     if (mutate_flags[i]) {
       const Expression *e = indices[i];
       assert(e->term_type == eTermType::eVariable);
@@ -486,11 +485,10 @@ void ArrayVariable::OutputDef(std::ostream &out, int indent) const {
     } else {
       // use string initializer for arrays
       // create the strings for initial values
-      size_t i;
       vector<string> init_strings;
       assert(init);
       init_strings.push_back(init->to_string());
-      for (i = 0; i < init_values.size(); i++) {
+      for (size_t i = 0; i < init_values.size(); i++) {
         init_strings.push_back(init_values[i]->to_string());
       }
 
@@ -502,7 +500,7 @@ void ArrayVariable::OutputDef(std::ostream &out, int indent) const {
       // print type, name, and dimensions
       output_qualified_type(out);
       out << get_actual_name();
-      for (i = 0; i < sizes.size(); i++) {
+      for (size_t i = 0; i < sizes.size(); i++) {
         out << "[" << sizes[i] << "]";
       }
       out << " = " << build_initializer_str(init_strings) << ";";
@@ -588,15 +586,14 @@ void ArrayVariable::output_checksum_with_indices(
     const string &field_name) const {
   out << "printf(\"...checksum after hashing ";
 
-  size_t i;
   out << get_actual_name();
-  for (i = 0; i < get_dimension(); i++) {
+  for (size_t i = 0; i < get_dimension(); i++) {
     out << "[%d]";
   }
   out << field_name;
 
   out << " : %X\\n\"";
-  for (i = 0; i < get_dimension(); i++) {
+  for (size_t i = 0; i < get_dimension(); i++) {
     out << " ,";
     cvs[i]->Output(out);
   }
@@ -610,9 +607,8 @@ void ArrayVariable::output_init(std::ostream &out, const Expression *init,
                                 int indent) const {
   if (collective != 0)
     return;
-  size_t i;
 
-  for (i = 0; i < get_dimension(); i++) {
+  for (size_t i = 0; i < get_dimension(); i++) {
     if (i > 0) {
       output_tab(out, indent);
       out << "{";
@@ -640,7 +636,7 @@ void ArrayVariable::output_init(std::ostream &out, const Expression *init,
   out << ";";
   outputln(out);
   // output the closing bracelets
-  for (i = 1; i < get_dimension(); i++) {
+  for (size_t i = 1; i < get_dimension(); i++) {
     indent--;
     output_tab(out, indent);
     out << "}";

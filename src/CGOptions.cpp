@@ -605,8 +605,7 @@ bool CGOptions::safe_math_wrapper(int id) {
 void CGOptions::disable_builtin_kinds(const string &kinds) {
   vector<string> vs;
   StringUtils::split_string(kinds, vs, ",");
-  for (vector<string>::const_iterator i = vs.begin(), e = vs.end(); i != e;
-       ++i) {
+  for (auto i = vs.begin(), e = vs.end(); i != e; ++i) {
     enabled_builtin_kinds_[*i] = false;
   }
 }
@@ -614,14 +613,13 @@ void CGOptions::disable_builtin_kinds(const string &kinds) {
 void CGOptions::enable_builtin_kinds(const string &kinds) {
   vector<string> vs;
   StringUtils::split_string(kinds, vs, ",");
-  for (vector<string>::const_iterator i = vs.begin(), e = vs.end(); i != e;
-       ++i) {
+  for (auto i = vs.begin(), e = vs.end(); i != e; ++i) {
     enabled_builtin_kinds_[*i] = true;
   }
 }
 
 bool CGOptions::enabled_builtin_kind(const string &kind) {
-  const map<string, bool>::const_iterator i = enabled_builtin_kinds_.find(kind);
+  const auto i = enabled_builtin_kinds_.find(kind);
   if (i == enabled_builtin_kinds_.end())
     return false;
   return i->second;
@@ -630,7 +628,7 @@ bool CGOptions::enabled_builtin_kind(const string &kind) {
 bool CGOptions::enabled_builtin(const string &ks) {
   vector<string> vs;
   StringUtils::split_string(ks, vs, "|");
-  for (vector<string>::iterator iter_begin = vs.begin(), iter_end = vs.end();
+  for (auto iter_begin = vs.begin(), iter_end = vs.end();
        iter_begin != iter_end; ++iter_begin) {
     if (enabled_builtin_kind(*iter_begin))
       return true;

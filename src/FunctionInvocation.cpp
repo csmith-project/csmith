@@ -420,7 +420,6 @@ vector<intvec> FunctionInvocation::permute_param_oders(void) const {
   vector<intvec> ret;
   intvec ret_base; // the ordered sequence
   vector<int> base;
-  size_t i, j;
   // shortcut for 2 parameters
   if (param_value.size() == 2) {
     ret_base.push_back(0);
@@ -433,7 +432,7 @@ vector<intvec> FunctionInvocation::permute_param_oders(void) const {
     return ret;
   }
   // get initial order, mark those paramters that invoke function call
-  for (i = 0; i < param_value.size(); i++) {
+  for (size_t i = 0; i < param_value.size(); i++) {
     if (param_value[i]->func_count() > 0) {
       base.push_back(i);
     }
@@ -441,10 +440,10 @@ vector<intvec> FunctionInvocation::permute_param_oders(void) const {
   }
   // permute
   vector<intvec> permuted = permute(base);
-  for (i = 0; i < permuted.size(); i++) {
+  for (size_t i = 0; i < permuted.size(); i++) {
     intvec new_seq = permuted[i];
     intvec tmp = ret_base;
-    for (j = 0; j < new_seq.size(); j++) {
+    for (size_t j = 0; j < new_seq.size(); j++) {
       // plug back the new sequence into initial ordered sequence
       int orig_pos = base[j];
       int new_pos = new_seq[j];
@@ -460,13 +459,12 @@ bool FunctionInvocation::visit_unordered_params(vector<const Fact *> &inputs,
   vector<const Fact *> inputs_copy = inputs;
   vector<const Fact *> tmp;
   vector<intvec> orders = permute_param_oders();
-  size_t i, j;
   assert(orders.size() > 0);
   // visit function calls with all possible orders
-  for (i = 0; i < orders.size(); i++) {
+  for (size_t i = 0; i < orders.size(); i++) {
     intvec &order = orders[i];
     inputs = inputs_copy;
-    for (j = 0; j < order.size(); j++) {
+    for (size_t j = 0; j < order.size(); j++) {
       int param_id = order[j];
       const Expression *value = param_value[param_id];
       if (!value->visit_facts(inputs, cg_context)) {
@@ -597,8 +595,7 @@ FunctionInvocation::FunctionInvocation(eInvocationType e,
  */
 FunctionInvocation::FunctionInvocation(const FunctionInvocation &fi)
     : invoke_type(fi.invoke_type), failed(fi.failed), ptr_cmp(fi.ptr_cmp) {
-  std::vector<const Expression *>::const_iterator i;
-  for (i = fi.param_value.begin(); i != fi.param_value.end(); ++i) {
+  for (auto i = fi.param_value.begin(); i != fi.param_value.end(); ++i) {
     const Expression *expr = (*i)->clone();
     param_value.push_back(expr);
   }
@@ -610,8 +607,7 @@ FunctionInvocation::FunctionInvocation(const FunctionInvocation &fi)
  *
  */
 FunctionInvocation::~FunctionInvocation(void) {
-  std::vector<const Expression *>::const_iterator i;
-  for (i = param_value.begin(); i != param_value.end(); ++i) {
+  for (auto i = param_value.begin(); i != param_value.end(); ++i) {
     delete (*i);
   }
   param_value.clear();

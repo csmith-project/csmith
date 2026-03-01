@@ -487,8 +487,7 @@ bool Type::signed_overflow_possible() const {
 void Type::get_all_ok_struct_union_types(vector<Type *> &ok_types,
                                          bool no_const, bool no_volatile,
                                          bool need_int_field, bool bStruct) {
-  vector<Type *>::iterator i;
-  for (i = AllTypes.begin(); i != AllTypes.end(); ++i) {
+  for (auto i = AllTypes.begin(); i != AllTypes.end(); ++i) {
     Type *t = (*i);
     if (bStruct && t->eType != eTypeDesc::eStruct)
       continue;
@@ -680,10 +679,9 @@ void Type::make_one_union_field(vector<const Type *> &fields,
   if (is_bitfield) {
     make_one_bitfield(fields, qfers, lens);
   } else {
-    size_t i;
     vector<Type *> ok_nonstruct_types;
     vector<Type *> struct_types;
-    for (i = 0; i < AllTypes.size(); i++) {
+    for (size_t i = 0; i < AllTypes.size(); i++) {
       // Filter out pointer types.
       // See https://github.com/csmith-project/csmith/issues/108 for details.
       // This includes the cases that:
@@ -911,8 +909,7 @@ void Type::make_all_struct_types_(Enumerator<string> &bitfields_enumerator,
                          all_types.size(), all_quals.size(),
                          all_bitfield_quals.size());
 
-  Enumerator<string> *i;
-  for (i = fields_enumerator.begin(); i != fields_enumerator.end();
+  for (auto i = fields_enumerator.begin(); i != fields_enumerator.end();
        i = i->next()) {
     make_all_struct_types_with_bitfields(*i, bitfields_enumerator, accum_types,
                                          all_types, all_quals,
@@ -969,15 +966,13 @@ void Type::make_all_struct_types_with_bitfields(
  */
 void Type::copy_all_fields_types(vector<const Type *> &dest_types,
                                  vector<const Type *> &src_types) {
-  vector<const Type *>::const_iterator i;
-  for (i = src_types.begin(); i != src_types.end(); ++i)
+  for (auto i = src_types.begin(); i != src_types.end(); ++i)
     dest_types.push_back(*i);
 }
 
 void Type::reset_accum_types(vector<const Type *> &accum_types) {
   accum_types.clear();
-  vector<Type *>::const_iterator i;
-  for (i = AllTypes.begin(); i != AllTypes.end(); ++i)
+  for (auto i = AllTypes.begin(); i != AllTypes.end(); ++i)
     accum_types.push_back(*i);
 }
 
@@ -1014,8 +1009,7 @@ void Type::make_all_struct_types(int level, vector<const Type *> &accum_types) {
   Enumerator<string> fields_enumerator;
   init_is_bitfield_enumerator(fields_enumerator, ExhaustiveBitFieldsProb());
 
-  Enumerator<string> *i;
-  for (i = fields_enumerator.begin(); i != fields_enumerator.end();
+  for (auto i = fields_enumerator.begin(); i != fields_enumerator.end();
        i = i->next()) {
     make_all_struct_types_(*i, accum_types, all_types, all_quals,
                            all_bitfield_quals);
@@ -1036,8 +1030,7 @@ void Type::make_all_struct_union_types(void) {
 }
 
 bool Type::has_aggregate_field(const vector<const Type *> &fields) {
-  for (vector<const Type *>::const_iterator iter = fields.begin(),
-                                            iter_end = fields.end();
+  for (auto iter = fields.begin(), iter_end = fields.end();
        iter != iter_end; ++iter) {
     if ((*iter)->is_aggregate())
       return true;
@@ -1046,8 +1039,7 @@ bool Type::has_aggregate_field(const vector<const Type *> &fields) {
 }
 
 bool Type::has_longlong_field(const vector<const Type *> &fields) {
-  for (vector<const Type *>::const_iterator iter = fields.begin(),
-                                            iter_end = fields.end();
+  for (auto iter = fields.begin(), iter_end = fields.end();
        iter != iter_end; ++iter) {
     if ((*iter)->is_long_long())
       return true;
@@ -1943,12 +1935,11 @@ std::string Type::printf_directive(void) const {
  *
  */
 void Type::doFinalization(void) {
-  vector<Type *>::iterator j;
-  for (j = AllTypes.begin(); j != AllTypes.end(); ++j)
+  for (auto j = AllTypes.begin(); j != AllTypes.end(); ++j)
     delete (*j);
   AllTypes.clear();
 
-  for (j = derived_types.begin(); j != derived_types.end(); ++j)
+  for (auto j = derived_types.begin(); j != derived_types.end(); ++j)
     delete (*j);
   derived_types.clear();
 }

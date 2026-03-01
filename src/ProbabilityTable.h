@@ -82,8 +82,7 @@ ProbabilityTable<Key, Value>::ProbabilityTable() : curr_max_key_(0) {
 
 template <class Key, class Value>
 ProbabilityTable<Key, Value>::~ProbabilityTable() {
-  typename vector<Entry *>::iterator i;
-  for (i = table_.begin(); i != table_.end(); ++i)
+  for (auto i = table_.begin(); i != table_.end(); ++i)
     delete (*i);
   table_.clear();
 }
@@ -106,8 +105,8 @@ void ProbabilityTable<Key, Value>::sorted_insert(Entry *t) {
     return;
   }
 
-  typename vector<Entry *>::iterator i;
-  for (i = table_.begin(); i != table_.end(); i++) {
+  auto i = table_.begin();
+  for (; i != table_.end(); i++) {
     if ((*i)->get_key() > k) {
       break;
     }
@@ -131,9 +130,8 @@ template <class Key, class Value>
 Value ProbabilityTable<Key, Value>::get_value(Key k) const {
   assert(k < curr_max_key_);
 
-  typename vector<Entry *>::const_iterator i;
-  i = find_if(table_.begin(), table_.end(),
-              [k](Entry *e) { return e->get_key() > k; });
+  auto i = find_if(table_.begin(), table_.end(),
+                   [k](Entry *e) { return e->get_key() > k; });
 
   assert(i != table_.end());
   return (*i)->get_value();

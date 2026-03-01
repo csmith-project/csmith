@@ -128,8 +128,7 @@ template <class Name> Enumerator<Name>::Enumerator() {
 }
 
 template <class Name> Enumerator<Name>::~Enumerator() {
-  typename map<Name, EnumObject *>::iterator i;
-  for (i = objs_.begin(); i != objs_.end(); ++i) {
+  for (auto i = objs_.begin(); i != objs_.end(); ++i) {
     delete i->second;
   }
   objs_.clear();
@@ -204,7 +203,7 @@ template <class Name> int Enumerator<Name>::get_elem(const Name &name) {
 }
 
 template <class Name> void Enumerator<Name>::reset_after_backward_pos() {
-  typename map<Name, EnumObject *>::iterator i = backward_pos_;
+  auto i = backward_pos_;
   ++i;
   while (i != objs_.end()) {
     EnumObject *obj = (*i).second;
@@ -251,8 +250,7 @@ template <class Name> bool Enumerator<Name>::is_changed(const Name &name) {
 }
 
 template <class Name> void Enumerator<Name>::reset_all_changed() {
-  typename map<Name, EnumObject *>::iterator i;
-  for (i = objs_.begin(); i != objs_.end(); ++i) {
+  for (auto i = objs_.begin(); i != objs_.end(); ++i) {
     EnumObject *obj = (*i).second;
     assert(obj);
     obj->reset_changed();

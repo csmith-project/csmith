@@ -84,14 +84,15 @@ void FactMgr::add_new_var_fact_and_update_inout_maps(const Block *blk,
         global_facts.push_back(f);
       }
 
-      map<const Statement *, FactVec>::iterator iter;
-      for (iter = map_facts_in.begin(); iter != map_facts_in.end(); ++iter) {
+      for (auto iter = map_facts_in.begin(); iter != map_facts_in.end();
+           ++iter) {
         const Statement *stm = iter->first;
         if (stm && (stm->in_block(blk) || blk == nullptr)) {
           iter->second.push_back(f);
         }
       }
-      for (iter = map_facts_out.begin(); iter != map_facts_out.end(); ++iter) {
+      for (auto iter = map_facts_out.begin(); iter != map_facts_out.end();
+           ++iter) {
         const Statement *stm = iter->first;
         assert(stm);
         if (blk) {
@@ -177,11 +178,10 @@ void FactMgr::update_facts_for_oos_vars(const vector<const Variable *> &vars,
  */
 void FactMgr::remove_function_local_facts(std::vector<const Fact *> &inputs,
                                           const Statement *stm) {
-  size_t i;
   size_t len = inputs.size();
   assert(stm->func);
   // remove irrelevant facts
-  for (i = 0; i < len; i++) {
+  for (size_t i = 0; i < len; i++) {
     const Variable *v = inputs[i]->get_var();
     // if it's fact for a local variable of this function, or return variable
     // of another function, we are not interested in them after exit function
@@ -194,7 +194,7 @@ void FactMgr::remove_function_local_facts(std::vector<const Fact *> &inputs,
   }
   // mark any remaining facts that may point to a local vars of this
   // function as "point to garbage"
-  for (i = 0; i < inputs.size(); i++) {
+  for (size_t i = 0; i < inputs.size(); i++) {
     if (inputs[i]->eCat == eFactCategory::ePointTo) {
       const FactPointTo *f = static_cast<const FactPointTo *>(inputs[i]);
       const FactPointTo *new_fact = f->mark_func_end(stm);
@@ -209,13 +209,13 @@ void FactMgr::setup_in_out_maps(bool first_time) {
   if (first_time) {
     // first time revisit, create map_facts_in_final and map_facts_out_final
     // with cloned facts
-    map<const Statement *, vector<const Fact *>>::const_iterator iter;
-    for (iter = map_facts_in.begin(); iter != map_facts_in.end(); ++iter) {
+    for (auto iter = map_facts_in.begin(); iter != map_facts_in.end(); ++iter) {
       const Statement *stm = iter->first;
       const vector<const Fact *> &facts1 = iter->second;
       map_facts_in_final[stm] = copy_facts(facts1);
     }
-    for (iter = map_facts_out.begin(); iter != map_facts_out.end(); ++iter) {
+    for (auto iter = map_facts_out.begin(); iter != map_facts_out.end();
+         ++iter) {
       const Statement *stm = iter->first;
       const vector<const Fact *> &facts1 = iter->second;
       map_facts_out_final[stm] = copy_facts(facts1);
@@ -224,15 +224,16 @@ void FactMgr::setup_in_out_maps(bool first_time) {
     // not the 1st time revisit
     // combine facts_in and facts_out from this invocation with facts from
     // previous invocations
-    map<const Statement *, vector<Fact *>>::iterator iter;
-    for (iter = map_facts_in_final.begin(); iter != map_facts_in_final.end();
+    for (auto iter = map_facts_in_final.begin();
+         iter != map_facts_in_final.end();
          ++iter) {
       const Statement *stm = iter->first;
       vector<Fact *> &facts1 = iter->second;
       const FactVec &facts2 = map_facts_in[stm];
       combine_facts(facts1, facts2);
     }
-    for (iter = map_facts_out_final.begin(); iter != map_facts_out_final.end();
+    for (auto iter = map_facts_out_final.begin();
+         iter != map_facts_out_final.end();
          ++iter) {
       const Statement *stm = iter->first;
       vector<Fact *> &facts1 = iter->second;
@@ -283,9 +284,9 @@ void FactMgr::add_fact_out(const Statement *stm, const Fact *fact) {
     if (stm->eType == eStatementType::eReturn && !var->is_global())
       return;
     if (stm->eType == eStatementType::eBreak || stm->eType == eStatementType::eContinue) {
-      Block *b;
-      for (b = stm->parent; b && !b->looping; b = b->parent) {
-        /* Empty. */
+      Block *b = stm->parent;
+      while (b && !b->looping) {
+        b = b->parent;
       }
       if (!func->is_var_visible(var, b)) {
         return;
@@ -313,11 +314,11 @@ void FactMgr::caller_to_callee_handover(const FunctionInvocationUser *fiu,
   // add parameter facts
   add_param_facts(fiu->param_value, inputs);
 
-  size_t i, j, cnt;
+  size_t cnt;
   std::vector<const Fact *> keep_facts;
   size_t len = inputs.size();
   // move global facts and parameter facts to a separate "keep" list
-  for (i = 0; i < len; i++) {
+  for (size_t i = 0; i < len; i++) {
     const Variable *v = inputs[i]->get_var();
     if (v->is_global() || find_variable_in_set(func->param, v) >= 0) {
       keep_facts.push_back(inputs[i]);
@@ -331,9 +332,9 @@ void FactMgr::caller_to_callee_handover(const FunctionInvocationUser *fiu,
   // callers) but invisible to this function
   do {
     cnt = keep_facts.size();
-    for (i = 0; i < len; i++) {
+    for (size_t i = 0; i < len; i++) {
       // const Variable* v = f->get_var();
-      for (j = 0; j < keep_facts.size(); j++) {
+      for (size_t j = 0; j < keep_facts.size(); j++) {
         if (keep_facts[j]->eCat == eFactCategory::ePointTo) {
           const FactPointTo *fp =
               dynamic_cast<const FactPointTo *>(keep_facts[j]);
@@ -404,12 +405,11 @@ bool FactMgr::update_fact_for_assign(const StatementAssign *sa,
 
 void FactMgr::update_fact_for_return(const StatementReturn *sr,
                                      FactVec &inputs) {
-  size_t i, j;
-  for (i = 0; i < FactMgr::meta_facts.size(); i++) {
+  for (size_t i = 0; i < FactMgr::meta_facts.size(); i++) {
     std::vector<const Fact *> facts =
         FactMgr::meta_facts[i]->abstract_fact_for_return(inputs, sr->get_var(),
                                                          sr->func);
-    for (j = 0; j < facts.size(); j++) {
+    for (size_t j = 0; j < facts.size(); j++) {
       // merge with other return statements
       if (merge_fact(inputs, facts[j])) {
         sr->func->fact_changed = true;
@@ -423,13 +423,12 @@ void FactMgr::update_fact_for_return(const StatementReturn *sr,
 
 void FactMgr::update_facts_for_dest(const FactVec &facts_in, FactVec &facts_out,
                                     const Statement *dest) {
-  size_t i, j;
   vector<const Variable *> oos_vars;
   const Function *func = dest->func;
   assert(func);
   // find all the variales that are out-of-scope after jump to destination
   // oos variables are those not on stack and not global
-  for (i = 0; i < facts_in.size(); i++) {
+  for (size_t i = 0; i < facts_in.size(); i++) {
     const Fact *f = facts_in[i];
     const Variable *var = f->get_var();
     // return variable, target site don't need them
@@ -442,7 +441,7 @@ void FactMgr::update_facts_for_dest(const FactVec &facts_in, FactVec &facts_out,
     }
     if (f->eCat == eFactCategory::ePointTo) {
       const FactPointTo *fp = dynamic_cast<const FactPointTo *>(f);
-      for (j = 0; j < fp->get_point_to_vars().size(); j++) {
+      for (size_t j = 0; j < fp->get_point_to_vars().size(); j++) {
         const Variable *v = fp->get_point_to_vars()[j];
         if (!FactPointTo::is_special_ptr(v) && func->is_var_oos(v, dest)) {
           if (find_variable_in_set(oos_vars, v) == -1) {
@@ -509,8 +508,7 @@ void FactMgr::makeup_new_var_facts(vector<const Fact *> &old_facts,
 }
 
 void FactMgr::clear_map_visited(void) {
-  map<const Statement *, bool>::iterator iter;
-  for (iter = map_visited.begin(); iter != map_visited.end(); ++iter) {
+  for (auto iter = map_visited.begin(); iter != map_visited.end(); ++iter) {
     iter->second = false;
   }
 }
@@ -703,8 +701,7 @@ void FactMgr::find_dangling_global_ptrs(Function *f) {
 }
 
 void FactMgr::sanity_check_map() const {
-  map<const Statement *, vector<const Fact *>>::const_iterator iter;
-  for (iter = map_facts_in.begin(); iter != map_facts_in.end(); ++iter) {
+  for (auto iter = map_facts_in.begin(); iter != map_facts_in.end(); ++iter) {
     const Statement *stm = iter->first;
     const vector<const Fact *> &facts = iter->second;
     for (size_t i = 0; i < facts.size(); i++) {
@@ -720,7 +717,7 @@ void FactMgr::sanity_check_map() const {
     }
   }
 
-  for (iter = map_facts_out.begin(); iter != map_facts_out.end(); ++iter) {
+  for (auto iter = map_facts_out.begin(); iter != map_facts_out.end(); ++iter) {
     const Statement *stm = iter->first;
     const vector<const Fact *> &facts = iter->second;
     for (size_t i = 0; i < facts.size(); i++) {

@@ -97,14 +97,13 @@ StatementArrayOp::make_random_array_init(CGContext &cg_context) {
   // the iteration settings are simple: start from index 0, step through all
   // members
   vector<int> inits, incrs;
-  size_t i;
   cg_context.get_effect_stm().clear();
   FactMgr *fm = get_fact_mgr(&cg_context);
   int vol_count = 0;
   if (av->is_volatile())
     vol_count++;
 
-  for (i = 0; i < av->get_dimension(); i++) {
+  for (size_t i = 0; i < av->get_dimension(); i++) {
     inits.push_back(0);
     incrs.push_back(1);
     Variable *cv = nullptr;
@@ -152,7 +151,7 @@ StatementArrayOp::make_random_array_init(CGContext &cg_context) {
   fm->map_stm_effect[sa] = cg_context.get_effect_stm();
 
   // clear IV list from cg_context
-  for (i = 0; i < cvs.size(); i++) {
+  for (size_t i = 0; i < cvs.size(); i++) {
     cg_context.iv_bounds.erase(cvs[i]);
   }
   return sa;
@@ -225,7 +224,6 @@ void StatementArrayOp::output_header(std::ostream &out, int &indent) const {
  */
 void StatementArrayOp::Output(std::ostream &out, FactMgr *fm,
                               int indent) const {
-  size_t i;
   output_header(out, indent);
 
   if (body) {
@@ -260,7 +258,7 @@ void StatementArrayOp::Output(std::ostream &out, FactMgr *fm,
     outputln(out);
   }
   // output the closing bracelets
-  for (i = 1; i < array_var->get_dimension(); i++) {
+  for (size_t i = 1; i < array_var->get_dimension(); i++) {
     indent--;
     output_tab(out, indent);
     out << "}";
@@ -271,8 +269,7 @@ void StatementArrayOp::Output(std::ostream &out, FactMgr *fm,
 bool StatementArrayOp::visit_facts(vector<const Fact *> &inputs,
                                    CGContext &cg_context) const {
   // walk the iterations
-  size_t i;
-  for (i = 0; i < array_var->get_dimension(); i++) {
+  for (size_t i = 0; i < array_var->get_dimension(); i++) {
     const Variable *cv = ctrl_vars[i];
     if (!cg_context.check_write_var(cv, inputs)) {
       return log_analysis_fail("StatementArrayOp cv");
@@ -297,7 +294,7 @@ bool StatementArrayOp::visit_facts(vector<const Fact *> &inputs,
     // find edges leading to the end of this statement, and merge
     vector<const CFGEdge *> edges;
     find_edges_in(edges, true, false);
-    for (i = 0; i < edges.size(); i++) {
+    for (size_t i = 0; i < edges.size(); i++) {
       const Statement *src = edges[i]->src;
       FactMgr::merge_jump_facts(inputs, fm->map_facts_out[src]);
     }

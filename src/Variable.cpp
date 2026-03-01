@@ -336,14 +336,14 @@ int Variable::get_field_id(void) const {
  ************************************************************************/
 void Variable::create_field_vars(const Type *type) {
   assert(type->is_aggregate());
-  size_t i, j;
+  size_t j;
   assert(type->fields.size() == type->qfers_.size());
   j = 0;
   if (name == "g_481")
     j = 0;
   bool is_vol_var = qfer.is_volatile();
   bool is_const_var = qfer.is_const();
-  for (i = 0; i < type->fields.size(); i++) {
+  for (size_t i = 0; i < type->fields.size(); i++) {
     if (type->is_unamed_padding(i))
       continue;
     ostringstream ss;
@@ -462,8 +462,7 @@ Variable::Variable(const std::string &name, const Type *type,
  */
 Variable::~Variable(void) {
   // delete field vars explicitly because they are not stored in AllVars anymore
-  vector<Variable *>::iterator i;
-  for (i = field_vars.begin(); i != field_vars.end(); ++i)
+  for (auto i = field_vars.begin(); i != field_vars.end(); ++i)
     delete (*i);
   field_vars.clear();
   delete init;
@@ -778,13 +777,10 @@ std::vector<const Variable *> &Variable::get_last_ctrl_vars() {
 
 // ------------------------------------------------------------
 void Variable::doFinalization(void) {
-  for (vector<vector<const Variable *> *>::iterator
-           vi = ctrl_vars_vectors.begin(),
-           ve = ctrl_vars_vectors.end();
+  for (auto vi = ctrl_vars_vectors.begin(), ve = ctrl_vars_vectors.end();
        vi != ve; ++vi) {
     vector<const Variable *> *v = (*vi);
-    for (vector<const Variable *>::iterator i = v->begin(), e = v->end();
-         i != e; ++i) {
+    for (auto i = v->begin(), e = v->end(); i != e; ++i) {
       delete (*i);
     }
     delete v;
@@ -795,8 +791,7 @@ void Variable::doFinalization(void) {
 // --------------------------------------------------------------
 void MapVariableList(const vector<Variable *> &var, std::ostream &out,
                      void (*func)(Variable *var, std::ostream *pOut)) {
-  for (vector<Variable *>::const_iterator i = var.begin(); i != var.end();
-       ++i) {
+  for (auto i = var.begin(); i != var.end(); ++i) {
     func(*i, &out);
   }
 }
@@ -833,12 +828,12 @@ size_t Variable::GetMaxArrayDimension(const vector<Variable *> &vars) {
 
 void OutputArrayInitializers(const vector<Variable *> &vars, std::ostream &out,
                              int indent) {
-  size_t i, dimen;
+  size_t dimen;
   dimen = Variable::GetMaxArrayDimension(vars);
   if (dimen) {
     vector<const Variable *> &ctrl_vars = Variable::get_new_ctrl_vars();
     OutputArrayCtrlVars(ctrl_vars, out, dimen, indent);
-    for (i = 0; i < vars.size(); i++) {
+    for (size_t i = 0; i < vars.size(); i++) {
       if (vars[i]->isArray) {
         ArrayVariable *av = static_cast<ArrayVariable *>(vars[i]);
         if (!av->no_loop_initializer()) {
@@ -934,13 +929,12 @@ void HashVariable(Variable *var, std::ostream *pOut) {
 
 std::string Variable::to_string(void) const {
   string ret;
-  size_t i;
   if (is_virtual() && isArray) {
     vector<intvec> all_indices;
     const ArrayVariable *av = static_cast<const ArrayVariable *>(this);
     expand_within_ranges(av->get_sizes(), all_indices);
     // ret = "(";
-    for (i = 0; i < all_indices.size(); i++) {
+    for (size_t i = 0; i < all_indices.size(); i++) {
       intvec &indices = all_indices[i];
       ArrayVariable *member = av->itemize(indices);
       if (i > 0)
@@ -954,7 +948,7 @@ std::string Variable::to_string(void) const {
   case eTypeDesc::eUnion:
   case eTypeDesc::eStruct:
     // ret = "(";
-    for (i = 0; i < field_vars.size(); i++) {
+    for (size_t i = 0; i < field_vars.size(); i++) {
       if (i > 0)
         ret += ", ";
       ret += field_vars[i]->to_string();
@@ -981,13 +975,12 @@ int Variable::output_runtime_value(ostream &out, const string &prefix,
     ostringstream oss;
     assert(!is_field_var());
     // var must be a virtual array, duplicate the directive for all members
-    int j, k;
     const ArrayVariable *av = static_cast<const ArrayVariable *>(this);
-    for (k = av->get_sizes().size() - 1; k >= 0; k--) {
+    for (int k = av->get_sizes().size() - 1; k >= 0; k--) {
       int len = av->get_sizes()[k];
       oss.str("");
       oss << "{";
-      for (j = 0; j < len; j++) {
+      for (int j = 0; j < len; j++) {
         oss << directive;
         if (j < len - 1) {
           oss << ", ";
@@ -1054,7 +1047,7 @@ int Variable::output_volatile_fprintf(ostream &out, int indent,
 
 bool Variable::is_seen_name(vector<std::string> &seen_names,
                             const std::string &name) const {
-  for (vector<string>::iterator i = seen_names.begin(); i != seen_names.end();
+  for (auto i = seen_names.begin(); i != seen_names.end();
        ++i) {
     std::string n = (*i);
     n += "[";
@@ -1082,7 +1075,6 @@ bool Variable::is_valid_volatile(void) const {
 int Variable::output_volatile_address(ostream &out, int indent,
                                       const string &fp_string,
                                       vector<std::string> &seen_names) const {
-  size_t i;
   //    	bool is_vol = qfer.is_volatile_after_deref(0);
   std::string sizeof_string;
   type->get_type_sizeof_string(sizeof_string);
@@ -1104,7 +1096,7 @@ int Variable::output_volatile_address(ostream &out, int indent,
 #endif
     vector<intvec> all_indices;
     expand_within_ranges(av->get_sizes(), all_indices);
-    for (i = 0; i < all_indices.size(); i++) {
+    for (size_t i = 0; i < all_indices.size(); i++) {
       ArrayVariable *member = av->itemize(all_indices[i]);
       member->output_volatile_address(out, indent, fp_string, seen_names);
     }
@@ -1134,7 +1126,7 @@ int Variable::output_volatile_address(ostream &out, int indent,
 		}
 		else {
 #endif
-    for (i = 0; i < field_vars.size(); i++) {
+    for (size_t i = 0; i < field_vars.size(); i++) {
       // bit fields can not be taken address
       if (!field_vars[i]->isBitfield_) {
         field_vars[i]->output_volatile_address(out, indent, fp_string,
@@ -1147,13 +1139,12 @@ int Variable::output_volatile_address(ostream &out, int indent,
 }
 
 int Variable::output_addressable_name(ostream &out, int indent) const {
-  size_t i;
   if (is_virtual()) {
     assert(!is_field_var());
     const ArrayVariable *av = static_cast<const ArrayVariable *>(this);
     vector<intvec> all_indices;
     expand_within_ranges(av->get_sizes(), all_indices);
-    for (i = 0; i < all_indices.size(); i++) {
+    for (size_t i = 0; i < all_indices.size(); i++) {
       ArrayVariable *member = av->itemize(all_indices[i]);
       member->output_addressable_name(out, indent);
     }
@@ -1166,7 +1157,7 @@ int Variable::output_addressable_name(ostream &out, int indent) const {
     output_print_str(out, str, str_value, indent);
     outputln(out);
   } else if (type->eType == eTypeDesc::eStruct || type->eType == eTypeDesc::eUnion) {
-    for (i = 0; i < field_vars.size(); i++) {
+    for (size_t i = 0; i < field_vars.size(); i++) {
       // bit fields can not be taken address
       if (!field_vars[i]->isBitfield_) {
         field_vars[i]->output_addressable_name(out, indent);
@@ -1181,13 +1172,12 @@ int Variable::output_addressable_name(ostream &out, int indent) const {
 
 int Variable::output_value_dump(ostream &out, const string &prefix,
                                 int indent) const {
-  size_t i;
   if (is_virtual()) {
     assert(!is_field_var());
     const ArrayVariable *av = static_cast<const ArrayVariable *>(this);
     vector<intvec> all_indices;
     expand_within_ranges(av->get_sizes(), all_indices);
-    for (i = 0; i < all_indices.size(); i++) {
+    for (size_t i = 0; i < all_indices.size(); i++) {
       ArrayVariable *member = av->itemize(all_indices[i]);
       member->output_value_dump(out, prefix, indent);
     }
@@ -1197,13 +1187,13 @@ int Variable::output_value_dump(ostream &out, const string &prefix,
         to_string(), indent);
     outputln(out);
   } else if (type->eType == eTypeDesc::eStruct) {
-    for (i = 0; i < field_vars.size(); i++) {
+    for (size_t i = 0; i < field_vars.size(); i++) {
       // bit fields can not be taken address
       field_vars[i]->output_value_dump(out, prefix, indent);
     }
   } else if (type->eType == eTypeDesc::eUnion) {
     const vector<const Fact *> &facts = FactMgr::get_program_end_facts();
-    for (i = 0; i < field_vars.size(); i++) {
+    for (size_t i = 0; i < field_vars.size(); i++) {
       if (FactUnion::is_field_readable(this, i, facts)) {
         field_vars[i]->output_value_dump(out, prefix, indent);
       }

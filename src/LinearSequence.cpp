@@ -71,11 +71,10 @@ void LinearSequence::clear() { seq_map_.clear(); }
 void LinearSequence::get_sequence(ostream &ss) {
   assert(!seq_map_.empty());
 
-  size_t i = 0;
-  for (i = 0; i < seq_map_.size() - 1; ++i) {
+  for (size_t i = 0; i < seq_map_.size() - 1; ++i) {
     ss << seq_map_[i] << sep_char_;
   }
-  ss << seq_map_[i];
+  ss << seq_map_[seq_map_.size() - 1];
 }
 
 unsigned INT64 LinearSequence::sequence_length() { return seq_map_.size(); }

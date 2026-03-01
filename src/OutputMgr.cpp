@@ -80,7 +80,7 @@ void OutputMgr::set_curr_func(const std::string &fname) {
 bool OutputMgr::is_monitored_func(void) {
   if (OutputMgr::monitored_funcs_.empty())
     return true;
-  std::vector<string>::iterator result =
+  auto result =
       find(monitored_funcs_.begin(), monitored_funcs_.end(), curr_func_);
   return (result != monitored_funcs_.end());
 }

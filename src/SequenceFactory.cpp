@@ -51,8 +51,7 @@ Sequence *SequenceFactory::make_sequence() {
 }
 
 void SequenceFactory::destroy_sequences() {
-  std::set<Sequence *>::iterator i;
-  for (i = seqs_.begin(); i != seqs_.end(); ++i) {
+  for (auto i = seqs_.begin(); i != seqs_.end(); ++i) {
     delete *i;
   }
   seqs_.clear();

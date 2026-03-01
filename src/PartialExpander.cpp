@@ -40,8 +40,7 @@ std::map<eStatementType, bool> PartialExpander::expands_;
 std::map<eStatementType, bool> PartialExpander::expands_backup_;
 
 void print_map(const map<eStatementType, bool> &m) {
-  std::map<eStatementType, bool>::const_iterator i;
-  for (i = m.begin(); i != m.end(); ++i) {
+  for (auto i = m.begin(); i != m.end(); ++i) {
     cout << "t = " << static_cast<int>((*i).first) << " , v = " << (*i).second
          << std::endl;
   }
@@ -114,8 +113,7 @@ bool PartialExpander::set_expand(const std::string &s) {
 
 void PartialExpander::copy_expands(std::map<eStatementType, bool> &dest,
                                    const map<eStatementType, bool> &src) {
-  std::map<eStatementType, bool>::const_iterator i;
-  for (i = src.begin(); i != src.end(); ++i) {
+  for (auto i = src.begin(); i != src.end(); ++i) {
     eStatementType t = (*i).first;
     dest[t] = (*i).second;
   }

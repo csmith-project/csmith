@@ -132,8 +132,7 @@ void DefaultOutputMgr::OutputAllHeaders() {
 
   *outs[0] << "#include \"" << global_header << ".h\"" << std::endl;
 
-  vector<ofstream *>::iterator j;
-  for (j = outs.begin(); j != outs.end(); ++j) {
+  for (auto j = outs.begin(); j != outs.end(); ++j) {
     ofstream *out = (*j);
     string prefix = "extern ";
     // OutputGlobalVariablesDecls(*out, prefix);
@@ -145,8 +144,7 @@ void DefaultOutputMgr::OutputAllHeaders() {
 void DefaultOutputMgr::RandomOutputVarDefs() {
   vector<Variable *> *globals = VariableSelector::GetGlobalVariables();
   size_t size = outs.size();
-  vector<Variable *>::iterator i;
-  for (i = globals->begin(); i != globals->end(); ++i) {
+  for (auto i = globals->begin(); i != globals->end(); ++i) {
     int index = pure_rnd_upto(size);
     ostream *out = outs[index];
     (*i)->OutputDef(*out, 0);
@@ -156,8 +154,7 @@ void DefaultOutputMgr::RandomOutputVarDefs() {
 void DefaultOutputMgr::RandomOutputFuncDefs() {
   const vector<Function *> &funcs = get_all_functions();
   size_t size = outs.size();
-  vector<Function *>::const_iterator i;
-  for (i = funcs.begin(); i != funcs.end(); ++i) {
+  for (auto i = funcs.begin(); i != funcs.end(); ++i) {
     if ((*i)->is_builtin)
       continue;
     int index = pure_rnd_upto(size);
@@ -226,8 +223,7 @@ DefaultOutputMgr::DefaultOutputMgr(std::ofstream *ofile) : ofile_(ofile) {}
 DefaultOutputMgr::DefaultOutputMgr() : ofile_(nullptr) {}
 
 DefaultOutputMgr::~DefaultOutputMgr() {
-  std::vector<std::ofstream *>::iterator out;
-  for (out = outs.begin(); out != outs.end(); ++out) {
+  for (auto out = outs.begin(); out != outs.end(); ++out) {
     (*out)->close();
     delete (*out);
   }

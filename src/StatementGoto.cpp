@@ -93,9 +93,8 @@ StatementGoto *StatementGoto::make_random(CGContext &cg_context) {
   // find statements that are good for backward/forward jumps (a good statement
   // has the type other than break/continue/goto/return) (relax this
   // constriction?)
-  size_t i;
   vector<const Statement *> ok_stms;
-  for (i = 0; i < ok_blk->stms.size(); i++) {
+  for (size_t i = 0; i < ok_blk->stms.size(); i++) {
     const Statement *s = ok_blk->stms[i];
     if (s != stm) {
       // forward goto shouldn't be inserted after a return statement
@@ -184,7 +183,7 @@ StatementGoto *StatementGoto::make_random(CGContext &cg_context) {
 
       Block *other_blk = other_stm->parent;
       sg = new StatementGoto(other_blk, *test, stm, skipped_vars);
-      for (i = 0; i < other_blk->stms.size(); i++) {
+      for (size_t i = 0; i < other_blk->stms.size(); i++) {
         if (other_blk->stms[i] == other_stm) {
           // note we don't return goto statement for forward edges, instead the
           // statement is inserted into an existing block

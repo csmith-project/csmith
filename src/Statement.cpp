@@ -329,15 +329,14 @@ Statement::get_dereferenced_ptrs(void) const {
 }
 
 void Statement::get_referenced_ptrs(std::vector<const Variable *> &ptrs) const {
-  size_t i;
   vector<const Expression *> exprs;
   vector<const Block *> blks;
   get_exprs(exprs);
   get_blocks(blks);
-  for (i = 0; i < exprs.size(); i++) {
+  for (size_t i = 0; i < exprs.size(); i++) {
     exprs[i]->get_referenced_ptrs(ptrs);
   }
-  for (i = 0; i < blks.size(); i++) {
+  for (size_t i = 0; i < blks.size(); i++) {
     for (size_t j = 0; j < blks[i]->stms.size(); j++) {
       const Statement *s = blks[i]->stms[j];
       s->get_referenced_ptrs(ptrs);
@@ -712,9 +711,8 @@ int Statement::find_contained_labels(vector<string> &labels) const {
 
   vector<const Block *> blks;
   get_blocks(blks);
-  size_t i, j;
-  for (i = 0; i < blks.size(); i++) {
-    for (j = 0; j < blks[i]->stms.size(); j++) {
+  for (size_t i = 0; i < blks.size(); i++) {
+    for (size_t j = 0; j < blks[i]->stms.size(); j++) {
       const Statement *s = blks[i]->stms[j];
       s->find_contained_labels(labels);
     }
@@ -749,15 +747,14 @@ const FunctionInvocation *Statement::get_direct_invocation(void) const {
  */
 void Statement::get_called_funcs(
     std::vector<const FunctionInvocationUser *> &funcs) const {
-  size_t i;
   vector<const Expression *> exprs;
   vector<const Block *> blks;
   get_exprs(exprs);
   get_blocks(blks);
-  for (i = 0; i < exprs.size(); i++) {
+  for (size_t i = 0; i < exprs.size(); i++) {
     exprs[i]->get_called_funcs(funcs);
   }
-  for (i = 0; i < blks.size(); i++) {
+  for (size_t i = 0; i < blks.size(); i++) {
     for (size_t j = 0; j < blks[i]->stms.size(); j++) {
       const Statement *s = blks[i]->stms[j];
       s->get_called_funcs(funcs);
@@ -772,8 +769,7 @@ void Statement::get_called_funcs(
 bool Statement::contains_unfixed_goto(void) const {
   FactMgr *fm = get_fact_mgr_for_func(func);
   assert(fm);
-  size_t i, j;
-  for (i = 0; i < fm->cfg_edges.size(); i++) {
+  for (size_t i = 0; i < fm->cfg_edges.size(); i++) {
     const CFGEdge *edge = fm->cfg_edges[i];
     /* the following for-loop has to be analyzed at least once
        label: ...
@@ -793,7 +789,7 @@ bool Statement::contains_unfixed_goto(void) const {
           fm->map_facts_in[edge->dest].empty()) {
         return true;
       }
-      for (j = 0; j < fm->map_facts_in[edge->dest].size(); j++) {
+      for (size_t j = 0; j < fm->map_facts_in[edge->dest].size(); j++) {
         const Fact *f = fm->map_facts_in[edge->dest][j];
         // ignore return variable facts
         if (!f->get_var()->is_rv()) {
@@ -812,15 +808,16 @@ bool Statement::contains_unfixed_goto(void) const {
 bool Statement::analyze_with_edges_in(vector<const Fact *> &inputs,
                                       CGContext &cg_context) const {
   FactMgr *fm = get_fact_mgr(&cg_context);
-  size_t i;
   vector<const CFGEdge *> edges;
-  if (find_jump_label() == "lbl_101")
-    i = 0;
+  if (find_jump_label() == "lbl_101") {
+    volatile size_t debug_i = 0;
+    (void)debug_i;
+  }
   // consider output from back edges. we should not merge them if this is the
   // first time
   if (fm->map_visited[this] && has_edge_in(false, true)) {
     find_edges_in(edges, false, true);
-    for (i = 0; i < edges.size(); i++) {
+    for (size_t i = 0; i < edges.size(); i++) {
       const Statement *src = edges[i]->src;
       if (fm->map_visited[src]) {
         FactMgr::merge_jump_facts(inputs, fm->map_facts_out[src]);
@@ -831,7 +828,7 @@ bool Statement::analyze_with_edges_in(vector<const Fact *> &inputs,
   // always consider output from forward edges
   if (has_edge_in(false, false)) {
     find_edges_in(edges, false, false);
-    for (i = 0; i < edges.size(); i++) {
+    for (size_t i = 0; i < edges.size(); i++) {
       const Statement *src = edges[i]->src;
       if (fm->map_visited[src]) {
         FactMgr::merge_jump_facts(inputs, fm->map_facts_out[src]);

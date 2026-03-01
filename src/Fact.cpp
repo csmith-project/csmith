@@ -108,8 +108,7 @@ vector<const Fact *> Fact::abstract_fact_for_var_init(const Variable *v) {
 }
 
 void Fact::doFinalization() {
-  std::vector<Fact *>::iterator i;
-  for (i = facts_.begin(); i != facts_.end(); ++i) {
+  for (auto i = facts_.begin(); i != facts_.end(); ++i) {
     delete (*i);
   }
   facts_.clear();
@@ -224,9 +223,8 @@ vector<Fact *> copy_facts(const FactVec &facts_in) {
  * combine facts obtained from two visits to the same piece of code
  *************************************************************/
 void combine_facts(vector<Fact *> &facts1, const FactVec &facts2) {
-  size_t i, j;
-  for (i = 0; i < facts2.size(); i++) {
-    for (j = 0; j < facts1.size(); j++) {
+  for (size_t i = 0; i < facts2.size(); i++) {
+    for (size_t j = 0; j < facts1.size(); j++) {
       Fact *old_fact = facts1[j];
       if (old_fact->is_related(*facts2[i])) {
         old_fact->join_visits(*facts2[i]);

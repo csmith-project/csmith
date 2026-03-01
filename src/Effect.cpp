@@ -57,11 +57,9 @@ static bool non_empty_intersection(const vector<const Variable *> &va,
                                    const vector<const Variable *> &vb) {
   vector<const Variable *>::size_type va_len = va.size();
   vector<const Variable *>::size_type vb_len = vb.size();
-  vector<const Variable *>::size_type i;
-  vector<const Variable *>::size_type j;
 
-  for (i = 0; i < va_len; ++i) {
-    for (j = 0; j < vb_len; ++j) {
+  for (vector<const Variable *>::size_type i = 0; i < va_len; ++i) {
+    for (vector<const Variable *>::size_type j = 0; j < vb_len; ++j) {
       if (va[i]->match(vb[j]) || vb[j]->match(va[i])) {
         return true;
       }
@@ -165,17 +163,16 @@ void Effect::add_effect(const Effect &e, bool include_lhs_effects) {
   // and algorithms... compute the union effect.
 
   vector<const Variable *>::size_type len;
-  vector<const Variable *>::size_type i;
 
   len = e.read_vars.size();
-  for (i = 0; i < len; ++i) {
+  for (vector<const Variable *>::size_type i = 0; i < len; ++i) {
     // this->read_var(e.read_vars[i]);
     if (!is_read(e.read_vars[i])) {
       this->read_vars.push_back(e.read_vars[i]);
     }
   }
   len = e.write_vars.size();
-  for (i = 0; i < len; ++i) {
+  for (vector<const Variable *>::size_type i = 0; i < len; ++i) {
     // this->write_var(e.write_vars[i]);
     if (!is_written(e.write_vars[i])) {
       this->write_vars.push_back(e.write_vars[i]);
@@ -198,17 +195,16 @@ void Effect::add_external_effect(const Effect &e) {
   }
 
   vector<Variable *>::size_type len;
-  vector<Variable *>::size_type i;
 
   len = e.read_vars.size();
-  for (i = 0; i < len; ++i) {
+  for (vector<Variable *>::size_type i = 0; i < len; ++i) {
     if (e.read_vars[i]->is_global()) {
       this->read_var(e.read_vars[i]);
     }
   }
 
   len = e.write_vars.size();
-  for (i = 0; i < len; ++i) {
+  for (vector<Variable *>::size_type i = 0; i < len; ++i) {
     if (e.write_vars[i]->is_global()) {
       this->write_var(e.write_vars[i]);
       // Make sure the "purity" is set correctly
@@ -229,15 +225,15 @@ void Effect::add_external_effect(const Effect &e,
   }
 
   vector<Variable *>::size_type len;
-  vector<Variable *>::size_type i, j;
 
   len = e.read_vars.size();
-  for (i = 0; i < len; ++i) {
+  for (vector<Variable *>::size_type i = 0; i < len; ++i) {
     const Variable *var = e.read_vars[i];
     if (var->is_global()) {
       read_var(var);
     } else {
-      for (j = 0; j < call_chain.size(); j++) {
+      size_t j = 0;
+      for (; j < call_chain.size(); j++) {
         const Block *b = call_chain[j];
         if (b->is_var_on_stack(var)) {
           break;
@@ -250,14 +246,15 @@ void Effect::add_external_effect(const Effect &e,
   }
 
   len = e.write_vars.size();
-  for (i = 0; i < len; ++i) {
+  for (vector<Variable *>::size_type i = 0; i < len; ++i) {
     const Variable *var = e.write_vars[i];
     if (var->is_global()) {
       write_var(var);
       // Make sure the "purity" is set correctly
       pure = false;
     } else {
-      for (j = 0; j < call_chain.size(); j++) {
+      size_t j = 0;
+      for (; j < call_chain.size(); j++) {
         const Block *b = call_chain[j];
         if (b->is_var_on_stack(var)) {
           break;
@@ -297,9 +294,8 @@ bool Effect::is_read(const Variable *v) const {
  */
 bool Effect::is_read(const string &vname) const {
   const vector<Variable *>::size_type len = read_vars.size();
-  vector<Variable *>::size_type i;
 
-  for (i = 0; i < len; ++i) {
+  for (vector<Variable *>::size_type i = 0; i < len; ++i) {
     const string &rname = read_vars[i]->name;
     size_t pos;
     if (rname == vname) {
@@ -336,9 +332,8 @@ bool Effect::is_read(const string &vname) const {
  */
 bool Effect::is_written(const Variable *v) const {
   const vector<Variable *>::size_type len = write_vars.size();
-  vector<Variable *>::size_type i;
 
-  for (i = 0; i < len; ++i) {
+  for (vector<Variable *>::size_type i = 0; i < len; ++i) {
     if (write_vars[i] == v) {
       return true;
     }
@@ -355,9 +350,8 @@ bool Effect::is_written(const Variable *v) const {
  */
 bool Effect::is_written(const string &vname) const {
   const vector<Variable *>::size_type len = write_vars.size();
-  vector<Variable *>::size_type i;
 
-  for (i = 0; i < len; ++i) {
+  for (vector<Variable *>::size_type i = 0; i < len; ++i) {
     const string &wname = write_vars[i]->name;
     size_t pos;
     if (wname == vname) {
@@ -460,9 +454,8 @@ bool Effect::is_written_partially(const Variable *v) const {
  * consolidate the read/write set
  */
 void Effect::consolidate(void) {
-  size_t i;
   size_t len = read_vars.size();
-  for (i = 0; i < len; i++) {
+  for (size_t i = 0; i < len; i++) {
     const Variable *tmp = read_vars[i];
     if (tmp->is_field_var() && is_read(tmp->field_var_of)) {
       read_vars.erase(read_vars.begin() + i);
@@ -471,7 +464,7 @@ void Effect::consolidate(void) {
     }
   }
   len = write_vars.size();
-  for (i = 0; i < len; i++) {
+  for (size_t i = 0; i < len; i++) {
     const Variable *tmp = write_vars[i];
     if (tmp->is_field_var() && is_written(tmp->field_var_of)) {
       write_vars.erase(write_vars.begin() + i);
@@ -513,14 +506,13 @@ void Effect::clear(void) {
  */
 void Effect::Output(std::ostream &out) const {
   vector<Variable *>::size_type len;
-  vector<Variable *>::size_type i;
 
   std::ostringstream ss;
 
   ss << std::endl;
   ss << " * reads :";
   len = read_vars.size();
-  for (i = 0; i < len; ++i) {
+  for (vector<Variable *>::size_type i = 0; i < len; ++i) {
     ss << " ";
     read_vars[i]->OutputForComment(ss);
   }
@@ -528,7 +520,7 @@ void Effect::Output(std::ostream &out) const {
 
   ss << " * writes:";
   len = write_vars.size();
-  for (i = 0; i < len; ++i) {
+  for (vector<Variable *>::size_type i = 0; i < len; ++i) {
     ss << " ";
     write_vars[i]->OutputForComment(ss);
   }
@@ -550,17 +542,16 @@ void Effect::update_purity(void) {
  */
 bool Effect::has_global_effect(void) const {
   vector<Variable *>::size_type len;
-  vector<Variable *>::size_type i;
 
   len = read_vars.size();
-  for (i = 0; i < len; ++i) {
+  for (vector<Variable *>::size_type i = 0; i < len; ++i) {
     if (read_vars[i]->is_global()) {
       return true;
     }
   }
 
   len = write_vars.size();
-  for (i = 0; i < len; ++i) {
+  for (vector<Variable *>::size_type i = 0; i < len; ++i) {
     if (write_vars[i]->is_global()) {
       return true;
     }

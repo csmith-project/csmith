@@ -411,7 +411,7 @@ Variable *VariableSelector::choose_var(
   // check availability of volatiles
   has_eligible_volatile_var(*candidate_vars, type, qfer, access, cg_context);
 
-  for (vector<Variable *>::const_iterator i = candidate_vars->begin();
+  for (auto i = candidate_vars->begin();
        i != candidate_vars->end(); ++i) {
     // skip any type mismatched var
     if (no_bitfield && (*i)->isBitfield_)
@@ -670,8 +670,7 @@ VariableSelector::SelectGlobal(Effect::Access access,
 
 void VariableSelector::find_all_non_bitfield_visible_vars(
     const Block *b, vector<Variable *> &vars) {
-  vector<Variable *>::iterator i;
-  for (i = GlobalList.begin(); i != GlobalList.end(); ++i) {
+  for (auto i = GlobalList.begin(); i != GlobalList.end(); ++i) {
     if (!((*i)->isBitfield_))
       vars.push_back(*i);
   }
@@ -687,17 +686,16 @@ void VariableSelector::find_all_non_bitfield_visible_vars(
 
 void VariableSelector::find_all_non_array_visible_vars(
     const Block *b, vector<Variable *> &vars) {
-  size_t i;
-  for (i = 0; i < GlobalList.size(); i++) {
+  for (size_t i = 0; i < GlobalList.size(); i++) {
     if (!(GlobalList[i]->isArray))
       vars.push_back(GlobalList[i]);
   }
   if (b) {
-    for (i = 0; i < b->func->param.size(); i++) {
+    for (size_t i = 0; i < b->func->param.size(); i++) {
       vars.push_back(b->func->param[i]);
     }
     while (b) {
-      for (i = 0; i < b->local_vars.size(); i++) {
+      for (size_t i = 0; i < b->local_vars.size(); i++) {
         if (!((b->local_vars[i])->isArray))
           vars.push_back(b->local_vars[i]);
       }
@@ -743,8 +741,8 @@ Block *VariableSelector::expand_block_for_goto(Block *b,
                                                const CGContext &cg_context) {
   FactMgr *fm = get_fact_mgr(&cg_context);
   while (true) {
-    size_t i;
-    for (i = 0; i < fm->cfg_edges.size(); i++) {
+    bool expanded = false;
+    for (size_t i = 0; i < fm->cfg_edges.size(); i++) {
       const CFGEdge *edge = fm->cfg_edges[i];
       if (edge->src->eType == eStatementType::eGoto && b->contains_stmt(edge->dest) &&
           !b->contains_stmt(edge->src)) {
@@ -752,11 +750,12 @@ Block *VariableSelector::expand_block_for_goto(Block *b,
           b = b->parent;
         }
         assert(b);
+        expanded = true;
         break;
       }
     }
     // exit loop only when requirement for all edges are satisfied
-    if (i == fm->cfg_edges.size()) {
+    if (!expanded) {
       break;
     }
   }
@@ -1360,8 +1359,8 @@ ArrayVariable *VariableSelector::select_array(const CGContext &cg_context) {
   const Block *b = cg_context.get_current_block();
   vector<Variable *> vars = find_all_visible_vars(b);
   vector<ArrayVariable *> array_vars;
-  size_t i, len;
-  for (i = 0; i < vars.size(); i++) {
+  size_t len;
+  for (size_t i = 0; i < vars.size(); i++) {
     if (!vars[i]->isArray)
       continue;
 
@@ -1406,8 +1405,7 @@ ArrayVariable *VariableSelector::itemize_array(CGContext &cg_context,
     // within array bound
     vector<const Variable *> ok_ivs;
     unsigned int dimen_len = av->get_sizes()[i];
-    map<const Variable *, unsigned int>::iterator iter;
-    for (iter = cg_context.iv_bounds.begin();
+    for (auto iter = cg_context.iv_bounds.begin();
          iter != cg_context.iv_bounds.end(); ++iter) {
       if (iter->second != INVALID_BOUND && iter->second < dimen_len) {
         const Variable *iv = iter->first;

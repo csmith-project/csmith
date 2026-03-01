@@ -188,11 +188,10 @@ CVQualifiers ExpressionVariable::get_qualifiers(void) const {
  */
 void ExpressionVariable::Output(std::ostream &out) const {
   output_cast(out);
-  int i;
   int indirect_level = get_indirect_level();
   if (indirect_level > 0) {
     out << "(";
-    for (i = 0; i < indirect_level; i++) {
+    for (int i = 0; i < indirect_level; i++) {
       out << "*";
     }
   } else if (indirect_level < 0) {

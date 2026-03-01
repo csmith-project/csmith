@@ -125,8 +125,7 @@ DFSRndNumGenerator::DFSRndNumGenerator(Sequence *concrete_seq)
 }
 
 DFSRndNumGenerator::~DFSRndNumGenerator() {
-  std::vector<DFSRndNumGenerator::SearchState *>::iterator i;
-  for (i = states_.begin(); i != states_.end(); ++i) {
+  for (auto i = states_.begin(); i != states_.end(); ++i) {
     delete (*i);
   }
   states_.clear();
@@ -233,7 +232,7 @@ bool DFSRndNumGenerator::filter_invalid_nums(vector<int> *invalid_nums, int v) {
   if (!invalid_nums)
     return false;
 
-  vector<int>::iterator i = find(invalid_nums->begin(), invalid_nums->end(), v);
+  auto i = find(invalid_nums->begin(), invalid_nums->end(), v);
   return (i != invalid_nums->end());
 }
 

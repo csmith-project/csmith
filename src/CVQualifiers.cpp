@@ -93,7 +93,6 @@ CVQualifiers &CVQualifiers::operator=(const CVQualifiers &qfer) {
  * http://www.embedded.com/columns/programmingpointers/180205632?_requestid=488055
  **************************************************************/
 bool CVQualifiers::stricter_than(const CVQualifiers &qfer) const {
-  size_t i;
   assert(is_consts.size() == is_volatiles.size());
   const vector<bool> &v_consts = qfer.get_consts();
   const vector<bool> &v_volatiles = qfer.get_volatiles();
@@ -104,7 +103,7 @@ bool CVQualifiers::stricter_than(const CVQualifiers &qfer) const {
 
   size_t depth = is_consts.size();
   // check "const" qualifier first
-  for (i = 0; i < depth; i++) {
+  for (size_t i = 0; i < depth; i++) {
     // for special rule: "const int**" is not convertable from "int**"
     // actually for a level that is followed by two "*"s, we have to match
     // "const" qualifier
@@ -122,7 +121,7 @@ bool CVQualifiers::stricter_than(const CVQualifiers &qfer) const {
   if (depth > 1 && is_volatiles[0] != v_volatiles[0]) {
     return false;
   }
-  for (i = 0; i < depth; i++) {
+  for (size_t i = 0; i < depth; i++) {
     // similiar to const: "volatile int**" is not convertable from "int**"
     // actually for a level that is followed by two "*"s, we have to match
     if (depth - i > 2 && is_volatiles[i] != v_volatiles[i]) {
@@ -621,8 +620,8 @@ void CVQualifiers::get_all_qualifiers(vector<CVQualifiers> &quals,
   Enumerator<string> qual_enumerator;
   qual_enumerator.add_bool_elem("const_prob", const_prob);
   qual_enumerator.add_bool_elem("volatile_prob", volatile_prob);
-  Enumerator<string> *i;
-  for (i = qual_enumerator.begin(); i != qual_enumerator.end(); i = i->next()) {
+  for (auto i = qual_enumerator.begin(); i != qual_enumerator.end();
+       i = i->next()) {
     bool isConst = i->get_elem("const_prob") != 0;
     bool isVolatile = i->get_elem("volatile_prob") != 0;
 
@@ -652,12 +651,11 @@ void CVQualifiers::OutputFirstQuals(std::ostream &out) const {
 }
 
 void CVQualifiers::output() const {
-  size_t i;
-  for (i = 0; i < is_consts.size(); i++) {
+  for (size_t i = 0; i < is_consts.size(); i++) {
     cout << is_consts[i] << " ";
   }
   cout << ", ";
-  for (i = 0; i < is_volatiles.size(); i++) {
+  for (size_t i = 0; i < is_volatiles.size(); i++) {
     cout << is_volatiles[i] << " ";
   }
   cout << endl;

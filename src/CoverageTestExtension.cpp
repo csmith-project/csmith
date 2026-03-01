@@ -48,8 +48,7 @@ CoverageTestExtension::CoverageTestExtension(int inputs_size)
 CoverageTestExtension::~CoverageTestExtension() { values_.clear(); }
 
 void CoverageTestExtension::GenerateValues() {
-  vector<ExtensionValue *>::iterator i;
-  for (i = values_.begin(); i != values_.end(); ++i) {
+  for (auto i = values_.begin(); i != values_.end(); ++i) {
     const Type *type = (*i)->get_type();
     for (int j = 0; j < inputs_size_; ++j) {
       Constant *c = Constant::make_random(type);

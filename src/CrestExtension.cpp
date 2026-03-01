@@ -74,8 +74,7 @@ std::string CrestExtension::type_to_string(const Type *t) {
 }
 
 void CrestExtension::output_symbolics(ostream &out) {
-  std::vector<ExtensionValue *>::iterator i;
-  for (i = values_.begin(); i != values_.end(); ++i) {
+  for (auto i = values_.begin(); i != values_.end(); ++i) {
     assert(*i);
     out << AbsExtension::tab_;
     out << CrestExtension::input_base_name_ << type_to_string((*i)->get_type());

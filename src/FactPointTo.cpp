@@ -680,9 +680,8 @@ FactPointTo::merge_pointees_of_pointer(const Variable *ptr, int indirect,
 std::vector<const Variable *> FactPointTo::merge_pointees_of_pointers(
     const std::vector<const Variable *> &ptrs,
     const std::vector<const Fact *> &facts) {
-  size_t i, j;
   vector<const Variable *> pointee_vars;
-  for (i = 0; i < ptrs.size(); i++) {
+  for (size_t i = 0; i < ptrs.size(); i++) {
     const Variable *p = ptrs[i];
     if (FactPointTo::is_special_ptr(p))
       continue;
@@ -694,7 +693,7 @@ std::vector<const Variable *> FactPointTo::merge_pointees_of_pointers(
     // are in the middle of creating f
     assert(exist_fact);
     if (exist_fact) {
-      for (j = 0; j < exist_fact->get_point_to_vars().size(); j++) {
+      for (size_t j = 0; j < exist_fact->get_point_to_vars().size(); j++) {
         const Variable *pointee = exist_fact->get_point_to_vars()[j];
         add_variable_to_set(pointee_vars, pointee);
       }
@@ -712,10 +711,9 @@ std::vector<const Variable *> FactPointTo::merge_pointees_of_pointers(
  */
 const FactPointTo *
 FactPointTo::update_with_modified_index(const Variable *index_var) const {
-  size_t j, k;
   vector<const Variable *> pointees = point_to_vars;
   bool changed = false;
-  for (j = 0; j < point_to_vars.size(); j++) {
+  for (size_t j = 0; j < point_to_vars.size(); j++) {
     const Variable *v = point_to_vars[j];
     while (v->field_var_of) {
       v = v->field_var_of;
@@ -725,7 +723,7 @@ FactPointTo::update_with_modified_index(const Variable *index_var) const {
       const ArrayVariable *av = static_cast<const ArrayVariable *>(v);
       ArrayVariable *new_av = 0;
       vector<size_t> modified;
-      for (k = 0; k < av->get_indices().size(); k++) {
+      for (size_t k = 0; k < av->get_indices().size(); k++) {
         const Expression *exp = av->get_indices()[k];
         if (exp->use_var(index_var)) {
           modified.push_back(k);
@@ -733,7 +731,7 @@ FactPointTo::update_with_modified_index(const Variable *index_var) const {
       }
       if (!modified.empty()) {
         new_av = new ArrayVariable(*av);
-        for (k = 0; k < modified.size(); k++) {
+        for (size_t k = 0; k < modified.size(); k++) {
           Constant *neg1 = new Constant(get_int_type(), "-1");
           new_av->set_index(modified[k], neg1);
         }
@@ -766,8 +764,7 @@ void FactPointTo::update_facts_with_modified_index(
 void FactPointTo::update_ptr_aliases(
     const vector<Fact *> &facts, vector<const Variable *> &ptrs,
     vector<vector<const Variable *>> &aliases) {
-  size_t i, j;
-  for (j = 0; j < facts.size(); j++) {
+  for (size_t j = 0; j < facts.size(); j++) {
     if (facts[j]->eCat == eFactCategory::ePointTo) {
       const FactPointTo *f = static_cast<const FactPointTo *>(facts[j]);
       // don't include rv facts
@@ -780,7 +777,7 @@ void FactPointTo::update_ptr_aliases(
           assert(ptrs.size() == aliases.size());
         } else {
           // merge the old alias set with new alias set
-          for (i = 0; i < f->get_point_to_vars().size(); i++) {
+          for (size_t i = 0; i < f->get_point_to_vars().size(); i++) {
             const Variable *v = f->get_point_to_vars()[i];
             if (find_variable_in_set(aliases[pos], v) == -1) {
               aliases[pos].push_back(v);
@@ -798,8 +795,7 @@ void FactPointTo::aggregate_all_pointto_sets(void) {
     if (funcs[i]->is_builtin)
       continue;
     FactMgr *fm = get_fact_mgr_for_func(funcs[i]);
-    map<const Statement *, vector<Fact *>>::iterator iter;
-    for (iter = fm->map_facts_out_final.begin();
+    for (auto iter = fm->map_facts_out_final.begin();
          iter != fm->map_facts_out_final.end(); ++iter) {
       update_ptr_aliases(iter->second, all_ptrs, all_aliases);
     }
