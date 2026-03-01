@@ -487,8 +487,7 @@ CGContext::find_variable_scope(const Variable* var) const
 	Function *func = get_current_func();
 	assert(func);
 
-	int i;
-	for (i=0; i<(int)func->param.size(); i++) {
+	for (int i=0; i<(int)func->param.size(); i++) {
 		if (func->param[i]->match(var)) {
 			return 0;
 		}
@@ -496,17 +495,17 @@ CGContext::find_variable_scope(const Variable* var) const
 
 	// check if visible in current function
 	const Block* b = get_current_block();
-	i = 1;
+	int idx = 1;
 	do {
 		if (find_variable_in_set(b->local_vars, var) != -1) {
-			return i;
+			return idx;
 		}
 		b = b->parent;
-		i++;
+		idx++;
 	} while (b);
 
 	// check if exist on one of the stack frames
-	for (i=call_chain.size()-1; i>=0; i--) {
+	for (int i=call_chain.size()-1; i>=0; i--) {
 		b = call_chain[i];
 		do {
 			if (find_variable_in_set(b->local_vars, var) != -1) {
@@ -524,7 +523,7 @@ void CGContext::extend_call_chain(const CGContext& cg_context)
 {
 	call_chain = cg_context.call_chain;
 	const Block* b = cg_context.get_current_block();
-	if (b==0) {
+	if (!b) {
 		b = cg_context.curr_blk;
 	}
 	if (b) {
