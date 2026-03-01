@@ -13,6 +13,34 @@ from dataclasses import dataclass
 from typing import List, Optional
 
 
+ALL_SWARM_OPTS = [
+    "arrays",
+    "bitfields",
+    "checksum",
+    "comma-operators",
+    "compound-assignment",
+    "consts",
+    "divs",
+    "embedded-assigns",
+    "jumps",
+    "longlong",
+    "force-non-uniform-arrays",
+    "math64",
+    "muls",
+    "packed-struct",
+    "paranoid",
+    "pointers",
+    "structs",
+    "volatiles",
+    "volatile-pointers",
+    "inline-function",
+    "return-structs",
+    "arg-structs",
+    "dangling-global-pointers",
+    "return-dead-pointer",
+]
+
+
 @dataclass
 class RunResult:
     cmd: List[str]
@@ -30,6 +58,12 @@ class Divergence:
     old_result: RunResult
 
 
+@dataclass
+class TestCase:
+    seed: int
+    extra_args: List[str]
+
+
 def resolve_executable(path: str) -> str:
     if os.path.sep in path:
         resolved = path
@@ -44,8 +78,12 @@ def resolve_executable(path: str) -> str:
     return os.path.abspath(resolved)
 
 
-def run_once(exe: str, seed: int, extra_args: List[str], timeout_s: float) -> RunResult:
+def run_once(
+    exe: str, seed: int, extra_args: List[str], timeout_s: float, verbose: bool
+) -> RunResult:
     cmd = [exe, "--seed", str(seed), *extra_args]
+    if verbose:
+        print(shlex.join(cmd), file=sys.stderr, flush=True)
     try:
         proc = subprocess.run(
             cmd,
@@ -78,10 +116,15 @@ def normalize_stdout(data: bytes) -> bytes:
 
 
 def compare_seed(
-    seed: int, new_exe: str, old_exe: str, extra_args: List[str], timeout_s: float
+    seed: int,
+    new_exe: str,
+    old_exe: str,
+    extra_args: List[str],
+    timeout_s: float,
+    verbose: bool,
 ) -> Optional[Divergence]:
-    new_res = run_once(new_exe, seed, extra_args, timeout_s)
-    old_res = run_once(old_exe, seed, extra_args, timeout_s)
+    new_res = run_once(new_exe, seed, extra_args, timeout_s, verbose)
+    old_res = run_once(old_exe, seed, extra_args, timeout_s, verbose)
 
     if new_res.timed_out or old_res.timed_out:
         return Divergence(seed, "timeout", new_res, old_res)
@@ -119,11 +162,23 @@ def print_run_summary(label: str, res: RunResult) -> None:
         print(f"{label} stderr preview: {preview(res.stderr)}", file=sys.stderr)
 
 
+def make_swarm_args(rng: random.Random) -> List[str]:
+    p = rng.random()
+    args: List[str] = []
+    for opt in ALL_SWARM_OPTS:
+        if rng.random() < p:
+            args.append(f"--{opt}")
+        else:
+            args.append(f"--no-{opt}")
+    return args
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description=(
             "Compare two csmith executables by running both with the same seeds "
-            "and checking for identical outputs."
+            "and checking for identical outputs. Optional swarm mode randomizes "
+            "csmith feature flags on each run."
         )
     )
     parser.add_argument("new_exe", help="Path to the new csmith executable.")
@@ -158,10 +213,41 @@ def main() -> int:
         help="Per-execution timeout in seconds (default: 30).",
     )
     parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Print each csmith command line before execution.",
+    )
+    parser.add_argument(
         "--arg",
         action="append",
         default=[],
         help="Extra argument passed to both csmith executables. Can be repeated.",
+    )
+    parser.add_argument(
+        "--swarm",
+        dest="swarm",
+        action="store_true",
+        default=True,
+        help=(
+            "Enable swarm testing by randomizing csmith --opt/--no-opt feature "
+            "flags per run (matching driver/random_test style). Enabled by default."
+        ),
+    )
+    parser.add_argument(
+        "--no-swarm",
+        dest="swarm",
+        action="store_false",
+        help="Disable swarm option randomization.",
+    )
+    parser.add_argument(
+        "--rng-seed",
+        type=int,
+        default=None,
+        help=(
+            "Seed for random seed/swarm generation. Omit for nondeterministic "
+            "system entropy."
+        ),
     )
     args = parser.parse_args()
 
@@ -182,23 +268,33 @@ def main() -> int:
         print(f"error: {exc}", file=sys.stderr)
         return 2
 
-    start_seed = args.start_seed
     jobs = min(args.jobs, args.runs)
-    rng = random.SystemRandom()
+    rng: random.Random
+    if args.rng_seed is None:
+        rng = random.SystemRandom()
+    else:
+        rng = random.Random(args.rng_seed)
+
     max_seed = (1 << 31) - 1
     seen = set()
-    seeds: List[int] = []
-    while len(seeds) < args.runs:
+    cases: List[TestCase] = []
+    while len(cases) < args.runs:
         seed = rng.randint(1, max_seed)
         if seed not in seen:
             seen.add(seed)
-            seeds.append(seed)
+            extra_args = list(args.arg)
+            if args.swarm:
+                extra_args.extend(make_swarm_args(rng))
+            cases.append(TestCase(seed=seed, extra_args=extra_args))
 
+    mode = "swarm randomized seeds/options" if args.swarm else "unique randomized seeds"
     print(
         f"Running {args.runs} comparisons with {jobs} workers "
-        f"(unique randomized seeds)",
+        f"({mode})",
         file=sys.stderr,
     )
+    if args.rng_seed is not None:
+        print(f"RNG seed: {args.rng_seed}", file=sys.stderr)
 
     next_index = 0
     checked = 0
@@ -213,11 +309,18 @@ def main() -> int:
 
         while not stop_event.is_set():
             with lock:
-                if next_index >= len(seeds):
+                if next_index >= len(cases):
                     return
-                seed = seeds[next_index]
+                case = cases[next_index]
                 next_index += 1
-            diff = compare_seed(seed, new_exe, old_exe, args.arg, args.timeout)
+            diff = compare_seed(
+                case.seed,
+                new_exe,
+                old_exe,
+                case.extra_args,
+                args.timeout,
+                args.verbose,
+            )
             if diff is not None:
                 with lock:
                     if divergence is None:
