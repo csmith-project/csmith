@@ -177,8 +177,6 @@ FunctionInvocationUser *FunctionInvocationUser::build_invocation_and_function(
   Effect running_eff_context(cg_context.get_effect_context());
   Function *func = Function::make_random_signature(cg_context, type, qfer);
 
-  if (func->name == "func_51")
-    BREAK_NOP; // for debugging
   vector<const Expression *> param_values;
   for (size_t i = 0; i < func->param.size(); i++) {
     Effect param_eff_accum;
@@ -315,13 +313,6 @@ bool FunctionInvocationUser::revisit(std::vector<const Fact *> &inputs,
   if (func->visited_cnt++ == 0) {
     fm->setup_in_out_maps(true);
   }
-  // for debugging
-  if (func->name == "func_10" && func->visited_cnt == 19) {
-    // cout << func->visited_cnt << endl;
-    // func->Output(cout);
-    // cout << endl;
-  }
-
   // make copies so we can back up if fail
   vector<const Fact *> inputs_copy = inputs;
 

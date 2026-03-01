@@ -98,10 +98,6 @@ void DefaultRndNumGenerator::add_number(int, int, int) {}
 unsigned int DefaultRndNumGenerator::rnd_upto(const unsigned int n,
                                               const Filter *f,
                                               const std::string *where) {
-  static int g = 0;
-  int h = g;
-  if (h == 440)
-    BREAK_NOP; // for debugging
   unsigned int v = genrand() % n;
   unsigned INT64 local_depth = rand_depth_;
   rand_depth_++;

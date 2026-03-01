@@ -105,7 +105,6 @@ void DFSRndNumGenerator::SearchState::initSearchState(bool init, int value,
   bound_ = bound;
 }
 
-#define DEBUG
 #ifdef DEBUG
 void DFSRndNumGenerator::SearchState::dump(const string &where) {
   cout << "[state]" << where << ", index = " << index_ << ", init = " << init_

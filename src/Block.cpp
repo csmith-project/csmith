@@ -143,8 +143,6 @@ Block *Block::make_random(CGContext &cg_context, bool looping) {
     delete b;
     return nullptr;
   }
-  if (b->stm_id == 1)
-    BREAK_NOP; // for debugging
   for (unsigned int i = 0; i <= max; ++i) {
     Statement *s = Statement::make_random(cg_context);
     // In the exhaustive mode, Statement::make_random could return nullptr;
@@ -519,7 +517,6 @@ bool Block::find_fixed_point(const vector<const Fact *> &inputs,
   FactMgr *const fm = get_fact_mgr(&cg_context);
   FactVec current_inputs(inputs);
   // include outputs from all back edges leading to this block
-  static int g = 0;
   vector<const CFGEdge *> edges;
   int cnt = 0;
   do {
@@ -554,9 +551,6 @@ bool Block::find_fixed_point(const vector<const Fact *> &inputs,
 
     // revisit statements with new inputs
     for (size_t i = 0; i < stms.size(); i++) {
-      const int h = g++;
-      if (h == 558)
-        BREAK_NOP; // for debugging
       if (!stms[i]->analyze_with_edges_in(outputs, cg_context)) {
         fail_index = i;
         return false;

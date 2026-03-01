@@ -55,10 +55,6 @@ using std::vector;
 #define INT64 long long
 #endif
 
-#define BREAK_NOP                                                              \
-  do {                                                                         \
-  } while (0)
-
 // ----------------------------------------------------------------
 // Forward class declarations
 class Block;
