@@ -93,32 +93,6 @@ void AbsRndNumGenerator::seedrand(const unsigned long seed) {
 #endif
 }
 
-/*
- * Return random shuffled integers in set [0...n]
- * Note: deprecated.
- */
-#if 0
-unsigned int*
-AbsRndNumGenerator::rnd_shuffle(unsigned int n)
-{
-	unsigned int* ary = new unsigned int[n];
-	unsigned int i = 0;
-	unsigned int tmp;
-
-	for (i = 0; i < n; i++) {
-		ary[i] = i;
-	}
-
-	for (i = 0; i < n; i++) {
-		unsigned int j = rnd_upto(i);
-		tmp = ary[j];
-		ary[j] = ary[i];
-		ary[i] = tmp;
-	}
-	return ary;
-}
-#endif
-
 unsigned long AbsRndNumGenerator::genrand(void) { return lrand48(); }
 
 std::string AbsRndNumGenerator::RandomHexDigits(int num) {
@@ -126,7 +100,6 @@ std::string AbsRndNumGenerator::RandomHexDigits(int num) {
   while (num--) {
     str += hex1[genrand() % 16];
   }
-
   return str;
 }
 
@@ -135,7 +108,6 @@ std::string AbsRndNumGenerator::RandomDigits(int num) {
   while (num--) {
     str += dec1[genrand() % 10];
   }
-
   return str;
 }
 

@@ -68,12 +68,11 @@ using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
 Block *find_block_by_id(int blk_id) {
   const vector<Function *> &funcs = get_all_functions();
-  size_t i, j;
-  for (i = 0; i < funcs.size(); i++) {
+  for (size_t i = 0; i < funcs.size(); i++) {
     Function *const f = funcs[i];
     if (f->is_builtin)
       continue;
-    for (j = 0; j < f->blocks.size(); j++) {
+    for (size_t j = 0; j < f->blocks.size(); j++) {
       if (f->blocks[j]->stm_id == blk_id) {
         return f->blocks[j];
       }
@@ -198,32 +197,16 @@ Block::Block(Block *b, int block_size)
     : Statement(eBlock, b), need_revisit(false), depth_protect(false),
       block_size_(block_size) {}
 
-#if 0
-/*
- * ISSUE:I guess we don't need it.
- */
-Block::Block(const Block &b)
-	: Statement(eBlock),
-	  stms(b.stms),
-	  local_vars(b.local_vars),
-	  depth_protect(b.depth_protect)
-{
-	// Nothing else to do.
-}
-#endif
-
 /*
  *
  */
 Block::~Block(void) {
-  vector<Statement *>::iterator i;
-  for (i = stms.begin(); i != stms.end(); ++i) {
+  for (auto i = stms.begin(); i != stms.end(); ++i) {
     delete (*i);
   }
   stms.clear();
 
-  vector<Statement *>::iterator j;
-  for (j = deleted_stms.begin(); j != deleted_stms.end(); ++j) {
+  for (auto j = deleted_stms.begin(); j != deleted_stms.end(); ++j) {
     delete (*j);
   }
   deleted_stms.clear();
@@ -239,8 +222,7 @@ std::string Block::create_new_tmp_var(enum eSimpleType type) const {
 }
 
 void Block::OutputTmpVariableList(std::ostream &out, int indent) const {
-  std::map<string, enum eSimpleType>::const_iterator i;
-  for (i = macro_tmp_vars.begin(); i != macro_tmp_vars.end(); ++i) {
+  for (auto i = macro_tmp_vars.begin(); i != macro_tmp_vars.end(); ++i) {
     const std::string name = (*i).first;
     const enum eSimpleType type = (*i).second;
     output_tab(out, indent);
@@ -413,11 +395,10 @@ Statement *Block::append_return_stmt(CGContext &cg_context) {
 }
 
 bool Block::need_nested_loop(const CGContext &cg_context) {
-  size_t i;
   const Statement *const s = get_last_stm();
   if (looping && (s == nullptr || !s->must_jump()) && cg_context.rw_directive) {
     RWDirective *const rwd = cg_context.rw_directive;
-    for (i = 0; i < rwd->must_read_vars.size(); i++) {
+    for (size_t i = 0; i < rwd->must_read_vars.size(); i++) {
       const size_t dimen = rwd->must_read_vars[i]->get_dimension();
       if (dimen > cg_context.iv_bounds.size()) {
         return true;
@@ -425,7 +406,7 @@ bool Block::need_nested_loop(const CGContext &cg_context) {
         return true;
       }
     }
-    for (i = 0; i < rwd->must_write_vars.size(); i++) {
+    for (size_t i = 0; i < rwd->must_write_vars.size(); i++) {
       const size_t dimen = rwd->must_write_vars[i]->get_dimension();
       if (dimen > cg_context.iv_bounds.size()) {
         return true;
@@ -538,7 +519,6 @@ bool Block::find_fixed_point(const vector<const Fact *> &inputs,
   FactMgr *const fm = get_fact_mgr(&cg_context);
   FactVec current_inputs(inputs);
   // include outputs from all back edges leading to this block
-  size_t i;
   static int g = 0;
   vector<const CFGEdge *> edges;
   int cnt = 0;
@@ -552,7 +532,7 @@ bool Block::find_fixed_point(const vector<const Fact *> &inputs,
         assert(0);
       }
       find_edges_in(edges, false, true);
-      for (i = 0; i < edges.size(); i++) {
+      for (size_t i = 0; i < edges.size(); i++) {
         const Statement *src = edges[i]->src;
         // assert(fm->map_visited[src]);
         merge_facts(current_inputs, fm->map_facts_out[src]);
@@ -567,13 +547,13 @@ bool Block::find_fixed_point(const vector<const Fact *> &inputs,
 
     FactVec outputs = current_inputs;
     // add facts for locals
-    for (i = 0; i < local_vars.size(); i++) {
+    for (size_t i = 0; i < local_vars.size(); i++) {
       const Variable *v = local_vars[i];
       FactMgr::add_new_var_fact(v, outputs);
     }
 
     // revisit statements with new inputs
-    for (i = 0; i < stms.size(); i++) {
+    for (size_t i = 0; i < stms.size(); i++) {
       const int h = g++;
       if (h == 558)
         BREAK_NOP; // for debugging
@@ -610,8 +590,7 @@ void Block::set_accumulated_effect(CGContext &cg_context) const {
  * it from break_stms, deleting CFG edges linked to it, etc
  */
 size_t Block::remove_stmt(const Statement *s) {
-  int i, len, cnt;
-  cnt = 0;
+  int cnt = 0;
   assert(func);
   FactMgr *fm = get_fact_mgr_for_func(func);
   vector<const Statement *> cfg_stms;
@@ -628,8 +607,8 @@ size_t Block::remove_stmt(const Statement *s) {
       /* Empty. */
     }
     if (b != 0) {
-      len = b->break_stms.size();
-      for (i = 0; i < len; i++) {
+      int len = b->break_stms.size();
+      for (int i = 0; i < len; i++) {
         if (find_stm_in_set(cfg_stms, b->break_stms[i]) >= 0) {
           b->break_stms.erase(b->break_stms.begin() + i);
           i--;
@@ -639,8 +618,8 @@ size_t Block::remove_stmt(const Statement *s) {
     }
     // remove any CFG edges that has s (or flow-control statements inside s) as
     // src
-    len = fm->cfg_edges.size();
-    for (i = 0; i < len; i++) {
+    int len = fm->cfg_edges.size();
+    for (int i = 0; i < len; i++) {
       const CFGEdge *edge = fm->cfg_edges[i];
       if (find_stm_in_set(cfg_stms, edge->src) >= 0) {
         fm->cfg_edges.erase(fm->cfg_edges.begin() + i);
@@ -652,8 +631,8 @@ size_t Block::remove_stmt(const Statement *s) {
   }
 
   // remove any CFG edges that has s (or statements inside s) as dest
-  len = fm->cfg_edges.size();
-  for (i = 0; i < len; i++) {
+  int len = fm->cfg_edges.size();
+  for (int i = 0; i < len; i++) {
     const CFGEdge *edge = fm->cfg_edges[i];
     if (s->contains_stmt(edge->dest)) {
       const Statement *src = edge->src;
@@ -678,7 +657,7 @@ size_t Block::remove_stmt(const Statement *s) {
 
   // delete all the blocks inside s
   len = func->blocks.size();
-  for (i = 0; i < len; i++) {
+  for (int i = 0; i < len; i++) {
     Block *b = func->blocks[i];
     if (s->contains_stmt(b)) {
       func->blocks.erase(func->blocks.begin() + i);
@@ -687,7 +666,7 @@ size_t Block::remove_stmt(const Statement *s) {
     }
   }
   // delete the statment itself
-  for (i = 0; i < (int)stms.size(); i++) {
+  for (int i = 0; i < (int)stms.size(); i++) {
     if (stms[i] == s) {
       deleted_stms.push_back(stms[i]);
       stms.erase(stms.begin() + i);

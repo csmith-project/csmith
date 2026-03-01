@@ -64,8 +64,7 @@ AbsExtension::MakeFuncInvocation(Function *func,
                                  std::vector<ExtensionValue *> &values) {
   FunctionInvocationUser *fi = new FunctionInvocationUser(func, true, nullptr);
 
-  vector<ExtensionValue *>::iterator i;
-  for (i = values.begin(); i != values.end(); ++i) {
+  for (auto i = values.begin(); i != values.end(); ++i) {
     assert(*i);
     CVQualifiers qfer = (*i)->get_qfer();
     Variable *v = VariableSelector::new_variable(
@@ -78,8 +77,7 @@ AbsExtension::MakeFuncInvocation(Function *func,
 
 void AbsExtension::GenerateFirstParameterList(
     Function &curFunc, std::vector<ExtensionValue *> &values) {
-  vector<ExtensionValue *>::iterator i;
-  for (i = values.begin(); i != values.end(); ++i) {
+  for (auto i = values.begin(); i != values.end(); ++i) {
     assert(*i);
     CVQualifiers qfer = (*i)->get_qfer();
     Variable *v =
@@ -91,8 +89,7 @@ void AbsExtension::GenerateFirstParameterList(
 
 void AbsExtension::default_output_definitions(
     ostream &out, std::vector<ExtensionValue *> &values, bool init_flag) {
-  std::vector<ExtensionValue *>::iterator i;
-  for (i = values.begin(); i != values.end(); ++i) {
+  for (auto i = values.begin(); i != values.end(); ++i) {
     assert(*i);
     out << AbsExtension::tab_;
     (*i)->get_type()->Output(out);

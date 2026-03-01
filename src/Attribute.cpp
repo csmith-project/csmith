@@ -10,8 +10,7 @@
 
 void AttributeGenerator::Output(std::ostream &out) {
   bool attr_emitted = false;
-  vector<Attribute *>::iterator itr;
-  for (itr = attributes.begin(); itr != attributes.end(); itr++) {
+  for (auto itr = attributes.begin(); itr != attributes.end(); itr++) {
     string attr_generated;
     attr_generated = (*itr)->make_random();
     if (attr_generated != "") {

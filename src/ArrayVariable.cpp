@@ -652,11 +652,10 @@ void ArrayVariable::output_init(std::ostream &out, const Expression *init,
 void ArrayVariable::output_addr_checks(std::ostream &out, const Variable *var,
                                        const string &field_name,
                                        int indent) const {
-  size_t i;
   vector<const Variable *> &ctrl_vars = Variable::get_new_ctrl_vars();
   // declare control variables
   OutputArrayCtrlVars(ctrl_vars, out, get_dimension(), indent);
-  for (i = 0; i < get_dimension(); i++) {
+  for (size_t i = 0; i < get_dimension(); i++) {
     output_tab(out, indent);
     out << "for (";
     out << ctrl_vars[i]->get_actual_name();
@@ -685,11 +684,11 @@ void ArrayVariable::output_addr_checks(std::ostream &out, const Variable *var,
   var->Output(out);
   out << " = &";
   out << get_actual_name();
-  for (i = 0; i < get_dimension(); i++) {
+  for (size_t i = 0; i < get_dimension(); i++) {
     out << "[%d]";
   }
   out << ";\\n\"";
-  for (i = 0; i < get_dimension(); i++) {
+  for (size_t i = 0; i < get_dimension(); i++) {
     out << ", ";
     out << ctrl_vars[i]->get_actual_name();
   }
@@ -698,20 +697,19 @@ void ArrayVariable::output_addr_checks(std::ostream &out, const Variable *var,
   out << "break;";
   output_close_encloser("}", out, indent);
   // output the closing bracelets
-  for (i = 0; i < get_dimension(); i++) {
+  for (size_t i = 0; i < get_dimension(); i++) {
     output_close_encloser("}", out, indent);
   }
 }
 
 string
 ArrayVariable::make_print_index_str(const vector<const Variable *> &cvs) const {
-  size_t i;
   string str = "printf(\"index = ";
-  for (i = 0; i < get_dimension(); i++) {
+  for (size_t i = 0; i < get_dimension(); i++) {
     str += "[%d]";
   }
   str += "\\n\", ";
-  for (i = 0; i < get_dimension(); i++) {
+  for (size_t i = 0; i < get_dimension(); i++) {
     if (i) {
       str += ", ";
     }
@@ -748,13 +746,12 @@ void ArrayVariable::hash(std::ostream &out) const {
   if (field_names.size() == 0)
     return;
 
-  size_t i, j;
   int indent = 1;
   // ISSUE: ugly hack to make sure we use the latest ctrl_vars, which is
   // generated
   //  from the call of OutputArrayInitializers in OutputMgr.cpp
   const vector<const Variable *> &cvs = Variable::get_last_ctrl_vars();
-  for (i = 0; i < get_dimension(); i++) {
+  for (size_t i = 0; i < get_dimension(); i++) {
     output_tab(out, indent);
     out << "for (";
     out << cvs[i]->get_actual_name();
@@ -775,7 +772,7 @@ void ArrayVariable::hash(std::ostream &out) const {
   output_with_indices(oss, cvs);
   vname = oss.str();
   if (CGOptions::compute_hash()) {
-    for (j = 0; j < field_names.size(); j++) {
+    for (size_t j = 0; j < field_names.size(); j++) {
       if (field_types[j]->eType == eSimple &&
           field_types[j]->simple_type == eFloat) {
         output_tab(out, indent);
@@ -803,7 +800,7 @@ void ArrayVariable::hash(std::ostream &out) const {
     }
   }
   // output the closing bracelets
-  for (i = 0; i < get_dimension(); i++) {
+  for (size_t i = 0; i < get_dimension(); i++) {
     output_close_encloser("}", out, indent);
   }
   outputln(out);
