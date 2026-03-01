@@ -77,10 +77,8 @@ PartialExpander::init_partial_expander(const std::string &options)
 bool
 PartialExpander::parse_options(const std::string &options, char sep_char)
 {
-	size_t pos = 0;
-	size_t start_pos = 0;
-
-	while(true) {
+	for (size_t pos = 0; true; ) {
+		size_t start_pos = 0;
 		// Shouldn't happen
 		assert(options[pos] != ' ');
 
@@ -189,4 +187,3 @@ PartialExpander::~PartialExpander()
 {
 
 }
-

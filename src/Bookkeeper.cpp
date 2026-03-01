@@ -280,10 +280,9 @@ Bookkeeper::output_pointer_statistics(std::ostream &out)
 	int point_to_struct = 0;
 	int point_to_pointer = 0;
 	const vector<const Variable*>& ptrs = FactPointTo::all_ptrs;
-	const vector<vector<const Variable*> >& aliases = FactPointTo::all_aliases;
 	for (i=0; i<ptrs.size(); i++) {
-		total_alias_cnt += aliases[i].size();
-		if (find_variable_in_set(aliases[i], FactPointTo::null_ptr) >= 0) {
+		total_alias_cnt += FactPointTo::all_aliases[i].size();
+		if (find_variable_in_set(FactPointTo::all_aliases[i], FactPointTo::null_ptr) >= 0) {
 			total_has_null_ptr++;
 		}
 		const Variable* var = ptrs[i];

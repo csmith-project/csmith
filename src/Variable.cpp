@@ -119,9 +119,8 @@ int find_variable_in_set(const vector<Variable*>& set, const Variable* v)
 
 int find_field_variable_in_set(const vector<const Variable*>& set, const Variable* v)
 {
-    size_t i;
 	if (v->is_aggregate()) {
-		for (i=0; i<v->field_vars.size(); i++) {
+		for (size_t i=0; i<v->field_vars.size(); i++) {
 			const Variable* field = v->field_vars[i];
 			int pos = find_variable_in_set(set, field);
 			if (pos != -1) return pos;
@@ -165,9 +164,8 @@ bool add_variables_to_set(vector<const Variable*>& set, const vector<const Varia
 // return true if two sets contains same variables
 bool equal_variable_sets(const vector<const Variable*>& set1, const vector<const Variable*>& set2)
 {
-    size_t i;
     if (set1.size() == set2.size()) {
-        for (i=0; i<set1.size(); i++) {
+        for (size_t i=0; i<set1.size(); i++) {
             if (!is_variable_in_set(set2, set1[i])) {
                 return false;
             }
@@ -180,9 +178,8 @@ bool equal_variable_sets(const vector<const Variable*>& set1, const vector<const
 // return true if set1 is subset of set2, or equal
 bool sub_variable_sets(const vector<const Variable*>& set1, const vector<const Variable*>& set2)
 {
-    size_t i;
     if (set1.size() <= set2.size()) {
-        for (i=0; i<set1.size(); i++) {
+        for (size_t i=0; i<set1.size(); i++) {
             if (!is_variable_in_set(set2, set1[i])) {
                 return false;
             }
@@ -934,11 +931,8 @@ OutputArrayInitializers(const vector<Variable*>& vars, std::ostream &out, int in
 
 void OutputVolatileAddress(const vector<Variable*> &vars, std::ostream &out, int indent, const string &fp_string)
 {
-	std::vector<Variable*>::const_iterator i;
-	std::vector<std::string> seen_names;
-
-	for(i = vars.begin(); i != vars.end(); ++i) {
-		(*i)->output_volatile_address(out, indent, fp_string, seen_names);
+	for (std::vector<std::string> seen_names; const Variable* var : vars) {
+		var->output_volatile_address(out, indent, fp_string, seen_names);
 	}
 }
 
@@ -1069,10 +1063,10 @@ int
 Variable::output_runtime_value(ostream &out, const string &prefix, const string &suffix, int indent, bool multi_lines) const
 {
 	string directive = type->printf_directive();
-	ostringstream oss;
 	// for field of struct arrays, create an itemized variable for each member and output the printf individually
 	// JYTODO: if all members are the same value, consolidate into one printf?
 	if (is_virtual()) {
+		ostringstream oss;
 		assert (!is_field_var());
 		// var must be a virtual array, duplicate the directive for all members
 		int j, k;

@@ -349,8 +349,8 @@ CGOptions::set_platform_specific_options(void)
 		conf.close();
 	}
 	else {
-		string line;
 		while(!conf.eof()) {
+			string line;
 			getline(conf, line);
 			if (line.substr(0, strlen(int_str)) == int_str) {
 				string s = line.substr(strlen(int_str));
@@ -575,8 +575,8 @@ CGOptions::has_conflict(void)
 	if (!(CGOptions::dump_default_probabilities().empty()))
 		prob->dump_default_probabilities(CGOptions::dump_default_probabilities());
 
-	string msg;
 	if (!(CGOptions::probability_configuration().empty())) {
+		string msg;
 		if (!prob->parse_configuration(msg, CGOptions::probability_configuration())) {
 			conflict_msg_ = msg;
 			return true;

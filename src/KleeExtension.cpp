@@ -59,14 +59,12 @@ KleeExtension::GenerateValues()
 void
 KleeExtension::output_symbolics(ostream &out)
 {
-	std::vector<ExtensionValue*>::iterator i;
-	int count = 0;
-	for (i = values_.begin(); i != values_.end(); ++i) {
-		assert(*i);
+	for (int count = 0; count < static_cast<int>(values_.size()); ++count) {
+		ExtensionValue* value = values_[count];
+		assert(value);
 		out << AbsExtension::tab_;
-		out << "klee_make_symbolic(&" << (*i)->get_name() << ", sizeof(" << (*i)->get_name() << "), ";
+		out << "klee_make_symbolic(&" << value->get_name() << ", sizeof(" << value->get_name() << "), ";
 		out << "\"" << KleeExtension::input_base_name_ << count << "\");" << endl;
-		count++;
 	}
 }
 
@@ -96,4 +94,3 @@ KleeExtension::OutputFirstFunInvocation(std::ostream &out, FunctionInvocation *i
 {
 	AbsExtension::OutputFirstFunInvocation(out, invoke);
 }
-

@@ -189,9 +189,9 @@ bool CGContext::check_deref_volatile(const Variable *v, int deref_level)
         assert(v && "nullptr Variable!");
         if (!CGOptions::strict_volatile_rule())
                 return true;
-	int level = deref_level;
 
 	if (!effect_context.is_side_effect_free()) {
+		int level = deref_level;
 		while (level > 0) {
 			if (v->is_volatile_after_deref(level))
 				return false;
@@ -652,9 +652,9 @@ CGContext::get_external_no_reads_writes(VariableSet& no_reads, VariableSet& no_w
 {
 	no_reads.clear();
 	no_writes.clear();
-	size_t i;
 
 	if (rw_directive) {
+		size_t i;
 		for (i=0; i<rw_directive->no_read_vars.size(); i++) {
 			const Variable* v = rw_directive->no_read_vars[i];
 			if (v->is_global() || find_variable_in_set(frame_vars, v) != -1) {

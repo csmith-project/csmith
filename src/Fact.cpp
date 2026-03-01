@@ -251,11 +251,10 @@ combine_facts(vector<Fact*>& facts1, const FactVec& facts2)
 {
     size_t i, j;
     for (i=0; i<facts2.size(); i++) {
-		const Fact* new_fact = facts2[i];
 		for (j=0; j<facts1.size(); j++) {
 			Fact* old_fact = facts1[j];
-			if (old_fact->is_related(*new_fact)) {
-				old_fact->join_visits(*new_fact);
+			if (old_fact->is_related(*facts2[i])) {
+				old_fact->join_visits(*facts2[i]);
 				break;
 			}
 		}

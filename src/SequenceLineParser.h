@@ -62,11 +62,9 @@ SequenceLineParser<Container>::~SequenceLineParser()
 template <class Container> bool
 SequenceLineParser<Container>::parse_sequence(Container &q, const std::string &seq, const char sep_char)
 {
-	size_t pos = 0;
-	size_t start_pos = 0;
-
 	//while (pos < static_cast<int>(seq.size())) {
-	while(true) {
+	for (size_t pos = 0; true; ) {
+		size_t start_pos = 0;
 		while (seq[pos] == ' ')
 			pos++;
 

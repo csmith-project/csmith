@@ -78,8 +78,8 @@ AbsProgramGenerator::CreateInstance(int argc, char *argv[], unsigned long seed)
 	}
 
 	Probabilities *prob = Probabilities::GetInstance();
-	string msg;
 	if (!(CGOptions::probability_configuration().empty())) {
+		string msg;
 		if (!prob->parse_configuration(msg, CGOptions::probability_configuration())) {
 			cout << "parsing configuration file error:" << msg << endl;
 			return nullptr;

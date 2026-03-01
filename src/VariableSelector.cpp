@@ -770,8 +770,8 @@ Block*
 VariableSelector::expand_block_for_goto(Block* b, const CGContext& cg_context)
 {
 	FactMgr* fm = get_fact_mgr(&cg_context);
-	size_t i;
 	while (true) {
+		size_t i;
 		for (i=0; i<fm->cfg_edges.size(); i++) {
 			const CFGEdge* edge = fm->cfg_edges[i];
 			if (edge->src->eType == eGoto && b->contains_stmt(edge->dest) && !b->contains_stmt(edge->src)) {
@@ -797,12 +797,10 @@ VariableSelector::expand_block_for_goto(Block* b, const CGContext& cg_context)
 Block*
 VariableSelector::lower_block_for_vars(const vector<Block*>& blks, vector<const Variable*>& vars)
 {
-	size_t i, j, len;
-	Block* b = 0;
-	for (j=0; j<blks.size(); j++) {
-		b = blks[j];
-		len = vars.size();
-		for (i=0; i<len; i++) {
+	for (size_t j=0; j<blks.size(); j++) {
+		Block* b = blks[j];
+		size_t len = vars.size();
+		for (size_t i=0; i<len; i++) {
 			if (find_variable_in_set(b->local_vars, vars[i]) != -1) {
 				vars.erase(vars.begin() + i);
 				i--;
@@ -1098,9 +1096,9 @@ VariableSelector::GenerateNewVariable(Effect::Access access,
 	Function &func = *cg_context.get_current_func();
 	eVariableScope scope = VariableCreationProbability();
 	ERROR_GUARD(nullptr);
-	const Type* t = 0;
 	switch (scope) {
 	case eGlobal:
+	{
 		DEPTH_GUARD_BY_TYPE_RETURN(dtGenerateNewGlobal, nullptr);
 		// TODO: it's ugly. For dfs_exhaustive mode, we've generate the first variable
 		// by SelectGlobal. To reduce the redundant code, we don't re-generate the first
@@ -1109,10 +1107,11 @@ VariableSelector::GenerateNewVariable(Effect::Access access,
 			Error::set_error(ERROR);
 			return nullptr;
 		}
-		t = Type::random_type_from_type(type);
+		const Type* t = Type::random_type_from_type(type);
 		ERROR_GUARD(nullptr);
 		var = GenerateNewGlobal(access, cg_context, t, qfer);
 		break;
+	}
 	case eParentLocal:
 	{
 		DEPTH_GUARD_BY_DEPTH_RETURN(dtGenerateNewParentLocal, nullptr);
@@ -1126,7 +1125,7 @@ VariableSelector::GenerateNewVariable(Effect::Access access,
 			Error::set_error(ERROR);
 			return nullptr;
 		}
-		t = Type::random_type_from_type(type, true, false);
+		const Type* t = Type::random_type_from_type(type, true, false);
 		ERROR_GUARD(nullptr);
 		var = GenerateNewParentLocal(*(func.stack[index]), access, cg_context, t, qfer);
 		break;

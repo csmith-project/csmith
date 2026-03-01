@@ -95,16 +95,14 @@ void
 CoverageTestExtension::output_decls(std::ostream &out)
 {
 	AbsExtension::default_output_definitions(out, values_, false);
-	vector<ExtensionValue *>::iterator i;
-	int count = 0;
-	for (i = values_.begin(); i != values_.end(); ++i) {
+	for (int count = 0; count < static_cast<int>(values_.size()); ++count) {
+		ExtensionValue* value = values_[count];
 		out << AbsExtension::tab_;
-		(*i)->get_type()->Output(out);
+		value->get_type()->Output(out);
 		out << " " << CoverageTestExtension::array_base_name_ << count;
 		out << "[" << inputs_size_ << "] = {";
 		output_array_init(out, count);
 		out << "};" << std::endl;
-		count++;
 	}
 	out << AbsExtension::tab_ << "int " << array_index_ << ";" << std::endl;
 }
@@ -114,14 +112,12 @@ CoverageTestExtension::OutputFirstFunInvocation(std::ostream &out, FunctionInvoc
 {
 	out << AbsExtension::tab_ << "for(" << array_index_ << " = 0; ";
 	out << array_index_ << " < " << inputs_size_ << "; " << array_index_ << "++) {" << std::endl;
-	vector<ExtensionValue *>::iterator i;
-	int count = 0;
-	for (i = values_.begin(); i != values_.end(); ++i) {
+	for (int count = 0; count < static_cast<int>(values_.size()); ++count) {
+		ExtensionValue* value = values_[count];
 		out << AbsExtension::tab_ << AbsExtension::tab_;
-		out << (*i)->get_name() << " = ";
+		out << value->get_name() << " = ";
 		out << CoverageTestExtension::array_base_name_ << count;
 		out << "[" << array_index_ << "];" << std::endl;
-		count++;
 	}
 	assert(invoke);
 	out << AbsExtension::tab_ << AbsExtension::tab_;
@@ -150,4 +146,3 @@ CoverageTestExtension::OutputTail(std::ostream &out)
 {
 	out << AbsExtension::tab_ << "return 0;" << endl;
 }
-

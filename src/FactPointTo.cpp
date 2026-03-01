@@ -142,11 +142,10 @@ FactPointTo::mark_func_end(const Statement* stm) const
 	size_t len = var_set.size();
 	bool changed = false;
 	bool has_garbage_ptr = (find_variable_in_set(var_set, garbage_ptr) >= 0);
-	const Function* func = stm->func;
 
 	for (size_t i=0; i<len; i++) {
 		const Variable* v = var_set[i];
-		if (func->is_var_on_stack(v, stm)) {
+		if (stm->func->is_var_on_stack(v, stm)) {
 			if (has_garbage_ptr) {
 				var_set.erase(var_set.begin() + i);
 				i--;

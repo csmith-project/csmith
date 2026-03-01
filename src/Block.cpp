@@ -695,8 +695,8 @@ Block::remove_stmt(const Statement* s)
 	len = fm->cfg_edges.size();
 	for (i=0; i<len; i++) {
 		const CFGEdge* edge = fm->cfg_edges[i];
-		const Statement* src = edge->src;
 		if (s->contains_stmt(edge->dest)) {
+			const Statement* src = edge->src;
 			fm->cfg_edges.erase(fm->cfg_edges.begin() + i);
 			delete edge;
 			i--;
@@ -762,8 +762,8 @@ Block::post_creation_analysis(CGContext& cg_context, const Effect& pre_effect)
 
 	// find out if fixed-point-searching is required
 	const bool is_loop_body = !must_break_or_return() && looping;
-	bool self_back_edge = false;
 	if (is_loop_body || need_revisit || has_edge_in(false, true)) {
+		bool self_back_edge = false;
 		if (is_loop_body && from_tail_to_head()) {
 			self_back_edge = true;
 			fm->create_cfg_edge(this, this, false, true);

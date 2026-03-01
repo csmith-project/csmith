@@ -147,12 +147,10 @@ void
 FactMgr::update_facts_for_oos_vars(const vector<const Variable*>& vars, FactVec& facts)
 {
 	//print_facts(facts);
-	size_t i, j;
 	// remove all facts related to vars, as they become irrelevant going out of scope
-	for (i=0; i<vars.size(); i++) {
-		const Variable* var = vars[i];
+	for (const Variable* var : vars) {
 		size_t len = facts.size();
-		for (j=0; j<len; j++) {
+		for (size_t j=0; j<len; j++) {
 			//print_facts(facts);
 			// remove all facts related to this variable
 			const Fact* f = facts[j];
@@ -164,9 +162,8 @@ FactMgr::update_facts_for_oos_vars(const vector<const Variable*>& vars, FactVec&
 		}
 	}
 	// mark any remaining facts that may point to a out-of-scope variable as "point to garbage"
-	for (i=0; i<vars.size(); i++) {
-		const Variable* var = vars[i];
-		for (j=0; j<facts.size(); j++) {
+	for (const Variable* var : vars) {
+		for (size_t j=0; j<facts.size(); j++) {
 			if (facts[j]->eCat == ePointTo) {
 				const FactPointTo* f = static_cast<const FactPointTo*>(facts[j]);
 				const FactPointTo* new_fact = f->mark_dead_var(var);
@@ -188,13 +185,12 @@ FactMgr::remove_function_local_facts(std::vector<const Fact*>& inputs, const Sta
 	size_t i;
 	size_t len = inputs.size();
 	assert(stm->func);
-	const Function* func = stm->func;
 	// remove irrelevant facts
 	for (i=0; i<len; i++) {
 		const Variable* v = inputs[i]->get_var();
 		// if it's fact for a local variable of this function, or return variable
 		// of another function, we are not interested in them after exit function
-		if (func->is_var_on_stack(v, stm) || (v->is_rv() && !func->rv->match(v))) {
+		if (stm->func->is_var_on_stack(v, stm) || (v->is_rv() && !stm->func->rv->match(v))) {
 			inputs.erase(inputs.begin() + i);
 			i--;
 			len--;
@@ -347,13 +343,12 @@ FactMgr::caller_to_callee_handover(const FunctionInvocationUser* fiu, std::vecto
 	do {
 		cnt = keep_facts.size();
 		for (i=0; i<len; i++) {
-			const Fact* f = inputs[i];
 			// const Variable* v = f->get_var();
 			for (j=0; j<keep_facts.size(); j++) {
 				if (keep_facts[j]->eCat == ePointTo) {
 					const FactPointTo* fp = dynamic_cast<const FactPointTo*>(keep_facts[j]);
-					if (fp->point_to(f->get_var())) {
-						keep_facts.push_back(f);
+					if (fp->point_to(inputs[i]->get_var())) {
+						keep_facts.push_back(inputs[i]);
 						inputs.erase(inputs.begin() + i);
 						i--;
 						len--;

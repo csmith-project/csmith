@@ -1478,19 +1478,18 @@ bool
 Type::is_promotable(const Type* t) const
 {
     if (eType == eSimple && t->eType == eSimple) {
-		eSimpleType t2 = t->simple_type;
 		switch (simple_type) {
 			case eChar:
-			case eUChar: return (t2 != eVoid);
+			case eUChar: return (t->simple_type != eVoid);
 			case eShort:
-			case eUShort: return (t2 != eVoid && t2 != eChar && t2 != eUChar);
+			case eUShort: return (t->simple_type != eVoid && t->simple_type != eChar && t->simple_type != eUChar);
 			case eInt:
-			case eUInt: return (t2 != eVoid && t2 != eChar && t2 != eUChar && t2 != eShort && t2 != eUShort);
+			case eUInt: return (t->simple_type != eVoid && t->simple_type != eChar && t->simple_type != eUChar && t->simple_type != eShort && t->simple_type != eUShort);
 			case eLong:
-			case eULong: return (t2 == eLong || t2 == eULong || t2 == eLongLong || t2 == eULongLong);
+			case eULong: return (t->simple_type == eLong || t->simple_type == eULong || t->simple_type == eLongLong || t->simple_type == eULongLong);
 			case eLongLong:
-			case eULongLong: return (t2 == eLongLong || t2 == eULongLong);
-			case eFloat: return (t2 != eVoid);
+			case eULongLong: return (t->simple_type == eLongLong || t->simple_type == eULongLong);
+			case eFloat: return (t->simple_type != eVoid);
 			default: break;
 		}
 	}
@@ -1607,7 +1606,6 @@ Type::is_derivable(const Type* t) const
 unsigned long
 Type::SizeInBytes(void) const
 {
-    size_t i;
 	switch (eType) {
 	default: break;
 	case eSimple:
@@ -1631,7 +1629,7 @@ Type::SizeInBytes(void) const
 		break;
 	case eUnion: {
         unsigned int max_size = 0;
-        for (i=0; i<fields.size(); i++) {
+        for (size_t i = 0; i<fields.size(); i++) {
 			unsigned int sz = 0;
 			if (is_bitfield(i)) {
 				assert(i < bitfields_length_.size());
@@ -1651,7 +1649,7 @@ Type::SizeInBytes(void) const
 		// give up if there are bitfields, too much compiler-dependence and machine-dependence
 		if (this->has_bitfields()) return SIZE_UNKNOWN;
         unsigned int total_size = 0;
-        for (i=0; i<fields.size(); i++) {
+        for (size_t i = 0; i<fields.size(); i++) {
 			unsigned int sz = fields[i]->SizeInBytes();
 			if (sz == SIZE_UNKNOWN) return sz;
             total_size += sz;
@@ -1714,8 +1712,7 @@ Type::get_int_subfield_names(const string &prefix, vector<string>& names,
 		types.push_back(this);
 	}
 	else if (is_aggregate()) {
-		size_t j = 0;
-		for (size_t i =0; i<fields.size(); i++) {
+		for (size_t i =0, j = 0; i<fields.size(); i++) {
 			if (is_unamed_padding(i)) continue; // skip 0 length bitfields
 			// skip excluded fields
 			if (std::find(excluded_fields.begin(), excluded_fields.end(), j) != excluded_fields.end()) {
@@ -1886,13 +1883,12 @@ void OutputUnionAssignOps(Type* type, std::ostream &out, bool vol)
  *************************************************************/
 void OutputStructUnion(Type* type, std::ostream &out)
 {
-    size_t i;
     // sanity check
     assert (type->is_aggregate());
 
     if (!type->printed) {
         // output dependent structs, if any
-        for (i=0; i<type->fields.size(); i++) {
+        for (size_t i = 0; i<type->fields.size(); i++) {
 			if (type->fields[i]->is_aggregate()) {
                 OutputStructUnion(const_cast<Type*>(type->fields[i]), out);
             }
@@ -1911,8 +1907,7 @@ void OutputStructUnion(Type* type, std::ostream &out)
 		really_outputln(out);
 
 		assert(type->fields.size() == type->qfers_.size());
-		unsigned int j = 0;
-        for (i=0; i<type->fields.size(); i++) {
+        for (size_t i = 0, j = 0; i<type->fields.size(); i++) {
             out << "   ";
 			const Type *field = type->fields[i];
 			bool is_bitfield = type->is_bitfield(i);
@@ -1993,7 +1988,6 @@ std::string
 Type::printf_directive(void) const
 {
 	string ret;
-	size_t i;
 	switch (eType) {
 	case eSimple:
 		if (SizeInBytes() >= 8) {
@@ -2008,7 +2002,7 @@ Type::printf_directive(void) const
 	case eUnion:
 	case eStruct:
 		ret = "{";
-		for (i=0; i<fields.size(); i++) {
+		for (size_t i = 0; i<fields.size(); i++) {
 			if (i > 0) ret += ", ";
 			ret += fields[i]->printf_directive();
 		}

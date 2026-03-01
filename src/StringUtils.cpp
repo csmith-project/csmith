@@ -113,9 +113,8 @@ StringUtils::find_any_char(const string &s, size_t pos, const string& to_match)
 void
 StringUtils::split_string(const string &str, vector<string> &v, const char sep_char)
 {
-	size_t pos = 0;
-	size_t start_pos = 0;
-	while(true) {
+	for (size_t pos = 0; true; ) {
+		size_t start_pos = 0;
 		ignore_spaces(str, pos);
 		start_pos = pos;
 		pos = str.find_first_of(sep_char, pos);
@@ -132,9 +131,8 @@ StringUtils::split_string(const string &str, vector<string> &v, const char sep_c
 void
 StringUtils::split_string(const string &str, vector<string> &v, const string &sep_chars)
 {
-	size_t pos = 0;
-	size_t start_pos = 0;
-	while(true) {
+	for (size_t pos = 0; true; ) {
+		size_t start_pos = 0;
 		ignore_spaces(str, pos);
 		start_pos = pos;
 		pos = find_any_char(str, pos, sep_chars);
@@ -151,9 +149,8 @@ StringUtils::split_string(const string &str, vector<string> &v, const string &se
 void
 StringUtils::split_int_string(const string &str, vector<int> &values, const string &sep_chars)
 {
-	size_t pos = 0;
-	size_t start_pos = 0;
-	while(true) {
+	for (size_t pos = 0; true; ) {
+		size_t start_pos = 0;
 		ignore_spaces(str, pos);
 		start_pos = pos;
 		pos = find_any_char(str, pos, sep_chars);
@@ -197,9 +194,8 @@ INT64
 StringUtils::str2longlong(const std::string &s)
 {
 	INT64 i = 0;
-	size_t j;
 	if (s.find("0x")==0) {
-		for (j=2; j<s.length(); j++) {
+		for (size_t j=2; j<s.length(); j++) {
 			int v = 0;
 			if (s[j] >= '0' && s[j] <= '9') {
 				v = s[j] - '0';

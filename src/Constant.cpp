@@ -482,15 +482,15 @@ Constant::make_int(int v)
 	ERROR_GUARD(nullptr);
 
 #if 0
-	// Initialize our cache of small-number constants.
-	if (!cache_inited) {
-		cache_inited = true;
+		// Initialize our cache of small-number constants.
+		if (!cache_inited) {
+			cache_inited = true;
 
-		ostringstream oss;
-		for (int i = 0; i < cache_size; ++i) {
-			oss.str("");
-			oss << i;
-			cache_constants[i] = new Constant(&int_type, oss.str());
+			for (int i = 0; i < cache_size; ++i) {
+				ostringstream oss;
+				oss.str("");
+				oss << i;
+				cache_constants[i] = new Constant(&int_type, oss.str());
 		}
 	}
 

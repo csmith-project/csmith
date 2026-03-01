@@ -956,8 +956,8 @@ Probabilities::parse_configuration(std::string &error_msg, const string &fname)
 		return false;
 	}
 
-	std::string line;
 	while(!conf.eof()) {
+		std::string line;
 		getline(conf, line);
 		if (StringUtils::empty_line(line))
 			continue;

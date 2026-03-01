@@ -314,9 +314,8 @@ CVQualifiers
 CVQualifiers::random_qualifiers(const Type* t, Effect::Access access, const CGContext &cg_context, bool no_volatile,
 					unsigned int const_prob, unsigned int volatile_prob)
 {
-	CVQualifiers ret_qfer;
 	if (t==0) {
-		return ret_qfer;
+		return CVQualifiers();
 	}
 	bool isVolatile = false;
 	bool isConst = false;

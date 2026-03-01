@@ -432,9 +432,8 @@ Effect::is_written(const string &vname) const
 bool
 Effect::field_is_read(const Variable *v) const
 {
-	size_t j;
 	if (v->is_aggregate()) {
-		for (j=0; j<v->field_vars.size(); j++) {
+		for (size_t j=0; j<v->field_vars.size(); j++) {
 			Variable* const field_var = v->field_vars[j];
 			if (is_read(field_var) || field_is_read(field_var)) {
 				return true;
@@ -450,9 +449,8 @@ Effect::field_is_read(const Variable *v) const
 bool
 Effect::field_is_written(const Variable *v) const
 {
-	size_t j;
 	if (v->is_aggregate()) {
-		for (j=0; j<v->field_vars.size(); j++) {
+		for (size_t j=0; j<v->field_vars.size(); j++) {
 			Variable* const field_var = v->field_vars[j];
 			if (is_written(field_var) || field_is_written(field_var)) {
 				return true;
