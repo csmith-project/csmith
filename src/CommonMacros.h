@@ -30,9 +30,7 @@
 #ifndef COMMON_MACROS_H
 #define COMMON_MACROS_H
 
-// Macro for disallowing copy and assign constructors
-#define DISALLOW_COPY_AND_ASSIGN(ClassName) \
-  ClassName(const ClassName&);               \
-  void operator=(const ClassName&)
+// Intentionally empty: legacy helper macros were removed in favor of C++11+
+// language features such as deleted copy operations.
 
 #endif // COMMON_MACROS_H

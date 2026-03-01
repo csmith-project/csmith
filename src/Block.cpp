@@ -93,7 +93,7 @@ BlockProbability(Block &block)
 {
 	vector<unsigned int> v;
 	v.push_back(block.block_size() - 1);
-	VectorFilter filter(v, NOT_FILTER_OUT);
+	VectorFilter filter(v, VectorFilter::Mode::Keep);
 	filter.disable(fDefault);
 	return rnd_upto(block.block_size(), &filter);
 }

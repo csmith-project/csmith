@@ -41,22 +41,22 @@ using namespace std;
 
 VectorFilter::VectorFilter(void)
 	: ptable(nullptr),
-	  flag_(FILTER_OUT)
+	  mode_(Mode::FilterOut)
 {
 	//Nothing to do
 }
 
 VectorFilter::VectorFilter(DistributionTable *table)
 	: ptable(table),
-	  flag_(FILTER_OUT)
+	  mode_(Mode::FilterOut)
 {
 	//Nothing to do
 }
 
-VectorFilter::VectorFilter(std::vector<unsigned int> &vs, int flag)
+VectorFilter::VectorFilter(std::vector<unsigned int> &vs, Mode mode)
 	: vs_(vs),
 	  ptable(nullptr),
-	  flag_(flag)
+	  mode_(mode)
 {
 	//Nothing to do
 }
@@ -74,7 +74,7 @@ VectorFilter::filter(int v) const
 
 	v = lookup(v);
 	bool re = std::find(vs_.begin(), vs_.end(), static_cast<unsigned int>(v)) != vs_.end();
-	return (flag_ == FILTER_OUT) ? re : !re;
+	return (mode_ == Mode::FilterOut) ? re : !re;
 }
 
 VectorFilter&

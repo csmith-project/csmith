@@ -38,30 +38,28 @@
 
 /*
  * XXX --- Collect all the default values here.
- *
- * "static const int" still needs declared storage, so use #define's instead.
  */
-#define CGOPTIONS_DEFAULT_MAX_FUNCS			(10)
-#define CGOPTIONS_DEFAULT_MAX_PARAMS		(5)
-#define CGOPTIONS_DEFAULT_FUNC1_MAX_PARAMS		(3)
-#define CGOPTIONS_DEFAULT_COVERAGE_TEST_SIZE	(500)
-#define CGOPTIONS_DEFAULT_MAX_BLOCK_SIZE	(4)
-#define CGOPTIONS_DEFAULT_MAX_BLOCK_DEPTH	(5)
-#define CGOPTIONS_DEFAULT_MAX_EXPR_DEPTH	(10)
-#define CGOPTIONS_DEFAULT_MAX_STRUCT_FIELDS	(10)
-#define CGOPTIONS_DEFAULT_MAX_UNION_FIELDS	(5)
-#define CGOPTIONS_DEFAULT_MAX_NESTED_STRUCT_LEVEL	(3)
-#define CGOPTIONS_DEFAULT_MAX_INDIRECT_LEVEL (5)
-#define CGOPTIONS_DEFAULT_MAX_ARRAY_DIMENSIONS	(3)
-#define CGOPTIONS_DEFAULT_MAX_ARRAY_LENGTH_PER_DIMENSION (10)
-#define CGOPTIONS_DEFAULT_MAX_ARRAY_LENGTH	(256)
-#define CGOPTIONS_DEFAULT_MAX_ARRAY_NUM_IN_LOOP	(4)
-#define CGOPTIONS_DEFAULT_MAX_EXHAUSTIVE_DEPTH	(-1)
+inline constexpr int CGOPTIONS_DEFAULT_MAX_FUNCS = 10;
+inline constexpr int CGOPTIONS_DEFAULT_MAX_PARAMS = 5;
+inline constexpr int CGOPTIONS_DEFAULT_FUNC1_MAX_PARAMS = 3;
+inline constexpr int CGOPTIONS_DEFAULT_COVERAGE_TEST_SIZE = 500;
+inline constexpr int CGOPTIONS_DEFAULT_MAX_BLOCK_SIZE = 4;
+inline constexpr int CGOPTIONS_DEFAULT_MAX_BLOCK_DEPTH = 5;
+inline constexpr int CGOPTIONS_DEFAULT_MAX_EXPR_DEPTH = 10;
+inline constexpr int CGOPTIONS_DEFAULT_MAX_STRUCT_FIELDS = 10;
+inline constexpr int CGOPTIONS_DEFAULT_MAX_UNION_FIELDS = 5;
+inline constexpr int CGOPTIONS_DEFAULT_MAX_NESTED_STRUCT_LEVEL = 3;
+inline constexpr int CGOPTIONS_DEFAULT_MAX_INDIRECT_LEVEL = 5;
+inline constexpr int CGOPTIONS_DEFAULT_MAX_ARRAY_DIMENSIONS = 3;
+inline constexpr int CGOPTIONS_DEFAULT_MAX_ARRAY_LENGTH_PER_DIMENSION = 10;
+inline constexpr int CGOPTIONS_DEFAULT_MAX_ARRAY_LENGTH = 256;
+inline constexpr int CGOPTIONS_DEFAULT_MAX_ARRAY_NUM_IN_LOOP = 4;
+inline constexpr int CGOPTIONS_DEFAULT_MAX_EXHAUSTIVE_DEPTH = -1;
 // 0 means we output to the standard output
-#define CGOPTIONS_DEFAULT_MAX_SPLIT_FILES	(0)
-#define CGOPTIONS_DEFAULT_SPLIT_FILES_DIR	("./output")
-#define CGOPTIONS_DEFAULT_OUTPUT_FILE		("")
-#define PLATFORM_CONFIG_FILE                ("platform.info")
+inline constexpr int CGOPTIONS_DEFAULT_MAX_SPLIT_FILES = 0;
+inline constexpr const char CGOPTIONS_DEFAULT_SPLIT_FILES_DIR[] = "./output";
+inline constexpr const char CGOPTIONS_DEFAULT_OUTPUT_FILE[] = "";
+inline constexpr const char PLATFORM_CONFIG_FILE[] = "platform.info";
 
 /*
  *

@@ -35,18 +35,17 @@
 
 class DistributionTable;
 
-// Filter out elements from the vector, i.e., elements in the vector
-// is invalid.
-#define FILTER_OUT 0
-// Elements in the vector are valid
-#define NOT_FILTER_OUT 1
-
 class VectorFilter : public Filter
 {
 public:
+	enum class Mode {
+		FilterOut,
+		Keep
+	};
+
 	VectorFilter(void);
 	VectorFilter(DistributionTable *table);
-	explicit VectorFilter(std::vector<unsigned int> &vs, int flag = FILTER_OUT);
+	explicit VectorFilter(std::vector<unsigned int> &vs, Mode mode = Mode::FilterOut);
 
 	VectorFilter& add(unsigned int item);
 
@@ -62,7 +61,7 @@ private:
 
 	DistributionTable *ptable;
 
-	int flag_;
+	Mode mode_;
 };
 
 #endif // VECTOR_FILTER_H

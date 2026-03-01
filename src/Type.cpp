@@ -838,10 +838,12 @@ Type::make_normal_struct_fields(size_t field_cnt, vector<const Type*> &random_fi
 	}
 }
 
-#define ZERO_BITFIELD 0
-#define RANDOM_BITFIELD 1
-//#define MAX_BITFIELD 2
-#define ENUM_BITFIELD_SIZE 2
+namespace {
+constexpr int kZeroBitfield = 0;
+constexpr int kRandomBitfield = 1;
+// constexpr int kMaxBitfield = 2;
+constexpr int kEnumBitfieldSize = 2;
+}
 
 void
 Type::init_is_bitfield_enumerator(Enumerator<string> &enumerator, int bitfield_prob)
@@ -878,7 +880,7 @@ Type::init_fields_enumerator(Enumerator<string> &enumerator,
 			ss3 << "bitfield_length" << i;
 			enumerator.add_bool_elem_of_bool(ss1.str(), false);
 			enumerator.add_elem(ss2.str(), bitfield_qual_bound);
-			enumerator.add_elem(ss3.str(), ENUM_BITFIELD_SIZE);
+			enumerator.add_elem(ss3.str(), kEnumBitfieldSize);
 		}
 		else {
 			std::ostringstream ss1, ss2;
@@ -898,15 +900,15 @@ Type::get_bitfield_length(int length_flag)
 	assert(max_length > 0);
 	int length = 0;
 	switch (length_flag) {
-	case ZERO_BITFIELD:
+	case kZeroBitfield:
 		length = 0;
 		break;
 #if 0
-	case MAX_BITFIELD:
+	case kMaxBitfield:
 		length = max_length;
 		break;
 #endif
-	case RANDOM_BITFIELD:
+	case kRandomBitfield:
 		length = pure_rnd_upto(max_length);
 		break;
 	default:
