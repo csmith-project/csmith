@@ -56,6 +56,10 @@ public:
   virtual ~FactUnion(void) {};
 
   virtual const Variable *get_var(void) const override { return var; };
+  virtual bool is_related(const Fact &fact) const override {
+    return fact.eCat == eFactCategory::eUnionWrite &&
+           var == static_cast<const FactUnion &>(fact).var;
+  }
   void set_var(const Variable *v) { var = v; }
   const Type *get_last_written_type(void) const;
   int get_last_written_fid(void) const { return last_written_fid; };

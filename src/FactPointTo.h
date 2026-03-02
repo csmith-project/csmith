@@ -62,6 +62,10 @@ public:
   virtual ~FactPointTo(void) override;
 
   virtual const Variable *get_var(void) const override { return var; };
+  virtual bool is_related(const Fact &fact) const override {
+    return fact.eCat == eFactCategory::ePointTo &&
+           var == static_cast<const FactPointTo &>(fact).var;
+  }
   const vector<const Variable *> &get_point_to_vars(void) const {
     return point_to_vars;
   };
